@@ -1,0 +1,62 @@
+{
+  "name": "@uniswap/routing-api",
+  "version": "0.1.0",
+  "bin": {
+    "app": "./dist/bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:lint": "eslint src --ext .ts --fix"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.77",
+    "@types/bunyan": "^1.8.6",
+    "@types/hapi__joi": "^17.1.6",
+    "@types/http-errors": "^1.8.0",
+    "@types/jest": "^26.0.9",
+    "@types/node": "14.0.27",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "esbuild": "^0.12.8",
+    "eslint": "^7.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "jest": "^26.3.0",
+    "json-schema-to-ts": "^1.6.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@aws-cdk/assert": "^1.108.0",
+    "@hapi/joi": "^17.1.1",
+    "@middy/core": "^2.4.1",
+    "@middy/http-error-handler": "^2.4.1",
+    "@middy/http-json-body-parser": "^2.4.1",
+    "@middy/http-urlencode-path-parser": "^2.4.1",
+    "@middy/input-output-logger": "^2.4.1",
+    "@middy/validator": "^2.4.1",
+    "@uniswap/sdk-core": "3.0.0",
+    "@uniswap/smart-order-router": "^1.2.1",
+    "@uniswap/v3-sdk": "3.0.0",
+    "aws-cdk-lib": "2.0.0-rc.6",
+    "bunyan": "^1.8.15",
+    "constructs": "^10.0.0",
+    "ethers": "5.1.4",
+    "http-errors": "^1.7.3",
+    "http-json-errors": "^1.2.10",
+    "source-map-support": "^0.5.19"
+  },
+  "prettier": {
+    "singleQuote": true
+  }
+}
