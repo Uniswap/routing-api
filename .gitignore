@@ -3,3 +3,4 @@ node_modules
 build
 cdk.out
 dist
+.DS_Store
