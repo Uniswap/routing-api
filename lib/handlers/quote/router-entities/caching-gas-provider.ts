@@ -4,7 +4,7 @@ import {
 } from '@uniswap/smart-order-router';
 import NodeCache from 'node-cache';
 
-const GAS_CACHE = new NodeCache({ stdTTL: 120, useClones: false });
+const GAS_CACHE = new NodeCache({ stdTTL: 180, useClones: true });
 const GAS_KEY = 'gas';
 
 export class CachingGasStationProvider extends ETHGasStationInfoProvider {

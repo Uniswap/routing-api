@@ -18,6 +18,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: 'RoutingDashboard',
       dashboardBody: JSON.stringify({
+        periodOverride: 'inherit',
         widgets: [
           {
             height: 6,
@@ -86,23 +87,34 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             x: 0,
             type: 'metric',
             properties: {
-              metrics: [
-                ['AWS/ApiGateway', 'Latency', 'ApiName', apiName],
-                ['...', { stat: 'p90' }],
-                ['...', { stat: 'p50' }],
-              ],
+              metrics: [['AWS/ApiGateway', 'Latency', 'ApiName', apiName]],
               view: 'timeSeries',
               stacked: false,
               region,
               period: 300,
-              stat: 'p100',
-              title: 'Latency | 5min',
+              stat: 'p90',
+              title: 'Latency p90 | 5min',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 18,
+            width: 24,
+            height: 6,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [[NAMESPACE, 'QuotesFetched', 'Service', 'RoutingAPI']],
+              region,
+              title: 'Average Quotes Fetched Per Swap',
+              period: 300,
             },
           },
           {
             height: 12,
             width: 24,
-            y: 18,
+            y: 24,
             x: 0,
             type: 'metric',
             properties: {
@@ -126,6 +138,29 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'p90',
               period: 300,
               title: 'Latency Breakdown | 5min',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 30,
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                [NAMESPACE, 'Top2directswappool', 'Service', 'RoutingAPI'],
+                ['.', 'Top2ethquotetokenpool', '.', '.'],
+                ['.', 'Topbytvl', '.', '.'],
+                ['.', 'Topbytvlusingtokenin', '.', '.'],
+                ['.', 'Topbytvlusingtokeninsecondhops', '.', '.'],
+                ['.', 'Topbytvlusingtokenout', '.', '.'],
+                ['.', 'Topbytvlusingtokenoutsecondhops', '.', '.'],
+              ],
+              region: region,
+              title: 'Top N Pools Used From Sources in Best Route | 5min',
+              stat: 'Maximum',
             },
           },
         ],

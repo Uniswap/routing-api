@@ -13,9 +13,11 @@ export type SubgraphPool = {
   liquidity: string;
   token0: {
     symbol: string;
+    id: string;
   };
   token1: {
     symbol: string;
+    id: string;
   };
   totalValueLockedETH: string;
 };
@@ -43,9 +45,11 @@ const handler: ScheduledHandler = async (
         id
         token0 {
           symbol
+          id
         }
         token1 {
           symbol
+          id
         }
         feeTier
         liquidity

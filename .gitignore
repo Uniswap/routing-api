@@ -2,5 +2,7 @@ node_modules
 .vscode
 build
 cdk.out
+.yalc
+yalc.lock
 dist
 .DS_Store

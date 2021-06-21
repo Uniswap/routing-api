@@ -6,6 +6,10 @@ export const QuoteBodySchemaJoi = Joi.object({
   amount: Joi.string().required(),
   chainId: Joi.number().required(),
   type: Joi.string().valid('exactIn', 'exactOut').required(),
+  recipient: Joi.string().required(),
+  slippageTolerance: Joi.string().required(),
+  deadline: Joi.string().required(),
+  algorithm: Joi.string().optional(),
   config: Joi.object({
     topN: Joi.number().required(),
     maxSwapsPerPath: Joi.number().required(),
@@ -21,9 +25,14 @@ export type QuoteBody = {
   type: 'exactIn' | 'exactOut';
   amount: string;
   chainId: number;
+  recipient: string;
+  slippageTolerance: string;
+  deadline: string;
+  algorithm?: string;
   config?: {
     topN: number;
     topNSecondHop: number;
+    topNTokenInOut: number;
     maxSwapsPerPath: number;
     maxSplits: number;
     distributionPercent: number;
