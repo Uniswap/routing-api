@@ -1,6 +1,5 @@
-import * as cdk from 'aws-cdk-lib';
-import { aws_cloudwatch, Stack } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as cdk from '@aws-cdk/core';
 
 export const NAMESPACE = 'Uniswap';
 
@@ -9,11 +8,15 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
-  constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
+  constructor(
+    scope: cdk.Construct,
+    name: string,
+    props: RoutingDashboardProps
+  ) {
     super(scope, name, props);
 
     const { apiName } = props;
-    const region = Stack.of(this).region;
+    const region = cdk.Stack.of(this).region;
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: 'RoutingDashboard',

@@ -1,3 +1,4 @@
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
 import { Currency, CurrencyAmount, Ether, Percent } from '@uniswap/sdk-core';
 import {
   AlphaRouter,
@@ -20,7 +21,7 @@ import {
   Handler,
 } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
-import { ethers, providers } from 'ethers';
+import { ethers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
 import { QuoteBody, QuoteBodySchemaJoi } from '../../schema/quote';
@@ -92,24 +93,19 @@ export const quoteHandler: Handler<APIGatewayProxyEvent> = metricScope(
         algorithm,
       });
 
-      const tokenListURI = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
+      // const tokenListURI = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
       const chainId = ID_TO_CHAIN_ID(chainIdNum);
       const chainName = ID_TO_NETWORK_NAME(chainIdNum);
 
-      const provider = new ethers.providers.InfuraProvider(
-        chainName,
-        process.env.INFURA_KEY
-      ) as providers.BaseProvider;
-
-      // const provider = new ethers.providers.JsonRpcProvider(
-      //   'https://0063f479-b2d8-49ea-9208-72cda6b014d9.ethereum.bison.run',
-      //   chainName
-      // );
+      const provider = new ethers.providers.JsonRpcProvider(
+        process.env.JSON_RPC_URL,
+        chainName
+      );
 
       const multicall2Provider = new Multicall2Provider(provider, log);
-      const tokenProvider = await TokenProvider.fromTokenListURI(
-        tokenListURI,
+      const tokenProvider = await TokenProvider.fromTokenList(
+        DEFAULT_TOKEN_LIST,
         log,
         metricLogger
       );

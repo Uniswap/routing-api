@@ -1,17 +1,16 @@
-import * as cdk from 'aws-cdk-lib';
-import {
-  aws_s3,
-  aws_lambda,
-  aws_lambda_nodejs,
-  aws_iam,
-  aws_events,
-  aws_events_targets,
-  Duration,
-} from 'aws-cdk-lib';
-import { Schedule } from 'aws-cdk-lib/lib/aws-events';
-import { Construct } from 'constructs';
+import * as aws_events from '@aws-cdk/aws-events';
+import * as aws_events_targets from '@aws-cdk/aws-events-targets';
+import * as aws_iam from '@aws-cdk/aws-iam';
+import * as aws_lambda from '@aws-cdk/aws-lambda';
+import * as aws_lambda_nodejs from '@aws-cdk/aws-lambda-nodejs';
+import * as aws_s3 from '@aws-cdk/aws-s3';
+import * as cdk from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
 import * as path from 'path';
 
+export interface RoutingCachingStackProps extends cdk.NestedStackProps {
+  region: string;
+}
 export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheBucket: aws_s3.Bucket;
   public readonly poolCacheKey: string;
@@ -32,6 +31,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
       ],
     });
 
+    const region = cdk.Stack.of(this).region;
+
     const poolCachingLambda = new aws_lambda_nodejs.NodejsFunction(
       this,
       'PoolCacheLambda',
@@ -50,7 +51,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           aws_lambda.LayerVersion.fromLayerVersionArn(
             this,
             'InsightsLayer',
-            'arn:aws:lambda:us-east-1:580247275435:layer:LambdaInsightsExtension:14'
+            `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
           ),
         ],
         tracing: aws_lambda.Tracing.ACTIVE,
@@ -64,7 +65,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.poolCacheBucket.grantReadWrite(poolCachingLambda);
 
     new aws_events.Rule(this, 'SchedulePoolCache', {
-      schedule: Schedule.rate(Duration.minutes(1)),
+      schedule: aws_events.Schedule.rate(Duration.minutes(1)),
       targets: [new aws_events_targets.LambdaFunction(poolCachingLambda)],
     });
   }
