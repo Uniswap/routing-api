@@ -13,7 +13,11 @@ export class RoutingAPIStack extends cdk.Stack {
   constructor(
     parent: cdk.Construct,
     name: string,
-    props: cdk.StackProps & { nodeRPC: string }
+    props: cdk.StackProps & {
+      nodeRPC: string;
+      nodeRPCUsername: string;
+      nodeRPCPassword: string;
+    }
   ) {
     super(parent, name, props);
 
@@ -22,12 +26,18 @@ export class RoutingAPIStack extends cdk.Stack {
       'RoutingCachingStack'
     );
 
-    const { nodeRPC } = props;
+    const { nodeRPC, nodeRPCUsername, nodeRPCPassword } = props;
 
     const { routingLambda } = new RoutingLambdaStack(
       this,
       'RoutingLambdaStack',
-      { poolCacheBucket, poolCacheKey, nodeRPC }
+      {
+        poolCacheBucket,
+        poolCacheKey,
+        nodeRPC,
+        nodeRPCUsername,
+        nodeRPCPassword,
+      }
     );
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs');

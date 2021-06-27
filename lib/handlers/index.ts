@@ -1,3 +1,8 @@
-import { quoteHandler } from './quote/quote';
+import { QuoteHandler } from './quote/quote';
+import { QuoteHandlerInjector } from "./quote/injector";
 
-module.exports = { quoteHandler };
+const quoteHandlerInjector = new QuoteHandlerInjector();
+quoteHandlerInjector.build();
+const quoteHandler = new QuoteHandler('quote', quoteHandlerInjector);
+
+module.exports = { quoteHandler: quoteHandler.handler };

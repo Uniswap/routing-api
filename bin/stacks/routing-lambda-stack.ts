@@ -9,6 +9,8 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket;
   poolCacheKey: string;
   nodeRPC: string;
+  nodeRPCUsername: string;
+  nodeRPCPassword: string;
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
@@ -20,7 +22,13 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     props: RoutingLambdaStackProps
   ) {
     super(scope, name, props);
-    const { poolCacheBucket, poolCacheKey, nodeRPC } = props;
+    const {
+      poolCacheBucket,
+      poolCacheKey,
+      nodeRPC,
+      nodeRPCUsername,
+      nodeRPCPassword,
+    } = props;
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -59,6 +67,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
           POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
           POOL_CACHE_KEY: poolCacheKey,
           JSON_RPC_URL: nodeRPC,
+          JSON_RPC_USERNAME: nodeRPCUsername,
+          JSON_RPC_PASSWORD: nodeRPCPassword,
         },
         layers: [
           aws_lambda.LayerVersion.fromLayerVersionArn(

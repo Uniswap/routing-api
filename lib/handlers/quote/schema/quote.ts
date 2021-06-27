@@ -12,6 +12,8 @@ export const QuoteBodySchemaJoi = Joi.object({
   algorithm: Joi.string().optional(),
   config: Joi.object({
     topN: Joi.number().required(),
+    topNSecondHop: Joi.number().required(),
+    topNTokenInOut: Joi.number().required(),
     maxSwapsPerPath: Joi.number().required(),
     maxSplits: Joi.number().required(),
     distributionPercent: Joi.number().required(),
@@ -39,3 +41,5 @@ export type QuoteBody = {
     multicallChunkSize: number;
   };
 };
+
+export type QuoteResponse = any;

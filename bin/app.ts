@@ -30,12 +30,20 @@ export class RoutingAPIStage extends Stage {
   constructor(
     scope: Construct,
     id: string,
-    props: StageProps & { nodeRPC: string }
+    props: StageProps & {
+      nodeRPC: string;
+      nodeRPCUsername: string;
+      nodeRPCPassword: string;
+    }
   ) {
     super(scope, id, props);
-    const { nodeRPC } = props;
+    const { nodeRPC, nodeRPCUsername, nodeRPCPassword } = props;
 
-    const { url } = new RoutingAPIStack(this, 'RoutingAPI', { nodeRPC });
+    const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
+      nodeRPC,
+      nodeRPCUsername,
+      nodeRPCPassword,
+    });
     this.url = url;
   }
 }
@@ -81,17 +89,21 @@ export class RoutingAPIPipeline extends Stack {
 
     // Secrets are stored in secrets manager in the pipeline account. Accounts we deploy to
     // have been granted permissions to access secrets via resource policies.
-    const rpcNodeUrl = sm.Secret.fromSecretAttributes(this, 'RPCNodeUrl', {
+    const rpcNodeDetails = sm.Secret.fromSecretAttributes(this, 'RPCNodeUrl', {
       secretCompleteArn:
-        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-fSmY28',
-    });
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-bison-trails-c1bCOW',
+    }).secretValue.toJSON();
 
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
-      nodeRPC: rpcNodeUrl.secretValue.toString(),
+      nodeRPC: rpcNodeDetails.url,
+      nodeRPCUsername: rpcNodeDetails.username ?? '',
+      nodeRPCPassword: rpcNodeDetails.password ?? '',
     });
+
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
+
     this.addIntegTests(
       pipeline,
       sourceArtifact,
@@ -102,9 +114,13 @@ export class RoutingAPIPipeline extends Stack {
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
-      nodeRPC: rpcNodeUrl.secretValue.toString(),
+      nodeRPC: rpcNodeDetails.url,
+      nodeRPCUsername: rpcNodeDetails.username ?? '',
+      nodeRPCPassword: rpcNodeDetails.password ?? '',
     });
+
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
+
     this.addIntegTests(
       pipeline,
       sourceArtifact,
@@ -149,6 +165,8 @@ const app = new cdk.App();
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   nodeRPC: process.env.JSON_RPC_URL!,
+  nodeRPCUsername: process.env.JSON_RPC_USERNAME!,
+  nodeRPCPassword: process.env.JSON_RPC_PASSWORD!,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

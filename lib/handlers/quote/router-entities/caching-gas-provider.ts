@@ -1,6 +1,7 @@
 import {
   ETHGasStationInfoProvider,
   GasPrice,
+  log,
 } from '@uniswap/smart-order-router';
 import NodeCache from 'node-cache';
 
@@ -12,7 +13,7 @@ export class CachingGasStationProvider extends ETHGasStationInfoProvider {
     const cachedGasPrice = GAS_CACHE.get<GasPrice>(GAS_KEY);
 
     if (cachedGasPrice) {
-      this.log.info(
+      log.info(
         { cachedGasPrice },
         `Got gas station price from local cache: ${cachedGasPrice.gasPriceWei}.`
       );
@@ -20,7 +21,7 @@ export class CachingGasStationProvider extends ETHGasStationInfoProvider {
       return cachedGasPrice;
     }
 
-    this.log.info('Gas station price local cache miss.');
+    log.info('Gas station price local cache miss.');
     const gasPrice = await super.getGasPrice();
     GAS_CACHE.set<GasPrice>(GAS_KEY, gasPrice);
 
