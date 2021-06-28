@@ -91,15 +91,15 @@ export class RoutingAPIPipeline extends Stack {
     // have been granted permissions to access secrets via resource policies.
     const rpcNodeDetails = sm.Secret.fromSecretAttributes(this, 'RPCNodeUrl', {
       secretCompleteArn:
-        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-bison-trails-c1bCOW',
-    }).secretValue.toJSON();
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-json-3ifNy7',
+    });
 
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
-      nodeRPC: rpcNodeDetails.url,
-      nodeRPCUsername: rpcNodeDetails.username ?? '',
-      nodeRPCPassword: rpcNodeDetails.password ?? '',
+      nodeRPC: rpcNodeDetails.secretValueFromJson('url').toString(),
+      nodeRPCUsername: rpcNodeDetails.secretValueFromJson('username').toString(),
+      nodeRPCPassword: rpcNodeDetails.secretValueFromJson('password').toString(),
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -114,9 +114,9 @@ export class RoutingAPIPipeline extends Stack {
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
-      nodeRPC: rpcNodeDetails.url,
-      nodeRPCUsername: rpcNodeDetails.username ?? '',
-      nodeRPCPassword: rpcNodeDetails.password ?? '',
+      nodeRPC: rpcNodeDetails.secretValueFromJson('url').toString(),
+      nodeRPCUsername: rpcNodeDetails.secretValueFromJson('username').toString(),
+      nodeRPCPassword: rpcNodeDetails.secretValueFromJson('password').toString(),
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
