@@ -1,6 +1,9 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
 import {
   AlphaRouter,
+  CachingGasStationProvider,
+  CachingPoolProvider,
+  ETHGasStationInfoProvider,
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
@@ -8,7 +11,6 @@ import {
   IRouter,
   LegacyRouter,
   Multicall2Provider,
-  PoolProvider,
   QuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
@@ -21,7 +23,6 @@ import { ethers } from 'ethers';
 import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
-import { CachingGasStationProvider } from './router-entities/caching-gas-provider';
 import { QuoteBody } from './schema/quote';
 
 export interface ContainerInjected {
@@ -96,7 +97,7 @@ export class QuoteHandlerInjector extends Injector<
         router = new LegacyRouter({
           chainId,
           multicall2Provider: new Multicall2Provider(provider),
-          poolProvider: new PoolProvider(multicall2Provider),
+          poolProvider: new CachingPoolProvider(multicall2Provider),
           quoteProvider: new QuoteProvider(multicall2Provider),
           tokenProvider,
         });
@@ -108,7 +109,7 @@ export class QuoteHandlerInjector extends Injector<
           chainId,
           subgraphProvider,
           multicall2Provider: new Multicall2Provider(provider),
-          poolProvider: new PoolProvider(multicall2Provider),
+          poolProvider: new CachingPoolProvider(multicall2Provider),
           quoteProvider: new QuoteProvider(multicall2Provider),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
@@ -130,7 +131,7 @@ export class QuoteHandlerInjector extends Injector<
     const tokenProvider = await TokenProvider.fromTokenList(DEFAULT_TOKEN_LIST);
 
     return {
-      gasStationProvider: new CachingGasStationProvider(),
+      gasStationProvider: new CachingGasStationProvider(new ETHGasStationInfoProvider()),
       subgraphProvider: new AWSSubgraphProvider(
         POOL_CACHE_BUCKET!,
         POOL_CACHE_KEY!

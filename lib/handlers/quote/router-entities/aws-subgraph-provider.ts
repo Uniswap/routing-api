@@ -1,4 +1,8 @@
-import { ISubgraphProvider, log, SubgraphPool } from '@uniswap/smart-order-router';
+import {
+  ISubgraphProvider,
+  log,
+  SubgraphPool,
+} from '@uniswap/smart-order-router';
 import { S3 } from 'aws-sdk';
 import NodeCache from 'node-cache';
 
@@ -21,7 +25,7 @@ export class AWSSubgraphProvider implements ISubgraphProvider {
     if (cachedPools) {
       log.info(
         { subgraphPools: cachedPools.length },
-        'Subgraph pool fetched from local cache.'
+        `Subgraph pools fetched from local cache. Num: ${cachedPools.length}`
       );
 
       return cachedPools;
@@ -38,16 +42,16 @@ export class AWSSubgraphProvider implements ISubgraphProvider {
 
     const { Body: poolsBuffer } = result;
 
-    log.info(
-      { bucket: this.bucket, key: this.key },
-      'Got subgraph pools from S3'
-    );
-
     if (!poolsBuffer) {
       throw new Error('Could not get subgraph pool cache from S3');
     }
 
     const pools = JSON.parse(poolsBuffer.toString('utf-8')) as SubgraphPool[];
+
+    log.info(
+      { bucket: this.bucket, key: this.key },
+      `Got subgraph pools from S3. Num: ${pools.length}`
+    );
 
     POOL_CACHE.set<SubgraphPool[]>(POOL_CACHE_KEY, pools);
 

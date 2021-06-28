@@ -65,7 +65,7 @@
     "@typechain/ethers-v5": "^7.0.1",
     "@types/async-retry": "^1.4.2",
     "@uniswap/sdk-core": "3.0.0",
-    "@uniswap/smart-order-router": "1.7.1",
+    "@uniswap/smart-order-router": "^1.8.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "@uniswap/v3-periphery": "^1.1.0",
     "@uniswap/v3-sdk": "3.1.0",

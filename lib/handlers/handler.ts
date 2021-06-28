@@ -127,7 +127,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             return { statusCode: 500, body: 'Internal error' };
           }
 
-          // let response: Res;
+          let response: Res;
           try {
             const responseValidation = await this.parseAndValidateResponse(
               body
@@ -137,13 +137,13 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
               return responseValidation.errorResponse;
             }
 
-            // response = responseValidation.response;
+            response = responseValidation.response;
           } catch (err) {
             log.error({ err }, 'Unexpected error in handler');
             return { statusCode: 500, body: 'Internal error' };
           }
 
-          return { statusCode, body: JSON.stringify(body) };
+          return { statusCode, body: JSON.stringify(response) };
         }
     );
   }

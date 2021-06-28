@@ -24,7 +24,7 @@ export const QuoteBodySchemaJoi = Joi.object({
 export type QuoteBody = {
   tokenIn: string;
   tokenOut: string;
-  type: 'exactIn' | 'exactOut';
+  type: string;
   amount: string;
   chainId: number;
   recipient: string;

@@ -1,11 +1,10 @@
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda';
-import bunyan from 'bunyan';
-import Logger from 'bunyan';
-import { request, gql } from 'graphql-request';
 import { S3 } from 'aws-sdk';
+import { default as bunyan, default as Logger } from 'bunyan';
+import { gql, request } from 'graphql-request';
 
 const SUBGRAPH_URL =
-  'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3';
+  'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-prod';
 
 export type SubgraphPool = {
   id: string;

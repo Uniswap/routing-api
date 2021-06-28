@@ -148,7 +148,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     };
 
     log.info({ result }, 'Request ended.');
-    return { statusCode: 200, body: JSON.stringify(result) };
+    return { statusCode: 200, body: result };
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {

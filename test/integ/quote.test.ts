@@ -3,30 +3,23 @@ import { QuoteBody } from '../../lib/handlers/quote/schema/quote';
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`;
 
-describe('exactIn', () => {
-  describe('2xx', () => {
-    test.only('succeeds erc20 -> erc20', async () => {
+describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
+  describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
+    test('succeeds erc20 -> erc20', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
         amount: '100',
-        type: 'exactIn',
+        type,
         chainId: 1,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       const response = await axios.post<any>(API, quotePost);
       const { data, status } = response;
-
-      console.log(response);
-      console.log(response.headers);
-      console.log(JSON.parse(data));
-      console.log(typeof data);
-      console.log(data.rawQuote);
-      console.log(data.methodParameters);
 
       expect(status).toBe(200);
       expect(parseFloat(data.rawQuote)).toBeGreaterThan(90);
@@ -38,18 +31,16 @@ describe('exactIn', () => {
         tokenIn: 'USDC',
         tokenOut: 'ETH',
         amount: '100',
-        type: 'exactIn',
+        type,
         chainId: 1,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       const response = await axios.post<any>(API, quotePost);
       const { data, status } = response;
-
-      console.log(data);
 
       expect(status).toBe(200);
       expect(data.methodParameters).toBeDefined();
@@ -60,12 +51,12 @@ describe('exactIn', () => {
         tokenIn: 'ETH',
         tokenOut: 'UNI',
         amount: '100',
-        type: 'exactIn',
+        type,
         chainId: 1,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       const response = await axios.post<any>(API, quotePost);
@@ -80,12 +71,12 @@ describe('exactIn', () => {
         tokenIn: 'WETH',
         tokenOut: 'DAI',
         amount: '100',
-        type: 'exactIn',
+        type,
         chainId: 1,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       const response = await axios.post<any>(API, quotePost);
@@ -100,12 +91,12 @@ describe('exactIn', () => {
         tokenIn: 'USDT',
         tokenOut: 'WETH',
         amount: '100',
-        type: 'exactIn',
+        type,
         chainId: 1,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       const response = await axios.post<any>(API, quotePost);
@@ -126,7 +117,7 @@ describe('exactIn', () => {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        algorithm: 'alpha',
+        algorithm,
       };
 
       await expect(axios.post<any>(API, quotePost)).rejects.toMatchObject({
