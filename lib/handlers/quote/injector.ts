@@ -8,6 +8,7 @@ import {
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
   IMetric,
+  IPoolProvider,
   IRouter,
   LegacyRouter,
   Multicall2Provider,
@@ -34,6 +35,7 @@ export interface ContainerInjected {
 export interface RequestInjected extends BaseRInj {
   quoteId: string;
   metric: IMetric;
+  poolProvider: IPoolProvider;
   router: IRouter<any>;
 }
 
@@ -87,6 +89,7 @@ export class QuoteHandlerInjector extends Injector<
     );
 
     const multicall2Provider = new Multicall2Provider(provider);
+    const poolProvider = new CachingPoolProvider(multicall2Provider);
 
     const { gasStationProvider, subgraphProvider, tokenProvider } =
       containerInjected;
@@ -97,7 +100,7 @@ export class QuoteHandlerInjector extends Injector<
         router = new LegacyRouter({
           chainId,
           multicall2Provider: new Multicall2Provider(provider),
-          poolProvider: new CachingPoolProvider(multicall2Provider),
+          poolProvider,
           quoteProvider: new QuoteProvider(multicall2Provider),
           tokenProvider,
         });
@@ -109,7 +112,7 @@ export class QuoteHandlerInjector extends Injector<
           chainId,
           subgraphProvider,
           multicall2Provider: new Multicall2Provider(provider),
-          poolProvider: new CachingPoolProvider(multicall2Provider),
+          poolProvider,
           quoteProvider: new QuoteProvider(multicall2Provider),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
@@ -123,6 +126,7 @@ export class QuoteHandlerInjector extends Injector<
       log,
       metric,
       router,
+      poolProvider,
     };
   }
 
@@ -131,7 +135,9 @@ export class QuoteHandlerInjector extends Injector<
     const tokenProvider = await TokenProvider.fromTokenList(DEFAULT_TOKEN_LIST);
 
     return {
-      gasStationProvider: new CachingGasStationProvider(new ETHGasStationInfoProvider()),
+      gasStationProvider: new CachingGasStationProvider(
+        new ETHGasStationInfoProvider()
+      ),
       subgraphProvider: new AWSSubgraphProvider(
         POOL_CACHE_BUCKET!,
         POOL_CACHE_KEY!

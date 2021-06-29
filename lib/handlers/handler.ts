@@ -21,8 +21,14 @@ export type HandleRequestParams<CInj, RInj, Req> = {
 };
 
 export type Response<Res> = {
-  statusCode: number;
+  statusCode: 200 | 202;
   body: Res;
+};
+
+export type ErrorResponse = {
+  statusCode: 400 | 403 | 404 | 408 | 409 | 500;
+  errorCode: string;
+  detail?: string;
 };
 
 export abstract class Injector<CInj, RInj extends BaseRInj, Req> {
@@ -54,6 +60,14 @@ export abstract class Injector<CInj, RInj extends BaseRInj, Req> {
     return this.containerInjected;
   }
 }
+
+const INTERNAL_ERROR: APIGatewayProxyResult = {
+  statusCode: 500,
+  body: JSON.stringify({
+    errorCode: 'INTERNAL_ERROR',
+    detail: 'Unexpected error.',
+  }),
+};
 
 export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
   constructor(
@@ -88,7 +102,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             request = requestValidation.request;
           } catch (err) {
             log.error({ err }, 'Unexpected error validating request');
-            return { statusCode: 500, body: 'Internal error' };
+            return INTERNAL_ERROR;
           }
 
           const containerInjected = await this.injector.getContainerInjected();
@@ -105,7 +119,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             );
           } catch (err) {
             log.error({ err, event }, 'Error building request injected.');
-            return { statusCode: 500, body: 'Internal error' };
+            return INTERNAL_ERROR;
           }
 
           ({ log } = requestInjected);
@@ -115,16 +129,26 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
 
           log.info({ request }, 'Invoking handle request');
           try {
-            ({ statusCode, body } = await this.handleRequest({
+            const handleRequestResult = await this.handleRequest({
               context,
               event,
               request,
               containerInjected,
               requestInjected,
-            }));
+            });
+
+            if (this.isError(handleRequestResult)) {
+              const { statusCode, detail, errorCode } = handleRequestResult;
+              return {
+                statusCode,
+                body: JSON.stringify({ detail, errorCode }),
+              };
+            } else {
+              ({ body, statusCode } = handleRequestResult);
+            }
           } catch (err) {
             log.error({ err }, 'Unexpected error in handler');
-            return { statusCode: 500, body: 'Internal error' };
+            return INTERNAL_ERROR;
           }
 
           let response: Res;
@@ -140,7 +164,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             response = responseValidation.response;
           } catch (err) {
             log.error({ err }, 'Unexpected error in handler');
-            return { statusCode: 500, body: 'Internal error' };
+            return INTERNAL_ERROR;
           }
 
           return { statusCode, body: JSON.stringify(response) };
@@ -150,10 +174,16 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
 
   public abstract handleRequest(
     params: HandleRequestParams<CInj, RInj, Req>
-  ): Promise<Response<Res>>;
+  ): Promise<Response<Res> | ErrorResponse>;
 
   protected abstract requestBodySchema(): Joi.ObjectSchema | null;
   protected abstract responseBodySchema(): Joi.ObjectSchema | null;
+
+  private isError(
+    result: Response<Res> | ErrorResponse
+  ): result is ErrorResponse {
+    return result.statusCode != 200 && result.statusCode != 202;
+  }
 
   private async parseAndValidateRequest(
     event: APIGatewayProxyEvent

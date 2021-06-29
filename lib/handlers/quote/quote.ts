@@ -1,11 +1,32 @@
 import Joi from '@hapi/joi';
 import { Currency, CurrencyAmount, Ether, Percent } from '@uniswap/sdk-core';
-import { routeAmountToString, SwapRoute } from '@uniswap/smart-order-router';
+import { SwapRoute } from '@uniswap/smart-order-router';
+import { Pool } from '@uniswap/v3-sdk';
 import { parseUnits } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
-import { APIGLambdaHandler, HandleRequestParams, Response } from '../handler';
+import {
+  APIGLambdaHandler,
+  ErrorResponse,
+  HandleRequestParams,
+  Response,
+} from '../handler';
 import { ContainerInjected, RequestInjected } from './injector';
-import { QuoteBody, QuoteBodySchemaJoi, QuoteResponse } from './schema/quote';
+import {
+  QuoteBody,
+  QuoteBodySchemaJoi,
+  QuoteResponse,
+  TokenInRoute,
+} from './schema/quote';
+
+const ROUTING_CONFIG = {
+  topN: 4,
+  topNTokenInOut: 3,
+  topNSecondHop: 2,
+  maxSwapsPerPath: 3,
+  maxSplits: 3,
+  distributionPercent: 5,
+  multicallChunkSize: 50,
+};
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -15,18 +36,18 @@ export class QuoteHandler extends APIGLambdaHandler<
 > {
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected, QuoteBody>
-  ): Promise<Response<QuoteResponse>> {
+  ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
       request: {
         chainId,
         tokenIn: tokenInRaw,
         tokenOut: tokenOutRaw,
         amount: amountRaw,
-        config: routingConfig,
         type,
         recipient,
         slippageTolerance,
         deadline,
+        inputTokenPermit,
       },
       requestInjected: { router, log, quoteId },
       containerInjected: { tokenProvider },
@@ -55,6 +76,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
       recipient: recipient,
       slippageTolerance: slippageTolerancePercent,
+      inputTokenPermit,
     };
 
     let swapRoute: SwapRoute | null;
@@ -70,7 +92,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           {
             amountIn: amountIn.toExact(),
             currency: amountIn.currency.symbol,
-            routingConfig,
+            routingConfig: ROUTING_CONFIG,
           },
           `Exact In Swap: Give ${amountIn.toExact()} ${
             amountIn.currency.symbol
@@ -82,7 +104,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           currencyOut,
           amountIn,
           swapParams,
-          routingConfig
+          ROUTING_CONFIG
         );
         break;
       case 'exactOut':
@@ -99,7 +121,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           {
             amountIn: amountOut.toExact(),
             currency: amountOut.currency.symbol,
-            routingConfig,
+            routingConfig: ROUTING_CONFIG,
           },
           `Exact Out Swap: Want ${amountOut.toExact()} ${
             amountOut.currency.symbol
@@ -111,7 +133,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           currencyOut,
           amountOut,
           swapParams,
-          routingConfig
+          ROUTING_CONFIG
         );
         break;
       default:
@@ -119,7 +141,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
-      return { statusCode: 404, body: 'No route found' };
+      return {
+        statusCode: 404,
+        errorCode: 'NO_ROUTE',
+        detail: 'No route found.',
+      };
     }
 
     const {
@@ -132,18 +158,60 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute;
 
-    const routeStrings = routeAmounts.map((routeAmount) => {
-      return routeAmountToString(routeAmount);
-    });
+    const firstTokenInRoute: TokenInRoute = {
+      type: 'token',
+      address: currencyIn.wrapped.address,
+      symbol: currencyIn.wrapped.symbol!,
+    };
 
-    const result = {
+    for (const routeAmount of routeAmounts) {
+      const {
+        route: { tokenPath, pools },
+        percentage,
+      } = routeAmount;
+
+      let curTokenInRoute = firstTokenInRoute;
+      for (let i = 0; i < pools.length; i++) {
+        if (!curTokenInRoute.nextPools) {
+          curTokenInRoute.nextPools = {};
+        }
+
+        const nextPool = pools[i];
+        const nextToken = tokenPath[i + 1];
+
+        const nextTokenInRoute: TokenInRoute = {
+          type: 'token',
+          address: nextToken.address,
+          symbol: nextToken.symbol!,
+        };
+
+        curTokenInRoute.nextPools[i == 0 ? percentage : '100'] = {
+          address: Pool.getAddress(
+            nextPool.token0,
+            nextPool.token1,
+            nextPool.fee
+          ),
+          type: 'pool',
+          fee: nextPool.fee.toString(),
+          token0Address: nextPool.token0.address,
+          token1Address: nextPool.token1.address,
+          token0Symbol: nextPool.token0.symbol!,
+          token1Symbol: nextPool.token1.symbol!,
+          nextToken: nextTokenInRoute,
+        };
+
+        curTokenInRoute = nextTokenInRoute;
+      }
+    }
+
+    const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
-      estimatedGasUsed: estimatedGasUsed.toString(),
+      gasUseEstimate: estimatedGasUsed.toString(),
       gasPriceWei: gasPriceWei.toString(),
-      routes: routeStrings,
-      gasAdjustedQuote: quoteGasAdjusted.toExact(),
-      rawQuote: quote.toExact(),
+      route: firstTokenInRoute,
+      quoteGasAdjusted: quoteGasAdjusted.toExact(),
+      quote: quote.toExact(),
       quoteId,
     };
 
