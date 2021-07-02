@@ -21,10 +21,8 @@ export class RoutingAPIStack extends cdk.Stack {
   ) {
     super(parent, name, props);
 
-    const { poolCacheBucket, poolCacheKey } = new RoutingCachingStack(
-      this,
-      'RoutingCachingStack'
-    );
+    const { poolCacheBucket, poolCacheKey, tokenListCacheBucket } =
+      new RoutingCachingStack(this, 'RoutingCachingStack');
 
     const { nodeRPC, nodeRPCUsername, nodeRPCPassword } = props;
 
@@ -37,6 +35,7 @@ export class RoutingAPIStack extends cdk.Stack {
         nodeRPC,
         nodeRPCUsername,
         nodeRPCPassword,
+        tokenListCacheBucket,
       }
     );
 

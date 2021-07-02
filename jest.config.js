@@ -6,4 +6,5 @@ module.exports = {
   },
   testEnvironment: 'node',
   setupFiles: ['dotenv/config'],
+  setupFilesAfterEnv: ['jest-expect-message'],
 };

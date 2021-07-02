@@ -1,4 +1,3 @@
-import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
 import {
   AlphaRouter,
   CachingGasStationProvider,
@@ -7,9 +6,13 @@ import {
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
+  IGasPriceProvider,
   IMetric,
   IPoolProvider,
   IRouter,
+  ISubgraphProvider,
+  ITokenListProvider,
+  ITokenProvider,
   LegacyRouter,
   Multicall2Provider,
   QuoteProvider,
@@ -24,18 +27,24 @@ import { ethers } from 'ethers';
 import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
-import { QuoteBody } from './schema/quote';
+import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
+import { QuoteBody } from './schema/quote-schema';
+
+const DEFAULT_TOKEN_LIST = 'https://tokens.coingecko.com/uniswap/all.json';
+const DEFAULT_BLOCKED_TOKEN_LIST =
+  'https://raw.githubusercontent.com/The-Blockchain-Association/sec-notice-list/master/ba-sec-list.json';
 
 export interface ContainerInjected {
-  subgraphProvider: AWSSubgraphProvider;
-  gasStationProvider: CachingGasStationProvider;
-  tokenProvider: TokenProvider;
+  subgraphProvider: ISubgraphProvider;
+  gasStationProvider: IGasPriceProvider;
+  tokenListProvider: ITokenListProvider;
 }
 
 export interface RequestInjected extends BaseRInj {
   quoteId: string;
   metric: IMetric;
   poolProvider: IPoolProvider;
+  tokenProvider: ITokenProvider;
   router: IRouter<any>;
 }
 
@@ -90,8 +99,9 @@ export class QuoteHandlerInjector extends Injector<
 
     const multicall2Provider = new Multicall2Provider(provider);
     const poolProvider = new CachingPoolProvider(multicall2Provider);
+    const tokenProvider = new TokenProvider(chainIdEnum, multicall2Provider);
 
-    const { gasStationProvider, subgraphProvider, tokenProvider } =
+    const { gasStationProvider, subgraphProvider, tokenListProvider } =
       containerInjected;
     let router;
     switch (algorithm) {
@@ -102,7 +112,7 @@ export class QuoteHandlerInjector extends Injector<
           multicall2Provider: new Multicall2Provider(provider),
           poolProvider,
           quoteProvider: new QuoteProvider(multicall2Provider),
-          tokenProvider,
+          tokenListProvider,
         });
         break;
       case 'alpha':
@@ -116,6 +126,7 @@ export class QuoteHandlerInjector extends Injector<
           quoteProvider: new QuoteProvider(multicall2Provider),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
+          tokenListProvider,
           tokenProvider,
         });
         break;
@@ -127,12 +138,25 @@ export class QuoteHandlerInjector extends Injector<
       metric,
       router,
       poolProvider,
+      tokenProvider,
     };
   }
 
   public async buildContainerInjected(): Promise<ContainerInjected> {
-    const { POOL_CACHE_BUCKET, POOL_CACHE_KEY } = process.env;
-    const tokenProvider = await TokenProvider.fromTokenList(DEFAULT_TOKEN_LIST);
+    const log: Logger = bunyan.createLogger({
+      name: this.injectorName,
+      serializers: bunyan.stdSerializers,
+      level: bunyan.INFO,
+    });
+    setGlobalLogger(log);
+
+    const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } =
+      process.env;
+    const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
+      TOKEN_LIST_CACHE_BUCKET!,
+      DEFAULT_TOKEN_LIST,
+      DEFAULT_BLOCKED_TOKEN_LIST
+    );
 
     return {
       gasStationProvider: new CachingGasStationProvider(
@@ -142,7 +166,7 @@ export class QuoteHandlerInjector extends Injector<
         POOL_CACHE_BUCKET!,
         POOL_CACHE_KEY!
       ),
-      tokenProvider,
+      tokenListProvider,
     };
   }
 }

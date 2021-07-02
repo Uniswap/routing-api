@@ -2,13 +2,16 @@ import Joi from '@hapi/joi';
 import { MethodParameters } from '@uniswap/v3-sdk';
 
 export const QuoteBodySchemaJoi = Joi.object({
-  tokenIn: Joi.string().alphanum().max(40).required(), // Support symbols or addresses
-  tokenOut: Joi.string().alphanum().max(40).required(), // Support symbols or addresses
-  amount: Joi.string().max(20).required(),
+  tokenIn: Joi.string().alphanum().max(42).required(), // Support symbols or addresses
+  tokenOut: Joi.string().alphanum().max(42).required(), // Support symbols or addresses
+  amount: Joi.string()
+    .max(20)
+    .pattern(new RegExp(/^[+]?([.]\d+|\d+([.]\d+)?)$/))
+    .required(),
   chainId: Joi.number().valid(1).required(),
   type: Joi.string().valid('exactIn', 'exactOut').required(),
   recipient: Joi.string()
-    .pattern(new RegExp('/^0x[a-fA-F0-9]{40}$/'))
+    .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
     .required(),
   slippageTolerance: Joi.number().min(0).max(20).precision(2).required(),
   deadline: Joi.number().max(600).required(),
@@ -78,18 +81,27 @@ export type TokenInRoute = {
   nextPools?: { [percentage: string]: PoolInRoute };
 };
 
-// export type RouteAmount = {
-//   route: RouteSOR;
-//   amount: CurrencyAmount; // Amount in or out from user.
-//   quote: CurrencyAmount;
-//   quoteGasAdjusted: CurrencyAmount;
-//   estimatedGasUsed: BigNumber;
-//   percentage: number;
-// };
+export const QuoteResponseSchemaJoi = Joi.object({
+  blockNumber: Joi.string().required(),
+  gasUseEstimate: Joi.string().required(),
+  gasUseEstimateUSD: Joi.string().required(),
+  gasUseEstimateQuoteToken: Joi.string().required(),
+  gasPriceWei: Joi.string().required(),
+  route: Joi.any().required(),
+  quote: Joi.string().required(),
+  quoteGasAdjusted: Joi.string().required(),
+  quoteId: Joi.string().required(),
+  methodParameters: Joi.object({
+    calldata: Joi.string().required(),
+    value: Joi.string().required(),
+  }),
+});
 
 export type QuoteResponse = {
   blockNumber: string;
   gasUseEstimate: string;
+  gasUseEstimateUSD: string;
+  gasUseEstimateQuoteToken: string;
   gasPriceWei: string;
   route: TokenInRoute;
   quote: string;

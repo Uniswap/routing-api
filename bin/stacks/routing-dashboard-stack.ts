@@ -38,8 +38,20 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   apiName,
                   { label: 'Requests' },
                 ],
-                ['.', '5XXError', '.', '.', { label: '5XXError Responses' }],
-                ['.', '4XXError', '.', '.', { label: '4XXError Responses' }],
+                [
+                  '.',
+                  '5XXError',
+                  '.',
+                  '.',
+                  { label: '5XXError Responses', color: '#ff7f0e' },
+                ],
+                [
+                  '.',
+                  '4XXError',
+                  '.',
+                  '.',
+                  { label: '4XXError Responses', color: '#2ca02c' },
+                ],
               ],
               view: 'timeSeries',
               stacked: false,
@@ -57,8 +69,22 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             properties: {
               metrics: [
-                [{ expression: 'm1 * 100', label: '5XX Error Rate', id: 'e1' }],
-                [{ expression: 'm2 * 100', label: '4XX Error Rate', id: 'e2' }],
+                [
+                  {
+                    expression: 'm1 * 100',
+                    label: '5XX Error Rate',
+                    id: 'e1',
+                    color: '#ff7f0e',
+                  },
+                ],
+                [
+                  {
+                    expression: 'm2 * 100',
+                    label: '4XX Error Rate',
+                    id: 'e2',
+                    color: '#2ca02c',
+                  },
+                ],
                 [
                   'AWS/ApiGateway',
                   '5XXError',
@@ -163,7 +189,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               ],
               region: region,
               title: 'Top N Pools Used From Sources in Best Route | 5min',
-              stat: 'Maximum',
+              stat: 'p90',
             },
           },
         ],

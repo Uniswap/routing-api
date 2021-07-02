@@ -11,6 +11,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   nodeRPC: string;
   nodeRPCUsername: string;
   nodeRPCPassword: string;
+  tokenListCacheBucket: aws_s3.Bucket;
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
@@ -28,6 +29,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      tokenListCacheBucket,
     } = props;
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -45,6 +47,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       ],
     });
     poolCacheBucket.grantRead(lambdaRole);
+    tokenListCacheBucket.grantRead(lambdaRole);
 
     const region = cdk.Stack.of(this).region;
 
@@ -69,6 +72,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
           JSON_RPC_URL: nodeRPC,
           JSON_RPC_USERNAME: nodeRPCUsername,
           JSON_RPC_PASSWORD: nodeRPCPassword,
+          TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         },
         layers: [
           aws_lambda.LayerVersion.fromLayerVersionArn(

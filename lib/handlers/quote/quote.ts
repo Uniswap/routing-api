@@ -1,7 +1,14 @@
 import Joi from '@hapi/joi';
 import { Currency, CurrencyAmount, Ether, Percent } from '@uniswap/sdk-core';
-import { SwapRoute } from '@uniswap/smart-order-router';
+import {
+  ChainId,
+  ITokenListProvider,
+  ITokenProvider,
+  MetricLoggerUnit,
+  SwapRoute,
+} from '@uniswap/smart-order-router';
 import { Pool } from '@uniswap/v3-sdk';
+import Logger from 'bunyan';
 import { parseUnits } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
 import {
@@ -15,8 +22,9 @@ import {
   QuoteBody,
   QuoteBodySchemaJoi,
   QuoteResponse,
+  QuoteResponseSchemaJoi,
   TokenInRoute,
-} from './schema/quote';
+} from './schema/quote-schema';
 
 const ROUTING_CONFIG = {
   topN: 4,
@@ -49,24 +57,50 @@ export class QuoteHandler extends APIGLambdaHandler<
         deadline,
         inputTokenPermit,
       },
-      requestInjected: { router, log, quoteId },
-      containerInjected: { tokenProvider },
+      requestInjected: { router, log, quoteId, tokenProvider, metric },
+      containerInjected: { tokenListProvider },
     } = params;
 
-    // Parse user provided token string to Currency object.
-    let currencyIn: Currency;
-    let currencyOut: Currency;
+    // Parse user provided token address/symbol to Currency object.
+    const before = Date.now();
 
-    if (tokenInRaw == 'ETH') {
-      currencyIn = Ether.onChain(chainId);
-    } else {
-      currencyIn = tokenProvider.getToken(chainId, tokenInRaw);
+    const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
+      chainId,
+      tokenListProvider,
+      tokenProvider,
+      tokenInRaw,
+      tokenOutRaw,
+      log
+    );
+
+    metric.putMetric(
+      'TokenInOutStrToToken',
+      Date.now() - before,
+      MetricLoggerUnit.Milliseconds
+    );
+
+    if (!currencyIn) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_INVALID',
+        detail: `Could not find token ${tokenInRaw}`,
+      };
     }
 
-    if (tokenOutRaw == 'ETH') {
-      currencyOut = Ether.onChain(chainId);
-    } else {
-      currencyOut = tokenProvider.getToken(chainId, tokenOutRaw);
+    if (!currencyOut) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_OUT_INVALID',
+        detail: `Could not find token ${tokenOutRaw}`,
+      };
+    }
+
+    if (currencyIn.equals(currencyOut)) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_OUT_SAME',
+        detail: `tokenIn and tokenOut must be different`,
+      };
     }
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
@@ -144,7 +178,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
-        detail: 'No route found.',
+        detail: 'No route found',
       };
     }
 
@@ -153,6 +187,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteGasAdjusted,
       routeAmounts,
       estimatedGasUsed,
+      estimatedGasUsedQuoteToken,
+      estimatedGasUsedUSD,
       gasPriceWei,
       methodParameters,
       blockNumber,
@@ -208,6 +244,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       methodParameters,
       blockNumber: blockNumber.toString(),
       gasUseEstimate: estimatedGasUsed.toString(),
+      gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
+      gasUseEstimateQuoteToken: estimatedGasUsedQuoteToken.toExact(),
       gasPriceWei: gasPriceWei.toString(),
       route: firstTokenInRoute,
       quoteGasAdjusted: quoteGasAdjusted.toExact(),
@@ -215,8 +253,69 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteId,
     };
 
-    log.info({ result }, 'Request ended.');
     return { statusCode: 200, body: result };
+  }
+
+  private async tokenStringToCurrency(
+    chainId: ChainId,
+    tokenListProvider: ITokenListProvider,
+    tokenProvider: ITokenProvider,
+    tokenInRaw: string,
+    tokenOutRaw: string,
+    log: Logger
+  ): Promise<{
+    currencyIn: Currency | undefined;
+    currencyOut: Currency | undefined;
+  }> {
+    const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
+
+    const tryTokenList = (tokenRaw: string): Currency | undefined => {
+      if (
+        tokenRaw == 'ETH' ||
+        tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+      ) {
+        return Ether.onChain(chainId);
+      }
+
+      if (isAddress(tokenRaw)) {
+        const token = tokenListProvider.getTokenByAddressIfExists(
+          chainId,
+          tokenRaw
+        );
+
+        return token;
+      }
+
+      return tokenListProvider.getTokenBySymbolIfExists(chainId, tokenRaw);
+    };
+
+    let currencyIn: Currency | undefined = tryTokenList(tokenInRaw);
+    let currencyOut: Currency | undefined = tryTokenList(tokenOutRaw);
+
+    if (currencyIn && currencyOut) {
+      log.info('Got both input tokens from token list');
+      return { currencyIn, currencyOut };
+    }
+
+    const tokensToFetch = [];
+    if (!currencyIn && isAddress(tokenInRaw)) {
+      tokensToFetch.push(tokenInRaw);
+    }
+    if (!currencyOut && isAddress(tokenOutRaw)) {
+      tokensToFetch.push(tokenOutRaw);
+    }
+
+    log.info(`Getting tokens ${tokensToFetch} from chain`);
+    const tokenAccessor = await tokenProvider.getTokens(tokensToFetch);
+
+    if (!currencyIn) {
+      currencyIn = tokenAccessor.getToken(tokenInRaw);
+    }
+    if (!currencyOut) {
+      currencyOut = tokenAccessor.getToken(tokenOutRaw);
+    }
+
+    return { currencyIn, currencyOut };
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {
@@ -224,6 +323,6 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
-    return null;
+    return QuoteResponseSchemaJoi;
   }
 }

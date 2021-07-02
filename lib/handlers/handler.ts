@@ -33,7 +33,7 @@ export type ErrorResponse = {
 
 export abstract class Injector<CInj, RInj extends BaseRInj, Req> {
   private containerInjected: CInj;
-  public constructor() {}
+  public constructor(protected injectorName: string) {}
 
   public async build() {
     this.containerInjected = await this.buildContainerInjected();
@@ -65,14 +65,14 @@ const INTERNAL_ERROR: APIGatewayProxyResult = {
   statusCode: 500,
   body: JSON.stringify({
     errorCode: 'INTERNAL_ERROR',
-    detail: 'Unexpected error.',
+    detail: 'Unexpected error',
   }),
 };
 
 export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
   constructor(
     private handlerName: string,
-    private injector: Injector<CInj, RInj, Req>
+    private injectorPromise: Promise<Injector<CInj, RInj, Req>>
   ) {}
 
   get handler(): APIGatewayProxyHandler {
@@ -93,7 +93,10 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
 
           let request: Req;
           try {
-            const requestValidation = await this.parseAndValidateRequest(event);
+            const requestValidation = await this.parseAndValidateRequest(
+              event,
+              log
+            );
 
             if (requestValidation.state == 'invalid') {
               return requestValidation.errorResponse;
@@ -105,11 +108,13 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             return INTERNAL_ERROR;
           }
 
-          const containerInjected = await this.injector.getContainerInjected();
+          const injector = await this.injectorPromise;
+
+          const containerInjected = await injector.getContainerInjected();
 
           let requestInjected: RInj;
           try {
-            requestInjected = await this.injector.getRequestInjected(
+            requestInjected = await injector.getRequestInjected(
               containerInjected,
               request,
               event,
@@ -118,7 +123,10 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
               metric
             );
           } catch (err) {
-            log.error({ err, event }, 'Error building request injected.');
+            log.error(
+              { err, event },
+              'Unexpected error building request injected.'
+            );
             return INTERNAL_ERROR;
           }
 
@@ -127,7 +135,6 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
           let statusCode: number;
           let body: Res;
 
-          log.info({ request }, 'Invoking handle request');
           try {
             const handleRequestResult = await this.handleRequest({
               context,
@@ -138,12 +145,20 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             });
 
             if (this.isError(handleRequestResult)) {
+              log.info({ handleRequestResult }, 'Handler did not return a 200');
               const { statusCode, detail, errorCode } = handleRequestResult;
+              const response = JSON.stringify({ detail, errorCode });
+
+              log.info(
+                { statusCode, response },
+                `Request ended. ${statusCode}`
+              );
               return {
                 statusCode,
-                body: JSON.stringify({ detail, errorCode }),
+                body: response,
               };
             } else {
+              log.info({ request }, 'Handler returned 200');
               ({ body, statusCode } = handleRequestResult);
             }
           } catch (err) {
@@ -154,7 +169,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
           let response: Res;
           try {
             const responseValidation = await this.parseAndValidateResponse(
-              body
+              body,
+              log
             );
 
             if (responseValidation.state == 'invalid') {
@@ -163,10 +179,11 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
 
             response = responseValidation.response;
           } catch (err) {
-            log.error({ err }, 'Unexpected error in handler');
+            log.error({ err }, 'Unexpected error validating response');
             return INTERNAL_ERROR;
           }
 
+          log.info({ statusCode, response }, `Request ended. ${statusCode}`);
           return { statusCode, body: JSON.stringify(response) };
         }
     );
@@ -186,7 +203,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
   }
 
   private async parseAndValidateRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
+    log: Logger
   ): Promise<
     | { state: 'valid'; request: Req }
     | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
@@ -195,7 +213,16 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
     try {
       body = JSON.parse(event.body ?? '');
     } catch (err) {
-      return { state: 'invalid', errorResponse: { statusCode: 422, body: '' } };
+      return {
+        state: 'invalid',
+        errorResponse: {
+          statusCode: 422,
+          body: JSON.stringify({
+            detail: 'Invalid JSON body',
+            errorCode: 'VALIDATION_ERROR',
+          }),
+        },
+      };
     }
 
     const bodySchema = this.requestBodySchema();
@@ -210,9 +237,16 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
     });
 
     if (res.error) {
+      log.info({ res }, 'Request failed validation');
       return {
         state: 'invalid',
-        errorResponse: { statusCode: 400, body: res.error.message },
+        errorResponse: {
+          statusCode: 400,
+          body: JSON.stringify({
+            detail: res.error.message,
+            errorCode: 'VALIDATION_ERROR',
+          }),
+        },
       };
     }
 
@@ -220,7 +254,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
   }
 
   private async parseAndValidateResponse(
-    body: Res
+    body: Res,
+    log: Logger
   ): Promise<
     | { state: 'valid'; response: Res }
     | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
@@ -237,9 +272,13 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
     });
 
     if (res.error) {
+      log.error(
+        { error: res.error?.details, errors: res.errors?.details, body },
+        'Unexpected error. Response failed validation.'
+      );
       return {
         state: 'invalid',
-        errorResponse: { statusCode: 500, body: 'Internal error' },
+        errorResponse: INTERNAL_ERROR,
       };
     }
 

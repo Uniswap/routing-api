@@ -4,7 +4,7 @@ import { default as bunyan, default as Logger } from 'bunyan';
 import { gql, request } from 'graphql-request';
 
 const SUBGRAPH_URL =
-  'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-prod';
+  'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3';
 
 export type SubgraphPool = {
   id: string;
