@@ -69,8 +69,6 @@ export type PoolInRoute = {
   fee: string;
   token0Symbol: string;
   token1Symbol: string;
-  token0Address: string;
-  token1Address: string;
   nextToken: TokenInRoute;
 };
 
@@ -88,6 +86,7 @@ export const QuoteResponseSchemaJoi = Joi.object({
   gasUseEstimateQuoteToken: Joi.string().required(),
   gasPriceWei: Joi.string().required(),
   route: Joi.any().required(),
+  routeString: Joi.string().required(),
   quote: Joi.string().required(),
   quoteGasAdjusted: Joi.string().required(),
   quoteId: Joi.string().required(),
@@ -104,6 +103,7 @@ export type QuoteResponse = {
   gasUseEstimateQuoteToken: string;
   gasPriceWei: string;
   route: TokenInRoute;
+  routeString: string;
   quote: string;
   quoteGasAdjusted: string;
   quoteId: string;

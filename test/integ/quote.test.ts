@@ -8,7 +8,7 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`;
 
 describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
   describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
-    test('succeeds erc20 -> erc20', async () => {
+    test('erc20 -> erc20', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
@@ -21,10 +21,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
-        API,
-        quotePost
-      );
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.post<QuoteResponse>(API, quotePost);
       const {
         data: { quote, quoteGasAdjusted },
         status,
@@ -46,7 +44,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(parseFloat(quote)).toBeLessThan(110);
     });
 
-    test('succeeds erc20 -> eth', async () => {
+    test('erc20 -> eth', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'ETH',
@@ -66,7 +64,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(data.methodParameters).toBeDefined();
     });
 
-    test('succeeds eth -> erc20', async () => {
+    test('eth -> erc20', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'ETH',
         tokenOut: 'UNI',
@@ -86,7 +84,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(data.methodParameters).toBeDefined();
     });
 
-    test('succeeds weth -> erc20', async () => {
+    test('weth -> erc20', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'WETH',
         tokenOut: 'DAI',
@@ -106,7 +104,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(data.methodParameters).toBeDefined();
     });
 
-    test('succeeds erc20 -> weth', async () => {
+    test('erc20 -> weth', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDT',
         tokenOut: 'WETH',
@@ -126,7 +124,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(data.methodParameters).toBeDefined();
     });
 
-    test('succeeds erc20 -> erc20 by address', async () => {
+    test('erc20 -> erc20 by address', async () => {
       const quotePost: QuoteBody = {
         tokenIn: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
         tokenOut: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
@@ -139,10 +137,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
-        API,
-        quotePost
-      );
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.post<QuoteResponse>(API, quotePost);
 
       const {
         data: { quote, quoteGasAdjusted },
@@ -165,7 +161,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(parseFloat(quote)).toBeLessThan(110);
     });
 
-    test('succeeds erc20 -> erc20 one by address one by symbol', async () => {
+    test('erc20 -> erc20 one by address one by symbol', async () => {
       const quotePost: QuoteBody = {
         tokenIn: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
         tokenOut: 'USDC',
@@ -178,10 +174,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
-        API,
-        quotePost
-      );
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.post<QuoteResponse>(API, quotePost);
       const {
         data: { quote, quoteGasAdjusted },
         status,
@@ -203,7 +197,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(parseFloat(quote)).toBeLessThan(110);
     });
 
-    test('succeeds for input token permit with amount and deadline', async () => {
+    test('for input token permit with amount and deadline', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
@@ -223,10 +217,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         },
       };
 
-      const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
-        API,
-        quotePost
-      );
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.post<QuoteResponse>(API, quotePost);
       const {
         data: { quote, quoteGasAdjusted },
         status,
@@ -248,7 +240,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(parseFloat(quote)).toBeLessThan(110);
     });
 
-    test('succeeds for input token permit with nonce and expiry', async () => {
+    test('for input token permit with nonce and expiry', async () => {
       const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
@@ -268,10 +260,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         },
       };
 
-      const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
-        API,
-        quotePost
-      );
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.post<QuoteResponse>(API, quotePost);
       const {
         data: { quote, quoteGasAdjusted },
         status,
@@ -295,7 +285,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
   });
 
   describe.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
-    test('fails if field is missing in body', async () => {
+    test('field is missing in body', async () => {
       const quotePost: Partial<QuoteBody> = {
         tokenOut: 'USDT',
         amount: '100',
@@ -307,7 +297,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -318,8 +310,34 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if amount is negative', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('amount is too big', async () => {
+      const quotePost: QuoteBody = {
+        tokenIn: 'ETH',
+        tokenOut: 'UNI',
+        amount: '1000000000',
+        type,
+        chainId: 1,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm,
+      };
+
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
+        response: {
+          status: 404,
+          data: {
+            detail: 'No route found',
+            errorCode: 'NO_ROUTE',
+          },
+        },
+      });
+    });
+
+    test('amount is negative', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
         amount: '-100',
@@ -331,7 +349,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -343,8 +363,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if amount is too big', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('amount is too big', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'USDT',
         amount: '10000000000000000000000000000000',
@@ -356,7 +376,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -368,8 +390,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if symbol doesnt exist', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('symbol doesnt exist', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDC',
         tokenOut: 'NONEXISTANTTOKEN',
         amount: '100',
@@ -381,7 +403,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -392,8 +416,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if tokens are the same symbol', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('tokens are the same symbol', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDT',
         tokenOut: 'USDT',
         amount: '100',
@@ -405,7 +429,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -416,8 +442,8 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if tokens are the same address', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('tokens are the same symbol and address', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDT',
         tokenOut: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
         amount: '100',
@@ -429,7 +455,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
@@ -440,8 +468,34 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
-    test('fails if recipient is an invalid address', async () => {
-      const quotePost: Partial<QuoteBody> = {
+    test('tokens are the same address', async () => {
+      const quotePost: QuoteBody = {
+        tokenIn: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        tokenOut: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        amount: '100',
+        type,
+        chainId: 1,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm,
+      };
+
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
+        response: {
+          status: 400,
+          data: {
+            detail: 'tokenIn and tokenOut must be different',
+            errorCode: 'TOKEN_IN_OUT_SAME',
+          },
+        },
+      });
+    });
+
+    test('recipient is an invalid address', async () => {
+      const quotePost: QuoteBody = {
         tokenIn: 'USDT',
         tokenOut: 'USDC',
         amount: '100',
@@ -453,7 +507,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      await expect(axios.post<QuoteResponse>(API, quotePost)).rejects.toMatchObject({
+      await expect(
+        axios.post<QuoteResponse>(API, quotePost)
+      ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {

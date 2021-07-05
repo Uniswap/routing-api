@@ -19,7 +19,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     const region = cdk.Stack.of(this).region;
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
-      dashboardName: 'RoutingDashboard',
+      dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: [

@@ -2,6 +2,7 @@ import {
   ISubgraphProvider,
   log,
   SubgraphPool,
+  SubgraphProvider,
 } from '@uniswap/smart-order-router';
 import { S3 } from 'aws-sdk';
 import NodeCache from 'node-cache';
@@ -9,8 +10,13 @@ import NodeCache from 'node-cache';
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false });
 const POOL_CACHE_KEY = 'pools';
 
-export class AWSSubgraphProvider implements ISubgraphProvider {
-  constructor(private bucket: string, private key: string) {}
+export class AWSSubgraphProvider
+  extends SubgraphProvider
+  implements ISubgraphProvider
+{
+  constructor(private bucket: string, private key: string) {
+    super();
+  }
 
   public async getPools(): Promise<SubgraphPool[]> {
     const s3 = new S3();
@@ -24,7 +30,7 @@ export class AWSSubgraphProvider implements ISubgraphProvider {
 
     if (cachedPools) {
       log.info(
-        { subgraphPools: cachedPools.length },
+        { subgraphPoolsSample: cachedPools.slice(0, 5) },
         `Subgraph pools fetched from local cache. Num: ${cachedPools.length}`
       );
 
@@ -35,26 +41,34 @@ export class AWSSubgraphProvider implements ISubgraphProvider {
       { bucket: this.bucket, key: this.key },
       'Subgraph pools local cache miss. Getting subgraph pools from S3'
     );
+    try {
+      const result = await s3
+        .getObject({ Key: this.key, Bucket: this.bucket })
+        .promise();
 
-    const result = await s3
-      .getObject({ Key: this.key, Bucket: this.bucket })
-      .promise();
+      const { Body: poolsBuffer } = result;
 
-    const { Body: poolsBuffer } = result;
+      if (!poolsBuffer) {
+        throw new Error('Could not get subgraph pool cache from S3');
+      }
 
-    if (!poolsBuffer) {
-      throw new Error('Could not get subgraph pool cache from S3');
+      const pools = JSON.parse(poolsBuffer.toString('utf-8')) as SubgraphPool[];
+
+      log.info(
+        { bucket: this.bucket, key: this.key },
+        `Got subgraph pools from S3. Num: ${pools.length}`
+      );
+
+      POOL_CACHE.set<SubgraphPool[]>(POOL_CACHE_KEY, pools);
+
+      return pools;
+    } catch (err) {
+      log.info(
+        { bucket: this.bucket, key: this.key },
+        `Failed to get subgraph pools from S3.`
+      );
+
+      return super.getPools();
     }
-
-    const pools = JSON.parse(poolsBuffer.toString('utf-8')) as SubgraphPool[];
-
-    log.info(
-      { bucket: this.bucket, key: this.key },
-      `Got subgraph pools from S3. Num: ${pools.length}`
-    );
-
-    POOL_CACHE.set<SubgraphPool[]>(POOL_CACHE_KEY, pools);
-
-    return pools;
   }
 }

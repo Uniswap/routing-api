@@ -5,12 +5,14 @@ import {
   ITokenListProvider,
   ITokenProvider,
   MetricLoggerUnit,
+  routeAmountToString,
   SwapRoute,
 } from '@uniswap/smart-order-router';
 import { Pool } from '@uniswap/v3-sdk';
 import Logger from 'bunyan';
 import { parseUnits } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
+import _ from 'lodash';
 import {
   APIGLambdaHandler,
   ErrorResponse,
@@ -33,7 +35,7 @@ const ROUTING_CONFIG = {
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
-  multicallChunkSize: 50,
+  multicallChunkSize: 100,
 };
 
 export class QuoteHandler extends APIGLambdaHandler<
@@ -229,8 +231,6 @@ export class QuoteHandler extends APIGLambdaHandler<
           ),
           type: 'pool',
           fee: nextPool.fee.toString(),
-          token0Address: nextPool.token0.address,
-          token1Address: nextPool.token1.address,
           token0Symbol: nextPool.token0.symbol!,
           token1Symbol: nextPool.token1.symbol!,
           nextToken: nextTokenInRoute,
@@ -248,6 +248,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimateQuoteToken: estimatedGasUsedQuoteToken.toExact(),
       gasPriceWei: gasPriceWei.toString(),
       route: firstTokenInRoute,
+      routeString: _.map(routeAmounts, routeAmountToString).join(', '),
       quoteGasAdjusted: quoteGasAdjusted.toExact(),
       quote: quote.toExact(),
       quoteId,
@@ -293,7 +294,13 @@ export class QuoteHandler extends APIGLambdaHandler<
     let currencyOut: Currency | undefined = tryTokenList(tokenOutRaw);
 
     if (currencyIn && currencyOut) {
-      log.info('Got both input tokens from token list');
+      log.info(
+        {
+          tokenInAddress: currencyIn.wrapped.address,
+          tokenOutAddress: currencyOut.wrapped.address,
+        },
+        'Got both input tokens from token list'
+      );
       return { currencyIn, currencyOut };
     }
 

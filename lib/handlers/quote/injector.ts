@@ -14,11 +14,11 @@ import {
   ITokenListProvider,
   ITokenProvider,
   LegacyRouter,
-  Multicall2Provider,
   QuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
   TokenProvider,
+  UniswapMulticallProvider,
 } from '@uniswap/smart-order-router';
 import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
@@ -30,7 +30,7 @@ import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
 import { QuoteBody } from './schema/quote-schema';
 
-const DEFAULT_TOKEN_LIST = 'https://tokens.coingecko.com/uniswap/all.json';
+const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 const DEFAULT_BLOCKED_TOKEN_LIST =
   'https://raw.githubusercontent.com/The-Blockchain-Association/sec-notice-list/master/ba-sec-list.json';
 
@@ -97,7 +97,7 @@ export class QuoteHandlerInjector extends Injector<
       chainName
     );
 
-    const multicall2Provider = new Multicall2Provider(provider);
+    const multicall2Provider = new UniswapMulticallProvider(provider);
     const poolProvider = new CachingPoolProvider(multicall2Provider);
     const tokenProvider = new TokenProvider(chainIdEnum, multicall2Provider);
 
@@ -109,7 +109,7 @@ export class QuoteHandlerInjector extends Injector<
         log.info({ algorithm }, 'Using Legacy Algorithm');
         router = new LegacyRouter({
           chainId,
-          multicall2Provider: new Multicall2Provider(provider),
+          multicall2Provider: new UniswapMulticallProvider(provider),
           poolProvider,
           quoteProvider: new QuoteProvider(multicall2Provider),
           tokenListProvider,
@@ -121,7 +121,7 @@ export class QuoteHandlerInjector extends Injector<
         router = new AlphaRouter({
           chainId,
           subgraphProvider,
-          multicall2Provider: new Multicall2Provider(provider),
+          multicall2Provider: new UniswapMulticallProvider(provider),
           poolProvider,
           quoteProvider: new QuoteProvider(multicall2Provider),
           gasPriceProvider: gasStationProvider,
