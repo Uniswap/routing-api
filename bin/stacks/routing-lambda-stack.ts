@@ -1,3 +1,4 @@
+import * as asg from '@aws-cdk/aws-applicationautoscaling';
 import * as aws_iam from '@aws-cdk/aws-iam';
 import * as aws_lambda from '@aws-cdk/aws-lambda';
 import * as aws_lambda_nodejs from '@aws-cdk/aws-lambda-nodejs';
@@ -12,10 +13,11 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   nodeRPCUsername: string;
   nodeRPCPassword: string;
   tokenListCacheBucket: aws_s3.Bucket;
+  provisionedConcurrency: number;
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
-  // public readonly routingLambdaAlias: aws_lambda.Alias;
+  public readonly routingLambdaAlias: aws_lambda.Alias;
 
   constructor(
     scope: cdk.Construct,
@@ -30,6 +32,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       nodeRPCUsername,
       nodeRPCPassword,
       tokenListCacheBucket,
+      provisionedConcurrency,
     } = props;
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -53,14 +56,14 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
     this.routingLambda = new aws_lambda_nodejs.NodejsFunction(
       this,
-      'RoutingLambda',
+      'RoutingLambda2',
       {
         role: lambdaRole,
         runtime: aws_lambda.Runtime.NODEJS_14_X,
         entry: path.join(__dirname, '../../lib/handlers/index.ts'),
         handler: 'quoteHandler',
         timeout: cdk.Duration.seconds(15),
-        memorySize: 2048,
+        memorySize: 1024,
         bundling: {
           minify: true,
           sourceMap: true,
@@ -85,10 +88,32 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       }
     );
 
-    // this.routingLambdaAlias = new aws_lambda.Alias(this, 'LiveAlias', {
-    //   aliasName: 'live',
-    //   version: this.routingLambda.currentVersion,
-    //   provisionedConcurrentExecutions: 20,
-    // });
+    const enableProvisionedConcurrency = provisionedConcurrency > 0;
+
+    this.routingLambdaAlias = new aws_lambda.Alias(this, 'RoutingLiveAlias', {
+      aliasName: 'live',
+      version: this.routingLambda.currentVersion,
+      provisionedConcurrentExecutions: enableProvisionedConcurrency
+        ? provisionedConcurrency
+        : undefined,
+    });
+
+    if (enableProvisionedConcurrency) {
+      const target = new asg.ScalableTarget(this, 'RoutingProvConcASG', {
+        serviceNamespace: asg.ServiceNamespace.LAMBDA,
+        maxCapacity: provisionedConcurrency * 5,
+        minCapacity: provisionedConcurrency,
+        resourceId: `function:${this.routingLambdaAlias.lambda.functionName}:${this.routingLambdaAlias.aliasName}`,
+        scalableDimension: 'lambda:function:ProvisionedConcurrency',
+      });
+
+      target.node.addDependency(this.routingLambdaAlias);
+
+      target.scaleToTrackMetric('RoutingProvConcTracking', {
+        targetValue: 0.8,
+        predefinedMetric:
+          asg.PredefinedMetric.LAMBDA_PROVISIONED_CONCURRENCY_UTILIZATION,
+      });
+    }
   }
 }

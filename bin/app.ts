@@ -34,15 +34,22 @@ export class RoutingAPIStage extends Stage {
       nodeRPC: string;
       nodeRPCUsername: string;
       nodeRPCPassword: string;
+      provisionedConcurrency: number;
     }
   ) {
     super(scope, id, props);
-    const { nodeRPC, nodeRPCUsername, nodeRPCPassword } = props;
+    const {
+      nodeRPC,
+      nodeRPCUsername,
+      nodeRPCPassword,
+      provisionedConcurrency,
+    } = props;
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      provisionedConcurrency,
     });
     this.url = url;
   }
@@ -98,8 +105,13 @@ export class RoutingAPIPipeline extends Stack {
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
       nodeRPC: rpcNodeDetails.secretValueFromJson('url').toString(),
-      nodeRPCUsername: rpcNodeDetails.secretValueFromJson('username').toString(),
-      nodeRPCPassword: rpcNodeDetails.secretValueFromJson('password').toString(),
+      nodeRPCUsername: rpcNodeDetails
+        .secretValueFromJson('username')
+        .toString(),
+      nodeRPCPassword: rpcNodeDetails
+        .secretValueFromJson('password')
+        .toString(),
+      provisionedConcurrency: 3,
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -115,8 +127,13 @@ export class RoutingAPIPipeline extends Stack {
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
       nodeRPC: rpcNodeDetails.secretValueFromJson('url').toString(),
-      nodeRPCUsername: rpcNodeDetails.secretValueFromJson('username').toString(),
-      nodeRPCPassword: rpcNodeDetails.secretValueFromJson('password').toString(),
+      nodeRPCUsername: rpcNodeDetails
+        .secretValueFromJson('username')
+        .toString(),
+      nodeRPCPassword: rpcNodeDetails
+        .secretValueFromJson('password')
+        .toString(),
+      provisionedConcurrency: 20,
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
@@ -167,6 +184,9 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   nodeRPC: process.env.JSON_RPC_URL!,
   nodeRPCUsername: process.env.JSON_RPC_USERNAME!,
   nodeRPCPassword: process.env.JSON_RPC_PASSWORD!,
+  provisionedConcurrency: process.env.PROVISION_CONCURRENCY
+    ? parseInt(process.env.PROVISION_CONCURRENCY)
+    : 0,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

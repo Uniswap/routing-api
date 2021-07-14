@@ -17,6 +17,7 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPC: string;
       nodeRPCUsername: string;
       nodeRPCPassword: string;
+      provisionedConcurrency: number;
     }
   ) {
     super(parent, name, props);
@@ -24,9 +25,14 @@ export class RoutingAPIStack extends cdk.Stack {
     const { poolCacheBucket, poolCacheKey, tokenListCacheBucket } =
       new RoutingCachingStack(this, 'RoutingCachingStack');
 
-    const { nodeRPC, nodeRPCUsername, nodeRPCPassword } = props;
+    const {
+      nodeRPC,
+      nodeRPCUsername,
+      nodeRPCPassword,
+      provisionedConcurrency,
+    } = props;
 
-    const { routingLambda } = new RoutingLambdaStack(
+    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
       this,
       'RoutingLambdaStack',
       {
@@ -36,6 +42,7 @@ export class RoutingAPIStack extends cdk.Stack {
         nodeRPCUsername,
         nodeRPCPassword,
         tokenListCacheBucket,
+        provisionedConcurrency,
       }
     );
 
@@ -56,14 +63,15 @@ export class RoutingAPIStack extends cdk.Stack {
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
+      lambdaName: routingLambda.functionName,
     });
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(
-      routingLambda
+      routingLambdaAlias
     );
 
     const quote = api.root.addResource('quote');
-    quote.addMethod('POST', lambdaIntegration); // POST /swap
+    quote.addMethod('POST', lambdaIntegration);
 
     this.url = new CfnOutput(this, 'Url', {
       value: api.url,

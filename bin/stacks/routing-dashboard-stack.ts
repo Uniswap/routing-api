@@ -5,6 +5,7 @@ export const NAMESPACE = 'Uniswap';
 
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string;
+  lambdaName: string;
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
@@ -15,7 +16,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
   ) {
     super(scope, name, props);
 
-    const { apiName } = props;
+    const { apiName, lambdaName } = props;
     const region = cdk.Stack.of(this).region;
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
@@ -190,6 +191,30 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region: region,
               title: 'Top N Pools Used From Sources in Best Route | 5min',
               stat: 'p90',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 36,
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                [
+                  'AWS/Lambda',
+                  'ProvisionedConcurrentExecutions',
+                  'FunctionName',
+                  lambdaName,
+                ],
+                ['.', 'ConcurrentExecutions', '.', '.'],
+                ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
+              ],
+              region: region,
+              title: 'Routing Lambda Provisioned Concurrency | 5min',
+              stat: 'Average',
             },
           },
         ],
