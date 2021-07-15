@@ -93,6 +93,7 @@ export class QuoteHandlerInjector extends Injector<
         url: process.env.JSON_RPC_URL!,
         user: process.env.JSON_RPC_USERNAME,
         password: process.env.JSON_RPC_PASSWORD,
+        timeout: 2500,
       },
       chainName
     );
