@@ -60,6 +60,10 @@ export class RoutingAPIStack extends cdk.Stack {
         accessLogFormat:
           aws_apigateway.AccessLogFormat.jsonWithStandardFields(),
       },
+      defaultCorsPreflightOptions: {
+        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
+        allowMethods: aws_apigateway.Cors.ALL_METHODS,
+      },
     });
 
     const ipThrottlingACL = new aws_waf.CfnWebACL(
@@ -137,7 +141,12 @@ export class RoutingAPIStack extends cdk.Stack {
       routingLambdaAlias
     );
 
-    const quote = api.root.addResource('quote');
+    const quote = api.root.addResource('quote', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
+        allowMethods: aws_apigateway.Cors.ALL_METHODS,
+      },
+    });
     quote.addMethod('POST', lambdaIntegration);
 
     this.url = new CfnOutput(this, 'Url', {

@@ -23,6 +23,7 @@ export type HandleRequestParams<CInj, RInj, Req> = {
 export type Response<Res> = {
   statusCode: 200 | 202;
   body: Res;
+  headers?: any;
 };
 
 export type ErrorResponse = {
@@ -67,6 +68,13 @@ const INTERNAL_ERROR: APIGatewayProxyResult = {
     errorCode: 'INTERNAL_ERROR',
     detail: 'Unexpected error',
   }),
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers':
+      'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Credentials': true,
+    'Content-Type': 'application/json',
+  },
 };
 
 export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
@@ -156,6 +164,13 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
               return {
                 statusCode,
                 body: response,
+                headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Access-Control-Allow-Headers':
+                    'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+                  'Access-Control-Allow-Credentials': true,
+                  'Content-Type': 'application/json',
+                },
               };
             } else {
               log.info({ request }, 'Handler returned 200');
@@ -184,7 +199,17 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
           }
 
           log.info({ statusCode, response }, `Request ended. ${statusCode}`);
-          return { statusCode, body: JSON.stringify(response) };
+          return {
+            statusCode,
+            body: JSON.stringify(response),
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers':
+                'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+              'Access-Control-Allow-Credentials': true,
+              'Content-Type': 'application/json',
+            },
+          };
         }
     );
   }
@@ -221,6 +246,13 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             detail: 'Invalid JSON body',
             errorCode: 'VALIDATION_ERROR',
           }),
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers':
+              'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+            'Access-Control-Allow-Credentials': true,
+            'Content-Type': 'application/json',
+          },
         },
       };
     }

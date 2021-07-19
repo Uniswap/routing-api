@@ -260,7 +260,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteId,
     };
 
-    return { statusCode: 200, body: result };
+    return {
+      statusCode: 200,
+      body: result,
+    };
   }
 
   private async tokenStringToCurrency(
