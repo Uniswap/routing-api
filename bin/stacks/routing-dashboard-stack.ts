@@ -187,6 +187,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ['.', 'Topbytvlusingtokeninsecondhops', '.', '.'],
                 ['.', 'Topbytvlusingtokenout', '.', '.'],
                 ['.', 'Topbytvlusingtokenoutsecondhops', '.', '.'],
+                ['.', 'Topbybasewithtokenin', '.', '.'],
+                ['.', 'Topbybasewithtokenout', '.', '.'],
               ],
               region: region,
               title: 'Top N Pools Used From Sources in Best Route | 5min',

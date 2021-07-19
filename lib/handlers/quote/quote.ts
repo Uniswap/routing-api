@@ -29,9 +29,9 @@ import {
 } from './schema/quote-schema';
 
 const ROUTING_CONFIG = {
-  topN: 4,
+  topN: 3,
   topNTokenInOut: 3,
-  topNSecondHop: 2,
+  topNSecondHop: 1,
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
