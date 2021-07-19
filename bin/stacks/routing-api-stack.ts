@@ -1,6 +1,7 @@
 import * as aws_apigateway from '@aws-cdk/aws-apigateway';
 import { MethodLoggingLevel } from '@aws-cdk/aws-apigateway';
 import * as aws_logs from '@aws-cdk/aws-logs';
+import * as aws_waf from '@aws-cdk/aws-wafv2';
 import * as cdk from '@aws-cdk/core';
 import { CfnOutput } from '@aws-cdk/core';
 import { RoutingCachingStack } from './routing-caching-stack';
@@ -60,6 +61,72 @@ export class RoutingAPIStack extends cdk.Stack {
           aws_apigateway.AccessLogFormat.jsonWithStandardFields(),
       },
     });
+
+    const ipThrottlingACL = new aws_waf.CfnWebACL(
+      this,
+      'RoutingAPIIPThrottlingACL',
+      {
+        defaultAction: { allow: {} },
+        scope: 'REGIONAL',
+        visibilityConfig: {
+          sampledRequestsEnabled: true,
+          cloudWatchMetricsEnabled: true,
+          metricName: 'RoutingAPIIPBasedThrottling',
+        },
+        customResponseBodies: {
+          RoutingAPIThrottledResponseBody: {
+            contentType: 'APPLICATION_JSON',
+            content: '{"errorCode": "TOO_MANY_REQUESTS"}',
+          },
+        },
+        name: 'RoutingAPIIPThrottling',
+        rules: [
+          {
+            name: 'ip',
+            priority: 0,
+            statement: {
+              rateBasedStatement: {
+                // Limit is per 5 mins, i.e. 120 requests every 5 mins
+                limit: 120,
+                // API is of type EDGE so is fronted by Cloudfront as a proxy.
+                // Use the ip set in X-Forwarded-For by Cloudfront, not the regular IP
+                // which would just resolve to Cloudfronts IP.
+                aggregateKeyType: 'FORWARDED_IP',
+                forwardedIpConfig: {
+                  headerName: 'X-Forwarded-For',
+                  fallbackBehavior: 'MATCH',
+                },
+              },
+            },
+            action: {
+              block: {
+                customResponse: {
+                  responseCode: 429,
+                  customResponseBodyKey: 'RoutingAPIThrottledResponseBody',
+                },
+              },
+            },
+            visibilityConfig: {
+              sampledRequestsEnabled: true,
+              cloudWatchMetricsEnabled: true,
+              metricName: 'RoutingAPIIPBasedThrottlingRule',
+            },
+          },
+        ],
+      }
+    );
+
+    const region = cdk.Stack.of(this).region;
+    const apiArn = `arn:aws:apigateway:${region}::/restapis/${api.restApiId}/stages/${api.deploymentStage.stageName}`;
+
+    new aws_waf.CfnWebACLAssociation(
+      this,
+      'RoutingAPIIPThrottlingAssociation',
+      {
+        resourceArn: apiArn,
+        webAclArn: ipThrottlingACL.getAtt('Arn').toString(),
+      }
+    );
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,

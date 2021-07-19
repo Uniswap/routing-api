@@ -10,7 +10,6 @@ import {
 } from '@uniswap/smart-order-router';
 import { Pool } from '@uniswap/v3-sdk';
 import Logger from 'bunyan';
-import { parseUnits } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
 import _ from 'lodash';
 import {
@@ -21,11 +20,12 @@ import {
 } from '../handler';
 import { ContainerInjected, RequestInjected } from './injector';
 import {
+  EdgeInRoute,
+  NodeInRoute,
   QuoteBody,
   QuoteBodySchemaJoi,
   QuoteResponse,
   QuoteResponseSchemaJoi,
-  TokenInRoute,
 } from './schema/quote-schema';
 
 const ROUTING_CONFIG = {
@@ -49,7 +49,6 @@ export class QuoteHandler extends APIGLambdaHandler<
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
       request: {
-        chainId,
         tokenIn: tokenInRaw,
         tokenOut: tokenOutRaw,
         amount: amountRaw,
@@ -57,7 +56,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient,
         slippageTolerance,
         deadline,
-        inputTokenPermit,
       },
       requestInjected: { router, log, quoteId, tokenProvider, metric },
       containerInjected: { tokenListProvider },
@@ -66,12 +64,16 @@ export class QuoteHandler extends APIGLambdaHandler<
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
 
+    const { address: tokenInAddress, chainId: tokenInChainId } = tokenInRaw;
+    const { address: tokenOutAddress, chainId: tokenOutChainId } = tokenOutRaw;
+
     const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
-      chainId,
       tokenListProvider,
       tokenProvider,
-      tokenInRaw,
-      tokenOutRaw,
+      tokenInAddress,
+      tokenOutAddress,
+      tokenInChainId,
+      tokenOutChainId,
       log
     );
 
@@ -85,7 +87,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_INVALID',
-        detail: `Could not find token ${tokenInRaw}`,
+        detail: `Could not find token with address "${tokenInAddress}"`,
       };
     }
 
@@ -93,7 +95,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       return {
         statusCode: 400,
         errorCode: 'TOKEN_OUT_INVALID',
-        detail: `Could not find token ${tokenOutRaw}`,
+        detail: `Could not find token with address "${tokenOutAddress}"`,
       };
     }
 
@@ -112,16 +114,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
       recipient: recipient,
       slippageTolerance: slippageTolerancePercent,
-      inputTokenPermit,
     };
 
     let swapRoute: SwapRoute | null;
     switch (type) {
       case 'exactIn':
-        const parsedAmountExactIn = parseUnits(amountRaw, currencyIn.decimals);
         const amountIn = CurrencyAmount.fromRawAmount(
           currencyIn,
-          JSBI.BigInt(parsedAmountExactIn)
+          JSBI.BigInt(amountRaw)
         );
 
         log.info(
@@ -144,13 +144,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         );
         break;
       case 'exactOut':
-        const parsedAmountExactOut = parseUnits(
-          amountRaw,
-          currencyOut.decimals
-        );
         const amountOut = CurrencyAmount.fromRawAmount(
           currencyOut,
-          JSBI.BigInt(parsedAmountExactOut)
+          JSBI.BigInt(amountRaw)
         );
 
         log.info(
@@ -196,11 +192,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute;
 
-    const firstTokenInRoute: TokenInRoute = {
-      type: 'token',
-      address: currencyIn.wrapped.address,
-      symbol: currencyIn.wrapped.symbol!,
-    };
+    const nodes: NodeInRoute[] = [];
+    const edges: EdgeInRoute[] = [];
+
+    const tokenSet: Set<string> = new Set<string>();
 
     for (const routeAmount of routeAmounts) {
       const {
@@ -208,49 +203,60 @@ export class QuoteHandler extends APIGLambdaHandler<
         percentage,
       } = routeAmount;
 
-      let curTokenInRoute = firstTokenInRoute;
-      for (let i = 0; i < pools.length; i++) {
-        if (!curTokenInRoute.nextPools) {
-          curTokenInRoute.nextPools = {};
-        }
+      let prevToken = tokenPath[0];
 
+      if (!tokenSet.has(prevToken.address)) {
+        tokenSet.add(prevToken.address);
+        nodes.push({
+          type: 'token',
+          id: prevToken.address,
+          chainId: prevToken.chainId,
+          symbol: prevToken.symbol!,
+        });
+      }
+
+      for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i];
         const nextToken = tokenPath[i + 1];
 
-        const nextTokenInRoute: TokenInRoute = {
-          type: 'token',
-          address: nextToken.address,
-          symbol: nextToken.symbol!,
-        };
+        if (!tokenSet.has(nextToken.address)) {
+          tokenSet.add(nextToken.address);
+          nodes.push({
+            type: 'token',
+            id: nextToken.address,
+            chainId: nextToken.chainId,
+            symbol: nextToken.symbol!,
+          });
+        }
 
-        curTokenInRoute.nextPools[i == 0 ? percentage : '100'] = {
-          address: Pool.getAddress(
-            nextPool.token0,
-            nextPool.token1,
-            nextPool.fee
-          ),
+        edges.push({
           type: 'pool',
+          id: Pool.getAddress(nextPool.token0, nextPool.token1, nextPool.fee),
+          inId: tokenPath[i].address,
+          outId: nextToken.address,
           fee: nextPool.fee.toString(),
-          token0Symbol: nextPool.token0.symbol!,
-          token1Symbol: nextPool.token1.symbol!,
-          nextToken: nextTokenInRoute,
-        };
+          percent: i == 0 ? percentage : 100,
+        });
 
-        curTokenInRoute = nextTokenInRoute;
+        prevToken = nextToken;
       }
     }
 
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
+      quote: quote.quotient.toString(),
+      quoteDecimals: quote.toExact(),
+      quoteGasAdjusted: quoteGasAdjusted.quotient.toString(),
+      quoteGasAdjustedDecimals: quoteGasAdjusted.toExact(),
+      gasUseEstimateQuote: estimatedGasUsedQuoteToken.quotient.toString(),
+      gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
-      gasUseEstimateQuoteToken: estimatedGasUsedQuoteToken.toExact(),
       gasPriceWei: gasPriceWei.toString(),
-      route: firstTokenInRoute,
+      routeNodes: nodes,
+      routeEdges: edges,
       routeString: _.map(routeAmounts, routeAmountToString).join(', '),
-      quoteGasAdjusted: quoteGasAdjusted.toExact(),
-      quote: quote.toExact(),
       quoteId,
     };
 
@@ -258,11 +264,12 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   private async tokenStringToCurrency(
-    chainId: ChainId,
     tokenListProvider: ITokenListProvider,
     tokenProvider: ITokenProvider,
     tokenInRaw: string,
     tokenOutRaw: string,
+    tokenInChainId: ChainId,
+    tokenOutChainId: ChainId,
     log: Logger
   ): Promise<{
     currencyIn: Currency | undefined;
@@ -270,7 +277,10 @@ export class QuoteHandler extends APIGLambdaHandler<
   }> {
     const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
 
-    const tryTokenList = (tokenRaw: string): Currency | undefined => {
+    const tryTokenList = (
+      tokenRaw: string,
+      chainId: ChainId
+    ): Currency | undefined => {
       if (
         tokenRaw == 'ETH' ||
         tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
@@ -290,8 +300,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       return tokenListProvider.getTokenBySymbolIfExists(chainId, tokenRaw);
     };
 
-    let currencyIn: Currency | undefined = tryTokenList(tokenInRaw);
-    let currencyOut: Currency | undefined = tryTokenList(tokenOutRaw);
+    let currencyIn: Currency | undefined = tryTokenList(
+      tokenInRaw,
+      tokenInChainId
+    );
+    let currencyOut: Currency | undefined = tryTokenList(
+      tokenOutRaw,
+      tokenOutChainId
+    );
 
     if (currencyIn && currencyOut) {
       log.info(

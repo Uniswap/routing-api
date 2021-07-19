@@ -12,11 +12,10 @@ dotenv.config();
 
 (async function () {
   const quotePost: QuoteBody = {
-    tokenIn: 'MKR',
-    tokenOut: 'GRT',
+    tokenIn: { address: 'MKR', chainId: 1 },
+    tokenOut: { address: 'GRT', chainId: 1 },
     amount: '50',
     type: 'exactIn',
-    chainId: 1,
     recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     slippageTolerance: '5',
     deadline: '360',

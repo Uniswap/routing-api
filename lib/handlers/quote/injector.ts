@@ -65,7 +65,7 @@ export class QuoteHandlerInjector extends Injector<
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
 
-    const { tokenIn, tokenOut, chainId, amount, type, algorithm } = request;
+    const { tokenIn, tokenOut, amount, type, algorithm } = request;
     log = log.child({
       serializers: bunyan.stdSerializers,
       level: logLevel,
@@ -73,7 +73,6 @@ export class QuoteHandlerInjector extends Injector<
       quoteId,
       tokenIn,
       tokenOut,
-      chainId,
       amount,
       type,
       algorithm,
@@ -85,6 +84,8 @@ export class QuoteHandlerInjector extends Injector<
     const metric = new AWSMetricsLogger(metricsLogger);
     setGlobalMetric(metric);
 
+    // Today API is restricted such that both tokens must be on the same chain.
+    const chainId = tokenIn.chainId;
     const chainIdEnum = ID_TO_CHAIN_ID(chainId);
     const chainName = ID_TO_NETWORK_NAME(chainIdEnum);
 
