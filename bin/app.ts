@@ -187,6 +187,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   provisionedConcurrency: process.env.PROVISION_CONCURRENCY
     ? parseInt(process.env.PROVISION_CONCURRENCY)
     : 0,
+  throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

@@ -14,6 +14,7 @@ import {
   ITokenListProvider,
   ITokenProvider,
   LegacyRouter,
+  PoolProvider,
   QuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
@@ -28,7 +29,7 @@ import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
-import { QuoteBody } from './schema/quote-schema';
+import { QuoteQueryParams } from './schema/quote-schema';
 
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 const DEFAULT_BLOCKED_TOKEN_LIST =
@@ -51,11 +52,13 @@ export interface RequestInjected extends BaseRInj {
 export class QuoteHandlerInjector extends Injector<
   ContainerInjected,
   RequestInjected,
-  QuoteBody
+  void,
+  QuoteQueryParams
 > {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
-    request: QuoteBody,
+    _requestBody: void,
+    requestQueryParams: QuoteQueryParams,
     _event: APIGatewayProxyEvent,
     context: Context,
     log: Logger,
@@ -65,14 +68,24 @@ export class QuoteHandlerInjector extends Injector<
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
 
-    const { tokenIn, tokenOut, amount, type, algorithm } = request;
+    log.info({ requestQueryParams, _requestBody }, 'Request body query');
+
+    const {
+      tokenInAddress,
+      tokenInChainId,
+      tokenOutAddress,
+      amount,
+      type,
+      algorithm,
+    } = requestQueryParams;
+
     log = log.child({
       serializers: bunyan.stdSerializers,
       level: logLevel,
       requestId,
       quoteId,
-      tokenIn,
-      tokenOut,
+      tokenInAddress,
+      tokenOutAddress,
       amount,
       type,
       algorithm,
@@ -85,7 +98,7 @@ export class QuoteHandlerInjector extends Injector<
     setGlobalMetric(metric);
 
     // Today API is restricted such that both tokens must be on the same chain.
-    const chainId = tokenIn.chainId;
+    const chainId = tokenInChainId;
     const chainIdEnum = ID_TO_CHAIN_ID(chainId);
     const chainName = ID_TO_NETWORK_NAME(chainIdEnum);
 
@@ -100,7 +113,9 @@ export class QuoteHandlerInjector extends Injector<
     );
 
     const multicall2Provider = new UniswapMulticallProvider(provider);
-    const poolProvider = new CachingPoolProvider(multicall2Provider);
+    const poolProvider = new CachingPoolProvider(
+      new PoolProvider(multicall2Provider)
+    );
     const tokenProvider = new TokenProvider(chainIdEnum, multicall2Provider);
 
     const { gasStationProvider, subgraphProvider, tokenListProvider } =

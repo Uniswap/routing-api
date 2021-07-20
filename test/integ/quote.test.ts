@@ -2,8 +2,9 @@ import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
 import { TokenListProvider } from '@uniswap/smart-order-router';
 import axios, { AxiosResponse } from 'axios';
 import { ethers } from 'ethers';
+import qs from 'qs';
 import {
-  QuoteBody,
+  QuoteQueryParams,
   QuoteResponse,
 } from '../../lib/handlers/quote/schema/quote-schema';
 
@@ -27,9 +28,11 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`;
 describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
   describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
     test('erc20 -> erc20', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDC', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -38,15 +41,18 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       const response: AxiosResponse<QuoteResponse> =
-        await axios.post<QuoteResponse>(API, quotePost);
+        await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const {
-        data: { quoteDecimals, quoteGasAdjustedDecimals },
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
         status,
       } = response;
 
       expect(status).toBe(200);
       expect(parseFloat(quoteDecimals)).toBeGreaterThan(90);
+      expect(parseFloat(quoteDecimals)).toBeLessThan(110);
 
       if (type == 'exactIn') {
         expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(
@@ -58,13 +64,52 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         );
       }
 
+      expect(methodParameters).toBeDefined();
+    });
+
+    test('erc20 -> erc20 no recipient/deadline/slippage', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        algorithm,
+      };
+
+      const queryParams = qs.stringify(quoteReq);
+
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.get<QuoteResponse>(`${API}?${queryParams}`);
+      const {
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+        status,
+      } = response;
+
+      expect(status).toBe(200);
+      expect(parseFloat(quoteDecimals)).toBeGreaterThan(90);
       expect(parseFloat(quoteDecimals)).toBeLessThan(110);
+
+      if (type == 'exactIn') {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(
+          parseFloat(quoteDecimals)
+        );
+      } else {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeGreaterThanOrEqual(
+          parseFloat(quoteDecimals)
+        );
+      }
+
+      expect(methodParameters).not.toBeDefined();
     });
 
     test('erc20 -> eth', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'ETH', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'ETH',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDC', 'ETH', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -73,7 +118,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response = await axios.post<QuoteResponse>(API, quotePost);
+      const queryParams = qs.stringify(quoteReq);
+
+      const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const { data, status } = response;
 
       expect(status).toBe(200);
@@ -81,9 +128,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('eth -> erc20', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'ETH', chainId: 1 },
-        tokenOut: { address: 'UNI', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'ETH',
+        tokenInChainId: 1,
+        tokenOutAddress: 'UNI',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'ETH', 'UNI', '10'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -92,7 +141,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response = await axios.post<QuoteResponse>(API, quotePost);
+      const queryParams = qs.stringify(quoteReq);
+
+      const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const { data, status } = response;
 
       expect(status).toBe(200);
@@ -100,9 +151,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('weth -> erc20', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'WETH', chainId: 1 },
-        tokenOut: { address: 'DAI', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'WETH',
+        tokenInChainId: 1,
+        tokenOutAddress: 'DAI',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'WETH', 'DAI', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -111,7 +164,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response = await axios.post<QuoteResponse>(API, quotePost);
+      const queryParams = qs.stringify(quoteReq);
+
+      const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const { data, status } = response;
 
       expect(status).toBe(200);
@@ -119,9 +174,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('erc20 -> weth', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDT', chainId: 1 },
-        tokenOut: { address: 'WETH', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDT',
+        tokenInChainId: 1,
+        tokenOutAddress: 'WETH',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDT', 'WETH', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -130,7 +187,9 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
-      const response = await axios.post<QuoteResponse>(API, quotePost);
+      const queryParams = qs.stringify(quoteReq);
+
+      const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const { data, status } = response;
 
       expect(status).toBe(200);
@@ -138,15 +197,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('erc20 -> erc20 by address', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: {
-          address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-          chainId: 1,
-        }, // DAI
-        tokenOut: {
-          address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          chainId: 1,
-        }, // USDC
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        tokenInChainId: 1, // DAI
+        tokenOutAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        tokenOutChainId: 1, // USDC
         amount: getAmount(type, 'DAI', 'USDC', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -155,8 +210,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       const response: AxiosResponse<QuoteResponse> =
-        await axios.post<QuoteResponse>(API, quotePost);
+        await axios.get<QuoteResponse>(`${API}?${queryParams}`);
 
       const {
         data: { quoteDecimals, quoteGasAdjustedDecimals },
@@ -180,15 +237,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('erc20 -> erc20 one by address one by symbol', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: {
-          address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-          chainId: 1,
-        }, // DAI
-        tokenOut: {
-          address: 'USDC',
-          chainId: 1,
-        }, // USDC
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDC',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'DAI', 'USDC', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -197,8 +250,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       const response: AxiosResponse<QuoteResponse> =
-        await axios.post<QuoteResponse>(API, quotePost);
+        await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const {
         data: { quoteDecimals, quoteGasAdjustedDecimals },
         status,
@@ -223,8 +278,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
 
   describe.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
     test('field is missing in body', async () => {
-      const quotePost: Partial<QuoteBody> = {
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: Partial<QuoteQueryParams> = {
+        tokenOutAddress: 'USDT',
+        tokenInChainId: 1,
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDC', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -233,13 +290,15 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
           data: {
-            detail: '"tokenIn" is required',
+            detail: '"tokenInAddress" is required',
             errorCode: 'VALIDATION_ERROR',
           },
         },
@@ -247,9 +306,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('amount is too big to find route', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'ETH', chainId: 1 },
-        tokenOut: { address: 'UNI', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'ETH',
+        tokenInChainId: 1,
+        tokenOutAddress: 'UNI',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'ETH', 'UNI', '1000000000000000000000000000'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -258,8 +319,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 404,
@@ -272,9 +335,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('amount is too big for uint256', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
         amount: getAmount(
           type,
           'USDC',
@@ -288,8 +353,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -303,9 +370,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('amount is negative', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
         amount: '-10000000000',
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -314,8 +383,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -329,9 +400,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('amount is decimal', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
         amount: '1000000000.25',
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -340,8 +413,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -355,9 +430,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('symbol doesnt exist', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDC', chainId: 1 },
-        tokenOut: { address: 'NONEXISTANTTOKEN', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'NONEXISTANTTOKEN',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDC', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -366,8 +443,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -380,9 +459,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('tokens are the same symbol', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDT', chainId: 1 },
-        tokenOut: { address: 'USDT', chainId: 1 },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDT',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDC', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -391,8 +472,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -405,12 +488,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('tokens are the same symbol and address', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: { address: 'USDT', chainId: 1 },
-        tokenOut: {
-          address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-          chainId: 1,
-        },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDT',
+        tokenInChainId: 1,
+        tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDT', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -419,8 +501,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -433,15 +517,11 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     });
 
     test('tokens are the same address', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: {
-          address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-          chainId: 1,
-        },
-        tokenOut: {
-          address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-          chainId: 1,
-        },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        tokenInChainId: 1,
+        tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDT', 'USDT', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
@@ -450,8 +530,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,
@@ -463,16 +545,41 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       });
     });
 
+    test('one of recipient/deadline/slippage is missing', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm,
+      };
+
+      const queryParams = qs.stringify(quoteReq);
+
+      await expect(
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
+      ).rejects.toMatchObject({
+        response: {
+          status: 400,
+          data: {
+            detail:
+              '"value" contains [slippageTolerance, deadline] without its required peers [recipient]',
+            errorCode: 'VALIDATION_ERROR',
+          },
+        },
+      });
+    });
+
     test('recipient is an invalid address', async () => {
-      const quotePost: QuoteBody = {
-        tokenIn: {
-          address: 'USDT',
-          chainId: 1,
-        },
-        tokenOut: {
-          address: 'USDC',
-          chainId: 1,
-        },
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDT',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDC',
+        tokenOutChainId: 1,
         amount: getAmount(type, 'USDT', 'USDC', '100'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aZZZZZZZ',
@@ -481,8 +588,10 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         algorithm,
       };
 
+      const queryParams = qs.stringify(quoteReq);
+
       await expect(
-        axios.post<QuoteResponse>(API, quotePost)
+        axios.get<QuoteResponse>(`${API}?${queryParams}`)
       ).rejects.toMatchObject({
         response: {
           status: 400,

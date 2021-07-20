@@ -2,6 +2,7 @@ import Joi from '@hapi/joi';
 import { metricScope, MetricsLogger } from 'aws-embedded-metrics';
 import {
   APIGatewayProxyEvent,
+  APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyHandler,
   APIGatewayProxyResult,
   Context,
@@ -12,10 +13,11 @@ export type BaseRInj = {
   log: Logger;
 };
 
-export type HandleRequestParams<CInj, RInj, Req> = {
+export type HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams> = {
   context: Context;
   event: APIGatewayProxyEvent;
-  request: Req;
+  requestBody: ReqBody;
+  requestQueryParams: ReqQueryParams;
   containerInjected: CInj;
   requestInjected: RInj;
 };
@@ -32,7 +34,12 @@ export type ErrorResponse = {
   detail?: string;
 };
 
-export abstract class Injector<CInj, RInj extends BaseRInj, Req> {
+export abstract class Injector<
+  CInj,
+  RInj extends BaseRInj,
+  ReqBody,
+  ReqQueryParams
+> {
   private containerInjected: CInj;
   public constructor(protected injectorName: string) {}
 
@@ -43,7 +50,8 @@ export abstract class Injector<CInj, RInj extends BaseRInj, Req> {
 
   public abstract getRequestInjected(
     containerInjected: CInj,
-    request: Req,
+    requestBody: ReqBody,
+    requestQueryParams: ReqQueryParams,
     event: APIGatewayProxyEvent,
     context: Context,
     log: Logger,
@@ -77,10 +85,18 @@ const INTERNAL_ERROR: APIGatewayProxyResult = {
   },
 };
 
-export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
+export abstract class APIGLambdaHandler<
+  CInj,
+  RInj extends BaseRInj,
+  ReqBody,
+  ReqQueryParams,
+  Res
+> {
   constructor(
     private handlerName: string,
-    private injectorPromise: Promise<Injector<CInj, RInj, Req>>
+    private injectorPromise: Promise<
+      Injector<CInj, RInj, ReqBody, ReqQueryParams>
+    >
   ) {}
 
   get handler(): APIGatewayProxyHandler {
@@ -99,7 +115,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
 
           log.info({ event, context }, 'Request started.');
 
-          let request: Req;
+          let requestBody: ReqBody;
+          let requestQueryParams: ReqQueryParams;
           try {
             const requestValidation = await this.parseAndValidateRequest(
               event,
@@ -110,7 +127,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
               return requestValidation.errorResponse;
             }
 
-            request = requestValidation.request;
+            requestBody = requestValidation.requestBody;
+            requestQueryParams = requestValidation.requestQueryParams;
           } catch (err) {
             log.error({ err }, 'Unexpected error validating request');
             return INTERNAL_ERROR;
@@ -124,7 +142,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
           try {
             requestInjected = await injector.getRequestInjected(
               containerInjected,
-              request,
+              requestBody,
+              requestQueryParams,
               event,
               context,
               log,
@@ -147,7 +166,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
             const handleRequestResult = await this.handleRequest({
               context,
               event,
-              request,
+              requestBody,
+              requestQueryParams,
               containerInjected,
               requestInjected,
             });
@@ -173,7 +193,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
                 },
               };
             } else {
-              log.info({ request }, 'Handler returned 200');
+              log.info({ requestBody, requestQueryParams }, 'Handler returned 200');
               ({ body, statusCode } = handleRequestResult);
             }
           } catch (err) {
@@ -215,10 +235,11 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
   }
 
   public abstract handleRequest(
-    params: HandleRequestParams<CInj, RInj, Req>
+    params: HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams>
   ): Promise<Response<Res> | ErrorResponse>;
 
   protected abstract requestBodySchema(): Joi.ObjectSchema | null;
+  protected abstract requestQueryParamsSchema(): Joi.ObjectSchema | null;
   protected abstract responseBodySchema(): Joi.ObjectSchema | null;
 
   private isError(
@@ -231,58 +252,98 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, Req, Res> {
     event: APIGatewayProxyEvent,
     log: Logger
   ): Promise<
-    | { state: 'valid'; request: Req }
+    | {
+        state: 'valid';
+        requestBody: ReqBody;
+        requestQueryParams: ReqQueryParams;
+      }
     | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
   > {
-    let body: any;
-    try {
-      body = JSON.parse(event.body ?? '');
-    } catch (err) {
-      return {
-        state: 'invalid',
-        errorResponse: {
-          statusCode: 422,
-          body: JSON.stringify({
-            detail: 'Invalid JSON body',
-            errorCode: 'VALIDATION_ERROR',
-          }),
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers':
-              'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-            'Access-Control-Allow-Credentials': true,
-            'Content-Type': 'application/json',
+    let bodyRaw: any;
+
+    if (event.body) {
+      try {
+        bodyRaw = JSON.parse(event.body);
+      } catch (err) {
+        return {
+          state: 'invalid',
+          errorResponse: {
+            statusCode: 422,
+            body: JSON.stringify({
+              detail: 'Invalid JSON body',
+              errorCode: 'VALIDATION_ERROR',
+            }),
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers':
+                'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+              'Access-Control-Allow-Credentials': true,
+              'Content-Type': 'application/json',
+            },
           },
-        },
-      };
+        };
+      }
+    }
+
+    let queryParamsRaw: APIGatewayProxyEventQueryStringParameters | null =
+      event.queryStringParameters;
+    const queryParamsSchema = this.requestQueryParamsSchema();
+
+    let queryParams: ReqQueryParams | undefined;
+    if (queryParamsRaw && queryParamsSchema) {
+      const queryParamsValidation = queryParamsSchema.validate(queryParamsRaw, {
+        allowUnknown: true, // Makes API schema changes and rollbacks easier.
+        stripUnknown: true,
+      });
+
+      if (queryParamsValidation.error) {
+        log.info({ queryParamsValidation }, 'Request failed validation');
+        return {
+          state: 'invalid',
+          errorResponse: {
+            statusCode: 400,
+            body: JSON.stringify({
+              detail: queryParamsValidation.error.message,
+              errorCode: 'VALIDATION_ERROR',
+            }),
+          },
+        };
+      }
+
+      queryParams = queryParamsValidation.value as ReqQueryParams;
     }
 
     const bodySchema = this.requestBodySchema();
 
-    if (!bodySchema) {
-      return { state: 'valid', request: body as Req };
+    let body: ReqBody | undefined;
+    if (bodyRaw && bodySchema) {
+      const bodyValidation = bodySchema.validate(bodyRaw, {
+        allowUnknown: true, // Makes API schema changes and rollbacks easier.
+        stripUnknown: true,
+      });
+
+      if (bodyValidation.error) {
+        log.info({ bodyValidation }, 'Request failed validation');
+        return {
+          state: 'invalid',
+          errorResponse: {
+            statusCode: 400,
+            body: JSON.stringify({
+              detail: bodyValidation.error.message,
+              errorCode: 'VALIDATION_ERROR',
+            }),
+          },
+        };
+      }
+
+      body = bodyValidation.value;
     }
 
-    const res = bodySchema.validate(body, {
-      allowUnknown: true, // Makes API schema changes and rollbacks easier.
-      stripUnknown: true,
-    });
-
-    if (res.error) {
-      log.info({ res }, 'Request failed validation');
-      return {
-        state: 'invalid',
-        errorResponse: {
-          statusCode: 400,
-          body: JSON.stringify({
-            detail: res.error.message,
-            errorCode: 'VALIDATION_ERROR',
-          }),
-        },
-      };
-    }
-
-    return { state: 'valid', request: res.value as Req };
+    return {
+      state: 'valid',
+      requestBody: body as ReqBody,
+      requestQueryParams: queryParams as ReqQueryParams,
+    };
   }
 
   private async parseAndValidateResponse(

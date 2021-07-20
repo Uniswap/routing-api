@@ -1,15 +1,11 @@
 import Joi from '@hapi/joi';
 import { MethodParameters } from '@uniswap/v3-sdk';
 
-export const QuoteBodySchemaJoi = Joi.object({
-  tokenIn: Joi.object({
-    address: Joi.string().alphanum().max(42).required(),
-    chainId: Joi.number().valid(1).required(),
-  }).required(),
-  tokenOut: Joi.object({
-    address: Joi.string().alphanum().max(42).required(),
-    chainId: Joi.number().valid(1).required(),
-  }).required(),
+export const QuoteQueryParamsJoi = Joi.object({
+  tokenInAddress: Joi.string().alphanum().max(42).required(),
+  tokenInChainId: Joi.number().valid(1).required(),
+  tokenOutAddress: Joi.string().alphanum().max(42).required(),
+  tokenOutChainId: Joi.number().valid(1).required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256
@@ -17,26 +13,22 @@ export const QuoteBodySchemaJoi = Joi.object({
   type: Joi.string().valid('exactIn', 'exactOut').required(),
   recipient: Joi.string()
     .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
-    .required(),
-  slippageTolerance: Joi.number().min(0).max(20).precision(2).required(),
-  deadline: Joi.number().max(600).required(),
+    .optional(),
+  slippageTolerance: Joi.number().min(0).max(20).precision(2).optional(),
+  deadline: Joi.number().max(600).optional(),
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
-});
+}).and('recipient', 'slippageTolerance', 'deadline');
 
-export type QuoteBody = {
-  tokenIn: {
-    address: string;
-    chainId: number;
-  };
-  tokenOut: {
-    address: string;
-    chainId: number;
-  };
+export type QuoteQueryParams = {
+  tokenInAddress: string;
+  tokenInChainId: number;
+  tokenOutAddress: string;
+  tokenOutChainId: number;
   type: string;
   amount: string;
-  recipient: string;
-  slippageTolerance: string;
-  deadline: string;
+  recipient?: string;
+  slippageTolerance?: string;
+  deadline?: string;
   algorithm?: string;
 };
 
@@ -74,7 +66,7 @@ export const QuoteResponseSchemaJoi = Joi.object({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
-  }),
+  }).optional(),
 });
 
 export type QuoteResponse = {
@@ -92,5 +84,5 @@ export type QuoteResponse = {
   routeNodes: NodeInRoute[];
   routeEdges: EdgeInRoute[];
   routeString: string;
-  methodParameters: MethodParameters;
+  methodParameters?: MethodParameters;
 };

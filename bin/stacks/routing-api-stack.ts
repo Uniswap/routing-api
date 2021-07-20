@@ -19,6 +19,7 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPCUsername: string;
       nodeRPCPassword: string;
       provisionedConcurrency: number;
+      throttlingOverride?: string;
     }
   ) {
     super(parent, name, props);
@@ -31,6 +32,7 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPCUsername,
       nodeRPCPassword,
       provisionedConcurrency,
+      throttlingOverride,
     } = props;
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
@@ -91,7 +93,7 @@ export class RoutingAPIStack extends cdk.Stack {
             statement: {
               rateBasedStatement: {
                 // Limit is per 5 mins, i.e. 120 requests every 5 mins
-                limit: 120,
+                limit: throttlingOverride ? parseInt(throttlingOverride) : 120,
                 // API is of type EDGE so is fronted by Cloudfront as a proxy.
                 // Use the ip set in X-Forwarded-For by Cloudfront, not the regular IP
                 // which would just resolve to Cloudfronts IP.
@@ -147,7 +149,7 @@ export class RoutingAPIStack extends cdk.Stack {
         allowMethods: aws_apigateway.Cors.ALL_METHODS,
       },
     });
-    quote.addMethod('POST', lambdaIntegration);
+    quote.addMethod('GET', lambdaIntegration);
 
     this.url = new CfnOutput(this, 'Url', {
       value: api.url,

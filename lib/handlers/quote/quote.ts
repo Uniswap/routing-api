@@ -6,9 +6,9 @@ import {
   ITokenProvider,
   MetricLoggerUnit,
   routeAmountToString,
+  SwapConfig,
   SwapRoute,
 } from '@uniswap/smart-order-router';
-import { Pool } from '@uniswap/v3-sdk';
 import Logger from 'bunyan';
 import JSBI from 'jsbi';
 import _ from 'lodash';
@@ -22,8 +22,8 @@ import { ContainerInjected, RequestInjected } from './injector';
 import {
   EdgeInRoute,
   NodeInRoute,
-  QuoteBody,
-  QuoteBodySchemaJoi,
+  QuoteQueryParams,
+  QuoteQueryParamsJoi,
   QuoteResponse,
   QuoteResponseSchemaJoi,
 } from './schema/quote-schema';
@@ -41,31 +41,43 @@ const ROUTING_CONFIG = {
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
   RequestInjected,
-  QuoteBody,
+  void,
+  QuoteQueryParams,
   QuoteResponse
 > {
   public async handleRequest(
-    params: HandleRequestParams<ContainerInjected, RequestInjected, QuoteBody>
+    params: HandleRequestParams<
+      ContainerInjected,
+      RequestInjected,
+      void,
+      QuoteQueryParams
+    >
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
-      request: {
-        tokenIn: tokenInRaw,
-        tokenOut: tokenOutRaw,
+      requestQueryParams: {
+        tokenInAddress,
+        tokenInChainId,
+        tokenOutAddress,
+        tokenOutChainId,
         amount: amountRaw,
         type,
         recipient,
         slippageTolerance,
         deadline,
       },
-      requestInjected: { router, log, quoteId, tokenProvider, metric },
+      requestInjected: {
+        router,
+        log,
+        quoteId,
+        tokenProvider,
+        poolProvider,
+        metric,
+      },
       containerInjected: { tokenListProvider },
     } = params;
 
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
-
-    const { address: tokenInAddress, chainId: tokenInChainId } = tokenInRaw;
-    const { address: tokenOutAddress, chainId: tokenOutChainId } = tokenOutRaw;
 
     const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
       tokenListProvider,
@@ -107,15 +119,19 @@ export class QuoteHandler extends APIGLambdaHandler<
       };
     }
 
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100);
-    const slippageTolerancePercent = new Percent(slippagePer10k, 10_000);
-    const swapParams = {
-      deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-      recipient: recipient,
-      slippageTolerance: slippageTolerancePercent,
-    };
+    let swapParams: SwapConfig | undefined = undefined;
 
+    if (slippageTolerance && deadline && recipient) {
+      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100);
+      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000);
+      swapParams = {
+        deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+        recipient: recipient,
+        slippageTolerance: slippageTolerancePercent,
+      };
+    }
+
+    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     let swapRoute: SwapRoute | null;
     switch (type) {
       case 'exactIn':
@@ -231,7 +247,11 @@ export class QuoteHandler extends APIGLambdaHandler<
 
         edges.push({
           type: 'pool',
-          id: Pool.getAddress(nextPool.token0, nextPool.token1, nextPool.fee),
+          id: poolProvider.getPoolAddress(
+            nextPool.token0,
+            nextPool.token1,
+            nextPool.fee
+          ).poolAddress,
           inId: tokenPath[i].address,
           outId: nextToken.address,
           fee: nextPool.fee.toString(),
@@ -345,7 +365,11 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {
-    return QuoteBodySchemaJoi;
+    return null;
+  }
+
+  protected requestQueryParamsSchema(): Joi.ObjectSchema | null {
+    return QuoteQueryParamsJoi;
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
