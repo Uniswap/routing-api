@@ -3,11 +3,15 @@ import { metricScope, MetricsLogger } from 'aws-embedded-metrics';
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyEventQueryStringParameters,
-  APIGatewayProxyHandler,
   APIGatewayProxyResult,
   Context,
 } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
+
+export type APIGatewayProxyHandler = (
+  event: APIGatewayProxyEvent,
+  context: Context
+) => Promise<APIGatewayProxyResult>;
 
 export type BaseRInj = {
   log: Logger;
@@ -76,13 +80,6 @@ const INTERNAL_ERROR: APIGatewayProxyResult = {
     errorCode: 'INTERNAL_ERROR',
     detail: 'Unexpected error',
   }),
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers':
-      'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-    'Access-Control-Allow-Credentials': true,
-    'Content-Type': 'application/json',
-  },
 };
 
 export abstract class APIGLambdaHandler<
@@ -100,6 +97,29 @@ export abstract class APIGLambdaHandler<
   ) {}
 
   get handler(): APIGatewayProxyHandler {
+    return async (
+      event: APIGatewayProxyEvent,
+      context: Context
+    ): Promise<APIGatewayProxyResult> => {
+      const handler = this.buildHandler();
+
+      const response = await handler(event, context);
+
+      return {
+        ...response,
+        headers: {
+          ...response.headers,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers':
+            'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+          'Access-Control-Allow-Credentials': true,
+          'Content-Type': 'application/json',
+        },
+      };
+    };
+  }
+
+  private buildHandler(): APIGatewayProxyHandler {
     return metricScope(
       (metric: MetricsLogger) =>
         async (
@@ -184,16 +204,12 @@ export abstract class APIGLambdaHandler<
               return {
                 statusCode,
                 body: response,
-                headers: {
-                  'Access-Control-Allow-Origin': '*',
-                  'Access-Control-Allow-Headers':
-                    'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-                  'Access-Control-Allow-Credentials': true,
-                  'Content-Type': 'application/json',
-                },
               };
             } else {
-              log.info({ requestBody, requestQueryParams }, 'Handler returned 200');
+              log.info(
+                { requestBody, requestQueryParams },
+                'Handler returned 200'
+              );
               ({ body, statusCode } = handleRequestResult);
             }
           } catch (err) {
@@ -222,13 +238,6 @@ export abstract class APIGLambdaHandler<
           return {
             statusCode,
             body: JSON.stringify(response),
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Headers':
-                'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-              'Access-Control-Allow-Credentials': true,
-              'Content-Type': 'application/json',
-            },
           };
         }
     );
@@ -273,13 +282,6 @@ export abstract class APIGLambdaHandler<
               detail: 'Invalid JSON body',
               errorCode: 'VALIDATION_ERROR',
             }),
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Headers':
-                'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-              'Access-Control-Allow-Credentials': true,
-              'Content-Type': 'application/json',
-            },
           },
         };
       }
