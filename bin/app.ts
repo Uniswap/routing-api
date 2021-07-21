@@ -111,7 +111,7 @@ export class RoutingAPIPipeline extends Stack {
       nodeRPCPassword: rpcNodeDetails
         .secretValueFromJson('password')
         .toString(),
-      provisionedConcurrency: 3,
+      provisionedConcurrency: 20,
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
