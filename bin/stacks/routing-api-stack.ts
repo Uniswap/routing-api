@@ -20,6 +20,7 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPCPassword: string;
       provisionedConcurrency: number;
       throttlingOverride?: string;
+      ethGasStationInfoUrl: string;
     }
   ) {
     super(parent, name, props);
@@ -33,6 +34,7 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPCPassword,
       provisionedConcurrency,
       throttlingOverride,
+      ethGasStationInfoUrl,
     } = props;
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
@@ -46,6 +48,7 @@ export class RoutingAPIStack extends cdk.Stack {
         nodeRPCPassword,
         tokenListCacheBucket,
         provisionedConcurrency,
+        ethGasStationInfoUrl,
       }
     );
 
@@ -68,7 +71,7 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
 
-    /* const ipThrottlingACL =  */new aws_waf.CfnWebACL(
+    /* const ipThrottlingACL =  */ new aws_waf.CfnWebACL(
       this,
       'RoutingAPIIPThrottlingACL',
       {
@@ -122,7 +125,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }
     );
 
-/*     const region = cdk.Stack.of(this).region;
+    /*     const region = cdk.Stack.of(this).region;
     const apiArn = `arn:aws:apigateway:${region}::/restapis/${api.restApiId}/stages/${api.deploymentStage.stageName}`;
 
     new aws_waf.CfnWebACLAssociation(

@@ -14,6 +14,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   nodeRPCPassword: string;
   tokenListCacheBucket: aws_s3.Bucket;
   provisionedConcurrency: number;
+  ethGasStationInfoUrl: string;
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
@@ -33,6 +34,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       nodeRPCPassword,
       tokenListCacheBucket,
       provisionedConcurrency,
+      ethGasStationInfoUrl,
     } = props;
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -62,7 +64,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         runtime: aws_lambda.Runtime.NODEJS_14_X,
         entry: path.join(__dirname, '../../lib/handlers/index.ts'),
         handler: 'quoteHandler',
-        timeout: cdk.Duration.seconds(15),
+        timeout: cdk.Duration.seconds(20),
         memorySize: 1024,
         bundling: {
           minify: true,
@@ -76,6 +78,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
           JSON_RPC_USERNAME: nodeRPCUsername,
           JSON_RPC_PASSWORD: nodeRPCPassword,
           TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
+          ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         },
         layers: [
           aws_lambda.LayerVersion.fromLayerVersionArn(

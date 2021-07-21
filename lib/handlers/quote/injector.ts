@@ -107,7 +107,7 @@ export class QuoteHandlerInjector extends Injector<
         url: process.env.JSON_RPC_URL!,
         user: process.env.JSON_RPC_USERNAME,
         password: process.env.JSON_RPC_PASSWORD,
-        timeout: 2500,
+        timeout: 5000,
       },
       chainName
     );
@@ -177,7 +177,7 @@ export class QuoteHandlerInjector extends Injector<
 
     return {
       gasStationProvider: new CachingGasStationProvider(
-        new ETHGasStationInfoProvider()
+        new ETHGasStationInfoProvider(process.env.ETH_GAS_STATION_INFO_URL!)
       ),
       subgraphProvider: new AWSSubgraphProvider(
         POOL_CACHE_BUCKET!,

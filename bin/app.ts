@@ -35,6 +35,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCUsername: string;
       nodeRPCPassword: string;
       provisionedConcurrency: number;
+      ethGasStationInfoUrl: string;
     }
   ) {
     super(scope, id, props);
@@ -43,6 +44,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCUsername,
       nodeRPCPassword,
       provisionedConcurrency,
+      ethGasStationInfoUrl,
     } = props;
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -50,6 +52,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCUsername,
       nodeRPCPassword,
       provisionedConcurrency,
+      ethGasStationInfoUrl,
     });
     this.url = url;
   }
@@ -101,6 +104,15 @@ export class RoutingAPIPipeline extends Stack {
         'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-json-3ifNy7',
     });
 
+    const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(
+      this,
+      'ETHGasStationUrl',
+      {
+        secretCompleteArn:
+          'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
+      }
+    );
+
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
@@ -112,6 +124,7 @@ export class RoutingAPIPipeline extends Stack {
         .secretValueFromJson('password')
         .toString(),
       provisionedConcurrency: 20,
+      ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -134,6 +147,7 @@ export class RoutingAPIPipeline extends Stack {
         .secretValueFromJson('password')
         .toString(),
       provisionedConcurrency: 20,
+      ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
@@ -188,6 +202,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
     ? parseInt(process.env.PROVISION_CONCURRENCY)
     : 0,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
+  ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
