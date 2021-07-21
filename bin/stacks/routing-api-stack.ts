@@ -68,7 +68,7 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
 
-    const ipThrottlingACL = new aws_waf.CfnWebACL(
+    /* const ipThrottlingACL =  */new aws_waf.CfnWebACL(
       this,
       'RoutingAPIIPThrottlingACL',
       {
@@ -122,7 +122,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }
     );
 
-    const region = cdk.Stack.of(this).region;
+/*     const region = cdk.Stack.of(this).region;
     const apiArn = `arn:aws:apigateway:${region}::/restapis/${api.restApiId}/stages/${api.deploymentStage.stageName}`;
 
     new aws_waf.CfnWebACLAssociation(
@@ -132,7 +132,7 @@ export class RoutingAPIStack extends cdk.Stack {
         resourceArn: apiArn,
         webAclArn: ipThrottlingACL.getAtt('Arn').toString(),
       }
-    );
+    ); */
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
