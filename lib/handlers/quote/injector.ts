@@ -112,7 +112,7 @@ export class QuoteHandlerInjector extends Injector<
       chainName
     );
 
-    const multicall2Provider = new UniswapMulticallProvider(provider);
+    const multicall2Provider = new UniswapMulticallProvider(provider, 750_000);
     const poolProvider = new CachingPoolProvider(
       new PoolProvider(multicall2Provider)
     );

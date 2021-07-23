@@ -31,14 +31,14 @@ import {
 const ROUTING_CONFIG = {
   topN: 3,
   topNTokenInOut: 3,
-  topNSecondHop: 1,
+  topNSecondHop: 0,
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
-  // Each quote is hardcoded to consume max 1m gas.
-  // Some providers like Infura set a gas limit per call of 10x block gas limit.
-  // 125m should be within this limit.
-  multicallChunkSize: 125,
+  // Multicall is parameterized to consume max 750k gas.
+  // Some providers like Infura set a gas limit per call of 10x block gas
+  // limit i.e. ~ 150m. 175*750k < 150m
+  multicallChunkSize: 175,
 };
 
 export class QuoteHandler extends APIGLambdaHandler<
