@@ -40,12 +40,13 @@ export type NodeInRoute = {
 };
 
 export type EdgeInRoute = {
-  type: 'pool';
+  type: 'v3-pool';
   id: string;
   inId: string;
   outId: string;
   fee: string;
-  percent: number;
+  amountIn?: string;
+  amountOut?: string;
 };
 
 export const QuoteResponseSchemaJoi = Joi.object({

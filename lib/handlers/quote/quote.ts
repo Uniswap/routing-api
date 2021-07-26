@@ -1,17 +1,22 @@
 import Joi from '@hapi/joi';
-import { Currency, CurrencyAmount, Ether, Percent } from '@uniswap/sdk-core';
+import {
+  Currency,
+  CurrencyAmount,
+  Ether,
+  Percent,
+  TradeType,
+} from '@uniswap/sdk-core';
 import {
   ChainId,
   ITokenListProvider,
   ITokenProvider,
   MetricLoggerUnit,
-  routeAmountToString,
+  routeAmountsToString,
   SwapConfig,
   SwapRoute,
 } from '@uniswap/smart-order-router';
 import Logger from 'bunyan';
 import JSBI from 'jsbi';
-import _ from 'lodash';
 import {
   APIGLambdaHandler,
   ErrorResponse,
@@ -135,7 +140,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    let swapRoute: SwapRoute | null;
+    let swapRoute: SwapRoute<TradeType> | null;
     switch (type) {
       case 'exactIn':
         const amountIn = CurrencyAmount.fromRawAmount(
@@ -219,7 +224,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     for (const routeAmount of routeAmounts) {
       const {
         route: { tokenPath, pools },
-        percentage,
+        amount,
+        quote,
       } = routeAmount;
 
       let prevToken = tokenPath[0];
@@ -248,8 +254,24 @@ export class QuoteHandler extends APIGLambdaHandler<
           });
         }
 
+        let edgeAmountIn = undefined;
+        if (i == 0) {
+          edgeAmountIn =
+            type == 'exactIn'
+              ? amount.quotient.toString()
+              : quote.quotient.toString();
+        }
+
+        let edgeAmountOut = undefined;
+        if (i == pools.length - 1) {
+          edgeAmountOut =
+            type == 'exactIn'
+              ? quote.quotient.toString()
+              : amount.quotient.toString();
+        }
+
         edges.push({
-          type: 'pool',
+          type: 'v3-pool',
           id: poolProvider.getPoolAddress(
             nextPool.token0,
             nextPool.token1,
@@ -258,7 +280,8 @@ export class QuoteHandler extends APIGLambdaHandler<
           inId: tokenPath[i].address,
           outId: nextToken.address,
           fee: nextPool.fee.toString(),
-          percent: i == 0 ? percentage : 100,
+          amountIn: edgeAmountIn,
+          amountOut: edgeAmountOut,
         });
 
         prevToken = nextToken;
@@ -279,7 +302,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasPriceWei: gasPriceWei.toString(),
       routeNodes: nodes,
       routeEdges: edges,
-      routeString: _.map(routeAmounts, routeAmountToString).join(', '),
+      routeString: routeAmountsToString(routeAmounts),
       quoteId,
     };
 
