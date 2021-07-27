@@ -2,6 +2,7 @@ import {
   AlphaRouter,
   CachingGasStationProvider,
   CachingPoolProvider,
+  ChainId,
   ETHGasStationInfoProvider,
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
@@ -19,6 +20,7 @@ import {
   setGlobalLogger,
   setGlobalMetric,
   TokenProvider,
+  TokenProviderWithFallback,
   UniswapMulticallProvider,
 } from '@uniswap/smart-order-router';
 import { MetricsLogger } from 'aws-embedded-metrics';
@@ -39,6 +41,8 @@ export interface ContainerInjected {
   subgraphProvider: ISubgraphProvider;
   gasStationProvider: IGasPriceProvider;
   tokenListProvider: ITokenListProvider;
+  tokenProviderFromTokenList: ITokenProvider;
+  blockedTokenListProvider: ITokenListProvider;
 }
 
 export interface RequestInjected extends BaseRInj {
@@ -116,10 +120,20 @@ export class QuoteHandlerInjector extends Injector<
     const poolProvider = new CachingPoolProvider(
       new PoolProvider(multicall2Provider)
     );
-    const tokenProvider = new TokenProvider(chainIdEnum, multicall2Provider);
 
-    const { gasStationProvider, subgraphProvider, tokenListProvider } =
-      containerInjected;
+    const {
+      gasStationProvider,
+      subgraphProvider,
+      tokenListProvider,
+      tokenProviderFromTokenList,
+      blockedTokenListProvider,
+    } = containerInjected;
+
+    const tokenProvider = new TokenProviderWithFallback(
+      tokenProviderFromTokenList,
+      new TokenProvider(chainIdEnum, multicall2Provider)
+    );
+
     let router;
     switch (algorithm) {
       case 'legacy':
@@ -143,7 +157,7 @@ export class QuoteHandlerInjector extends Injector<
           quoteProvider: new QuoteProvider(multicall2Provider),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
-          tokenListProvider,
+          blockedTokenListProvider,
           tokenProvider,
         });
         break;
@@ -169,11 +183,19 @@ export class QuoteHandlerInjector extends Injector<
 
     const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } =
       process.env;
+
     const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
+      ChainId.MAINNET,
       TOKEN_LIST_CACHE_BUCKET!,
-      DEFAULT_TOKEN_LIST,
-      DEFAULT_BLOCKED_TOKEN_LIST
+      DEFAULT_TOKEN_LIST
     );
+
+    const blockedTokenListProvider =
+      await AWSTokenListProvider.fromTokenListS3Bucket(
+        ChainId.MAINNET,
+        TOKEN_LIST_CACHE_BUCKET!,
+        DEFAULT_BLOCKED_TOKEN_LIST
+      );
 
     return {
       gasStationProvider: new CachingGasStationProvider(
@@ -184,6 +206,8 @@ export class QuoteHandlerInjector extends Injector<
         POOL_CACHE_KEY!
       ),
       tokenListProvider,
+      tokenProviderFromTokenList: tokenListProvider,
+      blockedTokenListProvider,
     };
   }
 }

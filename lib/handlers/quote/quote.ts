@@ -7,6 +7,7 @@ import {
   TradeType,
 } from '@uniswap/sdk-core';
 import {
+  AlphaRouterConfig,
   ChainId,
   ITokenListProvider,
   ITokenProvider,
@@ -33,10 +34,13 @@ import {
   QuoteResponseSchemaJoi,
 } from './schema/quote-schema';
 
-const ROUTING_CONFIG = {
+const ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 3,
   topNTokenInOut: 3,
   topNSecondHop: 0,
+  topNWithEachBaseToken: 2,
+  topNWithBaseToken: 6,
+  topNWithBaseTokenInSet: true,
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
@@ -237,6 +241,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           id: prevToken.address,
           chainId: prevToken.chainId,
           symbol: prevToken.symbol!,
+          decimals: prevToken.decimals.toString()!
         });
       }
 
@@ -251,6 +256,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             id: nextToken.address,
             chainId: nextToken.chainId,
             symbol: nextToken.symbol!,
+            decimals: prevToken.decimals.toString()!
           });
         }
 
@@ -280,6 +286,9 @@ export class QuoteHandler extends APIGLambdaHandler<
           inId: tokenPath[i].address,
           outId: nextToken.address,
           fee: nextPool.fee.toString(),
+          liquidity: nextPool.liquidity.toString(),
+          sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
+          tickCurrent: nextPool.tickCurrent.toString(),
           amountIn: edgeAmountIn,
           amountOut: edgeAmountOut,
         });
@@ -338,15 +347,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
 
       if (isAddress(tokenRaw)) {
-        const token = tokenListProvider.getTokenByAddressIfExists(
-          chainId,
-          tokenRaw
-        );
+        const token = tokenListProvider.getTokenByAddress(tokenRaw);
 
         return token;
       }
 
-      return tokenListProvider.getTokenBySymbolIfExists(chainId, tokenRaw);
+      return tokenListProvider.getTokenBySymbol(tokenRaw);
     };
 
     let currencyIn: Currency | undefined = tryTokenList(
@@ -381,10 +387,10 @@ export class QuoteHandler extends APIGLambdaHandler<
     const tokenAccessor = await tokenProvider.getTokens(tokensToFetch);
 
     if (!currencyIn) {
-      currencyIn = tokenAccessor.getToken(tokenInRaw);
+      currencyIn = tokenAccessor.getTokenByAddress(tokenInRaw);
     }
     if (!currencyOut) {
-      currencyOut = tokenAccessor.getToken(tokenOutRaw);
+      currencyOut = tokenAccessor.getTokenByAddress(tokenOutRaw);
     }
 
     return { currencyIn, currencyOut };

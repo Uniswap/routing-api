@@ -8,7 +8,7 @@ import {
   QuoteResponse,
 } from '../../lib/handlers/quote/schema/quote-schema';
 
-const tokenListProvider = new TokenListProvider(DEFAULT_TOKEN_LIST);
+const tokenListProvider = new TokenListProvider(1, DEFAULT_TOKEN_LIST);
 
 const getAmount = (
   type: string,
@@ -17,9 +17,8 @@ const getAmount = (
   amount: string
 ) => {
   const decimals = tokenListProvider.getTokenBySymbol(
-    1,
     type == 'exactIn' ? symbolIn : symbolOut
-  ).decimals;
+  )!.decimals;
   return ethers.utils.parseUnits(amount, decimals).toString();
 };
 

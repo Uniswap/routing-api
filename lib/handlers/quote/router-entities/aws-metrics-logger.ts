@@ -1,4 +1,4 @@
-import { IMetric, log, MetricLoggerUnit } from '@uniswap/smart-order-router';
+import { IMetric, MetricLoggerUnit } from '@uniswap/smart-order-router';
 import { MetricsLogger as AWSEmbeddedMetricsLogger } from 'aws-embedded-metrics';
 
 export class AWSMetricsLogger implements IMetric {
@@ -9,7 +9,6 @@ export class AWSMetricsLogger implements IMetric {
   }
 
   public putMetric(key: string, value: number, unit?: MetricLoggerUnit): void {
-    log.info({ key, value, unit }, `[Metric] ${key}: ${value} | ${unit}`);
     this.awsMetricLogger.putMetric(key, value, unit);
   }
 }

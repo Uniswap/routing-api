@@ -37,6 +37,7 @@ export type NodeInRoute = {
   id: string;
   chainId: number;
   symbol: string;
+  decimals: string;
 };
 
 export type EdgeInRoute = {
@@ -44,6 +45,9 @@ export type EdgeInRoute = {
   id: string;
   inId: string;
   outId: string;
+  sqrtRatioX96: string;
+  liquidity: string;
+  tickCurrent: string;
   fee: string;
   amountIn?: string;
   amountOut?: string;
