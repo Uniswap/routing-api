@@ -36,7 +36,7 @@ import {
 
 const ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 3,
-  topNTokenInOut: 3,
+  topNTokenInOut: 2,
   topNSecondHop: 0,
   topNWithEachBaseToken: 2,
   topNWithBaseToken: 6,
@@ -44,10 +44,6 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
-  // Multicall is parameterized to consume max 750k gas.
-  // Some providers like Infura set a gas limit per call of 10x block gas
-  // limit i.e. ~ 150m. 175*750k < 150m
-  multicallChunkSize: 175,
 };
 
 export class QuoteHandler extends APIGLambdaHandler<
@@ -80,7 +76,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       requestInjected: {
         router,
         log,
-        quoteId,
+        id: quoteId,
         tokenProvider,
         poolProvider,
         metric,
@@ -145,53 +141,54 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     let swapRoute: SwapRoute<TradeType> | null;
+    let amount: CurrencyAmount<Currency>;
     switch (type) {
       case 'exactIn':
-        const amountIn = CurrencyAmount.fromRawAmount(
+        amount = CurrencyAmount.fromRawAmount(
           currencyIn,
           JSBI.BigInt(amountRaw)
         );
 
         log.info(
           {
-            amountIn: amountIn.toExact(),
-            currency: amountIn.currency.symbol,
+            amountIn: amount.toExact(),
+            currency: amount.currency.symbol,
             routingConfig: ROUTING_CONFIG,
           },
-          `Exact In Swap: Give ${amountIn.toExact()} ${
-            amountIn.currency.symbol
+          `Exact In Swap: Give ${amount.toExact()} ${
+            amount.currency.symbol
           }, Want: ${currencyOut.symbol}`
         );
 
         swapRoute = await router.routeExactIn(
           currencyIn,
           currencyOut,
-          amountIn,
+          amount,
           swapParams,
           ROUTING_CONFIG
         );
         break;
       case 'exactOut':
-        const amountOut = CurrencyAmount.fromRawAmount(
+        amount = CurrencyAmount.fromRawAmount(
           currencyOut,
           JSBI.BigInt(amountRaw)
         );
 
         log.info(
           {
-            amountIn: amountOut.toExact(),
-            currency: amountOut.currency.symbol,
+            amountIn: amount.toExact(),
+            currency: amount.currency.symbol,
             routingConfig: ROUTING_CONFIG,
           },
-          `Exact Out Swap: Want ${amountOut.toExact()} ${
-            amountOut.currency.symbol
+          `Exact Out Swap: Want ${amount.toExact()} ${
+            amount.currency.symbol
           } Give: ${currencyIn.symbol}`
         );
 
         swapRoute = await router.routeExactOut(
           currencyIn,
           currencyOut,
-          amountOut,
+          amount,
           swapParams,
           ROUTING_CONFIG
         );
@@ -241,7 +238,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           id: prevToken.address,
           chainId: prevToken.chainId,
           symbol: prevToken.symbol!,
-          decimals: prevToken.decimals.toString()!
+          decimals: prevToken.decimals.toString()!,
         });
       }
 
@@ -256,7 +253,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             id: nextToken.address,
             chainId: nextToken.chainId,
             symbol: nextToken.symbol!,
-            decimals: prevToken.decimals.toString()!
+            decimals: prevToken.decimals.toString()!,
           });
         }
 
@@ -300,6 +297,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
+      amount: amount.quotient.toString(),
+      amountDecimals: amount.toExact(),
       quote: quote.quotient.toString(),
       quoteDecimals: quote.toExact(),
       quoteGasAdjusted: quoteGasAdjusted.quotient.toString(),

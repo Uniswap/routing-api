@@ -1,7 +1,8 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
 import { TokenListProvider } from '@uniswap/smart-order-router';
 import axios, { AxiosResponse } from 'axios';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import _ from 'lodash';
 import qs from 'qs';
 import {
   QuoteQueryParams,
@@ -124,6 +125,48 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
 
       expect(status).toBe(200);
       expect(data.methodParameters).toBeDefined();
+    });
+
+    test('erc20 -> eth large trade', async () => {
+      // Trade of this size almost always results in splits.
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'ETH',
+        tokenOutChainId: 1,
+        amount:
+          type == 'exactIn'
+            ? getAmount(type, 'USDC', 'ETH', '2000000')
+            : getAmount(type, 'USDC', 'ETH', '1000'),
+        type,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm,
+      };
+
+      const queryParams = qs.stringify(quoteReq);
+
+      const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`);
+      const { data, status } = response;
+
+      expect(status).toBe(200);
+      expect(data.methodParameters).toBeDefined();
+
+      const amountInEdgesTotal = _(data.routeEdges)
+        .filter((routeEdge) => !!routeEdge.amountIn)
+        .map((routeEdge) => BigNumber.from(routeEdge.amountIn))
+        .reduce((cur, total) => total.add(cur), BigNumber.from(0));
+      const amountIn = BigNumber.from(data.quote);
+      expect(amountIn.eq(amountInEdgesTotal));
+
+      const amountOutEdgesTotal = _(data.routeEdges)
+        .filter((routeEdge) => !!routeEdge.amountOut)
+        .map((routeEdge) => BigNumber.from(routeEdge.amountOut))
+        .reduce((cur, total) => total.add(cur), BigNumber.from(0));
+      const amountOut = BigNumber.from(data.quote);
+      expect(amountOut.eq(amountOutEdgesTotal));
+      expect(data.routeEdges).toBeDefined();
     });
 
     test('eth -> erc20', async () => {
@@ -312,7 +355,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         tokenOutChainId: 1,
         amount: getAmount(type, 'ETH', 'UNI', '1000000000000000000000000000'),
         type,
-        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        recipient: '0x88fc765949a27405480F374Aa49E20dcCD3fCfb8',
         slippageTolerance: '5',
         deadline: '360',
         algorithm,

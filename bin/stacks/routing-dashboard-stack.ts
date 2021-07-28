@@ -222,5 +222,80 @@ export class RoutingDashboardStack extends cdk.NestedStack {
         ],
       }),
     });
+
+    new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIQuoteProviderDashboard', {
+      dashboardName: `RoutingQuoteProviderDashboard`,
+      dashboardBody: JSON.stringify({
+        periodOverride: 'inherit',
+        widgets: [
+          {
+            height: 6,
+            width: 24,
+            y: 0,
+            x: 0,
+            type: 'metric',
+            properties: {
+              metrics: [
+                [
+                  NAMESPACE,
+                  'QuoteApproxGasUsedPerSuccessfulCall',
+                  'Service',
+                  'RoutingAPI',
+                ],
+              ],
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Average',
+              period: 300,
+              title: 'Approx gas used by each call',
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            y: 6,
+            x: 0,
+            type: 'metric',
+            properties: {
+              metrics: [
+                [NAMESPACE, 'QuoteNumRetries', 'Service', 'RoutingAPI'],
+              ],
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Average',
+              period: 300,
+              title: 'Number of retries to provider needed to get quote',
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            y: 12,
+            x: 0,
+            type: 'metric',
+            properties: {
+              metrics: [
+                [
+                  NAMESPACE,
+                  'QuoteOutOfGasExceptionRetry',
+                  'Service',
+                  'RoutingAPI',
+                ],
+                ['.', 'QuoteSuccessRateRetry', '.', '.'],
+              ],
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              period: 300,
+              stat: 'Sum',
+              title:
+                'Number of requests that retried due to out of gas or success rate',
+            },
+          },
+        ],
+      }),
+    });
   }
 }

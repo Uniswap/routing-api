@@ -62,8 +62,17 @@ export class RoutingAPIStack extends cdk.Stack {
         accessLogDestination: new aws_apigateway.LogGroupLogDestination(
           accessLogGroup
         ),
-        accessLogFormat:
-          aws_apigateway.AccessLogFormat.jsonWithStandardFields(),
+        accessLogFormat: aws_apigateway.AccessLogFormat.jsonWithStandardFields({
+          ip: false,
+          caller: false,
+          user: false,
+          requestTime: true,
+          httpMethod: true,
+          resourcePath: true,
+          status: true,
+          protocol: true,
+          responseLength: true,
+        }),
       },
       defaultCorsPreflightOptions: {
         allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,

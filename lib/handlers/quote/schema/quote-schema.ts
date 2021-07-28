@@ -15,7 +15,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
     .optional(),
   slippageTolerance: Joi.number().min(0).max(20).precision(2).optional(),
-  deadline: Joi.number().max(600).optional(),
+  deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
 }).and('recipient', 'slippageTolerance', 'deadline');
 
@@ -55,6 +55,8 @@ export type EdgeInRoute = {
 
 export const QuoteResponseSchemaJoi = Joi.object({
   quoteId: Joi.string().required(),
+  amount: Joi.string().required(),
+  amountDecimals: Joi.string().required(),
   quote: Joi.string().required(),
   quoteDecimals: Joi.string().required(),
   quoteGasAdjusted: Joi.string().required(),
@@ -76,6 +78,8 @@ export const QuoteResponseSchemaJoi = Joi.object({
 
 export type QuoteResponse = {
   quoteId: string;
+  amount: string;
+  amountDecimals: string;
   quote: string;
   quoteDecimals: string;
   quoteGasAdjusted: string;

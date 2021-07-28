@@ -19,14 +19,17 @@ import {
   QuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
+  TokenListProvider,
   TokenProvider,
   TokenProviderWithFallback,
   UniswapMulticallProvider,
 } from '@uniswap/smart-order-router';
+import { TokenList } from '@uniswap/token-lists';
 import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
 import { ethers } from 'ethers';
+import UNSUPPORTED_TOKEN_LIST from '../../config/unsupported.tokenlist.json';
 import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
@@ -34,8 +37,6 @@ import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { QuoteQueryParams } from './schema/quote-schema';
 
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
-const DEFAULT_BLOCKED_TOKEN_LIST =
-  'https://raw.githubusercontent.com/The-Blockchain-Association/sec-notice-list/master/ba-sec-list.json';
 
 export interface ContainerInjected {
   subgraphProvider: ISubgraphProvider;
@@ -46,7 +47,6 @@ export interface ContainerInjected {
 }
 
 export interface RequestInjected extends BaseRInj {
-  quoteId: string;
   metric: IMetric;
   poolProvider: IPoolProvider;
   tokenProvider: ITokenProvider;
@@ -116,7 +116,7 @@ export class QuoteHandlerInjector extends Injector<
       chainName
     );
 
-    const multicall2Provider = new UniswapMulticallProvider(provider, 750_000);
+    const multicall2Provider = new UniswapMulticallProvider(provider, 375_000);
     const poolProvider = new CachingPoolProvider(
       new PoolProvider(multicall2Provider)
     );
@@ -140,9 +140,13 @@ export class QuoteHandlerInjector extends Injector<
         log.info({ algorithm }, 'Using Legacy Algorithm');
         router = new LegacyRouter({
           chainId,
-          multicall2Provider: new UniswapMulticallProvider(provider),
+          multicall2Provider,
           poolProvider,
-          quoteProvider: new QuoteProvider(multicall2Provider),
+          quoteProvider: new QuoteProvider(multicall2Provider, undefined, {
+            multicallChunk: 150,
+            gasLimitPerCall: 1_000_000,
+            quoteMinSuccessRate: 0.0,
+          }),
           tokenListProvider,
         });
         break;
@@ -152,9 +156,23 @@ export class QuoteHandlerInjector extends Injector<
         router = new AlphaRouter({
           chainId,
           subgraphProvider,
-          multicall2Provider: new UniswapMulticallProvider(provider),
+          multicall2Provider,
           poolProvider,
-          quoteProvider: new QuoteProvider(multicall2Provider),
+          // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
+          // 200*725k < 150m
+          quoteProvider: new QuoteProvider(
+            multicall2Provider,
+            {
+              retries: 2,
+              minTimeout: 25,
+              maxTimeout: 250,
+            },
+            {
+              multicallChunk: 200,
+              gasLimitPerCall: 725_000,
+              quoteMinSuccessRate: 0.2,
+            }
+          ),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
           blockedTokenListProvider,
@@ -164,7 +182,7 @@ export class QuoteHandlerInjector extends Injector<
     }
 
     return {
-      quoteId,
+      id: quoteId,
       log,
       metric,
       router,
@@ -190,12 +208,10 @@ export class QuoteHandlerInjector extends Injector<
       DEFAULT_TOKEN_LIST
     );
 
-    const blockedTokenListProvider =
-      await AWSTokenListProvider.fromTokenListS3Bucket(
-        ChainId.MAINNET,
-        TOKEN_LIST_CACHE_BUCKET!,
-        DEFAULT_BLOCKED_TOKEN_LIST
-      );
+    const blockedTokenListProvider = await TokenListProvider.fromTokenList(
+      ChainId.MAINNET,
+      UNSUPPORTED_TOKEN_LIST as TokenList
+    );
 
     return {
       gasStationProvider: new CachingGasStationProvider(
