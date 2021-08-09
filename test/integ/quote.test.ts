@@ -153,20 +153,24 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(status).toBe(200);
       expect(data.methodParameters).toBeDefined();
 
-      const amountInEdgesTotal = _(data.routeEdges)
-        .filter((routeEdge) => !!routeEdge.amountIn)
-        .map((routeEdge) => BigNumber.from(routeEdge.amountIn))
+      expect(data.route).toBeDefined();
+      
+      const amountInEdgesTotal = _(data.route)
+        .flatMap((route) => route[0]!)
+        .filter((pool) => !!pool.amountIn)
+        .map((pool) => BigNumber.from(pool.amountIn))
         .reduce((cur, total) => total.add(cur), BigNumber.from(0));
       const amountIn = BigNumber.from(data.quote);
       expect(amountIn.eq(amountInEdgesTotal));
 
-      const amountOutEdgesTotal = _(data.routeEdges)
-        .filter((routeEdge) => !!routeEdge.amountOut)
-        .map((routeEdge) => BigNumber.from(routeEdge.amountOut))
+      const amountOutEdgesTotal = _(data.route)
+        .flatMap((route) => route[0]!)
+        .filter((pool) => !!pool.amountOut)
+        .map((pool) => BigNumber.from(pool.amountOut))
         .reduce((cur, total) => total.add(cur), BigNumber.from(0));
       const amountOut = BigNumber.from(data.quote);
       expect(amountOut.eq(amountOutEdgesTotal));
-      expect(data.routeEdges).toBeDefined();
+      
     });
 
     test('eth -> erc20', async () => {

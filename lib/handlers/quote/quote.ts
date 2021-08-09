@@ -26,8 +26,7 @@ import {
 } from '../handler';
 import { ContainerInjected, RequestInjected } from './injector';
 import {
-  EdgeInRoute,
-  NodeInRoute,
+  PoolInRoute,
   QuoteQueryParams,
   QuoteQueryParamsJoi,
   QuoteResponse,
@@ -40,7 +39,7 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   topNSecondHop: 0,
   topNWithEachBaseToken: 2,
   topNWithBaseToken: 6,
-  topNWithBaseTokenInSet: true,
+  topNWithBaseTokenInSet: false,
   maxSwapsPerPath: 3,
   maxSplits: 3,
   distributionPercent: 5,
@@ -217,10 +216,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute;
 
-    const nodes: NodeInRoute[] = [];
-    const edges: EdgeInRoute[] = [];
-
-    const tokenSet: Set<string> = new Set<string>();
+    const route: Array<PoolInRoute[]> = [];
 
     for (const routeAmount of routeAmounts) {
       const {
@@ -229,33 +225,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         quote,
       } = routeAmount;
 
-      let prevToken = tokenPath[0];
-
-      if (!tokenSet.has(prevToken.address)) {
-        tokenSet.add(prevToken.address);
-        nodes.push({
-          type: 'token',
-          id: prevToken.address,
-          chainId: prevToken.chainId,
-          symbol: prevToken.symbol!,
-          decimals: prevToken.decimals.toString()!,
-        });
-      }
-
+      const curRoute: PoolInRoute[] = [];
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i];
-        const nextToken = tokenPath[i + 1];
-
-        if (!tokenSet.has(nextToken.address)) {
-          tokenSet.add(nextToken.address);
-          nodes.push({
-            type: 'token',
-            id: nextToken.address,
-            chainId: nextToken.chainId,
-            symbol: nextToken.symbol!,
-            decimals: prevToken.decimals.toString()!,
-          });
-        }
+        const tokenIn = tokenPath[i];
+        const tokenOut = tokenPath[i + 1];
 
         let edgeAmountIn = undefined;
         if (i == 0) {
@@ -273,15 +247,15 @@ export class QuoteHandler extends APIGLambdaHandler<
               : amount.quotient.toString();
         }
 
-        edges.push({
+        curRoute.push({
           type: 'v3-pool',
-          id: poolProvider.getPoolAddress(
+          address: poolProvider.getPoolAddress(
             nextPool.token0,
             nextPool.token1,
             nextPool.fee
           ).poolAddress,
-          inId: tokenPath[i].address,
-          outId: nextToken.address,
+          tokenIn: { chainId: tokenIn.chainId, decimals: tokenIn.decimals.toString(), address: tokenIn.address, symbol: tokenIn.symbol! },
+          tokenOut: { chainId: tokenOut.chainId, decimals: tokenOut.decimals.toString(), address: tokenOut.address, symbol: tokenOut.symbol! },
           fee: nextPool.fee.toString(),
           liquidity: nextPool.liquidity.toString(),
           sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
@@ -289,9 +263,9 @@ export class QuoteHandler extends APIGLambdaHandler<
           amountIn: edgeAmountIn,
           amountOut: edgeAmountOut,
         });
-
-        prevToken = nextToken;
       }
+
+      route.push(curRoute);
     }
 
     const result: QuoteResponse = {
@@ -308,8 +282,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
       gasPriceWei: gasPriceWei.toString(),
-      routeNodes: nodes,
-      routeEdges: edges,
+      route: route,
       routeString: routeAmountsToString(routeAmounts),
       quoteId,
     };
@@ -382,7 +355,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       tokensToFetch.push(tokenOutRaw);
     }
 
-    log.info(`Getting tokens ${tokensToFetch} from chain`);
+    log.info(`Getting input tokens ${tokensToFetch} from chain`);
     const tokenAccessor = await tokenProvider.getTokens(tokensToFetch);
 
     if (!currencyIn) {

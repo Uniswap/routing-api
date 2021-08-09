@@ -24,27 +24,26 @@ export type QuoteQueryParams = {
   tokenInChainId: number;
   tokenOutAddress: string;
   tokenOutChainId: number;
-  type: string;
   amount: string;
+  type: string;
   recipient?: string;
   slippageTolerance?: string;
   deadline?: string;
   algorithm?: string;
 };
 
-export type NodeInRoute = {
-  type: 'token';
-  id: string;
+export type TokenInRoute = {
+  address: string;
   chainId: number;
   symbol: string;
   decimals: string;
 };
 
-export type EdgeInRoute = {
+export type PoolInRoute = {
   type: 'v3-pool';
-  id: string;
-  inId: string;
-  outId: string;
+  address: string;
+  tokenIn: TokenInRoute;
+  tokenOut: TokenInRoute;
   sqrtRatioX96: string;
   liquidity: string;
   tickCurrent: string;
@@ -67,8 +66,7 @@ export const QuoteResponseSchemaJoi = Joi.object({
   gasUseEstimateUSD: Joi.string().required(),
   gasPriceWei: Joi.string().required(),
   blockNumber: Joi.string().required(),
-  routeNodes: Joi.array().items(Joi.any()).required(),
-  routeEdges: Joi.array().items(Joi.any()).required(),
+  route: Joi.array().items(Joi.any()).required(),
   routeString: Joi.string().required(),
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
@@ -90,8 +88,7 @@ export type QuoteResponse = {
   gasUseEstimateUSD: string;
   gasPriceWei: string;
   blockNumber: string;
-  routeNodes: NodeInRoute[];
-  routeEdges: EdgeInRoute[];
+  route: Array<PoolInRoute[]>;
   routeString: string;
   methodParameters?: MethodParameters;
 };
