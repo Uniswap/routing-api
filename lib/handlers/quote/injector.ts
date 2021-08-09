@@ -72,8 +72,6 @@ export class QuoteHandlerInjector extends Injector<
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
 
-    log.info({ requestQueryParams, _requestBody }, 'Request body query');
-
     const {
       tokenInAddress,
       tokenInChainId,
@@ -124,7 +122,6 @@ export class QuoteHandlerInjector extends Injector<
     const {
       gasStationProvider,
       subgraphProvider,
-      tokenListProvider,
       tokenProviderFromTokenList,
       blockedTokenListProvider,
     } = containerInjected;
@@ -137,40 +134,45 @@ export class QuoteHandlerInjector extends Injector<
     let router;
     switch (algorithm) {
       case 'legacy':
-        log.info({ algorithm }, 'Using Legacy Algorithm');
         router = new LegacyRouter({
           chainId,
           multicall2Provider,
           poolProvider,
-          quoteProvider: new QuoteProvider(multicall2Provider, undefined, {
-            multicallChunk: 150,
-            gasLimitPerCall: 1_000_000,
-            quoteMinSuccessRate: 0.0,
-          }),
-          tokenListProvider,
+          quoteProvider: new QuoteProvider(
+            provider,
+            multicall2Provider,
+            undefined,
+            {
+              multicallChunk: 150,
+              gasLimitPerCall: 1_000_000,
+              quoteMinSuccessRate: 0.0,
+            }
+          ),
+          tokenProvider,
         });
         break;
       case 'alpha':
       default:
-        log.info({ algorithm }, 'Using Alpha Algorithm');
         router = new AlphaRouter({
           chainId,
+          provider,
           subgraphProvider,
           multicall2Provider,
           poolProvider,
           // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
           // 200*725k < 150m
           quoteProvider: new QuoteProvider(
+            provider,
             multicall2Provider,
             {
               retries: 2,
-              minTimeout: 25,
-              maxTimeout: 250,
+              minTimeout: 100,
+              maxTimeout: 1000,
             },
             {
-              multicallChunk: 200,
-              gasLimitPerCall: 725_000,
-              quoteMinSuccessRate: 0.2,
+              multicallChunk: 210, // 210
+              gasLimitPerCall: 705_000, // 705
+              quoteMinSuccessRate: 0.0,
             }
           ),
           gasPriceProvider: gasStationProvider,

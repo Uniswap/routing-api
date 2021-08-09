@@ -64,7 +64,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         runtime: aws_lambda.Runtime.NODEJS_14_X,
         entry: path.join(__dirname, '../../lib/handlers/index.ts'),
         handler: 'quoteHandler',
-        timeout: cdk.Duration.seconds(20),
+        timeout: cdk.Duration.seconds(29),
         memorySize: 1024,
         bundling: {
           minify: true,
