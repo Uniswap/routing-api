@@ -3,11 +3,10 @@ import {
   CachingGasStationProvider,
   CachingPoolProvider,
   ChainId,
-  ETHGasStationInfoProvider,
+  EIP1559GasPriceProvider,
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
-  IGasPriceProvider,
   IMetric,
   IPoolProvider,
   IRouter,
@@ -40,7 +39,6 @@ const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
 export interface ContainerInjected {
   subgraphProvider: ISubgraphProvider;
-  gasStationProvider: IGasPriceProvider;
   tokenListProvider: ITokenListProvider;
   tokenProviderFromTokenList: ITokenProvider;
   blockedTokenListProvider: ITokenListProvider;
@@ -119,8 +117,11 @@ export class QuoteHandlerInjector extends Injector<
       new PoolProvider(multicall2Provider)
     );
 
+    const gasStationProvider = new CachingGasStationProvider(
+      new EIP1559GasPriceProvider(provider)
+    );
+
     const {
-      gasStationProvider,
       subgraphProvider,
       tokenProviderFromTokenList,
       blockedTokenListProvider,
@@ -216,9 +217,6 @@ export class QuoteHandlerInjector extends Injector<
     );
 
     return {
-      gasStationProvider: new CachingGasStationProvider(
-        new ETHGasStationInfoProvider(process.env.ETH_GAS_STATION_INFO_URL!)
-      ),
       subgraphProvider: new AWSSubgraphProvider(
         POOL_CACHE_BUCKET!,
         POOL_CACHE_KEY!

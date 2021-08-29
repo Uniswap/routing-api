@@ -1,18 +1,50 @@
-# Prerequisites
+# Uniswap Routing API
 
-## API
+This repository contains routing API for the Uniswap V3 protocol.
 
-Create .env file with:
+It deploys an API to AWS that uses @uniswap/smart-order-router to search for the most efficient way to swap token A for token B.
 
-```
-ETH_GAS_STATION_INFO_KEY = '...'
-JSON_RPC_URL = '...'
-```
+## Development
 
-## Integ Tests
+The develop on the Routing API you must have an AWS account where you can deploy your API for testing.
 
-To run the integ tests you must first deploy the API, then add its url to your .env file.
+### Deploying the API
 
-```
-UNISWAP_ROUTING_API= '...'
-```
+The best way to develop and test the API is to deploy your own instance to AWS.
+
+1. Install and configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) and [AWS CDK V1](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html).
+2. Create .env file in the root directory of the project with:
+    ```
+    JSON_RPC_URL = '' # Required
+    JSON_RPC_USERNAME = '' # Optional
+    JSON_RPC_PASSWORD = '' # Optional
+    THROTTLE_PER_FIVE_MINS = '' # Optional
+    ```
+3. Install and build the package
+    ```
+    npm install && npm run build
+    ```
+4. To deploy the API run: 
+    ```
+    cdk deploy RoutingAPIStack
+    ```
+    This will deploy to the default account your AWS CLI is configured for. Once complete it will output something like:
+    ```
+    RoutingAPIStack.Url = https://...
+    ```
+    You can then try it out:
+    ```
+    curl --request GET '<INSERT_YOUR_URL_HERE>/quote?tokenInAddress=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&tokenInChainId=1&tokenOutAddress=0x1f9840a85d5af5bf1d1762f925bdaddc4201f984&tokenOutChainId=1&amount=100&type=exactIn'
+    ```
+### Integration Tests
+
+
+1. First deploy your test API using the intructions above. Then update your `.env` file with the URL:
+    ```
+    UNISWAP_ROUTING_API= '...'
+    ```
+
+2. Run the tests with:
+    ```
+    npm run integ-test
+    ```

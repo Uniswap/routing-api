@@ -35,6 +35,7 @@ import {
 
 const ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 3,
+  topNDirectSwaps: 2,
   topNTokenInOut: 2,
   topNSecondHop: 0,
   topNWithEachBaseToken: 2,
@@ -207,7 +208,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const {
       quote,
       quoteGasAdjusted,
-      routeAmounts,
+      route,
       estimatedGasUsed,
       estimatedGasUsedQuoteToken,
       estimatedGasUsedUSD,
@@ -216,14 +217,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute;
 
-    const route: Array<PoolInRoute[]> = [];
+    const routeResponse: Array<PoolInRoute[]> = [];
 
-    for (const routeAmount of routeAmounts) {
+    for (const subRoute of route) {
       const {
         route: { tokenPath, pools },
         amount,
         quote,
-      } = routeAmount;
+      } = subRoute;
 
       const curRoute: PoolInRoute[] = [];
       for (let i = 0; i < pools.length; i++) {
@@ -265,7 +266,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         });
       }
 
-      route.push(curRoute);
+      routeResponse.push(curRoute);
     }
 
     const result: QuoteResponse = {
@@ -282,8 +283,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
       gasPriceWei: gasPriceWei.toString(),
-      route: route,
-      routeString: routeAmountsToString(routeAmounts),
+      route: routeResponse,
+      routeString: routeAmountsToString(route),
       quoteId,
     };
 
