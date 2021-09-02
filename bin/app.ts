@@ -1,5 +1,5 @@
-#!/usr/bin/env node
 import { BuildEnvironmentVariableType } from '@aws-cdk/aws-codebuild';
+import * as chatbot from '@aws-cdk/aws-chatbot';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import * as sm from '@aws-cdk/aws-secretsmanager';
@@ -22,6 +22,7 @@ import {
 import dotenv from 'dotenv';
 import 'source-map-support/register';
 import { RoutingAPIStack } from './stacks/routing-api-stack';
+import { PipelineNotificationEvents } from '@aws-cdk/aws-codepipeline';
 dotenv.config();
 
 export class RoutingAPIStage extends Stage {
@@ -36,6 +37,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCPassword: string;
       provisionedConcurrency: number;
       ethGasStationInfoUrl: string;
+      chatbotSNSArn?: string;
     }
   ) {
     super(scope, id, props);
@@ -45,6 +47,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCPassword,
       provisionedConcurrency,
       ethGasStationInfoUrl,
+      chatbotSNSArn
     } = props;
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -53,6 +56,7 @@ export class RoutingAPIStage extends Stage {
       nodeRPCPassword,
       provisionedConcurrency,
       ethGasStationInfoUrl,
+      chatbotSNSArn,
     });
     this.url = url;
   }
@@ -125,6 +129,7 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -148,6 +153,7 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
@@ -158,36 +164,44 @@ export class RoutingAPIPipeline extends Stack {
       prodUsEast2Stage,
       prodUsEast2AppStage
     );
+
+    const slackChannel = chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(this, 'SlackChannel', 'arn:aws:chatbot::644039819003:chat-configuration/slack-channel/eng-ops-slack-chatbot')
+
+    pipeline.codePipeline.notifyOn('NotifySlack', slackChannel, {
+      events: [
+        PipelineNotificationEvents.PIPELINE_EXECUTION_FAILED,
+      ]
+    })
   }
 
   private addIntegTests(
     pipeline: CdkPipeline,
     sourceArtifact: codepipeline.Artifact,
     routingAPIStage: RoutingAPIStage,
-    applicationStage: CdkStage
+    applicationStage: CdkStage,
   ) {
-    applicationStage.addActions(
-      new ShellScriptAction({
-        actionName: 'IntegrationTests',
-        additionalArtifacts: [sourceArtifact],
-        useOutputs: {
-          UNISWAP_ROUTING_API: pipeline.stackOutput(routingAPIStage.url),
+    const testAction = new ShellScriptAction({
+      actionName: `IntegTests-${routingAPIStage.stageName}`,
+      additionalArtifacts: [sourceArtifact],
+      useOutputs: {
+        UNISWAP_ROUTING_API: pipeline.stackOutput(routingAPIStage.url),
+      },
+      environmentVariables: {
+        NPM_TOKEN: {
+          value: 'npm-private-repo-access-token',
+          type: BuildEnvironmentVariableType.SECRETS_MANAGER,
         },
-        environmentVariables: {
-          NPM_TOKEN: {
-            value: 'npm-private-repo-access-token',
-            type: BuildEnvironmentVariableType.SECRETS_MANAGER,
-          },
-        },
-        commands: [
-          'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
-          'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
-          'npm install',
-          'npm run integ-test',
-        ],
-        runOrder: applicationStage.nextSequentialRunOrder(),
-      })
-    );
+      },
+      commands: [
+        'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
+        'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
+        'npm install',
+        'npm run integ-test',
+      ],
+      runOrder: applicationStage.nextSequentialRunOrder(),
+    });
+
+    applicationStage.addActions(testAction);
   }
 }
 
@@ -203,6 +217,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
     : 0,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
+  chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

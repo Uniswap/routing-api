@@ -1,9 +1,12 @@
 import * as aws_apigateway from '@aws-cdk/aws-apigateway';
 import { MethodLoggingLevel } from '@aws-cdk/aws-apigateway';
+import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as aws_cloudwatch_actions from '@aws-cdk/aws-cloudwatch-actions';
 import * as aws_logs from '@aws-cdk/aws-logs';
+import * as aws_sns from '@aws-cdk/aws-sns';
 import * as aws_waf from '@aws-cdk/aws-wafv2';
 import * as cdk from '@aws-cdk/core';
-import { CfnOutput } from '@aws-cdk/core';
+import { CfnOutput, Duration } from '@aws-cdk/core';
 import { RoutingCachingStack } from './routing-caching-stack';
 import { RoutingDashboardStack } from './routing-dashboard-stack';
 import { RoutingLambdaStack } from './routing-lambda-stack';
@@ -21,6 +24,7 @@ export class RoutingAPIStack extends cdk.Stack {
       provisionedConcurrency: number;
       throttlingOverride?: string;
       ethGasStationInfoUrl: string;
+      chatbotSNSArn?: string;
     }
   ) {
     super(parent, name, props);
@@ -35,6 +39,7 @@ export class RoutingAPIStack extends cdk.Stack {
       provisionedConcurrency,
       throttlingOverride,
       ethGasStationInfoUrl,
+      chatbotSNSArn,
     } = props;
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
@@ -49,6 +54,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,
+        chatbotSNSArn
       }
     );
 
@@ -80,7 +86,7 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
 
-    /* const ipThrottlingACL =  */ new aws_waf.CfnWebACL(
+    const ipThrottlingACL = new aws_waf.CfnWebACL(
       this,
       'RoutingAPIIPThrottlingACL',
       {
@@ -134,7 +140,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }
     );
 
-    /*     const region = cdk.Stack.of(this).region;
+    const region = cdk.Stack.of(this).region;
     const apiArn = `arn:aws:apigateway:${region}::/restapis/${api.restApiId}/stages/${api.deploymentStage.stageName}`;
 
     new aws_waf.CfnWebACLAssociation(
@@ -144,7 +150,7 @@ export class RoutingAPIStack extends cdk.Stack {
         resourceArn: apiArn,
         webAclArn: ipThrottlingACL.getAtt('Arn').toString(),
       }
-    ); */
+    );
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
@@ -162,6 +168,54 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
     quote.addMethod('GET', lambdaIntegration);
+
+    const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
+      metric: api.metricServerError({
+        period: Duration.minutes(5),
+        statistic: 'avg',
+      }),
+      threshold: 0.05,
+      evaluationPeriods: 3,
+    });
+
+    const apiAlarm4xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-4XXAlarm', {
+      metric: api.metricClientError({
+        period: Duration.minutes(5),
+        statistic: 'avg',
+      }),
+      threshold: 0.8,
+      evaluationPeriods: 3,
+    });
+
+    const apiAlarmLatency = new aws_cloudwatch.Alarm(
+      this,
+      'RoutingAPI-Latency',
+      {
+        metric: api.metricLatency({
+          period: Duration.minutes(5),
+          statistic: 'p90',
+        }),
+        threshold: 5000,
+        evaluationPeriods: 3,
+      }
+    );
+
+    if (chatbotSNSArn) {
+      const chatBotTopic = aws_sns.Topic.fromTopicArn(
+        this,
+        'ChatbotTopic',
+        chatbotSNSArn
+      );
+      apiAlarm5xx.addAlarmAction(
+        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
+      );
+      apiAlarm4xx.addAlarmAction(
+        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
+      );
+      apiAlarmLatency.addAlarmAction(
+        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
+      );
+    }
 
     this.url = new CfnOutput(this, 'Url', {
       value: api.url,

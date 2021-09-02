@@ -1,9 +1,13 @@
 import * as asg from '@aws-cdk/aws-applicationautoscaling';
+import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as aws_cloudwatch_actions from '@aws-cdk/aws-cloudwatch-actions';
 import * as aws_iam from '@aws-cdk/aws-iam';
 import * as aws_lambda from '@aws-cdk/aws-lambda';
 import * as aws_lambda_nodejs from '@aws-cdk/aws-lambda-nodejs';
 import * as aws_s3 from '@aws-cdk/aws-s3';
+import * as aws_sns from '@aws-cdk/aws-sns';
 import * as cdk from '@aws-cdk/core';
+import { Duration } from '@aws-cdk/core';
 import * as path from 'path';
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
@@ -15,6 +19,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tokenListCacheBucket: aws_s3.Bucket;
   provisionedConcurrency: number;
   ethGasStationInfoUrl: string;
+  chatbotSNSArn?: string;
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
@@ -35,6 +40,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
+      chatbotSNSArn,
     } = props;
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -90,6 +96,49 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         tracing: aws_lambda.Tracing.ACTIVE,
       }
     );
+
+    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
+      metric: new aws_cloudwatch.MathExpression({
+        expression: "errors / invocations",
+        usingMetrics: {
+          errors: this.routingLambda.metricErrors({
+            period: Duration.minutes(5),
+            statistic: 'avg',
+          }),
+          invocations: this.routingLambda.metricInvocations({
+            period: Duration.minutes(5),
+            statistic: 'avg',
+          })
+        }
+      }),
+      threshold: 0.05,
+      evaluationPeriods: 3,
+    });
+
+    const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaThrottles', {
+      metric: this.routingLambda.metricThrottles({
+        period: Duration.minutes(5),
+        statistic: 'sum'
+      }),
+      threshold: 10,
+      evaluationPeriods: 3,
+    });
+
+    if (chatbotSNSArn) {
+      const chatBotTopic = aws_sns.Topic.fromTopicArn(
+        this,
+        'ChatbotTopic',
+        chatbotSNSArn
+      );
+
+      lambdaAlarmErrorRate.addAlarmAction(
+        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
+      );
+      
+      lambdaThrottlesErrorRate.addAlarmAction(
+        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
+      );
+    }
 
     const enableProvisionedConcurrency = provisionedConcurrency > 0;
 
