@@ -38,7 +38,7 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   topNDirectSwaps: 2,
   topNTokenInOut: 2,
   topNSecondHop: 0,
-  topNWithEachBaseToken: 2,
+  topNWithEachBaseToken: 3,
   topNWithBaseToken: 6,
   topNWithBaseTokenInSet: false,
   maxSwapsPerPath: 3,
