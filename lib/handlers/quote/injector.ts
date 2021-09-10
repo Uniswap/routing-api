@@ -27,12 +27,13 @@ import { TokenList } from '@uniswap/token-lists';
 import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import UNSUPPORTED_TOKEN_LIST from '../../config/unsupported.tokenlist.json';
 import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
+import { StaticGasPriceProvider } from './router-entities/static-gas-price-provider';
 import { QuoteQueryParams } from './schema/quote-schema';
 
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
@@ -77,6 +78,7 @@ export class QuoteHandlerInjector extends Injector<
       amount,
       type,
       algorithm,
+      gasPriceWei
     } = requestQueryParams;
 
     log = log.child({
@@ -117,9 +119,15 @@ export class QuoteHandlerInjector extends Injector<
       new PoolProvider(multicall2Provider)
     );
 
-    const gasStationProvider = new CachingGasStationProvider(
-      new EIP1559GasPriceProvider(provider)
-    );
+    let gasStationProvider;
+    if (gasPriceWei) {
+      const gasPriceWeiBN = BigNumber.from(gasPriceWei);
+      gasStationProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
+    } else {
+      gasStationProvider = new CachingGasStationProvider(
+        new EIP1559GasPriceProvider(provider)
+      );
+    }
 
     const {
       subgraphProvider,

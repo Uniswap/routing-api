@@ -104,6 +104,49 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(methodParameters).not.toBeDefined();
     });
 
+    test('erc20 -> erc20 gas price specified', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        algorithm,
+        gasPriceWei: '60000000000'
+      };
+
+      const queryParams = qs.stringify(quoteReq);
+
+      const response: AxiosResponse<QuoteResponse> =
+        await axios.get<QuoteResponse>(`${API}?${queryParams}`);
+      const {
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
+        status,
+      } = response;
+
+      expect(status).toBe(200);
+      
+      if (algorithm == 'alpha') {
+        expect(gasPriceWei).toEqual('60000000000');
+      }
+
+      expect(parseFloat(quoteDecimals)).toBeGreaterThan(90);
+      expect(parseFloat(quoteDecimals)).toBeLessThan(110);
+
+      if (type == 'exactIn') {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(
+          parseFloat(quoteDecimals)
+        );
+      } else {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeGreaterThanOrEqual(
+          parseFloat(quoteDecimals)
+        );
+      }
+
+      expect(methodParameters).not.toBeDefined();
+    });
+
     test('erc20 -> eth', async () => {
       const quoteReq: QuoteQueryParams = {
         tokenInAddress: 'USDC',

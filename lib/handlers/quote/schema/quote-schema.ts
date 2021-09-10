@@ -17,6 +17,10 @@ export const QuoteQueryParamsJoi = Joi.object({
   slippageTolerance: Joi.number().min(0).max(20).precision(2).optional(),
   deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
+  gasPriceWei: Joi.string()
+  .pattern(/^[0-9]+$/)
+  .max(30)
+  .optional()
 }).and('recipient', 'slippageTolerance', 'deadline');
 
 export type QuoteQueryParams = {
@@ -30,6 +34,7 @@ export type QuoteQueryParams = {
   slippageTolerance?: string;
   deadline?: string;
   algorithm?: string;
+  gasPriceWei?: string;
 };
 
 export type TokenInRoute = {
