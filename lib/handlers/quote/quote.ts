@@ -42,7 +42,7 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   topNWithBaseToken: 6,
   topNWithBaseTokenInSet: false,
   maxSwapsPerPath: 3,
-  maxSplits: 3,
+  maxSplits: 4,
   distributionPercent: 5,
 };
 
