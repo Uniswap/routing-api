@@ -34,7 +34,7 @@ import {
 } from './schema/quote-schema';
 
 const ROUTING_CONFIG: AlphaRouterConfig = {
-  topN: 3,
+  topN: 2,
   topNDirectSwaps: 2,
   topNTokenInOut: 2,
   topNSecondHop: 0,
@@ -42,7 +42,7 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   topNWithBaseToken: 6,
   topNWithBaseTokenInSet: false,
   maxSwapsPerPath: 3,
-  maxSplits: 4,
+  maxSplits: 7,
   distributionPercent: 5,
 };
 
