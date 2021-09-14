@@ -184,8 +184,8 @@ export class QuoteHandlerInjector extends Injector<
               quoteMinSuccessRate: 0.15,
             },
             {
-              gasLimitOverride: 1_500_000,
-              multicallChunk: 95
+              gasLimitOverride: 2_000_000,
+              multicallChunk: 70
             }
           ),
           gasPriceProvider: gasStationProvider,

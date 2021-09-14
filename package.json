@@ -8,7 +8,7 @@
     "build": "tsc",
     "clean": "rm -rf dist cdk.out",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest test/unit test/cdk",
     "integ-test": "jest test/integ",
     "cdk": "cdk",
     "fix": "run-s fix:*",
