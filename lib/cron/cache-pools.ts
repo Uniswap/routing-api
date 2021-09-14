@@ -13,7 +13,7 @@ const handler: ScheduledHandler = async (
     requestId: event.id,
   });
 
-  const subgraphProvider = new SubgraphProvider();
+  const subgraphProvider = new SubgraphProvider(3, 15000);
   const pools = await subgraphProvider.getPools();
 
   const s3 = new S3();
