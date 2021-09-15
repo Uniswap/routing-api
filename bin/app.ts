@@ -35,6 +35,9 @@ export class RoutingAPIStage extends Stage {
       nodeRPC: string;
       nodeRPCUsername: string;
       nodeRPCPassword: string;
+      nodeRPCRinkeby: string;
+      nodeRPCUsernameRinkeby: string;
+      nodeRPCPasswordRinkeby: string;
       provisionedConcurrency: number;
       ethGasStationInfoUrl: string;
       chatbotSNSArn?: string;
@@ -45,6 +48,9 @@ export class RoutingAPIStage extends Stage {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      nodeRPCRinkeby,
+      nodeRPCUsernameRinkeby,
+      nodeRPCPasswordRinkeby,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn
@@ -54,6 +60,9 @@ export class RoutingAPIStage extends Stage {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      nodeRPCRinkeby,
+      nodeRPCUsernameRinkeby,
+      nodeRPCPasswordRinkeby,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -108,6 +117,11 @@ export class RoutingAPIPipeline extends Stack {
         'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-json-3ifNy7',
     });
 
+    const rpcNodeDetailsRinkeby = sm.Secret.fromSecretAttributes(this, 'RPCNodeUrlRinkeby', {
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-rinkeby-json-ZBo7kp',
+    });
+
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(
       this,
       'ETHGasStationUrl',
@@ -125,6 +139,13 @@ export class RoutingAPIPipeline extends Stack {
         .secretValueFromJson('username')
         .toString(),
       nodeRPCPassword: rpcNodeDetails
+        .secretValueFromJson('password')
+        .toString(),
+      nodeRPCRinkeby: rpcNodeDetailsRinkeby.secretValueFromJson('url').toString(),
+      nodeRPCUsernameRinkeby: rpcNodeDetailsRinkeby
+        .secretValueFromJson('username')
+        .toString(),
+      nodeRPCPasswordRinkeby: rpcNodeDetailsRinkeby
         .secretValueFromJson('password')
         .toString(),
       provisionedConcurrency: 20,
@@ -149,6 +170,13 @@ export class RoutingAPIPipeline extends Stack {
         .secretValueFromJson('username')
         .toString(),
       nodeRPCPassword: rpcNodeDetails
+        .secretValueFromJson('password')
+        .toString(),
+      nodeRPCRinkeby: rpcNodeDetailsRinkeby.secretValueFromJson('url').toString(),
+      nodeRPCUsernameRinkeby: rpcNodeDetailsRinkeby
+        .secretValueFromJson('username')
+        .toString(),
+      nodeRPCPasswordRinkeby: rpcNodeDetailsRinkeby
         .secretValueFromJson('password')
         .toString(),
       provisionedConcurrency: 20,
@@ -212,6 +240,9 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   nodeRPC: process.env.JSON_RPC_URL!,
   nodeRPCUsername: process.env.JSON_RPC_USERNAME!,
   nodeRPCPassword: process.env.JSON_RPC_PASSWORD!,
+  nodeRPCRinkeby: process.env.JSON_RPC_URL_RINKEBY!,
+  nodeRPCUsernameRinkeby: process.env.JSON_RPC_USERNAME_RINKEBY!,
+  nodeRPCPasswordRinkeby: process.env.JSON_RPC_PASSWORD_RINKEBY!,
   provisionedConcurrency: process.env.PROVISION_CONCURRENCY
     ? parseInt(process.env.PROVISION_CONCURRENCY)
     : 0,

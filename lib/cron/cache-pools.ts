@@ -1,4 +1,4 @@
-import { SubgraphProvider } from '@uniswap/smart-order-router';
+import { ChainId, SubgraphProvider } from '@uniswap/smart-order-router';
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda';
 import { S3 } from 'aws-sdk';
 import { default as bunyan, default as Logger } from 'bunyan';
@@ -13,24 +13,31 @@ const handler: ScheduledHandler = async (
     requestId: event.id,
   });
 
-  const subgraphProvider = new SubgraphProvider(3, 15000);
-  const pools = await subgraphProvider.getPools();
+  for (const chain of [ChainId.MAINNET, ChainId.RINKEBY]) {
+    const subgraphProvider = new SubgraphProvider(chain, 3, 15000);
+    const pools = await subgraphProvider.getPools();
 
-  const s3 = new S3();
-  if (!pools || pools.length == 0) {
-    return;
-  }
-  log.info(
-    `Got ${pools.length} pools from the subgraph. Saving to ${process.env.POOL_CACHE_BUCKET}/${process.env.POOL_CACHE_KEY}`
-  );
+    const s3 = new S3();
+    if (!pools || pools.length == 0) {
+      return;
+    }
 
-  await s3
-    .putObject({
-      Bucket: process.env.POOL_CACHE_BUCKET!,
-      Key: process.env.POOL_CACHE_KEY!,
-      Body: JSON.stringify(pools),
-    })
-    .promise();
+    const key = `${process.env.POOL_CACHE_KEY}${chain != ChainId.MAINNET ? `-${chain}`: ''}`;
+
+    log.info(
+      `Got ${pools.length} pools from the subgraph. Saving to ${process.env.POOL_CACHE_BUCKET}/${key}`
+    );
+
+    await s3
+      .putObject({
+        Bucket: process.env.POOL_CACHE_BUCKET!,
+        Key: key,
+        Body: JSON.stringify(pools),
+      })
+      .promise();
+    }
+
+  
 };
 
 module.exports = { handler };

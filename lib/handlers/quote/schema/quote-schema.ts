@@ -3,9 +3,9 @@ import { MethodParameters } from '@uniswap/v3-sdk';
 
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
-  tokenInChainId: Joi.number().valid(1).required(),
+  tokenInChainId: Joi.number().valid(1, 4).required(),
   tokenOutAddress: Joi.string().alphanum().max(42).required(),
-  tokenOutChainId: Joi.number().valid(1).required(),
+  tokenOutChainId: Joi.number().valid(1, 4).required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256
@@ -20,7 +20,8 @@ export const QuoteQueryParamsJoi = Joi.object({
   gasPriceWei: Joi.string()
   .pattern(/^[0-9]+$/)
   .max(30)
-  .optional()
+  .optional(),
+  minSplits: Joi.number().max(7).optional()
 }).and('recipient', 'slippageTolerance', 'deadline');
 
 export type QuoteQueryParams = {
@@ -35,6 +36,7 @@ export type QuoteQueryParams = {
   deadline?: string;
   algorithm?: string;
   gasPriceWei?: string;
+  minSplits?: number;
 };
 
 export type TokenInRoute = {

@@ -16,6 +16,9 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   nodeRPC: string;
   nodeRPCUsername: string;
   nodeRPCPassword: string;
+  nodeRPCRinkeby: string;
+  nodeRPCUsernameRinkeby: string;
+  nodeRPCPasswordRinkeby: string;
   tokenListCacheBucket: aws_s3.Bucket;
   provisionedConcurrency: number;
   ethGasStationInfoUrl: string;
@@ -37,6 +40,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      nodeRPCRinkeby,
+      nodeRPCUsernameRinkeby,
+      nodeRPCPasswordRinkeby,
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
@@ -83,6 +89,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
           JSON_RPC_URL: nodeRPC,
           JSON_RPC_USERNAME: nodeRPCUsername,
           JSON_RPC_PASSWORD: nodeRPCPassword,
+          JSON_RPC_URL_RINKEBY: nodeRPCRinkeby,
+          JSON_RPC_USERNAME_RINKEBY: nodeRPCUsernameRinkeby,
+          JSON_RPC_PASSWORD_RINKEBY: nodeRPCPasswordRinkeby,
           TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
           ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         },

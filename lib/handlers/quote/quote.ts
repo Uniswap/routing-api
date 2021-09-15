@@ -33,7 +33,7 @@ import {
   QuoteResponseSchemaJoi,
 } from './schema/quote-schema';
 
-const ROUTING_CONFIG: AlphaRouterConfig = {
+const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 2,
   topNDirectSwaps: 2,
   topNTokenInOut: 2,
@@ -42,6 +42,7 @@ const ROUTING_CONFIG: AlphaRouterConfig = {
   topNWithBaseToken: 6,
   topNWithBaseTokenInSet: false,
   maxSwapsPerPath: 3,
+  minSplits: 1,
   maxSplits: 7,
   distributionPercent: 5,
 };
@@ -72,6 +73,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient,
         slippageTolerance,
         deadline,
+        minSplits,
       },
       requestInjected: {
         router,
@@ -81,14 +83,14 @@ export class QuoteHandler extends APIGLambdaHandler<
         poolProvider,
         metric,
       },
-      containerInjected: { tokenListProvider },
+      containerInjected: { tokenListProvider, tokenListProviderRinkeby },
     } = params;
 
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
 
     const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
-      tokenListProvider,
+      tokenInChainId == 1 ? tokenListProvider : tokenListProviderRinkeby,
       tokenProvider,
       tokenInAddress,
       tokenOutAddress,
@@ -127,6 +129,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       };
     }
 
+    const routingConfig = {
+      ...DEFAULT_ROUTING_CONFIG,
+      ...(minSplits ? { minSplits } : {})
+    };
+
     let swapParams: SwapConfig | undefined = undefined;
 
     if (slippageTolerance && deadline && recipient) {
@@ -153,7 +160,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           {
             amountIn: amount.toExact(),
             currency: amount.currency.symbol,
-            routingConfig: ROUTING_CONFIG,
+            routingConfig: routingConfig,
           },
           `Exact In Swap: Give ${amount.toExact()} ${
             amount.currency.symbol
@@ -165,7 +172,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           currencyOut,
           amount,
           swapParams,
-          ROUTING_CONFIG
+          routingConfig
         );
         break;
       case 'exactOut':
@@ -178,7 +185,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           {
             amountIn: amount.toExact(),
             currency: amount.currency.symbol,
-            routingConfig: ROUTING_CONFIG,
+            routingConfig: routingConfig,
           },
           `Exact Out Swap: Want ${amount.toExact()} ${
             amount.currency.symbol
@@ -190,7 +197,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           currencyOut,
           amount,
           swapParams,
-          ROUTING_CONFIG
+          routingConfig
         );
         break;
       default:

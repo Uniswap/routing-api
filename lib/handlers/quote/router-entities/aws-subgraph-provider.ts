@@ -3,19 +3,23 @@ import {
   log,
   SubgraphPool,
   SubgraphProvider,
+  ChainId,
 } from '@uniswap/smart-order-router';
 import { S3 } from 'aws-sdk';
 import NodeCache from 'node-cache';
 
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false });
-const POOL_CACHE_KEY = 'pools';
+const POOL_CACHE_KEY = (chainId: ChainId) => `pools${chainId}`;
 
 export class AWSSubgraphProvider
   extends SubgraphProvider
   implements ISubgraphProvider
 {
-  constructor(private bucket: string, private key: string) {
-    super();
+  private key: string;
+
+  constructor(private chain: ChainId, private bucket: string, key: string) {
+    super(chain);
+    this.key = `${key}${chain != ChainId.MAINNET ? `-${chain}`: ''}`;
   }
 
   public async getPools(): Promise<SubgraphPool[]> {
@@ -26,7 +30,7 @@ export class AWSSubgraphProvider
       'Subgraph pool cache status'
     );
 
-    const cachedPools = POOL_CACHE.get<SubgraphPool[]>(POOL_CACHE_KEY);
+    const cachedPools = POOL_CACHE.get<SubgraphPool[]>(POOL_CACHE_KEY(this.chain));
 
     if (cachedPools) {
       log.info(
@@ -59,7 +63,7 @@ export class AWSSubgraphProvider
         `Got subgraph pools from S3. Num: ${pools.length}`
       );
 
-      POOL_CACHE.set<SubgraphPool[]>(POOL_CACHE_KEY, pools);
+      POOL_CACHE.set<SubgraphPool[]>(POOL_CACHE_KEY(this.chain), pools);
 
       return pools;
     } catch (err) {

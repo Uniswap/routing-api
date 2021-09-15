@@ -40,9 +40,13 @@ const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
 export interface ContainerInjected {
   subgraphProvider: ISubgraphProvider;
+  subgraphProviderRinkeby: ISubgraphProvider;
   tokenListProvider: ITokenListProvider;
+  tokenListProviderRinkeby: ITokenListProvider;
   tokenProviderFromTokenList: ITokenProvider;
+  tokenProviderFromTokenListRinkeby: ITokenProvider;
   blockedTokenListProvider: ITokenListProvider;
+  blockedTokenListProviderRinkeby: ITokenListProvider;
 }
 
 export interface RequestInjected extends BaseRInj {
@@ -106,17 +110,17 @@ export class QuoteHandlerInjector extends Injector<
 
     const provider = new ethers.providers.JsonRpcProvider(
       {
-        url: process.env.JSON_RPC_URL!,
-        user: process.env.JSON_RPC_USERNAME,
-        password: process.env.JSON_RPC_PASSWORD,
+        url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
+        user: process.env.JSON_RPC_USERNAME_RINKEBY,
+        password: process.env.JSON_RPC_PASSWORD_RINKEBY,
         timeout: 5000,
       },
       chainName
     );
 
-    const multicall2Provider = new UniswapMulticallProvider(provider, 375_000);
-    const poolProvider = new CachingPoolProvider(
-      new PoolProvider(multicall2Provider)
+    const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000);
+    const poolProvider = new CachingPoolProvider(chainId,
+      new PoolProvider(chainIdEnum, multicall2Provider)
     );
 
     let gasStationProvider;
@@ -124,19 +128,27 @@ export class QuoteHandlerInjector extends Injector<
       const gasPriceWeiBN = BigNumber.from(gasPriceWei);
       gasStationProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
     } else {
-      gasStationProvider = new CachingGasStationProvider(
+      gasStationProvider = new CachingGasStationProvider(chainId,
         new EIP1559GasPriceProvider(provider)
       );
     }
 
     const {
       subgraphProvider,
+      subgraphProviderRinkeby,
       tokenProviderFromTokenList,
       blockedTokenListProvider,
+      tokenProviderFromTokenListRinkeby,
+      blockedTokenListProviderRinkeby,
     } = containerInjected;
 
+    const subgraphProviderFinal = chainIdEnum == ChainId.MAINNET ? subgraphProvider : subgraphProviderRinkeby;
+    const tokenProviderFromTokenListFinal = chainIdEnum == ChainId.MAINNET ? tokenProviderFromTokenList : tokenProviderFromTokenListRinkeby;
+    const blockedTokenListProviderRinkebyFinal = chainIdEnum == ChainId.MAINNET ? blockedTokenListProvider : blockedTokenListProviderRinkeby;
+
     const tokenProvider = new TokenProviderWithFallback(
-      tokenProviderFromTokenList,
+      chainId,
+      tokenProviderFromTokenListFinal,
       new TokenProvider(chainIdEnum, multicall2Provider)
     );
 
@@ -148,6 +160,7 @@ export class QuoteHandlerInjector extends Injector<
           multicall2Provider,
           poolProvider,
           quoteProvider: new QuoteProvider(
+            chainId,
             provider,
             multicall2Provider,
             undefined,
@@ -165,12 +178,13 @@ export class QuoteHandlerInjector extends Injector<
         router = new AlphaRouter({
           chainId,
           provider,
-          subgraphProvider,
+          subgraphProvider: subgraphProviderFinal,
           multicall2Provider,
           poolProvider,
           // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
           // 200*725k < 150m
           quoteProvider: new QuoteProvider(
+            chainId,
             provider,
             multicall2Provider,
             {
@@ -190,7 +204,7 @@ export class QuoteHandlerInjector extends Injector<
           ),
           gasPriceProvider: gasStationProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
-          blockedTokenListProvider,
+          blockedTokenListProvider: blockedTokenListProviderRinkebyFinal,
           tokenProvider,
         });
         break;
@@ -223,19 +237,39 @@ export class QuoteHandlerInjector extends Injector<
       DEFAULT_TOKEN_LIST
     );
 
+    const tokenListProviderRinkeby = await AWSTokenListProvider.fromTokenListS3Bucket(
+      ChainId.RINKEBY,
+      TOKEN_LIST_CACHE_BUCKET!,
+      DEFAULT_TOKEN_LIST
+    );
+
     const blockedTokenListProvider = await TokenListProvider.fromTokenList(
       ChainId.MAINNET,
       UNSUPPORTED_TOKEN_LIST as TokenList
     );
 
+    const blockedTokenListProviderRinkeby = await TokenListProvider.fromTokenList(
+      ChainId.RINKEBY,
+      UNSUPPORTED_TOKEN_LIST as TokenList
+    );
+
     return {
       subgraphProvider: new AWSSubgraphProvider(
+        ChainId.MAINNET,
+        POOL_CACHE_BUCKET!,
+        POOL_CACHE_KEY!
+      ),
+      subgraphProviderRinkeby: new AWSSubgraphProvider(
+        ChainId.RINKEBY,
         POOL_CACHE_BUCKET!,
         POOL_CACHE_KEY!
       ),
       tokenListProvider,
+      tokenListProviderRinkeby,
       tokenProviderFromTokenList: tokenListProvider,
+      tokenProviderFromTokenListRinkeby: tokenListProviderRinkeby,
       blockedTokenListProvider,
+      blockedTokenListProviderRinkeby
     };
   }
 }

@@ -21,6 +21,9 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPC: string;
       nodeRPCUsername: string;
       nodeRPCPassword: string;
+      nodeRPCRinkeby: string;
+      nodeRPCUsernameRinkeby: string;
+      nodeRPCPasswordRinkeby: string;
       provisionedConcurrency: number;
       throttlingOverride?: string;
       ethGasStationInfoUrl: string;
@@ -36,6 +39,9 @@ export class RoutingAPIStack extends cdk.Stack {
       nodeRPC,
       nodeRPCUsername,
       nodeRPCPassword,
+      nodeRPCRinkeby,
+      nodeRPCUsernameRinkeby,
+      nodeRPCPasswordRinkeby,
       provisionedConcurrency,
       throttlingOverride,
       ethGasStationInfoUrl,
@@ -51,6 +57,9 @@ export class RoutingAPIStack extends cdk.Stack {
         nodeRPC,
         nodeRPCUsername,
         nodeRPCPassword,
+        nodeRPCRinkeby,
+        nodeRPCUsernameRinkeby,
+        nodeRPCPasswordRinkeby,
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,
