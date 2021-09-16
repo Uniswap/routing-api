@@ -4,6 +4,8 @@
   "bin": {
     "app": "./dist/bin/app.js"
   },
+  "license": "GPL",
+  "repository": "https://github.com/Uniswap/routing-api",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist cdk.out",
