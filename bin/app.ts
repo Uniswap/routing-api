@@ -89,7 +89,7 @@ export class RoutingAPIPipeline extends Stack {
         output: sourceArtifact,
         oauthToken: SecretValue.secretsManager('github-token-2'),
         owner: 'Uniswap',
-        repo: 'uniswap-routing-api',
+        repo: 'routing-api',
         branch: 'main',
       }),
 
