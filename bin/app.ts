@@ -179,7 +179,7 @@ export class RoutingAPIPipeline extends Stack {
       nodeRPCPasswordRinkeby: rpcNodeDetailsRinkeby
         .secretValueFromJson('password')
         .toString(),
-      provisionedConcurrency: 20,
+      provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
     });

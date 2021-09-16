@@ -36,7 +36,7 @@ import {
 const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 2,
   topNDirectSwaps: 2,
-  topNTokenInOut: 2,
+  topNTokenInOut: 3,  
   topNSecondHop: 0,
   topNWithEachBaseToken: 3,
   topNWithBaseToken: 6,
