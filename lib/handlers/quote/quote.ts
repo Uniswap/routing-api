@@ -205,6 +205,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
+      log.info({ type, tokenIn: currencyIn, tokenOut: currencyOut, amount: amount.quotient.toString() }, `No route found. 404`);
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
