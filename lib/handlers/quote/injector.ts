@@ -1,3 +1,4 @@
+import { Token } from '@uniswap/sdk-core';
 import {
   AlphaRouter,
   CachingGasStationProvider,
@@ -7,6 +8,7 @@ import {
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
+  IGasPriceProvider,
   IMetric,
   IPoolProvider,
   IRouter,
@@ -14,13 +16,14 @@ import {
   ITokenListProvider,
   ITokenProvider,
   LegacyRouter,
+  NodeJSCache,
   PoolProvider,
   QuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
-  TokenListProvider,
+  CachingTokenListProvider,
   TokenProvider,
-  TokenProviderWithFallback,
+  CachingTokenProviderWithFallback,
   UniswapMulticallProvider,
 } from '@uniswap/smart-order-router';
 import { TokenList } from '@uniswap/token-lists';
@@ -28,6 +31,7 @@ import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
 import { BigNumber, ethers } from 'ethers';
+import NodeCache from 'node-cache';
 import UNSUPPORTED_TOKEN_LIST from '../../config/unsupported.tokenlist.json';
 import { BaseRInj, Injector } from '../handler';
 import { AWSMetricsLogger } from './router-entities/aws-metrics-logger';
@@ -36,23 +40,35 @@ import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { StaticGasPriceProvider } from './router-entities/static-gas-price-provider';
 import { QuoteQueryParams } from './schema/quote-schema';
 
+const SUPPORTED_CHAINS: ChainId[] = [ ChainId.MAINNET, ChainId.RINKEBY ];
+
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
-export interface ContainerInjected {
+export type ContainerDependencies = {
+  provider: ethers.providers.JsonRpcProvider;
   subgraphProvider: ISubgraphProvider;
-  subgraphProviderRinkeby: ISubgraphProvider;
   tokenListProvider: ITokenListProvider;
-  tokenListProviderRinkeby: ITokenListProvider;
+  gasPriceProvider: IGasPriceProvider;
   tokenProviderFromTokenList: ITokenProvider;
-  tokenProviderFromTokenListRinkeby: ITokenProvider;
   blockedTokenListProvider: ITokenListProvider;
-  blockedTokenListProviderRinkeby: ITokenListProvider;
+  poolProvider: IPoolProvider;
+  tokenProvider: ITokenProvider;
+  multicallProvider: UniswapMulticallProvider;
+  quoteProvider: QuoteProvider;
+};
+
+export interface ContainerInjected {
+  dependencies: {
+    [chainId in ChainId]?: ContainerDependencies;
+  } 
 }
 
 export interface RequestInjected extends BaseRInj {
+  chainId: ChainId;
   metric: IMetric;
   poolProvider: IPoolProvider;
   tokenProvider: ITokenProvider;
+  tokenListProvider: ITokenListProvider;
   router: IRouter<any>;
 }
 
@@ -106,70 +122,40 @@ export class QuoteHandlerInjector extends Injector<
     // Today API is restricted such that both tokens must be on the same chain.
     const chainId = tokenInChainId;
     const chainIdEnum = ID_TO_CHAIN_ID(chainId);
-    const chainName = ID_TO_NETWORK_NAME(chainIdEnum);
 
-    const provider = new ethers.providers.JsonRpcProvider(
-      {
-        url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
-        user: process.env.JSON_RPC_USERNAME_RINKEBY,
-        password: process.env.JSON_RPC_PASSWORD_RINKEBY,
-        timeout: 5000,
-      },
-      chainName
-    );
+    const { dependencies } = containerInjected;
 
-    const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000);
-    const poolProvider = new CachingPoolProvider(chainId,
-      new PoolProvider(chainIdEnum, multicall2Provider)
-    );
-
-    let gasStationProvider;
-    if (gasPriceWei) {
-      const gasPriceWeiBN = BigNumber.from(gasPriceWei);
-      gasStationProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
-    } else {
-      gasStationProvider = new CachingGasStationProvider(chainId,
-        new EIP1559GasPriceProvider(provider)
-      );
+    if (!dependencies[chainIdEnum]) {
+      // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
+      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`);
     }
 
     const {
+      provider,
+      poolProvider,
+      multicallProvider,
+      tokenProvider,
+      tokenListProvider,
       subgraphProvider,
-      subgraphProviderRinkeby,
-      tokenProviderFromTokenList,
       blockedTokenListProvider,
-      tokenProviderFromTokenListRinkeby,
-      blockedTokenListProviderRinkeby,
-    } = containerInjected;
+      quoteProvider,
+      gasPriceProvider: gasPriceProviderOnChain
+    } = dependencies[chainIdEnum]!;
 
-    const subgraphProviderFinal = chainIdEnum == ChainId.MAINNET ? subgraphProvider : subgraphProviderRinkeby;
-    const tokenProviderFromTokenListFinal = chainIdEnum == ChainId.MAINNET ? tokenProviderFromTokenList : tokenProviderFromTokenListRinkeby;
-    const blockedTokenListProviderRinkebyFinal = chainIdEnum == ChainId.MAINNET ? blockedTokenListProvider : blockedTokenListProviderRinkeby;
-
-    const tokenProvider = new TokenProviderWithFallback(
-      chainId,
-      tokenProviderFromTokenListFinal,
-      new TokenProvider(chainIdEnum, multicall2Provider)
-    );
+    let gasPriceProvider = gasPriceProviderOnChain;
+    if (gasPriceWei) {
+      const gasPriceWeiBN = BigNumber.from(gasPriceWei);
+      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
+    }
 
     let router;
     switch (algorithm) {
       case 'legacy':
         router = new LegacyRouter({
           chainId,
-          multicall2Provider,
+          multicall2Provider: multicallProvider,
           poolProvider,
-          quoteProvider: new QuoteProvider(
-            chainId,
-            provider,
-            multicall2Provider,
-            undefined,
-            {
-              multicallChunk: 150,
-              gasLimitPerCall: 1_000_000,
-              quoteMinSuccessRate: 0.0,
-            }
-          ),
+          quoteProvider,
           tokenProvider,
         });
         break;
@@ -178,45 +164,27 @@ export class QuoteHandlerInjector extends Injector<
         router = new AlphaRouter({
           chainId,
           provider,
-          subgraphProvider: subgraphProviderFinal,
-          multicall2Provider,
+          subgraphProvider,
+          multicall2Provider: multicallProvider,
           poolProvider,
-          // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
-          // 200*725k < 150m
-          quoteProvider: new QuoteProvider(
-            chainId,
-            provider,
-            multicall2Provider,
-            {
-              retries: 2,
-              minTimeout: 100,
-              maxTimeout: 1000,
-            },
-            {
-              multicallChunk: 210, // 210
-              gasLimitPerCall: 705_000, // 705
-              quoteMinSuccessRate: 0.15,
-            },
-            {
-              gasLimitOverride: 2_000_000,
-              multicallChunk: 70
-            }
-          ),
-          gasPriceProvider: gasStationProvider,
+          quoteProvider,
+          gasPriceProvider,
           gasModelFactory: new HeuristicGasModelFactory(),
-          blockedTokenListProvider: blockedTokenListProviderRinkebyFinal,
+          blockedTokenListProvider,
           tokenProvider,
         });
         break;
     }
 
     return {
+      chainId: chainIdEnum,
       id: quoteId,
       log,
       metric,
       router,
       poolProvider,
       tokenProvider,
+      tokenListProvider,
     };
   }
 
@@ -231,45 +199,95 @@ export class QuoteHandlerInjector extends Injector<
     const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } =
       process.env;
 
-    const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
-      ChainId.MAINNET,
-      TOKEN_LIST_CACHE_BUCKET!,
-      DEFAULT_TOKEN_LIST
-    );
+    const dependenciesByChain: { [chainId in ChainId]?: ContainerDependencies } = {};
 
-    const tokenListProviderRinkeby = await AWSTokenListProvider.fromTokenListS3Bucket(
-      ChainId.RINKEBY,
-      TOKEN_LIST_CACHE_BUCKET!,
-      DEFAULT_TOKEN_LIST
-    );
+    for (const chainId of SUPPORTED_CHAINS) {
+      const chainName = ID_TO_NETWORK_NAME(chainId);
 
-    const blockedTokenListProvider = await TokenListProvider.fromTokenList(
-      ChainId.MAINNET,
-      UNSUPPORTED_TOKEN_LIST as TokenList
-    );
+      const provider = new ethers.providers.JsonRpcProvider(
+        {
+          url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
+          user: chainId == ChainId.MAINNET ? process.env.JSON_RPC_USERNAME! : process.env.JSON_RPC_USERNAME_RINKEBY!,
+          password: chainId == ChainId.MAINNET ? process.env.JSON_RPC_PASSWORD : process.env.JSON_RPC_PASSWORD_RINKEBY,
+          timeout: 5000,
+        },
+        chainName
+      );
+      
+      const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
+        chainId,
+        TOKEN_LIST_CACHE_BUCKET!,
+        DEFAULT_TOKEN_LIST
+      );
+      
+      const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
+      const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
 
-    const blockedTokenListProviderRinkeby = await TokenListProvider.fromTokenList(
-      ChainId.RINKEBY,
-      UNSUPPORTED_TOKEN_LIST as TokenList
-    );
+      const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000);
+      const tokenProvider = new CachingTokenProviderWithFallback(
+        chainId,
+        tokenCache,
+        tokenListProvider,
+        new TokenProvider(chainId, multicall2Provider)
+      );
+
+      // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
+      // 200*725k < 150m
+      const quoteProvider = new QuoteProvider(
+        chainId,
+        provider,
+        multicall2Provider,
+        {
+          retries: 2,
+          minTimeout: 100,
+          maxTimeout: 1000,
+        },
+        {
+          multicallChunk: 210, // 210
+          gasLimitPerCall: 705_000, // 705
+          quoteMinSuccessRate: 0.15,
+        },
+        {
+          gasLimitOverride: 2_000_000,
+          multicallChunk: 70
+        }
+      );
+
+      dependenciesByChain[chainId as ChainId] = {
+        provider,
+        tokenListProvider: await AWSTokenListProvider.fromTokenListS3Bucket(
+          chainId,
+          TOKEN_LIST_CACHE_BUCKET!,
+          DEFAULT_TOKEN_LIST
+        ),
+        blockedTokenListProvider: await CachingTokenListProvider.fromTokenList(
+          chainId,
+          UNSUPPORTED_TOKEN_LIST as TokenList,
+          blockedTokenCache
+        ),
+        multicallProvider: multicall2Provider,
+        poolProvider: new CachingPoolProvider(
+          chainId,
+          new PoolProvider(chainId, multicall2Provider),
+          new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
+        ),
+        tokenProvider,
+        subgraphProvider: new AWSSubgraphProvider(
+          chainId,
+          POOL_CACHE_BUCKET!,
+          POOL_CACHE_KEY!,
+        ),
+        tokenProviderFromTokenList: tokenListProvider,
+        quoteProvider,
+        gasPriceProvider: new CachingGasStationProvider(chainId,
+          new EIP1559GasPriceProvider(provider),
+          new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
+        )
+      }
+    }
 
     return {
-      subgraphProvider: new AWSSubgraphProvider(
-        ChainId.MAINNET,
-        POOL_CACHE_BUCKET!,
-        POOL_CACHE_KEY!
-      ),
-      subgraphProviderRinkeby: new AWSSubgraphProvider(
-        ChainId.RINKEBY,
-        POOL_CACHE_BUCKET!,
-        POOL_CACHE_KEY!
-      ),
-      tokenListProvider,
-      tokenListProviderRinkeby,
-      tokenProviderFromTokenList: tokenListProvider,
-      tokenProviderFromTokenListRinkeby: tokenListProviderRinkeby,
-      blockedTokenListProvider,
-      blockedTokenListProviderRinkeby
+      dependencies: dependenciesByChain
     };
   }
 }

@@ -79,18 +79,19 @@ export class QuoteHandler extends APIGLambdaHandler<
         router,
         log,
         id: quoteId,
+        chainId,
         tokenProvider,
+        tokenListProvider,
         poolProvider,
         metric,
       },
-      containerInjected: { tokenListProvider, tokenListProviderRinkeby },
     } = params;
 
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
 
     const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
-      tokenInChainId == 1 ? tokenListProvider : tokenListProviderRinkeby,
+      tokenListProvider,
       tokenProvider,
       tokenInAddress,
       tokenOutAddress,
@@ -119,6 +120,14 @@ export class QuoteHandler extends APIGLambdaHandler<
         errorCode: 'TOKEN_OUT_INVALID',
         detail: `Could not find token with address "${tokenOutAddress}"`,
       };
+    }
+
+    if (tokenInChainId != tokenOutChainId) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_CHAINS_DIFFERENT',
+        detail: `Cannot request quotes for tokens on different chains`,
+      }
     }
 
     if (currencyIn.equals(currencyOut)) {
@@ -164,7 +173,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           },
           `Exact In Swap: Give ${amount.toExact()} ${
             amount.currency.symbol
-          }, Want: ${currencyOut.symbol}`
+          }, Want: ${currencyOut.symbol}. Chain: ${chainId}`
         );
 
         swapRoute = await router.routeExactIn(
@@ -189,7 +198,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           },
           `Exact Out Swap: Want ${amount.toExact()} ${
             amount.currency.symbol
-          } Give: ${currencyIn.symbol}`
+          } Give: ${currencyIn.symbol}. Chain: ${chainId}`
         );
 
         swapRoute = await router.routeExactOut(
@@ -205,7 +214,13 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
-      log.info({ type, tokenIn: currencyIn, tokenOut: currencyOut, amount: amount.quotient.toString() }, `No route found. 404`);
+      log.info({ 
+        type, 
+        tokenIn: currencyIn, 
+        tokenOut: currencyOut, 
+        amount: amount.quotient.toString() 
+      }, `No route found. 404`);
+      
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
@@ -316,10 +331,10 @@ export class QuoteHandler extends APIGLambdaHandler<
   }> {
     const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
 
-    const tryTokenList = (
+    const tryTokenList = async (
       tokenRaw: string,
       chainId: ChainId
-    ): Currency | undefined => {
+    ): Promise<Currency | undefined> => {
       if (
         tokenRaw == 'ETH' ||
         tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
@@ -328,19 +343,19 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
 
       if (isAddress(tokenRaw)) {
-        const token = tokenListProvider.getTokenByAddress(tokenRaw);
+        const token = await tokenListProvider.getTokenByAddress(tokenRaw);
 
         return token;
       }
 
-      return tokenListProvider.getTokenBySymbol(tokenRaw);
+      return await tokenListProvider.getTokenBySymbol(tokenRaw);
     };
 
-    let currencyIn: Currency | undefined = tryTokenList(
+    let currencyIn: Currency | undefined = await tryTokenList(
       tokenInRaw,
       tokenInChainId
     );
-    let currencyOut: Currency | undefined = tryTokenList(
+    let currencyOut: Currency | undefined = await tryTokenList(
       tokenOutRaw,
       tokenOutChainId
     );

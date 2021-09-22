@@ -39,6 +39,11 @@ export type ErrorResponse = {
   detail?: string;
 };
 
+export class UnsupportedChainError extends Error {
+  constructor(public chainId: number) {super()};
+  public name = 'UnsupportedChainError';
+};
+
 export abstract class Injector<
   CInj,
   RInj extends BaseRInj,
