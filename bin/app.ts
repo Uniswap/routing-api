@@ -41,6 +41,11 @@ export class RoutingAPIStage extends Stage {
       provisionedConcurrency: number;
       ethGasStationInfoUrl: string;
       chatbotSNSArn?: string;
+      stage: string;
+      route53Arn?: string;
+      pinata_key: string;
+      pinata_secret: string;
+      hosted_zone: string;
     }
   ) {
     super(scope, id, props);
@@ -53,7 +58,12 @@ export class RoutingAPIStage extends Stage {
       nodeRPCPasswordRinkeby,
       provisionedConcurrency,
       ethGasStationInfoUrl,
-      chatbotSNSArn
+      chatbotSNSArn,
+      stage, 
+      route53Arn,
+      pinata_key,
+      pinata_secret,
+      hosted_zone,
     } = props;
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -66,6 +76,11 @@ export class RoutingAPIStage extends Stage {
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
+      stage,
+      route53Arn,
+      pinata_key,
+      pinata_secret,
+      hosted_zone,
     });
     this.url = url;
   }
@@ -131,6 +146,8 @@ export class RoutingAPIPipeline extends Stack {
       }
     );
 
+    // grab secrets for route53, pinata keys, hosted zone
+
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
@@ -150,7 +167,12 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
-      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
+      stage: 'beta',
+      route53Arn: 'from secrets manager',
+      pinata_key: 'from secrets manager',//from secrets manager,
+      pinata_secret: 'from secrets manager',// from secrets manager,
+      hosted_zone:  'from secrets manager,'// from secrets manager, just trying to get it to compile locally
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -181,7 +203,12 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
-      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
+      stage: 'prod',
+      route53Arn: 'from secrets manager',
+      pinata_key: 'from secrets manager',//from secrets manager,
+      pinata_secret: 'from secrets manager',// from secrets manager,
+      hosted_zone:  'from secrets manager,'// from secrets manager, just trying to get it to compile locally
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
@@ -249,6 +276,11 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
+  stage: process.env.STAGE!,
+  route53Arn: process.env.ROLE_ARN,
+  pinata_key: process.env.PINATA_API_KEY!,
+  pinata_secret: process.env.PINATA_API_SECRET!,
+  hosted_zone: process.env.HOSTED_ZONE!
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
