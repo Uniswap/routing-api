@@ -1,7 +1,7 @@
 import Joi from '@hapi/joi';
 import { TickMath } from '@uniswap/v3-sdk';
 
-export const QuoteQueryParamsJoi = Joi.object({
+export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0Address: Joi.string().alphanum().max(42).required(),
   token0ChainId: Joi.number().valid(1, 4).required(),
   token1Address: Joi.string().alphanum().max(42).required(),
@@ -20,10 +20,12 @@ export const QuoteQueryParamsJoi = Joi.object({
   .pattern(/^[0-9]+$/)
   .max(30)
   .optional(),
-  minSplits: Joi.number().max(7).optional()
+  minSplits: Joi.number().max(7).optional(),
+  errorTolerance: Joi.number().valid(0, 100).default(1).required(),
+  maxIterations: Joi.number().max(10).default(5).required(),
 }).and('recipient', 'slippageTolerance', 'deadline');
 
-export type QuoteQueryParams = {
+export type QuoteToRatioQueryParams = {
   token0Address: string;
   token0ChainId: number;
   token1Address: string;
@@ -31,10 +33,13 @@ export type QuoteQueryParams = {
   token0Balance: number;
   token1Balance: number;
   tickLower: number;
-  tickerUpper: number;
+  tickUpper: number;
+  feeAmount: number;
   recipient?: string;
   slippageTolerance?: string;
   deadline?: string;
   gasPriceWei?: string;
   minSplits?: number;
+  errorTolerance: number;
+  maxIterations: number;
 };

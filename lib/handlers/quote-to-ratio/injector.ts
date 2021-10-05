@@ -11,11 +11,10 @@ import {
   IGasPriceProvider,
   IMetric,
   IPoolProvider,
-  IRouter,
+  ISwapToRatio,
   ISubgraphProvider,
   ITokenListProvider,
   ITokenProvider,
-  LegacyRouter,
   NodeJSCache,
   PoolProvider,
   QuoteProvider,
@@ -38,7 +37,7 @@ import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger';
 import { AWSSubgraphProvider } from '../router-entities/aws-subgraph-provider';
 import { AWSTokenListProvider } from '../router-entities/aws-token-list-provider';
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider';
-import { QuoteQueryParams } from './schema/quote-schema';
+import { QuoteToRatioQueryParams } from './schema/quote-to-ratio-schema';
 
 const SUPPORTED_CHAINS: ChainId[] = [ ChainId.MAINNET, ChainId.RINKEBY ];
 
@@ -69,19 +68,19 @@ export interface RequestInjected extends BaseRInj {
   poolProvider: IPoolProvider;
   tokenProvider: ITokenProvider;
   tokenListProvider: ITokenListProvider;
-  router: IRouter<any>;
+  router: ISwapToRatio<any, any>;
 }
 
 export class QuoteHandlerInjector extends Injector<
   ContainerInjected,
   RequestInjected,
   void,
-  QuoteQueryParams
+  QuoteToRatioQueryParams
 > {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,
-    requestQueryParams: QuoteQueryParams,
+    requestQueryParams: QuoteToRatioQueryParams,
     _event: APIGatewayProxyEvent,
     context: Context,
     log: Logger,
@@ -92,25 +91,28 @@ export class QuoteHandlerInjector extends Injector<
     const logLevel = bunyan.INFO;
 
     const {
-      tokenInAddress,
-      tokenInChainId,
-      tokenOutAddress,
-      amount,
-      type,
-      algorithm,
+      token0Address,
+      token0ChainId,
+      token1Address,
+      token1ChainId,
+      token0Balance,
+      token1Balance,
+      tickLower,
+      tickUpper,
       gasPriceWei
     } = requestQueryParams;
 
     log = log.child({
       serializers: bunyan.stdSerializers,
       level: logLevel,
-      requestId,
-      quoteId,
-      tokenInAddress,
-      tokenOutAddress,
-      amount,
-      type,
-      algorithm,
+      token0Address,
+      token0ChainId,
+      token1Address,
+      token1ChainId,
+      token0Balance,
+      token1Balance,
+      tickLower,
+      tickUpper,
     });
     setGlobalLogger(log);
 
@@ -120,7 +122,7 @@ export class QuoteHandlerInjector extends Injector<
     setGlobalMetric(metric);
 
     // Today API is restricted such that both tokens must be on the same chain.
-    const chainId = tokenInChainId;
+    const chainId = token0ChainId;
     const chainIdEnum = ID_TO_CHAIN_ID(chainId);
 
     const { dependencies } = containerInjected;
@@ -148,33 +150,18 @@ export class QuoteHandlerInjector extends Injector<
       gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
     }
 
-    let router;
-    switch (algorithm) {
-      case 'legacy':
-        router = new LegacyRouter({
-          chainId,
-          multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
-          tokenProvider,
-        });
-        break;
-      case 'alpha':
-      default:
-        router = new AlphaRouter({
-          chainId,
-          provider,
-          subgraphProvider,
-          multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
-          gasPriceProvider,
-          gasModelFactory: new HeuristicGasModelFactory(),
-          blockedTokenListProvider,
-          tokenProvider,
-        });
-        break;
-    }
+    let router = new AlphaRouter({
+      chainId,
+      provider,
+      subgraphProvider,
+      multicall2Provider: multicallProvider,
+      poolProvider,
+      quoteProvider,
+      gasPriceProvider,
+      gasModelFactory: new HeuristicGasModelFactory(),
+      blockedTokenListProvider,
+      tokenProvider,
+    });
 
     return {
       chainId: chainIdEnum,

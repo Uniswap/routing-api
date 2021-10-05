@@ -7,7 +7,6 @@ import {
   TradeType,
 } from '@uniswap/sdk-core';
 import {
-  AlphaRouterConfig,
   ChainId,
   ITokenListProvider,
   ITokenProvider,
@@ -34,20 +33,7 @@ import {
   QuoteResponse,
   QuoteResponseSchemaJoi,
 } from '../schema'
-
-const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
-  topN: 2,
-  topNDirectSwaps: 2,
-  topNTokenInOut: 3,
-  topNSecondHop: 0,
-  topNWithEachBaseToken: 3,
-  topNWithBaseToken: 6,
-  topNWithBaseTokenInSet: false,
-  maxSwapsPerPath: 3,
-  minSplits: 1,
-  maxSplits: 7,
-  distributionPercent: 5,
-};
+import { DEFAULT_ROUTING_CONFIG } from '../shared'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -164,7 +150,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(
           currencyIn,
-          JSBI.BigInt(amountRaw)
+          JSBI.BigInt(amountRaw).toString()
         );
 
         log.info(
@@ -189,7 +175,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(
           currencyOut,
-          JSBI.BigInt(amountRaw)
+          JSBI.BigInt(amountRaw).toString()
         );
 
         log.info(
