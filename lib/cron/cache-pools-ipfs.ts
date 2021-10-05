@@ -8,12 +8,12 @@ import fs from 'fs';
 if (process.env.STAGE == 'beta') {
   const PARENT = '/tmp/temp/';
   // future: add v2 directory
-  const DIRECTORY = '/tmp/temp/v3/pools/';
+  const DIRECTORY = '/tmp/temp/v1/pools/v3/';
 
   // add more chains here
   const chains: { fileName: string; chain: ChainId }[] = [
-    { fileName: 'mainnet.txt', chain: ChainId.MAINNET },
-    { fileName: 'rinkeby.txt', chain: ChainId.RINKEBY },
+    { fileName: 'mainnet.json', chain: ChainId.MAINNET },
+    { fileName: 'rinkeby.json', chain: ChainId.RINKEBY },
   ];
 
   const pinata = pinataSDK(
