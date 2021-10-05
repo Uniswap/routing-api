@@ -30,10 +30,9 @@ export class RoutingAPIStack extends cdk.Stack {
       chatbotSNSArn?: string;
       stage: string;
       route53Arn?: string;
-      pinata_key: string;
-      pinata_secret: string;
-      hosted_zone: string;
-      
+      pinata_key?: string;
+      pinata_secret?: string;
+      hosted_zone?: string;
     }
   ) {
     super(parent, name, props);
@@ -54,12 +53,16 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key,
       pinata_secret,
       hosted_zone,
-
     } = props;
 
-    const { poolCacheBucket, poolCacheKey, tokenListCacheBucket} =
-    new RoutingCachingStack(this, 'RoutingCachingStack', {stage, route53Arn, pinata_key, pinata_secret, hosted_zone});
-
+    const { poolCacheBucket, poolCacheKey, tokenListCacheBucket } =
+      new RoutingCachingStack(this, 'RoutingCachingStack', {
+        stage,
+        route53Arn,
+        pinata_key,
+        pinata_secret,
+        hosted_zone,
+      });
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
       this,
@@ -76,7 +79,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,
-        chatbotSNSArn
+        chatbotSNSArn,
       }
     );
 
