@@ -6,7 +6,6 @@ import { default as bunyan, default as Logger } from 'bunyan';
 import fs from 'fs';
 
 if (process.env.STAGE == 'beta') {
-  
   const PARENT = '/tmp/temp/';
   // future: add v2 directory
   const DIRECTORY = '/tmp/temp/v3/pools/';
@@ -65,7 +64,6 @@ if (process.env.STAGE == 'beta') {
       const { fileName, chain } = chains[i];
       const subgraphProvider = new SubgraphProvider(chain, 3, 15000);
       const pools = await subgraphProvider.getPools();
-      // TODO : filter pools
       const poolString = JSON.stringify(pools);
 
       // create directory and file

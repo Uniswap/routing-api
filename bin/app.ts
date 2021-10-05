@@ -169,8 +169,6 @@ export class RoutingAPIPipeline extends Stack {
         'arn:aws:secretsmanager:us-east-2:644039819003:secret:hosted-zone-JmPDNV',
     });
 
-    // grab secrets for route53, pinata keys, hosted zone
-
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },

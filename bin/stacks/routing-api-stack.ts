@@ -57,6 +57,7 @@ export class RoutingAPIStack extends cdk.Stack {
 
     const { poolCacheBucket, poolCacheKey, tokenListCacheBucket } =
       new RoutingCachingStack(this, 'RoutingCachingStack', {
+        chatbotSNSArn,
         stage,
         route53Arn,
         pinata_key,
