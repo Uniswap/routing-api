@@ -26,17 +26,19 @@ import {
 } from '../handler';
 import { ContainerInjected, RequestInjected } from './injector';
 import {
-  PoolInRoute,
   QuoteQueryParams,
   QuoteQueryParamsJoi,
+} from './schema/quote-schema';
+import {
+  PoolInRoute,
   QuoteResponse,
   QuoteResponseSchemaJoi,
-} from './schema/quote-schema';
+} from '../schema'
 
 const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 2,
   topNDirectSwaps: 2,
-  topNTokenInOut: 3,  
+  topNTokenInOut: 3,
   topNSecondHop: 0,
   topNWithEachBaseToken: 3,
   topNWithBaseToken: 6,
@@ -214,13 +216,13 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
-      log.info({ 
-        type, 
-        tokenIn: currencyIn, 
-        tokenOut: currencyOut, 
-        amount: amount.quotient.toString() 
+      log.info({
+        type,
+        tokenIn: currencyIn,
+        tokenOut: currencyOut,
+        amount: amount.quotient.toString()
       }, `No route found. 404`);
-      
+
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',

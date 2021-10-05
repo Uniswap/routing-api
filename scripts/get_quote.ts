@@ -5,8 +5,10 @@ import axios, { AxiosResponse } from 'axios';
 import dotenv from 'dotenv';
 import {
   QuoteQueryParams,
-  QuoteResponse,
 } from '../lib/handlers/quote/schema/quote-schema';
+import {
+  QuoteResponse,
+} from '../lib/handlers/schema'
 dotenv.config();
 
 (async function () {

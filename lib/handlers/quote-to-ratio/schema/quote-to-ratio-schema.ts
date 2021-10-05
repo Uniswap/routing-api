@@ -1,0 +1,40 @@
+import Joi from '@hapi/joi';
+import { TickMath } from '@uniswap/v3-sdk';
+
+export const QuoteQueryParamsJoi = Joi.object({
+  token0Address: Joi.string().alphanum().max(42).required(),
+  token0ChainId: Joi.number().valid(1, 4).required(),
+  token1Address: Joi.string().alphanum().max(42).required(),
+  token1ChainId: Joi.number().valid(1, 4).required(),
+  token0Balance: Joi.number().required(),
+  token1Balance: Joi.number().required(),
+  tickLower: Joi.number().valid(TickMath.MIN_TICK, TickMath.MAX_TICK).required(),
+  tickUpper: Joi.number().valid(TickMath.MIN_TICK, TickMath.MAX_TICK).required(),
+  feeAmount: Joi.number().valid(0, 10_000).required(),
+  recipient: Joi.string()
+    .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
+    .optional(),
+  slippageTolerance: Joi.number().min(0).max(20).precision(2).optional(),
+  deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
+  gasPriceWei: Joi.string()
+  .pattern(/^[0-9]+$/)
+  .max(30)
+  .optional(),
+  minSplits: Joi.number().max(7).optional()
+}).and('recipient', 'slippageTolerance', 'deadline');
+
+export type QuoteQueryParams = {
+  token0Address: string;
+  token0ChainId: number;
+  token1Address: string;
+  token1ChainId: number;
+  token0Balance: number;
+  token1Balance: number;
+  tickLower: number;
+  tickerUpper: number;
+  recipient?: string;
+  slippageTolerance?: string;
+  deadline?: string;
+  gasPriceWei?: string;
+  minSplits?: number;
+};
