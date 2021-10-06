@@ -33,6 +33,7 @@ const handler: ScheduledHandler = async (
 
   if (process.env.STAGE != STAGE.BETA) {
     log.info('Must run this in the beta environment');
+    return;
   }
 
   const sts = new STS();
@@ -91,8 +92,8 @@ const handler: ScheduledHandler = async (
       `Successful pinning. IPFS hash: ${hash} and url : ${url}`
     );
   } catch (err) {
-    log.error({err}, "Error pinning")
-    throw err
+    log.error({ err }, 'Error pinning');
+    throw err;
   }
 
   // link resulting hash to DNS
