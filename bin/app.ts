@@ -1,6 +1,7 @@
-import { BuildEnvironmentVariableType } from '@aws-cdk/aws-codebuild';
 import * as chatbot from '@aws-cdk/aws-chatbot';
+import { BuildEnvironmentVariableType } from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
+import { PipelineNotificationEvents } from '@aws-cdk/aws-codepipeline';
 import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import * as sm from '@aws-cdk/aws-secretsmanager';
 import * as cdk from '@aws-cdk/core';
@@ -22,8 +23,13 @@ import {
 import dotenv from 'dotenv';
 import 'source-map-support/register';
 import { RoutingAPIStack } from './stacks/routing-api-stack';
-import { PipelineNotificationEvents } from '@aws-cdk/aws-codepipeline';
 dotenv.config();
+
+export enum STAGE {
+  BETA = 'beta',
+  PROD = 'prod',
+  LOCAL = 'local',
+}
 
 export class RoutingAPIStage extends Stage {
   public readonly url: CfnOutput;
@@ -41,6 +47,11 @@ export class RoutingAPIStage extends Stage {
       provisionedConcurrency: number;
       ethGasStationInfoUrl: string;
       chatbotSNSArn?: string;
+      stage: string;
+      route53Arn?: string;
+      pinata_key?: string;
+      pinata_secret?: string;
+      hosted_zone?: string;
     }
   ) {
     super(scope, id, props);
@@ -53,7 +64,12 @@ export class RoutingAPIStage extends Stage {
       nodeRPCPasswordRinkeby,
       provisionedConcurrency,
       ethGasStationInfoUrl,
-      chatbotSNSArn
+      chatbotSNSArn,
+      stage,
+      route53Arn,
+      pinata_key,
+      pinata_secret,
+      hosted_zone,
     } = props;
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -66,6 +82,11 @@ export class RoutingAPIStage extends Stage {
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
+      stage,
+      route53Arn,
+      pinata_key,
+      pinata_secret,
+      hosted_zone,
     });
     this.url = url;
   }
@@ -117,10 +138,14 @@ export class RoutingAPIPipeline extends Stack {
         'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-json-3ifNy7',
     });
 
-    const rpcNodeDetailsRinkeby = sm.Secret.fromSecretAttributes(this, 'RPCNodeUrlRinkeby', {
-      secretCompleteArn:
-        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-rinkeby-json-ZBo7kp',
-    });
+    const rpcNodeDetailsRinkeby = sm.Secret.fromSecretAttributes(
+      this,
+      'RPCNodeUrlRinkeby',
+      {
+        secretCompleteArn:
+          'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-infura-rpc-url-rinkeby-json-ZBo7kp',
+      }
+    );
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(
       this,
@@ -130,6 +155,25 @@ export class RoutingAPIPipeline extends Stack {
           'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
       }
     );
+
+    const pinataApi = sm.Secret.fromSecretAttributes(this, 'PinataAPI', {
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:pinata-api-key-UVLAfM',
+    });
+    const route53Arn = sm.Secret.fromSecretAttributes(this, 'Route53Arn', {
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:Route53Arn-elRmmw',
+    });
+
+    const pinataSecret = sm.Secret.fromSecretAttributes(this, 'PinataSecret', {
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:pinata-secret-svGaPt',
+    });
+
+    const hostedZone = sm.Secret.fromSecretAttributes(this, 'HostedZone', {
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:hosted-zone-JmPDNV',
+    });
 
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
@@ -141,7 +185,9 @@ export class RoutingAPIPipeline extends Stack {
       nodeRPCPassword: rpcNodeDetails
         .secretValueFromJson('password')
         .toString(),
-      nodeRPCRinkeby: rpcNodeDetailsRinkeby.secretValueFromJson('url').toString(),
+      nodeRPCRinkeby: rpcNodeDetailsRinkeby
+        .secretValueFromJson('url')
+        .toString(),
       nodeRPCUsernameRinkeby: rpcNodeDetailsRinkeby
         .secretValueFromJson('username')
         .toString(),
@@ -150,7 +196,12 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
-      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
+      stage: STAGE.BETA,
+      route53Arn: route53Arn.secretValueFromJson('arn').toString(),
+      pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
+      pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
+      hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
     });
 
     const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage);
@@ -172,7 +223,9 @@ export class RoutingAPIPipeline extends Stack {
       nodeRPCPassword: rpcNodeDetails
         .secretValueFromJson('password')
         .toString(),
-      nodeRPCRinkeby: rpcNodeDetailsRinkeby.secretValueFromJson('url').toString(),
+      nodeRPCRinkeby: rpcNodeDetailsRinkeby
+        .secretValueFromJson('url')
+        .toString(),
       nodeRPCUsernameRinkeby: rpcNodeDetailsRinkeby
         .secretValueFromJson('username')
         .toString(),
@@ -181,7 +234,12 @@ export class RoutingAPIPipeline extends Stack {
         .toString(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
-      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic'
+      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
+      stage: STAGE.PROD,
+      route53Arn: route53Arn.secretValueFromJson('arn').toString(),
+      pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
+      pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
+      hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
     });
 
     const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage);
@@ -193,20 +251,23 @@ export class RoutingAPIPipeline extends Stack {
       prodUsEast2AppStage
     );
 
-    const slackChannel = chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(this, 'SlackChannel', 'arn:aws:chatbot::644039819003:chat-configuration/slack-channel/eng-ops-slack-chatbot')
+    const slackChannel =
+      chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(
+        this,
+        'SlackChannel',
+        'arn:aws:chatbot::644039819003:chat-configuration/slack-channel/eng-ops-slack-chatbot'
+      );
 
     pipeline.codePipeline.notifyOn('NotifySlack', slackChannel, {
-      events: [
-        PipelineNotificationEvents.PIPELINE_EXECUTION_FAILED,
-      ]
-    })
+      events: [PipelineNotificationEvents.PIPELINE_EXECUTION_FAILED],
+    });
   }
 
   private addIntegTests(
     pipeline: CdkPipeline,
     sourceArtifact: codepipeline.Artifact,
     routingAPIStage: RoutingAPIStage,
-    applicationStage: CdkStage,
+    applicationStage: CdkStage
   ) {
     const testAction = new ShellScriptAction({
       actionName: `IntegTests-${routingAPIStage.stageName}`,
@@ -249,6 +310,11 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
+  stage: STAGE.LOCAL,
+  route53Arn: process.env.ROLE_ARN,
+  pinata_key: process.env.PINATA_API_KEY!,
+  pinata_secret: process.env.PINATA_API_SECRET!,
+  hosted_zone: process.env.HOSTED_ZONE!,
 });
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
