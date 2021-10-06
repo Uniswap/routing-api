@@ -10,10 +10,8 @@ import * as aws_s3 from '@aws-cdk/aws-s3';
 import * as aws_sns from '@aws-cdk/aws-sns';
 import * as cdk from '@aws-cdk/core';
 import { Construct, Duration } from '@aws-cdk/core';
-import dotenv from 'dotenv';
 import * as path from 'path';
 import { STAGE } from '../app';
-dotenv.config();
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string;
