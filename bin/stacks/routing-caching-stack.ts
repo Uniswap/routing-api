@@ -12,6 +12,7 @@ import * as cdk from '@aws-cdk/core';
 import { Construct, Duration } from '@aws-cdk/core';
 import dotenv from 'dotenv';
 import * as path from 'path';
+import { STAGE } from '../app';
 dotenv.config();
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
@@ -92,7 +93,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
       targets: [new aws_events_targets.LambdaFunction(poolCachingLambda)],
     });
 
-    if (stage == 'beta') {
+    if (stage == STAGE.BETA) {
       const ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(
         this,
         'IpfsPoolCacheLambda',

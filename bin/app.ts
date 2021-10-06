@@ -25,6 +25,12 @@ import 'source-map-support/register';
 import { RoutingAPIStack } from './stacks/routing-api-stack';
 dotenv.config();
 
+export enum STAGE {
+  BETA = 'beta',
+  PROD = 'prod',
+  LOCAL = 'local',
+}
+
 export class RoutingAPIStage extends Stage {
   public readonly url: CfnOutput;
 
@@ -191,7 +197,7 @@ export class RoutingAPIPipeline extends Stack {
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
-      stage: 'beta',
+      stage: STAGE.BETA,
       route53Arn: route53Arn.secretValueFromJson('arn').toString(),
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
@@ -229,7 +235,7 @@ export class RoutingAPIPipeline extends Stack {
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
-      stage: 'prod',
+      stage: STAGE.PROD,
       route53Arn: route53Arn.secretValueFromJson('arn').toString(),
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
@@ -304,7 +310,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
-  stage: 'local',
+  stage: STAGE.LOCAL,
   route53Arn: process.env.ROLE_ARN,
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
