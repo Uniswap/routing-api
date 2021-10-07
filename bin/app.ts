@@ -22,14 +22,10 @@ import {
 } from '@aws-cdk/pipelines';
 import dotenv from 'dotenv';
 import 'source-map-support/register';
+import { STAGE } from '../lib/util/stage';
 import { RoutingAPIStack } from './stacks/routing-api-stack';
 dotenv.config();
 
-export enum STAGE {
-  BETA = 'beta',
-  PROD = 'prod',
-  LOCAL = 'local',
-}
 
 export class RoutingAPIStage extends Stage {
   public readonly url: CfnOutput;
