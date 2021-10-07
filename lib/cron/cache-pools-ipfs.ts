@@ -4,7 +4,7 @@ import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda';
 import { Route53, STS } from 'aws-sdk';
 import { default as bunyan, default as Logger } from 'bunyan';
 import fs from 'fs';
-import { STAGE } from '../../bin/app';
+import { STAGE } from '../util/stage';
 
 const PARENT = '/tmp/temp/';
 // future: add v2 directory

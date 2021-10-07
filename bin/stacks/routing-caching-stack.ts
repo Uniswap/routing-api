@@ -11,7 +11,7 @@ import * as aws_sns from '@aws-cdk/aws-sns';
 import * as cdk from '@aws-cdk/core';
 import { Construct, Duration } from '@aws-cdk/core';
 import * as path from 'path';
-import { STAGE } from '../app';
+import { STAGE } from '../../lib/util/stage';
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string;
