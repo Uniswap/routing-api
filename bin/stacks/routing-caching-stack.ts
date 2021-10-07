@@ -122,6 +122,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
             ROLE_ARN: route53Arn!,
             HOSTED_ZONE: hosted_zone!,
             STAGE: stage,
+            REDEPLOY: '1',
           },
         }
       );
