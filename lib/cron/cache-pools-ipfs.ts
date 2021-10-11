@@ -56,10 +56,12 @@ const handler: ScheduledHandler = async (
   try {
     const accessKeyId = data?.Credentials?.AccessKeyId;
     const secretAccess = data?.Credentials?.SecretAccessKey;
+    const sessionKey = data?.Credentials?.SessionToken;
     route53 = new Route53({
       credentials: {
         accessKeyId: accessKeyId!,
         secretAccessKey: secretAccess!,
+        sessionToken: sessionKey,
       },
     });
   } catch (err: any) {
