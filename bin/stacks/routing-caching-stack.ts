@@ -43,7 +43,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
           'service-role/AWSLambdaBasicExecutionRole'
         ),
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess')
       ],
     });
 
@@ -52,6 +51,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         new PolicyStatement({
           resources: [route53Arn!],
           actions: ['sts:AssumeRole'],
+          sid: "1",
         })
       );
     }
