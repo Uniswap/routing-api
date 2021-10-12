@@ -105,7 +105,7 @@ const handler: ScheduledHandler = async (
         {
           Action: 'UPSERT',
           ResourceRecordSet: {
-            Name: 'beta.api.uniswap.com',
+            Name: 'beta.api.uniswap.org',
             ResourceRecords: [
               {
                 Value: `\"dnslink=/ipfs/${hash}\"`,
