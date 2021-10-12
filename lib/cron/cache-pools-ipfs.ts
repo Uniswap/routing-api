@@ -108,7 +108,7 @@ const handler: ScheduledHandler = async (
             Name: 'beta.api.uniswap.com',
             ResourceRecords: [
               {
-                Value: `dnslink=/ipfs/${hash}`,
+                Value: `\"dnslink=/ipfs/${hash}\"`,
               },
             ],
             TTL: 60,
