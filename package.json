@@ -91,6 +91,7 @@
     "graphql-request": "^3.4.0",
     "http-errors": "^1.7.3",
     "http-json-errors": "^1.2.10",
+    "jsbi": "^3.2.4",
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "punycode": "^2.1.1",

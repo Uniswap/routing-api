@@ -150,7 +150,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(
           currencyIn,
-          JSBI.BigInt(amountRaw).toString()
+          JSBI.BigInt(amountRaw)
         );
 
         log.info(
@@ -175,7 +175,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(
           currencyOut,
-          JSBI.BigInt(amountRaw).toString()
+          JSBI.BigInt(amountRaw)
         );
 
         log.info(
