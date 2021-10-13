@@ -70,6 +70,7 @@
     "@middy/http-urlencode-path-parser": "^2.4.1",
     "@middy/input-output-logger": "^2.4.1",
     "@middy/validator": "^2.4.1",
+    "@pinata/sdk": "^1.1.23",
     "@typechain/ethers-v5": "^7.0.1",
     "@types/async-retry": "^1.4.2",
     "@types/qs": "^6.9.7",
