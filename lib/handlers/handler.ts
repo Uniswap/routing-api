@@ -282,6 +282,10 @@ export abstract class APIGLambdaHandler<
   > {
     let bodyRaw: any;
 
+    log.info('event information', {
+      event
+    })
+
     if (event.body) {
       try {
         bodyRaw = JSON.parse(event.body);
@@ -302,6 +306,11 @@ export abstract class APIGLambdaHandler<
     let queryParamsRaw: APIGatewayProxyEventQueryStringParameters | null =
       event.queryStringParameters;
     const queryParamsSchema = this.requestQueryParamsSchema();
+
+    log.info('queryParamsSchema', {
+      queryParamsSchema
+    })
+
 
     let queryParams: ReqQueryParams | undefined;
     if (queryParamsRaw && queryParamsSchema) {
