@@ -139,7 +139,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         layers: [
           aws_lambda.LayerVersion.fromLayerVersionArn(
             this,
-            'InsightsLayer',
+            'InsightsLayerSwapAndAdd',
             `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
           ),
         ],

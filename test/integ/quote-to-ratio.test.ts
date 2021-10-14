@@ -14,7 +14,7 @@ import{
 
 const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()));
 
-const API = `${process.env.UNISWAP_ROUTING_API!}quote`;
+const API = `${process.env.UNISWAP_ROUTING_API!}quoteToRatio`;
 
 describe('quote-to-ratio', () => {
 	test('erc20 -> erc20', async () => {
@@ -27,12 +27,29 @@ describe('quote-to-ratio', () => {
 			token1Balance: 1000,
 			tickLower: 0,
 			tickUpper: 60,
-			feeAmount: 3000,
+			feeAmount: 500,
 			recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
 			slippageTolerance: '5',
 			deadline: '360',
       errorTolerance: 1,
       maxIterations: 6,
 		}
+
+    const queryParams = qs.stringify(quoteToRatioRec)
+
+    const response: AxiosResponse<QuoteResponse> =
+      await axios.get<QuoteResponse>(`${API}?${queryParams}`);
+    const {
+      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+      status,
+    } = response;
+
+    expect(status).toBe(200);
+    expect(parseFloat(quoteDecimals)).toBeGreaterThan(90);
+    expect(parseFloat(quoteDecimals)).toBeLessThan(110);
+
+    expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(
+      parseFloat(quoteDecimals)
+    );
 	})
 })
