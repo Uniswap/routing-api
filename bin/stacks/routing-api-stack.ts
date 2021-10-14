@@ -195,6 +195,15 @@ export class RoutingAPIStack extends cdk.Stack {
     });
     quote.addMethod('GET', lambdaIntegration);
 
+    const quoteToRatio = api.root.addResource('quoteToRatio', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
+        allowMethods: aws_apigateway.Cors.ALL_METHODS,
+      },
+    });
+    quoteToRatio.addMethod('GET', lambdaIntegration);
+
+
     const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
       metric: api.metricServerError({
         period: Duration.minutes(5),

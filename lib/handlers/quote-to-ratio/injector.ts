@@ -71,7 +71,7 @@ export interface RequestInjected extends BaseRInj {
   router: ISwapToRatio<any, any>;
 }
 
-export class QuoteHandlerInjector extends Injector<
+export class QuoteToRatioHandlerInjector extends Injector<
   ContainerInjected,
   RequestInjected,
   void,
