@@ -82,8 +82,8 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     const token1 = await tokenStringToCurrency(
       tokenListProvider,
       tokenProvider,
-      token0Address,
-      token0ChainId,
+      token1Address,
+      token1ChainId,
       log
     );
 

@@ -6,11 +6,11 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0ChainId: Joi.number().valid(1, 4).required(),
   token1Address: Joi.string().alphanum().max(42).required(),
   token1ChainId: Joi.number().valid(1, 4).required(),
-  token0Balance: Joi.number().required(),
-  token1Balance: Joi.number().required(),
-  tickLower: Joi.number().valid(TickMath.MIN_TICK, TickMath.MAX_TICK).required(),
-  tickUpper: Joi.number().valid(TickMath.MIN_TICK, TickMath.MAX_TICK).required(),
-  feeAmount: Joi.number().valid(0, 10_000).required(),
+  token0Balance: Joi.number().min(0).required(),
+  token1Balance: Joi.number().min(0).required(),
+  tickLower: Joi.number().min(TickMath.MIN_TICK).max(TickMath.MAX_TICK).required(),
+  tickUpper: Joi.number().min(TickMath.MIN_TICK).max(TickMath.MAX_TICK).required(),
+  feeAmount: Joi.number().min(0).max(10_000).required(),
   recipient: Joi.string()
     .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
     .optional(),
@@ -21,8 +21,8 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
   .max(30)
   .optional(),
   minSplits: Joi.number().max(7).optional(),
-  errorTolerance: Joi.number().valid(0, 100).default(1).required(),
-  maxIterations: Joi.number().max(10).default(5).required(),
+  errorTolerance: Joi.number().min(0).max(100).default(1).required(),
+  maxIterations: Joi.number().min(1).max(10).default(5).required(),
 }).and('recipient', 'slippageTolerance', 'deadline');
 
 export type QuoteToRatioQueryParams = {
