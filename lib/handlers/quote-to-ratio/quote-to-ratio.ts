@@ -13,12 +13,14 @@ import {
   HandleRequestParams,
   Response,
 } from '../handler';
-import { PoolInRoute, QuoteResponse, QuoteResponseSchemaJoi } from '../schema';
+import { PoolInRoute, QuoteResponseSchemaJoi } from '../schema';
 import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared';
 import { ContainerInjected, RequestInjected } from './injector';
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
+  QuoteToRatioResponse,
+  QuotetoRatioResponseSchemaJoi,
 } from './schema/quote-to-ratio-schema';
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
@@ -26,7 +28,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   RequestInjected,
   void,
   QuoteToRatioQueryParams,
-  QuoteResponse
+  QuoteToRatioResponse
 > {
   public async handleRequest(
     params: HandleRequestParams<
@@ -35,7 +37,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       void,
       QuoteToRatioQueryParams
     >
-  ): Promise<Response<QuoteResponse> | ErrorResponse> {
+  ): Promise<Response<QuoteToRatioResponse> | ErrorResponse> {
     const {
       requestQueryParams: {
         token0Address,
@@ -285,12 +287,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute);
     }
 
-    const result: QuoteResponse = {
+    const result: QuoteToRatioResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
-      amount: swapRoute.trade.inputAmount.toString(),
-      amountDecimals: swapRoute.trade.inputAmount.toString(),
+      amount: swapRoute.trade.inputAmount.quotient.toString(),
+      amountDecimals: swapRoute.trade.inputAmount.toFixed(swapRoute.trade.inputAmount.currency.decimals),
       quote: quote.quotient.toString(),
+      tokenIn: swapRoute.trade.inputAmount.currency.wrapped.address,
+      tokenOut: swapRoute.trade.outputAmount.currency.wrapped.address,
       quoteDecimals: quote.toExact(),
       quoteGasAdjusted: quoteGasAdjusted.quotient.toString(),
       quoteGasAdjustedDecimals: quoteGasAdjusted.toExact(),
@@ -319,6 +323,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
-    return QuoteResponseSchemaJoi;
+    return QuotetoRatioResponseSchemaJoi;
   }
 }

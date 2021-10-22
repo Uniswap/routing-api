@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi';
 import { TickMath } from '@uniswap/v3-sdk';
+import { QuoteResponse, QuoteResponseSchemaJoi } from '../../schema'
 
 export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0Address: Joi.string().alphanum().max(42).required(),
@@ -43,3 +44,10 @@ export type QuoteToRatioQueryParams = {
   errorTolerance: number;
   maxIterations: number;
 };
+
+export type QuoteToRatioResponse = QuoteResponse & { tokenIn: string, tokenOut: string}
+
+export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
+  tokenIn: Joi.string().required(),
+  tokenOut: Joi.string().required(),
+})

@@ -14,7 +14,7 @@
     "integ-test": "jest test/integ",
     "cdk": "cdk",
     "fix": "run-s fix:*",
-    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:prettier": "prettier \"./src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix"
   },
   "devDependencies": {

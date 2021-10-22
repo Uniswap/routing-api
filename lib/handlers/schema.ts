@@ -21,7 +21,7 @@ export type PoolInRoute = {
   amountOut?: string;
 };
 
-export const QuoteResponseSchemaJoi = Joi.object({
+export const QuoteResponseSchemaJoi = Joi.object().keys({
   quoteId: Joi.string().required(),
   amount: Joi.string().required(),
   amountDecimals: Joi.string().required(),
