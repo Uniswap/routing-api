@@ -11,7 +11,6 @@ import * as aws_sns from '@aws-cdk/aws-sns';
 import * as cdk from '@aws-cdk/core';
 import { Construct, Duration } from '@aws-cdk/core';
 import * as path from 'path';
-import { STAGE } from '../../lib/util/stage';
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string;
@@ -46,15 +45,13 @@ export class RoutingCachingStack extends cdk.NestedStack {
       ],
     });
 
-    if (stage == STAGE.BETA) {
-      lambdaRole.addToPolicy(
-        new PolicyStatement({
-          resources: [route53Arn!],
-          actions: ['sts:AssumeRole'],
-          sid: "1",
-        })
-      );
-    }
+    lambdaRole.addToPolicy(
+      new PolicyStatement({
+        resources: [route53Arn!],
+        actions: ['sts:AssumeRole'],
+        sid: '1',
+      })
+    );
 
     const region = cdk.Stack.of(this).region;
 
@@ -94,45 +91,43 @@ export class RoutingCachingStack extends cdk.NestedStack {
       targets: [new aws_events_targets.LambdaFunction(poolCachingLambda)],
     });
 
-    if (stage == STAGE.BETA) {
-      const ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(
-        this,
-        'IpfsPoolCacheLambda',
-        {
-          role: lambdaRole,
-          runtime: aws_lambda.Runtime.NODEJS_14_X,
-          entry: path.join(__dirname, '../../lib/cron/cache-pools-ipfs.ts'),
-          handler: 'handler',
-          timeout: Duration.seconds(600),
-          memorySize: 1024,
-          bundling: {
-            minify: true,
-            sourceMap: true,
-          },
-          layers: [
-            aws_lambda.LayerVersion.fromLayerVersionArn(
-              this,
-              'InsightsLayerPoolsIPFS',
-              `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
-            ),
-          ],
-          tracing: aws_lambda.Tracing.ACTIVE,
-          environment: {
-            PINATA_API_KEY: pinata_key!,
-            PINATA_API_SECRET: pinata_secret!,
-            ROLE_ARN: route53Arn!,
-            HOSTED_ZONE: hosted_zone!,
-            STAGE: stage,
-            REDEPLOY: '1',
-          },
-        }
-      );
+    const ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      'IpfsPoolCacheLambda',
+      {
+        role: lambdaRole,
+        runtime: aws_lambda.Runtime.NODEJS_14_X,
+        entry: path.join(__dirname, '../../lib/cron/cache-pools-ipfs.ts'),
+        handler: 'handler',
+        timeout: Duration.seconds(600),
+        memorySize: 1024,
+        bundling: {
+          minify: true,
+          sourceMap: true,
+        },
+        layers: [
+          aws_lambda.LayerVersion.fromLayerVersionArn(
+            this,
+            'InsightsLayerPoolsIPFS',
+            `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
+          ),
+        ],
+        tracing: aws_lambda.Tracing.ACTIVE,
+        environment: {
+          PINATA_API_KEY: pinata_key!,
+          PINATA_API_SECRET: pinata_secret!,
+          ROLE_ARN: route53Arn!,
+          HOSTED_ZONE: hosted_zone!,
+          STAGE: stage,
+          REDEPLOY: '1',
+        },
+      }
+    );
 
-      new aws_events.Rule(this, 'ScheduleIpfsPoolCache', {
-        schedule: aws_events.Schedule.rate(Duration.minutes(2)),
-        targets: [new aws_events_targets.LambdaFunction(ipfsPoolCachingLambda)],
-      });
-    }
+    new aws_events.Rule(this, 'ScheduleIpfsPoolCache', {
+      schedule: aws_events.Schedule.rate(Duration.minutes(2)),
+      targets: [new aws_events_targets.LambdaFunction(ipfsPoolCachingLambda)],
+    });
 
     const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
       this,
