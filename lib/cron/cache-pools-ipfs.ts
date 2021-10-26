@@ -93,14 +93,15 @@ const handler: ScheduledHandler = async (
   }
 
   // link resulting hash to DNS
-
+  const domain =
+    process.env.STAGE == 'beta' ? 'beta.api.uniswap.org' : 'api.uniswap.org';
   var params = {
     ChangeBatch: {
       Changes: [
         {
           Action: 'UPSERT',
           ResourceRecordSet: {
-            Name: `${process.env.STAGE}.api.uniswap.org`,
+            Name: domain,
             ResourceRecords: [
               {
                 Value: `\"dnslink=/ipfs/${hash}\"`,
