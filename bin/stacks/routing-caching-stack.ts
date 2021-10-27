@@ -46,12 +46,12 @@ export class RoutingCachingStack extends cdk.NestedStack {
       ],
     });
 
-    if (stage == STAGE.BETA) {
+    if (stage == STAGE.BETA || stage == STAGE.PROD) {
       lambdaRole.addToPolicy(
         new PolicyStatement({
           resources: [route53Arn!],
           actions: ['sts:AssumeRole'],
-          sid: "1",
+          sid: '1',
         })
       );
     }
@@ -94,7 +94,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
       targets: [new aws_events_targets.LambdaFunction(poolCachingLambda)],
     });
 
-    if (stage == STAGE.BETA) {
+    if (stage == STAGE.BETA || stage == STAGE.PROD) {
       const ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(
         this,
         'IpfsPoolCacheLambda',

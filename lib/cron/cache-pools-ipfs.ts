@@ -4,7 +4,6 @@ import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda';
 import { Route53, STS } from 'aws-sdk';
 import { default as bunyan, default as Logger } from 'bunyan';
 import fs from 'fs';
-import { STAGE } from '../util/stage';
 
 const PARENT = '/tmp/temp/';
 // future: add v2 directory
@@ -30,11 +29,6 @@ const handler: ScheduledHandler = async (
     level: 'info',
     requestId: event.id,
   });
-
-  if (process.env.STAGE != STAGE.BETA) {
-    log.info('Must run this in the beta environment');
-    return;
-  }
 
   const sts = new STS();
   const stsParams = {
@@ -99,13 +93,15 @@ const handler: ScheduledHandler = async (
   }
 
   // link resulting hash to DNS
+  const domain =
+    process.env.STAGE == 'prod' ? 'api.uniswap.org': 'beta.api.uniswap.org';
   var params = {
     ChangeBatch: {
       Changes: [
         {
           Action: 'UPSERT',
           ResourceRecordSet: {
-            Name: 'beta.api.uniswap.org',
+            Name: domain,
             ResourceRecords: [
               {
                 Value: `\"dnslink=/ipfs/${hash}\"`,
