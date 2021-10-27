@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi';
-import { CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
 import { Pool, Position } from '@uniswap/v3-sdk';
 import {
   MetricLoggerUnit,
@@ -21,6 +21,7 @@ import {
   QuoteToRatioQueryParamsJoi,
   QuoteToRatioResponse,
   QuotetoRatioResponseSchemaJoi,
+  ResponseFraction,
 } from './schema/quote-to-ratio-schema';
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
@@ -146,11 +147,11 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
 
     const token0Balance = CurrencyAmount.fromRawAmount(
       token0,
-      JSBI.BigInt(token0BalanceRaw).toString()
+      JSBI.BigInt(token0BalanceRaw)
     );
     const token1Balance = CurrencyAmount.fromRawAmount(
       token1,
-      JSBI.BigInt(token1BalanceRaw).toString()
+      JSBI.BigInt(token1BalanceRaw)
     );
     const poolAccessor = await poolProvider.getPools([[
       token0.wrapped,
@@ -185,6 +186,13 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       `Swap to ratio -  token0: ${token0.symbol}, token0Balance: ${token0Balance}, token1: ${token1.symbol}. token1Balance: ${token1Balance}, Chain: ${chainId}`
     );
 
+    log.info({
+      token0Balance,
+      token1Balance,
+      position,
+      maxIterations,
+    }, 'more  useful logs')
+
     const swapRoute = await router.routeToRatio(
       token0Balance,
       token1Balance,
@@ -217,6 +225,9 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       quote,
       quoteGasAdjusted,
       route,
+      optimalRatio,
+      postSwapTargetPool,
+      trade,
       estimatedGasUsed,
       estimatedGasUsedQuoteToken,
       estimatedGasUsedUSD,
@@ -287,14 +298,66 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute);
     }
 
+    const tokenIn = trade.inputAmount.currency.wrapped
+    const tokenOut = trade.outputAmount.currency.wrapped
+
+    const zeroForOne = tokenIn == token0
+    let token0BalanceUpdated: CurrencyAmount<Currency>;
+    let token1BalanceUpdated: CurrencyAmount<Currency>;
+    let optimalRatioAdjusted: Fraction;
+    if (zeroForOne) {
+      token0BalanceUpdated = token0Balance.subtract(trade.inputAmount)
+      token1BalanceUpdated = token1Balance.add(trade.outputAmount)
+      optimalRatioAdjusted = optimalRatio
+    } else {
+      token0BalanceUpdated = token0Balance.add(trade.outputAmount)
+      token1BalanceUpdated = token1Balance.subtract(trade.inputAmount)
+      optimalRatioAdjusted = optimalRatio.invert()
+    }
+
+    const postSwapTargetPoolObject = {
+      address: poolProvider.getPoolAddress(
+        postSwapTargetPool.token0,
+        postSwapTargetPool.token1,
+        postSwapTargetPool.fee
+      ).poolAddress,
+      tokenIn: {
+        chainId: tokenIn.chainId,
+        decimals: tokenIn.decimals.toString(),
+        address: tokenIn.address,
+        symbol: tokenIn.symbol!,
+      },
+      tokenOut: {
+        chainId: tokenOut.chainId,
+        decimals: tokenOut.decimals.toString(),
+        address: tokenOut.address,
+        symbol: tokenOut.symbol!,
+      },
+      fee: postSwapTargetPool.fee.toString(),
+      liquidity: postSwapTargetPool.liquidity.toString(),
+      sqrtRatioX96: postSwapTargetPool.sqrtRatioX96.toString(),
+      tickCurrent: postSwapTargetPool.tickCurrent.toString(),
+    }
+
     const result: QuoteToRatioResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
-      amount: swapRoute.trade.inputAmount.quotient.toString(),
-      amountDecimals: swapRoute.trade.inputAmount.toFixed(swapRoute.trade.inputAmount.currency.decimals),
+      amount: trade.inputAmount.quotient.toString(),
+      amountDecimals: trade.inputAmount.toFixed(trade.inputAmount.currency.decimals),
       quote: quote.quotient.toString(),
-      tokenIn: swapRoute.trade.inputAmount.currency.wrapped.address,
-      tokenOut: swapRoute.trade.outputAmount.currency.wrapped.address,
+      tokenInAddress: trade.inputAmount.currency.wrapped.address,
+      tokenOutAddress: trade.outputAmount.currency.wrapped.address,
+      token0BalanceUpdated: token0BalanceUpdated.quotient.toString(),
+      token1BalanceUpdated: token1BalanceUpdated.quotient.toString(),
+      optimalRatio: {
+        numerator: optimalRatioAdjusted.numerator.toString(),
+        denominator: optimalRatioAdjusted.denominator.toString(),
+      },
+      newRatio: {
+        numerator: token0BalanceUpdated.quotient.toString(),
+        denominator: token1BalanceUpdated.quotient.toString(),
+      },
+      postSwapTargetPool: postSwapTargetPoolObject,
       quoteDecimals: quote.toExact(),
       quoteGasAdjusted: quoteGasAdjusted.quotient.toString(),
       quoteGasAdjustedDecimals: quoteGasAdjusted.toExact(),

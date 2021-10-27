@@ -1,107 +1,101 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
-import { CachingTokenListProvider, NodeJSCache } from '@uniswap/smart-order-router';
-import { SqrtPriceMath } from '@uniswap/v3-sdk';
-
+import { Fraction } from '@uniswap/sdk-core';
+import {
+  CachingTokenListProvider,
+  NodeJSCache,
+} from '@uniswap/smart-order-router';
 import axios, { AxiosResponse } from 'axios';
-import { BigNumber, ethers } from 'ethers';
-import _ from 'lodash';
+import { parseUnits } from 'ethers/lib/utils';
+import JSBI from 'jsbi';
 import NodeCache from 'node-cache';
 import qs from 'qs';
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioResponse,
+  ResponseFraction,
 } from '../../lib/handlers/quote-to-ratio/schema/quote-to-ratio-schema';
+import bn from 'bignumber.js'
 
-
-const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()));
+const tokenListProvider = new CachingTokenListProvider(
+  1,
+  DEFAULT_TOKEN_LIST,
+  new NodeJSCache(new NodeCache())
+);
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quoteToRatio`;
 
+// Try to parse a user entered amount for a given token
+async function parseAmount(
+  value: number,
+  tokenAddress: string
+): Promise<string> {
+  const decimals = (await tokenListProvider.getTokenByAddress(tokenAddress))!
+    .decimals;
+  return parseUnits(value.toString(), decimals).toString();
+}
+
+function parseFraction(fraction: ResponseFraction): Fraction {
+  return new Fraction(JSBI.BigInt(fraction.numerator), JSBI.BigInt(fraction.denominator))
+}
+
 describe('quote-to-ratio', () => {
-	test('erc20 -> erc20', async () => {
-		const quoteToRatioRec: QuoteToRatioQueryParams = {
-			token0Address: 'USDC',
-			token0ChainId: 1,
-			token1Address: 'USDT',
-			token1ChainId: 1,
-			token0Balance: 500_000_000_000,
-			token1Balance: 1_000_000_000,
-			tickLower: -60,
-			tickUpper: 180,
-			feeAmount: 500,
-			recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-			slippageTolerance: '5',
-			deadline: '360',
+  let token0Address: string;
+  let token1Address: string;
+  let token0Balance: string;
+  let token1Balance: string;
+
+  beforeEach(async () => {
+    token0Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+    token1Address = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+    token0Balance = await parseAmount(5_000, token0Address);
+    token1Balance = await parseAmount(2_000, token1Address);
+  });
+
+  test('erc20 -> erc20 large amount', async () => {
+    const quoteToRatioRec: QuoteToRatioQueryParams = {
+      token0Address,
+      token0ChainId: 1,
+      token1Address,
+      token1ChainId: 1,
+      token0Balance,
+      token1Balance,
+      tickLower: -60,
+      tickUpper: 180,
+      feeAmount: 500,
+      recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+      slippageTolerance: '5',
+      deadline: '360',
       errorTolerance: 1,
       maxIterations: 6,
-		}
+    };
 
-    const queryParams = qs.stringify(quoteToRatioRec)
+    const queryParams = qs.stringify(quoteToRatioRec);
     const response: AxiosResponse<QuoteToRatioResponse> =
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
-      data: { amount, quote, tokenIn, tokenOut, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+      data: {
+        amount,
+        quote,
+        tokenInAddress,
+        tokenOutAddress,
+        newRatio: newRatioRaw,
+        optimalRatio: optimalRatioRaw,
+        quoteDecimals,
+        quoteGasAdjustedDecimals,
+        methodParameters,
+      },
       status,
     } = response;
 
+    const newRatio = parseFraction(newRatioRaw)
+    const optimalRatio =  parseFraction(optimalRatioRaw)
+
     expect(status).toBe(200);
-    console.log(response.data)
-    console.log("amount", amount)
-    console.log("amountDecimals", response.data.amountDecimals)
-    console.log("route", response.data.route)
-    console.log("tokenIn", tokenIn)
-    console.log("tokenOut", tokenOut)
 
-    // let ratio
-    // if (tokenIn == token0Address) {
-    //   const precision = JSBI.BigInt('1' + '0'.repeat(18))
-    //   let optimalRatio =  new Fraction(
-    //     SqrtPriceMath.getAmount0Delta(
-    //       sqrtRatioX96,
-    //       upperSqrtRatioX96,
-    //       precision,
-    //       true
-    //     ),
-    //     SqrtPriceMath.getAmount1Delta(
-    //       sqrtRatioX96,
-    //       lowerSqrtRatioX96,
-    //       precision,
-    //       true
-    //     )
-    //   )
-    //   if (!zeroForOne) optimalRatio = optimalRatio.invert()
-    // }
 
-    // check that new ratio is within error tolerance
-    //
-	})
-})
-// 
-// function optimalRatio(tickLower: number, tickUpper: number, sqrtRatioX96: JSBI, zeroForOne: boolean): Fraction {
-//   const lowerSqrtRatioX96 = TickMath.getSqrtRatioAtTick(tickLower);
-//   const upperSqrtRatioX96 = TickMath.getSqrtRatioAtTick(tickUpper);
-//
-//   // returns Fraction(0, 1) for any out of range position regardless of zeroForOne. Implication: function
-//   // cannot be used to determine the trading direction of out of range positions.
-//   if (JSBI.greaterThan(sqrtRatioX96, upperSqrtRatioX96) || JSBI.lessThan(sqrtRatioX96, lowerSqrtRatioX96)) {
-//     return new Fraction(0,1)
-//   }
-//
-//   const precision = JSBI.BigInt('1' + '0'.repeat(18))
-//   let optimalRatio =  new Fraction(
-//     SqrtPriceMath.getAmount0Delta(
-//       sqrtRatioX96,
-//       upperSqrtRatioX96,
-//       precision,
-//       true
-//     ),
-//     SqrtPriceMath.getAmount1Delta(
-//       sqrtRatioX96,
-//       lowerSqrtRatioX96,
-//       precision,
-//       true
-//     )
-//   )
-//   if (!zeroForOne) optimalRatio = optimalRatio.invert()
-//   return optimalRatio
-// }
+
+    console.log('newRatio', newRatio.toFixed(10))
+    console.log('optimal', optimalRatio.toFixed(10))
+    console.log(response.data);
+  });
+});

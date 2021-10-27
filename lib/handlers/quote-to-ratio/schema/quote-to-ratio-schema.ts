@@ -1,6 +1,21 @@
 import Joi from '@hapi/joi';
-import { TickMath } from '@uniswap/v3-sdk';
-import { QuoteResponse, QuoteResponseSchemaJoi } from '../../schema'
+import {  TickMath } from '@uniswap/v3-sdk';
+import { TokenInRoute, QuoteResponse, QuoteResponseSchemaJoi } from '../../schema'
+
+export type PostSwapTargetPool = {
+  address: string;
+  tokenIn: TokenInRoute;
+  tokenOut: TokenInRoute;
+  sqrtRatioX96: string;
+  liquidity: string;
+  tickCurrent: string;
+  fee: string;
+};
+
+export type ResponseFraction = {
+  numerator: string;
+  denominator: string;
+}
 
 export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0Address: Joi.string().alphanum().max(42).required(),
@@ -22,7 +37,7 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
   .max(30)
   .optional(),
   minSplits: Joi.number().max(7).optional(),
-  errorTolerance: Joi.number().min(0).max(100).default(1).required(),
+  errorTolerance: Joi.number().min(0).max(10).precision(2).optional(),
   maxIterations: Joi.number().min(1).max(10).default(5).required(),
 }).and('recipient', 'slippageTolerance', 'deadline');
 
@@ -31,8 +46,8 @@ export type QuoteToRatioQueryParams = {
   token0ChainId: number;
   token1Address: string;
   token1ChainId: number;
-  token0Balance: number;
-  token1Balance: number;
+  token0Balance: string;
+  token1Balance: string;
   tickLower: number;
   tickUpper: number;
   feeAmount: number;
@@ -45,9 +60,28 @@ export type QuoteToRatioQueryParams = {
   maxIterations: number;
 };
 
-export type QuoteToRatioResponse = QuoteResponse & { tokenIn: string, tokenOut: string}
+export type QuoteToRatioResponse = QuoteResponse & {
+  tokenInAddress: string,
+  tokenOutAddress: string,
+  token0BalanceUpdated: string,
+  token1BalanceUpdated: string,
+  optimalRatio: ResponseFraction,
+  newRatio: ResponseFraction,
+  postSwapTargetPool: PostSwapTargetPool,
+}
 
 export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
-  tokenIn: Joi.string().required(),
-  tokenOut: Joi.string().required(),
+  tokenInAddress: Joi.string().required(),
+  tokenOutAddress: Joi.string().required(),
+  token0BalanceUpdated: Joi.string().required(),
+  token1BalanceUpdated: Joi.string().required(),
+  optimalRatio: Joi.object({
+    numerator: Joi.string(),
+    denominator: Joi.string(),
+  }).required(),
+  newRatio: Joi.object({
+    numerator: Joi.string(),
+    denominator: Joi.string(),
+  }).required(),
+  postSwapTargetPool: Joi.any().required(),
 })
