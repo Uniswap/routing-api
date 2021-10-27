@@ -94,7 +94,7 @@ const handler: ScheduledHandler = async (
 
   // link resulting hash to DNS
   const domain =
-    process.env.STAGE == 'beta' ? 'beta.api.uniswap.org' : 'api.uniswap.org';
+    process.env.STAGE == 'prod' ? 'api.uniswap.org': 'beta.api.uniswap.org';
   var params = {
     ChangeBatch: {
       Changes: [
