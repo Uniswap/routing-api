@@ -65,8 +65,10 @@ export type QuoteToRatioResponse = QuoteResponse & {
   tokenOutAddress: string,
   token0BalanceUpdated: string,
   token1BalanceUpdated: string,
-  optimalRatio: ResponseFraction,
-  newRatio: ResponseFraction,
+  optimalRatio: string,
+  optimalRatioFraction: ResponseFraction,
+  newRatio: string,
+  newRatioFraction: ResponseFraction,
   postSwapTargetPool: PostSwapTargetPool,
 }
 
@@ -75,11 +77,13 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
   tokenOutAddress: Joi.string().required(),
   token0BalanceUpdated: Joi.string().required(),
   token1BalanceUpdated: Joi.string().required(),
-  optimalRatio: Joi.object({
+  optimalRatio: Joi.string().required(),
+  optimalRatioFraction: Joi.object({
     numerator: Joi.string(),
     denominator: Joi.string(),
   }).required(),
-  newRatio: Joi.object({
+  newRatio: Joi.string().required(),
+  newRatioFraction: Joi.object({
     numerator: Joi.string(),
     denominator: Joi.string(),
   }).required(),

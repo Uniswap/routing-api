@@ -175,7 +175,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       tickUpper,
       liquidity: 1,
     });
-    const errorToleranceFraction = new Fraction(errorTolerance, 100)
+    const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
 
     log.info(
       {
@@ -183,7 +183,15 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         token1: token1.symbol,
         routingConfig: routingConfig,
       },
-      `Swap to ratio -  token0: ${token0.symbol}, token0Balance: ${token0Balance}, token1: ${token1.symbol}. token1Balance: ${token1Balance}, Chain: ${chainId}`
+      `Swap to ratio -  token0: ${
+        token0.symbol
+      }, token0Balance: ${
+        token0Balance
+      }, token1: ${
+        token1.symbol
+      }. token1Balance: ${
+        token1Balance
+      }, Chain: ${chainId}`
     );
 
     log.info({
@@ -191,6 +199,9 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token1Balance,
       position,
       maxIterations,
+      errorTolerance: errorToleranceFraction.toFixed(4),
+      swapParams,
+      routingConfig,
     }, 'more  useful logs')
 
     const swapRoute = await router.routeToRatio(
@@ -204,6 +215,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       swapParams,
       routingConfig,
     );
+    log.info('made it')
 
     if (!swapRoute) {
       log.info(
@@ -349,11 +361,16 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       tokenOutAddress: trade.outputAmount.currency.wrapped.address,
       token0BalanceUpdated: token0BalanceUpdated.quotient.toString(),
       token1BalanceUpdated: token1BalanceUpdated.quotient.toString(),
-      optimalRatio: {
+      optimalRatio: optimalRatioAdjusted.toFixed(token0.wrapped.decimals),
+      optimalRatioFraction: {
         numerator: optimalRatioAdjusted.numerator.toString(),
         denominator: optimalRatioAdjusted.denominator.toString(),
       },
-      newRatio: {
+      newRatio: new Fraction(
+        token0BalanceUpdated.quotient.toString(),
+        token1BalanceUpdated.quotient.toString()
+      ).toFixed(token0.wrapped.decimals),
+      newRatioFraction: {
         numerator: token0BalanceUpdated.quotient.toString(),
         denominator: token1BalanceUpdated.quotient.toString(),
       },
