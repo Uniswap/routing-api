@@ -167,7 +167,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       log.error(
         `Could not find pool.`
       );
-      return {statusCode: 400, errorCode: 'TODO: test error'};
+      return { statusCode: 400, errorCode: 'Could not find pool.' };
     }
     const position = new Position({
       pool,
@@ -317,14 +317,31 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     let token0BalanceUpdated: CurrencyAmount<Currency>;
     let token1BalanceUpdated: CurrencyAmount<Currency>;
     let optimalRatioAdjusted: Fraction;
+    let optimalRatioDecimal: string;
+    let newRatioDecimal: string
     if (zeroForOne) {
       token0BalanceUpdated = token0Balance.subtract(trade.inputAmount)
       token1BalanceUpdated = token1Balance.add(trade.outputAmount)
       optimalRatioAdjusted = optimalRatio
+      optimalRatioDecimal = optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
+      newRatioDecimal = new Fraction(
+        token0BalanceUpdated.quotient.toString(),
+        token1BalanceUpdated.quotient.toString()
+      ).toFixed(token0.wrapped.decimals)
     } else {
       token0BalanceUpdated = token0Balance.add(trade.outputAmount)
       token1BalanceUpdated = token1Balance.subtract(trade.inputAmount)
       optimalRatioAdjusted = optimalRatio.invert()
+      log.info({optimalRatioAdjusted: optimalRatioAdjusted.denominator.toString(), bigInt: JSBI.BigInt(0)}, 'logging stuff')
+      optimalRatioDecimal = optimalRatioAdjusted.denominator.toString() == '0'
+        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+        : optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
+      newRatioDecimal = token1BalanceUpdated.numerator.toString() == '0'
+        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+        : new Fraction(
+          token0BalanceUpdated.quotient.toString(),
+          token1BalanceUpdated.quotient.toString()
+        ).toFixed(token0.wrapped.decimals)
     }
 
     const postSwapTargetPoolObject = {
@@ -361,15 +378,12 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       tokenOutAddress: trade.outputAmount.currency.wrapped.address,
       token0BalanceUpdated: token0BalanceUpdated.quotient.toString(),
       token1BalanceUpdated: token1BalanceUpdated.quotient.toString(),
-      optimalRatio: optimalRatioAdjusted.toFixed(token0.wrapped.decimals),
+      optimalRatio: optimalRatioDecimal.toString(),
       optimalRatioFraction: {
         numerator: optimalRatioAdjusted.numerator.toString(),
         denominator: optimalRatioAdjusted.denominator.toString(),
       },
-      newRatio: new Fraction(
-        token0BalanceUpdated.quotient.toString(),
-        token1BalanceUpdated.quotient.toString()
-      ).toFixed(token0.wrapped.decimals),
+      newRatio: newRatioDecimal.toString(),
       newRatioFraction: {
         numerator: token0BalanceUpdated.quotient.toString(),
         denominator: token1BalanceUpdated.quotient.toString(),

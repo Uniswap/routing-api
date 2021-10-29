@@ -22,8 +22,14 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0ChainId: Joi.number().valid(1, 4).required(),
   token1Address: Joi.string().alphanum().max(42).required(),
   token1ChainId: Joi.number().valid(1, 4).required(),
-  token0Balance: Joi.number().min(0).required(),
-  token1Balance: Joi.number().min(0).required(),
+  token0Balance: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(77) // TODO: validate < 2**256
+    .required(),
+  token1Balance: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(77) // TODO: validate < 2**256
+    .required(),
   tickLower: Joi.number().min(TickMath.MIN_TICK).max(TickMath.MAX_TICK).required(),
   tickUpper: Joi.number().min(TickMath.MIN_TICK).max(TickMath.MAX_TICK).required(),
   feeAmount: Joi.number().min(0).max(10_000).required(),
