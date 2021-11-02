@@ -14,7 +14,6 @@ import {
   QuoteToRatioResponse,
   ResponseFraction,
 } from '../../lib/handlers/quote-to-ratio/schema/quote-to-ratio-schema';
-import { BigNumber } from 'ethers'
 import { FeeAmount, getMinTick, getMaxTick, TICK_SPACINGS } from '../utils/ticks';
 import { absoluteValue } from '../utils/absoluteValue';
 
@@ -104,15 +103,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -150,15 +142,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -196,15 +181,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -242,15 +220,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -288,15 +259,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -336,15 +300,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;
@@ -384,15 +341,8 @@ describe('quote-to-ratio', () => {
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
       data: {
-        amount,
-        quote,
-        tokenInAddress,
-        tokenOutAddress,
         newRatioFraction,
         optimalRatioFraction,
-        quoteDecimals,
-        quoteGasAdjustedDecimals,
-        methodParameters,
       },
       status,
     } = response;

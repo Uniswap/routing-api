@@ -1,5 +1,3 @@
-import { BigNumber } from 'ethers'
-
 export enum FeeAmount {
   LOW = 500,
   MEDIUM = 3000,

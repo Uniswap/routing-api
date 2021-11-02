@@ -2,20 +2,16 @@ import Joi from '@hapi/joi';
 import {
   Currency,
   CurrencyAmount,
-  Ether,
   Percent,
   TradeType,
 } from '@uniswap/sdk-core';
 import {
-  ChainId,
-  ITokenListProvider,
-  ITokenProvider,
+  IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
   SwapRoute,
 } from '@uniswap/smart-order-router';
-import Logger from 'bunyan';
 import JSBI from 'jsbi';
 import {
   APIGLambdaHandler,
@@ -23,7 +19,7 @@ import {
   HandleRequestParams,
   Response,
 } from '../handler';
-import { ContainerInjected, RequestInjected } from './injector';
+import { ContainerInjected, RequestInjected } from '../injector-sor';
 import {
   QuoteQueryParams,
   QuoteQueryParamsJoi,
@@ -33,11 +29,11 @@ import {
   QuoteResponse,
   QuoteResponseSchemaJoi,
 } from '../schema'
-import { DEFAULT_ROUTING_CONFIG } from '../shared'
+import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected,
+  RequestInjected<IRouter<any>>,
   void,
   QuoteQueryParams,
   QuoteResponse
@@ -45,7 +41,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected,
+      RequestInjected<IRouter<any>>,
       void,
       QuoteQueryParams
     >
@@ -78,12 +74,18 @@ export class QuoteHandler extends APIGLambdaHandler<
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
 
-    const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
+    const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
       tokenProvider,
       tokenInAddress,
-      tokenOutAddress,
       tokenInChainId,
+      log
+    );
+
+    const currencyOut = await tokenStringToCurrency(
+      tokenListProvider,
+      tokenProvider,
+      tokenOutAddress,
       tokenOutChainId,
       log
     );
@@ -303,81 +305,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       statusCode: 200,
       body: result,
     };
-  }
-
-  private async tokenStringToCurrency(
-    tokenListProvider: ITokenListProvider,
-    tokenProvider: ITokenProvider,
-    tokenInRaw: string,
-    tokenOutRaw: string,
-    tokenInChainId: ChainId,
-    tokenOutChainId: ChainId,
-    log: Logger
-  ): Promise<{
-    currencyIn: Currency | undefined;
-    currencyOut: Currency | undefined;
-  }> {
-    const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
-
-    const tryTokenList = async (
-      tokenRaw: string,
-      chainId: ChainId
-    ): Promise<Currency | undefined> => {
-      if (
-        tokenRaw == 'ETH' ||
-        tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-      ) {
-        return Ether.onChain(chainId);
-      }
-
-      if (isAddress(tokenRaw)) {
-        const token = await tokenListProvider.getTokenByAddress(tokenRaw);
-
-        return token;
-      }
-
-      return await tokenListProvider.getTokenBySymbol(tokenRaw);
-    };
-
-    let currencyIn: Currency | undefined = await tryTokenList(
-      tokenInRaw,
-      tokenInChainId
-    );
-    let currencyOut: Currency | undefined = await tryTokenList(
-      tokenOutRaw,
-      tokenOutChainId
-    );
-
-    if (currencyIn && currencyOut) {
-      log.info(
-        {
-          tokenInAddress: currencyIn.wrapped.address,
-          tokenOutAddress: currencyOut.wrapped.address,
-        },
-        'Got both input tokens from token list'
-      );
-      return { currencyIn, currencyOut };
-    }
-
-    const tokensToFetch = [];
-    if (!currencyIn && isAddress(tokenInRaw)) {
-      tokensToFetch.push(tokenInRaw);
-    }
-    if (!currencyOut && isAddress(tokenOutRaw)) {
-      tokensToFetch.push(tokenOutRaw);
-    }
-
-    log.info(`Getting input tokens ${tokensToFetch} from chain`);
-    const tokenAccessor = await tokenProvider.getTokens(tokensToFetch);
-
-    if (!currencyIn) {
-      currencyIn = tokenAccessor.getTokenByAddress(tokenInRaw);
-    }
-    if (!currencyOut) {
-      currencyOut = tokenAccessor.getTokenByAddress(tokenOutRaw);
-    }
-
-    return { currencyIn, currencyOut };
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {

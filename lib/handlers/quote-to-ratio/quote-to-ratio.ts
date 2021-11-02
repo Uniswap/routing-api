@@ -5,6 +5,7 @@ import {
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
+  ISwapToRatio,
 } from '@uniswap/smart-order-router';
 import JSBI from 'jsbi';
 import {
@@ -13,20 +14,19 @@ import {
   HandleRequestParams,
   Response,
 } from '../handler';
-import { PoolInRoute, QuoteResponseSchemaJoi } from '../schema';
+import { PoolInRoute } from '../schema';
 import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared';
-import { ContainerInjected, RequestInjected } from './injector';
+import { ContainerInjected, RequestInjected } from '../injector-sor';
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
   QuoteToRatioResponse,
   QuotetoRatioResponseSchemaJoi,
-  ResponseFraction,
 } from './schema/quote-to-ratio-schema';
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected,
+  RequestInjected<ISwapToRatio<any, any>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -34,7 +34,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected,
+      RequestInjected<ISwapToRatio<any, any>>,
       void,
       QuoteToRatioQueryParams
     >
@@ -91,7 +91,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     );
 
     metric.putMetric(
-      'TokenInOutStrToToken',
+      'Token01StrToToken',
       Date.now() - before,
       MetricLoggerUnit.Milliseconds
     );
@@ -99,7 +99,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (!token0) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN_IN_INVALID',
+        errorCode: 'TOKEN0_INVALID',
         detail: `Could not find token with address "${token0Address}"`,
       };
     }
@@ -107,7 +107,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (!token1) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN_OUT_INVALID',
+        errorCode: 'TOKEN1_INVALID',
         detail: `Could not find token with address "${token1Address}"`,
       };
     }
