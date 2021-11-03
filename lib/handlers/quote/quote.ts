@@ -6,11 +6,13 @@ import {
   TradeType,
 } from '@uniswap/sdk-core';
 import {
+  AlphaRouterConfig,
   IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
   SwapRoute,
+  LegacyRoutingConfig,
 } from '@uniswap/smart-order-router';
 import JSBI from 'jsbi';
 import {
@@ -33,7 +35,7 @@ import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<IRouter<any>>,
+  RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>,
   void,
   QuoteQueryParams,
   QuoteResponse

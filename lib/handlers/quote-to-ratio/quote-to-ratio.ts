@@ -2,10 +2,12 @@ import Joi from '@hapi/joi';
 import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
 import { Pool, Position } from '@uniswap/v3-sdk';
 import {
+  AlphaRouterConfig,
+  ISwapToRatio,
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
-  ISwapToRatio,
+  SwapAndAddConfig,
 } from '@uniswap/smart-order-router';
 import JSBI from 'jsbi';
 import {
@@ -26,7 +28,7 @@ import {
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<ISwapToRatio<any, any>>,
+  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -34,7 +36,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected<ISwapToRatio<any, any>>,
+      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
       void,
       QuoteToRatioQueryParams
     >

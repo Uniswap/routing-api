@@ -27,7 +27,7 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
     context: Context,
     log: Logger,
     metricsLogger: MetricsLogger
-  ): Promise<RequestInjected<IRouter<any>>> {
+  ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
     const requestId = context.awsRequestId;
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
