@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi';
 import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
-import { Pool, Position } from '@uniswap/v3-sdk';
+import { Position } from '@uniswap/v3-sdk';
 import {
   AlphaRouterConfig,
   ISwapToRatio,
@@ -164,12 +164,12 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token0.wrapped,
       token1.wrapped,
       feeAmount
-    ) as unknown as Pool
+    )
     if (!pool) {
       log.error(
         `Could not find pool.`
       );
-      return { statusCode: 400, errorCode: 'Could not find pool.' };
+      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' };
     }
     const position = new Position({
       pool,
@@ -183,28 +183,18 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       {
         token0: token0.symbol,
         token1: token1.symbol,
+        chainId,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        maxIterations,
+        errorTolerance: errorToleranceFraction.toFixed(4),
         routingConfig: routingConfig,
       },
-      `Swap to ratio -  token0: ${
-        token0.symbol
-      }, token0Balance: ${
-        token0Balance
-      }, token1: ${
-        token1.symbol
-      }. token1Balance: ${
-        token1Balance
-      }, Chain: ${chainId}`
+      `Swap To Ratio Parameters`
     );
-
-    log.info({
-      token0Balance,
-      token1Balance,
-      position,
-      maxIterations,
-      errorTolerance: errorToleranceFraction.toFixed(4),
-      swapParams,
-      routingConfig,
-    }, 'more  useful logs')
 
     const swapRoute = await router.routeToRatio(
       token0Balance,
@@ -217,13 +207,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       swapParams,
       routingConfig,
     );
-    log.info('made it')
 
     if (!swapRoute) {
       log.info(
         {
-          token0Balance,
-          token1Balance,
+          token0: token0.symbol,
+          token1: token1.symbol,
+          token0Balance: token0Balance.quotient.toString(),
+          token1Balance: token1Balance.quotient.toString(),
         },
         `No route found. 404`
       );
@@ -334,7 +325,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token0BalanceUpdated = token0Balance.add(trade.outputAmount)
       token1BalanceUpdated = token1Balance.subtract(trade.inputAmount)
       optimalRatioAdjusted = optimalRatio.invert()
-      log.info({optimalRatioAdjusted: optimalRatioAdjusted.denominator.toString(), bigInt: JSBI.BigInt(0)}, 'logging stuff')
       optimalRatioDecimal = optimalRatioAdjusted.denominator.toString() == '0'
         ? `0.${'0'.repeat(token1.wrapped.decimals)}`
         : optimalRatioAdjusted.toFixed(token0.wrapped.decimals)

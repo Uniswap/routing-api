@@ -79,19 +79,19 @@ export type QuoteToRatioResponse = QuoteResponse & {
 }
 
 export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
-  tokenInAddress: Joi.string().required(),
-  tokenOutAddress: Joi.string().required(),
-  token0BalanceUpdated: Joi.string().required(),
-  token1BalanceUpdated: Joi.string().required(),
-  optimalRatio: Joi.string().required(),
+  tokenInAddress: Joi.string().alphanum().max(42).required(),
+  tokenOutAddress: Joi.string().alphanum().max(42).required(),
+  token0BalanceUpdated: Joi.number().required(),
+  token1BalanceUpdated: Joi.number().required(),
+  optimalRatio: Joi.number().required(),
   optimalRatioFraction: Joi.object({
-    numerator: Joi.string(),
-    denominator: Joi.string(),
+    numerator: Joi.number(),
+    denominator: Joi.number(),
   }).required(),
-  newRatio: Joi.string().required(),
+  newRatio: Joi.number().required(),
   newRatioFraction: Joi.object({
-    numerator: Joi.string(),
-    denominator: Joi.string(),
+    numerator: Joi.number(),
+    denominator: Joi.number(),
   }).required(),
   postSwapTargetPool:Joi.object({
     address: Joi.string().alphanum().max(42).required(),
@@ -99,13 +99,13 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
       address: Joi.string().alphanum().max(42).required(),
       chainId: Joi.number().valid(1, 4).required(),
       symbol: Joi.string().alphanum().required(),
-      decimals: Joi.string().alphanum().required(),
+      decimals: Joi.number().required(),
     }),
     tokenOut: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
       chainId: Joi.number().valid(1, 4).required(),
       symbol: Joi.string().alphanum().required(),
-      decimals: Joi.string().alphanum().required(),
+      decimals: Joi.number().required(),
     }),
     sqrtRatioX96: Joi.number().required(),
     liquidity: Joi.number().required(),
