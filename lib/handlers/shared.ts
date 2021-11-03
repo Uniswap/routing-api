@@ -61,6 +61,10 @@ export async function tokenStringToCurrency(
   }
 
   log.info(`Getting input tokens ${tokenRaw} from chain`);
-  const tokenAccessor = await tokenProvider.getTokens([tokenRaw]);
-  return tokenAccessor.getTokenByAddress(tokenRaw);
+  if (!token && isAddress(tokenRaw)) {
+    const tokenAccessor = await tokenProvider.getTokens([tokenRaw]);
+    return tokenAccessor.getTokenByAddress(tokenRaw);
+  }
+
+  return undefined;
 }

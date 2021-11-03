@@ -5,7 +5,7 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   testEnvironment: 'node',
-  testTimeout: 30000,
+  testTimeout: 15000,
   setupFiles: ['dotenv/config'],
   setupFilesAfterEnv: ['jest-expect-message', 'jest-sinon'],
 };

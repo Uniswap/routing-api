@@ -117,47 +117,8 @@ describe('quote-to-ratio', () => {
     expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
   });
 
-  test('erc20 -> erc20 medium volume trade', async () => {
-    token0Balance = await parseAmount(100_000_000, token0Address);
-    token1Balance = await parseAmount(2_000, token1Address);
-    const quoteToRatioRec: QuoteToRatioQueryParams = {
-      token0Address,
-      token0ChainId: 1,
-      token1Address,
-      token1ChainId: 1,
-      token0Balance,
-      token1Balance,
-      tickLower: -200,
-      tickUpper: 200,
-      feeAmount: 10000,
-      recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      slippageTolerance: '5',
-      deadline: '360',
-      errorTolerance,
-      maxIterations: 6,
-    };
-
-    const queryParams = qs.stringify(quoteToRatioRec);
-    const response: AxiosResponse<QuoteToRatioResponse> =
-      await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
-    const {
-      data: {
-        newRatioFraction,
-        optimalRatioFraction,
-      },
-      status,
-    } = response;
-
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-
-    expect(status).toBe(200);
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
-  });
-
   test('erc20 -> erc20 high volume trade', async () => {
-    token0Balance = await parseAmount(500_000_000, token0Address);
+    token0Balance = await parseAmount(100_000_000, token0Address);
     token1Balance = await parseAmount(2_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
@@ -354,4 +315,152 @@ describe('quote-to-ratio', () => {
     expect(status).toBe(200);
     expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true)
   });
+
+  describe('4xx Error response',  () => {
+    test('when both balances are 0', async () => {
+      token0Address = 'WETH'
+      token1Address = 'DAI'
+      token0Balance = await parseAmount(0, token0Address);
+      token1Balance = await parseAmount(0, token1Address);
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 6,
+      };
+
+      const queryParams = qs.stringify(quoteToRatioRec);
+
+      await expect(
+        axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+      ).rejects.toMatchObject({
+        response: {
+          status: 404,
+          data: {
+            detail: 'No route found',
+            errorCode: 'NO_ROUTE',
+          },
+        },
+      });
+    })
+
+    test('when both balances are 0', async () => {
+      token0Address = 'WETH'
+      token1Address = 'DAI'
+      token0Balance = await parseAmount(0, token0Address);
+      token1Balance = await parseAmount(0, token1Address);
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 6,
+      };
+
+      const queryParams = qs.stringify(quoteToRatioRec);
+
+      await expect(
+        axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+      ).rejects.toMatchObject({
+        response: {
+          status: 404,
+          data: {
+            detail: 'No route found',
+            errorCode: 'NO_ROUTE',
+          },
+        },
+      });
+    })
+
+    test('when max iterations is 0', async () => {
+      token0Address = 'WETH'
+      token1Address = 'DAI'
+      token0Balance = await parseAmount(50_000, token0Address);
+      token1Balance = await parseAmount(2_000, token1Address);
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 0,
+      };
+
+      const queryParams = qs.stringify(quoteToRatioRec);
+
+      await expect(
+        axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+      ).rejects.toMatchObject({
+        response: {
+          status: 400,
+          data: {
+            detail: '"maxIterations" must be larger than or equal to 1',
+            errorCode: 'VALIDATION_ERROR',
+          },
+        },
+      });
+    })
+
+    test('when ratio is already fulfilled', async () => {
+      token0Balance = await parseAmount(0, token0Address);
+      token1Balance = await parseAmount(2_000, token1Address);
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: -120,
+        tickUpper: -60,
+        feeAmount: 500,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 6,
+      };
+
+      const queryParams = qs.stringify(quoteToRatioRec);
+
+      await expect(
+        axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+      ).rejects.toMatchObject({
+        response: {
+          status: 404,
+          data: {
+            detail: 'No route found',
+            errorCode: 'NO_ROUTE',
+          },
+        },
+      });
+    })
+  })
 });
