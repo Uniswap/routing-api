@@ -1,18 +1,21 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
-import { CachingTokenListProvider, NodeJSCache } from '@uniswap/smart-order-router';
+import {
+  CachingTokenListProvider,
+  NodeJSCache,
+} from '@uniswap/smart-order-router';
 import axios, { AxiosResponse } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
 import qs from 'qs';
-import {
-  QuoteQueryParams,
-} from '../../lib/handlers/quote/schema/quote-schema';
-import{
-  QuoteResponse,
-} from '../../lib/handlers/schema';
+import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema';
+import { QuoteResponse } from '../../lib/handlers/schema';
 
-const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()));
+const tokenListProvider = new CachingTokenListProvider(
+  1,
+  DEFAULT_TOKEN_LIST,
+  new NodeJSCache(new NodeCache())
+);
 
 const getAmount = async (
   type: string,
@@ -116,7 +119,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         amount: await getAmount(type, 'USDC', 'USDT', '100'),
         type,
         algorithm,
-        gasPriceWei: '60000000000'
+        gasPriceWei: '60000000000',
       };
 
       const queryParams = qs.stringify(quoteReq);
@@ -124,7 +127,12 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       const response: AxiosResponse<QuoteResponse> =
         await axios.get<QuoteResponse>(`${API}?${queryParams}`);
       const {
-        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
+        data: {
+          quoteDecimals,
+          quoteGasAdjustedDecimals,
+          methodParameters,
+          gasPriceWei,
+        },
         status,
       } = response;
 
@@ -216,7 +224,6 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         .reduce((cur, total) => total.add(cur), BigNumber.from(0));
       const amountOut = BigNumber.from(data.quote);
       expect(amountOut.eq(amountOutEdgesTotal));
-
     });
 
     test('eth -> erc20', async () => {
@@ -403,7 +410,12 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         tokenInChainId: 1,
         tokenOutAddress: 'KNC',
         tokenOutChainId: 1,
-        amount: await getAmount(type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
+        amount: await getAmount(
+          type,
+          'UNI',
+          'KNC',
+          '9999999999999999999999999999999999999999999999999'
+        ),
         type,
         recipient: '0x88fc765949a27405480F374Aa49E20dcCD3fCfb8',
         slippageTolerance: '5',
@@ -718,14 +730,12 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         response: {
           status: 400,
           data: {
-            detail:
-              '\"tokenInChainId\" must be one of [1, 4]',
+            detail: '"tokenInChainId" must be one of [1, 4]',
             errorCode: 'VALIDATION_ERROR',
           },
         },
       });
     });
-
   });
 });
 
@@ -744,9 +754,7 @@ describe('rinkeby', () => {
 
     const response: AxiosResponse<QuoteResponse> =
       await axios.get<QuoteResponse>(`${API}?${queryParams}`);
-    const {
-      status,
-    } = response;
+    const { status } = response;
 
     expect(status).toBe(200);
   });

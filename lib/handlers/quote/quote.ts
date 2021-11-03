@@ -8,11 +8,11 @@ import {
 import {
   AlphaRouterConfig,
   IRouter,
+  LegacyRoutingConfig,
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
   SwapRoute,
-  LegacyRoutingConfig,
 } from '@uniswap/smart-order-router';
 import JSBI from 'jsbi';
 import {
@@ -22,16 +22,9 @@ import {
   Response,
 } from '../handler';
 import { ContainerInjected, RequestInjected } from '../injector-sor';
-import {
-  QuoteQueryParams,
-  QuoteQueryParamsJoi,
-} from './schema/quote-schema';
-import {
-  PoolInRoute,
-  QuoteResponse,
-  QuoteResponseSchemaJoi,
-} from '../schema'
-import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
+import { PoolInRoute, QuoteResponse, QuoteResponseSchemaJoi } from '../schema';
+import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared';
+import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema';
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -119,7 +112,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
         detail: `Cannot request quotes for tokens on different chains`,
-      }
+      };
     }
 
     if (currencyIn.equals(currencyOut)) {
@@ -132,7 +125,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG,
-      ...(minSplits ? { minSplits } : {})
+      ...(minSplits ? { minSplits } : {}),
     };
 
     let swapParams: SwapConfig | undefined = undefined;
@@ -206,12 +199,15 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
-      log.info({
-        type,
-        tokenIn: currencyIn,
-        tokenOut: currencyOut,
-        amount: amount.quotient.toString()
-      }, `No route found. 404`);
+      log.info(
+        {
+          type,
+          tokenIn: currencyIn,
+          tokenOut: currencyOut,
+          amount: amount.quotient.toString(),
+        },
+        `No route found. 404`
+      );
 
       return {
         statusCode: 404,
@@ -270,8 +266,18 @@ export class QuoteHandler extends APIGLambdaHandler<
             nextPool.token1,
             nextPool.fee
           ).poolAddress,
-          tokenIn: { chainId: tokenIn.chainId, decimals: tokenIn.decimals.toString(), address: tokenIn.address, symbol: tokenIn.symbol! },
-          tokenOut: { chainId: tokenOut.chainId, decimals: tokenOut.decimals.toString(), address: tokenOut.address, symbol: tokenOut.symbol! },
+          tokenIn: {
+            chainId: tokenIn.chainId,
+            decimals: tokenIn.decimals.toString(),
+            address: tokenIn.address,
+            symbol: tokenIn.symbol!,
+          },
+          tokenOut: {
+            chainId: tokenOut.chainId,
+            decimals: tokenOut.decimals.toString(),
+            address: tokenOut.address,
+            symbol: tokenOut.symbol!,
+          },
           fee: nextPool.fee.toString(),
           liquidity: nextPool.liquidity.toString(),
           sqrtRatioX96: nextPool.sqrtRatioX96.toString(),

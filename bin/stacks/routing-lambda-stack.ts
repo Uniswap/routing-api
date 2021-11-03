@@ -147,32 +147,40 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       }
     );
 
-    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
-      metric: new aws_cloudwatch.MathExpression({
-        expression: "errors / invocations",
-        usingMetrics: {
-          errors: this.routingLambda.metricErrors({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-          invocations: this.routingLambda.metricInvocations({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          })
-        }
-      }),
-      threshold: 0.05,
-      evaluationPeriods: 3,
-    });
+    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
+      this,
+      'RoutingAPI-LambdaErrorRate',
+      {
+        metric: new aws_cloudwatch.MathExpression({
+          expression: 'errors / invocations',
+          usingMetrics: {
+            errors: this.routingLambda.metricErrors({
+              period: Duration.minutes(5),
+              statistic: 'avg',
+            }),
+            invocations: this.routingLambda.metricInvocations({
+              period: Duration.minutes(5),
+              statistic: 'avg',
+            }),
+          },
+        }),
+        threshold: 0.05,
+        evaluationPeriods: 3,
+      }
+    );
 
-    const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaThrottles', {
-      metric: this.routingLambda.metricThrottles({
-        period: Duration.minutes(5),
-        statistic: 'sum'
-      }),
-      threshold: 10,
-      evaluationPeriods: 3,
-    });
+    const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(
+      this,
+      'RoutingAPI-LambdaThrottles',
+      {
+        metric: this.routingLambda.metricThrottles({
+          period: Duration.minutes(5),
+          statistic: 'sum',
+        }),
+        threshold: 10,
+        evaluationPeriods: 3,
+      }
+    );
 
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(

@@ -17,10 +17,10 @@ export const QuoteQueryParamsJoi = Joi.object({
   deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
   gasPriceWei: Joi.string()
-  .pattern(/^[0-9]+$/)
-  .max(30)
-  .optional(),
-  minSplits: Joi.number().max(7).optional()
+    .pattern(/^[0-9]+$/)
+    .max(30)
+    .optional(),
+  minSplits: Joi.number().max(7).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline');
 
 export type QuoteQueryParams = {

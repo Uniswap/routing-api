@@ -14,8 +14,13 @@ import {
   QuoteToRatioResponse,
   ResponseFraction,
 } from '../../lib/handlers/quote-to-ratio/schema/quote-to-ratio-schema';
-import { FeeAmount, getMinTick, getMaxTick, TICK_SPACINGS } from '../utils/ticks';
 import { absoluteValue } from '../utils/absoluteValue';
+import {
+  FeeAmount,
+  getMaxTick,
+  getMinTick,
+  TICK_SPACINGS,
+} from '../utils/ticks';
 
 const tokenListProvider = new CachingTokenListProvider(
   1,
@@ -34,10 +39,12 @@ async function parseAmount(
   return parseUnits(value.toString(), decimals).toString();
 }
 
-async function tokenStringToCurrency(tokenString: string): Promise<Currency | undefined> {
+async function tokenStringToCurrency(
+  tokenString: string
+): Promise<Currency | undefined> {
   const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
 
-  let token: Currency | undefined
+  let token: Currency | undefined;
   if (
     tokenString == 'ETH' ||
     tokenString.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
@@ -52,15 +59,17 @@ async function tokenStringToCurrency(tokenString: string): Promise<Currency | un
   }
 
   if (!token) {
-    throw new Error('could not find token')
+    throw new Error('could not find token');
   }
 
   return token;
-
 }
 
 function parseFraction(fraction: ResponseFraction): Fraction {
-  return new Fraction(JSBI.BigInt(fraction.numerator), JSBI.BigInt(fraction.denominator))
+  return new Fraction(
+    JSBI.BigInt(fraction.numerator),
+    JSBI.BigInt(fraction.denominator)
+  );
 }
 
 describe('quote-to-ratio', () => {
@@ -76,8 +85,8 @@ describe('quote-to-ratio', () => {
     token1Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
     token0Balance = await parseAmount(5_000, token0Address);
     token1Balance = await parseAmount(2_000, token1Address);
-    errorTolerance = 1
-    errorToleranceFraction = new Fraction(errorTolerance * 100, 10_000)
+    errorTolerance = 1;
+    errorToleranceFraction = new Fraction(errorTolerance * 100, 10_000);
   });
 
   test('erc20 -> erc20 low volume trade token0Excess', async () => {
@@ -111,14 +120,16 @@ describe('quote-to-ratio', () => {
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
-    expect(tokenInAddress.toLowerCase()).toEqual(token0Address.toLowerCase())
-    expect(tokenOutAddress.toLowerCase()).toEqual(token1Address.toLowerCase())
+    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true);
+    expect(tokenInAddress.toLowerCase()).toEqual(token0Address.toLowerCase());
+    expect(tokenOutAddress.toLowerCase()).toEqual(token1Address.toLowerCase());
   });
 
   test('erc20 -> erc20 high volume trade token0Excess', async () => {
@@ -154,14 +165,16 @@ describe('quote-to-ratio', () => {
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
-    expect(tokenInAddress.toLowerCase()).toEqual(token0Address.toLowerCase())
-    expect(tokenOutAddress.toLowerCase()).toEqual(token1Address.toLowerCase())
+    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true);
+    expect(tokenInAddress.toLowerCase()).toEqual(token0Address.toLowerCase());
+    expect(tokenOutAddress.toLowerCase()).toEqual(token1Address.toLowerCase());
   });
 
   test('erc20 -> erc20 low volume trade token1Excess', async () => {
@@ -197,14 +210,16 @@ describe('quote-to-ratio', () => {
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
-    expect(tokenInAddress.toLowerCase()).toEqual(token1Address.toLowerCase())
-    expect(tokenOutAddress.toLowerCase()).toEqual(token0Address.toLowerCase())
+    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true);
+    expect(tokenInAddress.toLowerCase()).toEqual(token1Address.toLowerCase());
+    expect(tokenOutAddress.toLowerCase()).toEqual(token0Address.toLowerCase());
   });
 
   test('erc20 -> erc20 high volume trade token1Excess', async () => {
@@ -240,14 +255,16 @@ describe('quote-to-ratio', () => {
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true)
-    expect(tokenInAddress.toLowerCase()).toEqual(token1Address.toLowerCase())
-    expect(tokenOutAddress.toLowerCase()).toEqual(token0Address.toLowerCase())
+    expect(ratioDeviation.lessThan(errorToleranceFraction)).toBe(true);
+    expect(tokenInAddress.toLowerCase()).toEqual(token1Address.toLowerCase());
+    expect(tokenOutAddress.toLowerCase()).toEqual(token0Address.toLowerCase());
   });
 
   test('erc20 -> erc20 range order position token0 excess', async () => {
@@ -274,21 +291,19 @@ describe('quote-to-ratio', () => {
     const response: AxiosResponse<QuoteToRatioResponse> =
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
-      data: {
-        amount,
-        newRatioFraction,
-        optimalRatioFraction,
-      },
+      data: { amount, newRatioFraction, optimalRatioFraction },
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true)
-    expect(amount).toEqual(token0Balance)
+    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true);
+    expect(amount).toEqual(token0Balance);
   });
 
   test('erc20 -> erc20 range order position token1 excess', async () => {
@@ -315,26 +330,24 @@ describe('quote-to-ratio', () => {
     const response: AxiosResponse<QuoteToRatioResponse> =
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
-      data: {
-        amount,
-        newRatioFraction,
-        optimalRatioFraction,
-      },
+      data: { amount, newRatioFraction, optimalRatioFraction },
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(ratioDeviation).toEqual(new Fraction(0, 0))
-    expect(amount).toEqual(token1Balance)
+    expect(ratioDeviation).toEqual(new Fraction(0, 0));
+    expect(amount).toEqual(token1Balance);
   });
 
   test('weth -> erc20', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
+    token0Address = 'WETH';
+    token1Address = 'DAI';
     token0Balance = await parseAmount(5_000, token0Address);
     token1Balance = await parseAmount(2_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -358,24 +371,23 @@ describe('quote-to-ratio', () => {
     const response: AxiosResponse<QuoteToRatioResponse> =
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
-      data: {
-        newRatioFraction,
-        optimalRatioFraction,
-      },
+      data: { newRatioFraction, optimalRatioFraction },
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true)
+    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true);
   });
 
   test('erc20 -> weth', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
+    token0Address = 'WETH';
+    token1Address = 'DAI';
     token0Balance = await parseAmount(0, token0Address);
     token1Balance = await parseAmount(20_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -399,25 +411,24 @@ describe('quote-to-ratio', () => {
     const response: AxiosResponse<QuoteToRatioResponse> =
       await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`);
     const {
-      data: {
-        newRatioFraction,
-        optimalRatioFraction,
-      },
+      data: { newRatioFraction, optimalRatioFraction },
       status,
     } = response;
 
-    const newRatio = parseFraction(newRatioFraction)
-    const optimalRatio =  parseFraction(optimalRatioFraction)
-    const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+    const newRatio = parseFraction(newRatioFraction);
+    const optimalRatio = parseFraction(optimalRatioFraction);
+    const ratioDeviation = absoluteValue(
+      new Fraction(1, 1).subtract(newRatio.divide(optimalRatio))
+    );
 
     expect(status).toBe(200);
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true)
+    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).toBe(true);
   });
 
-  describe('4xx Error response',  () => {
+  describe('4xx Error response', () => {
     test('when both balances are 0', async () => {
-      token0Address = 'WETH'
-      token1Address = 'DAI'
+      token0Address = 'WETH';
+      token1Address = 'DAI';
       token0Balance = await parseAmount(0, token0Address);
       token1Balance = await parseAmount(0, token1Address);
       const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -450,11 +461,11 @@ describe('quote-to-ratio', () => {
           },
         },
       });
-    })
+    });
 
     test('when both balances are 0', async () => {
-      token0Address = 'WETH'
-      token1Address = 'DAI'
+      token0Address = 'WETH';
+      token1Address = 'DAI';
       token0Balance = await parseAmount(0, token0Address);
       token1Balance = await parseAmount(0, token1Address);
       const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -487,11 +498,11 @@ describe('quote-to-ratio', () => {
           },
         },
       });
-    })
+    });
 
     test('when max iterations is 0', async () => {
-      token0Address = 'WETH'
-      token1Address = 'DAI'
+      token0Address = 'WETH';
+      token1Address = 'DAI';
       token0Balance = await parseAmount(50_000, token0Address);
       token1Balance = await parseAmount(2_000, token1Address);
       const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -524,7 +535,7 @@ describe('quote-to-ratio', () => {
           },
         },
       });
-    })
+    });
 
     test('when ratio is already fulfilled', async () => {
       token0Balance = await parseAmount(2_000, token0Address);
@@ -559,13 +570,14 @@ describe('quote-to-ratio', () => {
           },
         },
       });
-    })
-  })
+    });
+  });
 
   test('amount exceeds uint256', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
-    token0Balance = '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+    token0Address = 'WETH';
+    token1Address = 'DAI';
+    token0Balance =
+      '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
     token1Balance = await parseAmount(2_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
@@ -592,17 +604,18 @@ describe('quote-to-ratio', () => {
       response: {
         status: 400,
         data: {
-          detail: '"token0Balance" length must be less than or equal to 77 characters long',
+          detail:
+            '"token0Balance" length must be less than or equal to 77 characters long',
           errorCode: 'VALIDATION_ERROR',
         },
       },
     });
-  })
+  });
 
   test('with unknown token', async () => {
-    token0Address = 'UNKNOWNTOKEN'
-    token1Address = 'DAI'
-    token0Balance = '2000000000000'
+    token0Address = 'UNKNOWNTOKEN';
+    token1Address = 'DAI';
+    token0Balance = '2000000000000';
     token1Balance = await parseAmount(2_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
@@ -634,12 +647,12 @@ describe('quote-to-ratio', () => {
         },
       },
     });
-  })
+  });
 
   test('when tokens are the same', async () => {
-    token0Address = 'DAI'
-    token1Address = 'DAI'
-    token0Balance = '2000000000000'
+    token0Address = 'DAI';
+    token1Address = 'DAI';
+    token0Balance = '2000000000000';
     token1Balance = await parseAmount(2_000, token1Address);
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
@@ -671,5 +684,5 @@ describe('quote-to-ratio', () => {
         },
       },
     });
-  })
+  });
 });

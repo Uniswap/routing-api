@@ -65,10 +65,8 @@ export class RoutingAPIStack extends cdk.Stack {
         hosted_zone,
       });
 
-    const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
-      this,
-      'RoutingLambdaStack',
-      {
+    const { routingLambda, routingLambdaAlias, routeToRatioLambda } =
+      new RoutingLambdaStack(this, 'RoutingLambdaStack', {
         poolCacheBucket,
         poolCacheKey,
         nodeRPC,
@@ -81,8 +79,7 @@ export class RoutingAPIStack extends cdk.Stack {
         provisionedConcurrency,
         ethGasStationInfoUrl,
         chatbotSNSArn,
-      }
-    );
+      });
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs');
 
@@ -195,7 +192,6 @@ export class RoutingAPIStack extends cdk.Stack {
     });
     quote.addMethod('GET', lambdaIntegration);
 
-
     const routeToRatioLambdaIntegration = new aws_apigateway.LambdaIntegration(
       routeToRatioLambda
     );
@@ -207,7 +203,6 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
     quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration);
-
 
     const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
       metric: api.metricServerError({

@@ -13,12 +13,19 @@ import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { default as bunyan, default as Logger } from 'bunyan';
 import { BigNumber } from 'ethers';
+import {
+  ContainerInjected,
+  InjectorSOR,
+  RequestInjected,
+} from '../injector-sor';
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger';
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider';
 import { QuoteQueryParams } from './schema/quote-schema';
-import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor';
 
-export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig | LegacyRoutingConfig>, QuoteQueryParams> {
+export class QuoteHandlerInjector extends InjectorSOR<
+  IRouter<AlphaRouterConfig | LegacyRoutingConfig>,
+  QuoteQueryParams
+> {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,
@@ -27,7 +34,9 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
     context: Context,
     log: Logger,
     metricsLogger: MetricsLogger
-  ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
+  ): Promise<
+    RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>
+  > {
     const requestId = context.awsRequestId;
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
@@ -39,7 +48,7 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       amount,
       type,
       algorithm,
-      gasPriceWei
+      gasPriceWei,
     } = requestQueryParams;
 
     log = log.child({
@@ -68,7 +77,9 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
 
     if (!dependencies[chainIdEnum]) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
-      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`);
+      throw new Error(
+        `No container injected dependencies for chain: ${chainIdEnum}`
+      );
     }
 
     const {
@@ -80,13 +91,13 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       subgraphProvider,
       blockedTokenListProvider,
       quoteProvider,
-      gasPriceProvider: gasPriceProviderOnChain
+      gasPriceProvider: gasPriceProviderOnChain,
     } = dependencies[chainIdEnum]!;
 
     let gasPriceProvider = gasPriceProviderOnChain;
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei);
-      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
+      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1);
     }
 
     let router;

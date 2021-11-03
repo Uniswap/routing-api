@@ -1,6 +1,9 @@
+import { Token } from '@uniswap/sdk-core';
 import {
   CachingGasStationProvider,
   CachingPoolProvider,
+  CachingTokenListProvider,
+  CachingTokenProviderWithFallback,
   ChainId,
   EIP1559GasPriceProvider,
   ID_TO_NETWORK_NAME,
@@ -14,22 +17,19 @@ import {
   PoolProvider,
   QuoteProvider,
   setGlobalLogger,
-  CachingTokenListProvider,
   TokenProvider,
-  CachingTokenProviderWithFallback,
   UniswapMulticallProvider,
 } from '@uniswap/smart-order-router';
-import { BaseRInj, Injector } from './handler';
-import {  ethers } from 'ethers';
-import { default as bunyan, default as Logger } from 'bunyan';
-import { Token } from '@uniswap/sdk-core';
-import NodeCache from 'node-cache';
-import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
-import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
 import { TokenList } from '@uniswap/token-lists';
+import { default as bunyan, default as Logger } from 'bunyan';
+import { ethers } from 'ethers';
+import NodeCache from 'node-cache';
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json';
+import { BaseRInj, Injector } from './handler';
+import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
+import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
 
-const SUPPORTED_CHAINS: ChainId[] = [ ChainId.MAINNET, ChainId.RINKEBY ];
+const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY];
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
 export interface RequestInjected<Router> extends BaseRInj {
@@ -57,7 +57,7 @@ export type ContainerDependencies = {
 export interface ContainerInjected {
   dependencies: {
     [chainId in ChainId]?: ContainerDependencies;
-  }
+  };
 }
 
 export abstract class InjectorSOR<Router, QueryParams> extends Injector<
@@ -77,31 +77,51 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } =
       process.env;
 
-    const dependenciesByChain: { [chainId in ChainId]?: ContainerDependencies } = {};
+    const dependenciesByChain: {
+      [chainId in ChainId]?: ContainerDependencies;
+    } = {};
 
     for (const chainId of SUPPORTED_CHAINS) {
       const chainName = ID_TO_NETWORK_NAME(chainId);
 
       const provider = new ethers.providers.JsonRpcProvider(
         {
-          url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
-          user: chainId == ChainId.MAINNET ? process.env.JSON_RPC_USERNAME! : process.env.JSON_RPC_USERNAME_RINKEBY!,
-          password: chainId == ChainId.MAINNET ? process.env.JSON_RPC_PASSWORD : process.env.JSON_RPC_PASSWORD_RINKEBY,
+          url:
+            chainId == ChainId.MAINNET
+              ? process.env.JSON_RPC_URL!
+              : process.env.JSON_RPC_URL_RINKEBY!,
+          user:
+            chainId == ChainId.MAINNET
+              ? process.env.JSON_RPC_USERNAME!
+              : process.env.JSON_RPC_USERNAME_RINKEBY!,
+          password:
+            chainId == ChainId.MAINNET
+              ? process.env.JSON_RPC_PASSWORD
+              : process.env.JSON_RPC_PASSWORD_RINKEBY,
           timeout: 5000,
         },
         chainName
       );
 
-      const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
-        chainId,
-        TOKEN_LIST_CACHE_BUCKET!,
-        DEFAULT_TOKEN_LIST
+      const tokenListProvider =
+        await AWSTokenListProvider.fromTokenListS3Bucket(
+          chainId,
+          TOKEN_LIST_CACHE_BUCKET!,
+          DEFAULT_TOKEN_LIST
+        );
+
+      const tokenCache = new NodeJSCache<Token>(
+        new NodeCache({ stdTTL: 3600, useClones: false })
+      );
+      const blockedTokenCache = new NodeJSCache<Token>(
+        new NodeCache({ stdTTL: 3600, useClones: false })
       );
 
-      const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
-      const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
-
-      const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000);
+      const multicall2Provider = new UniswapMulticallProvider(
+        chainId,
+        provider,
+        375_000
+      );
       const tokenProvider = new CachingTokenProviderWithFallback(
         chainId,
         tokenCache,
@@ -127,7 +147,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         },
         {
           gasLimitOverride: 2_000_000,
-          multicallChunk: 70
+          multicallChunk: 70,
         }
       );
 
@@ -153,19 +173,20 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         subgraphProvider: new AWSSubgraphProvider(
           chainId,
           POOL_CACHE_BUCKET!,
-          POOL_CACHE_KEY!,
+          POOL_CACHE_KEY!
         ),
         tokenProviderFromTokenList: tokenListProvider,
         quoteProvider,
-        gasPriceProvider: new CachingGasStationProvider(chainId,
+        gasPriceProvider: new CachingGasStationProvider(
+          chainId,
           new EIP1559GasPriceProvider(provider),
           new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
-        )
-      }
+        ),
+      };
     }
 
     return {
-      dependencies: dependenciesByChain
+      dependencies: dependenciesByChain,
     };
   }
 }

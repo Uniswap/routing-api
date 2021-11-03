@@ -260,10 +260,15 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             properties: {
               metrics: [
-                [NAMESPACE, 'QuoteTotalCallsToProvider', 'Service', 'RoutingAPI'],
+                [
+                  NAMESPACE,
+                  'QuoteTotalCallsToProvider',
+                  'Service',
+                  'RoutingAPI',
+                ],
                 ['.', 'QuoteExpectedCallsToProvider', '.', '.'],
                 ['.', 'QuoteNumRetriedCalls', '.', '.'],
-                ['.', 'QuoteNumRetryLoops', '.', '.']
+                ['.', 'QuoteNumRetryLoops', '.', '.'],
               ],
               view: 'timeSeries',
               stacked: false,

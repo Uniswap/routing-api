@@ -1,9 +1,9 @@
 import {
+  CachingTokenListProvider,
   ChainId,
   ITokenListProvider,
   ITokenProvider,
   log,
-  CachingTokenListProvider,
   NodeJSCache,
 } from '@uniswap/smart-order-router';
 import { TokenList } from '@uniswap/token-lists';
@@ -26,7 +26,11 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
 
     if (cachedTokenList) {
       log.info(`Found token lists for ${tokenListURI} in local cache`);
-      return super.fromTokenList(chainId, cachedTokenList, new NodeJSCache(tokenCache));
+      return super.fromTokenList(
+        chainId,
+        cachedTokenList,
+        new NodeJSCache(tokenCache)
+      );
     }
 
     try {
@@ -38,7 +42,11 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
       const { Body: tokenListBuffer } = tokenListResult;
 
       if (!tokenListBuffer) {
-        return super.fromTokenListURI(chainId, tokenListURI, new NodeJSCache(tokenCache));
+        return super.fromTokenListURI(
+          chainId,
+          tokenListURI,
+          new NodeJSCache(tokenCache)
+        );
       }
 
       const tokenList = JSON.parse(
@@ -51,10 +59,18 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
 
       TOKEN_LIST_CACHE.set<TokenList>(tokenListURI, tokenList);
 
-      return new CachingTokenListProvider(chainId, tokenList, new NodeJSCache(tokenCache));
+      return new CachingTokenListProvider(
+        chainId,
+        tokenList,
+        new NodeJSCache(tokenCache)
+      );
     } catch (err) {
       log.info({ err }, `Failed to get tokenLists from s3.`);
-      return super.fromTokenListURI(chainId, tokenListURI, new NodeJSCache(tokenCache));
+      return super.fromTokenListURI(
+        chainId,
+        tokenListURI,
+        new NodeJSCache(tokenCache)
+      );
     }
   }
 }

@@ -1,14 +1,14 @@
 import Joi from '@hapi/joi';
 import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
-import { Position } from '@uniswap/v3-sdk';
 import {
   AlphaRouterConfig,
   ISwapToRatio,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapConfig,
   SwapAndAddConfig,
+  SwapConfig,
 } from '@uniswap/smart-order-router';
+import { Position } from '@uniswap/v3-sdk';
 import JSBI from 'jsbi';
 import {
   APIGLambdaHandler,
@@ -16,9 +16,9 @@ import {
   HandleRequestParams,
   Response,
 } from '../handler';
+import { ContainerInjected, RequestInjected } from '../injector-sor';
 import { PoolInRoute } from '../schema';
 import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared';
-import { ContainerInjected, RequestInjected } from '../injector-sor';
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -155,20 +155,16 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token1,
       JSBI.BigInt(token1BalanceRaw)
     );
-    const poolAccessor = await poolProvider.getPools([[
-      token0.wrapped,
-      token1.wrapped,
-      feeAmount,
-    ]])
+    const poolAccessor = await poolProvider.getPools([
+      [token0.wrapped, token1.wrapped, feeAmount],
+    ]);
     const pool = poolAccessor.getPool(
       token0.wrapped,
       token1.wrapped,
       feeAmount
-    )
+    );
     if (!pool) {
-      log.error(
-        `Could not find pool.`
-      );
+      log.error(`Could not find pool.`);
       return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' };
     }
     const position = new Position({
@@ -177,7 +173,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       tickUpper,
       liquidity: 1,
     });
-    const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
+    const errorToleranceFraction = new Fraction(
+      Math.round(parseFloat(errorTolerance.toString()) * 100),
+      10_000
+    );
 
     log.info(
       {
@@ -202,10 +201,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       position,
       {
         errorTolerance: errorToleranceFraction,
-        maxIterations
+        maxIterations,
       },
       swapParams,
-      routingConfig,
+      routingConfig
     );
 
     if (!swapRoute) {
@@ -303,37 +302,41 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute);
     }
 
-    const tokenIn = trade.inputAmount.currency.wrapped
-    const tokenOut = trade.outputAmount.currency.wrapped
+    const tokenIn = trade.inputAmount.currency.wrapped;
+    const tokenOut = trade.outputAmount.currency.wrapped;
 
-    const zeroForOne = tokenIn == token0
+    const zeroForOne = tokenIn == token0;
     let token0BalanceUpdated: CurrencyAmount<Currency>;
     let token1BalanceUpdated: CurrencyAmount<Currency>;
     let optimalRatioAdjusted: Fraction;
     let optimalRatioDecimal: string;
-    let newRatioDecimal: string
+    let newRatioDecimal: string;
     if (zeroForOne) {
-      token0BalanceUpdated = token0Balance.subtract(trade.inputAmount)
-      token1BalanceUpdated = token1Balance.add(trade.outputAmount)
-      optimalRatioAdjusted = optimalRatio
-      optimalRatioDecimal = optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
+      token0BalanceUpdated = token0Balance.subtract(trade.inputAmount);
+      token1BalanceUpdated = token1Balance.add(trade.outputAmount);
+      optimalRatioAdjusted = optimalRatio;
+      optimalRatioDecimal = optimalRatioAdjusted.toFixed(
+        token0.wrapped.decimals
+      );
       newRatioDecimal = new Fraction(
         token0BalanceUpdated.quotient.toString(),
         token1BalanceUpdated.quotient.toString()
-      ).toFixed(token0.wrapped.decimals)
+      ).toFixed(token0.wrapped.decimals);
     } else {
-      token0BalanceUpdated = token0Balance.add(trade.outputAmount)
-      token1BalanceUpdated = token1Balance.subtract(trade.inputAmount)
-      optimalRatioAdjusted = optimalRatio.invert()
-      optimalRatioDecimal = optimalRatioAdjusted.denominator.toString() == '0'
-        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
-        : optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
-      newRatioDecimal = token1BalanceUpdated.numerator.toString() == '0'
-        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
-        : new Fraction(
-          token0BalanceUpdated.quotient.toString(),
-          token1BalanceUpdated.quotient.toString()
-        ).toFixed(token0.wrapped.decimals)
+      token0BalanceUpdated = token0Balance.add(trade.outputAmount);
+      token1BalanceUpdated = token1Balance.subtract(trade.inputAmount);
+      optimalRatioAdjusted = optimalRatio.invert();
+      optimalRatioDecimal =
+        optimalRatioAdjusted.denominator.toString() == '0'
+          ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+          : optimalRatioAdjusted.toFixed(token0.wrapped.decimals);
+      newRatioDecimal =
+        token1BalanceUpdated.numerator.toString() == '0'
+          ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+          : new Fraction(
+              token0BalanceUpdated.quotient.toString(),
+              token1BalanceUpdated.quotient.toString()
+            ).toFixed(token0.wrapped.decimals);
     }
 
     const postSwapTargetPoolObject = {
@@ -358,13 +361,15 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       liquidity: postSwapTargetPool.liquidity.toString(),
       sqrtRatioX96: postSwapTargetPool.sqrtRatioX96.toString(),
       tickCurrent: postSwapTargetPool.tickCurrent.toString(),
-    }
+    };
 
     const result: QuoteToRatioResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
       amount: trade.inputAmount.quotient.toString(),
-      amountDecimals: trade.inputAmount.toFixed(trade.inputAmount.currency.decimals),
+      amountDecimals: trade.inputAmount.toFixed(
+        trade.inputAmount.currency.decimals
+      ),
       quote: quote.quotient.toString(),
       tokenInAddress: trade.inputAmount.currency.wrapped.address,
       tokenOutAddress: trade.outputAmount.currency.wrapped.address,

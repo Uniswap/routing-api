@@ -22,7 +22,9 @@ const handler: ScheduledHandler = async (
       return;
     }
 
-    const key = `${process.env.POOL_CACHE_KEY}${chain != ChainId.MAINNET ? `-${chain}`: ''}`;
+    const key = `${process.env.POOL_CACHE_KEY}${
+      chain != ChainId.MAINNET ? `-${chain}` : ''
+    }`;
 
     log.info(
       `Got ${pools.length} pools from the subgraph. Saving to ${process.env.POOL_CACHE_BUCKET}/${key}`
@@ -35,9 +37,7 @@ const handler: ScheduledHandler = async (
         Body: JSON.stringify(pools),
       })
       .promise();
-    }
-
-  
+  }
 };
 
 module.exports = { handler };

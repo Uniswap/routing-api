@@ -1,15 +1,11 @@
-import { AlphaRouterConfig } from '@uniswap/smart-order-router';
+import { Currency, Ether } from '@uniswap/sdk-core';
 import {
-  Currency,
-  Ether,
-} from '@uniswap/sdk-core';
-import {
+  AlphaRouterConfig,
   ChainId,
   ITokenListProvider,
   ITokenProvider,
 } from '@uniswap/smart-order-router';
 import Logger from 'bunyan';
-
 
 export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   topN: 2,
@@ -25,7 +21,6 @@ export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   distributionPercent: 5,
 };
 
-
 export async function tokenStringToCurrency(
   tokenListProvider: ITokenListProvider,
   tokenProvider: ITokenProvider,
@@ -35,7 +30,7 @@ export async function tokenStringToCurrency(
 ): Promise<Currency | undefined> {
   const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
 
-  let token: Currency | undefined = undefined
+  let token: Currency | undefined = undefined;
 
   if (
     tokenRaw == 'ETH' ||

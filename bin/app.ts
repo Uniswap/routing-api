@@ -26,7 +26,6 @@ import { STAGE } from '../lib/util/stage';
 import { RoutingAPIStack } from './stacks/routing-api-stack';
 dotenv.config();
 
-
 export class RoutingAPIStage extends Stage {
   public readonly url: CfnOutput;
 
