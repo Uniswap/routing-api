@@ -3,11 +3,10 @@ import {
   AlphaRouterConfig,
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
-  IRouter,
-  LegacyRouter,
-  LegacyRoutingConfig,
+  ISwapToRatio,
   setGlobalLogger,
   setGlobalMetric,
+  SwapAndAddConfig,
 } from '@uniswap/smart-order-router';
 import { MetricsLogger } from 'aws-embedded-metrics';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
@@ -15,43 +14,46 @@ import { default as bunyan, default as Logger } from 'bunyan';
 import { BigNumber } from 'ethers';
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger';
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider';
-import { QuoteQueryParams } from './schema/quote-schema';
+import { QuoteToRatioQueryParams } from './schema/quote-to-ratio-schema';
 import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor';
 
-export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig | LegacyRoutingConfig>, QuoteQueryParams> {
+export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>, QuoteToRatioQueryParams> {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,
-    requestQueryParams: QuoteQueryParams,
+    requestQueryParams: QuoteToRatioQueryParams,
     _event: APIGatewayProxyEvent,
     context: Context,
     log: Logger,
     metricsLogger: MetricsLogger
-  ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
+  ): Promise<RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>> {
     const requestId = context.awsRequestId;
     const quoteId = requestId.substring(0, 5);
     const logLevel = bunyan.INFO;
 
     const {
-      tokenInAddress,
-      tokenInChainId,
-      tokenOutAddress,
-      amount,
-      type,
-      algorithm,
+      token0Address,
+      token0ChainId,
+      token1Address,
+      token1ChainId,
+      token0Balance,
+      token1Balance,
+      tickLower,
+      tickUpper,
       gasPriceWei
     } = requestQueryParams;
 
     log = log.child({
       serializers: bunyan.stdSerializers,
       level: logLevel,
-      requestId,
-      quoteId,
-      tokenInAddress,
-      tokenOutAddress,
-      amount,
-      type,
-      algorithm,
+      token0Address,
+      token0ChainId,
+      token1Address,
+      token1ChainId,
+      token0Balance,
+      token1Balance,
+      tickLower,
+      tickUpper,
     });
     setGlobalLogger(log);
 
@@ -61,7 +63,7 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
     setGlobalMetric(metric);
 
     // Today API is restricted such that both tokens must be on the same chain.
-    const chainId = tokenInChainId;
+    const chainId = token0ChainId;
     const chainIdEnum = ID_TO_CHAIN_ID(chainId);
 
     const { dependencies } = containerInjected;
@@ -89,33 +91,18 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
     }
 
-    let router;
-    switch (algorithm) {
-      case 'legacy':
-        router = new LegacyRouter({
-          chainId,
-          multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
-          tokenProvider,
-        });
-        break;
-      case 'alpha':
-      default:
-        router = new AlphaRouter({
-          chainId,
-          provider,
-          subgraphProvider,
-          multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
-          gasPriceProvider,
-          gasModelFactory: new HeuristicGasModelFactory(),
-          blockedTokenListProvider,
-          tokenProvider,
-        });
-        break;
-    }
+    let router = new AlphaRouter({
+      chainId,
+      provider,
+      subgraphProvider,
+      multicall2Provider: multicallProvider,
+      poolProvider,
+      quoteProvider,
+      gasPriceProvider,
+      gasModelFactory: new HeuristicGasModelFactory(),
+      blockedTokenListProvider,
+      tokenProvider,
+    });
 
     return {
       chainId: chainIdEnum,

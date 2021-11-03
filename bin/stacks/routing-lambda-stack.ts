@@ -26,6 +26,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction;
+  public readonly routeToRatioLambda: aws_lambda_nodejs.NodejsFunction;
   public readonly routingLambdaAlias: aws_lambda.Alias;
 
   constructor(
@@ -107,6 +108,45 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       }
     );
 
+    this.routeToRatioLambda = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      'RouteToRatioLambda2',
+      {
+        role: lambdaRole,
+        runtime: aws_lambda.Runtime.NODEJS_14_X,
+        entry: path.join(__dirname, '../../lib/handlers/index.ts'),
+        handler: 'quoteToRatioHandler',
+        timeout: cdk.Duration.seconds(29),
+        memorySize: 1024,
+        bundling: {
+          minify: true,
+          sourceMap: true,
+        },
+        environment: {
+          VERSION: '2',
+          NODE_OPTIONS: '--enable-source-maps',
+          POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
+          POOL_CACHE_KEY: poolCacheKey,
+          JSON_RPC_URL: nodeRPC,
+          JSON_RPC_USERNAME: nodeRPCUsername,
+          JSON_RPC_PASSWORD: nodeRPCPassword,
+          JSON_RPC_URL_RINKEBY: nodeRPCRinkeby,
+          JSON_RPC_USERNAME_RINKEBY: nodeRPCUsernameRinkeby,
+          JSON_RPC_PASSWORD_RINKEBY: nodeRPCPasswordRinkeby,
+          TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
+          ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+        },
+        layers: [
+          aws_lambda.LayerVersion.fromLayerVersionArn(
+            this,
+            'InsightsLayerSwapAndAdd',
+            `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
+          ),
+        ],
+        tracing: aws_lambda.Tracing.ACTIVE,
+      }
+    );
+
     const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
       metric: new aws_cloudwatch.MathExpression({
         expression: "errors / invocations",
@@ -144,7 +184,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       lambdaAlarmErrorRate.addAlarmAction(
         new aws_cloudwatch_actions.SnsAction(chatBotTopic)
       );
-      
+
       lambdaThrottlesErrorRate.addAlarmAction(
         new aws_cloudwatch_actions.SnsAction(chatBotTopic)
       );

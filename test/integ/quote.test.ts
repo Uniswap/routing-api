@@ -7,8 +7,10 @@ import NodeCache from 'node-cache';
 import qs from 'qs';
 import {
   QuoteQueryParams,
-  QuoteResponse,
 } from '../../lib/handlers/quote/schema/quote-schema';
+import{
+  QuoteResponse,
+} from '../../lib/handlers/schema';
 
 const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()));
 
@@ -127,7 +129,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       } = response;
 
       expect(status).toBe(200);
-      
+
       if (algorithm == 'alpha') {
         expect(gasPriceWei).toEqual('60000000000');
       }
@@ -198,7 +200,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
       expect(data.methodParameters).toBeDefined();
 
       expect(data.route).toBeDefined();
-      
+
       const amountInEdgesTotal = _(data.route)
         .flatMap((route) => route[0]!)
         .filter((pool) => !!pool.amountIn)
@@ -214,7 +216,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         .reduce((cur, total) => total.add(cur), BigNumber.from(0));
       const amountOut = BigNumber.from(data.quote);
       expect(amountOut.eq(amountOutEdgesTotal));
-      
+
     });
 
     test('eth -> erc20', async () => {

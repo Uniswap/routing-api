@@ -65,7 +65,7 @@ export class RoutingAPIStack extends cdk.Stack {
         hosted_zone,
       });
 
-    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
+    const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
       this,
       'RoutingLambdaStack',
       {
@@ -194,6 +194,20 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     });
     quote.addMethod('GET', lambdaIntegration);
+
+
+    const routeToRatioLambdaIntegration = new aws_apigateway.LambdaIntegration(
+      routeToRatioLambda
+    );
+
+    const quoteToRatio = api.root.addResource('quoteToRatio', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
+        allowMethods: aws_apigateway.Cors.ALL_METHODS,
+      },
+    });
+    quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration);
+
 
     const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
       metric: api.metricServerError({

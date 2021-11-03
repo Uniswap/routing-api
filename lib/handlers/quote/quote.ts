@@ -2,21 +2,18 @@ import Joi from '@hapi/joi';
 import {
   Currency,
   CurrencyAmount,
-  Ether,
   Percent,
   TradeType,
 } from '@uniswap/sdk-core';
 import {
   AlphaRouterConfig,
-  ChainId,
-  ITokenListProvider,
-  ITokenProvider,
+  IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
   SwapConfig,
   SwapRoute,
+  LegacyRoutingConfig,
 } from '@uniswap/smart-order-router';
-import Logger from 'bunyan';
 import JSBI from 'jsbi';
 import {
   APIGLambdaHandler,
@@ -24,32 +21,21 @@ import {
   HandleRequestParams,
   Response,
 } from '../handler';
-import { ContainerInjected, RequestInjected } from './injector';
+import { ContainerInjected, RequestInjected } from '../injector-sor';
 import {
-  PoolInRoute,
   QuoteQueryParams,
   QuoteQueryParamsJoi,
+} from './schema/quote-schema';
+import {
+  PoolInRoute,
   QuoteResponse,
   QuoteResponseSchemaJoi,
-} from './schema/quote-schema';
-
-const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
-  topN: 2,
-  topNDirectSwaps: 2,
-  topNTokenInOut: 3,  
-  topNSecondHop: 0,
-  topNWithEachBaseToken: 3,
-  topNWithBaseToken: 6,
-  topNWithBaseTokenInSet: false,
-  maxSwapsPerPath: 3,
-  minSplits: 1,
-  maxSplits: 7,
-  distributionPercent: 5,
-};
+} from '../schema'
+import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected,
+  RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>,
   void,
   QuoteQueryParams,
   QuoteResponse
@@ -57,7 +43,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected,
+      RequestInjected<IRouter<any>>,
       void,
       QuoteQueryParams
     >
@@ -90,12 +76,18 @@ export class QuoteHandler extends APIGLambdaHandler<
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now();
 
-    const { currencyIn, currencyOut } = await this.tokenStringToCurrency(
+    const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
       tokenProvider,
       tokenInAddress,
-      tokenOutAddress,
       tokenInChainId,
+      log
+    );
+
+    const currencyOut = await tokenStringToCurrency(
+      tokenListProvider,
+      tokenProvider,
+      tokenOutAddress,
       tokenOutChainId,
       log
     );
@@ -214,13 +206,13 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!swapRoute) {
-      log.info({ 
-        type, 
-        tokenIn: currencyIn, 
-        tokenOut: currencyOut, 
-        amount: amount.quotient.toString() 
+      log.info({
+        type,
+        tokenIn: currencyIn,
+        tokenOut: currencyOut,
+        amount: amount.quotient.toString()
       }, `No route found. 404`);
-      
+
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
@@ -315,81 +307,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       statusCode: 200,
       body: result,
     };
-  }
-
-  private async tokenStringToCurrency(
-    tokenListProvider: ITokenListProvider,
-    tokenProvider: ITokenProvider,
-    tokenInRaw: string,
-    tokenOutRaw: string,
-    tokenInChainId: ChainId,
-    tokenOutChainId: ChainId,
-    log: Logger
-  ): Promise<{
-    currencyIn: Currency | undefined;
-    currencyOut: Currency | undefined;
-  }> {
-    const isAddress = (s: string) => s.length == 42 && s.startsWith('0x');
-
-    const tryTokenList = async (
-      tokenRaw: string,
-      chainId: ChainId
-    ): Promise<Currency | undefined> => {
-      if (
-        tokenRaw == 'ETH' ||
-        tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-      ) {
-        return Ether.onChain(chainId);
-      }
-
-      if (isAddress(tokenRaw)) {
-        const token = await tokenListProvider.getTokenByAddress(tokenRaw);
-
-        return token;
-      }
-
-      return await tokenListProvider.getTokenBySymbol(tokenRaw);
-    };
-
-    let currencyIn: Currency | undefined = await tryTokenList(
-      tokenInRaw,
-      tokenInChainId
-    );
-    let currencyOut: Currency | undefined = await tryTokenList(
-      tokenOutRaw,
-      tokenOutChainId
-    );
-
-    if (currencyIn && currencyOut) {
-      log.info(
-        {
-          tokenInAddress: currencyIn.wrapped.address,
-          tokenOutAddress: currencyOut.wrapped.address,
-        },
-        'Got both input tokens from token list'
-      );
-      return { currencyIn, currencyOut };
-    }
-
-    const tokensToFetch = [];
-    if (!currencyIn && isAddress(tokenInRaw)) {
-      tokensToFetch.push(tokenInRaw);
-    }
-    if (!currencyOut && isAddress(tokenOutRaw)) {
-      tokensToFetch.push(tokenOutRaw);
-    }
-
-    log.info(`Getting input tokens ${tokensToFetch} from chain`);
-    const tokenAccessor = await tokenProvider.getTokens(tokensToFetch);
-
-    if (!currencyIn) {
-      currencyIn = tokenAccessor.getTokenByAddress(tokenInRaw);
-    }
-    if (!currencyOut) {
-      currencyOut = tokenAccessor.getTokenByAddress(tokenOutRaw);
-    }
-
-    return { currencyIn, currencyOut };
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {
