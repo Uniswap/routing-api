@@ -101,7 +101,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (!token0) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN0_INVALID',
+        errorCode: 'TOKEN_0_INVALID',
         detail: `Could not find token with address "${token0Address}"`,
       };
     }
@@ -109,7 +109,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (!token1) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN1_INVALID',
+        errorCode: 'TOKEN_1_INVALID',
         detail: `Could not find token with address "${token1Address}"`,
       };
     }
@@ -125,8 +125,8 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (token0.equals(token1)) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN_IN_OUT_SAME',
-        detail: `tokenIn and tokenOut must be different`,
+        errorCode: 'TOKEN_0_1_SAME',
+        detail: `token0 and token1 must be different`,
       };
     }
 
