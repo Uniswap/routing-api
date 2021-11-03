@@ -1,9 +1,11 @@
 import {
   AlphaRouter,
+  AlphaRouterConfig,
   HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   IRouter,
   LegacyRouter,
+  LegacyRoutingConfig,
   setGlobalLogger,
   setGlobalMetric,
 } from '@uniswap/smart-order-router';
@@ -16,7 +18,7 @@ import { StaticGasPriceProvider } from '../router-entities/static-gas-price-prov
 import { QuoteQueryParams } from './schema/quote-schema';
 import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor';
 
-export class QuoteHandlerInjector extends InjectorSOR<IRouter<any>, QuoteQueryParams> {
+export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig | LegacyRoutingConfig>, QuoteQueryParams> {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,

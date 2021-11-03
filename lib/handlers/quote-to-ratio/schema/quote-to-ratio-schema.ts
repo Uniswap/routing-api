@@ -93,5 +93,23 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
     numerator: Joi.string(),
     denominator: Joi.string(),
   }).required(),
-  postSwapTargetPool: Joi.any().required(),
+  postSwapTargetPool:Joi.object({
+    address: Joi.string().alphanum().max(42).required(),
+    tokenIn: Joi.object({
+      address: Joi.string().alphanum().max(42).required(),
+      chainId: Joi.number().valid(1, 4).required(),
+      symbol: Joi.string().alphanum().required(),
+      decimals: Joi.string().alphanum().required(),
+    }),
+    tokenOut: Joi.object({
+      address: Joi.string().alphanum().max(42).required(),
+      chainId: Joi.number().valid(1, 4).required(),
+      symbol: Joi.string().alphanum().required(),
+      decimals: Joi.string().alphanum().required(),
+    }),
+    sqrtRatioX96: Joi.number().required(),
+    liquidity: Joi.number().required(),
+    tickCurrent: Joi.number().required(),
+    fee: Joi.number().required(),
+  }).optional(),
 })
