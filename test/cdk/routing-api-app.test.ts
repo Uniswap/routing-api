@@ -10,4 +10,4 @@ test.skip('Empty Stack', () => {
   // expectCDK(stack).to(matchTemplate({
   //   "Resources": {}
   // }, MatchStyle.EXACT))
-});
+})
