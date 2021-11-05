@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi';
+import Joi from '@hapi/joi'
 
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
@@ -17,23 +17,23 @@ export const QuoteQueryParamsJoi = Joi.object({
   deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
   gasPriceWei: Joi.string()
-  .pattern(/^[0-9]+$/)
-  .max(30)
-  .optional(),
-  minSplits: Joi.number().max(7).optional()
-}).and('recipient', 'slippageTolerance', 'deadline');
+    .pattern(/^[0-9]+$/)
+    .max(30)
+    .optional(),
+  minSplits: Joi.number().max(7).optional(),
+}).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
-  tokenInAddress: string;
-  tokenInChainId: number;
-  tokenOutAddress: string;
-  tokenOutChainId: number;
-  amount: string;
-  type: string;
-  recipient?: string;
-  slippageTolerance?: string;
-  deadline?: string;
-  algorithm?: string;
-  gasPriceWei?: string;
-  minSplits?: number;
-};
+  tokenInAddress: string
+  tokenInChainId: number
+  tokenOutAddress: string
+  tokenOutChainId: number
+  amount: string
+  type: string
+  recipient?: string
+  slippageTolerance?: string
+  deadline?: string
+  algorithm?: string
+  gasPriceWei?: string
+  minSplits?: number
+}

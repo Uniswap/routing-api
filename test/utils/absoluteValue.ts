@@ -1,5 +1,5 @@
-import { Fraction } from '@uniswap/sdk-core';
-import JSBI from 'jsbi';
+import { Fraction } from '@uniswap/sdk-core'
+import JSBI from 'jsbi'
 
 export function absoluteValue(fraction: Fraction): Fraction {
   const numeratorAbs = JSBI.lessThan(fraction.numerator, JSBI.BigInt(0))

@@ -1,25 +1,25 @@
-import Joi from '@hapi/joi';
-import { MethodParameters } from '@uniswap/v3-sdk';
+import Joi from '@hapi/joi'
+import { MethodParameters } from '@uniswap/v3-sdk'
 
 export type TokenInRoute = {
-  address: string;
-  chainId: number;
-  symbol: string;
-  decimals: string;
-};
+  address: string
+  chainId: number
+  symbol: string
+  decimals: string
+}
 
 export type PoolInRoute = {
-  type: 'v3-pool';
-  address: string;
-  tokenIn: TokenInRoute;
-  tokenOut: TokenInRoute;
-  sqrtRatioX96: string;
-  liquidity: string;
-  tickCurrent: string;
-  fee: string;
-  amountIn?: string;
-  amountOut?: string;
-};
+  type: 'v3-pool'
+  address: string
+  tokenIn: TokenInRoute
+  tokenOut: TokenInRoute
+  sqrtRatioX96: string
+  liquidity: string
+  tickCurrent: string
+  fee: string
+  amountIn?: string
+  amountOut?: string
+}
 
 export const QuoteResponseSchemaJoi = Joi.object().keys({
   quoteId: Joi.string().required(),
@@ -41,23 +41,23 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
   }).optional(),
-});
+})
 
 export type QuoteResponse = {
-  quoteId: string;
-  amount: string;
-  amountDecimals: string;
-  quote: string;
-  quoteDecimals: string;
-  quoteGasAdjusted: string;
-  quoteGasAdjustedDecimals: string;
-  gasUseEstimate: string;
-  gasUseEstimateQuote: string;
-  gasUseEstimateQuoteDecimals: string;
-  gasUseEstimateUSD: string;
-  gasPriceWei: string;
-  blockNumber: string;
-  route: Array<PoolInRoute[]>;
-  routeString: string;
-  methodParameters?: MethodParameters;
-};
+  quoteId: string
+  amount: string
+  amountDecimals: string
+  quote: string
+  quoteDecimals: string
+  quoteGasAdjusted: string
+  quoteGasAdjustedDecimals: string
+  gasUseEstimate: string
+  gasUseEstimateQuote: string
+  gasUseEstimateQuoteDecimals: string
+  gasUseEstimateUSD: string
+  gasPriceWei: string
+  blockNumber: string
+  route: Array<PoolInRoute[]>
+  routeString: string
+  methodParameters?: MethodParameters
+}

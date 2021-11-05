@@ -8,4 +8,4 @@ module.exports = {
   testTimeout: 15000,
   setupFiles: ['dotenv/config'],
   setupFilesAfterEnv: ['jest-expect-message', 'jest-sinon'],
-};
+}

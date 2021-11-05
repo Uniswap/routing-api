@@ -7,17 +7,20 @@ import {
   setGlobalLogger,
   setGlobalMetric,
   SwapAndAddConfig,
-} from '@uniswap/smart-order-router';
-import { MetricsLogger } from 'aws-embedded-metrics';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { default as bunyan, default as Logger } from 'bunyan';
-import { BigNumber } from 'ethers';
-import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger';
-import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider';
-import { QuoteToRatioQueryParams } from './schema/quote-to-ratio-schema';
-import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor';
+} from '@uniswap/smart-order-router'
+import { MetricsLogger } from 'aws-embedded-metrics'
+import { APIGatewayProxyEvent, Context } from 'aws-lambda'
+import { default as bunyan, default as Logger } from 'bunyan'
+import { BigNumber } from 'ethers'
+import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor'
+import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
+import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
+import { QuoteToRatioQueryParams } from './schema/quote-to-ratio-schema'
 
-export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>, QuoteToRatioQueryParams> {
+export class QuoteToRatioHandlerInjector extends InjectorSOR<
+  ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>,
+  QuoteToRatioQueryParams
+> {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,
@@ -27,9 +30,9 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
     log: Logger,
     metricsLogger: MetricsLogger
   ): Promise<RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>> {
-    const requestId = context.awsRequestId;
-    const quoteId = requestId.substring(0, 5);
-    const logLevel = bunyan.INFO;
+    const requestId = context.awsRequestId
+    const quoteId = requestId.substring(0, 5)
+    const logLevel = bunyan.INFO
 
     const {
       token0Address,
@@ -40,8 +43,8 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
       token1Balance,
       tickLower,
       tickUpper,
-      gasPriceWei
-    } = requestQueryParams;
+      gasPriceWei,
+    } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -54,23 +57,23 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
       token1Balance,
       tickLower,
       tickUpper,
-    });
-    setGlobalLogger(log);
+    })
+    setGlobalLogger(log)
 
-    metricsLogger.setNamespace('Uniswap');
-    metricsLogger.setDimensions({ Service: 'RoutingAPI' });
-    const metric = new AWSMetricsLogger(metricsLogger);
-    setGlobalMetric(metric);
+    metricsLogger.setNamespace('Uniswap')
+    metricsLogger.setDimensions({ Service: 'RoutingAPI' })
+    const metric = new AWSMetricsLogger(metricsLogger)
+    setGlobalMetric(metric)
 
     // Today API is restricted such that both tokens must be on the same chain.
-    const chainId = token0ChainId;
-    const chainIdEnum = ID_TO_CHAIN_ID(chainId);
+    const chainId = token0ChainId
+    const chainIdEnum = ID_TO_CHAIN_ID(chainId)
 
-    const { dependencies } = containerInjected;
+    const { dependencies } = containerInjected
 
     if (!dependencies[chainIdEnum]) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
-      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`);
+      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`)
     }
 
     const {
@@ -82,12 +85,12 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
       subgraphProvider,
       blockedTokenListProvider,
       quoteProvider,
-      gasPriceProvider: gasPriceProviderOnChain
-    } = dependencies[chainIdEnum]!;
+      gasPriceProvider: gasPriceProviderOnChain,
+    } = dependencies[chainIdEnum]!
 
-    let gasPriceProvider = gasPriceProviderOnChain;
+    let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
-      const gasPriceWeiBN = BigNumber.from(gasPriceWei);
+      const gasPriceWeiBN = BigNumber.from(gasPriceWei)
       gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
     }
 
@@ -102,7 +105,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
       gasModelFactory: new HeuristicGasModelFactory(),
       blockedTokenListProvider,
       tokenProvider,
-    });
+    })
 
     return {
       chainId: chainIdEnum,
@@ -113,6 +116,6 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<ISwapToRatio<AlphaR
       poolProvider,
       tokenProvider,
       tokenListProvider,
-    };
+    }
   }
 }

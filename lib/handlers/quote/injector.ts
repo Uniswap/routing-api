@@ -8,17 +8,20 @@ import {
   LegacyRoutingConfig,
   setGlobalLogger,
   setGlobalMetric,
-} from '@uniswap/smart-order-router';
-import { MetricsLogger } from 'aws-embedded-metrics';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { default as bunyan, default as Logger } from 'bunyan';
-import { BigNumber } from 'ethers';
-import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger';
-import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider';
-import { QuoteQueryParams } from './schema/quote-schema';
-import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor';
+} from '@uniswap/smart-order-router'
+import { MetricsLogger } from 'aws-embedded-metrics'
+import { APIGatewayProxyEvent, Context } from 'aws-lambda'
+import { default as bunyan, default as Logger } from 'bunyan'
+import { BigNumber } from 'ethers'
+import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor'
+import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
+import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
+import { QuoteQueryParams } from './schema/quote-schema'
 
-export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig | LegacyRoutingConfig>, QuoteQueryParams> {
+export class QuoteHandlerInjector extends InjectorSOR<
+  IRouter<AlphaRouterConfig | LegacyRoutingConfig>,
+  QuoteQueryParams
+> {
   public async getRequestInjected(
     containerInjected: ContainerInjected,
     _requestBody: void,
@@ -28,19 +31,11 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
     log: Logger,
     metricsLogger: MetricsLogger
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
-    const requestId = context.awsRequestId;
-    const quoteId = requestId.substring(0, 5);
-    const logLevel = bunyan.INFO;
+    const requestId = context.awsRequestId
+    const quoteId = requestId.substring(0, 5)
+    const logLevel = bunyan.INFO
 
-    const {
-      tokenInAddress,
-      tokenInChainId,
-      tokenOutAddress,
-      amount,
-      type,
-      algorithm,
-      gasPriceWei
-    } = requestQueryParams;
+    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -52,23 +47,23 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       amount,
       type,
       algorithm,
-    });
-    setGlobalLogger(log);
+    })
+    setGlobalLogger(log)
 
-    metricsLogger.setNamespace('Uniswap');
-    metricsLogger.setDimensions({ Service: 'RoutingAPI' });
-    const metric = new AWSMetricsLogger(metricsLogger);
-    setGlobalMetric(metric);
+    metricsLogger.setNamespace('Uniswap')
+    metricsLogger.setDimensions({ Service: 'RoutingAPI' })
+    const metric = new AWSMetricsLogger(metricsLogger)
+    setGlobalMetric(metric)
 
     // Today API is restricted such that both tokens must be on the same chain.
-    const chainId = tokenInChainId;
-    const chainIdEnum = ID_TO_CHAIN_ID(chainId);
+    const chainId = tokenInChainId
+    const chainIdEnum = ID_TO_CHAIN_ID(chainId)
 
-    const { dependencies } = containerInjected;
+    const { dependencies } = containerInjected
 
     if (!dependencies[chainIdEnum]) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
-      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`);
+      throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`)
     }
 
     const {
@@ -80,16 +75,16 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       subgraphProvider,
       blockedTokenListProvider,
       quoteProvider,
-      gasPriceProvider: gasPriceProviderOnChain
-    } = dependencies[chainIdEnum]!;
+      gasPriceProvider: gasPriceProviderOnChain,
+    } = dependencies[chainIdEnum]!
 
-    let gasPriceProvider = gasPriceProviderOnChain;
+    let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
-      const gasPriceWeiBN = BigNumber.from(gasPriceWei);
+      const gasPriceWeiBN = BigNumber.from(gasPriceWei)
       gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
     }
 
-    let router;
+    let router
     switch (algorithm) {
       case 'legacy':
         router = new LegacyRouter({
@@ -98,8 +93,8 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
           poolProvider,
           quoteProvider,
           tokenProvider,
-        });
-        break;
+        })
+        break
       case 'alpha':
       default:
         router = new AlphaRouter({
@@ -113,8 +108,8 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
           gasModelFactory: new HeuristicGasModelFactory(),
           blockedTokenListProvider,
           tokenProvider,
-        });
-        break;
+        })
+        break
     }
 
     return {
@@ -126,6 +121,6 @@ export class QuoteHandlerInjector extends InjectorSOR<IRouter<AlphaRouterConfig 
       poolProvider,
       tokenProvider,
       tokenListProvider,
-    };
+    }
   }
 }

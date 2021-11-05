@@ -1,17 +1,13 @@
 /**
  * ts-node --project=tsconfig.cdk.json scripts/get_quote.ts
  */
-import axios, { AxiosResponse } from 'axios';
-import dotenv from 'dotenv';
-import {
-  QuoteQueryParams,
-} from '../lib/handlers/quote/schema/quote-schema';
-import {
-  QuoteResponse,
-} from '../lib/handlers/schema'
-dotenv.config();
+import axios, { AxiosResponse } from 'axios'
+import dotenv from 'dotenv'
+import { QuoteQueryParams } from '../lib/handlers/quote/schema/quote-schema'
+import { QuoteResponse } from '../lib/handlers/schema'
+dotenv.config()
 
-(async function () {
+;(async function () {
   const quotePost: QuoteQueryParams = {
     tokenInAddress: 'MKR',
     tokenInChainId: 1,
@@ -23,13 +19,12 @@ dotenv.config();
     slippageTolerance: '5',
     deadline: '360',
     algorithm: 'alpha',
-  };
+  }
 
-  const response: AxiosResponse<QuoteResponse> =
-    await axios.post<QuoteResponse>(
-      process.env.UNISWAP_ROUTING_API! + 'quote',
-      quotePost
-    );
+  const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(
+    process.env.UNISWAP_ROUTING_API! + 'quote',
+    quotePost
+  )
 
-  console.log({ response });
-})();
+  console.log({ response })
+})()

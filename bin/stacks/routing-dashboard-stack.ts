@@ -1,23 +1,19 @@
-import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch';
-import * as cdk from '@aws-cdk/core';
+import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch'
+import * as cdk from '@aws-cdk/core'
 
-export const NAMESPACE = 'Uniswap';
+export const NAMESPACE = 'Uniswap'
 
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
-  apiName: string;
-  lambdaName: string;
+  apiName: string
+  lambdaName: string
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
-  constructor(
-    scope: cdk.Construct,
-    name: string,
-    props: RoutingDashboardProps
-  ) {
-    super(scope, name, props);
+  constructor(scope: cdk.Construct, name: string, props: RoutingDashboardProps) {
+    super(scope, name, props)
 
-    const { apiName, lambdaName } = props;
-    const region = cdk.Stack.of(this).region;
+    const { apiName, lambdaName } = props
+    const region = cdk.Stack.of(this).region
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
@@ -32,27 +28,9 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             properties: {
               metrics: [
-                [
-                  'AWS/ApiGateway',
-                  'Count',
-                  'ApiName',
-                  apiName,
-                  { label: 'Requests' },
-                ],
-                [
-                  '.',
-                  '5XXError',
-                  '.',
-                  '.',
-                  { label: '5XXError Responses', color: '#ff7f0e' },
-                ],
-                [
-                  '.',
-                  '4XXError',
-                  '.',
-                  '.',
-                  { label: '4XXError Responses', color: '#2ca02c' },
-                ],
+                ['AWS/ApiGateway', 'Count', 'ApiName', apiName, { label: 'Requests' }],
+                ['.', '5XXError', '.', '.', { label: '5XXError Responses', color: '#ff7f0e' }],
+                ['.', '4XXError', '.', '.', { label: '4XXError Responses', color: '#2ca02c' }],
               ],
               view: 'timeSeries',
               stacked: false,
@@ -150,13 +128,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             properties: {
               metrics: [
-                [
-                  NAMESPACE,
-                  'TokenListLoad',
-                  'Service',
-                  'RoutingAPI',
-                  { color: '#c5b0d5' },
-                ],
+                [NAMESPACE, 'TokenListLoad', 'Service', 'RoutingAPI', { color: '#c5b0d5' }],
                 ['.', 'GasPriceLoad', '.', '.', { color: '#17becf' }],
                 ['.', 'PoolsLoad', '.', '.', { color: '#e377c2' }],
                 ['.', 'SubgraphPoolsLoad', '.', '.', { color: '#1f77b4' }],
@@ -206,12 +178,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               view: 'timeSeries',
               stacked: false,
               metrics: [
-                [
-                  'AWS/Lambda',
-                  'ProvisionedConcurrentExecutions',
-                  'FunctionName',
-                  lambdaName,
-                ],
+                ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', lambdaName],
                 ['.', 'ConcurrentExecutions', '.', '.'],
                 ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
               ],
@@ -222,7 +189,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
         ],
       }),
-    });
+    })
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIQuoteProviderDashboard', {
       dashboardName: `RoutingQuoteProviderDashboard`,
@@ -236,14 +203,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             x: 0,
             type: 'metric',
             properties: {
-              metrics: [
-                [
-                  NAMESPACE,
-                  'QuoteApproxGasUsedPerSuccessfulCall',
-                  'Service',
-                  'RoutingAPI',
-                ],
-              ],
+              metrics: [[NAMESPACE, 'QuoteApproxGasUsedPerSuccessfulCall', 'Service', 'RoutingAPI']],
               view: 'timeSeries',
               stacked: false,
               region,
@@ -263,7 +223,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 [NAMESPACE, 'QuoteTotalCallsToProvider', 'Service', 'RoutingAPI'],
                 ['.', 'QuoteExpectedCallsToProvider', '.', '.'],
                 ['.', 'QuoteNumRetriedCalls', '.', '.'],
-                ['.', 'QuoteNumRetryLoops', '.', '.']
+                ['.', 'QuoteNumRetryLoops', '.', '.'],
               ],
               view: 'timeSeries',
               stacked: false,
@@ -281,12 +241,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             properties: {
               metrics: [
-                [
-                  NAMESPACE,
-                  'QuoteOutOfGasExceptionRetry',
-                  'Service',
-                  'RoutingAPI',
-                ],
+                [NAMESPACE, 'QuoteOutOfGasExceptionRetry', 'Service', 'RoutingAPI'],
                 ['.', 'QuoteSuccessRateRetry', '.', '.'],
                 ['.', 'QuoteBlockHeaderNotFoundRetry', '.', '.'],
                 ['.', 'QuoteTimeoutRetry', '.', '.'],
@@ -303,6 +258,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
         ],
       }),
-    });
+    })
   }
 }

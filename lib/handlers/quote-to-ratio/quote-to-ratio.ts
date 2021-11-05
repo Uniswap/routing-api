@@ -1,30 +1,25 @@
-import Joi from '@hapi/joi';
-import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core';
-import { Position } from '@uniswap/v3-sdk';
+import Joi from '@hapi/joi'
+import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ISwapToRatio,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapConfig,
   SwapAndAddConfig,
-} from '@uniswap/smart-order-router';
-import JSBI from 'jsbi';
-import {
-  APIGLambdaHandler,
-  ErrorResponse,
-  HandleRequestParams,
-  Response,
-} from '../handler';
-import { PoolInRoute } from '../schema';
-import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared';
-import { ContainerInjected, RequestInjected } from '../injector-sor';
+  SwapConfig,
+} from '@uniswap/smart-order-router'
+import { Position } from '@uniswap/v3-sdk'
+import JSBI from 'jsbi'
+import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
+import { ContainerInjected, RequestInjected } from '../injector-sor'
+import { PoolInRoute } from '../schema'
+import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
   QuoteToRatioResponse,
   QuotetoRatioResponseSchemaJoi,
-} from './schema/quote-to-ratio-schema';
+} from './schema/quote-to-ratio-schema'
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -59,51 +54,26 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         errorTolerance,
         maxIterations,
       },
-      requestInjected: {
-        router,
-        log,
-        id: quoteId,
-        chainId,
-        tokenProvider,
-        tokenListProvider,
-        poolProvider,
-        metric,
-      },
-    } = params;
+      requestInjected: { router, log, id: quoteId, chainId, tokenProvider, tokenListProvider, poolProvider, metric },
+    } = params
 
     // Parse user provided token address/symbol to Currency object.
-    const before = Date.now();
+    const before = Date.now()
 
-    const type = 'exactIn';
+    const type = 'exactIn'
 
-    const token0 = await tokenStringToCurrency(
-      tokenListProvider,
-      tokenProvider,
-      token0Address,
-      token0ChainId,
-      log
-    );
+    const token0 = await tokenStringToCurrency(tokenListProvider, tokenProvider, token0Address, token0ChainId, log)
 
-    const token1 = await tokenStringToCurrency(
-      tokenListProvider,
-      tokenProvider,
-      token1Address,
-      token1ChainId,
-      log
-    );
+    const token1 = await tokenStringToCurrency(tokenListProvider, tokenProvider, token1Address, token1ChainId, log)
 
-    metric.putMetric(
-      'Token01StrToToken',
-      Date.now() - before,
-      MetricLoggerUnit.Milliseconds
-    );
+    metric.putMetric('Token01StrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
     if (!token0) {
       return {
         statusCode: 400,
         errorCode: 'TOKEN_0_INVALID',
         detail: `Could not find token with address "${token0Address}"`,
-      };
+      }
     }
 
     if (!token1) {
@@ -111,7 +81,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         statusCode: 400,
         errorCode: 'TOKEN_1_INVALID',
         detail: `Could not find token with address "${token1Address}"`,
-      };
+      }
     }
 
     if (token0ChainId != token1ChainId) {
@@ -119,7 +89,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
         detail: `Cannot request quotes for tokens on different chains`,
-      };
+      }
     }
 
     if (token0.equals(token1)) {
@@ -127,56 +97,40 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         statusCode: 400,
         errorCode: 'TOKEN_0_1_SAME',
         detail: `token0 and token1 must be different`,
-      };
+      }
     }
 
     const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
-    };
+    }
 
-    let swapParams: SwapConfig | undefined = undefined;
+    let swapParams: SwapConfig | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
-      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100);
-      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000);
+      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
+      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
       swapParams = {
         deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
-      };
+      }
     }
 
-    const token0Balance = CurrencyAmount.fromRawAmount(
-      token0,
-      JSBI.BigInt(token0BalanceRaw)
-    );
-    const token1Balance = CurrencyAmount.fromRawAmount(
-      token1,
-      JSBI.BigInt(token1BalanceRaw)
-    );
-    const poolAccessor = await poolProvider.getPools([[
-      token0.wrapped,
-      token1.wrapped,
-      feeAmount,
-    ]])
-    const pool = poolAccessor.getPool(
-      token0.wrapped,
-      token1.wrapped,
-      feeAmount
-    )
+    const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceRaw))
+    const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceRaw))
+    const poolAccessor = await poolProvider.getPools([[token0.wrapped, token1.wrapped, feeAmount]])
+    const pool = poolAccessor.getPool(token0.wrapped, token1.wrapped, feeAmount)
     if (!pool) {
-      log.error(
-        `Could not find pool.`
-      );
-      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' };
+      log.error(`Could not find pool.`)
+      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
     }
     const position = new Position({
       pool,
       tickLower,
       tickUpper,
       liquidity: 1,
-    });
+    })
     const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
 
     log.info(
@@ -194,7 +148,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         routingConfig: routingConfig,
       },
       `Swap To Ratio Parameters`
-    );
+    )
 
     const swapRoute = await router.routeToRatio(
       token0Balance,
@@ -202,11 +156,11 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       position,
       {
         errorTolerance: errorToleranceFraction,
-        maxIterations
+        maxIterations,
       },
       swapParams,
-      routingConfig,
-    );
+      routingConfig
+    )
 
     if (!swapRoute) {
       log.info(
@@ -217,13 +171,13 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
           token1Balance: token1Balance.quotient.toString(),
         },
         `No route found. 404`
-      );
+      )
 
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
         detail: 'No route found',
-      };
+      }
     }
 
     const {
@@ -239,46 +193,36 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-    } = swapRoute;
+    } = swapRoute
 
-    const routeResponse: Array<PoolInRoute[]> = [];
+    const routeResponse: Array<PoolInRoute[]> = []
 
     for (const subRoute of route) {
       const {
         route: { tokenPath, pools },
         amount,
         quote,
-      } = subRoute;
+      } = subRoute
 
-      const curRoute: PoolInRoute[] = [];
+      const curRoute: PoolInRoute[] = []
       for (let i = 0; i < pools.length; i++) {
-        const nextPool = pools[i];
-        const tokenIn = tokenPath[i];
-        const tokenOut = tokenPath[i + 1];
+        const nextPool = pools[i]
+        const tokenIn = tokenPath[i]
+        const tokenOut = tokenPath[i + 1]
 
-        let edgeAmountIn = undefined;
+        let edgeAmountIn = undefined
         if (i == 0) {
-          edgeAmountIn =
-            type == 'exactIn'
-              ? amount.quotient.toString()
-              : quote.quotient.toString();
+          edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
         }
 
-        let edgeAmountOut = undefined;
+        let edgeAmountOut = undefined
         if (i == pools.length - 1) {
-          edgeAmountOut =
-            type == 'exactIn'
-              ? quote.quotient.toString()
-              : amount.quotient.toString();
+          edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
         }
 
         curRoute.push({
           type: 'v3-pool',
-          address: poolProvider.getPoolAddress(
-            nextPool.token0,
-            nextPool.token1,
-            nextPool.fee
-          ).poolAddress,
+          address: poolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
           tokenIn: {
             chainId: tokenIn.chainId,
             decimals: tokenIn.decimals.toString(),
@@ -297,20 +241,20 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
           tickCurrent: nextPool.tickCurrent.toString(),
           amountIn: edgeAmountIn,
           amountOut: edgeAmountOut,
-        });
+        })
       }
 
-      routeResponse.push(curRoute);
+      routeResponse.push(curRoute)
     }
 
     const tokenIn = trade.inputAmount.currency.wrapped
     const tokenOut = trade.outputAmount.currency.wrapped
 
     const zeroForOne = tokenIn == token0
-    let token0BalanceUpdated: CurrencyAmount<Currency>;
-    let token1BalanceUpdated: CurrencyAmount<Currency>;
-    let optimalRatioAdjusted: Fraction;
-    let optimalRatioDecimal: string;
+    let token0BalanceUpdated: CurrencyAmount<Currency>
+    let token1BalanceUpdated: CurrencyAmount<Currency>
+    let optimalRatioAdjusted: Fraction
+    let optimalRatioDecimal: string
     let newRatioDecimal: string
     if (zeroForOne) {
       token0BalanceUpdated = token0Balance.subtract(trade.inputAmount)
@@ -325,23 +269,21 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token0BalanceUpdated = token0Balance.add(trade.outputAmount)
       token1BalanceUpdated = token1Balance.subtract(trade.inputAmount)
       optimalRatioAdjusted = optimalRatio.invert()
-      optimalRatioDecimal = optimalRatioAdjusted.denominator.toString() == '0'
-        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
-        : optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
-      newRatioDecimal = token1BalanceUpdated.numerator.toString() == '0'
-        ? `0.${'0'.repeat(token1.wrapped.decimals)}`
-        : new Fraction(
-          token0BalanceUpdated.quotient.toString(),
-          token1BalanceUpdated.quotient.toString()
-        ).toFixed(token0.wrapped.decimals)
+      optimalRatioDecimal =
+        optimalRatioAdjusted.denominator.toString() == '0'
+          ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+          : optimalRatioAdjusted.toFixed(token0.wrapped.decimals)
+      newRatioDecimal =
+        token1BalanceUpdated.numerator.toString() == '0'
+          ? `0.${'0'.repeat(token1.wrapped.decimals)}`
+          : new Fraction(token0BalanceUpdated.quotient.toString(), token1BalanceUpdated.quotient.toString()).toFixed(
+              token0.wrapped.decimals
+            )
     }
 
     const postSwapTargetPoolObject = {
-      address: poolProvider.getPoolAddress(
-        postSwapTargetPool.token0,
-        postSwapTargetPool.token1,
-        postSwapTargetPool.fee
-      ).poolAddress,
+      address: poolProvider.getPoolAddress(postSwapTargetPool.token0, postSwapTargetPool.token1, postSwapTargetPool.fee)
+        .poolAddress,
       tokenIn: {
         chainId: tokenIn.chainId,
         decimals: tokenIn.decimals.toString(),
@@ -392,23 +334,23 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
-    };
+    }
 
     return {
       statusCode: 200,
       body: result,
-    };
+    }
   }
 
   protected requestBodySchema(): Joi.ObjectSchema | null {
-    return null;
+    return null
   }
 
   protected requestQueryParamsSchema(): Joi.ObjectSchema | null {
-    return QuoteToRatioQueryParamsJoi;
+    return QuoteToRatioQueryParamsJoi
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
-    return QuotetoRatioResponseSchemaJoi;
+    return QuotetoRatioResponseSchemaJoi
   }
 }

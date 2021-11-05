@@ -14,8 +14,8 @@
     "integ-test": "jest test/integ",
     "cdk": "cdk",
     "fix": "run-s fix:*",
-    "fix:prettier": "prettier \"src/**/*.ts\" --write",
-    "fix:lint": "eslint src --ext .ts --fix"
+    "fix:prettier": "prettier \"lib/**/*.ts\" --write",
+    "fix:lint": "eslint lib --ext .ts --fix"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.77",
@@ -102,6 +102,8 @@
     "uuid": "^3.4.0"
   },
   "prettier": {
+    "printWidth": 120,
+    "semi": false,
     "singleQuote": true
   }
 }

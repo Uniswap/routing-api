@@ -1,61 +1,55 @@
-import Joi from '@hapi/joi';
-import { metricScope, MetricsLogger } from 'aws-embedded-metrics';
+import Joi from '@hapi/joi'
+import { metricScope, MetricsLogger } from 'aws-embedded-metrics'
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyResult,
   Context,
-} from 'aws-lambda';
-import { default as bunyan, default as Logger } from 'bunyan';
+} from 'aws-lambda'
+import { default as bunyan, default as Logger } from 'bunyan'
 
-export type APIGatewayProxyHandler = (
-  event: APIGatewayProxyEvent,
-  context: Context
-) => Promise<APIGatewayProxyResult>;
+export type APIGatewayProxyHandler = (event: APIGatewayProxyEvent, context: Context) => Promise<APIGatewayProxyResult>
 
 export type BaseRInj = {
-  log: Logger;
-  id: string;
-};
+  log: Logger
+  id: string
+}
 
 export type HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams> = {
-  context: Context;
-  event: APIGatewayProxyEvent;
-  requestBody: ReqBody;
-  requestQueryParams: ReqQueryParams;
-  containerInjected: CInj;
-  requestInjected: RInj;
-};
+  context: Context
+  event: APIGatewayProxyEvent
+  requestBody: ReqBody
+  requestQueryParams: ReqQueryParams
+  containerInjected: CInj
+  requestInjected: RInj
+}
 
 export type Response<Res> = {
-  statusCode: 200 | 202;
-  body: Res;
-  headers?: any;
-};
+  statusCode: 200 | 202
+  body: Res
+  headers?: any
+}
 
 export type ErrorResponse = {
-  statusCode: 400 | 403 | 404 | 408 | 409 | 500;
-  errorCode: string;
-  detail?: string;
-};
+  statusCode: 400 | 403 | 404 | 408 | 409 | 500
+  errorCode: string
+  detail?: string
+}
 
 export class UnsupportedChainError extends Error {
-  constructor(public chainId: number) {super()};
-  public name = 'UnsupportedChainError';
-};
+  constructor(public chainId: number) {
+    super()
+  }
+  public name = 'UnsupportedChainError'
+}
 
-export abstract class Injector<
-  CInj,
-  RInj extends BaseRInj,
-  ReqBody,
-  ReqQueryParams
-> {
-  private containerInjected: CInj;
+export abstract class Injector<CInj, RInj extends BaseRInj, ReqBody, ReqQueryParams> {
+  private containerInjected: CInj
   public constructor(protected injectorName: string) {}
 
   public async build() {
-    this.containerInjected = await this.buildContainerInjected();
-    return this;
+    this.containerInjected = await this.buildContainerInjected()
+    return this
   }
 
   public abstract getRequestInjected(
@@ -66,17 +60,15 @@ export abstract class Injector<
     context: Context,
     log: Logger,
     metrics: MetricsLogger
-  ): Promise<RInj>;
+  ): Promise<RInj>
 
-  public abstract buildContainerInjected(): Promise<CInj>;
+  public abstract buildContainerInjected(): Promise<CInj>
 
   public async getContainerInjected(): Promise<CInj> {
     if (this.containerInjected === undefined) {
-      throw new Error(
-        'Container injected undefined. Must call build() before using.'
-      );
+      throw new Error('Container injected undefined. Must call build() before using.')
     }
-    return this.containerInjected;
+    return this.containerInjected
   }
 }
 
@@ -88,86 +80,68 @@ const INTERNAL_ERROR = (id?: string) => {
       detail: 'Unexpected error',
       id,
     }),
-  };
-};
+  }
+}
 
-export abstract class APIGLambdaHandler<
-  CInj,
-  RInj extends BaseRInj,
-  ReqBody,
-  ReqQueryParams,
-  Res
-> {
+export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, ReqQueryParams, Res> {
   constructor(
     private handlerName: string,
-    private injectorPromise: Promise<
-      Injector<CInj, RInj, ReqBody, ReqQueryParams>
-    >
+    private injectorPromise: Promise<Injector<CInj, RInj, ReqBody, ReqQueryParams>>
   ) {}
 
   get handler(): APIGatewayProxyHandler {
-    return async (
-      event: APIGatewayProxyEvent,
-      context: Context
-    ): Promise<APIGatewayProxyResult> => {
-      const handler = this.buildHandler();
+    return async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+      const handler = this.buildHandler()
 
-      const response = await handler(event, context);
+      const response = await handler(event, context)
 
       return {
         ...response,
         headers: {
           ...response.headers,
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers':
-            'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+          'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
           'Access-Control-Allow-Credentials': true,
           'Content-Type': 'application/json',
         },
-      };
-    };
+      }
+    }
   }
 
   private buildHandler(): APIGatewayProxyHandler {
     return metricScope(
       (metric: MetricsLogger) =>
-        async (
-          event: APIGatewayProxyEvent,
-          context: Context
-        ): Promise<APIGatewayProxyResult> => {
+        async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
           let log: Logger = bunyan.createLogger({
             name: this.handlerName,
             serializers: bunyan.stdSerializers,
             level: bunyan.INFO,
             requestId: context.awsRequestId,
-          });
+          })
 
-          log.info({ event, context }, 'Request started.');
+          log.info({ event, context }, 'Request started.')
 
-          let requestBody: ReqBody;
-          let requestQueryParams: ReqQueryParams;
+          let requestBody: ReqBody
+          let requestQueryParams: ReqQueryParams
           try {
-            const requestValidation = await this.parseAndValidateRequest(
-              event,
-              log
-            );
+            const requestValidation = await this.parseAndValidateRequest(event, log)
 
             if (requestValidation.state == 'invalid') {
-              return requestValidation.errorResponse;
+              return requestValidation.errorResponse
             }
 
-            requestBody = requestValidation.requestBody;
-            requestQueryParams = requestValidation.requestQueryParams;
+            requestBody = requestValidation.requestBody
+            requestQueryParams = requestValidation.requestQueryParams
           } catch (err) {
-            log.error({ err }, 'Unexpected error validating request');
-            return INTERNAL_ERROR();
+            log.error({ err }, 'Unexpected error validating request')
+            return INTERNAL_ERROR()
           }
 
-          const injector = await this.injectorPromise;
+          const injector = await this.injectorPromise
 
-          const containerInjected = await injector.getContainerInjected();
+          const containerInjected = await injector.getContainerInjected()
 
-          let requestInjected: RInj;
+          let requestInjected: RInj
           try {
             requestInjected = await injector.getRequestInjected(
               containerInjected,
@@ -177,21 +151,18 @@ export abstract class APIGLambdaHandler<
               context,
               log,
               metric
-            );
+            )
           } catch (err) {
-            log.error(
-              { err, event },
-              'Unexpected error building request injected.'
-            );
-            return INTERNAL_ERROR();
+            log.error({ err, event }, 'Unexpected error building request injected.')
+            return INTERNAL_ERROR()
           }
 
-          const { id } = requestInjected;
+          const { id } = requestInjected
 
-          ({ log } = requestInjected);
+          ;({ log } = requestInjected)
 
-          let statusCode: number;
-          let body: Res;
+          let statusCode: number
+          let body: Res
 
           try {
             const handleRequestResult = await this.handleRequest({
@@ -201,72 +172,60 @@ export abstract class APIGLambdaHandler<
               requestQueryParams,
               containerInjected,
               requestInjected,
-            });
+            })
 
             if (this.isError(handleRequestResult)) {
-              log.info({ handleRequestResult }, 'Handler did not return a 200');
-              const { statusCode, detail, errorCode } = handleRequestResult;
-              const response = JSON.stringify({ detail, errorCode, id });
+              log.info({ handleRequestResult }, 'Handler did not return a 200')
+              const { statusCode, detail, errorCode } = handleRequestResult
+              const response = JSON.stringify({ detail, errorCode, id })
 
-              log.info(
-                { statusCode, response },
-                `Request ended. ${statusCode}`
-              );
+              log.info({ statusCode, response }, `Request ended. ${statusCode}`)
               return {
                 statusCode,
                 body: response,
-              };
+              }
             } else {
-              log.info(
-                { requestBody, requestQueryParams },
-                'Handler returned 200'
-              );
-              ({ body, statusCode } = handleRequestResult);
+              log.info({ requestBody, requestQueryParams }, 'Handler returned 200')
+              ;({ body, statusCode } = handleRequestResult)
             }
           } catch (err) {
-            log.error({ err }, 'Unexpected error in handler');
-            return INTERNAL_ERROR(id);
+            log.error({ err }, 'Unexpected error in handler')
+            return INTERNAL_ERROR(id)
           }
 
-          let response: Res;
+          let response: Res
           try {
-            const responseValidation = await this.parseAndValidateResponse(
-              body,
-              id,
-              log
-            );
+            const responseValidation = await this.parseAndValidateResponse(body, id, log)
 
             if (responseValidation.state == 'invalid') {
-              return responseValidation.errorResponse;
+              return responseValidation.errorResponse
             }
 
-            response = responseValidation.response;
+            response = responseValidation.response
           } catch (err) {
-            log.error({ err }, 'Unexpected error validating response');
-            return INTERNAL_ERROR(id);
+            log.error({ err }, 'Unexpected error validating response')
+            return INTERNAL_ERROR(id)
           }
 
-          log.info({ statusCode, response }, `Request ended. ${statusCode}`);
+          log.info({ statusCode, response }, `Request ended. ${statusCode}`)
           return {
             statusCode,
             body: JSON.stringify(response),
-          };
+          }
         }
-    );
+    )
   }
 
   public abstract handleRequest(
     params: HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams>
-  ): Promise<Response<Res> | ErrorResponse>;
+  ): Promise<Response<Res> | ErrorResponse>
 
-  protected abstract requestBodySchema(): Joi.ObjectSchema | null;
-  protected abstract requestQueryParamsSchema(): Joi.ObjectSchema | null;
-  protected abstract responseBodySchema(): Joi.ObjectSchema | null;
+  protected abstract requestBodySchema(): Joi.ObjectSchema | null
+  protected abstract requestQueryParamsSchema(): Joi.ObjectSchema | null
+  protected abstract responseBodySchema(): Joi.ObjectSchema | null
 
-  private isError(
-    result: Response<Res> | ErrorResponse
-  ): result is ErrorResponse {
-    return result.statusCode != 200 && result.statusCode != 202;
+  private isError(result: Response<Res> | ErrorResponse): result is ErrorResponse {
+    return result.statusCode != 200 && result.statusCode != 202
   }
 
   private async parseAndValidateRequest(
@@ -274,17 +233,17 @@ export abstract class APIGLambdaHandler<
     log: Logger
   ): Promise<
     | {
-        state: 'valid';
-        requestBody: ReqBody;
-        requestQueryParams: ReqQueryParams;
+        state: 'valid'
+        requestBody: ReqBody
+        requestQueryParams: ReqQueryParams
       }
     | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
   > {
-    let bodyRaw: any;
+    let bodyRaw: any
 
     if (event.body) {
       try {
-        bodyRaw = JSON.parse(event.body);
+        bodyRaw = JSON.parse(event.body)
       } catch (err) {
         return {
           state: 'invalid',
@@ -295,23 +254,22 @@ export abstract class APIGLambdaHandler<
               errorCode: 'VALIDATION_ERROR',
             }),
           },
-        };
+        }
       }
     }
 
-    let queryParamsRaw: APIGatewayProxyEventQueryStringParameters | null =
-      event.queryStringParameters;
-    const queryParamsSchema = this.requestQueryParamsSchema();
+    let queryParamsRaw: APIGatewayProxyEventQueryStringParameters | null = event.queryStringParameters
+    const queryParamsSchema = this.requestQueryParamsSchema()
 
-    let queryParams: ReqQueryParams | undefined;
+    let queryParams: ReqQueryParams | undefined
     if (queryParamsRaw && queryParamsSchema) {
       const queryParamsValidation = queryParamsSchema.validate(queryParamsRaw, {
         allowUnknown: true, // Makes API schema changes and rollbacks easier.
         stripUnknown: true,
-      });
+      })
 
       if (queryParamsValidation.error) {
-        log.info({ queryParamsValidation }, 'Request failed validation');
+        log.info({ queryParamsValidation }, 'Request failed validation')
         return {
           state: 'invalid',
           errorResponse: {
@@ -321,23 +279,23 @@ export abstract class APIGLambdaHandler<
               errorCode: 'VALIDATION_ERROR',
             }),
           },
-        };
+        }
       }
 
-      queryParams = queryParamsValidation.value as ReqQueryParams;
+      queryParams = queryParamsValidation.value as ReqQueryParams
     }
 
-    const bodySchema = this.requestBodySchema();
+    const bodySchema = this.requestBodySchema()
 
-    let body: ReqBody | undefined;
+    let body: ReqBody | undefined
     if (bodyRaw && bodySchema) {
       const bodyValidation = bodySchema.validate(bodyRaw, {
         allowUnknown: true, // Makes API schema changes and rollbacks easier.
         stripUnknown: true,
-      });
+      })
 
       if (bodyValidation.error) {
-        log.info({ bodyValidation }, 'Request failed validation');
+        log.info({ bodyValidation }, 'Request failed validation')
         return {
           state: 'invalid',
           errorResponse: {
@@ -347,49 +305,46 @@ export abstract class APIGLambdaHandler<
               errorCode: 'VALIDATION_ERROR',
             }),
           },
-        };
+        }
       }
 
-      body = bodyValidation.value;
+      body = bodyValidation.value
     }
 
     return {
       state: 'valid',
       requestBody: body as ReqBody,
       requestQueryParams: queryParams as ReqQueryParams,
-    };
+    }
   }
 
   private async parseAndValidateResponse(
     body: Res,
     id: string,
     log: Logger
-  ): Promise<
-    | { state: 'valid'; response: Res }
-    | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
-  > {
-    const responseSchema = this.responseBodySchema();
+  ): Promise<{ state: 'valid'; response: Res } | { state: 'invalid'; errorResponse: APIGatewayProxyResult }> {
+    const responseSchema = this.responseBodySchema()
 
     if (!responseSchema) {
-      return { state: 'valid', response: body as Res };
+      return { state: 'valid', response: body as Res }
     }
 
     const res = responseSchema.validate(body, {
       allowUnknown: true,
       stripUnknown: true, // Ensure no unexpected fields returned to users.
-    });
+    })
 
     if (res.error) {
       log.error(
         { error: res.error?.details, errors: res.errors?.details, body },
         'Unexpected error. Response failed validation.'
-      );
+      )
       return {
         state: 'invalid',
         errorResponse: INTERNAL_ERROR(id),
-      };
+      }
     }
 
-    return { state: 'valid', response: res.value as Res };
+    return { state: 'valid', response: res.value as Res }
   }
 }

@@ -1,6 +1,9 @@
+import { Token } from '@uniswap/sdk-core'
 import {
   CachingGasStationProvider,
   CachingPoolProvider,
+  CachingTokenListProvider,
+  CachingTokenProviderWithFallback,
   ChainId,
   EIP1559GasPriceProvider,
   ID_TO_NETWORK_NAME,
@@ -14,49 +17,46 @@ import {
   PoolProvider,
   QuoteProvider,
   setGlobalLogger,
-  CachingTokenListProvider,
   TokenProvider,
-  CachingTokenProviderWithFallback,
   UniswapMulticallProvider,
-} from '@uniswap/smart-order-router';
-import { BaseRInj, Injector } from './handler';
-import {  ethers } from 'ethers';
-import { default as bunyan, default as Logger } from 'bunyan';
-import { Token } from '@uniswap/sdk-core';
-import NodeCache from 'node-cache';
-import { AWSTokenListProvider } from './router-entities/aws-token-list-provider';
-import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider';
-import { TokenList } from '@uniswap/token-lists';
-import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json';
+} from '@uniswap/smart-order-router'
+import { TokenList } from '@uniswap/token-lists'
+import { default as bunyan, default as Logger } from 'bunyan'
+import { ethers } from 'ethers'
+import NodeCache from 'node-cache'
+import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
+import { BaseRInj, Injector } from './handler'
+import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
+import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 
-const SUPPORTED_CHAINS: ChainId[] = [ ChainId.MAINNET, ChainId.RINKEBY ];
-const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
+const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY]
+const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
-  chainId: ChainId;
-  metric: IMetric;
-  poolProvider: IPoolProvider;
-  tokenProvider: ITokenProvider;
-  tokenListProvider: ITokenListProvider;
-  router: Router;
+  chainId: ChainId
+  metric: IMetric
+  poolProvider: IPoolProvider
+  tokenProvider: ITokenProvider
+  tokenListProvider: ITokenListProvider
+  router: Router
 }
 
 export type ContainerDependencies = {
-  provider: ethers.providers.JsonRpcProvider;
-  subgraphProvider: ISubgraphProvider;
-  tokenListProvider: ITokenListProvider;
-  gasPriceProvider: IGasPriceProvider;
-  tokenProviderFromTokenList: ITokenProvider;
-  blockedTokenListProvider: ITokenListProvider;
-  poolProvider: IPoolProvider;
-  tokenProvider: ITokenProvider;
-  multicallProvider: UniswapMulticallProvider;
-  quoteProvider: QuoteProvider;
-};
+  provider: ethers.providers.JsonRpcProvider
+  subgraphProvider: ISubgraphProvider
+  tokenListProvider: ITokenListProvider
+  gasPriceProvider: IGasPriceProvider
+  tokenProviderFromTokenList: ITokenProvider
+  blockedTokenListProvider: ITokenListProvider
+  poolProvider: IPoolProvider
+  tokenProvider: ITokenProvider
+  multicallProvider: UniswapMulticallProvider
+  quoteProvider: QuoteProvider
+}
 
 export interface ContainerInjected {
   dependencies: {
-    [chainId in ChainId]?: ContainerDependencies;
+    [chainId in ChainId]?: ContainerDependencies
   }
 }
 
@@ -71,16 +71,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       name: this.injectorName,
       serializers: bunyan.stdSerializers,
       level: bunyan.INFO,
-    });
-    setGlobalLogger(log);
+    })
+    setGlobalLogger(log)
 
-    const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } =
-      process.env;
+    const { POOL_CACHE_BUCKET, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } = process.env
 
-    const dependenciesByChain: { [chainId in ChainId]?: ContainerDependencies } = {};
+    const dependenciesByChain: {
+      [chainId in ChainId]?: ContainerDependencies
+    } = {}
 
     for (const chainId of SUPPORTED_CHAINS) {
-      const chainName = ID_TO_NETWORK_NAME(chainId);
+      const chainName = ID_TO_NETWORK_NAME(chainId)
 
       const provider = new ethers.providers.JsonRpcProvider(
         {
@@ -90,24 +91,24 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           timeout: 5000,
         },
         chainName
-      );
+      )
 
       const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
         chainId,
         TOKEN_LIST_CACHE_BUCKET!,
         DEFAULT_TOKEN_LIST
-      );
+      )
 
-      const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
-      const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }));
+      const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
+      const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
 
-      const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000);
+      const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000)
       const tokenProvider = new CachingTokenProviderWithFallback(
         chainId,
         tokenCache,
         tokenListProvider,
         new TokenProvider(chainId, multicall2Provider)
-      );
+      )
 
       // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
       // 200*725k < 150m
@@ -127,9 +128,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         },
         {
           gasLimitOverride: 2_000_000,
-          multicallChunk: 70
+          multicallChunk: 70,
         }
-      );
+      )
 
       dependenciesByChain[chainId as ChainId] = {
         provider,
@@ -150,22 +151,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
         ),
         tokenProvider,
-        subgraphProvider: new AWSSubgraphProvider(
-          chainId,
-          POOL_CACHE_BUCKET!,
-          POOL_CACHE_KEY!,
-        ),
+        subgraphProvider: new AWSSubgraphProvider(chainId, POOL_CACHE_BUCKET!, POOL_CACHE_KEY!),
         tokenProviderFromTokenList: tokenListProvider,
         quoteProvider,
-        gasPriceProvider: new CachingGasStationProvider(chainId,
+        gasPriceProvider: new CachingGasStationProvider(
+          chainId,
           new EIP1559GasPriceProvider(provider),
           new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
-        )
+        ),
       }
     }
 
     return {
-      dependencies: dependenciesByChain
-    };
+      dependencies: dependenciesByChain,
+    }
   }
 }
