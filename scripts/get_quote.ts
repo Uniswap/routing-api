@@ -6,7 +6,6 @@ import dotenv from 'dotenv'
 import { QuoteQueryParams } from '../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../lib/handlers/schema'
 dotenv.config()
-
 ;(async function () {
   const quotePost: QuoteQueryParams = {
     tokenInAddress: 'MKR',
