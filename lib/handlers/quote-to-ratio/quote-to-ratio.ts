@@ -367,7 +367,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   protected noSwapNeededForRangeOrder(
     position: Position,
     token0Balance: CurrencyAmount<Currency>,
-    token1Balance: CurrencyAmount<Currency>,
+    token1Balance: CurrencyAmount<Currency>
   ): boolean {
     if (position.pool.tickCurrent < position.tickLower) {
       return token1Balance.equalTo(0) && token0Balance.greaterThan(0)
