@@ -600,5 +600,37 @@ describe('quote-to-ratio', () => {
         },
       })
     })
+
+    test('when token are out of order', async () => {
+      ;[token0Address, token1Address] = [token1Address, token0Address]
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 5,
+      }
+
+      const queryParams = qs.stringify(quoteToRatioRec)
+
+      await expect(axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)).rejects.toMatchObject({
+        response: {
+          status: 400,
+          data: {
+            detail: 'token0 address must be less than token1 address',
+            errorCode: 'TOKEN_MISORDERED',
+          },
+        },
+      })
+    })
   })
 })

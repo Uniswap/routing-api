@@ -100,7 +100,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (token0.wrapped.address > token1.wrapped.address) {
       return {
         statusCode: 400,
-        errorCode: 'TOKEN_MISORDERED',
+        errorCode: 'TOKENS_MISORDERED',
         detail: `token0 address must be less than token1 address`,
       }
     }
