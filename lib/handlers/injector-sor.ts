@@ -1,32 +1,35 @@
 import { Token } from '@uniswap/sdk-core'
 import {
   CachingGasStationProvider,
-  CachingPoolProvider,
   CachingTokenListProvider,
   CachingTokenProviderWithFallback,
+  CachingV3PoolProvider,
   ChainId,
   EIP1559GasPriceProvider,
   ID_TO_NETWORK_NAME,
   IGasPriceProvider,
   IMetric,
-  IPoolProvider,
-  ISubgraphProvider,
   ITokenListProvider,
   ITokenProvider,
+  IV2SubgraphProvider,
+  IV3PoolProvider,
+  IV3SubgraphProvider,
   NodeJSCache,
-  PoolProvider,
-  QuoteProvider,
   setGlobalLogger,
   TokenProvider,
   UniswapMulticallProvider,
+  V2QuoteProvider,
+  V3PoolProvider,
+  V3QuoteProvider,
 } from '@uniswap/smart-order-router'
+import { IV2PoolProvider, V2PoolProvider } from '@uniswap/smart-order-router/build/main/providers/v2/pool-provider'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
-import { AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
+import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 
 const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY]
@@ -35,7 +38,8 @@ const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
   metric: IMetric
-  poolProvider: IPoolProvider
+  v3PoolProvider: IV3PoolProvider
+  v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   tokenListProvider: ITokenListProvider
   router: Router
@@ -43,15 +47,18 @@ export interface RequestInjected<Router> extends BaseRInj {
 
 export type ContainerDependencies = {
   provider: ethers.providers.JsonRpcProvider
-  subgraphProvider: ISubgraphProvider
+  v3SubgraphProvider: IV3SubgraphProvider
+  v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
   gasPriceProvider: IGasPriceProvider
   tokenProviderFromTokenList: ITokenProvider
   blockedTokenListProvider: ITokenListProvider
-  poolProvider: IPoolProvider
+  v3PoolProvider: IV3PoolProvider
+  v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   multicallProvider: UniswapMulticallProvider
-  quoteProvider: QuoteProvider
+  v3QuoteProvider: V3QuoteProvider
+  v2QuoteProvider: V2QuoteProvider
 }
 
 export interface ContainerInjected {
@@ -112,7 +119,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
       // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
       // 200*725k < 150m
-      const quoteProvider = new QuoteProvider(
+      const quoteProvider = new V3QuoteProvider(
         chainId,
         provider,
         multicall2Provider,
@@ -132,6 +139,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         }
       )
 
+      const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
+        V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET!, POOL_CACHE_KEY!, chainId),
+        V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET!, POOL_CACHE_KEY!, chainId),
+      ])
+
       dependenciesByChain[chainId as ChainId] = {
         provider,
         tokenListProvider: await AWSTokenListProvider.fromTokenListS3Bucket(
@@ -145,20 +157,23 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           blockedTokenCache
         ),
         multicallProvider: multicall2Provider,
-        poolProvider: new CachingPoolProvider(
-          chainId,
-          new PoolProvider(chainId, multicall2Provider),
-          new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
-        ),
         tokenProvider,
-        subgraphProvider: new AWSSubgraphProvider(chainId, POOL_CACHE_BUCKET!, POOL_CACHE_KEY!),
         tokenProviderFromTokenList: tokenListProvider,
-        quoteProvider,
         gasPriceProvider: new CachingGasStationProvider(
           chainId,
           new EIP1559GasPriceProvider(provider),
           new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
         ),
+        v3SubgraphProvider,
+        v3QuoteProvider: quoteProvider,
+        v3PoolProvider: new CachingV3PoolProvider(
+          chainId,
+          new V3PoolProvider(chainId, multicall2Provider),
+          new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
+        ),
+        v2PoolProvider: new V2PoolProvider(chainId, multicall2Provider),
+        v2QuoteProvider: new V2QuoteProvider(),
+        v2SubgraphProvider,
       }
     }
 

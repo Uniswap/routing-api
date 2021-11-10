@@ -21,6 +21,7 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   hosted_zone?: string
   chatbotSNSArn?: string
 }
+
 export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheBucket: aws_s3.Bucket
   public readonly poolCacheKey: string
@@ -31,7 +32,12 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
     const { chatbotSNSArn } = props
 
-    this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
+    // TODO: Remove and swap to the new bucket below. Kept around for the rollout, but all requests will go to bucket 2.
+    new aws_s3.Bucket(this, 'PoolCacheBucket')
+
+    const poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
+
+    this.poolCacheBucket = poolCacheBucket2
     this.poolCacheKey = 'poolCache.json'
 
     const { stage, route53Arn, pinata_key, pinata_secret, hosted_zone } = props
@@ -61,7 +67,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
       runtime: aws_lambda.Runtime.NODEJS_14_X,
       entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
       handler: 'handler',
-      timeout: Duration.seconds(600),
+      timeout: Duration.seconds(900),
       memorySize: 1024,
       bundling: {
         minify: true,
@@ -76,12 +82,13 @@ export class RoutingCachingStack extends cdk.NestedStack {
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
       environment: {
-        POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
+        POOL_CACHE_BUCKET: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: this.poolCacheKey,
       },
     })
 
     this.poolCacheBucket.grantReadWrite(poolCachingLambda)
+    poolCacheBucket2.grantReadWrite(poolCachingLambda)
 
     new aws_events.Rule(this, 'SchedulePoolCache', {
       schedule: aws_events.Schedule.rate(Duration.minutes(2)),
@@ -94,7 +101,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         runtime: aws_lambda.Runtime.NODEJS_14_X,
         entry: path.join(__dirname, '../../lib/cron/cache-pools-ipfs.ts'),
         handler: 'handler',
-        timeout: Duration.seconds(600),
+        timeout: Duration.seconds(900),
         memorySize: 1024,
         bundling: {
           minify: true,

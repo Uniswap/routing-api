@@ -3,17 +3,29 @@ import { AlphaRouterConfig, ChainId, ITokenListProvider, ITokenProvider } from '
 import Logger from 'bunyan'
 
 export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
-  topN: 2,
-  topNDirectSwaps: 2,
-  topNTokenInOut: 3,
-  topNSecondHop: 0,
-  topNWithEachBaseToken: 3,
-  topNWithBaseToken: 6,
-  topNWithBaseTokenInSet: false,
+  v2PoolSelection: {
+    topN: 2,
+    topNDirectSwaps: 2,
+    topNTokenInOut: 3,
+    topNSecondHop: 0,
+    topNWithEachBaseToken: 3,
+    topNWithBaseToken: 6,
+    topNWithBaseTokenInSet: false,
+  },
+  v3PoolSelection: {
+    topN: 2,
+    topNDirectSwaps: 2,
+    topNTokenInOut: 3,
+    topNSecondHop: 0,
+    topNWithEachBaseToken: 3,
+    topNWithBaseToken: 6,
+    topNWithBaseTokenInSet: false,
+  },
   maxSwapsPerPath: 3,
   minSplits: 1,
   maxSplits: 7,
   distributionPercent: 5,
+  forceCrossProtocol: false,
 }
 
 export async function tokenStringToCurrency(
@@ -42,12 +54,12 @@ export async function tokenStringToCurrency(
       {
         tokenAddress: token.wrapped.address,
       },
-      `Got token from token list`
+      `Got input token from token list`
     )
     return token
   }
 
-  log.info(`Getting input tokens ${tokenRaw} from chain`)
+  log.info(`Getting input token ${tokenRaw} from chain`)
   if (!token && isAddress(tokenRaw)) {
     const tokenAccessor = await tokenProvider.getTokens([tokenRaw])
     return tokenAccessor.getTokenByAddress(tokenRaw)

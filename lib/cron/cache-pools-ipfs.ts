@@ -1,5 +1,5 @@
 import pinataSDK from '@pinata/sdk'
-import { ChainId, SubgraphProvider } from '@uniswap/smart-order-router'
+import { ChainId, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -60,7 +60,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
 
   for (let i = 0; i < chains.length; i++) {
     const { fileName, chain } = chains[i]
-    const subgraphProvider = new SubgraphProvider(chain, 3, 15000)
+    const subgraphProvider = new V3SubgraphProvider(chain, 3, 15000)
     const pools = await subgraphProvider.getPools()
     const poolString = JSON.stringify(pools)
 

@@ -19,7 +19,7 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
   describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
-    test('erc20 -> erc20', async () => {
+    test.only('erc20 -> erc20', async () => {
       const quoteReq: QuoteQueryParams = {
         tokenInAddress: 'USDC',
         tokenInChainId: 1,
@@ -331,7 +331,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     })
   })
 
-  describe.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
+  describe.skip.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
     test('field is missing in body', async () => {
       const quoteReq: Partial<QuoteQueryParams> = {
         tokenOutAddress: 'USDT',

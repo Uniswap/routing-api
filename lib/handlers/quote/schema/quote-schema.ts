@@ -21,6 +21,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .max(30)
     .optional(),
   minSplits: Joi.number().max(7).optional(),
+  forceCrossProtocol: Joi.boolean().optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -36,4 +37,5 @@ export type QuoteQueryParams = {
   algorithm?: string
   gasPriceWei?: string
   minSplits?: number
+  forceCrossProtocol?: boolean
 }

@@ -76,7 +76,7 @@
     "@types/qs": "^6.9.7",
     "@types/stats-lite": "^2.2.0",
     "@uniswap/sdk-core": "^3.0.1",
-    "@uniswap/smart-order-router": "1.46.5",
+    "@uniswap/smart-order-router": "file:.yalc/@uniswap/smart-order-router",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "@uniswap/v3-periphery": "^1.1.0",
     "@uniswap/v3-sdk": "^3.4.1",
