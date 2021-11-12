@@ -1,8 +1,9 @@
-import { ChainId, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/smart-order-router/build/main/util/protocols'
+import { Protocol } from '@uniswap/router-sdk'
+import { ChainId, StaticV2SubgraphProvider, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
+import _ from 'lodash'
 import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
@@ -13,52 +14,45 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     requestId: event.id,
   })
 
-  for (const chain of [ChainId.MAINNET, ChainId.RINKEBY]) {
-    const v3SubgraphProvider = new V3SubgraphProvider(chain, 3, 15000)
-    const v3Pools = await v3SubgraphProvider.getPools()
+  const chainProtocols = [
+    { protocol: Protocol.V3, chainId: ChainId.MAINNET, provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 15000) },
+    { protocol: Protocol.V3, chainId: ChainId.RINKEBY, provider: new V3SubgraphProvider(ChainId.RINKEBY, 3, 15000) },
+    { protocol: Protocol.V2, chainId: ChainId.MAINNET, provider: new V2SubgraphProvider(ChainId.MAINNET, 2) },
+    {
+      protocol: Protocol.V2,
+      chainId: ChainId.RINKEBY,
+      provider: new StaticV2SubgraphProvider(ChainId.RINKEBY),
+    },
+  ]
 
-    const s3 = new S3()
-    if (!v3Pools || v3Pools.length == 0) {
-      log.info(`No V3 pools found from the subgraph for ${chain.toString()}`)
-      continue
-    }
+  const s3 = new S3()
 
-    const v3Key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chain, Protocol.V3)
+  await Promise.all(
+    _.map(chainProtocols, async ({ protocol, chainId, provider }) => {
+      log.info(`Getting pools for ${protocol} on ${chainId}`)
 
-    log.info(`Got ${v3Pools.length} v3 pools from the subgraph for ${chain.toString()}. Saving to ${v3Key}`)
+      const pools = await provider.getPools()
 
-    const v3Result = await s3
-      .putObject({
-        Bucket: process.env.POOL_CACHE_BUCKET!,
-        Key: v3Key,
-        Body: JSON.stringify(v3Pools),
-      })
-      .promise()
+      if (!pools || pools.length == 0) {
+        log.info(`No ${protocol} pools found from the subgraph for ${chainId.toString()}`)
+        return
+      }
 
-    log.info({ v3Result }, `Done V3 for ${chain.toString()}`)
+      const key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chainId, protocol)
 
-    const v2SubgraphProvider = new V2SubgraphProvider(chain)
-    const v2Pools = await v2SubgraphProvider.getPools()
+      log.info(`Got ${pools.length} ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${key}`)
 
-    if (!v2Pools || v2Pools.length == 0) {
-      log.info(`No V2 pools found from the subgraph for ${chain.toString()}`)
-      continue
-    }
+      const result = await s3
+        .putObject({
+          Bucket: process.env.POOL_CACHE_BUCKET!,
+          Key: key,
+          Body: JSON.stringify(pools),
+        })
+        .promise()
 
-    const v2Key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chain, Protocol.V2)
-
-    log.info(`Got ${v2Pools.length} v2 pools from the subgraph for ${chain.toString()}. Saving to ${v2Key}`)
-
-    const v2Result = await s3
-      .putObject({
-        Bucket: process.env.POOL_CACHE_BUCKET!,
-        Key: v2Key,
-        Body: JSON.stringify(v2Pools),
-      })
-      .promise()
-
-    log.info({ v2Result }, `Done V2 for ${chain.toString()}`)
-  }
+      log.info({ result }, `Done ${protocol} for ${chainId.toString()}`)
+    })
+  )
 }
 
 module.exports = { handler }

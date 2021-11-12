@@ -1,4 +1,5 @@
 import Joi from '@hapi/joi'
+import { Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -9,7 +10,6 @@ import {
   SwapConfig,
   SwapRoute,
 } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/smart-order-router/build/main/util/protocols'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -40,6 +40,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         deadline,
         minSplits,
         forceCrossProtocol,
+        protocols: protocolsStr,
       },
       requestInjected: {
         router,
@@ -107,10 +108,31 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
+    let protocols: Protocol[] = []
+    if (protocolsStr) {
+      for (const protocolStr of protocolsStr) {
+        switch (protocolStr.toLowerCase()) {
+          case 'v2':
+            protocols.push(Protocol.V2)
+            break
+          case 'v3':
+            protocols.push(Protocol.V3)
+            break
+          default:
+            return {
+              statusCode: 400,
+              errorCode: 'INVALID_PROTOCOL',
+              detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
+            }
+        }
+      }
+    }
+
     const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
+      protocols,
     }
 
     let swapParams: SwapConfig | undefined = undefined
@@ -150,7 +172,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
         log.info(
           {
-            amountIn: amount.toExact(),
+            amountOut: amount.toExact(),
             currency: amount.currency.symbol,
             routingConfig: routingConfig,
           },
@@ -162,7 +184,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
         break
       default:
-        throw new Error('')
+        throw new Error('Invalid swap type')
     }
 
     if (!swapRoute) {

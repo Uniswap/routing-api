@@ -1,3 +1,4 @@
+import { Protocol } from '@uniswap/router-sdk'
 import {
   ChainId,
   IV2SubgraphProvider,
@@ -6,21 +7,18 @@ import {
   V2SubgraphPool,
   V3SubgraphPool,
 } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/smart-order-router/build/main/util/protocols'
 import { S3 } from 'aws-sdk'
 import NodeCache from 'node-cache'
 import { S3_POOL_CACHE_KEY } from '../../util/pool-cache-key'
 
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false })
-const LOCAL_POOL_CACHE_KEY = (chainId: ChainId) => `pools${chainId}`
+const LOCAL_POOL_CACHE_KEY = (chainId: ChainId, protocol: Protocol) => `pools${chainId}#${protocol}`
 
 export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3SubgraphPool> {
   constructor(private chain: ChainId, private protocol: Protocol, private bucket: string, private baseKey: string) {}
 
   public async getPools(): Promise<TSubgraphPool[]> {
-    const s3 = new S3()
-
-    const cachedPools = POOL_CACHE.get<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(this.chain))
+    const cachedPools = POOL_CACHE.get<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(this.chain, this.protocol))
 
     if (cachedPools) {
       log.info(
@@ -35,6 +33,9 @@ export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3Subgra
       { bucket: this.bucket, key: this.baseKey },
       `Subgraph pools local cache miss for protocol ${this.protocol}. Getting subgraph pools from S3`
     )
+
+    const s3 = new S3()
+
     const pools = await cachePoolsFromS3<TSubgraphPool>(s3, this.bucket, this.baseKey, this.chain, this.protocol)
 
     return pools
@@ -50,19 +51,24 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
 ) => {
   const key = S3_POOL_CACHE_KEY(baseKey, chainId, protocol)
 
-  const result = await s3.getObject({ Key: key, Bucket: bucket }).promise()
+  let result
+  try {
+    result = await s3.getObject({ Key: key, Bucket: bucket }).promise()
+  } catch (err) {
+    throw new Error(`Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
+  }
 
   const { Body: poolsBuffer } = result
 
   if (!poolsBuffer) {
-    throw new Error(`Could not get subgraph pool cache from S3 for protocol ${protocol}`)
+    throw new Error(`Could not get subgraph pool cache from S3 for protocol ${protocol} on chain ${chainId}`)
   }
 
   const pools = JSON.parse(poolsBuffer.toString('utf-8')) as TSubgraphPool[]
 
   log.info({ bucket, key }, `Got subgraph pools from S3 for protocol ${protocol} on ${chainId}. Num: ${pools.length}`)
 
-  POOL_CACHE.set<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(chainId), pools)
+  POOL_CACHE.set<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(chainId, protocol), pools)
 
   return pools
 }
@@ -87,7 +93,7 @@ export class V2AWSSubgraphProvider extends AWSSubgraphProvider<V2SubgraphPool> i
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V2AWSSubgraphProvider> {
     const s3 = new S3()
-    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
+    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
 
     return new V2AWSSubgraphProvider(chainId, bucket, baseKey)
   }

@@ -17,9 +17,9 @@ const getAmount = async (type: string, symbolIn: string, symbolOut: string, amou
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
-describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
+describe.each([['alpha'], ['legacy']])('alpha/legacy quote %s', (algorithm: string) => {
   describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
-    test.only('erc20 -> erc20', async () => {
+    test('erc20 -> erc20', async () => {
       const quoteReq: QuoteQueryParams = {
         tokenInAddress: 'USDC',
         tokenInChainId: 1,
@@ -130,7 +130,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
         tokenInChainId: 1,
         tokenOutAddress: 'ETH',
         tokenOutChainId: 1,
-        amount: await getAmount(type, 'USDC', 'ETH', '100'),
+        amount: await getAmount(type, 'USDC', 'ETH', '19'),
         type,
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
@@ -331,7 +331,7 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
     })
   })
 
-  describe.skip.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
+  describe.each([['exactIn'], ['exactOut']])('4xx %s', (type: string) => {
     test('field is missing in body', async () => {
       const quoteReq: Partial<QuoteQueryParams> = {
         tokenOutAddress: 'USDT',
@@ -658,6 +658,145 @@ describe.each([['alpha'], ['legacy']])('quote %s', (algorithm: string) => {
           },
         },
       })
+    })
+  })
+})
+
+describe('alpha only quote', () => {
+  describe.each([['exactIn'], ['exactOut']])('2xx %s', (type: string) => {
+    test('erc20 -> erc20 v3 only', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: await getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm: 'alpha',
+        protocols: 'v3',
+      }
+
+      const queryParams = qs.stringify(quoteReq)
+
+      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+      const {
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+        status,
+      } = response
+
+      expect(status).toBe(200)
+      expect(parseFloat(quoteDecimals)).toBeGreaterThan(90)
+      expect(parseFloat(quoteDecimals)).toBeLessThan(110)
+
+      if (type == 'exactIn') {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(parseFloat(quoteDecimals))
+      } else {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeGreaterThanOrEqual(parseFloat(quoteDecimals))
+      }
+
+      expect(methodParameters).toBeDefined()
+
+      for (const r of route) {
+        for (const pool of r) {
+          expect(pool.type).toEqual('v3-pool')
+        }
+      }
+    })
+
+    test('erc20 -> erc20 v2 only', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: await getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm: 'alpha',
+        protocols: 'v2',
+      }
+
+      const queryParams = qs.stringify(quoteReq)
+
+      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+      const {
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+        status,
+      } = response
+
+      expect(status).toBe(200)
+      expect(parseFloat(quoteDecimals)).toBeGreaterThan(90)
+      expect(parseFloat(quoteDecimals)).toBeLessThan(110)
+
+      if (type == 'exactIn') {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(parseFloat(quoteDecimals))
+      } else {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeGreaterThanOrEqual(parseFloat(quoteDecimals))
+      }
+
+      expect(methodParameters).toBeDefined()
+
+      for (const r of route) {
+        for (const pool of r) {
+          expect(pool.type).toEqual('v2-pool')
+        }
+      }
+    })
+
+    test('erc20 -> erc20 forceCrossProtocol', async () => {
+      const quoteReq: QuoteQueryParams = {
+        tokenInAddress: 'USDC',
+        tokenInChainId: 1,
+        tokenOutAddress: 'USDT',
+        tokenOutChainId: 1,
+        amount: await getAmount(type, 'USDC', 'USDT', '100'),
+        type,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        algorithm: 'alpha',
+        forceCrossProtocol: true,
+      }
+
+      const queryParams = qs.stringify(quoteReq)
+
+      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+      const {
+        data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+        status,
+      } = response
+
+      expect(status).toBe(200)
+      expect(parseFloat(quoteDecimals)).toBeGreaterThan(90)
+      expect(parseFloat(quoteDecimals)).toBeLessThan(110)
+
+      if (type == 'exactIn') {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeLessThanOrEqual(parseFloat(quoteDecimals))
+      } else {
+        expect(parseFloat(quoteGasAdjustedDecimals)).toBeGreaterThanOrEqual(parseFloat(quoteDecimals))
+      }
+
+      expect(methodParameters).toBeDefined()
+
+      let hasV3Pool = false
+      let hasV2Pool = false
+      for (const r of route) {
+        for (const pool of r) {
+          if (pool.type == 'v3-pool') {
+            hasV3Pool = true
+          }
+          if (pool.type == 'v2-pool') {
+            hasV2Pool = true
+          }
+        }
+      }
+
+      expect(hasV3Pool && hasV2Pool).toBeTruthy()
     })
   })
 })

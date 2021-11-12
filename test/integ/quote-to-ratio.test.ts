@@ -49,7 +49,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
   return new Fraction(JSBI.BigInt(fraction.numerator), JSBI.BigInt(fraction.denominator))
 }
 
-describe.skip('quote-to-ratio', () => {
+describe('quote-to-ratio', () => {
   let token0Address: string
   let token1Address: string
   let token0Balance: string

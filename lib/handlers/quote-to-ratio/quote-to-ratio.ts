@@ -1,4 +1,5 @@
 import Joi from '@hapi/joi'
+import { Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -8,7 +9,6 @@ import {
   SwapAndAddConfig,
   SwapConfig,
 } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/smart-order-router/build/main/util/protocols'
 import { Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -352,8 +352,11 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     }
 
     const postSwapTargetPoolObject = {
-      address: v3PoolProvider.getPoolAddress(postSwapTargetPool.token0, postSwapTargetPool.token1, postSwapTargetPool.fee)
-        .poolAddress,
+      address: v3PoolProvider.getPoolAddress(
+        postSwapTargetPool.token0,
+        postSwapTargetPool.token1,
+        postSwapTargetPool.fee
+      ).poolAddress,
       tokenIn: {
         chainId: tokenIn.chainId,
         decimals: tokenIn.decimals.toString(),
