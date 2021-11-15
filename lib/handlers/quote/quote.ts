@@ -126,6 +126,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             }
         }
       }
+    } else if(!forceCrossProtocol) {
+      protocols = [Protocol.V3]
     }
 
     const routingConfig = {
