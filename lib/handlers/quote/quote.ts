@@ -1,4 +1,5 @@
 import Joi from '@hapi/joi'
+import { Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -12,7 +13,7 @@ import {
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
-import { PoolInRoute, QuoteResponse, QuoteResponseSchemaJoi } from '../schema'
+import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 
@@ -38,8 +39,20 @@ export class QuoteHandler extends APIGLambdaHandler<
         slippageTolerance,
         deadline,
         minSplits,
+        forceCrossProtocol,
+        protocols: protocolsStr,
       },
-      requestInjected: { router, log, id: quoteId, chainId, tokenProvider, tokenListProvider, poolProvider, metric },
+      requestInjected: {
+        router,
+        log,
+        id: quoteId,
+        chainId,
+        tokenProvider,
+        tokenListProvider,
+        v3PoolProvider: v3PoolProvider,
+        v2PoolProvider: v2PoolProvider,
+        metric,
+      },
     } = params
 
     // Parse user provided token address/symbol to Currency object.
@@ -95,9 +108,31 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
+    let protocols: Protocol[] = []
+    if (protocolsStr) {
+      for (const protocolStr of protocolsStr) {
+        switch (protocolStr.toLowerCase()) {
+          case 'v2':
+            protocols.push(Protocol.V2)
+            break
+          case 'v3':
+            protocols.push(Protocol.V3)
+            break
+          default:
+            return {
+              statusCode: 400,
+              errorCode: 'INVALID_PROTOCOL',
+              detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
+            }
+        }
+      }
+    }
+
     const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
+      ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
+      protocols: [Protocol.V3], // TODO
     }
 
     let swapParams: SwapConfig | undefined = undefined
@@ -113,7 +148,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    let swapRoute: SwapRoute<TradeType> | null
+    let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
     switch (type) {
       case 'exactIn':
@@ -130,14 +165,14 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.routeExactIn(currencyIn, currencyOut, amount, swapParams, routingConfig)
+        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
 
         log.info(
           {
-            amountIn: amount.toExact(),
+            amountOut: amount.toExact(),
             currency: amount.currency.symbol,
             routingConfig: routingConfig,
           },
@@ -146,10 +181,10 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.routeExactOut(currencyIn, currencyOut, amount, swapParams, routingConfig)
+        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
         break
       default:
-        throw new Error('')
+        throw new Error('Invalid swap type')
     }
 
     if (!swapRoute) {
@@ -182,56 +217,115 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute
 
-    const routeResponse: Array<PoolInRoute[]> = []
+    const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
 
     for (const subRoute of route) {
-      const {
-        route: { tokenPath, pools },
-        amount,
-        quote,
-      } = subRoute
+      const { amount, quote, tokenPath } = subRoute
 
-      const curRoute: PoolInRoute[] = []
-      for (let i = 0; i < pools.length; i++) {
-        const nextPool = pools[i]
-        const tokenIn = tokenPath[i]
-        const tokenOut = tokenPath[i + 1]
+      if (subRoute.protocol == Protocol.V3) {
+        const pools = subRoute.route.pools
+        const curRoute: V3PoolInRoute[] = []
+        for (let i = 0; i < pools.length; i++) {
+          const nextPool = pools[i]
+          const tokenIn = tokenPath[i]
+          const tokenOut = tokenPath[i + 1]
 
-        let edgeAmountIn = undefined
-        if (i == 0) {
-          edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
+          let edgeAmountIn = undefined
+          if (i == 0) {
+            edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
+          }
+
+          let edgeAmountOut = undefined
+          if (i == pools.length - 1) {
+            edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
+          }
+
+          curRoute.push({
+            type: 'v3-pool',
+            address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
+            tokenIn: {
+              chainId: tokenIn.chainId,
+              decimals: tokenIn.decimals.toString(),
+              address: tokenIn.address,
+              symbol: tokenIn.symbol!,
+            },
+            tokenOut: {
+              chainId: tokenOut.chainId,
+              decimals: tokenOut.decimals.toString(),
+              address: tokenOut.address,
+              symbol: tokenOut.symbol!,
+            },
+            fee: nextPool.fee.toString(),
+            liquidity: nextPool.liquidity.toString(),
+            sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
+            tickCurrent: nextPool.tickCurrent.toString(),
+            amountIn: edgeAmountIn,
+            amountOut: edgeAmountOut,
+          })
         }
 
-        let edgeAmountOut = undefined
-        if (i == pools.length - 1) {
-          edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
+        routeResponse.push(curRoute)
+      } else if (subRoute.protocol == Protocol.V2) {
+        const pools = subRoute.route.pairs
+        const curRoute: V2PoolInRoute[] = []
+        for (let i = 0; i < pools.length; i++) {
+          const nextPool = pools[i]
+          const tokenIn = tokenPath[i]
+          const tokenOut = tokenPath[i + 1]
+
+          let edgeAmountIn = undefined
+          if (i == 0) {
+            edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
+          }
+
+          let edgeAmountOut = undefined
+          if (i == pools.length - 1) {
+            edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
+          }
+
+          const reserve0 = nextPool.reserve0
+          const reserve1 = nextPool.reserve1
+
+          curRoute.push({
+            type: 'v2-pool',
+            address: v2PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1).poolAddress,
+            tokenIn: {
+              chainId: tokenIn.chainId,
+              decimals: tokenIn.decimals.toString(),
+              address: tokenIn.address,
+              symbol: tokenIn.symbol!,
+            },
+            tokenOut: {
+              chainId: tokenOut.chainId,
+              decimals: tokenOut.decimals.toString(),
+              address: tokenOut.address,
+              symbol: tokenOut.symbol!,
+            },
+            reserve0: {
+              token: {
+                chainId: reserve0.currency.wrapped.chainId,
+                decimals: reserve0.currency.wrapped.decimals.toString(),
+                address: reserve0.currency.wrapped.address,
+                symbol: reserve0.currency.wrapped.symbol!,
+              },
+              quotient: reserve0.quotient.toString(),
+            },
+            reserve1: {
+              token: {
+                chainId: reserve1.currency.wrapped.chainId,
+                decimals: reserve1.currency.wrapped.decimals.toString(),
+                address: reserve1.currency.wrapped.address,
+                symbol: reserve1.currency.wrapped.symbol!,
+              },
+              quotient: reserve1.quotient.toString(),
+            },
+            amountIn: edgeAmountIn,
+            amountOut: edgeAmountOut,
+          })
         }
 
-        curRoute.push({
-          type: 'v3-pool',
-          address: poolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
-          tokenIn: {
-            chainId: tokenIn.chainId,
-            decimals: tokenIn.decimals.toString(),
-            address: tokenIn.address,
-            symbol: tokenIn.symbol!,
-          },
-          tokenOut: {
-            chainId: tokenOut.chainId,
-            decimals: tokenOut.decimals.toString(),
-            address: tokenOut.address,
-            symbol: tokenOut.symbol!,
-          },
-          fee: nextPool.fee.toString(),
-          liquidity: nextPool.liquidity.toString(),
-          sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
-          tickCurrent: nextPool.tickCurrent.toString(),
-          amountIn: edgeAmountIn,
-          amountOut: edgeAmountOut,
-        })
+        routeResponse.push(curRoute)
       }
-
-      routeResponse.push(curRoute)
     }
 
     const result: QuoteResponse = {
