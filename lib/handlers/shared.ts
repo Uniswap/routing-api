@@ -7,9 +7,9 @@ export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
     topN: 3,
     topNDirectSwaps: 1,
     topNTokenInOut: 5,
-    topNSecondHop: 3,
-    topNWithEachBaseToken: 4,
-    topNWithBaseToken: 8,
+    topNSecondHop: 2,
+    topNWithEachBaseToken: 2,
+    topNWithBaseToken: 6,
     topNWithBaseTokenInSet: false,
   },
   v3PoolSelection: {
