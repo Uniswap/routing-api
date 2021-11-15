@@ -21,7 +21,9 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "outDir": "dist",
+    "allowJs": true,
     "typeRoots": ["./node_modules/@types"]
   },
+  "files": ["./hardhat.config.js"],
   "exclude": ["cdk.out", "./dist/**/*"]
 }
