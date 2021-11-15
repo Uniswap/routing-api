@@ -706,7 +706,7 @@ describe('alpha only quote', () => {
       }
     })
 
-    test('erc20 -> erc20 v2 only', async () => {
+    test.skip('erc20 -> erc20 v2 only', async () => {
       const quoteReq: QuoteQueryParams = {
         tokenInAddress: 'USDC',
         tokenInChainId: 1,
@@ -748,7 +748,7 @@ describe('alpha only quote', () => {
       }
     })
 
-    test('erc20 -> erc20 forceCrossProtocol', async () => {
+    test.skip('erc20 -> erc20 forceCrossProtocol', async () => {
       const quoteReq: QuoteQueryParams = {
         tokenInAddress: 'USDC',
         tokenInChainId: 1,

@@ -18,6 +18,8 @@ export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3Subgra
   constructor(private chain: ChainId, private protocol: Protocol, private bucket: string, private baseKey: string) {}
 
   public async getPools(): Promise<TSubgraphPool[]> {
+    log.info(`In new AWS subgraph provider for protocol ${this.protocol}`)
+
     const cachedPools = POOL_CACHE.get<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(this.chain, this.protocol))
 
     if (cachedPools) {
@@ -55,6 +57,7 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
   try {
     result = await s3.getObject({ Key: key, Bucket: bucket }).promise()
   } catch (err) {
+    log.error({ bucket, key, err }, `Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
     throw new Error(`Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
   }
 

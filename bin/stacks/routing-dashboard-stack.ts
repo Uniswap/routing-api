@@ -113,7 +113,11 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             properties: {
               view: 'timeSeries',
               stacked: false,
-              metrics: [[NAMESPACE, 'QuotesFetched', 'Service', 'RoutingAPI']],
+              metrics: [
+                [NAMESPACE, 'QuotesFetched', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V3QuotesFetched', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V2QuotesFetched', 'Service', 'RoutingAPI'],
+              ],
               region,
               title: 'p90 Quotes Fetched Per Swap',
               period: 300,
@@ -121,9 +125,29 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
           {
+            type: 'metric',
+            x: 0,
+            y: 24,
+            width: 24,
+            height: 6,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                [NAMESPACE, 'V3AndV2Routes', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V3Routes', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V2Routes', 'Service', 'RoutingAPI'],
+              ],
+              region,
+              title: 'V3+V2 Aggregated routes vs V3 only routes vs V2 only routes',
+              period: 300,
+              stat: 'Sum',
+            },
+          },
+          {
             height: 12,
             width: 24,
-            y: 24,
+            y: 30,
             x: 0,
             type: 'metric',
             properties: {
@@ -135,7 +159,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ['.', 'V3SubgraphPoolsLoad', '.', '.', { color: '#1f77b4' }],
                 ['.', 'V2SubgraphPoolsLoad', '.', '.', { color: '#bf77b4' }],
                 ['.', 'V3QuotesLoad', '.', '.', { color: '#2ca02c' }],
-                ['.', 'V2QuotesLoad', '.', '.', { color: '#5ca02c' }],
+                ['.', 'V2QuotesLoad', '.', '.', { color: '#7f7f7f' }],
                 ['.', 'FindBestSwapRoute', '.', '.', { color: '#d62728' }],
               ],
               view: 'timeSeries',
@@ -149,7 +173,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 30,
+            y: 36,
             width: 24,
             height: 9,
             properties: {
@@ -174,7 +198,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 39,
+            y: 45,
             width: 24,
             height: 9,
             properties: {
@@ -199,7 +223,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 48,
+            y: 54,
             width: 24,
             height: 9,
             properties: {

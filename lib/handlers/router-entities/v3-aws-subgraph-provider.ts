@@ -1,5 +1,6 @@
 import { ChainId, IV3SubgraphProvider, log, V3SubgraphPool, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { S3 } from 'aws-sdk'
+import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false })
@@ -29,7 +30,10 @@ export class V3AWSSubgraphProviderWithFallback extends V3SubgraphProvider implem
       return cachedPools
     }
 
-    log.info({ bucket: this.bucket, key: this.key }, 'Subgraph pools local cache miss. Getting subgraph pools from S3')
+    log.info(
+      { bucket: this.bucket, key: this.key },
+      `Subgraph pools local cache miss. Getting subgraph pools from S3 ${this.bucket}/${this.key}`
+    )
     try {
       const result = await s3.getObject({ Key: this.key, Bucket: this.bucket }).promise()
 
@@ -39,15 +43,41 @@ export class V3AWSSubgraphProviderWithFallback extends V3SubgraphProvider implem
         throw new Error('Could not get subgraph pool cache from S3')
       }
 
-      const pools = JSON.parse(poolsBuffer.toString('utf-8')) as V3SubgraphPool[]
+      let pools = JSON.parse(poolsBuffer.toString('utf-8'))
 
-      log.info({ bucket: this.bucket, key: this.key }, `Got subgraph pools from S3. Num: ${pools.length}`)
+      if (pools[0].totalValueLockedETH) {
+        pools = _.map(
+          pools,
+          (pool) =>
+            ({
+              ...pool,
+              id: pool.id.toLowerCase(),
+              token0: {
+                id: pool.token0.id.toLowerCase(),
+              },
+              token1: {
+                id: pool.token1.id.toLowerCase(),
+              },
+              tvlETH: parseFloat(pool.totalValueLockedETH),
+              tvlUSD: parseFloat(pool.totalValueLockedUSD),
+            } as V3SubgraphPool)
+        )
+        log.info({ sample: pools.slice(0, 5) }, 'Converted legacy schema to new schema')
+      }
+
+      log.info(
+        { bucket: this.bucket, key: this.key, sample: pools.slice(0, 3) },
+        `Got subgraph pools from S3. Num: ${pools.length}`
+      )
 
       POOL_CACHE.set<V3SubgraphPool[]>(POOL_CACHE_KEY(this.chain), pools)
 
       return pools
     } catch (err) {
-      log.info({ bucket: this.bucket, key: this.key }, `Failed to get subgraph pools from S3.`)
+      log.info(
+        { bucket: this.bucket, key: this.key },
+        `Failed to get subgraph pools from S3 ${this.bucket}/${this.key}.`
+      )
 
       return super.getPools()
     }

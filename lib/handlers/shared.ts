@@ -4,12 +4,12 @@ import Logger from 'bunyan'
 
 export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
   v2PoolSelection: {
-    topN: 2,
-    topNDirectSwaps: 2,
-    topNTokenInOut: 3,
-    topNSecondHop: 0,
-    topNWithEachBaseToken: 3,
-    topNWithBaseToken: 6,
+    topN: 3,
+    topNDirectSwaps: 1,
+    topNTokenInOut: 5,
+    topNSecondHop: 3,
+    topNWithEachBaseToken: 4,
+    topNWithBaseToken: 8,
     topNWithBaseTokenInSet: false,
   },
   v3PoolSelection: {
@@ -18,7 +18,7 @@ export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
     topNTokenInOut: 3,
     topNSecondHop: 0,
     topNWithEachBaseToken: 3,
-    topNWithBaseToken: 6,
+    topNWithBaseToken: 5,
     topNWithBaseTokenInSet: false,
   },
   maxSwapsPerPath: 3,

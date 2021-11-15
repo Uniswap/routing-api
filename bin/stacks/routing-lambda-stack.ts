@@ -12,6 +12,7 @@ import * as path from 'path'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
+  poolCacheBucket2: aws_s3.Bucket
   poolCacheKey: string
   nodeRPC: string
   nodeRPCUsername: string
@@ -33,6 +34,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     super(scope, name, props)
     const {
       poolCacheBucket,
+      poolCacheBucket2,
       poolCacheKey,
       nodeRPC,
       nodeRPCUsername,
@@ -55,6 +57,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       ],
     })
     poolCacheBucket.grantRead(lambdaRole)
+    poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
 
     const region = cdk.Stack.of(this).region
@@ -74,6 +77,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         VERSION: '2',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
+        POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
         JSON_RPC_URL: nodeRPC,
         JSON_RPC_USERNAME: nodeRPCUsername,
@@ -109,6 +113,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         VERSION: '2',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
+        POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
         JSON_RPC_URL: nodeRPC,
         JSON_RPC_USERNAME: nodeRPCUsername,
