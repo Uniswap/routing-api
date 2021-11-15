@@ -17,6 +17,7 @@ import {
   NodeJSCache,
   setGlobalLogger,
   StaticV2SubgraphProvider,
+  StaticV3SubgraphProvider,
   TokenProvider,
   UniswapMulticallProvider,
   V2QuoteProvider,
@@ -31,8 +32,8 @@ import _ from 'lodash'
 import NodeCache from 'node-cache'
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
+import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
-import { V3AWSSubgraphProviderWithFallback } from './router-entities/v3-aws-subgraph-provider'
 
 const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
@@ -83,7 +84,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     })
     setGlobalLogger(log)
 
-    const { POOL_CACHE_BUCKET, POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } = process.env
+    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } = process.env
 
     const dependenciesByChain: {
       [chainId in ChainId]?: ContainerDependencies
@@ -150,36 +151,33 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        // const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
-        //   (async () => {
-        //     try {
-        //       const subgraphProvider = await V3AWSSubgraphProvider.EagerBuild(
-        //         POOL_CACHE_BUCKET_2!,
-        //         POOL_CACHE_KEY!,
-        //         chainId
-        //       )
-        //       return subgraphProvider
-        //     } catch (err) {
-        //       return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
-        //     }
-        //   })(),
-        //   (async () => {
-        //     try {
-        //       const subgraphProvider = await V2AWSSubgraphProvider.EagerBuild(
-        //         POOL_CACHE_BUCKET_2!,
-        //         POOL_CACHE_KEY!,
-        //         chainId
-        //       )
-        //       return subgraphProvider
-        //     } catch (err) {
-        //       return new StaticV2SubgraphProvider(chainId)
-        //     }
-        //   })(),
-        // ])
+        const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
+          (async () => {
+            try {
+              const subgraphProvider = await V3AWSSubgraphProvider.EagerBuild(
+                POOL_CACHE_BUCKET_2!,
+                POOL_CACHE_KEY!,
+                chainId
+              )
+              return subgraphProvider
+            } catch (err) {
+              return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
+            }
+          })(),
+          (async () => {
+            try {
+              const subgraphProvider = await V2AWSSubgraphProvider.EagerBuild(
+                POOL_CACHE_BUCKET_2!,
+                POOL_CACHE_KEY!,
+                chainId
+              )
+              return subgraphProvider
+            } catch (err) {
+              return new StaticV2SubgraphProvider(chainId)
+            }
+          })(),
+        ])
 
-        POOL_CACHE_BUCKET_2
-        const v3SubgraphProvider = new V3AWSSubgraphProviderWithFallback(chainId, POOL_CACHE_BUCKET!, POOL_CACHE_KEY!)
-        const v2SubgraphProvider = new StaticV2SubgraphProvider(chainId)
         return {
           chainId,
           dependencies: {

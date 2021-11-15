@@ -132,7 +132,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
-      protocols: [Protocol.V3], // TODO
+      protocols,
     }
 
     let swapParams: SwapConfig | undefined = undefined
