@@ -1,6 +1,5 @@
-import { string } from '@hapi/joi'
 import pinataSDK from '@pinata/sdk'
-import { ChainId, V3SubgraphProvider , V2SubgraphProvider} from '@uniswap/smart-order-router'
+import { ChainId, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -12,7 +11,7 @@ const DIRECTORY = '/tmp/temp/v1/pools/'
 
 enum VERSION {
   V2 = 'v2',
-  V3 = 'v3'
+  V3 = 'v3',
 }
 
 // add more chains here
@@ -84,8 +83,6 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     const directoryV2 = DIRECTORY.concat(VERSION.V2).concat('/')
     fs.mkdirSync(directoryV2, { recursive: true })
     fs.writeFileSync(directoryV2.concat(fileName), pairString)
-
-
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
