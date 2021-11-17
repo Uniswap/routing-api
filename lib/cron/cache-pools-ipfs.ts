@@ -80,7 +80,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     const pairs = await subgraphProviderV2.getPools()
     const pairString = JSON.stringify(pairs)
 
-    // create directory and file for v3
+    // create directory and file for v2
     const directoryV2 = DIRECTORY.concat(VERSION.V2).concat('/')
     fs.mkdirSync(directoryV2, { recursive: true })
     fs.writeFileSync(directoryV2.concat(fileName), pairString)
