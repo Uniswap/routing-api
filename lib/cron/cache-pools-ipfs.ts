@@ -75,7 +75,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     fs.writeFileSync(directoryV3.concat(fileName), poolString)
 
     // create directory and file for v2
-    const subgraphProviderV2 = new V2SubgraphProvider(chain, 3, 15000)
+    const subgraphProviderV2 = new V2SubgraphProvider(chain, 3)
     const pairs = await subgraphProviderV2.getPools()
     const pairString = JSON.stringify(pairs)
 
