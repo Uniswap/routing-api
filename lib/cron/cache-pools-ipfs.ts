@@ -1,13 +1,18 @@
 import pinataSDK from '@pinata/sdk'
-import { ChainId, V3SubgraphProvider } from '@uniswap/smart-order-router'
+import { ChainId, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
 import fs from 'fs'
 
 const PARENT = '/tmp/temp/'
-// future: add v2 directory
-const DIRECTORY = '/tmp/temp/v1/pools/v3/'
+
+const DIRECTORY = '/tmp/temp/v1/pools/'
+
+enum VERSION {
+  V2 = 'v2',
+  V3 = 'v3',
+}
 
 // add more chains here
 const chains: { fileName: string; chain: ChainId }[] = [
@@ -60,13 +65,24 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
 
   for (let i = 0; i < chains.length; i++) {
     const { fileName, chain } = chains[i]
-    const subgraphProvider = new V3SubgraphProvider(chain, 3, 15000)
-    const pools = await subgraphProvider.getPools()
+    const subgraphProviderV3 = new V3SubgraphProvider(chain, 3, 15000)
+    const pools = await subgraphProviderV3.getPools()
     const poolString = JSON.stringify(pools)
 
-    // create directory and file
-    fs.mkdirSync(DIRECTORY, { recursive: true })
-    fs.writeFileSync(DIRECTORY.concat(fileName), poolString)
+    // create directory and file for v3
+    const directoryV3 = DIRECTORY.concat(VERSION.V3).concat('/')
+    fs.mkdirSync(directoryV3, { recursive: true })
+    fs.writeFileSync(directoryV3.concat(fileName), poolString)
+
+    // create directory and file for v2
+    const subgraphProviderV2 = new V2SubgraphProvider(chain, 3)
+    const pairs = await subgraphProviderV2.getPools()
+    const pairString = JSON.stringify(pairs)
+
+    // create directory and file for v2
+    const directoryV2 = DIRECTORY.concat(VERSION.V2).concat('/')
+    fs.mkdirSync(directoryV2, { recursive: true })
+    fs.writeFileSync(directoryV2.concat(fileName), pairString)
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
@@ -114,5 +130,4 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 }
-
 module.exports = { handler }
