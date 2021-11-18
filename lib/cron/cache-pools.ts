@@ -44,7 +44,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
 
       const result = await s3
         .putObject({
-          Bucket: process.env.POOL_CACHE_BUCKET!,
+          Bucket: process.env.POOL_CACHE_BUCKET_2!,
           Key: key,
           Body: JSON.stringify(pools),
         })
