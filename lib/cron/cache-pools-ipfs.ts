@@ -70,19 +70,18 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     const poolString = JSON.stringify(pools)
 
     // create directory and file for v3
-    const directoryV3 = DIRECTORY.concat(VERSION.V3).concat('/')
-    fs.mkdirSync(directoryV3, { recursive: true })
-    fs.writeFileSync(directoryV3.concat(fileName), poolString)
+    //  file: /tmp/temp/v1/pools/v3mainnet.json
+    const directoryV3 = DIRECTORY.concat(VERSION.V3).concat(fileName)
+    fs.mkdirSync(DIRECTORY, { recursive: true })
+    fs.writeFileSync(directoryV3, poolString)
 
-    // create directory and file for v2
     const subgraphProviderV2 = new V2SubgraphProvider(chain, 3)
     const pairs = await subgraphProviderV2.getPools()
     const pairString = JSON.stringify(pairs)
 
-    // create directory and file for v2
-    const directoryV2 = DIRECTORY.concat(VERSION.V2).concat('/')
-    fs.mkdirSync(directoryV2, { recursive: true })
-    fs.writeFileSync(directoryV2.concat(fileName), pairString)
+    // file: /tmp/temp/v1/pools/v2mainnet.json
+    const directoryV2 = DIRECTORY.concat(VERSION.V2).concat(fileName)
+    fs.writeFileSync(directoryV2, pairString)
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
