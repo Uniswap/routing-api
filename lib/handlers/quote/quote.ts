@@ -126,7 +126,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             }
         }
       }
-    } else if(!forceCrossProtocol) {
+    } else if (!forceCrossProtocol) {
       protocols = [Protocol.V3]
     }
 
