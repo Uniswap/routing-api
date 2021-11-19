@@ -17,7 +17,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { getAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET, UNI_MAINNET, DAI_MAINNET } from '../utils/tokens'
+import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
 
 const { ethers } = hre
 
