@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { Currency, CurrencyAmount, Ether, Token, WETH9 } from '@uniswap/sdk-core'
-import { CachingTokenListProvider, ChainId, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Ether, WETH9 } from '@uniswap/sdk-core'
+import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -17,31 +17,14 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
+import { getAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET, UNI_MAINNET, DAI_MAINNET } from '../utils/tokens'
 
 const { ethers } = hre
 
-// mocha.timeout(10000)
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
-
-const getAmount = async (type: string, symbolIn: string, symbolOut: string, amount: string) => {
-  const decimals = (await tokenListProvider.getTokenBySymbol(type == 'exactIn' ? symbolIn : symbolOut))!.decimals
-  return ethers.utils.parseUnits(amount, decimals).toString()
-}
-
-const USDC_MAINNET = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C')
-const USDT_MAINNET = new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD')
-const WBTC_MAINNET = new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC')
-const UNI_MAINNET = new Token(ChainId.MAINNET, '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', 8, 'UNI', 'Uniswap')
-const DAI_MAINNET = new Token(
-  ChainId.MAINNET,
-  '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-  18,
-  'DAI',
-  'Dai Stablecoin'
-)
+export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
