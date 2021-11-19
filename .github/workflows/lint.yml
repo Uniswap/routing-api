@@ -22,10 +22,10 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm install
 
       - name: Run linters
-        uses: wearerequired/lint-action@a8497ddb33fb1205941fd40452ca9fff07e0770d
+        uses: wearerequired/lint-action@v1
         with:
           github_token: ${{ secrets.github_token }}
           prettier: true
