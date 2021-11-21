@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { Currency, CurrencyAmount, Ether, WETH9 } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
 import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
@@ -26,6 +26,10 @@ chai.use(chaiSubset)
 
 export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
+if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
+  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables. See README')
+}
+
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { status: number; data: any }) => {
@@ -36,6 +40,28 @@ const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { st
   } catch (err) {
     expect(err.response).to.containSubset(resp)
   }
+}
+
+const checkQuoteToken = (
+  before: CurrencyAmount<Currency>,
+  after: CurrencyAmount<Currency>,
+  tokensQuoted: CurrencyAmount<Currency>
+) => {
+  // Check which is bigger to support exactIn and exactOut
+  const tokensSwapped = after.greaterThan(before) ? after.subtract(before) : before.subtract(after)
+
+  const tokensDiff = tokensQuoted.greaterThan(tokensSwapped)
+    ? tokensQuoted.subtract(tokensSwapped)
+    : tokensSwapped.subtract(tokensQuoted)
+  const percentDiff = tokensDiff.asFraction.divide(tokensQuoted.asFraction)
+  /* console.log(
+    `5pc: ${new Fraction(5, 100).toFixed(10)} tokens diff: ${tokensDiff.toExact()} percent diff: ${percentDiff.toFixed(
+      5
+    )} ${percentDiff.quotient} ${percentDiff.remainder.toFixed(5)} (${percentDiff.numerator}/${
+      percentDiff.denominator
+    }), quote: ${tokensQuoted.toExact()}, rceived: ${tokensSwapped.toExact()}`
+  ) */
+  expect(percentDiff.lessThan(new Fraction(5, 100))).to.be.true
 }
 
 // TODO: Update to prod
@@ -117,7 +143,7 @@ describe('quote', function () {
     ])
   })
 
-  for (const algorithm of ['alpha', 'legacy']) {
+  for (const algorithm of ['alpha' /* , 'legacy' */]) {
     for (const type of ['exactIn', 'exactOut']) {
       describe(`${algorithm} ${type} 2xx`, () => {
         describe(`+ simulate swap`, () => {
@@ -139,7 +165,7 @@ describe('quote', function () {
 
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
             const {
-              data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
               status,
             } = response
 
@@ -156,16 +182,17 @@ describe('quote', function () {
             expect(methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters,
+              methodParameters!,
               USDC_MAINNET,
               USDT_MAINNET
             )
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              expect(tokenInBefore.greaterThan(tokenInAfter)).to.be.true
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
             }
           })
 
@@ -187,7 +214,7 @@ describe('quote', function () {
 
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
             const {
-              data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
               status,
             } = response
 
@@ -204,16 +231,17 @@ describe('quote', function () {
             expect(methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters,
+              methodParameters!,
               USDC_MAINNET,
               USDT_MAINNET
             )
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              expect(tokenInBefore.greaterThan(tokenInAfter)).to.be.true
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
             }
           })
 
@@ -223,7 +251,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'ETH',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'ETH', '100'),
+              amount: await getAmount(type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
               type,
               recipient: alice.address,
               slippageTolerance: '5',
@@ -235,7 +263,7 @@ describe('quote', function () {
 
             const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
             const {
-              data: { methodParameters },
+              data: { quote, methodParameters },
               status,
             } = response
 
@@ -243,16 +271,17 @@ describe('quote', function () {
             expect(methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters,
+              methodParameters!,
               USDC_MAINNET,
               Ether.onChain(1)
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
             } else {
               // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
-              expect(tokenInBefore.greaterThan(tokenInAfter)).to.be.true
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
             }
           })
 
@@ -301,16 +330,17 @@ describe('quote', function () {
             expect(amountOut.eq(amountOutEdgesTotal))
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters,
+              data.methodParameters!,
               USDC_MAINNET,
               Ether.onChain(1)
             )
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
             } else {
               // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
-              expect(tokenInBefore.greaterThan(tokenInAfter)).to.be.true
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
           })
 
@@ -320,7 +350,10 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'UNI',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'ETH', 'UNI', '10'),
+              amount:
+                type == 'exactIn'
+                  ? await getAmount(type, 'ETH', 'UNI', '10')
+                  : await getAmount(type, 'ETH', 'UNI', '10000'),
               type,
               recipient: alice.address,
               slippageTolerance: '5',
@@ -337,7 +370,7 @@ describe('quote', function () {
             expect(data.methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters,
+              data.methodParameters!,
               Ether.onChain(1),
               UNI_MAINNET
             )
@@ -345,8 +378,10 @@ describe('quote', function () {
             if (type == 'exactIn') {
               // We've swapped 10 ETH + gas costs
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
-              expect(tokenInBefore.greaterThan(tokenInAfter)).to.be.true
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
             }
           })
 
@@ -373,15 +408,17 @@ describe('quote', function () {
             expect(data.methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters,
+              data.methodParameters!,
               WETH9[1]!,
               DAI_MAINNET
             )
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
             }
           })
 
@@ -408,15 +445,17 @@ describe('quote', function () {
             expect(data.methodParameters).to.not.be.undefined
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters,
+              data.methodParameters!,
               USDC_MAINNET,
               WETH9[1]!
             )
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
           })
 
@@ -440,7 +479,7 @@ describe('quote', function () {
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
               } = response
 
@@ -463,15 +502,17 @@ describe('quote', function () {
               }
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters,
+                response.data.methodParameters!,
                 USDC_MAINNET,
                 USDT_MAINNET!
               )
 
               if (type == 'exactIn') {
                 expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
               }
             })
 
@@ -494,7 +535,7 @@ describe('quote', function () {
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
               } = response
 
@@ -517,15 +558,17 @@ describe('quote', function () {
               }
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters,
+                response.data.methodParameters!,
                 USDC_MAINNET,
                 USDT_MAINNET!
               )
 
               if (type == 'exactIn') {
                 expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
               }
             })
 
@@ -548,7 +591,7 @@ describe('quote', function () {
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
               } = response
 
@@ -580,15 +623,17 @@ describe('quote', function () {
               expect(hasV3Pool && hasV2Pool).to.be.true
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters,
+                response.data.methodParameters!,
                 USDC_MAINNET,
                 USDT_MAINNET!
               )
 
               if (type == 'exactIn') {
                 expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
               }
             })
           }

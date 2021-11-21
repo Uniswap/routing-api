@@ -5,6 +5,7 @@ import { Erc20, Erc20__factory } from '../../lib/types/ext'
 
 const WHALES = [
   '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
+  '0x72a53cdbbcc1b9efa39c834a540550e23463aacb',
   '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
   '0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf',
   '0x1e3d6eab4bcf24bcd04721caa11c478a2e59852d',
@@ -22,7 +23,7 @@ export const resetAndFundAtBlock = async (
   alice: SignerWithAddress,
   blockNumber: number,
   currencyAmounts: CurrencyAmount<Currency>[]
-) => {
+): Promise<SignerWithAddress> => {
   await hre.network.provider.request({
     method: 'hardhat_reset',
     params: [
