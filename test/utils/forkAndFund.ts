@@ -49,7 +49,7 @@ export const resetAndFundAtBlock = async (
 
     if (currency.isNative) {
       // Requested funding was for ETH. Hardhat prefunds Alice with 1000 Eth.
-      return
+      return alice
     }
 
     for (let i = 0; i < WHALES.length; i++) {
