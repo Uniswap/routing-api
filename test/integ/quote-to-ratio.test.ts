@@ -385,10 +385,10 @@ describe('quote-to-ratio', () => {
 
       await expect(axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)).rejects.toMatchObject({
         response: {
-          status: 404,
+          status: 400,
           data: {
-            detail: 'No route found',
-            errorCode: 'NO_ROUTE',
+            detail: 'No swap needed',
+            errorCode: 'NO_SWAP_NEEDED',
           },
         },
       })
@@ -420,10 +420,10 @@ describe('quote-to-ratio', () => {
 
       await expect(axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)).rejects.toMatchObject({
         response: {
-          status: 404,
+          status: 400,
           data: {
-            detail: 'No route found',
-            errorCode: 'NO_ROUTE',
+            detail: 'No swap needed',
+            errorCode: 'NO_SWAP_NEEDED',
           },
         },
       })
@@ -488,10 +488,10 @@ describe('quote-to-ratio', () => {
 
       await expect(axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)).rejects.toMatchObject({
         response: {
-          status: 404,
+          status: 400,
           data: {
-            detail: 'No route found',
-            errorCode: 'NO_ROUTE',
+            detail: 'No swap needed',
+            errorCode: 'NO_SWAP_NEEDED',
           },
         },
       })
