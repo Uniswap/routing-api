@@ -8,6 +8,7 @@ import {
   routeAmountsToString,
   SwapAndAddConfig,
   SwapConfig,
+  SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
 import { Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -173,7 +174,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       routingConfig
     )
 
-    if (!swapRoute) {
+    if (swapRoute.status == SwapToRatioStatus.NO_ROUTE_FOUND) {
       log.info(
         {
           token0: token0.symbol,
@@ -191,6 +192,24 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
+    if (swapRoute.status == SwapToRatioStatus.NO_SWAP_NEEDED) {
+      log.info(
+        {
+          token0: token0.symbol,
+          token1: token1.symbol,
+          token0Balance: token0Balance.quotient.toString(),
+          token1Balance: token1Balance.quotient.toString(),
+        },
+        `No swap needed found. 404`
+      )
+
+      return {
+        statusCode: 400,
+        errorCode: 'NO_SWAP_NEEDED',
+        detail: 'No swap needed',
+      }
+    }
+
     const {
       quote,
       quoteGasAdjusted,
@@ -204,7 +223,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-    } = swapRoute
+    } = swapRoute.result
 
     const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
 
