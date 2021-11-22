@@ -26,6 +26,7 @@ chai.use(chaiSubset)
 
 export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
+console.log(`Using "${process.env.UNISWAP_ROUTING_API}" and "${process.env.ARCHIVE_NODE_RPC}"`)
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables. See README')
 }
