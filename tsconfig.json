@@ -21,6 +21,7 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "outDir": "dist",
+    "allowJs": true,
     "typeRoots": ["./node_modules/@types"]
   },
   "exclude": ["cdk.out", "./dist/**/*"]

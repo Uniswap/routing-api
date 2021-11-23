@@ -7,4 +7,5 @@ cdk.out
 yalc.lock
 dist
 .DS_Store
+lib/types
 cache

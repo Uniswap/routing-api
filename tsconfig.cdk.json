@@ -1,4 +1,3 @@
-// CDK does not support esnext. Use this config for CDK compiles.
 {
   "compilerOptions": {
     "target": "ES2018",
@@ -12,10 +11,10 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "noUnusedLocals": true /* Report errors on unused locals. */,
-    "noUnusedParameters": true /* Report errors on unused parameters. */,
-    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
-    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "inlineSourceMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
@@ -23,5 +22,6 @@
     "outDir": "dist",
     "typeRoots": ["./node_modules/@types"]
   },
+  "files": ["./hardhat.config.js"],
   "exclude": ["cdk.out", "./dist/**/*"]
 }

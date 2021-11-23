@@ -216,10 +216,15 @@ export class RoutingAPIPipeline extends Stack {
           value: 'npm-private-repo-access-token',
           type: BuildEnvironmentVariableType.SECRETS_MANAGER,
         },
+        ARCHIVE_NODE_RPC: {
+          value: 'archive-node-rpc-url',
+          type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+        },
       },
       commands: [
         'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
         'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
+        'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
         'npm install',
         'npm run integ-test',
       ],
