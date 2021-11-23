@@ -217,7 +217,7 @@ export class RoutingAPIPipeline extends Stack {
           type: BuildEnvironmentVariableType.SECRETS_MANAGER,
         },
         ARCHIVE_NODE_RPC: {
-          value: 'archive-node-rpc-url',
+          value: 'archive-node-rpc-url-default-kms',
           type: BuildEnvironmentVariableType.SECRETS_MANAGER,
         },
       },
