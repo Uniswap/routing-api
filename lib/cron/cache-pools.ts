@@ -15,8 +15,8 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   })
 
   const chainProtocols = [
-    { protocol: Protocol.V3, chainId: ChainId.MAINNET, provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 15000) },
-    { protocol: Protocol.V3, chainId: ChainId.RINKEBY, provider: new V3SubgraphProvider(ChainId.RINKEBY, 3, 15000) },
+    { protocol: Protocol.V3, chainId: ChainId.MAINNET, provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 90000) },
+    { protocol: Protocol.V3, chainId: ChainId.RINKEBY, provider: new V3SubgraphProvider(ChainId.RINKEBY, 3, 90000) },
     { protocol: Protocol.V2, chainId: ChainId.MAINNET, provider: new V2SubgraphProvider(ChainId.MAINNET, 2) },
     {
       protocol: Protocol.V2,
@@ -31,7 +31,13 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     _.map(chainProtocols, async ({ protocol, chainId, provider }) => {
       log.info(`Getting pools for ${protocol} on ${chainId}`)
 
-      const pools = await provider.getPools()
+      let pools
+      try {
+        pools = await provider.getPools()
+      } catch (err) {
+        log.error({ err }, `Failed to get pools for ${protocol} on ${chainId}`)
+        throw new Error(`Failed to get pools for ${protocol} on ${chainId}`)
+      }
 
       if (!pools || pools.length == 0) {
         log.info(`No ${protocol} pools found from the subgraph for ${chainId.toString()}`)
