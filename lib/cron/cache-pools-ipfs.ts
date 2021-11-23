@@ -65,8 +65,10 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
 
   for (let i = 0; i < chains.length; i++) {
     const { fileName, chain } = chains[i]
-    const subgraphProviderV3 = new V3SubgraphProvider(chain, 3, 15000)
+    log.info(`Getting V3 pools for chain ${chain}`)
+    const subgraphProviderV3 = new V3SubgraphProvider(chain, 3, 90000)
     const pools = await subgraphProviderV3.getPools()
+    log.info(`Got ${pools.length} V3 pools for chain ${chain}`)
     const poolString = JSON.stringify(pools)
 
     // create directory and file for v3
@@ -75,8 +77,10 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     fs.mkdirSync(DIRECTORY, { recursive: true })
     fs.writeFileSync(directoryV3, poolString)
 
+    log.info(`Getting V2 pairs for chain ${chain}`)
     const subgraphProviderV2 = new V2SubgraphProvider(chain, 3)
     const pairs = await subgraphProviderV2.getPools()
+    log.info(`Got ${pairs.length} V2 pairs for chain ${chain}`)
     const pairString = JSON.stringify(pairs)
 
     // file: /tmp/temp/v1/pools/v2mainnet.json
@@ -89,6 +93,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   let result
   let hash
   try {
+    log.info({ result }, `Pinning to pinata: ${PARENT}`)
     result = await pinata.pinFromFS(PARENT)
     const url = `https://ipfs.io/ipfs/${result.IpfsHash}`
     hash = result.IpfsHash
@@ -122,6 +127,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     HostedZoneId: process.env.HOSTED_ZONE!,
   }
   try {
+    log.info({ params }, `Updating record set`)
     const data = await route53.changeResourceRecordSets(params).promise()
     log.info(`Successful record update: ${data}`)
   } catch (err) {
