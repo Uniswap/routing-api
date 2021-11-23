@@ -1,24 +1,14 @@
 import pinataSDK from '@pinata/sdk'
-import { ChainId, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
 import fs from 'fs'
+import path from 'path'
+import { chainProtocols } from './cache-config'
 
 const PARENT = '/tmp/temp/'
 
 const DIRECTORY = '/tmp/temp/v1/pools/'
-
-enum VERSION {
-  V2 = 'v2',
-  V3 = 'v3',
-}
-
-// add more chains here
-const chains: { fileName: string; chain: ChainId }[] = [
-  { fileName: 'mainnet.json', chain: ChainId.MAINNET },
-  { fileName: 'rinkeby.json', chain: ChainId.RINKEBY },
-]
 
 const pinata = pinataSDK(process.env.PINATA_API_KEY!, process.env.PINATA_API_SECRET!)
 
@@ -63,29 +53,17 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 
-  for (let i = 0; i < chains.length; i++) {
-    const { fileName, chain } = chains[i]
-    log.info(`Getting V3 pools for chain ${chain}`)
-    const subgraphProviderV3 = new V3SubgraphProvider(chain, 3, 90000)
-    const pools = await subgraphProviderV3.getPools()
-    log.info(`Got ${pools.length} V3 pools for chain ${chain}`)
+  for (const { chainId, protocol, provider, ipfsFilename } of chainProtocols) {
+    log.info(`Getting ${protocol} pools for chain ${chainId}`)
+    const pools = await provider.getPools()
+    log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}`)
     const poolString = JSON.stringify(pools)
 
-    // create directory and file for v3
-    //  file: /tmp/temp/v1/pools/v3mainnet.json
-    const directoryV3 = DIRECTORY.concat(VERSION.V3).concat(fileName)
+    // create directory and file for the chain and protocol
+    // e.g: /tmp/temp/v1/pools/v3/mainnet.json
+    const directory = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
     fs.mkdirSync(DIRECTORY, { recursive: true })
-    fs.writeFileSync(directoryV3, poolString)
-
-    log.info(`Getting V2 pairs for chain ${chain}`)
-    const subgraphProviderV2 = new V2SubgraphProvider(chain, 3)
-    const pairs = await subgraphProviderV2.getPools()
-    log.info(`Got ${pairs.length} V2 pairs for chain ${chain}`)
-    const pairString = JSON.stringify(pairs)
-
-    // file: /tmp/temp/v1/pools/v2mainnet.json
-    const directoryV2 = DIRECTORY.concat(VERSION.V2).concat(fileName)
-    fs.writeFileSync(directoryV2, pairString)
+    fs.writeFileSync(directory, poolString)
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
