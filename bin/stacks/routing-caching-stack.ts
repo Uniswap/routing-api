@@ -156,7 +156,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
       lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
-      if (stage == 'beta') {
+      if (stage == 'beta' || stage == 'prod') {
         const lambdaIpfsAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToIPFSLambdaError', {
           metric: poolCachingLambda.metricErrors({
             period: Duration.minutes(60),
