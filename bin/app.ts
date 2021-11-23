@@ -226,6 +226,7 @@ export class RoutingAPIPipeline extends Stack {
         'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
         'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
         'npm install',
+        'npm run build',
         'npm run integ-test',
       ],
       runOrder: applicationStage.nextSequentialRunOrder(),
