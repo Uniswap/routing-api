@@ -26,12 +26,13 @@ chai.use(chaiSubset)
 
 export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
-console.log(`Using "${process.env.UNISWAP_ROUTING_API}" and "${process.env.ARCHIVE_NODE_RPC}"`)
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
-  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables. See README')
+  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
 }
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
+
+const SLIPPAGE = '5'
 
 const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { status: number; data: any }) => {
   const queryParams = qs.stringify(quoteReq)
@@ -55,14 +56,7 @@ const checkQuoteToken = (
     ? tokensQuoted.subtract(tokensSwapped)
     : tokensSwapped.subtract(tokensQuoted)
   const percentDiff = tokensDiff.asFraction.divide(tokensQuoted.asFraction)
-  /* console.log(
-    `5pc: ${new Fraction(5, 100).toFixed(10)} tokens diff: ${tokensDiff.toExact()} percent diff: ${percentDiff.toFixed(
-      5
-    )} ${percentDiff.quotient} ${percentDiff.remainder.toFixed(5)} (${percentDiff.numerator}/${
-      percentDiff.denominator
-    }), quote: ${tokensQuoted.toExact()}, rceived: ${tokensSwapped.toExact()}`
-  ) */
-  expect(percentDiff.lessThan(new Fraction(5, 100))).to.be.true
+  expect(percentDiff.lessThan(new Fraction(parseInt(SLIPPAGE), 100))).to.be.true
 }
 
 // TODO: Update to prod
@@ -157,7 +151,7 @@ describe('quote', function () {
               amount: await getAmount(type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -206,7 +200,7 @@ describe('quote', function () {
               amount: await getAmount(type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -255,7 +249,7 @@ describe('quote', function () {
               amount: await getAmount(type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -299,7 +293,7 @@ describe('quote', function () {
                   : await getAmount(type, 'USDC', 'ETH', '100'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -357,7 +351,7 @@ describe('quote', function () {
                   : await getAmount(type, 'ETH', 'UNI', '10000'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -395,7 +389,7 @@ describe('quote', function () {
               amount: await getAmount(type, 'WETH', 'DAI', '100'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -432,7 +426,7 @@ describe('quote', function () {
               amount: await getAmount(type, 'USDC', 'WETH', '100'),
               type,
               recipient: alice.address,
-              slippageTolerance: '5',
+              slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
             }
@@ -470,7 +464,7 @@ describe('quote', function () {
                 amount: await getAmount(type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
-                slippageTolerance: '5',
+                slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm: 'alpha',
                 protocols: 'v3',
@@ -526,7 +520,7 @@ describe('quote', function () {
                 amount: await getAmount(type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
-                slippageTolerance: '5',
+                slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm: 'alpha',
                 protocols: 'v2',
@@ -582,7 +576,7 @@ describe('quote', function () {
                 amount: await getAmount(type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
-                slippageTolerance: '5',
+                slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm: 'alpha',
                 forceCrossProtocol: true,
@@ -719,7 +713,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -754,7 +748,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -789,7 +783,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -812,7 +806,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
             type,
             recipient: '0x88fc765949a27405480F374Aa49E20dcCD3fCfb8',
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -840,7 +834,7 @@ describe('quote', function () {
             ),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -863,7 +857,7 @@ describe('quote', function () {
             amount: '-10000000000',
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -886,7 +880,7 @@ describe('quote', function () {
             amount: '1000000000.25',
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -909,7 +903,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -932,7 +926,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -955,7 +949,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -978,7 +972,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -999,7 +993,7 @@ describe('quote', function () {
             tokenOutChainId: 1,
             amount: await getAmount(type, 'USDC', 'USDT', '100'),
             type,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -1021,7 +1015,7 @@ describe('quote', function () {
             amount: await getAmount(type, 'USDT', 'USDC', '100'),
             type,
             recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aZZZZZZZ',
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }
@@ -1045,7 +1039,7 @@ describe('quote', function () {
             amount: '10000000000',
             type,
             recipient: alice.address,
-            slippageTolerance: '5',
+            slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
           }

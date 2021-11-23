@@ -39,6 +39,8 @@ The best way to develop and test the API is to deploy your own instance to AWS.
 
 ### Integration Tests
 
+The integration tests fetch quotes from your deployed API, then execute the swaps on a Hardhat mainnet fork.
+
 1. First deploy your test API using the intructions above. Then update your `.env` file with the URL of the API, and the RPC URL of an archive node:
 
    ```
