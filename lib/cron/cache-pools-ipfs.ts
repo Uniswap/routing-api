@@ -61,9 +61,10 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
 
     // create directory and file for the chain and protocol
     // e.g: /tmp/temp/v1/pools/v3/mainnet.json
-    const directory = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
-    fs.mkdirSync(DIRECTORY, { recursive: true })
-    fs.writeFileSync(directory, poolString)
+    const parentDirectory = path.join(DIRECTORY, protocol.toLowerCase())
+    const fullPath = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
+    fs.mkdirSync(parentDirectory, { recursive: true })
+    fs.writeFileSync(fullPath, poolString)
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
