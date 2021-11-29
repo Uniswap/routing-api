@@ -60,7 +60,7 @@ const checkQuoteToken = (
 }
 
 // TODO: Update to prod
-const SWAP_ROUTER_V2 = '0x39D6C807811F3D57FfCa750ad8E9F296e06D8a37'
+const SWAP_ROUTER_V2 = '0xc49598d64C01c59d6ab23e5610A5CC6Ef0919487'
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
