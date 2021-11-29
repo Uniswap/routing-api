@@ -1,13 +1,13 @@
 import {
   AlphaRouter,
   AlphaRouterConfig,
-  HeuristicGasModelFactory,
   ID_TO_CHAIN_ID,
   IRouter,
   LegacyRouter,
   LegacyRoutingConfig,
   setGlobalLogger,
   setGlobalMetric,
+  V3HeuristicGasModelFactory,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
@@ -68,13 +68,16 @@ export class QuoteHandlerInjector extends InjectorSOR<
 
     const {
       provider,
-      poolProvider,
+      v3PoolProvider,
       multicallProvider,
       tokenProvider,
       tokenListProvider,
-      subgraphProvider,
+      v3SubgraphProvider,
       blockedTokenListProvider,
-      quoteProvider,
+      v3QuoteProvider,
+      v2PoolProvider,
+      v2QuoteProvider,
+      v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
     } = dependencies[chainIdEnum]!
 
@@ -90,8 +93,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
         router = new LegacyRouter({
           chainId,
           multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
+          poolProvider: v3PoolProvider,
+          quoteProvider: v3QuoteProvider,
           tokenProvider,
         })
         break
@@ -100,14 +103,17 @@ export class QuoteHandlerInjector extends InjectorSOR<
         router = new AlphaRouter({
           chainId,
           provider,
-          subgraphProvider,
+          v3SubgraphProvider,
           multicall2Provider: multicallProvider,
-          poolProvider,
-          quoteProvider,
+          v3PoolProvider,
+          v3QuoteProvider,
           gasPriceProvider,
-          gasModelFactory: new HeuristicGasModelFactory(),
+          v3GasModelFactory: new V3HeuristicGasModelFactory(),
           blockedTokenListProvider,
           tokenProvider,
+          v2PoolProvider,
+          v2QuoteProvider,
+          v2SubgraphProvider,
         })
         break
     }
@@ -118,7 +124,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       log,
       metric,
       router,
-      poolProvider,
+      v3PoolProvider,
+      v2PoolProvider,
       tokenProvider,
       tokenListProvider,
     }

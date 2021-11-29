@@ -1,7 +1,9 @@
-import { ChainId, SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
+import _ from 'lodash'
+import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
+import { chainProtocols } from './cache-config'
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
   const log: Logger = bunyan.createLogger({
@@ -11,27 +13,40 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     requestId: event.id,
   })
 
-  for (const chain of [ChainId.MAINNET, ChainId.RINKEBY]) {
-    const subgraphProvider = new SubgraphProvider(chain, 3, 15000)
-    const pools = await subgraphProvider.getPools()
+  const s3 = new S3()
 
-    const s3 = new S3()
-    if (!pools || pools.length == 0) {
-      return
-    }
+  await Promise.all(
+    _.map(chainProtocols, async ({ protocol, chainId, provider }) => {
+      log.info(`Getting pools for ${protocol} on ${chainId}`)
 
-    const key = `${process.env.POOL_CACHE_KEY}${chain != ChainId.MAINNET ? `-${chain}` : ''}`
+      let pools
+      try {
+        pools = await provider.getPools()
+      } catch (err) {
+        log.error({ err }, `Failed to get pools for ${protocol} on ${chainId}`)
+        throw new Error(`Failed to get pools for ${protocol} on ${chainId}`)
+      }
 
-    log.info(`Got ${pools.length} pools from the subgraph. Saving to ${process.env.POOL_CACHE_BUCKET}/${key}`)
+      if (!pools || pools.length == 0) {
+        log.info(`No ${protocol} pools found from the subgraph for ${chainId.toString()}`)
+        return
+      }
 
-    await s3
-      .putObject({
-        Bucket: process.env.POOL_CACHE_BUCKET!,
-        Key: key,
-        Body: JSON.stringify(pools),
-      })
-      .promise()
-  }
+      const key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chainId, protocol)
+
+      log.info(`Got ${pools.length} ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${key}`)
+
+      const result = await s3
+        .putObject({
+          Bucket: process.env.POOL_CACHE_BUCKET_2!,
+          Key: key,
+          Body: JSON.stringify(pools),
+        })
+        .promise()
+
+      log.info({ result }, `Done ${protocol} for ${chainId.toString()}`)
+    })
+  )
 }
 
 module.exports = { handler }

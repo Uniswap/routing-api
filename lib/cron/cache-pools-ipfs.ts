@@ -1,19 +1,14 @@
 import pinataSDK from '@pinata/sdk'
-import { ChainId, SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
 import fs from 'fs'
+import path from 'path'
+import { chainProtocols } from './cache-config'
 
 const PARENT = '/tmp/temp/'
-// future: add v2 directory
-const DIRECTORY = '/tmp/temp/v1/pools/v3/'
 
-// add more chains here
-const chains: { fileName: string; chain: ChainId }[] = [
-  { fileName: 'mainnet.json', chain: ChainId.MAINNET },
-  { fileName: 'rinkeby.json', chain: ChainId.RINKEBY },
-]
+const DIRECTORY = '/tmp/temp/v1/pools/'
 
 const pinata = pinataSDK(process.env.PINATA_API_KEY!, process.env.PINATA_API_SECRET!)
 
@@ -58,15 +53,18 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 
-  for (let i = 0; i < chains.length; i++) {
-    const { fileName, chain } = chains[i]
-    const subgraphProvider = new SubgraphProvider(chain, 3, 15000)
-    const pools = await subgraphProvider.getPools()
+  for (const { chainId, protocol, provider, ipfsFilename } of chainProtocols) {
+    log.info(`Getting ${protocol} pools for chain ${chainId}`)
+    const pools = await provider.getPools()
+    log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}`)
     const poolString = JSON.stringify(pools)
 
-    // create directory and file
-    fs.mkdirSync(DIRECTORY, { recursive: true })
-    fs.writeFileSync(DIRECTORY.concat(fileName), poolString)
+    // create directory and file for the chain and protocol
+    // e.g: /tmp/temp/v1/pools/v3/mainnet.json
+    const parentDirectory = path.join(DIRECTORY, protocol.toLowerCase())
+    const fullPath = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
+    fs.mkdirSync(parentDirectory, { recursive: true })
+    fs.writeFileSync(fullPath, poolString)
   }
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
@@ -74,6 +72,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   let result
   let hash
   try {
+    log.info({ result }, `Pinning to pinata: ${PARENT}`)
     result = await pinata.pinFromFS(PARENT)
     const url = `https://ipfs.io/ipfs/${result.IpfsHash}`
     hash = result.IpfsHash
@@ -107,6 +106,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     HostedZoneId: process.env.HOSTED_ZONE!,
   }
   try {
+    log.info({ params }, `Updating record set`)
     const data = await route53.changeResourceRecordSets(params).promise()
     log.info(`Successful record update: ${data}`)
   } catch (err) {
@@ -114,5 +114,4 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 }
-
 module.exports = { handler }

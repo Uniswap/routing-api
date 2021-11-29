@@ -1,4 +1,22 @@
-import Joi from '@hapi/joi'
+import BaseJoi from '@hapi/joi'
+
+const Joi = BaseJoi.extend((joi) => ({
+  base: joi.array(),
+  type: 'stringArray',
+  messages: {
+    'stringArray.type': '{{#label}} is not a valid string array',
+  },
+  coerce: (value, helpers) => {
+    if (typeof value !== 'string') {
+      return { value: value, errors: [helpers.error('stringArray.type')] }
+    }
+    value = value.replace(/^\[|\]$/g, '').split(',')
+    const ar = (value as string[]).map((val) => {
+      return val.trim()
+    })
+    return { value: ar }
+  },
+}))
 
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
@@ -21,6 +39,8 @@ export const QuoteQueryParamsJoi = Joi.object({
     .max(30)
     .optional(),
   minSplits: Joi.number().max(7).optional(),
+  forceCrossProtocol: Joi.boolean().optional(),
+  protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3')).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -36,4 +56,6 @@ export type QuoteQueryParams = {
   algorithm?: string
   gasPriceWei?: string
   minSplits?: number
+  forceCrossProtocol?: boolean
+  protocols?: string[] | string
 }

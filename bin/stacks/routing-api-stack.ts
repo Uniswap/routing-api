@@ -55,7 +55,7 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     } = props
 
-    const { poolCacheBucket, poolCacheKey, tokenListCacheBucket } = new RoutingCachingStack(
+    const { poolCacheBucket, poolCacheBucket2, poolCacheKey, tokenListCacheBucket } = new RoutingCachingStack(
       this,
       'RoutingCachingStack',
       {
@@ -73,6 +73,7 @@ export class RoutingAPIStack extends cdk.Stack {
       'RoutingLambdaStack',
       {
         poolCacheBucket,
+        poolCacheBucket2,
         poolCacheKey,
         nodeRPC,
         nodeRPCUsername,
@@ -219,7 +220,7 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'p90',
       }),
-      threshold: 5000,
+      threshold: 7500,
       evaluationPeriods: 3,
     })
 
