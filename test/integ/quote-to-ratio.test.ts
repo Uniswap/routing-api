@@ -80,8 +80,8 @@ describe('quote-to-ratio', function () {
   let errorToleranceFraction: Fraction
 
   beforeEach(async () => {
-    token0Address = '0xdac17f958d2ee523a2206206994597c13d831ec7'
-    token1Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    token0Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    token1Address = '0xdac17f958d2ee523a2206206994597c13d831ec7'
     token0Balance = await parseAmount(5_000, token0Address)
     token1Balance = await parseAmount(2_000, token1Address)
     errorTolerance = 1
@@ -234,7 +234,7 @@ describe('quote-to-ratio', function () {
     expect(tokenOutAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
   })
 
-  it('erc20 -> erc20 range order position token0 excess', async () => {
+  it('erc20 -> erc20 range order position token1 excess', async () => {
     token0Balance = await parseAmount(50_000, token0Address)
     token1Balance = await parseAmount(2_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -267,10 +267,10 @@ describe('quote-to-ratio', function () {
 
     expect(status).to.equal(200)
     expect(!ratioDeviation.greaterThan(errorToleranceFraction)).to.be.true
-    expect(amount).to.equal(token0Balance)
+    expect(amount).to.equal(token1Balance)
   })
 
-  it('erc20 -> erc20 range order position token1 excess', async () => {
+  it('erc20 -> erc20 range order position token0 excess', async () => {
     token0Balance = await parseAmount(50_000, token0Address)
     token1Balance = await parseAmount(2_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -303,14 +303,14 @@ describe('quote-to-ratio', function () {
 
     expect(status).to.equal(200)
     expect(ratioDeviation.equalTo(new Fraction(0, 0))).to.be.true
-    expect(amount).to.equal(token1Balance)
+    expect(amount).to.equal(token0Balance)
   })
 
   it('weth -> erc20', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
-    token0Balance = await parseAmount(5_000, token0Address)
-    token1Balance = await parseAmount(2_000, token1Address)
+    token0Address = 'DAI'
+    token1Address = 'WETH'
+    token0Balance = await parseAmount(2_000, token0Address)
+    token1Balance = await parseAmount(5_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -344,10 +344,10 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> weth', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
-    token0Balance = await parseAmount(0, token0Address)
-    token1Balance = await parseAmount(20_000, token1Address)
+    token0Address = 'DAI'
+    token1Address = 'WETH'
+    token0Balance = await parseAmount(20_000, token0Address)
+    token1Balance = await parseAmount(0, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -382,39 +382,8 @@ describe('quote-to-ratio', function () {
 
   describe('4xx Error response', () => {
     it('when both balances are 0', async () => {
-      token0Address = 'WETH'
-      token1Address = 'DAI'
-      token0Balance = await parseAmount(0, token0Address)
-      token1Balance = await parseAmount(0, token1Address)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address,
-        token0ChainId: 1,
-        token1Address,
-        token1ChainId: 1,
-        token0Balance,
-        token1Balance,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        feeAmount: FeeAmount.MEDIUM,
-        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-        slippageTolerance: '5',
-        deadline: '360',
-        errorTolerance,
-        maxIterations: 6,
-      }
-
-      await callAndExpectFail(quoteToRatioRec, {
-        status: 400,
-        data: {
-          detail: 'No swap needed',
-          errorCode: 'NO_SWAP_NEEDED',
-        },
-      })
-    })
-
-    it('when both balances are 0', async () => {
-      token0Address = 'WETH'
-      token1Address = 'DAI'
+      token0Address = 'DAI'
+      token1Address = 'WETH'
       token0Balance = await parseAmount(0, token0Address)
       token1Balance = await parseAmount(0, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -474,9 +443,9 @@ describe('quote-to-ratio', function () {
       })
     })
 
-    it('when ratio is already fulfilled', async () => {
-      token0Balance = await parseAmount(2_000, token0Address)
-      token1Balance = await parseAmount(0, token1Address)
+    it('when ratio is already fulfilled with token1', async () => {
+      token0Balance = await parseAmount(0, token0Address)
+      token1Balance = await parseAmount(5_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -497,104 +466,161 @@ describe('quote-to-ratio', function () {
       await callAndExpectFail(quoteToRatioRec, {
         status: 400,
         data: {
-          detail: 'No swap needed',
+          detail: 'No swap needed for range order',
           errorCode: 'NO_SWAP_NEEDED',
         },
       })
     })
-  })
 
-  it('amount exceeds uint256', async () => {
-    token0Address = 'WETH'
-    token1Address = 'DAI'
-    token0Balance =
-      '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-    token1Balance = await parseAmount(2_000, token1Address)
-    const quoteToRatioRec: QuoteToRatioQueryParams = {
-      token0Address,
-      token0ChainId: 1,
-      token1Address,
-      token1ChainId: 1,
-      token0Balance,
-      token1Balance,
-      tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      feeAmount: FeeAmount.MEDIUM,
-      recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      slippageTolerance: '5',
-      deadline: '360',
-      errorTolerance,
-      maxIterations: 5,
-    }
+    it('when ratio is already fulfilled with token0', async () => {
+      token0Balance = await parseAmount(50_000, token0Address)
+      token1Balance = await parseAmount(0, token1Address)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: 60,
+        tickUpper: 120,
+        feeAmount: 500,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 6,
+      }
 
-    await callAndExpectFail(quoteToRatioRec, {
-      status: 400,
-      data: {
-        detail: '"token0Balance" length must be less than or equal to 77 characters long',
-        errorCode: 'VALIDATION_ERROR',
-      },
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'No swap needed for range order',
+          errorCode: 'NO_SWAP_NEEDED',
+        },
+      })
     })
-  })
 
-  it('with unknown token', async () => {
-    token0Address = 'UNKNOWNTOKEN'
-    token1Address = 'DAI'
-    token0Balance = '2000000000000'
-    token1Balance = await parseAmount(2_000, token1Address)
-    const quoteToRatioRec: QuoteToRatioQueryParams = {
-      token0Address,
-      token0ChainId: 1,
-      token1Address,
-      token1ChainId: 1,
-      token0Balance,
-      token1Balance,
-      tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      feeAmount: FeeAmount.MEDIUM,
-      recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      slippageTolerance: '5',
-      deadline: '360',
-      errorTolerance,
-      maxIterations: 5,
-    }
+    it('amount exceeds uint256', async () => {
+      token0Address = 'WETH'
+      token1Address = 'DAI'
+      token0Balance =
+        '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+      token1Balance = await parseAmount(2_000, token1Address)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 5,
+      }
 
-    await callAndExpectFail(quoteToRatioRec, {
-      status: 400,
-      data: {
-        detail: 'Could not find token with address "UNKNOWNTOKEN"',
-        errorCode: 'TOKEN_0_INVALID',
-      },
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: '"token0Balance" length must be less than or equal to 77 characters long',
+          errorCode: 'VALIDATION_ERROR',
+        },
+      })
     })
-  })
 
-  it('when tokens are the same', async () => {
-    token0Address = 'DAI'
-    token1Address = 'DAI'
-    token0Balance = '2000000000000'
-    token1Balance = await parseAmount(2_000, token1Address)
-    const quoteToRatioRec: QuoteToRatioQueryParams = {
-      token0Address,
-      token0ChainId: 1,
-      token1Address,
-      token1ChainId: 1,
-      token0Balance,
-      token1Balance,
-      tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-      feeAmount: FeeAmount.MEDIUM,
-      recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      slippageTolerance: '5',
-      deadline: '360',
-      errorTolerance,
-      maxIterations: 5,
-    }
+    it('with unknown token', async () => {
+      token0Address = 'UNKNOWNTOKEN'
+      token1Address = 'DAI'
+      token0Balance = '2000000000000'
+      token1Balance = await parseAmount(2_000, token1Address)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 5,
+      }
 
-    await callAndExpectFail(quoteToRatioRec, {
-      status: 400,
-      data: {
-        detail: 'token0 and token1 must be different',
-        errorCode: 'TOKEN_0_1_SAME',
-      },
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'Could not find token with address "UNKNOWNTOKEN"',
+          errorCode: 'TOKEN_0_INVALID',
+        },
+      })
+    })
+
+    it('when tokens are the same', async () => {
+      token0Address = 'DAI'
+      token1Address = 'DAI'
+      token0Balance = '2000000000000'
+      token1Balance = await parseAmount(2_000, token1Address)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 5,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'token0 and token1 must be different',
+          errorCode: 'TOKEN_0_1_SAME',
+        },
+      })
+    })
+
+    it('when token are out of order', async () => {
+      ;[token0Address, token1Address] = [token1Address, token0Address]
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        errorTolerance,
+        maxIterations: 5,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'token0 address must be less than token1 address',
+          errorCode: 'TOKENS_MISORDERED',
+        },
+      })
     })
   })
 })

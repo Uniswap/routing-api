@@ -71,11 +71,8 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
 
     // Parse user provided token address/symbol to Currency object.
     const before = Date.now()
-
     const type = 'exactIn'
-
     const token0 = await tokenStringToCurrency(tokenListProvider, tokenProvider, token0Address, token0ChainId, log)
-
     const token1 = await tokenStringToCurrency(tokenListProvider, tokenProvider, token1Address, token1ChainId, log)
 
     metric.putMetric('Token01StrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
@@ -112,6 +109,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
+    if (token0.wrapped.address > token1.wrapped.address) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKENS_MISORDERED',
+        detail: `token0 address must be less than token1 address`,
+      }
+    }
+
     const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
@@ -143,6 +148,11 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       tickUpper,
       liquidity: 1,
     })
+
+    if (this.noSwapNeededForRangeOrder(position, token0Balance, token1Balance)) {
+      return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
+    }
+
     const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
 
     log.info(
@@ -444,5 +454,19 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
     return QuotetoRatioResponseSchemaJoi
+  }
+
+  protected noSwapNeededForRangeOrder(
+    position: Position,
+    token0Balance: CurrencyAmount<Currency>,
+    token1Balance: CurrencyAmount<Currency>
+  ): boolean {
+    if (position.pool.tickCurrent < position.tickLower) {
+      return token1Balance.equalTo(0) && token0Balance.greaterThan(0)
+    } else if (position.pool.tickCurrent > position.tickUpper) {
+      return token0Balance.equalTo(0) && token1Balance.greaterThan(1)
+    } else {
+      return false
+    }
   }
 }
