@@ -134,8 +134,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             maxTimeout: 1000,
           },
           {
-            multicallChunk: 210, // 210
-            gasLimitPerCall: 705_000, // 705
+            multicallChunk: 210,
+            gasLimitPerCall: 705_000,
             quoteMinSuccessRate: 0.15,
           },
           {
@@ -146,7 +146,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         const v3PoolProvider = new CachingV3PoolProvider(
           chainId,
           new V3PoolProvider(chainId, multicall2Provider),
-          new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
+          new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
         )
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
