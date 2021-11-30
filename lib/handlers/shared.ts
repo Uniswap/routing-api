@@ -10,7 +10,6 @@ export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
     topNSecondHop: 2,
     topNWithEachBaseToken: 2,
     topNWithBaseToken: 6,
-    topNWithBaseTokenInSet: false,
   },
   v3PoolSelection: {
     topN: 2,
@@ -19,7 +18,6 @@ export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
     topNSecondHop: 1,
     topNWithEachBaseToken: 3,
     topNWithBaseToken: 5,
-    topNWithBaseTokenInSet: false,
   },
   maxSwapsPerPath: 3,
   minSplits: 1,
