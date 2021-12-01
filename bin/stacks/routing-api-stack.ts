@@ -55,18 +55,21 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     } = props
 
-    const { poolCacheBucket, poolCacheBucket2, poolCacheKey, tokenListCacheBucket } = new RoutingCachingStack(
-      this,
-      'RoutingCachingStack',
-      {
-        chatbotSNSArn,
-        stage,
-        route53Arn,
-        pinata_key,
-        pinata_secret,
-        hosted_zone,
-      }
-    )
+    const {
+      poolCacheBucket,
+      poolCacheBucket2,
+      poolCacheKey,
+      tokenListCacheBucket,
+      poolCacheLambda,
+      ipfsPoolCachingLambda,
+    } = new RoutingCachingStack(this, 'RoutingCachingStack', {
+      chatbotSNSArn,
+      stage,
+      route53Arn,
+      pinata_key,
+      pinata_secret,
+      hosted_zone,
+    })
 
     const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
       this,
@@ -174,7 +177,9 @@ export class RoutingAPIStack extends cdk.Stack {
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
-      lambdaName: routingLambda.functionName,
+      routingLambdaName: routingLambda.functionName,
+      poolCacheLambdaName: poolCacheLambda.functionName,
+      ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
     })
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)

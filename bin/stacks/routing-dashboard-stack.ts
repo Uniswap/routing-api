@@ -5,14 +5,16 @@ export const NAMESPACE = 'Uniswap'
 
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
-  lambdaName: string
+  routingLambdaName: string
+  poolCacheLambdaName: string
+  ipfsPoolCacheLambdaName?: string
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: cdk.Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, lambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaName, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
@@ -134,12 +136,14 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               view: 'timeSeries',
               stacked: false,
               metrics: [
-                [NAMESPACE, 'V3AndV2Routes', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V3Routes', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V2Routes', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V3AndV2SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V3SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V3Route', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V2SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'V2Route', 'Service', 'RoutingAPI'],
               ],
               region,
-              title: 'V3+V2 Aggregated routes vs V3 only routes vs V2 only routes',
+              title: 'Types of routes returned',
               period: 300,
               stat: 'Sum',
             },
@@ -230,13 +234,37 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               view: 'timeSeries',
               stacked: false,
               metrics: [
-                ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', lambdaName],
+                ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', routingLambdaName],
                 ['.', 'ConcurrentExecutions', '.', '.'],
                 ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
               ],
               region: region,
               title: 'Routing Lambda Provisioned Concurrency | 5min',
               stat: 'Average',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 63,
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                ['AWS/Lambda', 'Errors', 'FunctionName', poolCacheLambdaName],
+                ['.', 'Invocations', '.', '.'],
+                ...(ipfsPoolCacheLambdaName
+                  ? [
+                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                      ['.', 'Invocations', '.', '.'],
+                    ]
+                  : []),
+              ],
+              region: region,
+              title: 'Pool Cache Lambda Error/Invocations | 5min',
+              stat: 'Sum',
             },
           },
         ],
@@ -282,7 +310,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Average',
               period: 300,
-              title: 'Number of callsretries to provider needed to get quote',
+              title: 'Number of retries to provider needed to get quote',
             },
           },
           {

@@ -27,6 +27,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheBucket2: aws_s3.Bucket
   public readonly poolCacheKey: string
   public readonly tokenListCacheBucket: aws_s3.Bucket
+  public readonly poolCacheLambda: aws_lambda_nodejs.NodejsFunction
+  public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
 
   constructor(scope: Construct, name: string, props: RoutingCachingStackProps) {
     super(scope, name, props)
@@ -61,7 +63,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
     const region = cdk.Stack.of(this).region
 
-    const poolCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'PoolCacheLambda', {
+    this.poolCacheLambda = new aws_lambda_nodejs.NodejsFunction(this, 'PoolCacheLambda', {
       role: lambdaRole,
       runtime: aws_lambda.Runtime.NODEJS_14_X,
       entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
@@ -87,16 +89,16 @@ export class RoutingCachingStack extends cdk.NestedStack {
       },
     })
 
-    this.poolCacheBucket.grantReadWrite(poolCachingLambda)
-    this.poolCacheBucket2.grantReadWrite(poolCachingLambda)
+    this.poolCacheBucket.grantReadWrite(this.poolCacheLambda)
+    this.poolCacheBucket2.grantReadWrite(this.poolCacheLambda)
 
     new aws_events.Rule(this, 'SchedulePoolCache', {
       schedule: aws_events.Schedule.rate(Duration.minutes(15)),
-      targets: [new aws_events_targets.LambdaFunction(poolCachingLambda)],
+      targets: [new aws_events_targets.LambdaFunction(this.poolCacheLambda)],
     })
 
     if (stage == STAGE.BETA || stage == STAGE.PROD) {
-      const ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'IpfsPoolCacheLambda', {
+      this.ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'IpfsPoolCacheLambda', {
         role: lambdaRole,
         runtime: aws_lambda.Runtime.NODEJS_14_X,
         entry: path.join(__dirname, '../../lib/cron/cache-pools-ipfs.ts'),
@@ -127,12 +129,12 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
       new aws_events.Rule(this, 'ScheduleIpfsPoolCache', {
         schedule: aws_events.Schedule.rate(Duration.minutes(15)),
-        targets: [new aws_events_targets.LambdaFunction(ipfsPoolCachingLambda)],
+        targets: [new aws_events_targets.LambdaFunction(this.ipfsPoolCachingLambda)],
       })
     }
 
     const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToS3LambdaError', {
-      metric: poolCachingLambda.metricErrors({
+      metric: this.poolCacheLambda.metricErrors({
         period: Duration.minutes(60),
         statistic: 'sum',
       }),
@@ -141,7 +143,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     })
 
     const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToS3LambdaThrottles', {
-      metric: poolCachingLambda.metricThrottles({
+      metric: this.poolCacheLambda.metricThrottles({
         period: Duration.minutes(5),
         statistic: 'sum',
       }),
@@ -158,7 +160,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
       if (stage == 'beta' || stage == 'prod') {
         const lambdaIpfsAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToIPFSLambdaError', {
-          metric: poolCachingLambda.metricErrors({
+          metric: this.poolCacheLambda.metricErrors({
             period: Duration.minutes(60),
             statistic: 'sum',
           }),
