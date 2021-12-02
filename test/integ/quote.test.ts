@@ -59,8 +59,7 @@ const checkQuoteToken = (
   expect(percentDiff.lessThan(new Fraction(parseInt(SLIPPAGE), 100))).to.be.true
 }
 
-// TODO: Update to prod
-const SWAP_ROUTER_V2 = '0xc49598d64C01c59d6ab23e5610A5CC6Ef0919487'
+const SWAP_ROUTER_V2 = '0x075B36dE1Bd11cb361c5B3B1E80A9ab0e7aa8a60'
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
