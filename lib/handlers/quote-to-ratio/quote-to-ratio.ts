@@ -25,7 +25,7 @@ import {
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
+  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -33,7 +33,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
+      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
       void,
       QuoteToRatioQueryParams
     >
@@ -53,7 +53,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         slippageTolerance,
         deadline,
         minSplits,
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations,
       },
       requestInjected: {
@@ -160,7 +160,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
     }
 
-    const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
+    const ratioErrorToleranceFraction = new Fraction(Math.round(parseFloat(ratioErrorTolerance.toString()) * 100), 10_000)
 
     log.info(
       {
@@ -173,7 +173,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         tickUpper,
         feeAmount,
         maxIterations,
-        errorTolerance: errorToleranceFraction.toFixed(4),
+        ratioErrorTolerance: ratioErrorToleranceFraction.toFixed(4),
         routingConfig: routingConfig,
       },
       `Swap To Ratio Parameters`
@@ -184,8 +184,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token1Balance,
       position,
       {
-        ratioErrorTolerance: errorToleranceFraction,
+        ratioErrorTolerance: ratioErrorToleranceFraction,
         maxIterations,
+        // TODO: filler in order to build
+        addLiquidityOptions: {
+          slippageTolerance: new Percent(1, 100),
+          deadline: 100,
+          recipient: '0x0000000000000000000000000000000000000001'
+        }
       },
       swapAndAddOptions,
       routingConfig

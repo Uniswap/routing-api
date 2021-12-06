@@ -43,7 +43,7 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
     .max(30)
     .optional(),
   minSplits: Joi.number().max(7).optional(),
-  errorTolerance: Joi.number().min(0).max(10).precision(2).optional(),
+  ratioErrorTolerance: Joi.number().min(0).max(10).precision(2).optional(),
   maxIterations: Joi.number().min(1).max(10).default(5).required(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
@@ -62,7 +62,7 @@ export type QuoteToRatioQueryParams = {
   deadline?: string
   gasPriceWei?: string
   minSplits?: number
-  errorTolerance: number
+  ratioErrorTolerance: number
   maxIterations: number
 }
 

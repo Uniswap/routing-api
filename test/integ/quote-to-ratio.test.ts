@@ -74,16 +74,16 @@ describe('quote-to-ratio', function () {
   let token1Address: string
   let token0Balance: string
   let token1Balance: string
-  let errorTolerance: number
-  let errorToleranceFraction: Fraction
+  let ratioErrorTolerance: number
+  let ratioErrorToleranceFraction: Fraction
 
   beforeEach(async () => {
     token0Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
     token1Address = '0xdac17f958d2ee523a2206206994597c13d831ec7'
     token0Balance = await parseAmount(5_000, token0Address)
     token1Balance = await parseAmount(2_000, token1Address)
-    errorTolerance = 1
-    errorToleranceFraction = new Fraction(errorTolerance * 100, 10_000)
+    ratioErrorTolerance = 1
+    ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
   })
 
   it('erc20 -> erc20 low volume trade token0Excess', async () => {
@@ -100,7 +100,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -116,7 +116,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).to.be.true
+    expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
     expect(tokenInAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(token1Address.toLowerCase())
   })
@@ -137,7 +137,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -153,7 +153,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).to.be.true
+    expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
     expect(tokenInAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(token1Address.toLowerCase())
   })
@@ -174,7 +174,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -190,7 +190,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).to.be.true
+    expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
     expect(tokenInAddress.toLowerCase()).to.equal(token1Address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
   })
@@ -211,7 +211,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -227,7 +227,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(ratioDeviation.lessThan(errorToleranceFraction)).to.be.true
+    expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
     expect(tokenInAddress.toLowerCase()).to.equal(token1Address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
   })
@@ -248,7 +248,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -264,7 +264,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).to.be.true
+    expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
     expect(amount).to.equal(token1Balance)
   })
 
@@ -284,7 +284,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -322,7 +322,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -338,7 +338,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).to.be.true
+    expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
   })
 
   // TODO: Having 'CURRENCY' exception issues.
@@ -360,7 +360,7 @@ describe('quote-to-ratio', function () {
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       slippageTolerance: '5',
       deadline: '360',
-      errorTolerance,
+      ratioErrorTolerance,
       maxIterations: 6,
     }
 
@@ -376,7 +376,7 @@ describe('quote-to-ratio', function () {
     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
 
     expect(status).to.equal(200)
-    expect(!ratioDeviation.greaterThan(errorToleranceFraction)).to.be.true
+    expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
   })
 
   describe('4xx Error response', () => {
@@ -398,7 +398,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 6,
       }
 
@@ -429,7 +429,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 0,
       }
 
@@ -458,7 +458,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 6,
       }
 
@@ -487,7 +487,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 6,
       }
 
@@ -519,7 +519,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 5,
       }
 
@@ -550,7 +550,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 5,
       }
 
@@ -581,7 +581,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 5,
       }
 
@@ -609,7 +609,7 @@ describe('quote-to-ratio', function () {
         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
         slippageTolerance: '5',
         deadline: '360',
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations: 5,
       }
 
