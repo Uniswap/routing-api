@@ -10,7 +10,7 @@ import {
   SwapAndAddOptions,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
-import { Position } from '@uniswap/v3-sdk'
+import { AddLiquidityOptions, CommonAddLiquidityOptions, Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -55,6 +55,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         minSplits,
         ratioErrorTolerance,
         maxIterations,
+        addLiquiditySlippageTolerance,
+        addLiquidityDeadline,
+        addLiquidityRecipient,
+        addLiquidityTokenId,
       },
       requestInjected: {
         router,
@@ -117,27 +121,42 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const routingConfig: AlphaRouterConfig = {
-      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
+    if (!!addLiquidityTokenId && !!addLiquidityRecipient) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOO_MANY_POSITION_OPTIONS',
+        detail: `addLiquidityTokenId and addLiquidityRecipient are mutually exclusive. must only provide one.`,
+      }
+    }
+
+    const routingConfig = {
+      ...DEFAULT_ROUTING_CONFIG,
       ...(minSplits ? { minSplits } : {}),
     }
 
-    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
-
+    let swapParams: SwapConfig | undefined = undefined
     if (slippageTolerance && deadline && recipient) {
-      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
-      swapAndAddOptions = {
-        swapOptions: {
-          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-        },
-        addLiquidityOptions: {
-          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-        },
+      swapParams = {
+        deadline: this.parseDeadline(deadline),
+        recipient: recipient,
+        slippageTolerance: this.parseSlippageTolerance(slippageTolerance),
+      }
+    }
+
+    const commonAddLiquidityOptions: CommonAddLiquidityOptions = {
+      deadline: this.parseDeadline(addLiquidityDeadline),
+      slippageTolerance: this.parseSlippageTolerance(addLiquiditySlippageTolerance),
+    }
+    let addLiquidityOptions: AddLiquidityOptions
+    if (addLiquidityTokenId) {
+      addLiquidityOptions = { ...commonAddLiquidityOptions, tokenId: addLiquidityTokenId }
+    } else if (addLiquidityRecipient) {
+      addLiquidityOptions = { ...commonAddLiquidityOptions, recipient: addLiquidityRecipient }
+    } else {
+      return {
+        statusCode: 400,
+        errorCode: 'UNSPECIFIED_POSITION_OPTIONS',
+        detail: `either addLiquidityTokenId must be provided for existing positions or addLiquidityRecipient for new positions`,
       }
     }
 
@@ -160,7 +179,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
     }
 
-    const ratioErrorToleranceFraction = new Fraction(Math.round(parseFloat(ratioErrorTolerance.toString()) * 100), 10_000)
+    const ratioErrorToleranceFraction = new Fraction(
+      Math.round(parseFloat(ratioErrorTolerance.toString()) * 100),
+      10_000
+    )
 
     log.info(
       {
@@ -186,12 +208,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       {
         ratioErrorTolerance: ratioErrorToleranceFraction,
         maxIterations,
-        // TODO: filler in order to build
-        addLiquidityOptions: {
-          slippageTolerance: new Percent(1, 100),
-          deadline: 100,
-          recipient: '0x0000000000000000000000000000000000000001'
-        }
+        addLiquidityOptions,
       },
       swapAndAddOptions,
       routingConfig
@@ -481,5 +498,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     } else {
       return false
     }
+  }
+
+  protected parseDeadline(deadline: string): number {
+    return Math.floor(Date.now() / 1000) + parseInt(deadline)
+  }
+
+  protected parseSlippageTolerance(slippageTolerance: string): Percent {
+    const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
+    return new Percent(slippagePer10k, 10_000)
   }
 }

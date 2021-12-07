@@ -45,6 +45,15 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
   minSplits: Joi.number().max(7).optional(),
   ratioErrorTolerance: Joi.number().min(0).max(10).precision(2).optional(),
   maxIterations: Joi.number().min(1).max(10).default(5).required(),
+  addLiquiditySlippageTolerance: Joi.number().min(0).max(20).precision(2),
+  addLiquidityDeadline: Joi.number().max(10800), // 180 mins, same as interface max
+  addLiquidityRecipient: Joi.string()
+    .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
+    .optional(),
+  addLiquidityTokenId: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(53) // TODO: validate < 2**176
+    .required(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteToRatioQueryParams = {
@@ -64,6 +73,10 @@ export type QuoteToRatioQueryParams = {
   minSplits?: number
   ratioErrorTolerance: number
   maxIterations: number
+  addLiquiditySlippageTolerance: string
+  addLiquidityDeadline: string
+  addLiquidityRecipient?: string
+  addLiquidityTokenId?: string
 }
 
 export type QuoteToRatioResponse = QuoteResponse & {

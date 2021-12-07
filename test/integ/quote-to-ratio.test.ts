@@ -102,6 +102,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -139,6 +142,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -176,6 +182,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -213,6 +222,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -250,6 +262,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -286,6 +301,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -324,6 +342,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -362,6 +383,9 @@ describe('quote-to-ratio', function () {
       deadline: '360',
       ratioErrorTolerance,
       maxIterations: 6,
+      addLiquiditySlippageTolerance: '5',
+      addLiquidityDeadline: '360',
+      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
     const queryParams = qs.stringify(quoteToRatioRec)
@@ -400,6 +424,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -431,6 +458,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 0,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -460,6 +490,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -489,6 +522,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -521,6 +557,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 5,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -552,6 +591,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 5,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -583,6 +625,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 5,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
@@ -611,6 +656,9 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 5,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
       await callAndExpectFail(quoteToRatioRec, {
