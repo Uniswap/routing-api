@@ -1,4 +1,10 @@
 import { Currency, Ether, Fraction } from '@uniswap/sdk-core'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
+import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
+import { MethodParameters } from '@uniswap/v3-sdk'
+import { BigNumber, providers } from 'ethers'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
 import chai, { expect } from 'chai'
@@ -6,15 +12,23 @@ import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
 import { parseUnits } from 'ethers/lib/utils'
 import JSBI from 'jsbi'
+import NodeCache from 'node-cache'
+import hre from 'hardhat'
 import qs from 'qs'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioResponse,
   ResponseFraction,
 } from '../../lib/handlers/quote-to-ratio/schema/quote-to-ratio-schema'
+import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
+import { QuoteResponse } from '../../lib/handlers/schema'
 import { absoluteValue } from '../utils/absoluteValue'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
 import { getTokenListProvider } from '../utils/tokens'
+import { resetAndFundAtBlock } from '../utils/forkAndFund'
+import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
+import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
+const { ethers } = hre
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
@@ -34,7 +48,7 @@ const callAndExpectFail = async (quoteReq: Partial<QuoteToRatioQueryParams>, res
 }
 
 // Try to parse a user entered amount for a given token
-async function parseAmount(value: number, tokenAddress: string): Promise<string> {
+async function parseAmountUsingAddress(value: number, tokenAddress: string): Promise<string> {
   const decimals = (await tokenStringToCurrency(tokenAddress))?.decimals
   return parseUnits(value.toString(), decimals).toString()
 }
@@ -64,12 +78,19 @@ function parseFraction(fraction: ResponseFraction): Fraction {
   return new Fraction(JSBI.BigInt(fraction.numerator), JSBI.BigInt(fraction.denominator))
 }
 
+const SWAP_ROUTER_V2 = '0x075B36dE1Bd11cb361c5B3B1E80A9ab0e7aa8a60'
+
 describe('quote-to-ratio', function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
   this.timeout(10000)
 
+  // chain parameters
+  let alice: SignerWithAddress
+  let block: number
+
+  // request parameters
   let token0Address: string
   let token1Address: string
   let token0Balance: string
@@ -77,11 +98,78 @@ describe('quote-to-ratio', function () {
   let ratioErrorTolerance: number
   let ratioErrorToleranceFraction: Fraction
 
-  beforeEach(async () => {
+  const executeSwap = async (
+    methodParameters: MethodParameters,
+    currencyIn: Currency,
+    currencyOut: Currency
+  ): Promise<{
+    tokenInAfter: CurrencyAmount<Currency>
+    tokenInBefore: CurrencyAmount<Currency>
+    tokenOutAfter: CurrencyAmount<Currency>
+    tokenOutBefore: CurrencyAmount<Currency>
+  }> => {
+    const tokenInBefore = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currencyIn)
+    const tokenOutBefore = await getBalance(alice, currencyOut)
+
+    const transaction = {
+      data: methodParameters.calldata,
+      to: SWAP_ROUTER_V2,
+      value: BigNumber.from(methodParameters.value),
+      from: alice.address,
+      gasPrice: BigNumber.from(2000000000000),
+      type: 1,
+    }
+
+    const transactionResponse: providers.TransactionResponse = await alice.sendTransaction(transaction)
+
+    await transactionResponse.wait()
+
+    const tokenInAfter = await getBalance(alice, currencyIn)
+    const tokenOutAfter = await getBalance(alice, currencyOut)
+
+    return {
+      tokenInAfter,
+      tokenInBefore,
+      tokenOutAfter,
+      tokenOutBefore,
+    }
+  }
+
+  before('generate blockchain fork', async function () {
+    this.timeout(40000)
+    ;[alice] = await ethers.getSigners()
+
+    // Make a dummy call to the API to get a block number to fork from.
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: 'USDC',
+      tokenInChainId: 1,
+      tokenOutAddress: 'USDT',
+      tokenOutChainId: 1,
+      amount: await getAmount('exactIn', 'USDC', 'USDT', '100'),
+      type: 'exactIn',
+    }
+
+    const {
+      data: { blockNumber },
+    } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
+
+    block = parseInt(blockNumber) - 10
+
+    alice = await resetAndFundAtBlock(alice, block, [
+      parseAmount('5000000', USDC_MAINNET),
+      parseAmount('5000000', USDT_MAINNET),
+      parseAmount('10', WBTC_MAINNET),
+      parseAmount('1000', UNI_MAINNET),
+      parseAmount('1000', WETH9[1]),
+      parseAmount('5000000', DAI_MAINNET),
+    ])
+  })
+
+  beforeEach('refresh query data', async () => {
     token0Address = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
     token1Address = '0xdac17f958d2ee523a2206206994597c13d831ec7'
-    token0Balance = await parseAmount(5_000, token0Address)
-    token1Balance = await parseAmount(2_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(5_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(2_000, token1Address)
     ratioErrorTolerance = 1
     ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
   })
@@ -125,8 +213,8 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> erc20 high volume trade token0Excess', async () => {
-    token0Balance = await parseAmount(100_000_000, token0Address)
-    token1Balance = await parseAmount(2_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(100_000_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(2_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -165,8 +253,8 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> erc20 low volume trade token1Excess', async () => {
-    token0Balance = await parseAmount(2_000, token0Address)
-    token1Balance = await parseAmount(5_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(2_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(5_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -205,8 +293,8 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> erc20 high volume trade token1Excess', async () => {
-    token0Balance = await parseAmount(2_000, token0Address)
-    token1Balance = await parseAmount(100_000_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(2_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(100_000_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -245,8 +333,8 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> erc20 range order position token1 excess', async () => {
-    token0Balance = await parseAmount(50_000, token0Address)
-    token1Balance = await parseAmount(2_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(50_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(2_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -284,8 +372,8 @@ describe('quote-to-ratio', function () {
   })
 
   it('erc20 -> erc20 range order position token0 excess', async () => {
-    token0Balance = await parseAmount(50_000, token0Address)
-    token1Balance = await parseAmount(2_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(50_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(2_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -325,8 +413,8 @@ describe('quote-to-ratio', function () {
   it('weth -> erc20', async () => {
     token0Address = 'DAI'
     token1Address = 'WETH'
-    token0Balance = await parseAmount(2_000, token0Address)
-    token1Balance = await parseAmount(5_000, token1Address)
+    token0Balance = await parseAmountUsingAddress(2_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(5_000, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -366,8 +454,8 @@ describe('quote-to-ratio', function () {
   it.skip('erc20 -> weth', async () => {
     token0Address = 'DAI'
     token1Address = 'WETH'
-    token0Balance = await parseAmount(20_000, token0Address)
-    token1Balance = await parseAmount(0, token1Address)
+    token0Balance = await parseAmountUsingAddress(20_000, token0Address)
+    token1Balance = await parseAmountUsingAddress(0, token1Address)
     const quoteToRatioRec: QuoteToRatioQueryParams = {
       token0Address,
       token0ChainId: 1,
@@ -407,8 +495,8 @@ describe('quote-to-ratio', function () {
     it('when both balances are 0', async () => {
       token0Address = 'DAI'
       token1Address = 'WETH'
-      token0Balance = await parseAmount(0, token0Address)
-      token1Balance = await parseAmount(0, token1Address)
+      token0Balance = await parseAmountUsingAddress(0, token0Address)
+      token1Balance = await parseAmountUsingAddress(0, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -441,8 +529,8 @@ describe('quote-to-ratio', function () {
     it('when max iterations is 0', async () => {
       token0Address = 'WETH'
       token1Address = 'DAI'
-      token0Balance = await parseAmount(50_000, token0Address)
-      token1Balance = await parseAmount(2_000, token1Address)
+      token0Balance = await parseAmountUsingAddress(50_000, token0Address)
+      token1Balance = await parseAmountUsingAddress(2_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -473,8 +561,8 @@ describe('quote-to-ratio', function () {
     })
 
     it('when ratio is already fulfilled with token1', async () => {
-      token0Balance = await parseAmount(0, token0Address)
-      token1Balance = await parseAmount(5_000, token1Address)
+      token0Balance = await parseAmountUsingAddress(0, token0Address)
+      token1Balance = await parseAmountUsingAddress(5_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -505,8 +593,8 @@ describe('quote-to-ratio', function () {
     })
 
     it('when ratio is already fulfilled with token0', async () => {
-      token0Balance = await parseAmount(50_000, token0Address)
-      token1Balance = await parseAmount(0, token1Address)
+      token0Balance = await parseAmountUsingAddress(50_000, token0Address)
+      token1Balance = await parseAmountUsingAddress(0, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -541,7 +629,7 @@ describe('quote-to-ratio', function () {
       token1Address = 'DAI'
       token0Balance =
         '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-      token1Balance = await parseAmount(2_000, token1Address)
+      token1Balance = await parseAmountUsingAddress(2_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -575,7 +663,7 @@ describe('quote-to-ratio', function () {
       token0Address = 'UNKNOWNTOKEN'
       token1Address = 'DAI'
       token0Balance = '2000000000000'
-      token1Balance = await parseAmount(2_000, token1Address)
+      token1Balance = await parseAmountUsingAddress(2_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -609,7 +697,7 @@ describe('quote-to-ratio', function () {
       token0Address = 'DAI'
       token1Address = 'DAI'
       token0Balance = '2000000000000'
-      token1Balance = await parseAmount(2_000, token1Address)
+      token1Balance = await parseAmountUsingAddress(2_000, token1Address)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
