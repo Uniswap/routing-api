@@ -22,6 +22,9 @@ export const getBalanceAndApprove = async (
   if (currency.isToken) {
     const aliceTokenIn: Erc20 = Erc20__factory.connect(currency.address, alice)
 
+    if (currency.symbol == "USDT") {
+      await (await aliceTokenIn.approve(approveTarget, 0)).wait()
+    }
     await (await aliceTokenIn.approve(approveTarget, constants.MaxUint256)).wait()
   }
 
