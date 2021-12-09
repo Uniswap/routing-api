@@ -26,7 +26,7 @@ import { absoluteValue } from '../utils/absoluteValue'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
 import { getTokenListProvider } from '../utils/tokens'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
-import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
+import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/getBalanceAndApprove'
 import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
 const { ethers } = hre
 
@@ -100,24 +100,32 @@ describe('quote-to-ratio', function () {
   let ratioErrorToleranceFraction: Fraction
 
   const executeSwap = async (
+    pool: string,
     methodParameters: MethodParameters,
     currencyIn: Currency,
     currencyOut: Currency,
     approveCurrentOut?: boolean
   ): Promise<{
-    tokenInAfter: CurrencyAmount<Currency>
-    tokenInBefore: CurrencyAmount<Currency>
-    tokenOutAfter: CurrencyAmount<Currency>
-    tokenOutBefore: CurrencyAmount<Currency>
+      tokenInAfterAlice: CurrencyAmount<Currency>
+      tokenInBeforeAlice: CurrencyAmount<Currency>
+      tokenOutAfterAlice: CurrencyAmount<Currency>
+      tokenOutBeforeAlice: CurrencyAmount<Currency>
+      tokenInAfterPool: CurrencyAmount<Currency>
+      tokenInBeforePool: CurrencyAmount<Currency>
+      tokenOutAfterPool: CurrencyAmount<Currency>
+      tokenOutBeforePool: CurrencyAmount<Currency>
   }> => {
-    const tokenInBefore = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currencyIn)
+    const tokenInBeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currencyIn)
 
-    let tokenOutBefore
+    let tokenOutBeforeAlice
     if (approveCurrentOut) {
-      tokenOutBefore = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currencyOut)
+      tokenOutBeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currencyOut)
     } else {
-      tokenOutBefore = await getBalance(alice, currencyOut)
+      tokenOutBeforeAlice = await getBalance(alice, currencyOut)
     }
+
+    const tokenInBeforePool = await getBalanceOfAddress(alice, pool, currencyIn)
+    const tokenOutBeforePool = await getBalanceOfAddress(alice, pool, currencyOut)
 
     const transaction = {
       data: methodParameters.calldata,
@@ -132,14 +140,21 @@ describe('quote-to-ratio', function () {
 
     await transactionResponse.wait()
 
-    // const tokenInAfter = await getBalance(alice, currencyIn)
-    // const tokenOutAfter = await getBalance(alice, currencyOut)
-    //
+    const tokenInAfterPool = await getBalanceOfAddress(alice, pool, currencyIn)
+    const tokenOutAfterPool = await getBalanceOfAddress(alice, pool, currencyOut)
+    const tokenInAfterAlice = await getBalance(alice, currencyIn)
+    const tokenOutAfterAlice = await getBalance(alice, currencyOut)
+
     return {
-      tokenInAfter:  await getBalance(alice, currencyIn),
-      tokenInBefore:  await getBalance(alice, currencyIn),
-      tokenOutAfter:  await getBalance(alice, currencyIn),
-      tokenOutBefore:  await getBalance(alice, currencyIn),
+      tokenInAfterAlice,
+      tokenInBeforeAlice,
+      tokenOutAfterAlice,
+      tokenOutBeforeAlice,
+      // TODO
+      tokenInAfterPool: tokenInAfterAlice,
+      tokenInBeforePool: tokenInAfterAlice,
+      tokenOutAfterPool: tokenInAfterAlice,
+      tokenOutBeforePool: tokenInAfterAlice,
     }
   }
 
@@ -186,6 +201,8 @@ describe('quote-to-ratio', function () {
       parseAmount('1000', WETH9[1]),
       parseAmount('5000000', DAI_MAINNET),
     ])
+    // TODO: better way to eliminate race conditoin for these approves and first test?
+    this.timeout(40000)
   })
 
   beforeEach('refresh query data', async () => {
@@ -221,7 +238,7 @@ describe('quote-to-ratio', function () {
     const queryParams = qs.stringify(quoteToRatioRec)
     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     const {
-      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters },
+      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters, postSwapTargetPool },
       status,
     } = response
 
@@ -236,7 +253,8 @@ describe('quote-to-ratio', function () {
 
     // console.log(response.data)
 
-    const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+    const { tokenInBeforeAlice, tokenInAfterAlice, tokenOutBeforeAlice, tokenOutAfterAlice } = await executeSwap(
+      postSwapTargetPool.address,
       methodParameters!,
       USDC_MAINNET,
       USDT_MAINNET,
@@ -245,7 +263,7 @@ describe('quote-to-ratio', function () {
 
   })
 
-  it.only('erc20 -> erc20 high volume trade token0Excess', async () => {
+  it('erc20 -> erc20 high volume trade token0Excess', async () => {
     token0Address = 'DAI'
     token1Address = 'USDC'
     token0Balance = parseAmount('1000000', DAI_MAINNET).quotient.toString()
@@ -273,7 +291,7 @@ describe('quote-to-ratio', function () {
     const queryParams = qs.stringify(quoteToRatioRec)
     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     const {
-      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters },
+      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters, postSwapTargetPool },
       status,
     } = response
 
@@ -286,7 +304,8 @@ describe('quote-to-ratio', function () {
     expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
 
-    const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+    const { tokenInBeforeAlice, tokenInAfterAlice, tokenOutBeforeAlice, tokenOutAfterAlice, tokenInBeforePool, tokenInAfterPool, tokenOutBeforePool, tokenOutAfterPool } = await executeSwap(
+      postSwapTargetPool.address,
       methodParameters!,
       USDC_MAINNET,
       DAI_MAINNET,
@@ -320,7 +339,7 @@ describe('quote-to-ratio', function () {
     const queryParams = qs.stringify(quoteToRatioRec)
     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     const {
-      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters },
+      data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction, methodParameters, postSwapTargetPool },
       status,
     } = response
 
@@ -333,7 +352,8 @@ describe('quote-to-ratio', function () {
     expect(tokenInAddress.toLowerCase()).to.equal(token1Address.toLowerCase())
     expect(tokenOutAddress.toLowerCase()).to.equal(token0Address.toLowerCase())
 
-    const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+    const { tokenInBeforeAlice, tokenInAfterAlice, tokenOutBeforeAlice, tokenOutAfterAlice } = await executeSwap(
+      postSwapTargetPool.address,
       methodParameters!,
       USDC_MAINNET,
       USDT_MAINNET,
