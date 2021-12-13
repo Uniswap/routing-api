@@ -1,9 +1,15 @@
 import { Token } from '@uniswap/sdk-core'
-import { ChainId } from '@uniswap/smart-order-router'
+import { CachingTokenListProvider, NodeJSCache, ChainId } from '@uniswap/smart-order-router'
+import NodeCache from 'node-cache'
 import { ethers } from 'ethers'
-import { tokenListProvider } from '../integ/quote.test'
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
 
-export const getAmount = async (type: string, symbolIn: string, symbolOut: string, amount: string) => {
+export const getTokenListProvider = (id: ChainId) => {
+  return new CachingTokenListProvider(id, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
+}
+
+export const getAmount = async (id: ChainId, type: string, symbolIn: string, symbolOut: string, amount: string) => {
+  const tokenListProvider = getTokenListProvider(id)
   const decimals = (await tokenListProvider.getTokenBySymbol(type == 'exactIn' ? symbolIn : symbolOut))!.decimals
   return ethers.utils.parseUnits(amount, decimals).toString()
 }

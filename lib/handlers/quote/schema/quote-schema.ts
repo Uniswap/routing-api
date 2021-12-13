@@ -20,9 +20,9 @@ const Joi = BaseJoi.extend((joi) => ({
 
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
-  tokenInChainId: Joi.number().valid(1, 4).required(),
+  tokenInChainId: Joi.number().valid(1, 3, 4, 5, 42, 10, 69, 42161, 421611).required(),
   tokenOutAddress: Joi.string().alphanum().max(42).required(),
-  tokenOutChainId: Joi.number().valid(1, 4).required(),
+  tokenOutChainId: Joi.number().valid(1, 3, 4, 5, 42, 10, 69, 42161, 421611).required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256

@@ -34,8 +34,19 @@ import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
+import { ID_TO_PROVIDER_URL, ID_TO_PROVIDER_USER, ID_TO_PROVIDER_PW } from '../util/chain-constants'
 
-const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY]
+const SUPPORTED_CHAINS: ChainId[] = [
+  ChainId.MAINNET,
+  ChainId.RINKEBY,
+  ChainId.ROPSTEN,
+  ChainId.KOVAN,
+  ChainId.OPTIMISM,
+  ChainId.OPTIMISTIC_KOVAN,
+  ChainId.ARBITRUM_ONE,
+  ChainId.ARBITRUM_RINKEBY,
+  // leaving goerli out for now
+]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
@@ -94,12 +105,15 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const chainName = ID_TO_NETWORK_NAME(chainId)
 
+        const providerURL = ID_TO_PROVIDER_URL(chainId)
+        const providerUser = ID_TO_PROVIDER_USER(chainId)
+        const providerPW = ID_TO_PROVIDER_PW(chainId)
+
         const provider = new ethers.providers.JsonRpcProvider(
           {
-            url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
-            user: chainId == ChainId.MAINNET ? process.env.JSON_RPC_USERNAME! : process.env.JSON_RPC_USERNAME_RINKEBY!,
-            password:
-              chainId == ChainId.MAINNET ? process.env.JSON_RPC_PASSWORD : process.env.JSON_RPC_PASSWORD_RINKEBY,
+            url: providerURL,
+            user: providerUser,
+            password: providerPW,
             timeout: 5000,
           },
           chainName
@@ -122,9 +136,36 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           new TokenProvider(chainId, multicall2Provider)
         )
 
+        const arbitrumQuoteProvider = new V3QuoteProvider(
+          chainId,
+          provider,
+          multicall2Provider,
+          {
+            retries: 2,
+            minTimeout: 100,
+            maxTimeout: 1000,
+          },
+          {
+            multicallChunk: 17,
+            gasLimitPerCall: 25_000_000,
+            quoteMinSuccessRate: 0.15,
+          },
+          {
+            gasLimitOverride: 30_000_000,
+            multicallChunk: 8,
+          },
+          {
+            gasLimitOverride: 30_000_000,
+            multicallChunk: 25,
+          }
+        );
+
+        const useArbitrumQuoteProvider =
+        chainId == ChainId.ARBITRUM_ONE || chainId == ChainId.ARBITRUM_RINKEBY;
+
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        const quoteProvider = new V3QuoteProvider(
+        const quoteProvider = useArbitrumQuoteProvider ? arbitrumQuoteProvider : new V3QuoteProvider(
           chainId,
           provider,
           multicall2Provider,

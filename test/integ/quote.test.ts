@@ -1,7 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
 import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
+import { parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -11,20 +10,17 @@ import chaiSubset from 'chai-subset'
 import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import _ from 'lodash'
-import NodeCache from 'node-cache'
 import qs from 'qs'
 import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
 import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
-
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -39,7 +35,7 @@ const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { st
   try {
     await axios.get<QuoteResponse>(`${API}?${queryParams}`)
     fail()
-  } catch (err) {
+  } catch (err: any) {
     expect(err.response).to.containSubset(resp)
   }
 }
@@ -117,7 +113,7 @@ describe('quote', function () {
       tokenInChainId: 1,
       tokenOutAddress: 'USDT',
       tokenOutChainId: 1,
-      amount: await getAmount('exactIn', 'USDC', 'USDT', '100'),
+      amount: await getAmount(1, 'exactIn', 'USDC', 'USDT', '100'),
       type: 'exactIn',
     }
 
@@ -147,7 +143,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDT',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'USDT', '100'),
+              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -196,7 +192,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDT',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'USDT', '100'),
+              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -245,7 +241,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'ETH',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
+              amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -288,8 +284,8 @@ describe('quote', function () {
               tokenOutChainId: 1,
               amount:
                 type == 'exactIn'
-                  ? await getAmount(type, 'USDC', 'ETH', '1000000')
-                  : await getAmount(type, 'USDC', 'ETH', '100'),
+                  ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
+                  : await getAmount(1, type, 'USDC', 'ETH', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -346,8 +342,8 @@ describe('quote', function () {
               tokenOutChainId: 1,
               amount:
                 type == 'exactIn'
-                  ? await getAmount(type, 'ETH', 'UNI', '10')
-                  : await getAmount(type, 'ETH', 'UNI', '10000'),
+                  ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -385,7 +381,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'DAI',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'WETH', 'DAI', '100'),
+              amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -422,7 +418,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'WETH',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'WETH', '100'),
+              amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -460,7 +456,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -516,7 +512,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -572,7 +568,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -639,7 +635,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
           }
@@ -671,7 +667,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
             gasPriceWei: '60000000000',
@@ -709,7 +705,7 @@ describe('quote', function () {
             tokenInChainId: 1, // DAI
             tokenOutAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
             tokenOutChainId: 1, // USDC
-            amount: await getAmount(type, 'DAI', 'USDC', '100'),
+            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -744,7 +740,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'DAI', 'USDC', '100'),
+            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -779,7 +775,7 @@ describe('quote', function () {
             tokenOutAddress: 'USDT',
             tokenInChainId: 1,
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -802,7 +798,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'KNC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
+            amount: await getAmount(1, type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
             type,
             recipient: '0x88fc765949a27405480F374Aa49E20dcCD3fCfb8',
             slippageTolerance: SLIPPAGE,
@@ -825,7 +821,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(
+            amount: await getAmount(1, 
               type,
               'USDC',
               'USDT',
@@ -899,7 +895,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'NONEXISTANTTOKEN',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -922,7 +918,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -945,7 +941,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -968,7 +964,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -990,7 +986,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             slippageTolerance: SLIPPAGE,
             deadline: '360',
@@ -1011,7 +1007,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDC', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDC', '100'),
             type,
             recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aZZZZZZZ',
             slippageTolerance: SLIPPAGE,
@@ -1071,7 +1067,27 @@ describe('rinkeby', () => {
       tokenInChainId: 4,
       tokenOutAddress: '0xf9bdcdef5fd9978110238cfd6f3177a0da199fd8',
       tokenOutChainId: 4,
-      amount: await getAmount('exactIn', 'WETH', 'USDT', '1'),
+      amount: await getAmount(4, 'exactIn', 'WETH', 'USDT', '1'),
+      type: 'exactIn',
+    }
+
+    const queryParams = qs.stringify(quoteReq)
+
+    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+    const { status } = response
+
+    expect(status).to.equal(200)
+  })
+})
+
+describe('optimism', () => {
+  it(`erc20 -> erc20`, async () => {
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+      tokenInChainId: 10,
+      tokenOutAddress: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+      tokenOutChainId: 10,
+      amount: await getAmount(4, 'exactIn', 'USDC', 'DAI', '1'),
       type: 'exactIn',
     }
 
