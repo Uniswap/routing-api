@@ -14,7 +14,9 @@ import {
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
+  LegacyGasPriceProvider,
   NodeJSCache,
+  OnChainGasPriceProvider,
   setGlobalLogger,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
@@ -235,7 +237,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             tokenProviderFromTokenList: tokenListProvider,
             gasPriceProvider: new CachingGasStationProvider(
               chainId,
-              new EIP1559GasPriceProvider(provider),
+              new OnChainGasPriceProvider(
+                chainId,
+                new EIP1559GasPriceProvider(provider),
+                new LegacyGasPriceProvider(provider)
+              ),
               new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
             ),
             v3SubgraphProvider,
