@@ -128,13 +128,9 @@ describe('quote', function () {
       type: 'exactIn',
     }
 
-    console.log('test ' + `${API}?${qs.stringify(quoteReq)}`)
-
     const {
       data: { blockNumber },
     } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
-
-    console.log('resp')
 
     block = parseInt(blockNumber) - 10
 
@@ -150,7 +146,7 @@ describe('quote', function () {
 
   for (const algorithm of ['alpha' /* , 'legacy' */]) {
     for (const type of ['exactIn', 'exactOut']) {
-      describe(`${algorithm} ${type} 2xx`, () => {
+      describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ simulate swap`, () => {
           it(`erc20 -> erc20`, async () => {
             const quoteReq: QuoteQueryParams = {
@@ -784,7 +780,7 @@ describe('quote', function () {
         })
       })
 
-      describe(`${algorithm} ${type} 4xx`, () => {
+      describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 4xx`, () => {
         it(`field is missing in body`, async () => {
           const quoteReq: Partial<QuoteQueryParams> = {
             tokenOutAddress: 'USDT',
@@ -1058,7 +1054,7 @@ describe('quote', function () {
           await callAndExpectFail(quoteReq, {
             status: 400,
             data: {
-              detail: '"tokenInChainId" must be one of [1, 4]',
+              detail: '"tokenInChainId" must be one of [1, 4, 3, 42, 10, 69, 42161, 421611]',
               errorCode: 'VALIDATION_ERROR',
             },
           })
