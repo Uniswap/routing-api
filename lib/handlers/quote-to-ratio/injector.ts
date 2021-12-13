@@ -5,7 +5,7 @@ import {
   ISwapToRatio,
   setGlobalLogger,
   setGlobalMetric,
-  SwapAndAddOptions,
+  SwapAndAddConfig,
   V3HeuristicGasModelFactory,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
@@ -18,7 +18,7 @@ import { StaticGasPriceProvider } from '../router-entities/static-gas-price-prov
 import { QuoteToRatioQueryParams } from './schema/quote-to-ratio-schema'
 
 export class QuoteToRatioHandlerInjector extends InjectorSOR<
-  ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>,
+  ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>,
   QuoteToRatioQueryParams
 > {
   public async getRequestInjected(
@@ -29,7 +29,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<
     context: Context,
     log: Logger,
     metricsLogger: MetricsLogger
-  ): Promise<RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>> {
+  ): Promise<RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>> {
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO

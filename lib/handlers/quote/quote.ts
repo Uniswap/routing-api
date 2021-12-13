@@ -7,7 +7,7 @@ import {
   LegacyRoutingConfig,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapConfig,
+  SwapOptions,
   SwapRoute,
 } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi'
@@ -137,7 +137,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols,
     }
 
-    let swapParams: SwapConfig | undefined = undefined
+    let swapParams: SwapOptions | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
       const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)

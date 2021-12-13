@@ -1,4 +1,5 @@
 import pinataSDK from '@pinata/sdk'
+import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -53,10 +54,11 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 
-  for (const { chainId, protocol, provider, ipfsFilename } of chainProtocols) {
+  for (const { chainId, protocol, provider } of chainProtocols) {
+    const ipfsFilename = `${ID_TO_NETWORK_NAME(chainId)}.json`
     log.info(`Getting ${protocol} pools for chain ${chainId}`)
     const pools = await provider.getPools()
-    log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}`)
+    log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}. Will save with filename ${ipfsFilename}`)
     const poolString = JSON.stringify(pools)
 
     // create directory and file for the chain and protocol
