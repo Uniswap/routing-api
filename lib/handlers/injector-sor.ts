@@ -161,7 +161,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               )
               return subgraphProvider
             } catch (err) {
-              return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
+              return new StaticV3SubgraphProvider(chainId)
             }
           })(),
           (async () => {

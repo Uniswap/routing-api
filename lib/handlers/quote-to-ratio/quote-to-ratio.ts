@@ -6,7 +6,7 @@ import {
   ISwapToRatio,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapAndAddConfig,
+  SwapAndAddOptions,
   SwapConfig,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
@@ -25,7 +25,7 @@ import {
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
+  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -33,7 +33,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
+      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
       void,
       QuoteToRatioQueryParams
     >
@@ -177,7 +177,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token1Balance,
       position,
       {
-        errorTolerance: errorToleranceFraction,
+        ratioErrorTolerance: errorToleranceFraction,
         maxIterations,
       },
       swapParams,
