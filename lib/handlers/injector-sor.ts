@@ -112,7 +112,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             url: url,
             timeout: 5000,
           },
-          chainName
+          chainId
         )
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
