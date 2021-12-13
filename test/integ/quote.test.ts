@@ -1087,7 +1087,7 @@ describe('optimism', () => {
       tokenInChainId: 10,
       tokenOutAddress: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
       tokenOutChainId: 10,
-      amount: await getAmount(4, 'exactIn', 'USDC', 'DAI', '1'),
+      amount: await getAmount(10, 'exactIn', 'USDC', 'DAI', '1'),
       type: 'exactIn',
     }
 
