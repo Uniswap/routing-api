@@ -26,6 +26,7 @@ import {
   USDC_ON,
   USDT_MAINNET,
   WBTC_MAINNET,
+  WETH_ON,
 } from '../utils/tokens'
 const { ethers } = hre
 
@@ -1074,6 +1075,24 @@ describe('alpha only quote', function () {
 for (const chain of SUPPORTED_CHAINS) {
   for (const type of ['exactIn', 'exactOut']) {
     describe(`${chain} ${type}`, () => {
+      it(`weth -> erc20`, async () => {
+        const quoteReq: QuoteQueryParams = {
+          tokenInAddress: WETH_ON(chain).address,
+          tokenInChainId: chain,
+          tokenOutAddress: USDC_ON(chain).address,
+          tokenOutChainId: chain,
+          amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
+          type,
+        }
+
+        const queryParams = qs.stringify(quoteReq)
+
+        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+        const { status } = response
+
+        expect(status).to.equal(200)
+      })
+
       it(`erc20 -> erc20`, async () => {
         const quoteReq: QuoteQueryParams = {
           tokenInAddress: DAI_ON(chain).address,
@@ -1081,6 +1100,24 @@ for (const chain of SUPPORTED_CHAINS) {
           tokenOutAddress: USDC_ON(chain).address,
           tokenOutChainId: chain,
           amount: await getAmountFromToken(type, DAI_ON(chain), USDC_ON(chain), '1'),
+          type,
+        }
+
+        const queryParams = qs.stringify(quoteReq)
+
+        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+        const { status } = response
+
+        expect(status).to.equal(200)
+      })
+
+      it(`eth -> erc20`, async () => {
+        const quoteReq: QuoteQueryParams = {
+          tokenInAddress: 'ETH',
+          tokenInChainId: chain,
+          tokenOutAddress: USDC_ON(chain).address,
+          tokenOutChainId: chain,
+          amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
           type,
         }
 
