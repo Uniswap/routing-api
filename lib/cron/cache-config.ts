@@ -8,6 +8,7 @@ import {
 } from '@uniswap/smart-order-router'
 
 export const chainProtocols = [
+  // V3.
   {
     protocol: Protocol.V3,
     chainId: ChainId.MAINNET,
@@ -23,12 +24,12 @@ export const chainProtocols = [
     chainId: ChainId.ARBITRUM_ONE,
     provider: new V3SubgraphProvider(ChainId.ARBITRUM_ONE, 3, 90000),
   },
+  // Currently there is no working V3 subgraph for Gorli, Kovan, Optimism, Optimism Kovan, Arbitrum Rinkeby, so we use static providers.
   {
     protocol: Protocol.V3,
     chainId: ChainId.OPTIMISM,
-    provider: new V3SubgraphProvider(ChainId.OPTIMISM, 3, 90000),
+    provider: new StaticV3SubgraphProvider(ChainId.OPTIMISM),
   },
-  // Currently there is no working V3 subgraph for Gorli, Kovan, Optimism Kovan, Arbitrum Rinkeby, so we use a static one.
   {
     protocol: Protocol.V3,
     chainId: ChainId.GÖRLI,
@@ -49,12 +50,13 @@ export const chainProtocols = [
     chainId: ChainId.ARBITRUM_RINKEBY,
     provider: new StaticV3SubgraphProvider(ChainId.ARBITRUM_RINKEBY),
   },
+  // V2.
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     provider: new V2SubgraphProvider(ChainId.MAINNET, 2),
   },
-  // Currently there is no working V2 subgraph for Rinkeby, Ropsten, Gorli or Kovan, so we use a static one.
+  // Currently there is no working V2 subgraph for Rinkeby, Ropsten, Gorli or Kovan, so we use static providers.
   {
     protocol: Protocol.V2,
     chainId: ChainId.RINKEBY,

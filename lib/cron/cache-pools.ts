@@ -47,6 +47,8 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
       log.info({ result }, `Done ${protocol} for ${chainId.toString()}`)
     })
   )
+
+  log.info('Successfully cached all protocols to S3')
 }
 
 module.exports = { handler }
