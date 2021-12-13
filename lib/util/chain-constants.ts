@@ -55,23 +55,23 @@ export const ID_TO_PROVIDER_USER = (id: ChainId): string => {
 export const ID_TO_PROVIDER_PW = (id: ChainId): string => {
     switch (id) {
       case ChainId.MAINNET:
-        return process.env.JSON_RPC_USERNAME!;
+        return process.env.JSON_RPC_PASSWORD!;
       case ChainId.ROPSTEN:
-        return process.env.JSON_RPC_USERNAME_ROPSTEN!;
+        return process.env.JSON_RPC_PASSWORD_ROPSTEN!;
       case ChainId.RINKEBY:
-        return process.env.JSON_RPC_USERNAME_RINKEBY!;
+        return process.env.JSON_RPC_PASSWORD_RINKEBY!;
       case ChainId.GÖRLI:
-        return process.env.JSON_RPC_USERNAME_GÖRLI!;
+        return process.env.JSON_RPC_PASSWORD_GÖRLI!;
       case ChainId.KOVAN:
-        return process.env.JSON_RPC_USERNAME_KOVAN!;
+        return process.env.JSON_RPC_PASSWORD_KOVAN!;
       case ChainId.OPTIMISM:
-        return process.env.JSON_RPC_USERNAME_OPTIMISM!;
+        return process.env.JSON_RPC_PASSWORD_OPTIMISM!;
       case ChainId.OPTIMISTIC_KOVAN:
-        return process.env.JSON_RPC_USERNAME_OPTIMISTIC_KOVAN!;
+        return process.env.JSON_RPC_PASSWORD_OPTIMISTIC_KOVAN!;
       case ChainId.ARBITRUM_ONE:
-        return process.env.JSON_RPC_USERNAME_ARBITRUM_ONE!;
+        return process.env.JSON_RPC_PASSWORD_ARBITRUM_ONE!;
       case ChainId.ARBITRUM_RINKEBY:
-        return process.env.JSON_RPC_USERNAME_ARBITRUM_RINKEBY!;
+        return process.env.JSON_RPC_PASSWORD_ARBITRUM_RINKEBY!;
       default:
         throw new Error(`Chain id: ${id} not supported`);
     }
