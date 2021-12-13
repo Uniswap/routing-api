@@ -6,8 +6,8 @@ import {
   ISwapToRatio,
   MetricLoggerUnit,
   routeAmountsToString,
+  SwapAndAddConfig,
   SwapAndAddOptions,
-  SwapConfig,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
 import { Position } from '@uniswap/v3-sdk'
@@ -25,7 +25,7 @@ import {
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
+  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -33,7 +33,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
+      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
       void,
       QuoteToRatioQueryParams
     >
@@ -122,15 +122,22 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       ...(minSplits ? { minSplits } : {}),
     }
 
-    let swapParams: SwapConfig | undefined = undefined
+    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
       const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
       const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
-      swapParams = {
-        deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-        recipient: recipient,
-        slippageTolerance: slippageTolerancePercent,
+      swapAndAddOptions = {
+        swapOptions: {
+          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        },
+        addLiquidityOptions: {
+          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        },
       }
     }
 
@@ -180,7 +187,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         ratioErrorTolerance: errorToleranceFraction,
         maxIterations,
       },
-      swapParams,
+      swapAndAddOptions,
       routingConfig
     )
 
