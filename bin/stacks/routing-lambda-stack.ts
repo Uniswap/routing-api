@@ -14,12 +14,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
   poolCacheKey: string
-  nodeRPC: string
-  nodeRPCUsername: string
-  nodeRPCPassword: string
-  nodeRPCRinkeby: string
-  nodeRPCUsernameRinkeby: string
-  nodeRPCPasswordRinkeby: string
+  infuraProjectId: string
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
@@ -36,12 +31,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
-      nodeRPC,
-      nodeRPCUsername,
-      nodeRPCPassword,
-      nodeRPCRinkeby,
-      nodeRPCUsernameRinkeby,
-      nodeRPCPasswordRinkeby,
+      infuraProjectId,
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
@@ -79,14 +69,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
-        JSON_RPC_URL: nodeRPC,
-        JSON_RPC_USERNAME: nodeRPCUsername,
-        JSON_RPC_PASSWORD: nodeRPCPassword,
-        JSON_RPC_URL_RINKEBY: nodeRPCRinkeby,
-        JSON_RPC_USERNAME_RINKEBY: nodeRPCUsernameRinkeby,
-        JSON_RPC_PASSWORD_RINKEBY: nodeRPCPasswordRinkeby,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+        PROJECT_ID : infuraProjectId,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
@@ -115,12 +100,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
-        JSON_RPC_URL: nodeRPC,
-        JSON_RPC_USERNAME: nodeRPCUsername,
-        JSON_RPC_PASSWORD: nodeRPCPassword,
-        JSON_RPC_URL_RINKEBY: nodeRPCRinkeby,
-        JSON_RPC_USERNAME_RINKEBY: nodeRPCUsernameRinkeby,
-        JSON_RPC_PASSWORD_RINKEBY: nodeRPCPasswordRinkeby,
+        PROJECT_ID: infuraProjectId,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
       },

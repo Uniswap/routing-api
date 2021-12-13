@@ -18,12 +18,7 @@ export class RoutingAPIStack extends cdk.Stack {
     parent: cdk.Construct,
     name: string,
     props: cdk.StackProps & {
-      nodeRPC: string
-      nodeRPCUsername: string
-      nodeRPCPassword: string
-      nodeRPCRinkeby: string
-      nodeRPCUsernameRinkeby: string
-      nodeRPCPasswordRinkeby: string
+      infuraProjectId: string
       provisionedConcurrency: number
       throttlingOverride?: string
       ethGasStationInfoUrl: string
@@ -38,12 +33,7 @@ export class RoutingAPIStack extends cdk.Stack {
     super(parent, name, props)
 
     const {
-      nodeRPC,
-      nodeRPCUsername,
-      nodeRPCPassword,
-      nodeRPCRinkeby,
-      nodeRPCUsernameRinkeby,
-      nodeRPCPasswordRinkeby,
+      infuraProjectId,
       provisionedConcurrency,
       throttlingOverride,
       ethGasStationInfoUrl,
@@ -78,12 +68,7 @@ export class RoutingAPIStack extends cdk.Stack {
         poolCacheBucket,
         poolCacheBucket2,
         poolCacheKey,
-        nodeRPC,
-        nodeRPCUsername,
-        nodeRPCPassword,
-        nodeRPCRinkeby,
-        nodeRPCUsernameRinkeby,
-        nodeRPCPasswordRinkeby,
+        infuraProjectId,
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,
