@@ -11,16 +11,26 @@ import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import _ from 'lodash'
 import qs from 'qs'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
+import {
+  DAI_MAINNET,
+  DAI_ON,
+  getAmount,
+  getAmountFromToken,
+  UNI_MAINNET,
+  USDC_MAINNET,
+  USDC_ON,
+  USDT_MAINNET,
+  WBTC_MAINNET,
+} from '../utils/tokens'
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
-
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -124,11 +134,11 @@ describe('quote', function () {
     block = parseInt(blockNumber) - 10
 
     alice = await resetAndFundAtBlock(alice, block, [
-      parseAmount('5000000', USDC_MAINNET),
+      parseAmount('8000000', USDC_MAINNET),
       parseAmount('5000000', USDT_MAINNET),
       parseAmount('10', WBTC_MAINNET),
       parseAmount('1000', UNI_MAINNET),
-      parseAmount('1000', WETH9[1]),
+      parseAmount('4000', WETH9[1]),
       parseAmount('5000000', DAI_MAINNET),
     ])
   })
@@ -821,7 +831,8 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(1, 
+            amount: await getAmount(
+              1,
               type,
               'USDC',
               'USDT',
@@ -1060,42 +1071,26 @@ describe('alpha only quote', function () {
   }
 })
 
-describe('rinkeby', () => {
-  it(`erc20 -> erc20`, async () => {
-    const quoteReq: QuoteQueryParams = {
-      tokenInAddress: '0xc778417e063141139fce010982780140aa0cd5ab',
-      tokenInChainId: 4,
-      tokenOutAddress: '0xf9bdcdef5fd9978110238cfd6f3177a0da199fd8',
-      tokenOutChainId: 4,
-      amount: await getAmount(4, 'exactIn', 'WETH', 'USDT', '1'),
-      type: 'exactIn',
-    }
+for (const chain of SUPPORTED_CHAINS) {
+  for (const type of ['exactIn', 'exactOut']) {
+    describe(`${chain} ${type}`, () => {
+      it(`erc20 -> erc20`, async () => {
+        const quoteReq: QuoteQueryParams = {
+          tokenInAddress: DAI_ON(chain).address,
+          tokenInChainId: chain,
+          tokenOutAddress: USDC_ON(chain).address,
+          tokenOutChainId: chain,
+          amount: await getAmountFromToken(type, DAI_ON(chain), USDC_ON(chain), '1'),
+          type,
+        }
 
-    const queryParams = qs.stringify(quoteReq)
+        const queryParams = qs.stringify(quoteReq)
 
-    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-    const { status } = response
+        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+        const { status } = response
 
-    expect(status).to.equal(200)
-  })
-})
-
-describe('optimism', () => {
-  it(`erc20 -> erc20`, async () => {
-    const quoteReq: QuoteQueryParams = {
-      tokenInAddress: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-      tokenInChainId: 10,
-      tokenOutAddress: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
-      tokenOutChainId: 10,
-      amount: await getAmount(10, 'exactIn', 'USDC', 'DAI', '1'),
-      type: 'exactIn',
-    }
-
-    const queryParams = qs.stringify(quoteReq)
-
-    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-    const { status } = response
-
-    expect(status).to.equal(200)
-  })
-})
+        expect(status).to.equal(200)
+      })
+    })
+  }
+}

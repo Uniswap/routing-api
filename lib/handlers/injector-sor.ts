@@ -34,9 +34,8 @@ import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
-import { ID_TO_PROVIDER_URL, ID_TO_PROVIDER_USER, ID_TO_PROVIDER_PW } from '../util/chain-constants'
 
-const SUPPORTED_CHAINS: ChainId[] = [
+export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
   ChainId.RINKEBY,
   ChainId.ROPSTEN,
@@ -155,32 +154,33 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             gasLimitOverride: 30_000_000,
             multicallChunk: 25,
           }
-        );
+        )
 
-        const useArbitrumQuoteProvider =
-        chainId == ChainId.ARBITRUM_ONE || chainId == ChainId.ARBITRUM_RINKEBY;
+        const useArbitrumQuoteProvider = chainId == ChainId.ARBITRUM_ONE || chainId == ChainId.ARBITRUM_RINKEBY
 
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        const quoteProvider = useArbitrumQuoteProvider ? arbitrumQuoteProvider : new V3QuoteProvider(
-          chainId,
-          provider,
-          multicall2Provider,
-          {
-            retries: 2,
-            minTimeout: 100,
-            maxTimeout: 1000,
-          },
-          {
-            multicallChunk: 210,
-            gasLimitPerCall: 705_000,
-            quoteMinSuccessRate: 0.15,
-          },
-          {
-            gasLimitOverride: 2_000_000,
-            multicallChunk: 70,
-          }
-        )
+        const quoteProvider = useArbitrumQuoteProvider
+          ? arbitrumQuoteProvider
+          : new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 210,
+                gasLimitPerCall: 705_000,
+                quoteMinSuccessRate: 0.15,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 70,
+              }
+            )
         const v3PoolProvider = new CachingV3PoolProvider(
           chainId,
           new V3PoolProvider(chainId, multicall2Provider),
