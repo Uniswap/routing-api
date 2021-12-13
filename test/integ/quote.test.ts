@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { parseAmount } from '@uniswap/smart-order-router'
+import { ID_TO_NETWORK_NAME, parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -128,9 +128,13 @@ describe('quote', function () {
       type: 'exactIn',
     }
 
+    console.log('test ' + `${API}?${qs.stringify(quoteReq)}`)
+
     const {
       data: { blockNumber },
     } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
+
+    console.log('resp')
 
     block = parseInt(blockNumber) - 10
 
@@ -1062,6 +1066,70 @@ describe('quote', function () {
       })
     }
   }
+
+  for (const chain of SUPPORTED_CHAINS) {
+    for (const type of ['exactIn', 'exactOut']) {
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${type}`, function () {
+        // Help with test flakiness by retrying.
+        this.retries(2)
+        this.timeout(10000)
+
+        it(`weth -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: WETH_ON(chain).address,
+            tokenInChainId: chain,
+            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        })
+
+        it(`erc20 -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: DAI_ON(chain).address,
+            tokenInChainId: chain,
+            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, DAI_ON(chain), USDC_ON(chain), '1'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        })
+
+        it(`eth -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'ETH',
+            tokenInChainId: chain,
+            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        })
+      })
+    }
+  }
 })
 
 describe('alpha only quote', function () {
@@ -1071,63 +1139,3 @@ describe('alpha only quote', function () {
     describe(`${type} 2xx`, () => {})
   }
 })
-
-for (const chain of SUPPORTED_CHAINS) {
-  for (const type of ['exactIn', 'exactOut']) {
-    describe(`${chain} ${type}`, () => {
-      it(`weth -> erc20`, async () => {
-        const quoteReq: QuoteQueryParams = {
-          tokenInAddress: WETH_ON(chain).address,
-          tokenInChainId: chain,
-          tokenOutAddress: USDC_ON(chain).address,
-          tokenOutChainId: chain,
-          amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
-          type,
-        }
-
-        const queryParams = qs.stringify(quoteReq)
-
-        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-        const { status } = response
-
-        expect(status).to.equal(200)
-      })
-
-      it(`erc20 -> erc20`, async () => {
-        const quoteReq: QuoteQueryParams = {
-          tokenInAddress: DAI_ON(chain).address,
-          tokenInChainId: chain,
-          tokenOutAddress: USDC_ON(chain).address,
-          tokenOutChainId: chain,
-          amount: await getAmountFromToken(type, DAI_ON(chain), USDC_ON(chain), '1'),
-          type,
-        }
-
-        const queryParams = qs.stringify(quoteReq)
-
-        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-        const { status } = response
-
-        expect(status).to.equal(200)
-      })
-
-      it(`eth -> erc20`, async () => {
-        const quoteReq: QuoteQueryParams = {
-          tokenInAddress: 'ETH',
-          tokenInChainId: chain,
-          tokenOutAddress: USDC_ON(chain).address,
-          tokenOutChainId: chain,
-          amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
-          type,
-        }
-
-        const queryParams = qs.stringify(quoteReq)
-
-        const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-        const { status } = response
-
-        expect(status).to.equal(200)
-      })
-    })
-  }
-}
