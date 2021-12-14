@@ -15,7 +15,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -117,8 +117,8 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const routingConfig = {
-      ...DEFAULT_ROUTING_CONFIG,
+    const routingConfig: AlphaRouterConfig = {
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
     }
 

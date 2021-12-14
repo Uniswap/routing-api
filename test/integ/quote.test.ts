@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
-import { ChainId, ID_TO_NETWORK_NAME, parseAmount } from '@uniswap/smart-order-router'
+import { ChainId, DAI_MAINNET, ID_TO_NETWORK_NAME, parseAmount, USDC_MAINNET, USDT_ARBITRUM_RINKEBY, USDT_MAINNET, USDT_OPTIMISTIC_KOVAN, WBTC_MAINNET } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -16,21 +16,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import {
-  DAI_MAINNET,
-  DAI_ON,
-  getAmount,
-  getAmountFromToken,
-  UNI_ARBITRUM_RINKEBY,
-  UNI_MAINNET,
-  USDC_MAINNET,
-  USDC_ON,
-  USDT_ARBITRUM_RINKEBY,
-  USDT_MAINNET,
-  USDT_OPTIMISTIC_KOVAN,
-  WBTC_MAINNET,
-  WETH_ON,
-} from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_ARBITRUM_RINKEBY, UNI_MAINNET, USDC_ON, WETH_ON } from '../utils/tokens'
 const { ethers } = hre
 
 chai.use(chaiAsPromised)

@@ -2,28 +2,60 @@ import { Currency, Ether } from '@uniswap/sdk-core'
 import { AlphaRouterConfig, ChainId, ITokenListProvider, ITokenProvider } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
-export const DEFAULT_ROUTING_CONFIG: AlphaRouterConfig = {
-  v2PoolSelection: {
-    topN: 3,
-    topNDirectSwaps: 1,
-    topNTokenInOut: 5,
-    topNSecondHop: 2,
-    topNWithEachBaseToken: 2,
-    topNWithBaseToken: 6,
-  },
-  v3PoolSelection: {
-    topN: 2,
-    topNDirectSwaps: 2,
-    topNTokenInOut: 3,
-    topNSecondHop: 1,
-    topNWithEachBaseToken: 3,
-    topNWithBaseToken: 5,
-  },
-  maxSwapsPerPath: 3,
-  minSplits: 1,
-  maxSplits: 7,
-  distributionPercent: 5,
-  forceCrossProtocol: false,
+export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
+  switch (chainId) {
+    // Arbitrum calls have lower gas limits which causes us to send more multicalls
+    // per quote. To compensate, we adjust the routing config so we explore fewer routes.
+    case ChainId.ARBITRUM_ONE:
+    case ChainId.ARBITRUM_RINKEBY:
+      return {
+        v2PoolSelection: {
+          topN: 3,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 5,
+          topNSecondHop: 2,
+          topNWithEachBaseToken: 2,
+          topNWithBaseToken: 6,
+        },
+        v3PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 3,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 5,
+        },
+        maxSwapsPerPath: 3,
+        minSplits: 1,
+        maxSplits: 7,
+        distributionPercent: 20,
+        forceCrossProtocol: false,
+      }
+    default:
+      return {
+        v2PoolSelection: {
+          topN: 3,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 5,
+          topNSecondHop: 2,
+          topNWithEachBaseToken: 2,
+          topNWithBaseToken: 6,
+        },
+        v3PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 3,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 5,
+        },
+        maxSwapsPerPath: 3,
+        minSplits: 1,
+        maxSplits: 7,
+        distributionPercent: 5,
+        forceCrossProtocol: false,
+      }
+  }
 }
 
 export async function tokenStringToCurrency(
