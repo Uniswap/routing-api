@@ -6,9 +6,7 @@ import {
   ID_TO_NETWORK_NAME,
   parseAmount,
   USDC_MAINNET,
-  USDT_ARBITRUM_RINKEBY,
   USDT_MAINNET,
-  USDT_OPTIMISTIC_KOVAN,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
@@ -30,11 +28,12 @@ import {
   DAI_ON,
   getAmount,
   getAmountFromToken,
-  UNI_ARBITRUM_RINKEBY,
   UNI_MAINNET,
   USDC_ON,
   WETH_ON,
 } from '../utils/tokens'
+
+
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
@@ -1070,6 +1069,7 @@ describe('quote', function () {
     }
   }
 
+
   const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
@@ -1077,11 +1077,10 @@ describe('quote', function () {
     [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN) ,
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_RINKEBY]: UNI_ARBITRUM_RINKEBY,
+    [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
   }
-
   const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: DAI_ON(1),
     [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
@@ -1089,9 +1088,9 @@ describe('quote', function () {
     [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
     [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISTIC_KOVAN]: USDT_OPTIMISTIC_KOVAN,
+    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_RINKEBY]: USDT_ARBITRUM_RINKEBY,
+    [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
   }
 
   for (const chain of SUPPORTED_CHAINS) {
@@ -1125,7 +1124,7 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
-
+        // erc20 test
         it(`erc20 -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
