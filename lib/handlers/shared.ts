@@ -4,8 +4,8 @@ import Logger from 'bunyan'
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
-    // Arbitrum calls have lower gas limits which causes us to send more multicalls
-    // per quote. To compensate, we adjust the routing config so we explore fewer routes.
+    // Arbitrum calls have lower gas limits and tend to timeout quickly, which causes us to
+    // send more multicalls per quote. To compensate, we adjust the routing config so we explore fewer routes.
     case ChainId.ARBITRUM_ONE:
     case ChainId.ARBITRUM_RINKEBY:
       return {
@@ -20,15 +20,15 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
         v3PoolSelection: {
           topN: 2,
           topNDirectSwaps: 2,
-          topNTokenInOut: 3,
+          topNTokenInOut: 2,
           topNSecondHop: 1,
           topNWithEachBaseToken: 3,
-          topNWithBaseToken: 5,
+          topNWithBaseToken: 2,
         },
-        maxSwapsPerPath: 3,
+        maxSwapsPerPath: 2,
         minSplits: 1,
         maxSplits: 7,
-        distributionPercent: 20,
+        distributionPercent: 25,
         forceCrossProtocol: false,
       }
     default:

@@ -1,6 +1,16 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
-import { ChainId, DAI_MAINNET, ID_TO_NETWORK_NAME, parseAmount, USDC_MAINNET, USDT_ARBITRUM_RINKEBY, USDT_MAINNET, USDT_OPTIMISTIC_KOVAN, WBTC_MAINNET } from '@uniswap/smart-order-router'
+import {
+  ChainId,
+  DAI_MAINNET,
+  ID_TO_NETWORK_NAME,
+  parseAmount,
+  USDC_MAINNET,
+  USDT_ARBITRUM_RINKEBY,
+  USDT_MAINNET,
+  USDT_OPTIMISTIC_KOVAN,
+  WBTC_MAINNET,
+} from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -11,12 +21,19 @@ import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import _ from 'lodash'
 import qs from 'qs'
-import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_ON, getAmount, getAmountFromToken, UNI_ARBITRUM_RINKEBY, UNI_MAINNET, USDC_ON, WETH_ON } from '../utils/tokens'
+import {
+  DAI_ON,
+  getAmount,
+  getAmountFromToken,
+  UNI_ARBITRUM_RINKEBY,
+  UNI_MAINNET,
+  USDC_ON,
+  WETH_ON,
+} from '../utils/tokens'
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
@@ -1076,15 +1093,15 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: USDT_ARBITRUM_RINKEBY,
   }
 
-  for (const chain of SUPPORTED_CHAINS) {
+  for (const chain of [ChainId.ARBITRUM_ONE, ChainId.ARBITRUM_RINKEBY, ChainId.OPTIMISM, ChainId.OPTIMISTIC_KOVAN]) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
 
-      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
+      describe.only(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
-        this.retries(2)
-        this.timeout(15000)
+        this.retries(0)
+        this.timeout(29000)
 
         it(`weth -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
@@ -1098,10 +1115,14 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const { status } = response
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
 
-          expect(status).to.equal(200)
+            expect(status).to.equal(200)
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
         })
 
         it(`erc20 -> erc20`, async () => {
@@ -1116,10 +1137,14 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const { status } = response
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
 
-          expect(status).to.equal(200)
+            expect(status).to.equal(200)
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
         })
 
         it(`eth -> erc20`, async () => {
@@ -1128,16 +1153,19 @@ describe('quote', function () {
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WETH_ON(chain), erc2, '10'),
+            amount: await getAmountFromToken(type, WETH_ON(chain), erc2, '100'),
             type,
           }
 
           const queryParams = qs.stringify(quoteReq)
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const { status } = response
-
-          expect(status).to.equal(200)
+            expect(status).to.equal(200, JSON.stringify(response.data))
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
         })
       })
     }

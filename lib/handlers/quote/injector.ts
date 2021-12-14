@@ -43,6 +43,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       requestId,
       quoteId,
       tokenInAddress,
+      chainId: tokenInChainId,
       tokenOutAddress,
       amount,
       type,
