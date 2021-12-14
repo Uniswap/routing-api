@@ -134,37 +134,72 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           new TokenProvider(chainId, multicall2Provider)
         )
 
-        const arbitrumQuoteProvider = new V3QuoteProvider(
-          chainId,
-          provider,
-          multicall2Provider,
-          {
-            retries: 2,
-            minTimeout: 100,
-            maxTimeout: 1000,
-          },
-          {
-            multicallChunk: 15,
-            gasLimitPerCall: 15_000_000,
-            quoteMinSuccessRate: 0.15,
-          },
-          {
-            gasLimitOverride: 30_000_000,
-            multicallChunk: 8,
-          },
-          {
-            gasLimitOverride: 30_000_000,
-            multicallChunk: 8,
-          }
-        )
-
-        const useArbitrumQuoteProvider = chainId == ChainId.ARBITRUM_ONE || chainId == ChainId.ARBITRUM_RINKEBY
-
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        const quoteProvider = useArbitrumQuoteProvider
-          ? arbitrumQuoteProvider
-          : new V3QuoteProvider(
+        let quoteProvider: V3QuoteProvider
+        switch (chainId) {
+          case ChainId.OPTIMISM:
+          case ChainId.OPTIMISTIC_KOVAN:
+            quoteProvider = new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 130,
+                gasLimitPerCall: 1_000_000,
+                quoteMinSuccessRate: 0.1,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 65,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 65,
+              },
+              {
+                baseBlockOffset: 20,
+                rollback: {
+                  enabled: true,
+                  attemptsBeforeRollback: 1,
+                  rollbackBlockOffset: 20,
+                },
+              }
+            )
+            break
+          case ChainId.ARBITRUM_ONE:
+          case ChainId.ARBITRUM_RINKEBY:
+            quoteProvider = new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 15,
+                gasLimitPerCall: 15_000_000,
+                quoteMinSuccessRate: 0.15,
+              },
+              {
+                gasLimitOverride: 30_000_000,
+                multicallChunk: 8,
+              },
+              {
+                gasLimitOverride: 30_000_000,
+                multicallChunk: 8,
+              }
+            )
+            break
+          default:
+            quoteProvider = new V3QuoteProvider(
               chainId,
               provider,
               multicall2Provider,
@@ -183,6 +218,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 multicallChunk: 70,
               }
             )
+            break
+        }
+
         const v3PoolProvider = new CachingV3PoolProvider(
           chainId,
           new V3PoolProvider(chainId, multicall2Provider),

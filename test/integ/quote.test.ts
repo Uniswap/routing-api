@@ -21,6 +21,7 @@ import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import _ from 'lodash'
 import qs from 'qs'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
@@ -1093,7 +1094,7 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: USDT_ARBITRUM_RINKEBY,
   }
 
-  for (const chain of [ChainId.ARBITRUM_ONE, ChainId.ARBITRUM_RINKEBY, ChainId.OPTIMISM, ChainId.OPTIMISTIC_KOVAN]) {
+  for (const chain of SUPPORTED_CHAINS) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
