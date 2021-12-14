@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { ID_TO_NETWORK_NAME, parseAmount } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, ID_TO_NETWORK_NAME, parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -21,10 +21,13 @@ import {
   DAI_ON,
   getAmount,
   getAmountFromToken,
+  UNI_ARBITRUM_RINKEBY,
   UNI_MAINNET,
   USDC_MAINNET,
   USDC_ON,
+  USDT_ARBITRUM_RINKEBY,
   USDT_MAINNET,
+  USDT_OPTIMISTIC_KOVAN,
   WBTC_MAINNET,
   WETH_ON,
 } from '../utils/tokens'
@@ -1063,20 +1066,47 @@ describe('quote', function () {
     }
   }
 
+  const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: USDC_ON(1),
+    [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: UNI_ARBITRUM_RINKEBY,
+  }
+
+  const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: DAI_ON(1),
+    [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: USDT_OPTIMISTIC_KOVAN,
+    [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: USDT_ARBITRUM_RINKEBY,
+  }
+
   for (const chain of SUPPORTED_CHAINS) {
     for (const type of ['exactIn', 'exactOut']) {
-      describe(`${ID_TO_NETWORK_NAME(chain)} ${type}`, function () {
+      const erc1 = TEST_ERC20_1[chain]
+      const erc2 = TEST_ERC20_2[chain]
+
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
         this.retries(2)
-        this.timeout(10000)
+        this.timeout(15000)
 
         it(`weth -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: WETH_ON(chain).address,
             tokenInChainId: chain,
-            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutAddress: erc1.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
+            amount: await getAmountFromToken(type, WETH_ON(chain), erc1, '10'),
             type,
           }
 
@@ -1090,11 +1120,11 @@ describe('quote', function () {
 
         it(`erc20 -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
-            tokenInAddress: DAI_ON(chain).address,
+            tokenInAddress: erc1.address,
             tokenInChainId: chain,
-            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, DAI_ON(chain), USDC_ON(chain), '1'),
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
             type,
           }
 
@@ -1110,9 +1140,9 @@ describe('quote', function () {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'ETH',
             tokenInChainId: chain,
-            tokenOutAddress: USDC_ON(chain).address,
+            tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WETH_ON(chain), USDC_ON(chain), '10'),
+            amount: await getAmountFromToken(type, WETH_ON(chain), erc2, '10'),
             type,
           }
 

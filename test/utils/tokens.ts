@@ -80,7 +80,7 @@ export const DAI_RINKEBY_1 = new Token(ChainId.RINKEBY, '0x5592ec0cfb4dbc12d3ab1
 export const DAI_RINKEBY_2 = new Token(ChainId.RINKEBY, '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735', 18, 'DAI', 'DAI')
 export const USDC_RINKEBY = new Token(
   ChainId.RINKEBY,
-  '0x30d7f32c41c880c538c592c339e7e9136a76c5df',
+  '0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b',
   6,
   'tUSDC',
   'test USD//C'
@@ -244,7 +244,7 @@ export const USDT_ARBITRUM_RINKEBY = new Token(
 
 export const USDC_ARBITRUM_RINKEBY = new Token(
   ChainId.ARBITRUM_RINKEBY,
-  '0xb0ad46bd50b44cbe47e2d83143e0e415d6a842f6',
+  '0xB17736aA76003F4873D9f4366190E5c6678d9a52',
   6,
   'USDC',
   'USD//C'
