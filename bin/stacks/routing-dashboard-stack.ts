@@ -1,5 +1,8 @@
 import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch'
 import * as cdk from '@aws-cdk/core'
+import { ChainId } from '@uniswap/smart-order-router'
+import _ from 'lodash'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -149,9 +152,28 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
           {
+            type: 'metric',
+            x: 0,
+            y: 30,
+            width: 24,
+            height: 6,
+            properties: {
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
+                ['Uniswap', `QuoteFoundForChain${chainId}`, 'Service', 'RoutingAPI'],
+                ['Uniswap', `QuoteRequestedForChain${chainId}`, 'Service', 'RoutingAPI'],
+              ]),
+              view: 'timeSeries',
+              stacked: false,
+              stat: 'Sum',
+              period: 300,
+              region,
+              title: 'Quote Requested/Found by Chain',
+            },
+          },
+          {
             height: 12,
             width: 24,
-            y: 30,
+            y: 36,
             x: 0,
             type: 'metric',
             properties: {
@@ -177,7 +199,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 36,
+            y: 42,
             width: 24,
             height: 9,
             properties: {
@@ -202,7 +224,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 45,
+            y: 48,
             width: 24,
             height: 9,
             properties: {
@@ -246,7 +268,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 63,
+            y: 61,
             width: 24,
             height: 9,
             properties: {
