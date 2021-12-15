@@ -134,9 +134,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
           slippageTolerance: slippageTolerancePercent,
         },
         addLiquidityOptions: {
-          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
           recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
         },
       }
     }
