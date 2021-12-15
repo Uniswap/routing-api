@@ -7,14 +7,14 @@ import {
   LegacyRoutingConfig,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapConfig,
+  SwapOptions,
   SwapRoute,
 } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 
 export class QuoteHandler extends APIGLambdaHandler<
@@ -130,14 +130,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols = [Protocol.V3]
     }
 
-    const routingConfig = {
-      ...DEFAULT_ROUTING_CONFIG,
+    const routingConfig: AlphaRouterConfig = {
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       protocols,
     }
 
-    let swapParams: SwapConfig | undefined = undefined
+    let swapParams: SwapOptions | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
       const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)

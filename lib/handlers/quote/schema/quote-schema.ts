@@ -1,4 +1,5 @@
 import BaseJoi from '@hapi/joi'
+import { SUPPORTED_CHAINS } from '../../injector-sor'
 
 const Joi = BaseJoi.extend((joi) => ({
   base: joi.array(),
@@ -20,9 +21,13 @@ const Joi = BaseJoi.extend((joi) => ({
 
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
-  tokenInChainId: Joi.number().valid(1, 4).required(),
+  tokenInChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   tokenOutAddress: Joi.string().alphanum().max(42).required(),
-  tokenOutChainId: Joi.number().valid(1, 4).required(),
+  tokenOutChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256

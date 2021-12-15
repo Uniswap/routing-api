@@ -94,7 +94,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
-      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
+      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN)
     }
 
     let router = new AlphaRouter({

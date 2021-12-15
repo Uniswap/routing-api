@@ -39,6 +39,13 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
     this.poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
 
+    // Set bucket such that objects are deleted after 60 minutes. Ensure that if the cache stops
+    // updating (e.g. Subgraph down) that we stop using the cache files and will fallback to a static pool list.
+    this.poolCacheBucket2.addLifecycleRule({
+      enabled: true,
+      expiration: cdk.Duration.minutes(60),
+    })
+
     this.poolCacheKey = 'poolCache.json'
 
     const { stage, route53Arn, pinata_key, pinata_secret, hosted_zone } = props

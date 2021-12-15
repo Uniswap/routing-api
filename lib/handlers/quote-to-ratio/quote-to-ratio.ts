@@ -7,7 +7,7 @@ import {
   MetricLoggerUnit,
   routeAmountsToString,
   SwapAndAddConfig,
-  SwapConfig,
+  SwapAndAddOptions,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
 import { Position } from '@uniswap/v3-sdk'
@@ -15,7 +15,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -117,20 +117,27 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const routingConfig = {
-      ...DEFAULT_ROUTING_CONFIG,
+    const routingConfig: AlphaRouterConfig = {
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
     }
 
-    let swapParams: SwapConfig | undefined = undefined
+    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
       const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
       const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
-      swapParams = {
-        deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-        recipient: recipient,
-        slippageTolerance: slippageTolerancePercent,
+      swapAndAddOptions = {
+        swapOptions: {
+          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        },
+        addLiquidityOptions: {
+          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        },
       }
     }
 
@@ -177,10 +184,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       token1Balance,
       position,
       {
-        errorTolerance: errorToleranceFraction,
+        ratioErrorTolerance: errorToleranceFraction,
         maxIterations,
       },
-      swapParams,
+      swapAndAddOptions,
       routingConfig
     )
 

@@ -1,34 +1,55 @@
-import { Token } from '@uniswap/sdk-core'
-import { ChainId } from '@uniswap/smart-order-router'
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
+import { Token, WETH9 } from '@uniswap/sdk-core'
+import {
+  CachingTokenListProvider,
+  ChainId,
+  DAI_ARBITRUM,
+  DAI_ARBITRUM_RINKEBY,
+  DAI_GÖRLI,
+  DAI_KOVAN,
+  DAI_MAINNET,
+  DAI_OPTIMISM,
+  DAI_OPTIMISTIC_KOVAN,
+  DAI_RINKEBY_1,
+  DAI_ROPSTEN,
+  NodeJSCache,
+  USDC_ARBITRUM,
+  USDC_ARBITRUM_RINKEBY,
+  USDC_GÖRLI,
+  USDC_KOVAN,
+  USDC_MAINNET,
+  USDC_OPTIMISM,
+  USDC_OPTIMISTIC_KOVAN,
+  USDC_RINKEBY,
+  USDC_ROPSTEN,
+  USDT_ARBITRUM,
+  USDT_ARBITRUM_RINKEBY,
+  USDT_GÖRLI,
+  USDT_KOVAN,
+  USDT_MAINNET,
+  USDT_OPTIMISM,
+  USDT_OPTIMISTIC_KOVAN,
+  USDT_RINKEBY,
+  USDT_ROPSTEN,
+} from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
-import { tokenListProvider } from '../integ/quote.test'
+import NodeCache from 'node-cache'
 
-export const getAmount = async (type: string, symbolIn: string, symbolOut: string, amount: string) => {
+export const getTokenListProvider = (id: ChainId) => {
+  return new CachingTokenListProvider(id, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
+}
+
+export const getAmount = async (id: ChainId, type: string, symbolIn: string, symbolOut: string, amount: string) => {
+  const tokenListProvider = getTokenListProvider(id)
   const decimals = (await tokenListProvider.getTokenBySymbol(type == 'exactIn' ? symbolIn : symbolOut))!.decimals
   return ethers.utils.parseUnits(amount, decimals).toString()
 }
 
-export const USDC_MAINNET = new Token(
-  ChainId.MAINNET,
-  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  6,
-  'USDC',
-  'USD//C'
-)
-export const USDT_MAINNET = new Token(
-  ChainId.MAINNET,
-  '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  6,
-  'USDT',
-  'Tether USD'
-)
-export const WBTC_MAINNET = new Token(
-  ChainId.MAINNET,
-  '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-  8,
-  'WBTC',
-  'Wrapped BTC'
-)
+export const getAmountFromToken = async (type: string, tokenIn: Token, tokenOut: Token, amount: string) => {
+  const decimals = (type == 'exactIn' ? tokenIn : tokenOut).decimals
+  return ethers.utils.parseUnits(amount, decimals).toString()
+}
+
 export const UNI_MAINNET = new Token(
   ChainId.MAINNET,
   '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
@@ -36,10 +57,90 @@ export const UNI_MAINNET = new Token(
   'UNI',
   'Uniswap'
 )
-export const DAI_MAINNET = new Token(
-  ChainId.MAINNET,
-  '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+
+export const UNI_ARBITRUM_RINKEBY = new Token(
+  ChainId.ARBITRUM_RINKEBY,
+  '0x049251a7175071316e089d0616d8b6aacd2c93b8',
   18,
-  'DAI',
-  'Dai Stablecoin'
+  'UNI',
+  'Uni token'
 )
+
+export const DAI_ON = (chainId: ChainId): Token => {
+  switch (chainId) {
+    case ChainId.MAINNET:
+      return DAI_MAINNET
+    case ChainId.ROPSTEN:
+      return DAI_ROPSTEN
+    case ChainId.RINKEBY:
+      return DAI_RINKEBY_1
+    case ChainId.GÖRLI:
+      return DAI_GÖRLI
+    case ChainId.KOVAN:
+      return DAI_KOVAN
+    case ChainId.OPTIMISM:
+      return DAI_OPTIMISM
+    case ChainId.OPTIMISTIC_KOVAN:
+      return DAI_OPTIMISTIC_KOVAN
+    case ChainId.ARBITRUM_ONE:
+      return DAI_ARBITRUM
+    case ChainId.ARBITRUM_RINKEBY:
+      return DAI_ARBITRUM_RINKEBY
+    default:
+      throw new Error(`Chain id: ${chainId} not supported`)
+  }
+}
+
+export const USDT_ON = (chainId: ChainId): Token => {
+  switch (chainId) {
+    case ChainId.MAINNET:
+      return USDT_MAINNET
+    case ChainId.ROPSTEN:
+      return USDT_ROPSTEN
+    case ChainId.RINKEBY:
+      return USDT_RINKEBY
+    case ChainId.GÖRLI:
+      return USDT_GÖRLI
+    case ChainId.KOVAN:
+      return USDT_KOVAN
+    case ChainId.OPTIMISM:
+      return USDT_OPTIMISM
+    case ChainId.OPTIMISTIC_KOVAN:
+      return USDT_OPTIMISTIC_KOVAN
+    case ChainId.ARBITRUM_ONE:
+      return USDT_ARBITRUM
+    case ChainId.ARBITRUM_RINKEBY:
+      return USDT_ARBITRUM_RINKEBY
+    default:
+      throw new Error(`Chain id: ${chainId} not supported`)
+  }
+}
+
+export const USDC_ON = (chainId: ChainId): Token => {
+  switch (chainId) {
+    case ChainId.MAINNET:
+      return USDC_MAINNET
+    case ChainId.ROPSTEN:
+      return USDC_ROPSTEN
+    case ChainId.RINKEBY:
+      return USDC_RINKEBY
+    case ChainId.GÖRLI:
+      return USDC_GÖRLI
+    case ChainId.KOVAN:
+      return USDC_KOVAN
+    case ChainId.OPTIMISM:
+      return USDC_OPTIMISM
+    case ChainId.OPTIMISTIC_KOVAN:
+      return USDC_OPTIMISTIC_KOVAN
+    case ChainId.ARBITRUM_ONE:
+      return USDC_ARBITRUM
+    case ChainId.ARBITRUM_RINKEBY:
+      return USDC_ARBITRUM_RINKEBY
+    default:
+      throw new Error(`Chain id: ${chainId} not supported`)
+  }
+}
+
+export const WETH_ON = (chainId: ChainId): Token => {
+  return WETH9[chainId]
+}

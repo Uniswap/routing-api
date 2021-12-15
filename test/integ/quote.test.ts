@@ -1,7 +1,14 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
+import {
+  ChainId,
+  DAI_MAINNET,
+  ID_TO_NETWORK_NAME,
+  parseAmount,
+  USDC_MAINNET,
+  USDT_MAINNET,
+  WBTC_MAINNET,
+} from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -11,20 +18,18 @@ import chaiSubset from 'chai-subset'
 import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import _ from 'lodash'
-import NodeCache from 'node-cache'
 import qs from 'qs'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_MAINNET, getAmount, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WETH_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
-
-export const tokenListProvider = new CachingTokenListProvider(1, DEFAULT_TOKEN_LIST, new NodeJSCache(new NodeCache()))
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -39,7 +44,7 @@ const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { st
   try {
     await axios.get<QuoteResponse>(`${API}?${queryParams}`)
     fail()
-  } catch (err) {
+  } catch (err: any) {
     expect(err.response).to.containSubset(resp)
   }
 }
@@ -59,7 +64,7 @@ const checkQuoteToken = (
   expect(percentDiff.lessThan(new Fraction(parseInt(SLIPPAGE), 100))).to.be.true
 }
 
-const SWAP_ROUTER_V2 = '0x075B36dE1Bd11cb361c5B3B1E80A9ab0e7aa8a60'
+const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
@@ -117,7 +122,7 @@ describe('quote', function () {
       tokenInChainId: 1,
       tokenOutAddress: 'USDT',
       tokenOutChainId: 1,
-      amount: await getAmount('exactIn', 'USDC', 'USDT', '100'),
+      amount: await getAmount(1, 'exactIn', 'USDC', 'USDT', '100'),
       type: 'exactIn',
     }
 
@@ -128,18 +133,18 @@ describe('quote', function () {
     block = parseInt(blockNumber) - 10
 
     alice = await resetAndFundAtBlock(alice, block, [
-      parseAmount('5000000', USDC_MAINNET),
+      parseAmount('8000000', USDC_MAINNET),
       parseAmount('5000000', USDT_MAINNET),
       parseAmount('10', WBTC_MAINNET),
       parseAmount('1000', UNI_MAINNET),
-      parseAmount('1000', WETH9[1]),
+      parseAmount('4000', WETH9[1]),
       parseAmount('5000000', DAI_MAINNET),
     ])
   })
 
-  for (const algorithm of ['alpha' /* , 'legacy' */]) {
+  for (const algorithm of ['alpha', 'legacy']) {
     for (const type of ['exactIn', 'exactOut']) {
-      describe(`${algorithm} ${type} 2xx`, () => {
+      describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ simulate swap`, () => {
           it(`erc20 -> erc20`, async () => {
             const quoteReq: QuoteQueryParams = {
@@ -147,7 +152,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDT',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'USDT', '100'),
+              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -196,7 +201,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDT',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'USDT', '100'),
+              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -245,7 +250,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'ETH',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
+              amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -288,8 +293,8 @@ describe('quote', function () {
               tokenOutChainId: 1,
               amount:
                 type == 'exactIn'
-                  ? await getAmount(type, 'USDC', 'ETH', '1000000')
-                  : await getAmount(type, 'USDC', 'ETH', '100'),
+                  ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
+                  : await getAmount(1, type, 'USDC', 'ETH', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -346,8 +351,8 @@ describe('quote', function () {
               tokenOutChainId: 1,
               amount:
                 type == 'exactIn'
-                  ? await getAmount(type, 'ETH', 'UNI', '10')
-                  : await getAmount(type, 'ETH', 'UNI', '10000'),
+                  ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -385,7 +390,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'DAI',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'WETH', 'DAI', '100'),
+              amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -422,7 +427,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'WETH',
               tokenOutChainId: 1,
-              amount: await getAmount(type, 'USDC', 'WETH', '100'),
+              amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -460,7 +465,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -516,7 +521,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -572,7 +577,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'USDT',
                 tokenOutChainId: 1,
-                amount: await getAmount(type, 'USDC', 'USDT', '100'),
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -639,7 +644,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
           }
@@ -671,7 +676,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
             gasPriceWei: '60000000000',
@@ -709,7 +714,7 @@ describe('quote', function () {
             tokenInChainId: 1, // DAI
             tokenOutAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
             tokenOutChainId: 1, // USDC
-            amount: await getAmount(type, 'DAI', 'USDC', '100'),
+            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -744,7 +749,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'DAI', 'USDC', '100'),
+            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -773,13 +778,13 @@ describe('quote', function () {
         })
       })
 
-      describe(`${algorithm} ${type} 4xx`, () => {
+      describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 4xx`, () => {
         it(`field is missing in body`, async () => {
           const quoteReq: Partial<QuoteQueryParams> = {
             tokenOutAddress: 'USDT',
             tokenInChainId: 1,
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -802,7 +807,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'KNC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
+            amount: await getAmount(1, type, 'UNI', 'KNC', '9999999999999999999999999999999999999999999999999'),
             type,
             recipient: '0x88fc765949a27405480F374Aa49E20dcCD3fCfb8',
             slippageTolerance: SLIPPAGE,
@@ -826,6 +831,7 @@ describe('quote', function () {
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
             amount: await getAmount(
+              1,
               type,
               'USDC',
               'USDT',
@@ -899,7 +905,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'NONEXISTANTTOKEN',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -922,7 +928,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -945,7 +951,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -968,7 +974,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDT', '100'),
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
@@ -990,7 +996,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDC', 'USDT', '100'),
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             slippageTolerance: SLIPPAGE,
             deadline: '360',
@@ -1011,7 +1017,7 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDC',
             tokenOutChainId: 1,
-            amount: await getAmount(type, 'USDT', 'USDC', '100'),
+            amount: await getAmount(1, type, 'USDT', 'USDC', '100'),
             type,
             recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aZZZZZZZ',
             slippageTolerance: SLIPPAGE,
@@ -1046,10 +1052,112 @@ describe('quote', function () {
           await callAndExpectFail(quoteReq, {
             status: 400,
             data: {
-              detail: '"tokenInChainId" must be one of [1, 4]',
+              detail: '"tokenInChainId" must be one of [1, 4, 3, 42, 10, 69, 42161, 421611]',
               errorCode: 'VALIDATION_ERROR',
             },
           })
+        })
+      })
+    }
+  }
+
+  const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: USDC_ON(1),
+    [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
+  }
+  const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: DAI_ON(1),
+    [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
+  }
+
+  // TODO: Find valid pools/tokens on optimistic kovan. We skip those tests for now.
+  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN)) {
+    for (const type of ['exactIn', 'exactOut']) {
+      const erc1 = TEST_ERC20_1[chain]
+      const erc2 = TEST_ERC20_2[chain]
+
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
+        // Help with test flakiness by retrying.
+        this.retries(1)
+        this.timeout(15000)
+
+        it(`weth -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: WETH_ON(chain).address,
+            tokenInChainId: chain,
+            tokenOutAddress: erc1.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, WETH_ON(chain), erc1, '10'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
+
+            expect(status).to.equal(200)
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
+        })
+        // erc20 test
+        it(`erc20 -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: erc1.address,
+            tokenInChainId: chain,
+            tokenOutAddress: erc2.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
+
+            expect(status).to.equal(200)
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
+        })
+
+        it(`eth -> erc20`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'ETH',
+            tokenInChainId: chain,
+            tokenOutAddress: erc2.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, WETH_ON(chain), erc2, '100'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
+
+            expect(status).to.equal(200, JSON.stringify(response.data))
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
         })
       })
     }
@@ -1062,24 +1170,4 @@ describe('alpha only quote', function () {
   for (const type of ['exactIn', 'exactOut']) {
     describe(`${type} 2xx`, () => {})
   }
-})
-
-describe('rinkeby', () => {
-  it(`erc20 -> erc20`, async () => {
-    const quoteReq: QuoteQueryParams = {
-      tokenInAddress: '0xc778417e063141139fce010982780140aa0cd5ab',
-      tokenInChainId: 4,
-      tokenOutAddress: '0xf9bdcdef5fd9978110238cfd6f3177a0da199fd8',
-      tokenOutChainId: 4,
-      amount: await getAmount('exactIn', 'WETH', 'USDT', '1'),
-      type: 'exactIn',
-    }
-
-    const queryParams = qs.stringify(quoteReq)
-
-    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-    const { status } = response
-
-    expect(status).to.equal(200)
-  })
 })

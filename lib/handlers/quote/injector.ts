@@ -43,6 +43,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       requestId,
       quoteId,
       tokenInAddress,
+      chainId: tokenInChainId,
       tokenOutAddress,
       amount,
       type,
@@ -84,7 +85,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
-      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN, 1)
+      gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN)
     }
 
     let router

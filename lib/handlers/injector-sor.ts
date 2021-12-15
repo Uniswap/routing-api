@@ -14,7 +14,9 @@ import {
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
+  LegacyGasPriceProvider,
   NodeJSCache,
+  OnChainGasPriceProvider,
   setGlobalLogger,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
@@ -35,7 +37,17 @@ import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 
-const SUPPORTED_CHAINS: ChainId[] = [ChainId.MAINNET, ChainId.RINKEBY]
+export const SUPPORTED_CHAINS: ChainId[] = [
+  ChainId.MAINNET,
+  ChainId.RINKEBY,
+  ChainId.ROPSTEN,
+  ChainId.KOVAN,
+  ChainId.OPTIMISM,
+  ChainId.OPTIMISTIC_KOVAN,
+  ChainId.ARBITRUM_ONE,
+  ChainId.ARBITRUM_RINKEBY,
+  // leaving goerli out for now
+]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
@@ -93,16 +105,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const chainName = ID_TO_NETWORK_NAME(chainId)
+        // updated chainNames to match infura strings
+        const projectId = process.env.PROJECT_ID
+        const url = `https://${chainName}.infura.io/v3/${projectId}`
 
         const provider = new ethers.providers.JsonRpcProvider(
           {
-            url: chainId == ChainId.MAINNET ? process.env.JSON_RPC_URL! : process.env.JSON_RPC_URL_RINKEBY!,
-            user: chainId == ChainId.MAINNET ? process.env.JSON_RPC_USERNAME! : process.env.JSON_RPC_USERNAME_RINKEBY!,
-            password:
-              chainId == ChainId.MAINNET ? process.env.JSON_RPC_PASSWORD : process.env.JSON_RPC_PASSWORD_RINKEBY,
+            url: url,
             timeout: 5000,
           },
-          chainName
+          chainId
         )
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
@@ -124,25 +136,91 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        const quoteProvider = new V3QuoteProvider(
-          chainId,
-          provider,
-          multicall2Provider,
-          {
-            retries: 2,
-            minTimeout: 100,
-            maxTimeout: 1000,
-          },
-          {
-            multicallChunk: 210,
-            gasLimitPerCall: 705_000,
-            quoteMinSuccessRate: 0.15,
-          },
-          {
-            gasLimitOverride: 2_000_000,
-            multicallChunk: 70,
-          }
-        )
+        let quoteProvider: V3QuoteProvider
+        switch (chainId) {
+          case ChainId.OPTIMISM:
+          case ChainId.OPTIMISTIC_KOVAN:
+            quoteProvider = new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 130,
+                gasLimitPerCall: 1_000_000,
+                quoteMinSuccessRate: 0.1,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 65,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 65,
+              },
+              {
+                baseBlockOffset: 20,
+                rollback: {
+                  enabled: true,
+                  attemptsBeforeRollback: 1,
+                  rollbackBlockOffset: 20,
+                },
+              }
+            )
+            break
+          case ChainId.ARBITRUM_ONE:
+          case ChainId.ARBITRUM_RINKEBY:
+            quoteProvider = new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 15,
+                gasLimitPerCall: 15_000_000,
+                quoteMinSuccessRate: 0.15,
+              },
+              {
+                gasLimitOverride: 30_000_000,
+                multicallChunk: 8,
+              },
+              {
+                gasLimitOverride: 30_000_000,
+                multicallChunk: 8,
+              }
+            )
+            break
+          default:
+            quoteProvider = new V3QuoteProvider(
+              chainId,
+              provider,
+              multicall2Provider,
+              {
+                retries: 2,
+                minTimeout: 100,
+                maxTimeout: 1000,
+              },
+              {
+                multicallChunk: 210,
+                gasLimitPerCall: 705_000,
+                quoteMinSuccessRate: 0.15,
+              },
+              {
+                gasLimitOverride: 2_000_000,
+                multicallChunk: 70,
+              }
+            )
+            break
+        }
+
         const v3PoolProvider = new CachingV3PoolProvider(
           chainId,
           new V3PoolProvider(chainId, multicall2Provider),
@@ -197,7 +275,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             tokenProviderFromTokenList: tokenListProvider,
             gasPriceProvider: new CachingGasStationProvider(
               chainId,
-              new EIP1559GasPriceProvider(provider),
+              new OnChainGasPriceProvider(
+                chainId,
+                new EIP1559GasPriceProvider(provider),
+                new LegacyGasPriceProvider(provider)
+              ),
               new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
             ),
             v3SubgraphProvider,
