@@ -24,15 +24,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import {
-  DAI_ON,
-  getAmount,
-  getAmountFromToken,
-  UNI_MAINNET,
-  USDC_ON,
-  WETH_ON,
-} from '../utils/tokens'
-
+import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WETH_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -150,7 +142,7 @@ describe('quote', function () {
     ])
   })
 
-  for (const algorithm of ['alpha' /* , 'legacy' */]) {
+  for (const algorithm of ['alpha' , 'legacy']) {
     for (const type of ['exactIn', 'exactOut']) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ simulate swap`, () => {
@@ -1069,7 +1061,6 @@ describe('quote', function () {
     }
   }
 
-
   const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
@@ -1077,7 +1068,7 @@ describe('quote', function () {
     [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN) ,
+    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
   }
@@ -1093,15 +1084,16 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
   }
 
-  for (const chain of SUPPORTED_CHAINS) {
+  // TODO: Find valid pools/tokens on optimistic kovan. We skip those tests for now.
+  for (const chain of _.filter(SUPPORTED_CHAINS, c => c != ChainId.OPTIMISTIC_KOVAN)) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
 
-      describe.only(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
-        this.retries(0)
-        this.timeout(29000)
+        this.retries(1)
+        this.timeout(15000)
 
         it(`weth -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
