@@ -43,7 +43,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     // updating (e.g. Subgraph down) that we stop using the cache files and will fallback to a static pool list.
     this.poolCacheBucket2.addLifecycleRule({
       enabled: true,
-      expiration: cdk.Duration.minutes(60),
+      expiration: cdk.Duration.days(1),
     })
 
     this.poolCacheKey = 'poolCache.json'
