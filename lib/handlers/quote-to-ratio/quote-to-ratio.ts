@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
+import { CondensedAddLiquidityOptions, Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -10,7 +10,7 @@ import {
   SwapAndAddOptions,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
-import { AddLiquidityOptions, CommonAddLiquidityOptions, Position } from '@uniswap/v3-sdk'
+import { Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -25,7 +25,7 @@ import {
 
 export class QuoteToRatioHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
+  RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
   void,
   QuoteToRatioQueryParams,
   QuoteToRatioResponse
@@ -33,7 +33,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<
       ContainerInjected,
-      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddOptions>>,
+      RequestInjected<ISwapToRatio<AlphaRouterConfig, SwapAndAddConfig>>,
       void,
       QuoteToRatioQueryParams
     >
@@ -130,33 +130,32 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     }
 
     const routingConfig = {
-      ...DEFAULT_ROUTING_CONFIG,
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
     }
 
-    let swapParams: SwapConfig | undefined = undefined
-    if (slippageTolerance && deadline && recipient) {
-      swapParams = {
-        deadline: this.parseDeadline(deadline),
-        recipient: recipient,
-        slippageTolerance: this.parseSlippageTolerance(slippageTolerance),
-      }
-    }
-
-    const commonAddLiquidityOptions: CommonAddLiquidityOptions = {
-      deadline: this.parseDeadline(addLiquidityDeadline),
-      slippageTolerance: this.parseSlippageTolerance(addLiquiditySlippageTolerance),
-    }
-    let addLiquidityOptions: AddLiquidityOptions
+    let addLiquidityOptions: CondensedAddLiquidityOptions
     if (addLiquidityTokenId) {
-      addLiquidityOptions = { ...commonAddLiquidityOptions, tokenId: addLiquidityTokenId }
+      addLiquidityOptions = { tokenId: addLiquidityTokenId }
     } else if (addLiquidityRecipient) {
-      addLiquidityOptions = { ...commonAddLiquidityOptions, recipient: addLiquidityRecipient }
+      addLiquidityOptions = { recipient: addLiquidityRecipient }
     } else {
       return {
         statusCode: 400,
         errorCode: 'UNSPECIFIED_POSITION_OPTIONS',
         detail: `either addLiquidityTokenId must be provided for existing positions or addLiquidityRecipient for new positions`,
+      }
+    }
+
+    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
+    if (slippageTolerance && deadline && recipient) {
+      swapAndAddOptions = {
+        swapOptions: {
+          deadline: this.parseDeadline(deadline),
+          recipient: recipient,
+          slippageTolerance: this.parseSlippageTolerance(slippageTolerance),
+        },
+        addLiquidityOptions
       }
     }
 
@@ -208,7 +207,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       {
         ratioErrorTolerance: ratioErrorToleranceFraction,
         maxIterations,
-        addLiquidityOptions,
       },
       swapAndAddOptions,
       routingConfig

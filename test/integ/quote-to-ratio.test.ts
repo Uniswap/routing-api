@@ -1,8 +1,6 @@
-import { Currency, Ether, Fraction } from '@uniswap/sdk-core'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
 import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { CachingTokenListProvider, NodeJSCache, parseAmount } from '@uniswap/smart-order-router'
 import { MethodParameters, Pool, Position } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -21,13 +19,22 @@ import {
   ResponseFraction,
 } from '../../lib/handlers/quote-to-ratio/schema/quote-to-ratio-schema'
 import { absoluteValue } from '../utils/absoluteValue'
-import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
 import { getTokenListProvider } from '../utils/tokens'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { parseEvents } from '../utils/parseEvents'
 import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/getBalanceAndApprove'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-import { DAI_MAINNET, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
+// import { DAI_MAINNET, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
+import {
+  CachingTokenListProvider, NodeJSCache, ChainId,
+  DAI_MAINNET,
+  ID_TO_NETWORK_NAME,
+  parseAmount,
+  USDC_MAINNET,
+  USDT_MAINNET,
+  WBTC_MAINNET,
+} from '@uniswap/smart-order-router'
+
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
@@ -224,7 +231,7 @@ describe('quote-to-ratio', function () {
       parseAmount('5000000', USDC_MAINNET),
       parseAmount('5000000', USDT_MAINNET),
       parseAmount('10', WBTC_MAINNET),
-      parseAmount('1000', UNI_MAINNET),
+      // parseAmount('1000', UNI_MAINNET),
       parseAmount('1000', WETH9[1]),
       parseAmount('5000000', DAI_MAINNET),
     ])
