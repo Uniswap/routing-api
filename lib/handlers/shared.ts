@@ -4,7 +4,6 @@ import Logger from 'bunyan'
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
-    // Optimism
     case ChainId.OPTIMISM:
     case ChainId.OPTIMISTIC_KOVAN:
       return {

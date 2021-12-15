@@ -109,10 +109,21 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         const projectId = process.env.PROJECT_ID
         const url = `https://${chainName}.infura.io/v3/${projectId}`
 
+        let timeout: number
+        switch (chainId) {
+          case ChainId.ARBITRUM_ONE:
+          case ChainId.ARBITRUM_RINKEBY:
+            timeout = 8000
+            break
+          default:
+            timeout = 5000
+            break
+        }
+
         const provider = new ethers.providers.JsonRpcProvider(
           {
             url: url,
-            timeout: 5000,
+            timeout,
           },
           chainId
         )
@@ -195,6 +206,14 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               {
                 gasLimitOverride: 30_000_000,
                 multicallChunk: 8,
+              },
+              {
+                baseBlockOffset: 0,
+                rollback: {
+                  enabled: true,
+                  attemptsBeforeRollback: 1,
+                  rollbackBlockOffset: -10,
+                },
               }
             )
             break

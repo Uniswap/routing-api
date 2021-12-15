@@ -1084,6 +1084,18 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
   }
 
+  // When testing in the deployment pipeline against beta/prod, the tests get throttled.
+  describe('Throttling buffer', function () {
+    it('Waits if running in CodeBuild', async () => {
+      if (process.env.CODEBUILD_SRC_DIR) {
+        console.log('Waiting for 2 minutes before running remaining tests to avoid being throttled.')
+        await new Promise((resolve) => {
+          setTimeout(resolve, 120000)
+        })
+      }
+    })
+  })
+
   // TODO: Find valid pools/tokens on optimistic kovan. We skip those tests for now.
   for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN)) {
     for (const type of ['exactIn', 'exactOut']) {
@@ -1093,7 +1105,7 @@ describe('quote', function () {
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
         this.retries(1)
-        this.timeout(15000)
+        this.timeout(20000)
 
         it(`weth -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
@@ -1116,7 +1128,7 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
-        // erc20 test
+
         it(`erc20 -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
