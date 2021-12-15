@@ -142,7 +142,7 @@ describe('quote', function () {
     ])
   })
 
-  for (const algorithm of ['alpha' , 'legacy']) {
+  for (const algorithm of ['alpha', 'legacy']) {
     for (const type of ['exactIn', 'exactOut']) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ simulate swap`, () => {
@@ -1085,7 +1085,7 @@ describe('quote', function () {
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan. We skip those tests for now.
-  for (const chain of _.filter(SUPPORTED_CHAINS, c => c != ChainId.OPTIMISTIC_KOVAN)) {
+  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN)) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]

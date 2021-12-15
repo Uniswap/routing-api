@@ -71,7 +71,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        PROJECT_ID : infuraProjectId,
+        PROJECT_ID: infuraProjectId,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(

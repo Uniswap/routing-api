@@ -19,7 +19,7 @@ import { getTokenListProvider } from '../utils/tokens'
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const tokenListProvider = getTokenListProvider(1);
+const tokenListProvider = getTokenListProvider(1)
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quoteToRatio`
 
