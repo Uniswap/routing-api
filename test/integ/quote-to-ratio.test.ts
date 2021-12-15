@@ -79,7 +79,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
   return new Fraction(JSBI.BigInt(fraction.numerator), JSBI.BigInt(fraction.denominator))
 }
 
-const SWAP_ROUTER_V2 = '0x075B36dE1Bd11cb361c5B3B1E80A9ab0e7aa8a60'
+const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
 describe('quote-to-ratio', function () {
   // Help with test flakiness by retrying.
