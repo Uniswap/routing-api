@@ -21,10 +21,9 @@ import {
 import { absoluteValue } from '../utils/absoluteValue'
 import { getTokenListProvider } from '../utils/tokens'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
-import { parseEvents } from '../utils/parseEvents'
+import { parseEvents, getTestParamsFromEvents } from '../utils/parseEvents'
 import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/getBalanceAndApprove'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-// import { DAI_MAINNET, UNI_MAINNET, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '../utils/tokens'
 import {
   CachingTokenListProvider, NodeJSCache, ChainId,
   DAI_MAINNET,
@@ -34,6 +33,7 @@ import {
   USDT_MAINNET,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
+import { parseSlippageTolerance } from '../../lib/handlers/shared'
 
 const { ethers } = hre
 
@@ -88,7 +88,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe('quote-to-ratio', function () {
+describe.only('quote-to-ratio', function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -106,8 +106,22 @@ describe('quote-to-ratio', function () {
   let tickUpper: number
   let tickLower: number
   let feeAmount: number
+  let slippageTolerance: string
   let ratioErrorTolerance: number
   let ratioErrorToleranceFraction: Fraction
+
+  function resetQueryParams() {
+    token0Address = 'USDC'
+    token1Address = 'USDT'
+    token0Balance = parseAmount('5000', USDC_MAINNET)
+    token1Balance = parseAmount('2000', USDT_MAINNET)
+    tickLower =  getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM])
+    tickUpper =  getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM])
+    feeAmount = FeeAmount.MEDIUM
+    slippageTolerance = '5'
+    ratioErrorTolerance = 1
+    ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
+  }
 
   let response: AxiosResponse<QuoteToRatioResponse>
 
@@ -188,15 +202,7 @@ describe('quote-to-ratio', function () {
     ;[alice] = await ethers.getSigners()
 
     // define query parameters
-    token0Address = 'USDC'
-    token1Address = 'USDT'
-    token0Balance = parseAmount('5000', USDC_MAINNET)
-    token1Balance = parseAmount('2000', USDT_MAINNET)
-    tickLower =  getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM])
-    tickUpper =  getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM])
-    feeAmount = FeeAmount.MEDIUM
-    ratioErrorTolerance = 1
-    ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
+    resetQueryParams()
 
     // Make a dummy call to the API to get a block number to fork from.
     const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -210,7 +216,7 @@ describe('quote-to-ratio', function () {
       tickUpper: 60,
       feeAmount: 500,
       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      slippageTolerance: '5',
+      slippageTolerance,
       deadline: '360',
       ratioErrorTolerance: 1,
       maxIterations: 6,
@@ -237,21 +243,18 @@ describe('quote-to-ratio', function () {
     ])
   })
 
-  afterEach('refresh query parameters', async () => {
-    token0Address = 'USDC'
-    token1Address = 'USDT'
-    token0Balance = parseAmount('5000', USDC_MAINNET)
-    token1Balance = parseAmount('2000', USDT_MAINNET)
-    ratioErrorTolerance = 1
-    ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
-  })
-
   describe('erc20 -> erc20 high volume trade token0Excess', () => {
+    after(() => {
+      resetQueryParams()
+    })
+
     before(async () => {
       token0Address = 'DAI'
       token1Address = 'USDC'
       token0Balance = parseAmount('1000000', DAI_MAINNET)
       token1Balance = parseAmount('2000', USDC_MAINNET)
+      slippageTolerance = '0.05'
+
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address,
         token0ChainId: 1,
@@ -262,14 +265,14 @@ describe('quote-to-ratio', function () {
         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
         feeAmount: 3000,
-        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-        slippageTolerance: '5',
+        recipient: alice.address,
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
         addLiquiditySlippageTolerance: '5',
         addLiquidityDeadline: '360',
-        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        addLiquidityRecipient: alice.address,
       }
 
       const queryParams = qs.stringify(quoteToRatioRec)
@@ -297,7 +300,9 @@ describe('quote-to-ratio', function () {
       expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
     })
 
-    it('executes at the contract level', async () => {
+    it.only('executes at the contract level', async () => {
+      // testSuccessfulContractExecution(response)
+
       const {
         data: {
           amount,
@@ -319,15 +324,6 @@ describe('quote-to-ratio', function () {
         parseInt(postSwapTargetPool.tickCurrent),
       )
 
-      const mintedPosition = Position.fromAmounts({
-        pool: postSwapPool,
-        tickLower,
-        tickUpper,
-        amount0: token0BalanceUpdated,
-        amount1: token1BalanceUpdated,
-        useFullPrecision: true,
-      })
-
       const {
         token0BeforeAlice,
         token0AfterAlice,
@@ -342,75 +338,101 @@ describe('quote-to-ratio', function () {
         events,
       } = await executeSwap(postSwapTargetPool.address, methodParameters!, USDC_MAINNET, DAI_MAINNET, true)
 
-      const currencyInSwapped = CurrencyAmount.fromRawAmount(DAI_MAINNET, JSBI.BigInt(amount))
-      const currencyOutSwapped = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(quote))
+      const {
+        // total amounts transferred from alice. including amounts transferred back as a result of dust
+        amount0TransferredFromAlice,
+        amount1TransferredFromAlice,
+        onChainPosition
+      } = getTestParamsFromEvents(events, DAI_MAINNET, USDC_MAINNET, alice.address)
 
-      const amount0Minted = mintedPosition.amount0
-      const amount1Minted = mintedPosition.amount1
+      // alice's balance differences after entire completed transaction
+      const amount0DiffAlice = token0BeforeAlice.subtract(token0AfterAlice)
+      const amount1DiffAlice = token1BeforeAlice.subtract(token1AfterAlice)
+
+      const currencyInSwapped = CurrencyAmount.fromRawAmount(DAI_MAINNET, JSBI.BigInt(amount))
+      const currencyOutQuote = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(quote))
 
       const newPoolBalance0 = token0AfterPool.subtract(token0BeforePool)
       const newPoolBalance1 = token1AfterPool.subtract(token1BeforePool)
 
-      const amount0Transferred = token0BeforeAlice.subtract(token0AfterAlice)
-      const amount1Transferred = token1BeforeAlice.subtract(token1AfterAlice)
+      const mintedPositionQuoted = Position.fromAmounts({
+        pool: postSwapPool,
+        tickLower,
+        tickUpper,
+        amount0: token0BalanceUpdated,
+        amount1: token1BalanceUpdated,
+        useFullPrecision: true,
+      })
+
+      const {
+        amount0: minPositionAmount0,
+        amount1: minPositionAmount1
+      } = mintedPositionQuoted.mintAmountsWithSlippage(parseSlippageTolerance(slippageTolerance))
+
+
+      // make sure we never transfer more than the user-stated available balance
+      expect(!amount1TransferredFromAlice.greaterThan(token1Balance)).to.be.true
+      expect(!amount0TransferredFromAlice.greaterThan(token0Balance)).to.be.true
+
+      // make sure router has no funds left
+      expect(swapRouterFinalBalance0.quotient.toString()).to.equal('0')
+      expect(swapRouterFinalBalance1.quotient.toString()).to.equal('0')
+
+      // total amountIn pulled but not swapped now lives in the position
+      expect(amount0DiffAlice.subtract(currencyInSwapped).quotient.toString()).to.equal(newPoolBalance0.quotient.toString())
+
+      // check position details
+      expect(onChainPosition.amount0.quotient.toString()).to.equal(newPoolBalance0.quotient.toString())
+      expect(onChainPosition.amount1.quotient.toString()).to.equal(newPoolBalance1.quotient.toString())
+      // check only for newly minted positions
+      expect(onChainPosition.owner).to.equal(alice.address)
+      expect(onChainPosition.tickLower).to.equal(tickLower)
+      expect(onChainPosition.tickUpper).to.equal(tickUpper)
+
+      // check slippage tolerance was not hit
+      expect(onChainPosition.amount0.greaterThan(minPositionAmount0)).to.be.true
+      expect(onChainPosition.amount1.greaterThan(minPositionAmount1)).to.be.true
 
       //////////////// CONSOLE LOGS /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      console.log('\n\n\n')
-      const transferEvents = events.filter(event => ( (event.name === 'Transfer' || event.name == 'Approval') &&
-        (event.args.from.toLowerCase() === alice.address.toLowerCase() || event.args.to.toLowerCase() === alice.address.toLowerCase()
-        // event.origin === USDC_MAINNET.address
-      )))
-
-      transferEvents.forEach(event => {
-        console.log(`${event.name} Event: `, event.origin)
-        if (event.name == 'Transfer') {
-          console.log('   from: ', event.args.from)
-          console.log('   to:   ', event.args.to)
-          console.log('   amount:', event.args.value.toString())
-        }
-        if (event.name == 'Approval') {
-          console.log('   spender: ', event.args.spender)
-          console.log('   owner:   ', event.args.owner)
-          console.log('   amount:', event.args.value.toString())
-        }
-
-      })
-      console.log('\n')
-      // console.log('amount1 IncreaseLiquidity', increaseLiquidityEvent[0].args.amount1.toString())
-
-      console.log('amount1Transferred from user:', amount1Transferred.toFixed(6))
-      console.log('position amount from user    ', newPoolBalance1.subtract(currencyOutSwapped).toFixed(6))
-      console.log('pool Balance:                ', newPoolBalance1.toFixed(6))
-      console.log('amount1 gained fromswap:     ', currencyOutSwapped.toFixed(6))
-
-      console.log('Swap router:')
-      console.log(swapRouterFinalBalance0.toFixed(6))
-      console.log(swapRouterFinalBalance1.toFixed(6))
-      console.log('\n')
-      console.log('position amount0', mintedPosition.amount0.toFixed(6))
-      console.log('position amount1', mintedPosition.amount1.toFixed(6))
-      console.log('token0BalanceUpdated', token0BalanceUpdated)
-      console.log('token1BalanceUpdated', token1BalanceUpdated)
+      // console.log('\n')
+      // // console.log('amount1 IncreaseLiquidity', increaseLiquidityEvent[0].args.amount1.toString())
+      //
+      // console.log('amount0Transferred from user:', amount0TransferredFromAlice.toFixed(6))
+      // console.log('amount1Transferred from user:', amount1TransferredFromAlice.toFixed(6))
+      // // console.log('position amount from user:   ', newPoolBalance1.subtract(currencyOutQuote).toFixed(6))
+      // console.log('amount0 input to swap:       ', currencyInSwapped.toFixed(6))
+      // console.log('amount1 quoted from swap:    ', currencyOutQuote.toFixed(6))
+      // console.log('pool Balance 0:              ', newPoolBalance0.toFixed(6))
+      // console.log('pool Balance 1:              ', newPoolBalance1.toFixed(6))
+      // console.log('position amount0 quoted:     ', amount0MintedQuoted.toFixed(6))
+      // console.log('position amount1 quoted:     ', amount1MintedQuoted.toFixed(6))
+      // console.log('position amount1 diff:       ', amount1MintedQuoted.subtract(newPoolBalance1).toFixed(6))
+      //
+      // console.log('Swap router:')
+      // console.log(swapRouterFinalBalance0.toFixed(6))
+      // console.log(swapRouterFinalBalance1.toFixed(6))
+      // console.log('\n')
+      // console.log('token0BalanceUpdated', token0BalanceUpdated)
+      // console.log('token1BalanceUpdated', token1BalanceUpdated)
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       // pool position and balance match up with expectations
-      expect(amount1Minted.quotient.toString()).to.equal(newPoolBalance1.asFraction.subtract(1).quotient.toString())
-      expect(amount0Minted.quotient.toString()).to.equal(newPoolBalance0.asFraction.subtract(1).quotient.toString())
+      // expect(amount1MintedQuoted.quotient.toString()).to.equal(newPoolBalance1.asFraction.subtract(1).quotient.toString())
+      // expect(amount0MintedQuoted.quotient.toString()).to.equal(newPoolBalance0.asFraction.subtract(1).quotient.toString())
 
       // all tokens transferred from alice are now in the Pool
-      expect(amount0Transferred.quotient.toString()).to.equal(newPoolBalance0.add(currencyInSwapped).quotient.toString())
-      expect(amount1Transferred.quotient.toString()).to.equal(newPoolBalance1.subtract(currencyOutSwapped).quotient.toString())
-
-      // token1 amount transferred from alice is lessThan or equal to her initial balance
-      expect(!amount1Transferred.greaterThan(token1Balance)).to.be.true
-
-
+      // expect(amount0TransferredFromAlice.quotient.toString()).to.equal(newPoolBalance0.quotient.toString())
+      // expect(amount1TransferredFromAlice.quotient.toString()).to.equal(newPoolBalance1.quotient.toString())
     })
   })
 
   describe('erc20 -> erc20 low volume trade token0Excess', () => {
+    after(() => {
+      resetQueryParams()
+    })
+
     before(async () => {
       tickLower = -60
       tickUpper = 60
@@ -431,7 +453,7 @@ describe('quote-to-ratio', function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
+        addLiquiditySlippageTolerance: slippageTolerance,
         addLiquidityDeadline: '360',
         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }

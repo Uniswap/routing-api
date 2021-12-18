@@ -14,7 +14,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseSlippageTolerance, tokenStringToCurrency } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 
 export class QuoteHandler extends APIGLambdaHandler<

@@ -1,4 +1,4 @@
-import { Currency, Ether } from '@uniswap/sdk-core'
+import { Currency, Ether, Percent } from '@uniswap/sdk-core'
 import { AlphaRouterConfig, ChainId, ITokenListProvider, ITokenProvider } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
@@ -122,4 +122,9 @@ export async function tokenStringToCurrency(
   }
 
   return undefined
+}
+
+export function parseSlippageTolerance(slippageTolerance: string): Percent {
+  const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
+  return new Percent(slippagePer10k, 10_000)
 }

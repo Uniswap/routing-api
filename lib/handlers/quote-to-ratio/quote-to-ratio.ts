@@ -15,7 +15,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseSlippageTolerance, tokenStringToCurrency } from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -153,7 +153,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         swapOptions: {
           deadline: this.parseDeadline(deadline),
           recipient: recipient,
-          slippageTolerance: this.parseSlippageTolerance(slippageTolerance),
+          slippageTolerance: parseSlippageTolerance(slippageTolerance),
         },
         addLiquidityOptions
       }
@@ -500,10 +500,5 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
 
   protected parseDeadline(deadline: string): number {
     return Math.floor(Date.now() / 1000) + parseInt(deadline)
-  }
-
-  protected parseSlippageTolerance(slippageTolerance: string): Percent {
-    const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-    return new Percent(slippagePer10k, 10_000)
   }
 }
