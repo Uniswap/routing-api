@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
 import { CondensedAddLiquidityOptions, Protocol } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ISwapToRatio,
@@ -155,7 +155,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
           recipient: recipient,
           slippageTolerance: parseSlippageTolerance(slippageTolerance),
         },
-        addLiquidityOptions
+        addLiquidityOptions,
       }
     }
 
