@@ -46,7 +46,11 @@ export type SwapAndAddEventTestParams = {
 
 export function parseEvents(
 	txReceipt: providers.TransactionReceipt,
+	addressFilter?: string[]
 ) {
+	if (!!addressFilter) {
+		addressFilter = addressFilter.map(str => str.toLowerCase())
+	}
 
 	return txReceipt.logs.map(log => {
 		if (log.address === NFT_POSITION_MANAGER) {
@@ -54,13 +58,15 @@ export function parseEvents(
 				origin: log.address,
 				...NFT_INTERFACE.parseLog(log)
 			}
-		} else {
+		} else if (!addressFilter || addressFilter.includes(log.address.toLowerCase())) {
 			return {
 				origin: log.address,
 				...GENERIC_INTERFACE.parseLog(log)
 			}
+		} else {
+			return null
 		}
-	})
+	}).filter(n => n)
 }
 
 export function getTestParamsFromEvents(
