@@ -23,6 +23,7 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
 import { getTokenListProvider, UNI_MAINNET } from '../utils/tokens'
+import { minimumAmountOut } from '../utils/minimumAmountOut'
 
 const { ethers } = hre
 
@@ -216,10 +217,22 @@ describe.only('quote-to-ratio', async function () {
       amount1: token1BalanceUpdated,
       useFullPrecision: true,
     })
-
     const { amount0: minPositionAmount0, amount1: minPositionAmount1 } = mintedPositionQuoted.mintAmountsWithSlippage(
       parseSlippageTolerance(slippageTolerance)
     )
+
+    // collect position with minimum amount out from swap with max slippage. Min amounts added to position
+    // will either be mintAmountsWithSlippage for quoted position OR amounts resulting from minimum possible amount quoted from swap.
+    // the lesser of the two, since mintAmountsWithSlippage can be undependable in certain scenarios, specifically range orders
+    const amountOutMaxSwapSlippage = minimumAmountOut(parseSlippageTolerance(slippageTolerance), currencyOutQuote)
+    const mintedPositionMaxSwapSlippage = Position.fromAmounts({
+      pool: postSwapPool,
+      tickLower,
+      tickUpper,
+      amount0: zeroForOne ? token0BalanceUpdated : amountOutMaxSwapSlippage.quotient,
+      amount1: zeroForOne ? amountOutMaxSwapSlippage.quotient : token1BalanceUpdated,
+      useFullPrecision: true,
+    })
 
     // make sure we never transfer more than the user-stated available balance
     expect(!amount0TransferredFromAlice.greaterThan(token0Balance)).to.be.true
@@ -243,14 +256,25 @@ describe.only('quote-to-ratio', async function () {
     // check position details
     expect(onChainPosition.amount0.quotient.toString()).to.equal(newPoolBalance0.quotient.toString())
     expect(onChainPosition.amount1.quotient.toString()).to.equal(newPoolBalance1.quotient.toString())
+
     // check only for newly minted positions
     expect(onChainPosition.owner).to.equal(alice.address)
     expect(onChainPosition.tickLower).to.equal(tickLower)
     expect(onChainPosition.tickUpper).to.equal(tickUpper)
 
     // check slippage tolerance was not hit
-    expect(!onChainPosition.amount0.lessThan(minPositionAmount0)).to.be.true
-    expect(!onChainPosition.amount1.lessThan(minPositionAmount1)).to.be.true
+    const min0 = mintedPositionMaxSwapSlippage.amount0.lessThan(minPositionAmount0) ? mintedPositionMaxSwapSlippage.amount0 : minPositionAmount0
+    const min1 = mintedPositionMaxSwapSlippage.amount1.lessThan(minPositionAmount1) ? mintedPositionMaxSwapSlippage.amount1 : minPositionAmount1
+    // console.log('\n\n\n')
+    // console.log('min0                ' , min0.quotient ? min0.quotient.toString() : min0.toString())
+    // console.log('minPositionAmount0  ', minPositionAmount0.toString())
+    // console.log('swapSlippage.amount0', mintedPositionMaxSwapSlippage.amount0.quotient.toString())
+    // console.log('\n')
+    // console.log('min1                ' , min1.quotient ? min1.quotient.toString() : min1.toString())
+    // console.log('minPositionAmount1  ', minPositionAmount1.toString())
+    // console.log('swapSlippage.amount1', mintedPositionMaxSwapSlippage.amount1.quotient.toString())
+    expect(!onChainPosition.amount0.lessThan(min0)).to.be.true
+    expect(!onChainPosition.amount1.lessThan(min1)).to.be.true
   }
 
   before('generate blockchain fork', async function () {
@@ -377,7 +401,7 @@ describe.only('quote-to-ratio', async function () {
         tickUpper,
         feeAmount,
         recipient: alice.address,
-        slippageTolerance: '10',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
@@ -439,7 +463,7 @@ describe.only('quote-to-ratio', async function () {
         tickUpper,
         feeAmount,
         recipient: alice.address,
-        slippageTolerance: '0.05',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
@@ -499,7 +523,7 @@ describe.only('quote-to-ratio', async function () {
         tickUpper,
         feeAmount,
         recipient: alice.address,
-        slippageTolerance: '0.05',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
@@ -561,7 +585,7 @@ describe.only('quote-to-ratio', async function () {
         tickUpper,
         feeAmount,
         recipient: alice.address,
-        slippageTolerance: '10',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
@@ -612,8 +636,8 @@ describe.only('quote-to-ratio', async function () {
     before(async () => {
       token0Balance = await parseAmount('50000', token0)
       token1Balance = await parseAmount('2000', token1)
-      tickLower = -276420
-      tickUpper = -276360
+      tickLower = -286420
+      tickUpper = -276420
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address: token0.wrapped.address,
         token0ChainId: 1,
@@ -623,9 +647,9 @@ describe.only('quote-to-ratio', async function () {
         token1Balance: token1Balance.quotient.toString(),
         tickLower,
         tickUpper,
-        feeAmount: 3000,
+        feeAmount,
         recipient: alice.address,
-        slippageTolerance: '10',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
@@ -688,7 +712,7 @@ describe.only('quote-to-ratio', async function () {
         tickUpper,
         feeAmount,
         recipient: alice.address,
-        slippageTolerance: '5',
+        slippageTolerance,
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
