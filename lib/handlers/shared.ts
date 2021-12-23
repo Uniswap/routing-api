@@ -1,5 +1,12 @@
-import { Currency, Ether } from '@uniswap/sdk-core'
-import { AlphaRouterConfig, ChainId, ITokenListProvider, ITokenProvider } from '@uniswap/smart-order-router'
+import { Currency } from '@uniswap/sdk-core'
+import {
+  AlphaRouterConfig,
+  ChainId,
+  ITokenListProvider,
+  ITokenProvider,
+  NativeCurrencyName,
+  nativeOnChain,
+} from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
@@ -95,8 +102,12 @@ export async function tokenStringToCurrency(
 
   let token: Currency | undefined = undefined
 
-  if (tokenRaw == 'ETH' || tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
-    token = Ether.onChain(chainId)
+  if (
+    tokenRaw == NativeCurrencyName.ETHER ||
+    tokenRaw == NativeCurrencyName.MATIC ||
+    tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+  ) {
+    token = nativeOnChain(chainId)
   } else if (isAddress(tokenRaw)) {
     token = await tokenListProvider.getTokenByAddress(tokenRaw)
   }

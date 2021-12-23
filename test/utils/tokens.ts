@@ -1,5 +1,5 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { Token, WETH9 } from '@uniswap/sdk-core'
+import { Token } from '@uniswap/sdk-core'
 import {
   CachingTokenListProvider,
   ChainId,
@@ -10,8 +10,11 @@ import {
   DAI_MAINNET,
   DAI_OPTIMISM,
   DAI_OPTIMISTIC_KOVAN,
+  DAI_POLYGON,
+  DAI_POLYGON_MUMBAI,
   DAI_RINKEBY_1,
   DAI_ROPSTEN,
+  log,
   NodeJSCache,
   USDC_ARBITRUM,
   USDC_ARBITRUM_RINKEBY,
@@ -20,6 +23,8 @@ import {
   USDC_MAINNET,
   USDC_OPTIMISM,
   USDC_OPTIMISTIC_KOVAN,
+  USDC_POLYGON,
+  USDC_POLYGON_MUMBAI,
   USDC_RINKEBY,
   USDC_ROPSTEN,
   USDT_ARBITRUM,
@@ -31,6 +36,7 @@ import {
   USDT_OPTIMISTIC_KOVAN,
   USDT_RINKEBY,
   USDT_ROPSTEN,
+  WRAPPED_NATIVE_CURRENCY,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -42,6 +48,7 @@ export const getTokenListProvider = (id: ChainId) => {
 export const getAmount = async (id: ChainId, type: string, symbolIn: string, symbolOut: string, amount: string) => {
   const tokenListProvider = getTokenListProvider(id)
   const decimals = (await tokenListProvider.getTokenBySymbol(type == 'exactIn' ? symbolIn : symbolOut))!.decimals
+  log.info(decimals)
   return ethers.utils.parseUnits(amount, decimals).toString()
 }
 
@@ -86,6 +93,10 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_ARBITRUM
     case ChainId.ARBITRUM_RINKEBY:
       return DAI_ARBITRUM_RINKEBY
+    case ChainId.POLYGON:
+      return DAI_POLYGON
+    case ChainId.POLYGON_MUMBAI:
+      return DAI_POLYGON_MUMBAI
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -136,11 +147,15 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_ARBITRUM
     case ChainId.ARBITRUM_RINKEBY:
       return USDC_ARBITRUM_RINKEBY
+    case ChainId.POLYGON:
+      return USDC_POLYGON
+    case ChainId.POLYGON_MUMBAI:
+      return USDC_POLYGON_MUMBAI
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
 }
 
-export const WETH_ON = (chainId: ChainId): Token => {
-  return WETH9[chainId]
+export const WNATIVE_ON = (chainId: ChainId): Token => {
+  return WRAPPED_NATIVE_CURRENCY[chainId]
 }

@@ -46,6 +46,8 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISTIC_KOVAN,
   ChainId.ARBITRUM_ONE,
   ChainId.ARBITRUM_RINKEBY,
+  ChainId.POLYGON,
+  ChainId.POLYGON_MUMBAI,
   // leaving goerli out for now
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
