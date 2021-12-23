@@ -4,6 +4,7 @@ import {
   ChainId,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
+  NATIVE_CURRENCY,
   parseAmount,
   USDC_MAINNET,
   USDT_MAINNET,
@@ -11,7 +12,8 @@ import {
 } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
-import axios, { AxiosResponse } from 'axios'
+import axiosStatic, { AxiosResponse } from 'axios'
+import axiosRetry from 'axios-retry'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
@@ -24,7 +26,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WETH_ON } from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -38,6 +40,13 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 const SLIPPAGE = '5'
+
+const axios = axiosStatic.create()
+axiosRetry(axios, {
+  retries: 10,
+  retryCondition: (err) => err.response?.status == 429,
+  retryDelay: axiosRetry.exponentialDelay,
+})
 
 const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { status: number; data: any }) => {
   const queryParams = qs.stringify(quoteReq)
@@ -66,7 +75,7 @@ const checkQuoteToken = (
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe('quote', function () {
+describe.only('quote', function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -1049,10 +1058,13 @@ describe('quote', function () {
             algorithm,
           }
 
+          const chains = SUPPORTED_CHAINS.values()
+          const chainStr = [...chains].toString().split(',').join(', ')
+
           await callAndExpectFail(quoteReq, {
             status: 400,
             data: {
-              detail: '"tokenInChainId" must be one of [1, 4, 3, 42, 10, 69, 42161, 421611]',
+              detail: `"tokenInChainId" must be one of [${chainStr}]`,
               errorCode: 'VALIDATION_ERROR',
             },
           })
@@ -1071,6 +1083,8 @@ describe('quote', function () {
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
   }
   const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: DAI_ON(1),
@@ -1082,23 +1096,12 @@ describe('quote', function () {
     [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
   }
 
-  // When testing in the deployment pipeline against beta/prod, the tests get throttled.
-  describe('Throttling buffer', function () {
-    this.timeout(350000)
-    it('Waits if running in CodeBuild', async () => {
-      if (process.env.CODEBUILD_SRC_DIR) {
-        console.log('Waiting for 5 minutes before running remaining tests to avoid being throttled.')
-        await new Promise((resolve) => {
-          setTimeout(resolve, 300000)
-        })
-      }
-    })
-  })
-
-  // TODO: Find valid pools/tokens on optimistic kovan. We skip those tests for now.
-  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN)) {
+  // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
+  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI)) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
@@ -1106,15 +1109,15 @@ describe('quote', function () {
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
         this.retries(1)
-        this.timeout(20000)
+        const wrappedNative = WNATIVE_ON(chain)
 
-        it(`weth -> erc20`, async () => {
+        it(`${wrappedNative.symbol} -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
-            tokenInAddress: WETH_ON(chain).address,
+            tokenInAddress: wrappedNative.address,
             tokenInChainId: chain,
             tokenOutAddress: erc1.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WETH_ON(chain), erc1, '10'),
+            amount: await getAmountFromToken(type, wrappedNative, erc1, '10'),
             type,
           }
 
@@ -1151,14 +1154,14 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
-
-        it(`eth -> erc20`, async () => {
+        const native = NATIVE_CURRENCY[chain]
+        it(`${native} -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
-            tokenInAddress: 'ETH',
+            tokenInAddress: native,
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WETH_ON(chain), erc2, '100'),
+            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '100'),
             type,
           }
 
