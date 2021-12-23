@@ -12,7 +12,8 @@ import {
 } from '@uniswap/smart-order-router'
 import { MethodParameters } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
-import axios, { AxiosResponse } from 'axios'
+import axiosStatic, { AxiosResponse } from 'axios'
+import axiosRetry from 'axios-retry'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
@@ -39,6 +40,13 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 const SLIPPAGE = '5'
+
+const axios = axiosStatic.create()
+axiosRetry(axios, {
+  retries: 10,
+  retryCondition: (err) => err.response?.status == 429,
+  retryDelay: axiosRetry.exponentialDelay,
+})
 
 const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { status: number; data: any }) => {
   const queryParams = qs.stringify(quoteReq)
@@ -1091,23 +1099,6 @@ describe.only('quote', function () {
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
   }
-
-  // function delay(ms: number) {
-  //   return new Promise((resolve) => setTimeout(resolve, ms))
-  // }
-
-  //  When testing in the deployment pipeline against beta/prod, the tests get throttled.
-  describe('Throttling buffer', function () {
-    this.timeout(350000)
-    it('Waits if running in CodeBuild', async () => {
-      //if (process.env.CODEBUILD_SRC_DIR) {
-      console.log('Waiting for 5 minutes before running remaining tests to avoid being throttled.')
-      await new Promise((resolve) => {
-        setTimeout(resolve, 300000)
-      })
-      // }
-    })
-  })
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
   for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI)) {
