@@ -1086,11 +1086,12 @@ describe('quote', function () {
 
   // When testing in the deployment pipeline against beta/prod, the tests get throttled.
   describe('Throttling buffer', function () {
+    this.timeout(350000)
     it('Waits if running in CodeBuild', async () => {
       if (process.env.CODEBUILD_SRC_DIR) {
-        console.log('Waiting for 2 minutes before running remaining tests to avoid being throttled.')
+        console.log('Waiting for 5 minutes before running remaining tests to avoid being throttled.')
         await new Promise((resolve) => {
-          setTimeout(resolve, 120000)
+          setTimeout(resolve, 300000)
         })
       }
     })
