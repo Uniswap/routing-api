@@ -20,10 +20,10 @@ import { parseSlippageTolerance } from '../../lib/handlers/shared'
 import { absoluteValue } from '../utils/absoluteValue'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/getBalanceAndApprove'
+import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
 import { getTokenListProvider, UNI_MAINNET } from '../utils/tokens'
-import { minimumAmountOut } from '../utils/minimumAmountOut'
 
 const { ethers } = hre
 
@@ -263,16 +263,12 @@ describe.only('quote-to-ratio', async function () {
     expect(onChainPosition.tickUpper).to.equal(tickUpper)
 
     // check slippage tolerance was not hit
-    const min0 = mintedPositionMaxSwapSlippage.amount0.lessThan(minPositionAmount0) ? mintedPositionMaxSwapSlippage.amount0 : minPositionAmount0
-    const min1 = mintedPositionMaxSwapSlippage.amount1.lessThan(minPositionAmount1) ? mintedPositionMaxSwapSlippage.amount1 : minPositionAmount1
-    // console.log('\n\n\n')
-    // console.log('min0                ' , min0.quotient ? min0.quotient.toString() : min0.toString())
-    // console.log('minPositionAmount0  ', minPositionAmount0.toString())
-    // console.log('swapSlippage.amount0', mintedPositionMaxSwapSlippage.amount0.quotient.toString())
-    // console.log('\n')
-    // console.log('min1                ' , min1.quotient ? min1.quotient.toString() : min1.toString())
-    // console.log('minPositionAmount1  ', minPositionAmount1.toString())
-    // console.log('swapSlippage.amount1', mintedPositionMaxSwapSlippage.amount1.quotient.toString())
+    const min0 = mintedPositionMaxSwapSlippage.amount0.lessThan(minPositionAmount0)
+      ? mintedPositionMaxSwapSlippage.amount0
+      : minPositionAmount0
+    const min1 = mintedPositionMaxSwapSlippage.amount1.lessThan(minPositionAmount1)
+      ? mintedPositionMaxSwapSlippage.amount1
+      : minPositionAmount1
     expect(!onChainPosition.amount0.lessThan(min0)).to.be.true
     expect(!onChainPosition.amount1.lessThan(min1)).to.be.true
   }
