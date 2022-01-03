@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Token, WETH9 } from '@uniswap/sdk-core'
 import { providers } from 'ethers'
 import hre from 'hardhat'
 import JSBI from 'jsbi'
@@ -13,11 +13,15 @@ const GENERIC_INTERFACE = new ethers.utils.Interface([
   'event Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)',
   'event Collect(address indexed owner, address recipient, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount0, uint128 amount1)',
   'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)',
+])
+
+const WETH_INTERFACE = new ethers.utils.Interface([
   'event Approval(address indexed src, address indexed guy, uint wad)',
   'event Transfer(address indexed src, address indexed dst, uint wad)',
   'event Deposit(address indexed dst, uint wad)',
   'event Withdrawal(address indexed src, uint wad)',
 ])
+
 const NFT_INTERFACE = new ethers.utils.Interface([
   'event Collect(uint256 indexed tokenId, address recipient, uint256 amount0, uint256 amount1)',
   'event IncreaseLiquidity(uint256 indexed tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)',
@@ -34,11 +38,21 @@ export function parseEvents(txReceipt: providers.TransactionReceipt, addressFilt
 
   return txReceipt.logs
     .map((log) => {
+      // transfer/approval needs own interface since parameters are named differently (ERC721)
       if (log.address === NFT_POSITION_MANAGER) {
         return {
           origin: log.address,
           ...NFT_INTERFACE.parseLog(log),
         }
+
+      // transfer/approval needs own interface because params are named differently (wad/guy eye-roll)
+    } else if (log.address === WETH9[1].address) {
+        return {
+          origin: log.address,
+          ...WETH_INTERFACE.parseLog(log)
+        }
+
+      // all other possible interfaces
       } else if (!addressFilter || addressFilter.includes(log.address.toLowerCase())) {
         return {
           origin: log.address,
@@ -66,7 +80,8 @@ export type SwapAndAddEventTestParams = {
   amount0TransferredFromAlice: CurrencyAmount<Currency>
   amount1TransferredFromAlice: CurrencyAmount<Currency>
 
-  // amount of tokenIn swapped through position's target pool
+  // amounts swapped through position's target pool. Positive if traded into pool,
+  // negative if traded out of pool
   amount0SwappedInPool: CurrencyAmount<Currency>
   amount1SwappedInPool: CurrencyAmount<Currency>
 
@@ -83,6 +98,7 @@ export function getTestParamsFromEvents(
 ): SwapAndAddEventTestParams {
   const zeroToken0 = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
   const zeroToken1 = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
+
   let amount0TransferredFromAlice = zeroToken0
   let amount1TransferredFromAlice = zeroToken1
   let amount0SwappedInPool =  CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
@@ -110,21 +126,23 @@ export function getTestParamsFromEvents(
         )
       }
 
-      // get position details from 'IncreaseLiquidity'
+    // get position details from 'IncreaseLiquidity'
     } else if (event.name === 'IncreaseLiquidity') {
       onChainPosition.tokenId = event.args.tokenId
       onChainPosition.liquidity = event.args.liquidity
       onChainPosition.amount0 = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(event.args.amount0))
       onChainPosition.amount1 = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(event.args.amount1))
 
-      // get position owner from nft 'Mint'
+    // get position owner from nft 'Mint'
     } else if (event.name === 'Transfer' && event.args.tokenId) {
       onChainPosition.owner = event.args.to
 
-      // get position bounds from pool 'Mint'
+    // get position bounds from pool 'Mint'
     } else if (event.name === 'Mint') {
       onChainPosition.tickLower = event.args.tickLower
       onChainPosition.tickUpper = event.args.tickUpper
+
+    // get amounts swapped inside target pool
     } else if (event.name === 'Swap' && event.origin === poolAddr) {
       amount0SwappedInPool = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(event.args.amount0))
       amount1SwappedInPool = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(event.args.amount1))
