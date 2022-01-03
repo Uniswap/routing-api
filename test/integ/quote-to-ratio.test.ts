@@ -63,8 +63,6 @@ describe.only('quote-to-ratio', async function () {
   // request parameters
   let token0: Currency
   let token1: Currency
-  let token0Address: string
-  let token1Address: string
   let token0Balance: CurrencyAmount<Currency>
   let token1Balance: CurrencyAmount<Currency>
   let tickUpper: number
@@ -857,361 +855,270 @@ describe.only('quote-to-ratio', async function () {
     })
   })
 
-  //   it('weth -> erc20', async () => {
-  //     token0Address = 'DAI'
-  //     token1Address = 'ETH'
-  //     token0Balance = await parseAmountUsingAddress(2_000, token0Address)
-  //     token1Balance = await parseAmountUsingAddress(5_000, token1Address)
-  //     const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //       token0Address,
-  //       token0ChainId: 1,
-  //       token1Address,
-  //       token1ChainId: 1,
-  //       token0Balance,
-  //       token1Balance,
-  //       tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //       tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //       feeAmount: FeeAmount.MEDIUM,
-  //       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       slippageTolerance: '5',
-  //       deadline: '360',
-  //       ratioErrorTolerance,
-  //       maxIterations: 6,
-  //       addLiquiditySlippageTolerance: '5',
-  //       addLiquidityDeadline: '360',
-  //       addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //     }
-  //
-  //     const queryParams = qs.stringify(quoteToRatioRec)
-  //     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-  //     const {
-  //       data: { newRatioFraction, optimalRatioFraction },
-  //       status,
-  //     } = response
-  //
-  //     const newRatio = parseFraction(newRatioFraction)
-  //     const optimalRatio = parseFraction(optimalRatioFraction)
-  //     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-  //
-  //     expect(status).to.equal(200)
-  //     expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-  //   })
-  //
-  //   // TODO: should be ERC20 -> ETH...residual ETH to WETH9
-  //   it('erc20 -> eth', async () => {
-  //     token0Address = 'DAI' //0x6b175474e89094c44da98b954eedeac495271d0f
-  //     token1Address = 'ETH' //0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-  //     token0Balance = await parseAmountUsingAddress(20_000, token0Address)
-  //     token1Balance = await parseAmountUsingAddress(0, token1Address)
-  //     const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //       token0Address,
-  //       token0ChainId: 1,
-  //       token1Address,
-  //       token1ChainId: 1,
-  //       token0Balance,
-  //       token1Balance,
-  //       tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //       tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //       feeAmount: FeeAmount.MEDIUM,
-  //       recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       slippageTolerance: '5',
-  //       deadline: '360',
-  //       ratioErrorTolerance,
-  //       maxIterations: 6,
-  //       addLiquiditySlippageTolerance: '5',
-  //       addLiquidityDeadline: '360',
-  //       addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //     }
-  //
-  //     const queryParams = qs.stringify(quoteToRatioRec)
-  //     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-  //     const {
-  //       data: { newRatioFraction, optimalRatioFraction },
-  //       status,
-  //     } = response
-  //
-  //     const newRatio = parseFraction(newRatioFraction)
-  //     const optimalRatio = parseFraction(optimalRatioFraction)
-  //     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-  //     expect(status).to.equal(200)
-  //     expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-  //   })
-  //
-  //   it('singleAssetAdd token0Excess')
-  //
-  //   it('singleAssetAdd token1Excess')
-  //
   //   it('mints a new position')
   //
   //   it('adds liquidity to an existing position')
   //
-  //   it('')
-  //
-  //   describe('4xx Error response', () => {
-  //     it('when both balances are 0', async () => {
-  //       token0Address = 'DAI'
-  //       token1Address = 'WETH'
-  //       token0Balance = await parseAmountUsingAddress(0, token0Address)
-  //       token1Balance = await parseAmountUsingAddress(0, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 6,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'No swap needed',
-  //           errorCode: 'NO_SWAP_NEEDED',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('when max iterations is 0', async () => {
-  //       token0Address = 'WETH'
-  //       token1Address = 'DAI'
-  //       token0Balance = await parseAmountUsingAddress(50_000, token0Address)
-  //       token1Balance = await parseAmountUsingAddress(2_000, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 0,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: '"maxIterations" must be larger than or equal to 1',
-  //           errorCode: 'VALIDATION_ERROR',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('when ratio is already fulfilled with token1', async () => {
-  //       token0Balance = await parseAmountUsingAddress(0, token0Address)
-  //       token1Balance = await parseAmountUsingAddress(5_000, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: -120,
-  //         tickUpper: -60,
-  //         feeAmount: 500,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 6,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'No swap needed for range order',
-  //           errorCode: 'NO_SWAP_NEEDED',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('when ratio is already fulfilled with token0', async () => {
-  //       token0Balance = await parseAmountUsingAddress(50_000, token0Address)
-  //       token1Balance = await parseAmountUsingAddress(0, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: 60,
-  //         tickUpper: 120,
-  //         feeAmount: 500,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 6,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'No swap needed for range order',
-  //           errorCode: 'NO_SWAP_NEEDED',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('amount exceeds uint256', async () => {
-  //       token0Address = 'WETH'
-  //       token1Address = 'DAI'
-  //       token0Balance =
-  //         '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-  //       token1Balance = await parseAmountUsingAddress(2_000, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 5,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: '"token0Balance" length must be less than or equal to 77 characters long',
-  //           errorCode: 'VALIDATION_ERROR',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('with unknown token', async () => {
-  //       token0Address = 'UNKNOWNTOKEN'
-  //       token1Address = 'DAI'
-  //       token0Balance = '2000000000000'
-  //       token1Balance = await parseAmountUsingAddress(2_000, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 5,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'Could not find token with address "UNKNOWNTOKEN"',
-  //           errorCode: 'TOKEN_0_INVALID',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('when tokens are the same', async () => {
-  //       token0Address = 'DAI'
-  //       token1Address = 'DAI'
-  //       token0Balance = '2000000000000'
-  //       token1Balance = await parseAmountUsingAddress(2_000, token1Address)
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 5,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'token0 and token1 must be different',
-  //           errorCode: 'TOKEN_0_1_SAME',
-  //         },
-  //       })
-  //     })
-  //
-  //     it('when token are out of order', async () => {
-  //       ;[token0Address, token1Address] = [token1Address, token0Address]
-  //       const quoteToRatioRec: QuoteToRatioQueryParams = {
-  //         token0Address,
-  //         token0ChainId: 1,
-  //         token1Address,
-  //         token1ChainId: 1,
-  //         token0Balance,
-  //         token1Balance,
-  //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //         feeAmount: FeeAmount.MEDIUM,
-  //         recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //         slippageTolerance: '5',
-  //         deadline: '360',
-  //         ratioErrorTolerance,
-  //         maxIterations: 5,
-  //         addLiquiditySlippageTolerance: '5',
-  //         addLiquidityDeadline: '360',
-  //         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-  //       }
-  //
-  //       await callAndExpectFail(quoteToRatioRec, {
-  //         status: 400,
-  //         data: {
-  //           detail: 'token0 address must be less than token1 address',
-  //           errorCode: 'TOKENS_MISORDERED',
-  //         },
-  //       })
-  //     })
-  //   })
+
+  describe('4xx Error response', () => {
+    beforeEach(() => {
+      resetQueryParams()
+    })
+
+    it('when both balances are 0', async () => {
+      token0Balance = await parseAmount('0', token0)
+      token1Balance = await parseAmount('0', token1)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'No swap needed',
+          errorCode: 'NO_SWAP_NEEDED',
+        },
+      })
+    })
+
+    it('when max iterations is 0', async () => {
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 0,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: '"maxIterations" must be larger than or equal to 1',
+          errorCode: 'VALIDATION_ERROR',
+        },
+      })
+    })
+
+    it('when ratio is already fulfilled with token1', async () => {
+      token0Balance = await parseAmount('0', token0)
+      token1Balance = await parseAmount('5000', token1)
+      tickLower = -286420
+      tickUpper = -276420
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'No swap needed for range order',
+          errorCode: 'NO_SWAP_NEEDED',
+        },
+      })
+    })
+
+    it('when ratio is already fulfilled with token0', async () => {
+      token0Balance = await parseAmount('50000', token0)
+      token1Balance = await parseAmount('0', token1)
+      tickLower = 0
+      tickUpper = 60
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'No swap needed for range order',
+          errorCode: 'NO_SWAP_NEEDED',
+        },
+      })
+    })
+
+    it('amount exceeds uint256', async () => {
+      token0Balance =
+        '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        feeAmount: FeeAmount.MEDIUM,
+        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+        slippageTolerance: '5',
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 5,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: '"token0Balance" length must be less than or equal to 77 characters long',
+          errorCode: 'VALIDATION_ERROR',
+        },
+      })
+    })
+
+    it('with unknown token', async () => {
+      const token0Address = 'UNKNOWNTOKEN'
+      token0Balance = '2000000000000'
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance,
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'Could not find token with address "UNKNOWNTOKEN"',
+          errorCode: 'TOKEN_0_INVALID',
+        },
+      })
+    })
+
+    it('when tokens are the same', async () => {
+      token0 = DAI_MAINNET
+      token1 = DAI_MAINNET
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'token0 and token1 must be different',
+          errorCode: 'TOKEN_0_1_SAME',
+        },
+      })
+    })
+
+    it('when token are out of order', async () => {
+      ;[token0, token1] = [token1, token0]
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'token0 address must be less than token1 address',
+          errorCode: 'TOKENS_MISORDERED',
+        },
+      })
+    })
+  })
 })
