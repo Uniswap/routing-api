@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { DAI_MAINNET, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
+import { DAI_MAINNET, NATIVE_CURRENCY, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
 import { MethodParameters, Pool, Position } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -115,14 +115,15 @@ describe.only('quote-to-ratio', async function () {
     const token0BeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currency0)
 
     let token1BeforeAlice
-    if (approveCurrentOut) {
+    // if (approveCddurrentOut) {
       token1BeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currency1)
-    } else {
-      token1BeforeAlice = await getBalance(alice, currency1)
-    }
+    // } else {
+    //   token1BeforeAlice = await getBalance(alice, currency1)
+    // }
 
     const token0BeforePool = await getBalanceOfAddress(alice, pool, currency0.wrapped)
     const token1BeforePool = await getBalanceOfAddress(alice, pool, currency1.wrapped)
+    // console.log('tx value:', BigNumber.from(methodParameters.value).toString())
 
     const transaction = {
       data: methodParameters.calldata,
@@ -136,7 +137,7 @@ describe.only('quote-to-ratio', async function () {
     const transactionResponse: providers.TransactionResponse = await alice.sendTransaction(transaction)
     const txReceipt = await transactionResponse.wait()
 
-    const events = parseEvents(txReceipt, [SWAP_ROUTER_V2, pool, alice.address])
+    const events = parseEvents(txReceipt, [SWAP_ROUTER_V2, pool, alice.address, currency0.wrapped.address, currency1.wrapped.address])
 
     const token0AfterPool = await getBalanceOfAddress(alice, pool, currency0.wrapped)
     const token1AfterPool = await getBalanceOfAddress(alice, pool, currency1.wrapped)
@@ -145,6 +146,17 @@ describe.only('quote-to-ratio', async function () {
     const swapRouterFinalBalance0 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency0)
     const swapRouterFinalBalance1 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency1)
 
+    //   console.log('\n\n\n\n')
+    //   console.log('tx value: ',  BigNumber.from(methodParameters.value).toString())
+    // for (let event of events) {
+    //   console.log('============')
+    //   console.log(event.name)
+    //   console.log(event.origin)
+    //   for (let key of event.args.keys()) {
+    //     console.log(`${key}: ${event.args[key]}`)
+    //   }
+    //   console.log('============')
+    // }
     return {
       token0AfterAlice,
       token0BeforeAlice,
@@ -165,13 +177,13 @@ describe.only('quote-to-ratio', async function () {
       data: { amount, quote, methodParameters, postSwapTargetPool, token0BalanceUpdated, token1BalanceUpdated },
     } = response
 
-    const token0 = token0Balance.currency.wrapped
-    const token1 = token1Balance.currency.wrapped
+    const token0 = token0Balance.currency
+    const token1 = token1Balance.currency
     const [tokenIn, tokenOut] = zeroForOne ? [token0, token1] : [token1, token0]
 
     const postSwapPool = new Pool(
-      token0,
-      token1,
+      token0.wrapped,
+      token1.wrapped,
       feeAmount,
       postSwapTargetPool.sqrtRatioX96,
       postSwapTargetPool.liquidity,
@@ -190,14 +202,16 @@ describe.only('quote-to-ratio', async function () {
       swapRouterFinalBalance0,
       swapRouterFinalBalance1,
       events,
-    } = await executeSwap(postSwapTargetPool.address, methodParameters!, token0, token1, true)
+    } = await executeSwap(postSwapTargetPool.address, methodParameters!, token0Balance.currency, token1Balance.currency, true)
 
     const {
       // total amounts transferred from alice. including amounts transferred back as a result of dust
       amount0TransferredFromAlice,
       amount1TransferredFromAlice,
+      amount0SwappedInPool,
+      amount1SwappedInPool,
       onChainPosition,
-    } = getTestParamsFromEvents(events, token0, token1, alice.address)
+    } = getTestParamsFromEvents(events, token0.wrapped, token1.wrapped, alice.address, postSwapTargetPool.address)
 
     // alice's balance differences after entire completed transaction
     const amount0DiffAlice = token0BeforeAlice.subtract(token0AfterAlice)
@@ -242,20 +256,49 @@ describe.only('quote-to-ratio', async function () {
     expect(swapRouterFinalBalance0.quotient.toString()).to.equal('0')
     expect(swapRouterFinalBalance1.quotient.toString()).to.equal('0')
 
+    // console.log('token0BeforeAlice', token0BeforeAlice.toFixed(6))
+    // console.log('token0AfterAlice ', token0AfterAlice.toFixed(6))
+    // console.log('token1BeforeAlice', token1BeforeAlice.toFixed(6))
+    // console.log('token1AfterAlice ', token1AfterAlice.toFixed(6))
+    // console.log('token0BeforePool ', token0BeforePool.toFixed(6))
+    // console.log('token0AfterPool  ', token0AfterPool.toFixed(6))
+    // console.log('token1BeforePool ', token1BeforePool.toFixed(6))
+    // console.log('token1AfterPool  ', token1AfterPool.toFixed(6))
+
+
     // total amountIn pulled but not swapped now lives in the position
     if (zeroForOne) {
+      // console.log('\n\n')
+      // console.log('amount0DiffAlice   ', amount0DiffAlice.toFixed(6))
+      // console.log('amount0Transferred ', amount0TransferredFromAlice.toFixed(6))
+      // console.log('amount1DiffAlice   ', amount1DiffAlice.toFixed(6))
+      // console.log('amount1Transferred ', amount1TransferredFromAlice.toFixed(6))
+      // console.log('currencyInSwapped  ', currencyInSwapped.toFixed(6))
+      // console.log('currencyOutQuote   ', currencyOutQuote.toFixed(6))
+      // console.log('newPoolBalance0    ', newPoolBalance0.toFixed(6))
+      // console.log('newPoolBalance1    ', newPoolBalance1.toFixed(6))
+
       expect(amount0DiffAlice.subtract(currencyInSwapped).quotient.toString()).to.equal(
-        newPoolBalance0.quotient.toString()
+        newPoolBalance0.subtract(amount0SwappedInPool).quotient.toString()
       )
     } else {
+      // console.log('\n\n')
+      // console.log('amount0DiffAlice   ', amount0DiffAlice.toFixed(6))
+      // console.log('amount0Transferred', amount0TransferredFromAlice.toFixed(6))
+      // console.log('amount1DiffAlice   ', amount1DiffAlice.toFixed(6))
+      // console.log('amount1Transferred ', amount1TransferredFromAlice.toFixed(6))
+      // console.log('currencyInSwapped  ', currencyInSwapped.toFixed(6))
+      // console.log('currencyOutQuote   ', currencyOutQuote.toFixed(6))
+      // console.log('newPoolBalance1    ', newPoolBalance1.toFixed(6))
+      // console.log('newPoolBalance0    ', newPoolBalance0.toFixed(6))
       expect(amount1DiffAlice.subtract(currencyInSwapped).quotient.toString()).to.equal(
-        newPoolBalance1.quotient.toString()
+        newPoolBalance1.subtract(amount1SwappedInPool).quotient.toString()
       )
     }
 
     // check position details
-    expect(onChainPosition.amount0.quotient.toString()).to.equal(newPoolBalance0.quotient.toString())
-    expect(onChainPosition.amount1.quotient.toString()).to.equal(newPoolBalance1.quotient.toString())
+    expect(onChainPosition.amount0.quotient.toString()).to.equal(newPoolBalance0.subtract(amount0SwappedInPool).quotient.toString())
+    expect(onChainPosition.amount1.quotient.toString()).to.equal(newPoolBalance1.subtract(amount1SwappedInPool).quotient.toString())
 
     // check only for newly minted positions
     expect(onChainPosition.owner).to.equal(alice.address)
@@ -688,15 +731,78 @@ describe.only('quote-to-ratio', async function () {
     })
   })
 
-  describe.skip('eth -> erc20', async () => {
+  describe('eth -> erc20', async () => {
     after(() => {
       resetQueryParams()
     })
 
     before(async () => {
-      token1 = Ether.onChain(1)
+      token1 = WETH9[1]
       token0Balance = await parseAmount('1000', token0)
       token1Balance = await parseAmount('3', token1)
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: 'WETH',
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: `3${'0'.repeat(18)}`,
+        tickLower,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquiditySlippageTolerance: '5',
+        addLiquidityDeadline: '360',
+        addLiquidityRecipient: alice.address,
+      }
+
+      const queryParams = qs.stringify(quoteToRatioRec)
+      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+    })
+
+    it('generates a legitimate trade with routing-api', async () => {
+      const {
+        data: {
+          amount,
+          quote,
+          tokenInAddress,
+          tokenOutAddress,
+          newRatioFraction,
+          optimalRatioFraction,
+          newRatio: newRatioStr,
+          optimalRatio: optimalRatioStr,
+        },
+        status,
+      } = response
+      const newRatio = parseFraction(newRatioFraction)
+      const optimalRatio = parseFraction(optimalRatioFraction)
+      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+
+      expect(status).to.equal(200)
+      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
+      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+    })
+
+    it('successfully executes at the contract level', async () => {
+      const zeroForOne = false
+      await testSuccessfulContractExecution(response, zeroForOne)
+    })
+  })
+
+  describe('erc20 -> eth', async () => {
+    after(() => {
+      resetQueryParams()
+    })
+
+    before(async () => {
+      token1 = WETH9[1]
+      token0Balance = await parseAmount('10000', token0)
+      token1Balance = await parseAmount('1', token1)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address: token0.wrapped.address,
         token0ChainId: 1,
@@ -741,12 +847,12 @@ describe.only('quote-to-ratio', async function () {
 
       expect(status).to.equal(200)
       expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
-      const zeroForOne = false
+      const zeroForOne = true
       await testSuccessfulContractExecution(response, zeroForOne)
     })
   })
@@ -817,8 +923,6 @@ describe.only('quote-to-ratio', async function () {
   //       addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
   //     }
   //
-  //     console.log('20_000: ', await parseAmountUsingAddress(20_000, token0Address))
-  //     console.log('0: ', await parseAmountUsingAddress(0, token1Address))
   //     const queryParams = qs.stringify(quoteToRatioRec)
   //     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
   //     const {
@@ -829,7 +933,6 @@ describe.only('quote-to-ratio', async function () {
   //     const newRatio = parseFraction(newRatioFraction)
   //     const optimalRatio = parseFraction(optimalRatioFraction)
   //     const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-  //     console.log(response.data)
   //     expect(status).to.equal(200)
   //     expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
   //   })

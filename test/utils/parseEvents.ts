@@ -13,6 +13,10 @@ const GENERIC_INTERFACE = new ethers.utils.Interface([
   'event Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)',
   'event Collect(address indexed owner, address recipient, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount0, uint128 amount1)',
   'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)',
+  'event Approval(address indexed src, address indexed guy, uint wad)',
+  'event Transfer(address indexed src, address indexed dst, uint wad)',
+  'event Deposit(address indexed dst, uint wad)',
+  'event Withdrawal(address indexed src, uint wad)',
 ])
 const NFT_INTERFACE = new ethers.utils.Interface([
   'event Collect(uint256 indexed tokenId, address recipient, uint256 amount0, uint256 amount1)',
@@ -22,25 +26,6 @@ const NFT_INTERFACE = new ethers.utils.Interface([
   'event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)',
   'event ApprovalForAll(address indexed owner, address indexed _operator, bool approved)',
 ])
-
-export type OnChainPosition = {
-  owner: string
-  tokenId: number
-  tickLower: number
-  tickUpper: number
-  liquidity: number
-  amount0: CurrencyAmount<Currency>
-  amount1: CurrencyAmount<Currency>
-}
-
-export type SwapAndAddEventTestParams = {
-  // total amounts transferred from user including anything sent back as dust
-  amount0TransferredFromAlice: CurrencyAmount<Currency>
-  amount1TransferredFromAlice: CurrencyAmount<Currency>
-
-  // attributes of the on-chain position
-  onChainPosition: OnChainPosition
-}
 
 export function parseEvents(txReceipt: providers.TransactionReceipt, addressFilter?: string[]) {
   if (!!addressFilter) {
@@ -66,16 +51,42 @@ export function parseEvents(txReceipt: providers.TransactionReceipt, addressFilt
     .filter((n) => n)
 }
 
+export type OnChainPosition = {
+  owner: string
+  tokenId: number
+  tickLower: number
+  tickUpper: number
+  liquidity: number
+  amount0: CurrencyAmount<Currency>
+  amount1: CurrencyAmount<Currency>
+}
+
+export type SwapAndAddEventTestParams = {
+  // total amounts transferred from user including anything sent back as dust
+  amount0TransferredFromAlice: CurrencyAmount<Currency>
+  amount1TransferredFromAlice: CurrencyAmount<Currency>
+
+  // amount of tokenIn swapped through position's target pool
+  amount0SwappedInPool: CurrencyAmount<Currency>
+  amount1SwappedInPool: CurrencyAmount<Currency>
+
+  // attributes of the on-chain position
+  onChainPosition: OnChainPosition
+}
+
 export function getTestParamsFromEvents(
   events: any[],
   token0: Token,
   token1: Token,
-  aliceAddr: string
+  aliceAddr: string,
+  poolAddr: string,
 ): SwapAndAddEventTestParams {
   const zeroToken0 = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
   const zeroToken1 = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
   let amount0TransferredFromAlice = zeroToken0
   let amount1TransferredFromAlice = zeroToken1
+  let amount0SwappedInPool =  CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
+  let amount1SwappedInPool =  CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
   let onChainPosition: OnChainPosition = {
     owner: '0',
     tokenId: 0,
@@ -114,30 +125,17 @@ export function getTestParamsFromEvents(
     } else if (event.name === 'Mint') {
       onChainPosition.tickLower = event.args.tickLower
       onChainPosition.tickUpper = event.args.tickUpper
+    } else if (event.name === 'Swap' && event.origin === poolAddr) {
+      amount0SwappedInPool = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(event.args.amount0))
+      amount1SwappedInPool = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(event.args.amount1))
     }
   })
 
   return {
     amount0TransferredFromAlice,
     amount1TransferredFromAlice,
+    amount0SwappedInPool,
+    amount1SwappedInPool,
     onChainPosition,
   }
-}
-
-export function getAmountTransferredFrom(fromAddress: string, token: Token, events: any[]): CurrencyAmount<Currency> {
-  const zeroAmount = CurrencyAmount.fromRawAmount(token, JSBI.BigInt('0'))
-  const result = events.reduce((prev, event) => {
-    if (
-      event.name == 'Transfer' &&
-      event.args.value &&
-      event.origin.toLowerCase() == token.address.toLowerCase() &&
-      event.args.from.toLowerCase() == fromAddress.toLowerCase()
-    ) {
-      const currencyAmount = CurrencyAmount.fromRawAmount(token, JSBI.BigInt(event.args.value))
-      return prev.add(currencyAmount)
-    } else {
-      return prev.add(zeroAmount)
-    }
-  }, zeroAmount)
-  return result
 }

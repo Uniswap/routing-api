@@ -75,7 +75,7 @@ const checkQuoteToken = (
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe.only('quote', function () {
+describe('quote', function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 

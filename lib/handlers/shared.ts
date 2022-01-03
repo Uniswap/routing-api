@@ -1,4 +1,4 @@
-import { Currency } from '@uniswap/sdk-core'
+import { Currency, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ChainId,
