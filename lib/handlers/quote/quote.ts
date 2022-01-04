@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   IRouter,
@@ -14,7 +14,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseDeadline, parseSlippageTolerance, tokenStringToCurrency } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 
 export class QuoteHandler extends APIGLambdaHandler<
@@ -140,10 +140,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     let swapParams: SwapOptions | undefined = undefined
 
     if (slippageTolerance && deadline && recipient) {
-      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
+      const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
       swapParams = {
-        deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
+        deadline: parseDeadline(deadline),
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }

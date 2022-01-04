@@ -15,7 +15,7 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseSlippageTolerance, tokenStringToCurrency } from '../shared'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseSlippageTolerance, parseDeadline, tokenStringToCurrency } from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -123,7 +123,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return {
         statusCode: 400,
         errorCode: 'TOO_MANY_POSITION_OPTIONS',
-        detail: `addLiquidityTokenId and addLiquidityRecipient are mutually exclusive. must only provide one.`,
+        detail: `addLiquidityTokenId and addLiquidityRecipient are mutually exclusive. Must only provide one.`,
       }
     }
 
@@ -149,7 +149,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return {
         statusCode: 400,
         errorCode: 'UNSPECIFIED_POSITION_OPTIONS',
-        detail: `either addLiquidityTokenId must be provided for existing positions or addLiquidityRecipient for new positions`,
+        detail: `Either addLiquidityTokenId must be provided for existing positions or addLiquidityRecipient for new positions`,
       }
     }
 
@@ -157,7 +157,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (slippageTolerance && deadline && recipient) {
       swapAndAddOptions = {
         swapOptions: {
-          deadline: this.parseDeadline(deadline),
+          deadline: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: parseSlippageTolerance(slippageTolerance),
         },
@@ -504,9 +504,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     }
   }
 
-  protected parseDeadline(deadline: string): number {
-    return Math.floor(Date.now() / 1000) + parseInt(deadline)
-  }
 
   protected validTick(tick: number, feeAmount: number): boolean {
     const TICK_SPACINGS = {
@@ -521,6 +518,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       validTickSpacing = tick % TICK_SPACINGS[feeAmount] === 0
     }
 
-    return validRange
+    return validTickSpacing
   }
 }

@@ -84,7 +84,7 @@ describe('quote-to-ratio', async function () {
     ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
   }
 
-  const executeSwap = async (
+  const executeSwapAndAdd = async (
     pool: string,
     methodParameters: MethodParameters,
     currencyIn: Currency,
@@ -186,7 +186,7 @@ describe('quote-to-ratio', async function () {
       swapRouterFinalBalance0,
       swapRouterFinalBalance1,
       events,
-    } = await executeSwap(postSwapTargetPool.address, methodParameters!, token0Balance.currency, token1Balance.currency)
+    } = await executeSwapAndAdd(postSwapTargetPool.address, methodParameters!, token0Balance.currency, token1Balance.currency)
 
     const {
       // total amounts transferred from alice. including amounts transferred back as a result of dust
@@ -381,11 +381,6 @@ describe('quote-to-ratio', async function () {
     })
 
     before(async () => {
-      // TODO: why doesn't this work
-      // tickLower =  getMinTick(TICK_SPACINGS[FeeAmount.LOW])
-      // tickUpper =  getMaxTick(TICK_SPACINGS[FeeAmount.LOW])
-      // feeAmount = 500
-
       const quoteToRatioRec: QuoteToRatioQueryParams = {
         token0Address: token0.wrapped.address,
         token0ChainId: 1,
@@ -778,7 +773,7 @@ describe('quote-to-ratio', async function () {
         data: { methodParameters, postSwapTargetPool },
       } = response
 
-      const { events } = await executeSwap(
+      const { events } = await executeSwapAndAdd(
         postSwapTargetPool.address,
         methodParameters!,
         token0Balance.currency,
