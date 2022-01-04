@@ -55,8 +55,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         minSplits,
         ratioErrorTolerance,
         maxIterations,
-        addLiquiditySlippageTolerance,
-        addLiquidityDeadline,
         addLiquidityRecipient,
         addLiquidityTokenId,
       },

@@ -45,7 +45,7 @@ export function parseEvents(txReceipt: providers.TransactionReceipt, addressFilt
           ...NFT_INTERFACE.parseLog(log),
         }
 
-      // transfer/approval needs own interface because params are named differently (wad/guy eye-roll)
+      // transfer/approval needs own interface because params are named differently (wad/guy *eye-roll*)
     } else if (log.address === WETH9[1].address) {
         return {
           origin: log.address,
@@ -73,6 +73,7 @@ export type OnChainPosition = {
   liquidity: number
   amount0: CurrencyAmount<Currency>
   amount1: CurrencyAmount<Currency>
+  newMint: boolean
 }
 
 export type SwapAndAddEventTestParams = {
@@ -111,6 +112,7 @@ export function getTestParamsFromEvents(
     liquidity: 0,
     amount0: zeroToken0,
     amount1: zeroToken1,
+    newMint: false,
   }
 
   events.forEach((event) => {
@@ -136,6 +138,7 @@ export function getTestParamsFromEvents(
     // get position owner from nft 'Mint'
     } else if (event.name === 'Transfer' && event.args.tokenId) {
       onChainPosition.owner = event.args.to
+      onChainPosition.newMint = true
 
     // get position bounds from pool 'Mint'
     } else if (event.name === 'Mint') {
