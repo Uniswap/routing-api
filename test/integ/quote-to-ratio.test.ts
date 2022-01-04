@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { DAI_MAINNET, NATIVE_CURRENCY, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Fraction, WETH9 } from '@uniswap/sdk-core'
+import { DAI_MAINNET, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
 import { MethodParameters, Pool, Position } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -23,14 +23,12 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-import { getTokenListProvider, UNI_MAINNET } from '../utils/tokens'
+import { UNI_MAINNET } from '../utils/tokens'
 
 const { ethers } = hre
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
-
-const tokenListProvider = getTokenListProvider(1)
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quoteToRatio`
 
@@ -292,8 +290,6 @@ describe.only('quote-to-ratio', async function () {
       deadline: '360',
       ratioErrorTolerance: 1,
       maxIterations: 6,
-      addLiquiditySlippageTolerance: '5',
-      addLiquidityDeadline: '360',
       addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     }
 
@@ -405,14 +401,10 @@ describe.only('quote-to-ratio', async function () {
     it('generates a legitimate trade with routing-api', async () => {
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -469,8 +461,6 @@ describe.only('quote-to-ratio', async function () {
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -527,8 +517,6 @@ describe.only('quote-to-ratio', async function () {
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -583,14 +571,10 @@ describe.only('quote-to-ratio', async function () {
     it('generates a legitimate trade with routing-api', async () => {
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -645,14 +629,10 @@ describe.only('quote-to-ratio', async function () {
     it('generates a legitimate trade with routing-api', async () => {
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -706,14 +686,10 @@ describe.only('quote-to-ratio', async function () {
     it('generates a legitimate trade with routing-api', async () => {
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -767,14 +743,10 @@ describe.only('quote-to-ratio', async function () {
     it('generates a legitimate trade with routing-api', async () => {
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -828,7 +800,7 @@ describe.only('quote-to-ratio', async function () {
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
 
       const {
-        data: { amount, quote, methodParameters, postSwapTargetPool, token0BalanceUpdated, token1BalanceUpdated },
+        data: { methodParameters, postSwapTargetPool },
       } = response
 
       const {
@@ -868,14 +840,10 @@ describe.only('quote-to-ratio', async function () {
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
       const {
         data: {
-          amount,
-          quote,
           tokenInAddress,
           tokenOutAddress,
           newRatioFraction,
           optimalRatioFraction,
-          newRatio: newRatioStr,
-          optimalRatio: optimalRatioStr,
         },
         status,
       } = response
@@ -979,8 +947,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: alice.address,
       }
 
@@ -1013,8 +979,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: alice.address,
       }
 
@@ -1045,8 +1009,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 5,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       }
 
@@ -1077,8 +1039,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: alice.address,
       }
 
@@ -1109,8 +1069,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: alice.address,
       }
 
@@ -1140,8 +1098,6 @@ describe.only('quote-to-ratio', async function () {
         deadline: '360',
         ratioErrorTolerance,
         maxIterations: 6,
-        addLiquiditySlippageTolerance: '5',
-        addLiquidityDeadline: '360',
         addLiquidityRecipient: alice.address,
       }
       await callAndExpectFail(quoteToRatioRec, {
