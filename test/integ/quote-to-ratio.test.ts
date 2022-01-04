@@ -48,7 +48,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe.only('quote-to-ratio', async function () {
+describe('quote-to-ratio', async function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -750,7 +750,7 @@ describe.only('quote-to-ratio', async function () {
     })
 
     // before hook times out. This test needed for subsequent tests in this block.
-    it('mint new position', async () => {
+    it('first mint new position', async () => {
       token0Balance = parseAmount('2000', token0)
       token1Balance = parseAmount('5000', token1)
       const quoteToRatioRec: QuoteToRatioQueryParams = {
@@ -1082,6 +1082,34 @@ describe.only('quote-to-ratio', async function () {
         data: {
           detail: 'token0 address must be less than token1 address',
           errorCode: 'TOKENS_MISORDERED',
+        },
+      })
+    })
+
+    it('when tick is not a multiple of target pool tick spacing', async () => {
+      const quoteToRatioRec: QuoteToRatioQueryParams = {
+        token0Address: token0.wrapped.address,
+        token0ChainId: 1,
+        token1Address: token1.wrapped.address,
+        token1ChainId: 1,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower: -44,
+        tickUpper,
+        feeAmount,
+        recipient: alice.address,
+        slippageTolerance,
+        deadline: '360',
+        ratioErrorTolerance,
+        maxIterations: 6,
+        addLiquidityRecipient: alice.address,
+      }
+
+      await callAndExpectFail(quoteToRatioRec, {
+        status: 400,
+        data: {
+          detail: 'tickLower and tickUpper must comply with the tick spacing of the target pool',
+          errorCode: 'INVALID_TICK_SPACING',
         },
       })
     })

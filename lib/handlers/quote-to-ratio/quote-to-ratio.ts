@@ -10,7 +10,7 @@ import {
   SwapAndAddOptions,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
-import { Position } from '@uniswap/v3-sdk'
+import { Position, TickMath } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -124,6 +124,14 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         statusCode: 400,
         errorCode: 'TOO_MANY_POSITION_OPTIONS',
         detail: `addLiquidityTokenId and addLiquidityRecipient are mutually exclusive. must only provide one.`,
+      }
+    }
+
+    if (!this.validTick(tickLower, feeAmount) || !this.validTick(tickUpper, feeAmount)) {
+      return {
+        statusCode: 400,
+        errorCode: 'INVALID_TICK_SPACING',
+        detail: `tickLower and tickUpper must comply with the tick spacing of the target pool`,
       }
     }
 
@@ -498,5 +506,21 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
 
   protected parseDeadline(deadline: string): number {
     return Math.floor(Date.now() / 1000) + parseInt(deadline)
+  }
+
+  protected validTick(tick: number, feeAmount: number): boolean {
+    const TICK_SPACINGS = {
+      500: 10,
+      3000: 60,
+      10000: 100,
+    } as { [feeAmount: string]: number }
+
+    let validTickSpacing = true
+
+    if (TICK_SPACINGS[feeAmount] != undefined) {
+      validTickSpacing = tick % TICK_SPACINGS[feeAmount] === 0
+    }
+
+    return validRange
   }
 }
