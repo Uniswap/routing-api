@@ -88,7 +88,7 @@ describe.only('quote-to-ratio', async function () {
     pool: string,
     methodParameters: MethodParameters,
     currencyIn: Currency,
-    currencyOut: Currency,
+    currencyOut: Currency
   ): Promise<{
     token0AfterAlice: CurrencyAmount<Currency>
     token0BeforeAlice: CurrencyAmount<Currency>
@@ -126,7 +126,13 @@ describe.only('quote-to-ratio', async function () {
     const transactionResponse: providers.TransactionResponse = await alice.sendTransaction(transaction)
     const txReceipt = await transactionResponse.wait()
 
-    const events = parseEvents(txReceipt, [SWAP_ROUTER_V2, pool, alice.address, currency0.wrapped.address, currency1.wrapped.address])
+    const events = parseEvents(txReceipt, [
+      SWAP_ROUTER_V2,
+      pool,
+      alice.address,
+      currency0.wrapped.address,
+      currency1.wrapped.address,
+    ])
 
     const token0AfterPool = await getBalanceOfAddress(alice, pool, currency0.wrapped)
     const token1AfterPool = await getBalanceOfAddress(alice, pool, currency1.wrapped)
@@ -246,8 +252,12 @@ describe.only('quote-to-ratio', async function () {
     }
 
     // check position details
-    expect(onChainPosition.amount0.quotient.toString()).to.equal(newPoolBalance0.subtract(amount0SwappedInPool).quotient.toString())
-    expect(onChainPosition.amount1.quotient.toString()).to.equal(newPoolBalance1.subtract(amount1SwappedInPool).quotient.toString())
+    expect(onChainPosition.amount0.quotient.toString()).to.equal(
+      newPoolBalance0.subtract(amount0SwappedInPool).quotient.toString()
+    )
+    expect(onChainPosition.amount1.quotient.toString()).to.equal(
+      newPoolBalance1.subtract(amount1SwappedInPool).quotient.toString()
+    )
 
     // check only for newly minted positions
     if (onChainPosition.newMint) {
@@ -400,12 +410,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -456,12 +461,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -512,12 +512,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -570,12 +565,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -628,12 +618,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -685,12 +670,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -742,12 +722,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('generates a legitimate trade with routing-api', async () => {
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
       const newRatio = parseFraction(newRatioFraction)
@@ -803,13 +778,20 @@ describe.only('quote-to-ratio', async function () {
         data: { methodParameters, postSwapTargetPool },
       } = response
 
-      const {
-        events,
-      } = await executeSwap(postSwapTargetPool.address, methodParameters!, token0Balance.currency, token1Balance.currency)
+      const { events } = await executeSwap(
+        postSwapTargetPool.address,
+        methodParameters!,
+        token0Balance.currency,
+        token1Balance.currency
+      )
 
-      const {
-        onChainPosition,
-      } = getTestParamsFromEvents(events, token0.wrapped, token1.wrapped, alice.address, postSwapTargetPool.address)
+      const { onChainPosition } = getTestParamsFromEvents(
+        events,
+        token0.wrapped,
+        token1.wrapped,
+        alice.address,
+        postSwapTargetPool.address
+      )
 
       tokenId = onChainPosition.tokenId.toString()
     })
@@ -839,12 +821,7 @@ describe.only('quote-to-ratio', async function () {
       const queryParams = qs.stringify(quoteToRatioRec)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
       const {
-        data: {
-          tokenInAddress,
-          tokenOutAddress,
-          newRatioFraction,
-          optimalRatioFraction,
-        },
+        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
       } = response
 

@@ -45,14 +45,14 @@ export function parseEvents(txReceipt: providers.TransactionReceipt, addressFilt
           ...NFT_INTERFACE.parseLog(log),
         }
 
-      // transfer/approval needs own interface because params are named differently (wad/guy *eye-roll*)
-    } else if (log.address === WETH9[1].address) {
+        // transfer/approval needs own interface because params are named differently (wad/guy *eye-roll*)
+      } else if (log.address === WETH9[1].address) {
         return {
           origin: log.address,
-          ...WETH_INTERFACE.parseLog(log)
+          ...WETH_INTERFACE.parseLog(log),
         }
 
-      // all other possible interfaces
+        // all other possible interfaces
       } else if (!addressFilter || addressFilter.includes(log.address.toLowerCase())) {
         return {
           origin: log.address,
@@ -95,15 +95,15 @@ export function getTestParamsFromEvents(
   token0: Token,
   token1: Token,
   aliceAddr: string,
-  poolAddr: string,
+  poolAddr: string
 ): SwapAndAddEventTestParams {
   const zeroToken0 = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
   const zeroToken1 = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
 
   let amount0TransferredFromAlice = zeroToken0
   let amount1TransferredFromAlice = zeroToken1
-  let amount0SwappedInPool =  CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
-  let amount1SwappedInPool =  CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
+  let amount0SwappedInPool = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt('0'))
+  let amount1SwappedInPool = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt('0'))
   let onChainPosition: OnChainPosition = {
     owner: '0',
     tokenId: 0,
@@ -128,24 +128,24 @@ export function getTestParamsFromEvents(
         )
       }
 
-    // get position details from 'IncreaseLiquidity'
+      // get position details from 'IncreaseLiquidity'
     } else if (event.name === 'IncreaseLiquidity') {
       onChainPosition.tokenId = event.args.tokenId
       onChainPosition.liquidity = event.args.liquidity
       onChainPosition.amount0 = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(event.args.amount0))
       onChainPosition.amount1 = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(event.args.amount1))
 
-    // get position owner from nft 'Mint'
+      // get position owner from nft 'Mint'
     } else if (event.name === 'Transfer' && event.args.tokenId) {
       onChainPosition.owner = event.args.to
       onChainPosition.newMint = true
 
-    // get position bounds from pool 'Mint'
+      // get position bounds from pool 'Mint'
     } else if (event.name === 'Mint') {
       onChainPosition.tickLower = event.args.tickLower
       onChainPosition.tickUpper = event.args.tickUpper
 
-    // get amounts swapped inside target pool
+      // get amounts swapped inside target pool
     } else if (event.name === 'Swap' && event.origin === poolAddr) {
       amount0SwappedInPool = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(event.args.amount0))
       amount1SwappedInPool = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(event.args.amount1))
