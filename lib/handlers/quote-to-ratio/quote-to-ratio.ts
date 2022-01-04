@@ -10,7 +10,7 @@ import {
   SwapAndAddOptions,
   SwapToRatioStatus,
 } from '@uniswap/smart-order-router'
-import { Position, TickMath } from '@uniswap/v3-sdk'
+import { Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
