@@ -108,7 +108,6 @@ describe('quote-to-ratio', async function () {
       : ([currency0, currency1] = [currencyOut, currencyIn])
 
     const token0BeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currency0)
-
     const token1BeforeAlice = await getBalanceAndApprove(alice, SWAP_ROUTER_V2, currency1)
 
     const token0BeforePool = await getBalanceOfAddress(alice, pool, currency0.wrapped)
@@ -221,7 +220,7 @@ describe('quote-to-ratio', async function () {
 
     // collect position with minimum amount out from swap with max slippage. Min amounts added to position
     // will either be mintAmountsWithSlippage for quoted position OR amounts resulting from minimum possible amount quoted from swap.
-    // the lesser of the two, since mintAmountsWithSlippage can be undependable in certain scenarios, specifically range orders
+    // the lesser of the two, since mintAmountsWithSlippage can be undependable in certain scenarios, specifically involving out-of-range positions
     const amountOutMaxSwapSlippage = minimumAmountOut(parseSlippageTolerance(slippageTolerance), currencyOutQuote)
     const mintedPositionMaxSwapSlippage = Position.fromAmounts({
       pool: postSwapPool,
