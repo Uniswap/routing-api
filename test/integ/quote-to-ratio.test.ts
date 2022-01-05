@@ -48,7 +48,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe('quote-to-ratio', async function () {
+describe.only('quote-to-ratio', async function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -137,8 +137,8 @@ describe('quote-to-ratio', async function () {
     const token1AfterPool = await getBalanceOfAddress(alice, pool, currency1.wrapped)
     const token0AfterAlice = await getBalance(alice, currency0)
     const token1AfterAlice = await getBalance(alice, currency1)
-    const swapRouterFinalBalance0 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency0)
-    const swapRouterFinalBalance1 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency1)
+    const swapRouterFinalBalance0 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency0.wrapped)
+    const swapRouterFinalBalance1 = await getBalanceOfAddress(alice, SWAP_ROUTER_V2, currency1.wrapped)
 
     return {
       token0AfterAlice,
@@ -316,308 +316,140 @@ describe('quote-to-ratio', async function () {
     ])
   })
 
-  describe('erc20 -> erc20 high volume trade token0Excess', () => {
-    before(async function () {
-      const token0Balance = parseAmount('1000000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('2000', USDC_MAINNET).quotient.toString()
-      const slippageTolerance = '0.05'
-
-      quoteToRatioParams = {
+  const TEST_CASES: {
+    testCase: string
+    token0: Currency
+    token1: Currency
+    zeroForOne: boolean
+    requestParams: QuoteToRatioQueryParams
+  }[] = [
+    {
+      testCase: 'erc20 -> erc20 low volume trade token0Excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: true,
+      requestParams: DEFAULT_QUERY_PARAMS,
+    },
+    {
+      testCase: 'erc20 -> erc20 high volume trade token0Excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: true,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        slippageTolerance,
+        token0Balance: parseAmount('1000000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('2000', USDC_MAINNET).quotient.toString(),
+        slippageTolerance: '0.05',
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async function () {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-    })
-
-    it('executes at the contract level', async function () {
-      const zeroForOne = true
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('erc20 -> erc20 low volume trade token0Excess', () => {
-    before(async () => {
-      quoteToRatioParams = DEFAULT_QUERY_PARAMS
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = true
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('erc20 -> erc20 low volume trade token1Excess', async () => {
-    before(async () => {
-      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('5000', USDC_MAINNET).quotient.toString()
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'erc20 -> erc20 low volume trade token1Excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: false,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
+        token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('5000', USDC_MAINNET).quotient.toString(),
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = false
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('erc20 -> erc20 high volume trade token1Excess', async () => {
-    before(async () => {
-      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('2000000', USDC_MAINNET).quotient.toString()
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'erc20 -> erc20 high volume trade token1Excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: false,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
+         token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
+         token1Balance: parseAmount('2000000', USDC_MAINNET).quotient.toString(),
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = false
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('erc20 -> erc20 range order position token1 excess', async () => {
-    before(async () => {
-      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('50000', USDC_MAINNET).quotient.toString()
-      const tickLower = 0
-      const tickUpper = 60
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'erc20 -> erc20 range order position token0 excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: true,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        tickLower,
-        tickUpper,
+        token0Balance: parseAmount('50000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('2000', USDC_MAINNET).quotient.toString(),
+        tickLower: -286420,
+        tickUpper: -276420,
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = false
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('erc20 -> erc20 range order position token0 excess', async () => {
-    before(async () => {
-      const token0Balance = parseAmount('50000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('2000', USDC_MAINNET).quotient.toString()
-      const tickLower = -286420
-      const tickUpper = -276420
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'erc20 -> erc20 range order position token1 excess',
+      token0: DAI_MAINNET,
+      token1: USDC_MAINNET,
+      zeroForOne: false,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        tickLower,
-        tickUpper,
+        token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('50000', USDC_MAINNET).quotient.toString(),
+        tickLower: 0,
+        tickUpper: 60,
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = true
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
-    })
-  })
-
-  describe('eth -> erc20', async () => {
-    before(async () => {
-      const token1Address = 'ETH'
-      const token0Balance = parseAmount('1000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('3', WETH9[1]).quotient.toString()
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'erc20 -> eth',
+      token0: DAI_MAINNET,
+      token1: Ether.onChain(1),
+      zeroForOne: true,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        token1Address,
+        token1Address: 'ETH',
+        token0Balance: parseAmount('10000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('1', WETH9[1]).quotient.toString(),
       }
-
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
-    })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(WETH9[1].address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = false
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, Ether.onChain(1), zeroForOne)
-    })
-  })
-
-  describe('erc20 -> eth', async () => {
-    before(async () => {
-      const token1Address = 'ETH'
-      const token0Balance = parseAmount('10000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('1', WETH9[1]).quotient.toString()
-
-      quoteToRatioParams = {
+    },
+    {
+      testCase: 'eth -> erc20',
+      token0: DAI_MAINNET,
+      token1: Ether.onChain(1),
+      zeroForOne: false,
+      requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        token1Address,
+        token1Address: 'ETH',
+        token0Balance: parseAmount('1000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('3', Ether.onChain(1)).quotient.toString(),
       }
+    },
+  ]
 
-      const queryParams = qs.stringify(quoteToRatioParams)
-      response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+  for (const { testCase, token0, token1, zeroForOne, requestParams } of TEST_CASES) {
+    describe(testCase, () => {
+      before(async function () {
+        const queryParams = qs.stringify(requestParams)
+        response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+      })
+
+      it('generates a legitimate trade with routing-api', async function () {
+        const {
+          data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
+          status,
+        } = response
+
+        const newRatio = parseFraction(newRatioFraction)
+        const optimalRatio = parseFraction(optimalRatioFraction)
+        const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+        const ratioErrorToleranceFraction = errorToleranceFraction(requestParams.ratioErrorTolerance)
+
+        expect(status).to.equal(200)
+        expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
+        if (zeroForOne) {
+          expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+          expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+        } else {
+          expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+          expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+        }
+      })
+
+      it('executes properly at the contract level', async function () {
+        await testSuccessfulContractExecution(response, requestParams, token0, token1, zeroForOne)
+      })
     })
-
-    it('generates a legitimate trade with routing-api', async () => {
-      const {
-        data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
-        status,
-      } = response
-      const newRatio = parseFraction(newRatioFraction)
-      const optimalRatio = parseFraction(optimalRatioFraction)
-      const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
-      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
-
-      expect(status).to.equal(200)
-      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(WETH9[1].address.toLowerCase())
-    })
-
-    it('successfully executes at the contract level', async () => {
-      const zeroForOne = true
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, Ether.onChain(1), zeroForOne)
-    })
-  })
+  }
 
   // ALL tests in this block are subsequent and must be run together
   describe('when adding to an existing position', async () => {
