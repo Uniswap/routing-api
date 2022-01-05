@@ -316,7 +316,7 @@ describe.only('quote-to-ratio', async function () {
     ])
   })
 
-  const TEST_CASES: {
+  const SUCCESS_TEST_CASES: {
     testCase: string
     token0: Currency
     token1: Currency
@@ -340,7 +340,7 @@ describe.only('quote-to-ratio', async function () {
         token0Balance: parseAmount('1000000', DAI_MAINNET).quotient.toString(),
         token1Balance: parseAmount('2000', USDC_MAINNET).quotient.toString(),
         slippageTolerance: '0.05',
-      }
+      },
     },
     {
       testCase: 'erc20 -> erc20 low volume trade token1Excess',
@@ -351,7 +351,7 @@ describe.only('quote-to-ratio', async function () {
         ...DEFAULT_QUERY_PARAMS,
         token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
         token1Balance: parseAmount('5000', USDC_MAINNET).quotient.toString(),
-      }
+      },
     },
     {
       testCase: 'erc20 -> erc20 high volume trade token1Excess',
@@ -360,9 +360,9 @@ describe.only('quote-to-ratio', async function () {
       zeroForOne: false,
       requestParams: {
         ...DEFAULT_QUERY_PARAMS,
-         token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
-         token1Balance: parseAmount('2000000', USDC_MAINNET).quotient.toString(),
-      }
+        token0Balance: parseAmount('2000', DAI_MAINNET).quotient.toString(),
+        token1Balance: parseAmount('2000000', USDC_MAINNET).quotient.toString(),
+      },
     },
     {
       testCase: 'erc20 -> erc20 range order position token0 excess',
@@ -375,7 +375,7 @@ describe.only('quote-to-ratio', async function () {
         token1Balance: parseAmount('2000', USDC_MAINNET).quotient.toString(),
         tickLower: -286420,
         tickUpper: -276420,
-      }
+      },
     },
     {
       testCase: 'erc20 -> erc20 range order position token1 excess',
@@ -388,7 +388,7 @@ describe.only('quote-to-ratio', async function () {
         token1Balance: parseAmount('50000', USDC_MAINNET).quotient.toString(),
         tickLower: 0,
         tickUpper: 60,
-      }
+      },
     },
     {
       testCase: 'erc20 -> eth',
@@ -400,7 +400,7 @@ describe.only('quote-to-ratio', async function () {
         token1Address: 'ETH',
         token0Balance: parseAmount('10000', DAI_MAINNET).quotient.toString(),
         token1Balance: parseAmount('1', WETH9[1]).quotient.toString(),
-      }
+      },
     },
     {
       testCase: 'eth -> erc20',
@@ -412,11 +412,11 @@ describe.only('quote-to-ratio', async function () {
         token1Address: 'ETH',
         token0Balance: parseAmount('1000', DAI_MAINNET).quotient.toString(),
         token1Balance: parseAmount('3', Ether.onChain(1)).quotient.toString(),
-      }
+      },
     },
   ]
 
-  for (const { testCase, token0, token1, zeroForOne, requestParams } of TEST_CASES) {
+  for (const { testCase, token0, token1, zeroForOne, requestParams } of SUCCESS_TEST_CASES) {
     describe(testCase, () => {
       before(async function () {
         const queryParams = qs.stringify(requestParams)
@@ -531,175 +531,160 @@ describe.only('quote-to-ratio', async function () {
   })
 
   describe('4xx Error response', () => {
-    it('when both balances are 0', async () => {
-      const token0Balance = '0'
-      const token1Balance = '0'
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
+    const ERROR_TEST_CASES: {
+      testCase: string
+      requestParams: QuoteToRatioQueryParams
+      result: {
+        status: number
         data: {
-          detail: 'No swap needed',
-          errorCode: 'NO_SWAP_NEEDED',
-        },
-      })
-    })
-
-    it('when max iterations is 0', async () => {
-      const maxIterations = 0
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        maxIterations,
+          detail: string
+          errorCode: string
+        }
       }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: '"maxIterations" must be larger than or equal to 1',
-          errorCode: 'VALIDATION_ERROR',
+    }[] = [
+      {
+        testCase: 'when both balances are 0',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Balance: '0',
+          token1Balance: '0',
         },
-      })
-    })
-
-    it('when ratio is already fulfilled with token1', async () => {
-      const token0Balance = parseAmount('0', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('5000', USDC_MAINNET).quotient.toString()
-      const tickLower = -286420
-      const tickUpper = -276420
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        tickLower,
-        tickUpper,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'No swap needed for range order',
-          errorCode: 'NO_SWAP_NEEDED',
+        result: {
+          status: 400,
+          data: {
+            detail: 'No swap needed',
+            errorCode: 'NO_SWAP_NEEDED',
+          },
+        }
+      },
+      {
+        testCase: 'when max iterations is 0',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          maxIterations: 0,
         },
-      })
-    })
-
-    it('when ratio is already fulfilled with token0', async () => {
-      const token0Balance = parseAmount('50000', DAI_MAINNET).quotient.toString()
-      const token1Balance = parseAmount('0', USDC_MAINNET).quotient.toString()
-      const tickLower = 0
-      const tickUpper = 60
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-        token1Balance,
-        tickLower,
-        tickUpper,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'No swap needed for range order',
-          errorCode: 'NO_SWAP_NEEDED',
+        result: {
+          status: 400,
+          data: {
+            detail: '"maxIterations" must be larger than or equal to 1',
+            errorCode: 'VALIDATION_ERROR',
+          },
+        }
+      },
+      {
+        testCase: 'when ratio is already fulfilled with token1',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Balance: parseAmount('0', DAI_MAINNET).quotient.toString(),
+          token1Balance: parseAmount('5000', USDC_MAINNET).quotient.toString(),
+          tickLower: -286420,
+          tickUpper: -276420,
         },
-      })
-    })
-
-    it('amount exceeds uint256', async () => {
-      const token0Balance =
-        '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Balance,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: '"token0Balance" length must be less than or equal to 77 characters long',
-          errorCode: 'VALIDATION_ERROR',
+        result: {
+          status: 400,
+          data: {
+            detail: 'No swap needed for range order',
+            errorCode: 'NO_SWAP_NEEDED',
+          },
+        }
+      },
+      {
+        testCase: 'when ratio is already fulfilled with token0',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Balance: parseAmount('50000', DAI_MAINNET).quotient.toString(),
+          token1Balance: parseAmount('0', USDC_MAINNET).quotient.toString(),
+          tickLower: 0,
+          tickUpper: 60,
         },
-      })
-    })
+        result: {
+          status: 400,
+          data: {
+            detail: 'No swap needed for range order',
+            errorCode: 'NO_SWAP_NEEDED',
+          },
+        }
+      },
+      {
+        testCase: 'amount exceeds uint256',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Balance: '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
 
-    it('with unknown token', async () => {
-      const token0Address = 'UNKNOWNTOKEN'
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Address,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'Could not find token with address "UNKNOWNTOKEN"',
-          errorCode: 'TOKEN_0_INVALID',
         },
-      })
-    })
+        result: {
+          status: 400,
+          data: {
+            detail: '"token0Balance" length must be less than or equal to 77 characters long',
+            errorCode: 'VALIDATION_ERROR'
+          },
+        }
+      },
+      {
+        testCase: 'with unknown token',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Address: 'UNKNOWNTOKEN',
 
-    it('when tokens are the same', async () => {
-      const token0Address = DAI_MAINNET.address
-      const token1Address = DAI_MAINNET.address
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Address,
-        token1Address,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'token0 and token1 must be different',
-          errorCode: 'TOKEN_0_1_SAME',
         },
-      })
-    })
-
-    it('when token are out of order', async () => {
-      const token0Address = USDC_MAINNET.address
-      const token1Address = DAI_MAINNET.address
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        token0Address,
-        token1Address,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'token0 address must be less than token1 address',
-          errorCode: 'TOKENS_MISORDERED',
+        result: {
+          status: 400,
+          data: {
+            detail: 'Could not find token with address "UNKNOWNTOKEN"',
+            errorCode: 'TOKEN_0_INVALID',
+          },
+        }
+      },
+      {
+        testCase: 'when tokens are the same',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Address: DAI_MAINNET.address,
+          token1Address: DAI_MAINNET.address,
         },
-      })
-    })
-
-    it('when tick is not a multiple of target pool tick spacing', async () => {
-      const tickLower = -44
-
-      quoteToRatioParams = {
-        ...DEFAULT_QUERY_PARAMS,
-        tickLower,
-      }
-
-      await callAndExpectFail(quoteToRatioParams, {
-        status: 400,
-        data: {
-          detail: 'tickLower and tickUpper must comply with the tick spacing of the target pool',
-          errorCode: 'INVALID_TICK_SPACING',
+        result: {
+          status: 400,
+          data: {
+            detail: 'token0 and token1 must be different',
+            errorCode: 'TOKEN_0_1_SAME',
+          },
+        }
+      },
+      {
+        testCase: 'when token are out of order',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Address: USDC_MAINNET.address,
+          token1Address: DAI_MAINNET.address,
         },
+        result: {
+          status: 400,
+          data: {
+            detail: 'token0 address must be less than token1 address',
+            errorCode: 'TOKENS_MISORDERED',
+          },
+        }
+      },
+      {
+        testCase: 'when tick is not a multiple of target pool tick spacing',
+        requestParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          tickLower: -44,
+        },
+        result: {
+          status: 400,
+          data: {
+            detail: 'tickLower and tickUpper must comply with the tick spacing of the target pool',
+            errorCode: 'INVALID_TICK_SPACING',
+          },
+        }
+      },
+    ]
+
+    for (const { testCase, requestParams, result } of ERROR_TEST_CASES) {
+      it(testCase, async () => {
+        await callAndExpectFail(requestParams, result)
       })
-    })
+    }
   })
 })
