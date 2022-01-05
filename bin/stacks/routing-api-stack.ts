@@ -7,6 +7,7 @@ import * as aws_sns from '@aws-cdk/aws-sns'
 import * as aws_waf from '@aws-cdk/aws-wafv2'
 import * as cdk from '@aws-cdk/core'
 import { CfnOutput, Duration } from '@aws-cdk/core'
+import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
@@ -190,10 +191,12 @@ export class RoutingAPIStack extends cdk.Stack {
     const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
       metric: api.metricServerError({
         period: Duration.minutes(5),
+        // For this metric 'avg' represents error rate.
         statistic: 'avg',
       }),
       threshold: 0.05,
-      evaluationPeriods: 3,
+      // Beta has much less traffic so is more susceptible to transient errors.
+      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
     })
 
     const apiAlarm4xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-4XXAlarm', {
