@@ -48,7 +48,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe('quote-to-ratio', async function () {
+describe.only('quote-to-ratio', async function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -59,29 +59,29 @@ describe('quote-to-ratio', async function () {
   let block: number
 
   // request parameters
-  let token0: Currency
-  let token1: Currency
-  let token0Balance: CurrencyAmount<Currency>
-  let token1Balance: CurrencyAmount<Currency>
-  let tickUpper: number
-  let tickLower: number
-  let feeAmount: number
-  let slippageTolerance: string
-  let ratioErrorTolerance: number
-  let ratioErrorToleranceFraction: Fraction
+  let quoteToRatioParams: QuoteToRatioQueryParams
   let response: AxiosResponse<QuoteToRatioResponse>
 
-  function resetQueryParams() {
-    token0 = DAI_MAINNET
-    token1 = USDC_MAINNET
-    token0Balance = parseAmount('5000', DAI_MAINNET)
-    token1Balance = parseAmount('2000', USDC_MAINNET)
-    tickLower = getMinTick(TICK_SPACINGS[FeeAmount.LOW])
-    tickUpper = getMaxTick(TICK_SPACINGS[FeeAmount.LOW])
-    feeAmount = FeeAmount.LOW
-    slippageTolerance = '5'
-    ratioErrorTolerance = 1
-    ratioErrorToleranceFraction = new Fraction(ratioErrorTolerance * 100, 10_000)
+  const DEFAULT_QUERY_PARAMS = {
+    token0Address: DAI_MAINNET.address,
+    token0ChainId: 1,
+    token1Address: USDC_MAINNET.address,
+    token1ChainId: 1,
+    token0Balance: parseAmount('5000', DAI_MAINNET).quotient.toString(),
+    token1Balance: parseAmount('2000', USDC_MAINNET).quotient.toString(),
+    tickLower: getMinTick(TICK_SPACINGS[FeeAmount.LOW]),
+    tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.LOW]),
+    feeAmount: FeeAmount.LOW,
+    recipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // alice address
+    slippageTolerance: '5',
+    deadline: '360',
+    ratioErrorTolerance: 1,
+    maxIterations: 6,
+    addLiquidityRecipient: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // alice address
+  }
+
+  const errorToleranceFraction = (ratioErrorTolerance: number): Fraction => {
+    return new Fraction(ratioErrorTolerance * 100, 10_000)
   }
 
   const executeSwapAndAdd = async (
@@ -155,13 +155,14 @@ describe('quote-to-ratio', async function () {
     }
   }
 
-  async function testSuccessfulContractExecution(response: AxiosResponse<QuoteToRatioResponse>, zeroForOne: boolean) {
+  async function testSuccessfulContractExecution(response: AxiosResponse<QuoteToRatioResponse>, params: QuoteToRatioQueryParams, token0: Currency, token1: Currency, zeroForOne: boolean) {
+    const { tickLower, tickUpper, feeAmount, slippageTolerance, token0Balance: token0BalanceStr, token1Balance: token1BalanceStr } = params
+    const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceStr))
+    const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceStr))
     const {
       data: { amount, quote, methodParameters, postSwapTargetPool, token0BalanceUpdated, token1BalanceUpdated },
     } = response
 
-    const token0 = token0Balance.currency
-    const token1 = token1Balance.currency
     const [tokenIn, tokenOut] = zeroForOne ? [token0, token1] : [token1, token0]
 
     const postSwapPool = new Pool(
@@ -215,13 +216,13 @@ describe('quote-to-ratio', async function () {
       useFullPrecision: true,
     })
     const { amount0: minPositionAmount0, amount1: minPositionAmount1 } = mintedPositionQuoted.mintAmountsWithSlippage(
-      parseSlippageTolerance(slippageTolerance)
+      parseSlippageTolerance(slippageTolerance!)
     )
 
     // collect position with minimum amount out from swap with max slippage. Min amounts added to position
     // will either be mintAmountsWithSlippage for quoted position OR amounts resulting from minimum possible amount quoted from swap.
     // the lesser of the two, since mintAmountsWithSlippage can be undependable in certain scenarios, specifically involving out-of-range positions
-    const amountOutMaxSwapSlippage = minimumAmountOut(parseSlippageTolerance(slippageTolerance), currencyOutQuote)
+    const amountOutMaxSwapSlippage = minimumAmountOut(parseSlippageTolerance(slippageTolerance!), currencyOutQuote)
     const mintedPositionMaxSwapSlippage = Position.fromAmounts({
       pool: postSwapPool,
       tickLower,
@@ -280,27 +281,8 @@ describe('quote-to-ratio', async function () {
     this.timeout(40000)
     ;[alice] = await ethers.getSigners()
 
-    // define query parameters
-    resetQueryParams()
-
     // Make a dummy call to the API to get a block number to fork from.
-    const quoteToRatioRec: QuoteToRatioQueryParams = {
-      token0Address: token0.wrapped.address,
-      token0ChainId: 1,
-      token1Address: token1.wrapped.address,
-      token1ChainId: 1,
-      token0Balance: token0Balance.quotient.toString(),
-      token1Balance: token1Balance.quotient.toString(),
-      tickLower,
-      tickUpper,
-      feeAmount: 500,
-      recipient: alice.address,
-      slippageTolerance,
-      deadline: '360',
-      ratioErrorTolerance: 1,
-      maxIterations: 6,
-      addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-    }
+    const quoteToRatioRec: QuoteToRatioQueryParams = DEFAULT_QUERY_PARAMS
 
     const queryParams = qs.stringify(quoteToRatioRec)
     const response: AxiosResponse<QuoteToRatioResponse> = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
@@ -321,34 +303,19 @@ describe('quote-to-ratio', async function () {
   })
 
   describe('erc20 -> erc20 high volume trade token0Excess', () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async function () {
-      token0Balance = parseAmount('1000000', token0)
-      token1Balance = parseAmount('2000', token1)
-      slippageTolerance = '0.05'
+      const token0Balance = parseAmount('1000000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('2000', USDC_MAINNET).quotient.toString()
+      const slippageTolerance = '0.05'
 
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
+        slippageTolerance
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -361,6 +328,7 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
@@ -370,35 +338,14 @@ describe('quote-to-ratio', async function () {
 
     it('executes at the contract level', async function () {
       const zeroForOne = true
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('erc20 -> erc20 low volume trade token0Excess', () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
-      }
-
-      const queryParams = qs.stringify(quoteToRatioRec)
+      quoteToRatioParams = DEFAULT_QUERY_PARAMS
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -410,46 +357,32 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = true
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('erc20 -> erc20 low volume trade token1Excess', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token0Balance = parseAmount('2000', token0)
-      token1Balance = parseAmount('5000', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('5000', USDC_MAINNET).quotient.toString()
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -461,46 +394,32 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('erc20 -> erc20 high volume trade token1Excess', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token0Balance = await parseAmount('2000', token0)
-      token1Balance = await parseAmount('2000000', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('2000000', USDC_MAINNET).quotient.toString()
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -512,48 +431,36 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('erc20 -> erc20 range order position token1 excess', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token0Balance = await parseAmount('2000', token0)
-      token1Balance = await parseAmount('50000', token1)
-      tickLower = 0
-      tickUpper = 60
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
+      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('50000', USDC_MAINNET).quotient.toString()
+      const tickLower = 0
+      const tickUpper = 60
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
         tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+        tickUpper
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -565,48 +472,36 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('erc20 -> erc20 range order position token0 excess', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token0Balance = await parseAmount('50000', token0)
-      token1Balance = await parseAmount('2000', token1)
-      tickLower = -286420
-      tickUpper = -276420
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
+      const token0Balance = parseAmount('50000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('2000', USDC_MAINNET).quotient.toString()
+      const tickLower = -286420
+      const tickUpper = -276420
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
         tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+        tickUpper
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -618,47 +513,34 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = true
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('eth -> erc20', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token1 = WETH9[1]
-      token0Balance = await parseAmount('1000', token0)
-      token1Balance = await parseAmount('3', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: 'WETH',
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: `3${'0'.repeat(18)}`,
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token1Address = 'ETH'
+      const token0Balance = parseAmount('1000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('3', WETH9[1]).quotient.toString()
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
+        token1Address,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -670,47 +552,34 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(WETH9[1].address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, WETH9[1], zeroForOne)
     })
   })
 
   describe('erc20 -> eth', async () => {
-    after(() => {
-      resetQueryParams()
-    })
-
     before(async () => {
-      token1 = WETH9[1]
-      token0Balance = await parseAmount('10000', token0)
-      token1Balance = await parseAmount('1', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token1Address = 'ETH'
+      const token0Balance = parseAmount('10000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('1', WETH9[1]).quotient.toString()
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
+        token1Address,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
     })
 
@@ -722,16 +591,17 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
       expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
+      expect(tokenInAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(WETH9[1].address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = true
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, WETH9[1], zeroForOne)
     })
   })
 
@@ -739,33 +609,18 @@ describe('quote-to-ratio', async function () {
   describe('when adding to an existing position', async () => {
     let tokenId: string
 
-    after(() => {
-      resetQueryParams()
-    })
-
     // before hook times out. This test needed for subsequent tests in this block.
     it('first mint new position', async () => {
-      token0Balance = parseAmount('2000', token0)
-      token1Balance = parseAmount('5000', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Balance = parseAmount('2000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('5000', USDC_MAINNET).quotient.toString()
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
 
       const {
@@ -775,14 +630,14 @@ describe('quote-to-ratio', async function () {
       const { events } = await executeSwapAndAdd(
         postSwapTargetPool.address,
         methodParameters!,
-        token0Balance.currency,
-        token1Balance.currency
+        DAI_MAINNET,
+        USDC_MAINNET
       )
 
       const { onChainPosition } = getTestParamsFromEvents(
         events,
-        token0.wrapped,
-        token1.wrapped,
+        DAI_MAINNET,
+        USDC_MAINNET,
         alice.address,
         postSwapTargetPool.address
       )
@@ -791,29 +646,22 @@ describe('quote-to-ratio', async function () {
     })
 
     it('generates a legitimate trade with routing-api', async () => {
-      token0Balance = await parseAmount('3000', token0)
-      token1Balance = await parseAmount('8000', token1)
+      const token0Balance = parseAmount('3000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('8000', USDC_MAINNET).quotient.toString()
+      const addLiquidityTokenId = tokenId
+      const addLiquidityRecipient = undefined
 
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        addLiquidityTokenId: tokenId, // replace recipient with tokenId to add to existing position
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
+        addLiquidityTokenId,
+        addLiquidityRecipient,
       }
 
-      const queryParams = qs.stringify(quoteToRatioRec)
+      const queryParams = qs.stringify(quoteToRatioParams)
       response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+
       const {
         data: { tokenInAddress, tokenOutAddress, newRatioFraction, optimalRatioFraction },
         status,
@@ -822,46 +670,32 @@ describe('quote-to-ratio', async function () {
       const newRatio = parseFraction(newRatioFraction)
       const optimalRatio = parseFraction(optimalRatioFraction)
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
+      const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
       expect(status).to.equal(200)
-      expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
-      expect(tokenInAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
-      expect(tokenOutAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
+      expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
+      expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
+      expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
     })
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, USDC_MAINNET, zeroForOne)
     })
   })
 
   describe('4xx Error response', () => {
-    beforeEach(() => {
-      resetQueryParams()
-    })
-
     it('when both balances are 0', async () => {
-      token0Balance = await parseAmount('0', token0)
-      token1Balance = await parseAmount('0', token1)
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Balance = '0'
+      const token1Balance = '0'
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'No swap needed',
@@ -871,25 +705,13 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when max iterations is 0', async () => {
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 0,
-        addLiquidityRecipient: alice.address,
+      const maxIterations = 0
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        maxIterations,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: '"maxIterations" must be larger than or equal to 1',
@@ -899,29 +721,20 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when ratio is already fulfilled with token1', async () => {
-      token0Balance = await parseAmount('0', token0)
-      token1Balance = await parseAmount('5000', token1)
-      tickLower = -286420
-      tickUpper = -276420
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
+      const token0Balance = parseAmount('0', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('5000', USDC_MAINNET).quotient.toString()
+      const tickLower = -286420
+      const tickUpper = -276420
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
         tickLower,
         tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'No swap needed for range order',
@@ -931,29 +744,20 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when ratio is already fulfilled with token0', async () => {
-      token0Balance = await parseAmount('50000', token0)
-      token1Balance = await parseAmount('0', token1)
-      tickLower = 0
-      tickUpper = 60
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
+      const token0Balance = parseAmount('50000', DAI_MAINNET).quotient.toString()
+      const token1Balance = parseAmount('0', USDC_MAINNET).quotient.toString()
+      const tickLower = 0
+      const tickUpper = 60
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+        token1Balance,
         tickLower,
         tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'No swap needed for range order',
@@ -963,27 +767,16 @@ describe('quote-to-ratio', async function () {
     })
 
     it('amount exceeds uint256', async () => {
-      const token0BalanceStr =
+      const token0Balance =
         '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0BalanceStr,
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        feeAmount: FeeAmount.MEDIUM,
-        recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-        slippageTolerance: '5',
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 5,
-        addLiquidityRecipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-      }
 
-      await callAndExpectFail(quoteToRatioRec, {
+        quoteToRatioParams = {
+          ...DEFAULT_QUERY_PARAMS,
+          token0Balance,
+        }
+
+
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: '"token0Balance" length must be less than or equal to 77 characters long',
@@ -994,26 +787,13 @@ describe('quote-to-ratio', async function () {
 
     it('with unknown token', async () => {
       const token0Address = 'UNKNOWNTOKEN'
-      const token0BalanceStr = '2000000000000'
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
         token0Address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0BalanceStr,
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'Could not find token with address "UNKNOWNTOKEN"',
@@ -1023,27 +803,16 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when tokens are the same', async () => {
-      token0 = DAI_MAINNET
-      token1 = DAI_MAINNET
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Address = DAI_MAINNET.address
+      const token1Address = DAI_MAINNET.address
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Address,
+        token1Address,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'token0 and token1 must be different',
@@ -1053,25 +822,16 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when token are out of order', async () => {
-      ;[token0, token1] = [token1, token0]
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const token0Address = USDC_MAINNET.address
+      const token1Address = DAI_MAINNET.address
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Address,
+        token1Address,
       }
-      await callAndExpectFail(quoteToRatioRec, {
+
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'token0 address must be less than token1 address',
@@ -1081,25 +841,14 @@ describe('quote-to-ratio', async function () {
     })
 
     it('when tick is not a multiple of target pool tick spacing', async () => {
-      const quoteToRatioRec: QuoteToRatioQueryParams = {
-        token0Address: token0.wrapped.address,
-        token0ChainId: 1,
-        token1Address: token1.wrapped.address,
-        token1ChainId: 1,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower: -44,
-        tickUpper,
-        feeAmount,
-        recipient: alice.address,
-        slippageTolerance,
-        deadline: '360',
-        ratioErrorTolerance,
-        maxIterations: 6,
-        addLiquidityRecipient: alice.address,
+      const tickLower = -44
+
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        tickLower,
       }
 
-      await callAndExpectFail(quoteToRatioRec, {
+      await callAndExpectFail(quoteToRatioParams, {
         status: 400,
         data: {
           detail: 'tickLower and tickUpper must comply with the tick spacing of the target pool',
