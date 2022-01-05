@@ -1,5 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Currency, CurrencyAmount, Fraction, WETH9 } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
 import { DAI_MAINNET, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
 import { MethodParameters, Pool, Position } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
@@ -48,7 +48,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe.only('quote-to-ratio', async function () {
+describe('quote-to-ratio', async function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -199,12 +199,7 @@ describe.only('quote-to-ratio', async function () {
       swapRouterFinalBalance0,
       swapRouterFinalBalance1,
       events,
-    } = await executeSwapAndAdd(
-      postSwapTargetPool.address,
-      methodParameters!,
-      token0Balance.currency,
-      token1Balance.currency
-    )
+    } = await executeSwapAndAdd(postSwapTargetPool.address, methodParameters!, token0, token1)
 
     const {
       // total amounts transferred from alice. including amounts transferred back as a result of dust
@@ -259,11 +254,12 @@ describe.only('quote-to-ratio', async function () {
     expect(swapRouterFinalBalance1.quotient.toString()).to.equal('0')
 
     // total amountIn pulled but not swapped now lives in the position
-    if (zeroForOne) {
+    // with native currency, other checks should suffice, gas effects these numbers.
+    if (zeroForOne && amount0DiffAlice.currency.symbol !== 'ETH') {
       expect(amount0DiffAlice.subtract(currencyInSwapped).quotient.toString()).to.equal(
         newPoolBalance0.subtract(amount0SwappedInPool).quotient.toString()
       )
-    } else {
+    } else if (amount1DiffAlice.currency.symbol !== 'ETH') {
       expect(amount1DiffAlice.subtract(currencyInSwapped).quotient.toString()).to.equal(
         newPoolBalance1.subtract(amount1SwappedInPool).quotient.toString()
       )
@@ -580,7 +576,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = false
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, WETH9[1], zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, Ether.onChain(1), zeroForOne)
     })
   })
 
@@ -619,7 +615,7 @@ describe.only('quote-to-ratio', async function () {
 
     it('successfully executes at the contract level', async () => {
       const zeroForOne = true
-      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, WETH9[1], zeroForOne)
+      await testSuccessfulContractExecution(response, quoteToRatioParams, DAI_MAINNET, Ether.onChain(1), zeroForOne)
     })
   })
 
