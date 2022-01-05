@@ -20,6 +20,61 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     const { apiName, routingLambdaName, poolCacheLambdaName, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
 
+    // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
+    const REQUESTED_QUOTES_RULE_NAME = 'RequestedQuotes'
+    const REQUESTED_QUOTES_BY_CHAIN_RULE_NAME = 'RequestedQuotesByChain'
+    new cdk.CfnResource(this, 'QuoteContributorInsights', {
+      type: 'AWS::CloudWatch::InsightRule',
+      properties: {
+        RuleBody: JSON.stringify({
+          Schema: {
+            Name: 'CloudWatchLogRule',
+            Version: 1,
+          },
+          AggregateOn: 'Count',
+          Contribution: {
+            Filters: [
+              {
+                Match: '$.tokenPairSymbol',
+                IsPresent: true,
+              },
+            ],
+            Keys: ['$.tokenPairSymbol'],
+          },
+          LogFormat: 'JSON',
+          LogGroupNames: [`/aws/lambda/${routingLambdaName}`],
+        }),
+        RuleName: REQUESTED_QUOTES_RULE_NAME,
+        RuleState: 'ENABLED',
+      },
+    })
+
+    new cdk.CfnResource(this, 'QuoteByChainContributorInsights', {
+      type: 'AWS::CloudWatch::InsightRule',
+      properties: {
+        RuleBody: JSON.stringify({
+          Schema: {
+            Name: 'CloudWatchLogRule',
+            Version: 1,
+          },
+          AggregateOn: 'Count',
+          Contribution: {
+            Filters: [
+              {
+                Match: '$.tokenPairSymbolChain',
+                IsPresent: true,
+              },
+            ],
+            Keys: ['$.tokenPairSymbolChain'],
+          },
+          LogFormat: 'JSON',
+          LogGroupNames: [`/aws/lambda/${routingLambdaName}`],
+        }),
+        RuleName: REQUESTED_QUOTES_BY_CHAIN_RULE_NAME,
+        RuleState: 'ENABLED',
+      },
+    })
+
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
@@ -132,6 +187,52 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
+            y: 25,
+            width: 24,
+            height: 6,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              insightRule: {
+                maxContributorCount: 25,
+                orderBy: 'Sum',
+                ruleName: REQUESTED_QUOTES_RULE_NAME,
+              },
+              legend: {
+                position: 'bottom',
+              },
+              region,
+              title: 'Requested Quotes',
+              period: 300,
+              stat: 'Sum',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 26,
+            width: 24,
+            height: 6,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              insightRule: {
+                maxContributorCount: 25,
+                orderBy: 'Sum',
+                ruleName: REQUESTED_QUOTES_BY_CHAIN_RULE_NAME,
+              },
+              legend: {
+                position: 'bottom',
+              },
+              region,
+              title: 'Requested Quotes By Chain',
+              period: 300,
+              stat: 'Sum',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
             y: 24,
             width: 24,
             height: 6,
@@ -146,7 +247,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 [NAMESPACE, 'V2Route', 'Service', 'RoutingAPI'],
               ],
               region,
-              title: 'Types of routes returned',
+              title: 'Types of routes returned across all chains',
               period: 300,
               stat: 'Sum',
             },
@@ -155,6 +256,28 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             type: 'metric',
             x: 0,
             y: 30,
+            width: 24,
+            height: 6,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
+                [NAMESPACE, `V3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `V3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `V3RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `V2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `V2RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+              ]),
+              region,
+              title: 'Types of V3 routes returned by chain',
+              period: 300,
+              stat: 'Sum',
+            },
+          },
+          {
+            type: 'metric',
+            x: 0,
+            y: 36,
             width: 24,
             height: 6,
             properties: {
@@ -173,7 +296,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             height: 12,
             width: 24,
-            y: 36,
+            y: 42,
             x: 0,
             type: 'metric',
             properties: {
@@ -199,7 +322,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 42,
+            y: 48,
             width: 24,
             height: 9,
             properties: {
@@ -224,7 +347,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 48,
+            y: 54,
             width: 24,
             height: 9,
             properties: {
@@ -249,7 +372,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 54,
+            y: 60,
             width: 24,
             height: 9,
             properties: {
@@ -268,7 +391,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             type: 'metric',
             x: 0,
-            y: 61,
+            y: 66,
             width: 24,
             height: 9,
             properties: {

@@ -11,6 +11,7 @@ import {
   SwapRoute,
 } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi'
+import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
@@ -139,6 +140,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     let swapParams: SwapOptions | undefined = undefined
 
+    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     if (slippageTolerance && deadline && recipient) {
       const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
       const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
@@ -149,9 +151,16 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
+
+    let tokenPairSymbol = ''
+    let tokenPairSymbolChain = ''
+    if (currencyIn.symbol && currencyOut.symbol) {
+      tokenPairSymbol = _([currencyIn.symbol, currencyOut.symbol]).sort().join('/')
+      tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
+    }
+
     switch (type) {
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
@@ -159,7 +168,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         log.info(
           {
             amountIn: amount.toExact(),
-            currency: amount.currency.symbol,
+            tokenInSymbol: currencyIn.symbol,
+            tokenOutSymbol: currencyOut.symbol,
+            tokenPairSymbol,
+            tokenPairSymbolChain,
+            type,
             routingConfig: routingConfig,
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
@@ -175,7 +188,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         log.info(
           {
             amountOut: amount.toExact(),
-            currency: amount.currency.symbol,
+            tokenInSymbol: currencyIn.symbol,
+            tokenOutSymbol: currencyOut.symbol,
+            tokenPairSymbol,
+            tokenPairSymbolChain,
+            type,
             routingConfig: routingConfig,
           },
           `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${

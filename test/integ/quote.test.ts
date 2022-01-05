@@ -79,7 +79,7 @@ describe('quote', function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
-  this.timeout(500000)
+  this.timeout('500s')
 
   let alice: SignerWithAddress
   let block: number
