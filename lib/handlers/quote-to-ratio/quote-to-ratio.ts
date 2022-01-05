@@ -15,7 +15,12 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, parseSlippageTolerance, parseDeadline, tokenStringToCurrency } from '../shared'
+import {
+  DEFAULT_ROUTING_CONFIG_BY_CHAIN,
+  parseDeadline,
+  parseSlippageTolerance,
+  tokenStringToCurrency,
+} from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -503,7 +508,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return false
     }
   }
-
 
   protected validTick(tick: number, feeAmount: number): boolean {
     const TICK_SPACINGS = {

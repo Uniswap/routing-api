@@ -155,8 +155,21 @@ describe.only('quote-to-ratio', async function () {
     }
   }
 
-  async function testSuccessfulContractExecution(response: AxiosResponse<QuoteToRatioResponse>, params: QuoteToRatioQueryParams, token0: Currency, token1: Currency, zeroForOne: boolean) {
-    const { tickLower, tickUpper, feeAmount, slippageTolerance, token0Balance: token0BalanceStr, token1Balance: token1BalanceStr } = params
+  async function testSuccessfulContractExecution(
+    response: AxiosResponse<QuoteToRatioResponse>,
+    params: QuoteToRatioQueryParams,
+    token0: Currency,
+    token1: Currency,
+    zeroForOne: boolean
+  ) {
+    const {
+      tickLower,
+      tickUpper,
+      feeAmount,
+      slippageTolerance,
+      token0Balance: token0BalanceStr,
+      token1Balance: token1BalanceStr,
+    } = params
     const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceStr))
     const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceStr))
     const {
@@ -186,7 +199,12 @@ describe.only('quote-to-ratio', async function () {
       swapRouterFinalBalance0,
       swapRouterFinalBalance1,
       events,
-    } = await executeSwapAndAdd(postSwapTargetPool.address, methodParameters!, token0Balance.currency, token1Balance.currency)
+    } = await executeSwapAndAdd(
+      postSwapTargetPool.address,
+      methodParameters!,
+      token0Balance.currency,
+      token1Balance.currency
+    )
 
     const {
       // total amounts transferred from alice. including amounts transferred back as a result of dust
@@ -312,7 +330,7 @@ describe.only('quote-to-ratio', async function () {
         ...DEFAULT_QUERY_PARAMS,
         token0Balance,
         token1Balance,
-        slippageTolerance
+        slippageTolerance,
       }
 
       const queryParams = qs.stringify(quoteToRatioParams)
@@ -457,7 +475,7 @@ describe.only('quote-to-ratio', async function () {
         token0Balance,
         token1Balance,
         tickLower,
-        tickUpper
+        tickUpper,
       }
 
       const queryParams = qs.stringify(quoteToRatioParams)
@@ -498,7 +516,7 @@ describe.only('quote-to-ratio', async function () {
         token0Balance,
         token1Balance,
         tickLower,
-        tickUpper
+        tickUpper,
       }
 
       const queryParams = qs.stringify(quoteToRatioParams)
@@ -770,11 +788,10 @@ describe.only('quote-to-ratio', async function () {
       const token0Balance =
         '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 
-        quoteToRatioParams = {
-          ...DEFAULT_QUERY_PARAMS,
-          token0Balance,
-        }
-
+      quoteToRatioParams = {
+        ...DEFAULT_QUERY_PARAMS,
+        token0Balance,
+      }
 
       await callAndExpectFail(quoteToRatioParams, {
         status: 400,
