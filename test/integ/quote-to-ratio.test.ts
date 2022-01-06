@@ -1,6 +1,18 @@
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
+import _ from 'lodash'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Currency, CurrencyAmount, Ether, Fraction, WETH9 } from '@uniswap/sdk-core'
-import { DAI_MAINNET, parseAmount, USDC_MAINNET, USDT_MAINNET, WBTC_MAINNET } from '@uniswap/smart-order-router'
+import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
+import { DAI_ON, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import {
+  ChainId,
+  DAI_MAINNET,
+  ID_TO_NETWORK_NAME,
+  NATIVE_CURRENCY,
+  parseAmount,
+  USDC_MAINNET,
+  USDT_MAINNET,
+  WBTC_MAINNET,
+} from '@uniswap/smart-order-router'
 import { MethodParameters, Pool, Position } from '@uniswap/v3-sdk'
 import { fail } from 'assert'
 import axios, { AxiosResponse } from 'axios'
@@ -23,7 +35,6 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-import { UNI_MAINNET } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -48,7 +59,7 @@ function parseFraction(fraction: ResponseFraction): Fraction {
 
 const SWAP_ROUTER_V2 = '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 
-describe.only('quote-to-ratio', async function () {
+describe('quote-to-ratio', async function () {
   // Help with test flakiness by retrying.
   this.retries(2)
 
@@ -687,4 +698,157 @@ describe.only('quote-to-ratio', async function () {
       })
     }
   })
+
+  const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: USDC_ON(1),
+    [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
+  }
+  const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
+    [ChainId.MAINNET]: DAI_ON(1),
+    [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
+    [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
+    [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
+    [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
+    [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
+  }
+
+  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI)) {
+    const erc1 = TEST_ERC20_1[chain]
+    const erc2 = TEST_ERC20_2[chain]
+
+    describe(`${ID_TO_NETWORK_NAME(chain)} 2xx`, function () {
+      // Help with test flakiness by retrying.
+      this.retries(1)
+      const wrappedNative = WNATIVE_ON(chain)
+
+      let currency0: Currency
+      let currency1: Currency
+
+      let currency0Balance: string
+      let currency1Balance: string
+
+      let token0: Currency
+      let token1: Currency
+
+      let feeTier: { 500: number; 3000: number; 10000: number; }
+
+      beforeEach(async () => {
+        if (erc1.sortsBefore(wrappedNative)) {
+          currency0 = erc1
+          currency1 = wrappedNative
+          currency0Balance = parseAmount('100', currency0).quotient.toString()
+          currency1Balance = parseAmount('0.5', currency1).quotient.toString()
+        } else {
+          currency0 = wrappedNative
+          currency1 = erc1
+          currency0Balance = parseAmount('0.5', currency0).quotient.toString()
+          currency1Balance = parseAmount('100', currency1).quotient.toString()
+        }
+
+        if (erc1.sortsBefore(erc2)) {
+          token0 = erc1
+          token1 = erc2
+        } else {
+          token0 = erc2
+          token1 = erc1
+        }
+
+        feeTier = FeeAmount.MEDIUM
+      })
+
+      it(`${wrappedNative.symbol} -> erc20`, async () => {
+        quoteToRatioParams = {
+          ...DEFAULT_QUERY_PARAMS,
+          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
+          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
+          feeAmount: feeTier,
+          token0Balance: currency0Balance,
+          token1Balance: currency1Balance,
+          token0Address: currency0.wrapped.address,
+          token0ChainId: chain,
+          token1Address: currency1.wrapped.address,
+          token1ChainId: chain,
+        }
+
+        const queryParams = qs.stringify(quoteToRatioParams)
+
+        try {
+          const response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        } catch (err) {
+          fail(JSON.stringify(err.response.data))
+        }
+      })
+
+      it(`erc20 -> erc20`, async () => {
+        quoteToRatioParams = {
+          ...DEFAULT_QUERY_PARAMS,
+          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
+          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
+          feeAmount: feeTier,
+          token0Address: token0.wrapped.address,
+          token0ChainId: chain,
+          token1Address: token1.wrapped.address,
+          token1ChainId: chain,
+          token0Balance:  parseAmount('2000', token0).quotient.toString(),
+          token1Balance:  parseAmount('1000', token1).quotient.toString(),
+        }
+        const queryParams = qs.stringify(quoteToRatioParams)
+
+        try {
+          response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        } catch (err) {
+          fail(JSON.stringify(err.response.data))
+        }
+      })
+
+      const native = NATIVE_CURRENCY[chain]
+      it(`${native} -> erc20`, async () => {
+        const token0Address = erc1.sortsBefore(wrappedNative) ? erc2.wrapped.address : native
+        const token1Address = erc1.sortsBefore(wrappedNative) ? native : erc2.wrapped.address
+
+        quoteToRatioParams = {
+          ...DEFAULT_QUERY_PARAMS,
+          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
+          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
+          feeAmount: feeTier,
+          token0Address: token0Address,
+          token0ChainId: chain,
+          token1Address: token1Address,
+          token1ChainId: chain,
+          token0Balance: currency0Balance,
+          token1Balance: currency1Balance,
+        }
+        const queryParams = qs.stringify(quoteToRatioParams)
+
+        try {
+          response = await axios.get<QuoteToRatioResponse>(`${API}?${queryParams}`)
+          const { status } = response
+
+          expect(status).to.equal(200)
+        } catch (err) {
+          fail(JSON.stringify(err.response.data))
+        }
+      })
+    })
+  }
 })

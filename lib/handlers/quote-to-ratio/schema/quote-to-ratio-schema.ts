@@ -1,6 +1,7 @@
 import Joi from '@hapi/joi'
 import { TickMath } from '@uniswap/v3-sdk'
 import { QuoteResponse, QuoteResponseSchemaJoi, TokenInRoute } from '../../schema'
+import { SUPPORTED_CHAINS } from '../../injector-sor'
 
 export type PostSwapTargetPool = {
   address: string
@@ -19,9 +20,13 @@ export type ResponseFraction = {
 
 export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0Address: Joi.string().alphanum().max(42).required(),
-  token0ChainId: Joi.number().valid(1, 4).required(),
+  token0ChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   token1Address: Joi.string().alphanum().max(42).required(),
-  token1ChainId: Joi.number().valid(1, 4).required(),
+  token1ChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   token0Balance: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256
@@ -106,13 +111,17 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
     address: Joi.string().alphanum().max(42).required(),
     tokenIn: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
-      chainId: Joi.number().valid(1, 4).required(),
+      chainId: Joi.number()
+        .valid(...SUPPORTED_CHAINS.values())
+        .required(),
       symbol: Joi.string().alphanum().required(),
       decimals: Joi.number().required(),
     }),
     tokenOut: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
-      chainId: Joi.number().valid(1, 4).required(),
+      chainId:  Joi.number()
+        .valid(...SUPPORTED_CHAINS.values())
+        .required(),
       symbol: Joi.string().alphanum().required(),
       decimals: Joi.number().required(),
     }),

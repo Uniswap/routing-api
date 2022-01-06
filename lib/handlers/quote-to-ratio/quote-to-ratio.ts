@@ -388,7 +388,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     const tokenIn = trade.inputAmount.currency.wrapped
     const tokenOut = trade.outputAmount.currency.wrapped
 
-    const zeroForOne = tokenIn == token0
+    const zeroForOne = tokenIn.wrapped.address === token0.wrapped.address
     let token0BalanceUpdated: CurrencyAmount<Currency>
     let token1BalanceUpdated: CurrencyAmount<Currency>
     let optimalRatioAdjusted: Fraction
