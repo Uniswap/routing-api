@@ -173,6 +173,9 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceRaw))
     const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceRaw))
     const poolAccessor = await v3PoolProvider.getPools([[token0.wrapped, token1.wrapped, feeAmount]])
+    console.log('MY LOGZZ token0', token0.wrapped)
+    console.log('MY LOGZZ token1', token1.wrapped)
+    console.log('MY LOGZZ feeAmount', feeAmount)
     const pool = poolAccessor.getPool(token0.wrapped, token1.wrapped, feeAmount)
     if (!pool) {
       log.error(`Could not find pool.`)

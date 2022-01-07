@@ -744,8 +744,6 @@ describe('quote-to-ratio', async function () {
       let token0: Currency
       let token1: Currency
 
-      let feeTier: { 500: number; 3000: number; 10000: number; }
-
       beforeEach(async () => {
         if (erc1.sortsBefore(wrappedNative)) {
           currency0 = erc1
@@ -766,16 +764,14 @@ describe('quote-to-ratio', async function () {
           token0 = erc2
           token1 = erc1
         }
-
-        feeTier = FeeAmount.MEDIUM
       })
 
       it(`${wrappedNative.symbol} -> erc20`, async () => {
         quoteToRatioParams = {
           ...DEFAULT_QUERY_PARAMS,
-          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
-          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
-          feeAmount: feeTier,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          feeAmount: FeeAmount.MEDIUM,
           token0Balance: currency0Balance,
           token1Balance: currency1Balance,
           token0Address: currency0.wrapped.address,
@@ -797,11 +793,22 @@ describe('quote-to-ratio', async function () {
       })
 
       it(`erc20 -> erc20`, async () => {
+        let feeTierParams = {
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          feeAmount: FeeAmount.MEDIUM,
+        }
+        if (chain == ChainId.ARBITRUM_RINKEBY) {
+          feeTierParams = {
+            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.LOW]),
+            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.LOW]),
+            feeAmount: FeeAmount.LOW,
+          }
+        }
+
         quoteToRatioParams = {
           ...DEFAULT_QUERY_PARAMS,
-          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
-          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
-          feeAmount: feeTier,
+          ...feeTierParams,
           token0Address: token0.wrapped.address,
           token0ChainId: chain,
           token1Address: token1.wrapped.address,
@@ -822,15 +829,16 @@ describe('quote-to-ratio', async function () {
       })
 
       const native = NATIVE_CURRENCY[chain]
+
       it(`${native} -> erc20`, async () => {
         const token0Address = erc1.sortsBefore(wrappedNative) ? erc2.wrapped.address : native
         const token1Address = erc1.sortsBefore(wrappedNative) ? native : erc2.wrapped.address
 
         quoteToRatioParams = {
           ...DEFAULT_QUERY_PARAMS,
-          tickLower: getMinTick(TICK_SPACINGS[feeTier]),
-          tickUpper: getMaxTick(TICK_SPACINGS[feeTier]),
-          feeAmount: feeTier,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          feeAmount: FeeAmount.MEDIUM,
           token0Address: token0Address,
           token0ChainId: chain,
           token1Address: token1Address,
