@@ -1,8 +1,5 @@
-import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
-import _ from 'lodash'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
-import { DAI_ON, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
 import {
   ChainId,
   DAI_MAINNET,
@@ -22,7 +19,9 @@ import chaiSubset from 'chai-subset'
 import { BigNumber, providers } from 'ethers'
 import hre from 'hardhat'
 import JSBI from 'jsbi'
+import _ from 'lodash'
 import qs from 'qs'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioResponse,
@@ -35,6 +34,7 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
+import { DAI_ON, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -566,7 +566,7 @@ describe('quote-to-ratio', async function () {
             detail: 'No swap needed',
             errorCode: 'NO_SWAP_NEEDED',
           },
-        }
+        },
       },
       {
         testCase: 'when max iterations is 0',
@@ -580,7 +580,7 @@ describe('quote-to-ratio', async function () {
             detail: '"maxIterations" must be larger than or equal to 1',
             errorCode: 'VALIDATION_ERROR',
           },
-        }
+        },
       },
       {
         testCase: 'when ratio is already fulfilled with token1',
@@ -597,7 +597,7 @@ describe('quote-to-ratio', async function () {
             detail: 'No swap needed for range order',
             errorCode: 'NO_SWAP_NEEDED',
           },
-        }
+        },
       },
       {
         testCase: 'when ratio is already fulfilled with token0',
@@ -614,29 +614,28 @@ describe('quote-to-ratio', async function () {
             detail: 'No swap needed for range order',
             errorCode: 'NO_SWAP_NEEDED',
           },
-        }
+        },
       },
       {
         testCase: 'amount exceeds uint256',
         requestParams: {
           ...DEFAULT_QUERY_PARAMS,
-          token0Balance: '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-
+          token0Balance:
+            '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
         },
         result: {
           status: 400,
           data: {
             detail: '"token0Balance" length must be less than or equal to 77 characters long',
-            errorCode: 'VALIDATION_ERROR'
+            errorCode: 'VALIDATION_ERROR',
           },
-        }
+        },
       },
       {
         testCase: 'with unknown token',
         requestParams: {
           ...DEFAULT_QUERY_PARAMS,
           token0Address: 'UNKNOWNTOKEN',
-
         },
         result: {
           status: 400,
@@ -644,7 +643,7 @@ describe('quote-to-ratio', async function () {
             detail: 'Could not find token with address "UNKNOWNTOKEN"',
             errorCode: 'TOKEN_0_INVALID',
           },
-        }
+        },
       },
       {
         testCase: 'when tokens are the same',
@@ -659,7 +658,7 @@ describe('quote-to-ratio', async function () {
             detail: 'token0 and token1 must be different',
             errorCode: 'TOKEN_0_1_SAME',
           },
-        }
+        },
       },
       {
         testCase: 'when token are out of order',
@@ -674,7 +673,7 @@ describe('quote-to-ratio', async function () {
             detail: 'token0 address must be less than token1 address',
             errorCode: 'TOKENS_MISORDERED',
           },
-        }
+        },
       },
       {
         testCase: 'when tick is not a multiple of target pool tick spacing',
@@ -688,7 +687,7 @@ describe('quote-to-ratio', async function () {
             detail: 'tickLower and tickUpper must comply with the tick spacing of the target pool',
             errorCode: 'INVALID_TICK_SPACING',
           },
-        }
+        },
       },
     ]
 
@@ -813,8 +812,8 @@ describe('quote-to-ratio', async function () {
           token0ChainId: chain,
           token1Address: token1.wrapped.address,
           token1ChainId: chain,
-          token0Balance:  parseAmount('2000', token0).quotient.toString(),
-          token1Balance:  parseAmount('1000', token1).quotient.toString(),
+          token0Balance: parseAmount('2000', token0).quotient.toString(),
+          token1Balance: parseAmount('1000', token1).quotient.toString(),
         }
         const queryParams = qs.stringify(quoteToRatioParams)
 

@@ -1,7 +1,7 @@
 import Joi from '@hapi/joi'
 import { TickMath } from '@uniswap/v3-sdk'
-import { QuoteResponse, QuoteResponseSchemaJoi, TokenInRoute } from '../../schema'
 import { SUPPORTED_CHAINS } from '../../injector-sor'
+import { QuoteResponse, QuoteResponseSchemaJoi, TokenInRoute } from '../../schema'
 
 export type PostSwapTargetPool = {
   address: string
@@ -119,7 +119,7 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
     }),
     tokenOut: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
-      chainId:  Joi.number()
+      chainId: Joi.number()
         .valid(...SUPPORTED_CHAINS.values())
         .required(),
       symbol: Joi.string().alphanum().required(),
