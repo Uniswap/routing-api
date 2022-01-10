@@ -201,7 +201,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       log.error(`Could not find pool.`, {
         token0,
         token1,
-        feeAmount
+        feeAmount,
       })
       return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
     }
