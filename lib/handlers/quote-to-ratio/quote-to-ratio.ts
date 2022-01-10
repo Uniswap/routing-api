@@ -170,29 +170,13 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceRaw))
-    const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceRaw))
-    const poolAccessor = await v3PoolProvider.getPools([[token0.wrapped, token1.wrapped, feeAmount]])
-    const pool = poolAccessor.getPool(token0.wrapped, token1.wrapped, feeAmount)
-    if (!pool) {
-      log.error(`Could not find pool.`)
-      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
-    }
-    const position = new Position({
-      pool,
-      tickLower,
-      tickUpper,
-      liquidity: 1,
-    })
-
-    if (this.noSwapNeededForRangeOrder(position, token0Balance, token1Balance)) {
-      return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
-    }
-
     const ratioErrorToleranceFraction = new Fraction(
       Math.round(parseFloat(ratioErrorTolerance.toString()) * 100),
       10_000
     )
+
+    const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceRaw))
+    const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceRaw))
 
     log.info(
       {
@@ -210,6 +194,27 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       },
       `Swap To Ratio Parameters`
     )
+
+    const poolAccessor = await v3PoolProvider.getPools([[token0.wrapped, token1.wrapped, feeAmount]])
+    const pool = poolAccessor.getPool(token0.wrapped, token1.wrapped, feeAmount)
+    if (!pool) {
+      log.error(`Could not find pool.`, {
+        token0,
+        token1,
+        feeAmount
+      })
+      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
+    }
+    const position = new Position({
+      pool,
+      tickLower,
+      tickUpper,
+      liquidity: 1,
+    })
+
+    if (this.noSwapNeededForRangeOrder(position, token0Balance, token1Balance)) {
+      return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
+    }
 
     const swapRoute = await router.routeToRatio(
       token0Balance,

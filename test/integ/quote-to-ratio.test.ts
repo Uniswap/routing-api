@@ -747,13 +747,13 @@ describe('quote-to-ratio', async function () {
         if (erc1.sortsBefore(wrappedNative)) {
           currency0 = erc1
           currency1 = wrappedNative
-          currency0Balance = parseAmount('100', currency0).quotient.toString()
+          currency0Balance = parseAmount('1000', currency0).quotient.toString()
           currency1Balance = parseAmount('0.5', currency1).quotient.toString()
         } else {
           currency0 = wrappedNative
           currency1 = erc1
           currency0Balance = parseAmount('0.5', currency0).quotient.toString()
-          currency1Balance = parseAmount('100', currency1).quotient.toString()
+          currency1Balance = parseAmount('1000', currency1).quotient.toString()
         }
 
         if (erc1.sortsBefore(erc2)) {
@@ -792,28 +792,45 @@ describe('quote-to-ratio', async function () {
       })
 
       it(`erc20 -> erc20`, async () => {
-        let feeTierParams = {
-          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-          feeAmount: FeeAmount.MEDIUM,
-        }
+        let token0Address: string
+        let token1Address: string
+        let token0Balance: string
+        let token1Balance: string
+        let feeTierParams: any
+
+        // finding active pools on arb-rink is difficult
         if (chain == ChainId.ARBITRUM_RINKEBY) {
+          token0Address = '0xe2c750ed87e81e2d4da24982eae385bad116eefe'
+          token1Address = '0xfec501fcc518a69473f132b4fff28a542ffffec4'
+          token0Balance = `1${'0'.repeat(18)}`
+          token1Balance = `30000${'0'.repeat(18)}`
           feeTierParams = {
-            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.LOW]),
-            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.LOW]),
-            feeAmount: FeeAmount.LOW,
+            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+            feeAmount: FeeAmount.MEDIUM,
+          }
+        } else {
+          feeTierParams = {}
+          token0Address = token0.wrapped.address
+          token1Address = token1.wrapped.address
+          token0Balance = parseAmount('2000', token0).quotient.toString()
+          token1Balance = parseAmount('1000', token1).quotient.toString()
+          feeTierParams = {
+            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+            feeAmount: FeeAmount.MEDIUM,
           }
         }
 
         quoteToRatioParams = {
           ...DEFAULT_QUERY_PARAMS,
           ...feeTierParams,
-          token0Address: token0.wrapped.address,
+          token0Address,
           token0ChainId: chain,
-          token1Address: token1.wrapped.address,
+          token1Address,
           token1ChainId: chain,
-          token0Balance: parseAmount('2000', token0).quotient.toString(),
-          token1Balance: parseAmount('1000', token1).quotient.toString(),
+          token0Balance,
+          token1Balance,
         }
         const queryParams = qs.stringify(quoteToRatioParams)
 
@@ -830,8 +847,8 @@ describe('quote-to-ratio', async function () {
       const native = NATIVE_CURRENCY[chain]
 
       it(`${native} -> erc20`, async () => {
-        const token0Address = erc1.sortsBefore(wrappedNative) ? erc2.wrapped.address : native
-        const token1Address = erc1.sortsBefore(wrappedNative) ? native : erc2.wrapped.address
+        const token0Address = erc2.sortsBefore(wrappedNative) ? erc2.wrapped.address : native
+        const token1Address = erc2.sortsBefore(wrappedNative) ? native : erc2.wrapped.address
 
         quoteToRatioParams = {
           ...DEFAULT_QUERY_PARAMS,
