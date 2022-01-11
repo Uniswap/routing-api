@@ -446,7 +446,7 @@ describe('quote-to-ratio', async function () {
         const ratioErrorToleranceFraction = errorToleranceFraction(requestParams.ratioErrorTolerance)
 
         expect(status).to.equal(200, JSON.stringify(response.data))
-        expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
+        expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.equal(true, JSON.stringify(response.data))
         if (zeroForOne) {
           expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
           expect(tokenOutAddress.toLowerCase()).to.equal(token1.wrapped.address.toLowerCase())
