@@ -445,7 +445,7 @@ describe('quote-to-ratio', async function () {
         const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
         const ratioErrorToleranceFraction = errorToleranceFraction(requestParams.ratioErrorTolerance)
 
-        expect(status).to.equal(200)
+        expect(status).to.equal(200, JSON.stringify(response.data))
         expect(!ratioDeviation.greaterThan(ratioErrorToleranceFraction)).to.be.true
         if (zeroForOne) {
           expect(tokenInAddress.toLowerCase()).to.equal(token0.wrapped.address.toLowerCase())
@@ -529,7 +529,7 @@ describe('quote-to-ratio', async function () {
       const ratioDeviation = absoluteValue(new Fraction(1, 1).subtract(newRatio.divide(optimalRatio)))
       const ratioErrorToleranceFraction = errorToleranceFraction(quoteToRatioParams.ratioErrorTolerance)
 
-      expect(status).to.equal(200)
+      expect(status).to.equal(200, JSON.stringify(response.data))
       expect(ratioDeviation.lessThan(ratioErrorToleranceFraction)).to.be.true
       expect(tokenInAddress.toLowerCase()).to.equal(USDC_MAINNET.address.toLowerCase())
       expect(tokenOutAddress.toLowerCase()).to.equal(DAI_MAINNET.address.toLowerCase())
