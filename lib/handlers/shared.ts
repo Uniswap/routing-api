@@ -1,4 +1,4 @@
-import { Currency } from '@uniswap/sdk-core'
+import { Currency, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ChainId,
@@ -133,4 +133,13 @@ export async function tokenStringToCurrency(
   }
 
   return undefined
+}
+
+export function parseSlippageTolerance(slippageTolerance: string): Percent {
+  const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
+  return new Percent(slippagePer10k, 10_000)
+}
+
+export function parseDeadline(deadline: string): number {
+  return Math.floor(Date.now() / 1000) + parseInt(deadline)
 }

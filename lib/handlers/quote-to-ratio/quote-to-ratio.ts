@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
+import { CondensedAddLiquidityOptions, Protocol } from '@uniswap/router-sdk'
+import { Currency, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ISwapToRatio,
@@ -15,7 +15,12 @@ import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { V2PoolInRoute, V3PoolInRoute } from '../schema'
-import { DEFAULT_ROUTING_CONFIG_BY_CHAIN, tokenStringToCurrency } from '../shared'
+import {
+  DEFAULT_ROUTING_CONFIG_BY_CHAIN,
+  parseDeadline,
+  parseSlippageTolerance,
+  tokenStringToCurrency,
+} from '../shared'
 import {
   QuoteToRatioQueryParams,
   QuoteToRatioQueryParamsJoi,
@@ -53,8 +58,10 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         slippageTolerance,
         deadline,
         minSplits,
-        errorTolerance,
+        ratioErrorTolerance,
         maxIterations,
+        addLiquidityRecipient,
+        addLiquidityTokenId,
       },
       requestInjected: {
         router,
@@ -117,34 +124,85 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const routingConfig: AlphaRouterConfig = {
+    if (!!addLiquidityTokenId && !!addLiquidityRecipient) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOO_MANY_POSITION_OPTIONS',
+        detail: `addLiquidityTokenId and addLiquidityRecipient are mutually exclusive. Must only provide one.`,
+      }
+    }
+
+    if (!this.validTick(tickLower, feeAmount) || !this.validTick(tickUpper, feeAmount)) {
+      return {
+        statusCode: 400,
+        errorCode: 'INVALID_TICK_SPACING',
+        detail: `tickLower and tickUpper must comply with the tick spacing of the target pool`,
+      }
+    }
+
+    const routingConfig = {
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
     }
 
-    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
-
-    if (slippageTolerance && deadline && recipient) {
-      const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-      const slippageTolerancePercent = new Percent(slippagePer10k, 10_000)
-      swapAndAddOptions = {
-        swapOptions: {
-          deadline: Math.floor(Date.now() / 1000) + parseInt(deadline),
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-        },
-        addLiquidityOptions: {
-          recipient: recipient,
-        },
+    let addLiquidityOptions: CondensedAddLiquidityOptions
+    if (addLiquidityTokenId) {
+      addLiquidityOptions = { tokenId: addLiquidityTokenId }
+    } else if (addLiquidityRecipient) {
+      addLiquidityOptions = { recipient: addLiquidityRecipient }
+    } else {
+      return {
+        statusCode: 400,
+        errorCode: 'UNSPECIFIED_POSITION_OPTIONS',
+        detail: `Either addLiquidityTokenId must be provided for existing positions or addLiquidityRecipient for new positions`,
       }
     }
 
+    let swapAndAddOptions: SwapAndAddOptions | undefined = undefined
+    if (slippageTolerance && deadline && recipient) {
+      swapAndAddOptions = {
+        swapOptions: {
+          deadline: parseDeadline(deadline),
+          recipient: recipient,
+          slippageTolerance: parseSlippageTolerance(slippageTolerance),
+        },
+        addLiquidityOptions,
+      }
+    }
+
+    const ratioErrorToleranceFraction = new Fraction(
+      Math.round(parseFloat(ratioErrorTolerance.toString()) * 100),
+      10_000
+    )
+
     const token0Balance = CurrencyAmount.fromRawAmount(token0, JSBI.BigInt(token0BalanceRaw))
     const token1Balance = CurrencyAmount.fromRawAmount(token1, JSBI.BigInt(token1BalanceRaw))
+
+    log.info(
+      {
+        token0: token0.symbol,
+        token1: token1.symbol,
+        chainId,
+        token0Balance: token0Balance.quotient.toString(),
+        token1Balance: token1Balance.quotient.toString(),
+        tickLower,
+        tickUpper,
+        feeAmount,
+        maxIterations,
+        ratioErrorTolerance: ratioErrorToleranceFraction.toFixed(4),
+        routingConfig: routingConfig,
+      },
+      `Swap To Ratio Parameters`
+    )
+
     const poolAccessor = await v3PoolProvider.getPools([[token0.wrapped, token1.wrapped, feeAmount]])
     const pool = poolAccessor.getPool(token0.wrapped, token1.wrapped, feeAmount)
     if (!pool) {
-      log.error(`Could not find pool.`)
+      log.error(`Could not find pool.`, {
+        token0,
+        token1,
+        feeAmount,
+      })
       return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
     }
     const position = new Position({
@@ -158,31 +216,12 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       return { statusCode: 400, errorCode: 'NO_SWAP_NEEDED', detail: 'No swap needed for range order' }
     }
 
-    const errorToleranceFraction = new Fraction(Math.round(parseFloat(errorTolerance.toString()) * 100), 10_000)
-
-    log.info(
-      {
-        token0: token0.symbol,
-        token1: token1.symbol,
-        chainId,
-        token0Balance: token0Balance.quotient.toString(),
-        token1Balance: token1Balance.quotient.toString(),
-        tickLower,
-        tickUpper,
-        feeAmount,
-        maxIterations,
-        errorTolerance: errorToleranceFraction.toFixed(4),
-        routingConfig: routingConfig,
-      },
-      `Swap To Ratio Parameters`
-    )
-
     const swapRoute = await router.routeToRatio(
       token0Balance,
       token1Balance,
       position,
       {
-        ratioErrorTolerance: errorToleranceFraction,
+        ratioErrorTolerance: ratioErrorToleranceFraction,
         maxIterations,
       },
       swapAndAddOptions,
@@ -354,7 +393,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     const tokenIn = trade.inputAmount.currency.wrapped
     const tokenOut = trade.outputAmount.currency.wrapped
 
-    const zeroForOne = tokenIn == token0
+    const zeroForOne = tokenIn.wrapped.address === token0.wrapped.address
     let token0BalanceUpdated: CurrencyAmount<Currency>
     let token1BalanceUpdated: CurrencyAmount<Currency>
     let optimalRatioAdjusted: Fraction
@@ -473,5 +512,21 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     } else {
       return false
     }
+  }
+
+  protected validTick(tick: number, feeAmount: number): boolean {
+    const TICK_SPACINGS = {
+      500: 10,
+      3000: 60,
+      10000: 100,
+    } as { [feeAmount: string]: number }
+
+    let validTickSpacing = true
+
+    if (TICK_SPACINGS[feeAmount] != undefined) {
+      validTickSpacing = tick % TICK_SPACINGS[feeAmount] === 0
+    }
+
+    return validTickSpacing
   }
 }

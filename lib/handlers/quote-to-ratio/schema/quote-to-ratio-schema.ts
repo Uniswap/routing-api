@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi'
 import { TickMath } from '@uniswap/v3-sdk'
+import { SUPPORTED_CHAINS } from '../../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, TokenInRoute } from '../../schema'
 
 export type PostSwapTargetPool = {
@@ -19,9 +20,13 @@ export type ResponseFraction = {
 
 export const QuoteToRatioQueryParamsJoi = Joi.object({
   token0Address: Joi.string().alphanum().max(42).required(),
-  token0ChainId: Joi.number().valid(1, 4).required(),
+  token0ChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   token1Address: Joi.string().alphanum().max(42).required(),
-  token1ChainId: Joi.number().valid(1, 4).required(),
+  token1ChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
   token0Balance: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256
@@ -43,9 +48,16 @@ export const QuoteToRatioQueryParamsJoi = Joi.object({
     .max(30)
     .optional(),
   minSplits: Joi.number().max(7).optional(),
-  errorTolerance: Joi.number().min(0).max(10).precision(2).optional(),
+  ratioErrorTolerance: Joi.number().min(0).max(10).precision(2).default(1).optional(),
   maxIterations: Joi.number().min(1).max(10).default(5).required(),
-}).and('recipient', 'slippageTolerance', 'deadline')
+  addLiquidityRecipient: Joi.string()
+    .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
+    .optional(),
+  addLiquidityTokenId: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(53) // TODO: validate < 2**176
+    .optional(),
+}).and('slippageTolerance', 'deadline')
 
 export type QuoteToRatioQueryParams = {
   token0Address: string
@@ -62,8 +74,10 @@ export type QuoteToRatioQueryParams = {
   deadline?: string
   gasPriceWei?: string
   minSplits?: number
-  errorTolerance: number
+  ratioErrorTolerance: number
   maxIterations: number
+  addLiquidityRecipient?: string
+  addLiquidityTokenId?: string
 }
 
 export type QuoteToRatioResponse = QuoteResponse & {
@@ -97,13 +111,17 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
     address: Joi.string().alphanum().max(42).required(),
     tokenIn: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
-      chainId: Joi.number().valid(1, 4).required(),
+      chainId: Joi.number()
+        .valid(...SUPPORTED_CHAINS.values())
+        .required(),
       symbol: Joi.string().alphanum().required(),
       decimals: Joi.number().required(),
     }),
     tokenOut: Joi.object({
       address: Joi.string().alphanum().max(42).required(),
-      chainId: Joi.number().valid(1, 4).required(),
+      chainId: Joi.number()
+        .valid(...SUPPORTED_CHAINS.values())
+        .required(),
       symbol: Joi.string().alphanum().required(),
       decimals: Joi.number().required(),
     }),
