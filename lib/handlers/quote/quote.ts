@@ -165,9 +165,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
     }
 
-    const [token0Address, token1Address] = currencyIn.wrapped.sortsBefore(currencyOut.wrapped)
-      ? [currencyIn.wrapped.address, currencyOut.wrapped.address]
-      : [currencyOut.wrapped.address, currencyIn.wrapped.address]
+    const [token0Symbol, token0Address, token1Symbol, token1Address] = currencyIn.wrapped.sortsBefore(
+      currencyOut.wrapped
+    )
+      ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
+      : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
 
     switch (type) {
       case 'exactIn':
@@ -178,6 +180,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountIn: amount.toExact(),
             token0Address,
             token1Address,
+            token0Symbol,
+            token1Symbol,
             tokenInSymbol: currencyIn.symbol,
             tokenOutSymbol: currencyOut.symbol,
             tokenPairSymbol,
@@ -200,6 +204,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountOut: amount.toExact(),
             token0Address,
             token1Address,
+            token0Symbol,
+            token1Symbol,
             tokenInSymbol: currencyIn.symbol,
             tokenOutSymbol: currencyOut.symbol,
             tokenPairSymbol,
