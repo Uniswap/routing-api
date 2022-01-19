@@ -165,6 +165,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
     }
 
+    const [token0Address, token1Address] = currencyIn.wrapped.sortsBefore(currencyOut.wrapped)
+      ? [currencyIn.wrapped.address, currencyOut.wrapped.address]
+      : [currencyOut.wrapped.address, currencyIn.wrapped.address]
+
     switch (type) {
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
@@ -172,6 +176,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         log.info(
           {
             amountIn: amount.toExact(),
+            token0Address,
+            token1Address,
             tokenInSymbol: currencyIn.symbol,
             tokenOutSymbol: currencyOut.symbol,
             tokenPairSymbol,
@@ -192,6 +198,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         log.info(
           {
             amountOut: amount.toExact(),
+            token0Address,
+            token1Address,
             tokenInSymbol: currencyIn.symbol,
             tokenOutSymbol: currencyOut.symbol,
             tokenPairSymbol,
