@@ -128,7 +128,6 @@ export class RoutingAPIPipeline extends Stack {
       env: { account: '145079444317', region: 'us-east-2' },
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
-      chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
       stage: STAGE.BETA,
       route53Arn: route53Arn.secretValueFromJson('arn').toString(),
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
