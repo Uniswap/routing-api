@@ -5,6 +5,9 @@ import { Erc20, Erc20__factory } from '../../lib/types/ext'
 
 const WHALES = [
   '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
+  '0x6555e1cc97d3cba6eaddebbcd7ca51d75771e0b8',
+  '0x08638ef1a205be6762a8b935f5da9b700cf7322c',
+  '0xe8e8f41ed29e46f34e206d7d2a7d6f735a3ff2cb',
   '0x72a53cdbbcc1b9efa39c834a540550e23463aacb',
   '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
   '0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf',
