@@ -389,7 +389,7 @@ describe('quote', function () {
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
+              // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
             }
           })
 
