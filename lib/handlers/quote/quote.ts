@@ -161,7 +161,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     let tokenPairSymbol = ''
     let tokenPairSymbolChain = ''
     if (currencyIn.symbol && currencyOut.symbol) {
-      tokenPairSymbol = _([currencyIn.symbol, currencyOut.symbol]).sort().join('/')
+      tokenPairSymbol = _([currencyIn.symbol, currencyOut.symbol]).join('/')
       tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
     }
 
