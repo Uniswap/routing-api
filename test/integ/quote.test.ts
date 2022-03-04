@@ -1175,6 +1175,37 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
+        it(`has quoteGasAdjusted values`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: erc1.address,
+            tokenInChainId: chain,
+            tokenOutAddress: erc2.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const {
+              data: { quoteDecimals, quoteGasAdjustedDecimals },
+              status,
+            } = response
+
+            expect(status).to.equal(200)
+
+            // check for quotes to be gas adjusted
+            if (type == 'exactIn') {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+            } else {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+            }
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
+        })
       })
     }
   }
