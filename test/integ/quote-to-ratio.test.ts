@@ -727,7 +727,12 @@ describe('quote-to-ratio', async function () {
 
   for (const chain of _.filter(
     SUPPORTED_CHAINS,
-    (c) => c != ChainId.POLYGON && c != ChainId.RINKEBY && c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI
+    (c) =>
+      c != ChainId.POLYGON &&
+      c != ChainId.RINKEBY &&
+      c != ChainId.OPTIMISTIC_KOVAN &&
+      c != ChainId.POLYGON_MUMBAI &&
+      c != ChainId.ARBITRUM_RINKEBY
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
