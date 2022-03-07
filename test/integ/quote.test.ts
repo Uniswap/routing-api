@@ -1101,7 +1101,10 @@ describe('quote', function () {
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
-  for (const chain of _.filter(SUPPORTED_CHAINS, (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI)) {
+  for (const chain of _.filter(
+    SUPPORTED_CHAINS,
+    (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI && c != ChainId.ARBITRUM_RINKEBY
+  )) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
@@ -1171,6 +1174,37 @@ describe('quote', function () {
             const { status } = response
 
             expect(status).to.equal(200, JSON.stringify(response.data))
+          } catch (err) {
+            fail(JSON.stringify(err.response.data))
+          }
+        })
+        it(`has quoteGasAdjusted values`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: erc1.address,
+            tokenInChainId: chain,
+            tokenOutAddress: erc2.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const {
+              data: { quoteDecimals, quoteGasAdjustedDecimals },
+              status,
+            } = response
+
+            expect(status).to.equal(200)
+
+            // check for quotes to be gas adjusted
+            if (type == 'exactIn') {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+            } else {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+            }
           } catch (err) {
             fail(JSON.stringify(err.response.data))
           }
