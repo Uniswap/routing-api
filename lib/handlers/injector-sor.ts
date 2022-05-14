@@ -23,10 +23,11 @@ import {
   TokenProvider,
   UniswapMulticallProvider,
   V2QuoteProvider,
+  V2PoolProvider,
+  IV2PoolProvider,
   V3PoolProvider,
   V3QuoteProvider,
 } from '@uniswap/smart-order-router'
-import { IV2PoolProvider, V2PoolProvider } from '@uniswap/smart-order-router/build/main/src/providers/v2/pool-provider'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { ethers } from 'ethers'
