@@ -11,6 +11,7 @@ import {
   IMetric,
   ITokenListProvider,
   ITokenProvider,
+  IV2PoolProvider,
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
@@ -22,9 +23,8 @@ import {
   StaticV3SubgraphProvider,
   TokenProvider,
   UniswapMulticallProvider,
-  V2QuoteProvider,
   V2PoolProvider,
-  IV2PoolProvider,
+  V2QuoteProvider,
   V3PoolProvider,
   V3QuoteProvider,
 } from '@uniswap/smart-order-router'
