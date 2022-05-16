@@ -732,7 +732,8 @@ describe('quote-to-ratio', async function () {
       c != ChainId.RINKEBY &&
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
-      c != ChainId.ARBITRUM_RINKEBY
+      c != ChainId.ARBITRUM_RINKEBY &&
+      c != ChainId.GÖRLI
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]

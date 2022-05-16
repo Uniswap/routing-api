@@ -26,7 +26,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_GORLI, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -1077,7 +1077,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
-    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
+    [ChainId.GÖRLI]: UNI_GORLI,
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
