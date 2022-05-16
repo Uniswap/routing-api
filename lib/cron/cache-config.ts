@@ -23,7 +23,12 @@ export const chainProtocols = [
     chainId: ChainId.POLYGON,
     provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000),
   },
-  // Currently there is no working V3 subgraph for Gorli, Kovan, Optimism, Optimism Kovan, Arbitrum Rinkeby, so we use static providers.
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.GÖRLI,
+    provider: new V3SubgraphProvider(ChainId.GÖRLI, 3, 90000),
+  },
+  // Currently there is no working V3 subgraph for Kovan, Optimism, Optimism Kovan, Arbitrum Rinkeby, so we use static providers.
   // V2.
   {
     protocol: Protocol.V2,
