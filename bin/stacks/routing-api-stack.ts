@@ -1,12 +1,13 @@
-import * as aws_apigateway from '@aws-cdk/aws-apigateway'
-import { MethodLoggingLevel } from '@aws-cdk/aws-apigateway'
-import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch'
-import * as aws_cloudwatch_actions from '@aws-cdk/aws-cloudwatch-actions'
-import * as aws_logs from '@aws-cdk/aws-logs'
-import * as aws_sns from '@aws-cdk/aws-sns'
-import * as aws_waf from '@aws-cdk/aws-wafv2'
-import * as cdk from '@aws-cdk/core'
-import { CfnOutput, Duration } from '@aws-cdk/core'
+import * as cdk from 'aws-cdk-lib'
+import { CfnOutput, Duration } from 'aws-cdk-lib'
+import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
+import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
+import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
+import * as aws_logs from 'aws-cdk-lib/aws-logs'
+import * as aws_sns from 'aws-cdk-lib/aws-sns'
+import * as aws_waf from 'aws-cdk-lib/aws-wafv2'
+import { Construct } from 'constructs'
 import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
@@ -16,7 +17,7 @@ export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
 
   constructor(
-    parent: cdk.Construct,
+    parent: Construct,
     name: string,
     props: cdk.StackProps & {
       infuraProjectId: string

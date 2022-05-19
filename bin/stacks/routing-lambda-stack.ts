@@ -1,13 +1,14 @@
-import * as asg from '@aws-cdk/aws-applicationautoscaling'
-import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch'
-import * as aws_cloudwatch_actions from '@aws-cdk/aws-cloudwatch-actions'
-import * as aws_iam from '@aws-cdk/aws-iam'
-import * as aws_lambda from '@aws-cdk/aws-lambda'
-import * as aws_lambda_nodejs from '@aws-cdk/aws-lambda-nodejs'
-import * as aws_s3 from '@aws-cdk/aws-s3'
-import * as aws_sns from '@aws-cdk/aws-sns'
-import * as cdk from '@aws-cdk/core'
-import { Duration } from '@aws-cdk/core'
+import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
+import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
+import * as aws_iam from 'aws-cdk-lib/aws-iam'
+import * as aws_lambda from 'aws-cdk-lib/aws-lambda'
+import * as aws_lambda_nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
+import * as aws_s3 from 'aws-cdk-lib/aws-s3'
+import * as aws_sns from 'aws-cdk-lib/aws-sns'
+import * as cdk from 'aws-cdk-lib'
+import { Duration } from 'aws-cdk-lib'
+import { Construct } from 'constructs'
 import * as path from 'path'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
@@ -25,7 +26,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routeToRatioLambda: aws_lambda_nodejs.NodejsFunction
   public readonly routingLambdaAlias: aws_lambda.Alias
 
-  constructor(scope: cdk.Construct, name: string, props: RoutingLambdaStackProps) {
+  constructor(scope: Construct, name: string, props: RoutingLambdaStackProps) {
     super(scope, name, props)
     const {
       poolCacheBucket,

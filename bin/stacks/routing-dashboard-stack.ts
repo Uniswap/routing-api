@@ -1,8 +1,9 @@
-import * as aws_cloudwatch from '@aws-cdk/aws-cloudwatch'
-import * as cdk from '@aws-cdk/core'
 import { ChainId } from '@uniswap/smart-order-router'
+import * as cdk from 'aws-cdk-lib'
+import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import _ from 'lodash'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
+import { Construct } from 'constructs'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -14,7 +15,7 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
-  constructor(scope: cdk.Construct, name: string, props: RoutingDashboardProps) {
+  constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
     const { apiName, routingLambdaName, poolCacheLambdaName, ipfsPoolCacheLambdaName } = props

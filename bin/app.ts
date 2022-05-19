@@ -1,12 +1,11 @@
-import * as chatbot from '@aws-cdk/aws-chatbot'
-import { BuildEnvironmentVariableType } from '@aws-cdk/aws-codebuild'
-import * as codepipeline from '@aws-cdk/aws-codepipeline'
-import { PipelineNotificationEvents } from '@aws-cdk/aws-codepipeline'
-import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions'
-import * as sm from '@aws-cdk/aws-secretsmanager'
-import * as cdk from '@aws-cdk/core'
-import { CfnOutput, Construct, SecretValue, Stack, StackProps, Stage, StageProps } from '@aws-cdk/core'
-import { CdkPipeline, CdkStage, ShellScriptAction, SimpleSynthAction } from '@aws-cdk/pipelines'
+import * as cdk from 'aws-cdk-lib'
+import * as chatbot from 'aws-cdk-lib/aws-chatbot'
+import { BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild'
+import { PipelineNotificationEvents } from 'aws-cdk-lib/aws-codepipeline'
+import * as sm from 'aws-cdk-lib/aws-secretsmanager'
+import { CfnOutput, SecretValue, Stack, StackProps, Stage, StageProps } from 'aws-cdk-lib'
+import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines'
+import { Construct } from 'constructs'
 import dotenv from 'dotenv'
 import 'source-map-support/register'
 import { STAGE } from '../lib/util/stage'
@@ -63,38 +62,30 @@ export class RoutingAPIPipeline extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
 
-    const sourceArtifact = new codepipeline.Artifact()
-    const cloudAssemblyArtifact = new codepipeline.Artifact()
-
-    const pipeline = new CdkPipeline(this, 'RoutingAPIPipeline', {
-      // The pipeline name
-      pipelineName: 'RoutingAPI',
-      cloudAssemblyArtifact,
-
-      // Where the source can be found
-      sourceAction: new codepipeline_actions.GitHubSourceAction({
-        actionName: 'GitHub',
-        output: sourceArtifact,
-        oauthToken: SecretValue.secretsManager('github-token-2'),
-        owner: 'Uniswap',
-        repo: 'routing-api',
-        branch: 'main',
+    const synthStep = new CodeBuildStep('Synth', {
+      input: CodePipelineSource.gitHub('Uniswap/routing-api', 'main', {
+        authentication: SecretValue.secretsManager('github-token-2'),
       }),
-
-      // Build, Unit Test, and Synth templates.
-      synthAction: SimpleSynthAction.standardNpmSynth({
-        sourceArtifact,
-        cloudAssemblyArtifact,
+      buildEnvironment: {
         environmentVariables: {
           NPM_TOKEN: {
             value: 'npm-private-repo-access-token',
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
           },
         },
-        installCommand: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
-        buildCommand: 'npm run build',
-        testCommands: ['npm run test'],
-      }),
+      },
+      commands: [
+        'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
+        'npm run build',
+        'npx cdk synth',
+      ],
+    })
+
+    const pipeline = new CodePipeline(this, 'RoutingAPIPipeline', {
+      // The pipeline name
+      pipelineName: 'RoutingAPI',
+      crossAccountKeys: true,
+      synth: synthStep,
     })
 
     // Secrets are stored in secrets manager in the pipeline account. Accounts we deploy to
@@ -136,9 +127,9 @@ export class RoutingAPIPipeline extends Stack {
       infuraProjectId: infuraProjectId.secretValue.toString(),
     })
 
-    const betaUsEast2AppStage = pipeline.addApplicationStage(betaUsEast2Stage)
+    const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
 
-    this.addIntegTests(pipeline, sourceArtifact, betaUsEast2Stage, betaUsEast2AppStage)
+    this.addIntegTests(synthStep, betaUsEast2Stage, betaUsEast2AppStage)
 
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
@@ -154,9 +145,9 @@ export class RoutingAPIPipeline extends Stack {
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
     })
 
-    const prodUsEast2AppStage = pipeline.addApplicationStage(prodUsEast2Stage)
+    const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
 
-    this.addIntegTests(pipeline, sourceArtifact, prodUsEast2Stage, prodUsEast2AppStage)
+    this.addIntegTests(synthStep, prodUsEast2Stage, prodUsEast2AppStage)
 
     const slackChannel = chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(
       this,
@@ -164,31 +155,33 @@ export class RoutingAPIPipeline extends Stack {
       'arn:aws:chatbot::644039819003:chat-configuration/slack-channel/eng-ops-slack-chatbot'
     )
 
-    pipeline.codePipeline.notifyOn('NotifySlack', slackChannel, {
+    pipeline.buildPipeline()
+    pipeline.pipeline.notifyOn('NotifySlack', slackChannel, {
       events: [PipelineNotificationEvents.PIPELINE_EXECUTION_FAILED],
     })
   }
 
   private addIntegTests(
-    pipeline: CdkPipeline,
-    sourceArtifact: codepipeline.Artifact,
+    sourceArtifact: cdk.pipelines.CodeBuildStep,
     routingAPIStage: RoutingAPIStage,
-    applicationStage: CdkStage
+    applicationStage: cdk.pipelines.StageDeployment
   ) {
-    const testAction = new ShellScriptAction({
-      actionName: `IntegTests-${routingAPIStage.stageName}`,
-      additionalArtifacts: [sourceArtifact],
-      useOutputs: {
-        UNISWAP_ROUTING_API: pipeline.stackOutput(routingAPIStage.url),
+    const testAction = new CodeBuildStep(`IntegTests-${routingAPIStage.stageName}`, {
+      projectName: `IntegTests-${routingAPIStage.stageName}`,
+      input: sourceArtifact,
+      envFromCfnOutputs: {
+        UNISWAP_ROUTING_API: routingAPIStage.url,
       },
-      environmentVariables: {
-        NPM_TOKEN: {
-          value: 'npm-private-repo-access-token',
-          type: BuildEnvironmentVariableType.SECRETS_MANAGER,
-        },
-        ARCHIVE_NODE_RPC: {
-          value: 'archive-node-rpc-url-default-kms',
-          type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+      buildEnvironment: {
+        environmentVariables: {
+          NPM_TOKEN: {
+            value: 'npm-private-repo-access-token',
+            type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+          },
+          ARCHIVE_NODE_RPC: {
+            value: 'archive-node-rpc-url-default-kms',
+            type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+          },
         },
       },
       commands: [
@@ -199,10 +192,9 @@ export class RoutingAPIPipeline extends Stack {
         'npm run build',
         'npm run integ-test',
       ],
-      runOrder: applicationStage.nextSequentialRunOrder(),
     })
 
-    applicationStage.addActions(testAction)
+    applicationStage.addPost(testAction)
   }
 }
 
