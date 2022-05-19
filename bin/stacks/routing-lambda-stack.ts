@@ -64,6 +64,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         minify: true,
         sourceMap: true,
       },
+      description: 'Routing Lambda',
       environment: {
         VERSION: '2',
         NODE_OPTIONS: '--enable-source-maps',
@@ -95,6 +96,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         minify: true,
         sourceMap: true,
       },
+      description: 'Route to Ratio Lambda',
       environment: {
         VERSION: '2',
         NODE_OPTIONS: '--enable-source-maps',

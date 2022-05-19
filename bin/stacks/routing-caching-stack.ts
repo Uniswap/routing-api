@@ -82,6 +82,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         minify: true,
         sourceMap: true,
       },
+      description: 'Pool Cache Lambda',
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
@@ -117,6 +118,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           minify: true,
           sourceMap: true,
         },
+        description: 'IPFS Pool Cache Lambda',
         layers: [
           aws_lambda.LayerVersion.fromLayerVersionArn(
             this,
@@ -200,6 +202,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
+      description: 'Token List Cache Lambda',
       tracing: aws_lambda.Tracing.ACTIVE,
       environment: {
         TOKEN_LIST_CACHE_BUCKET: this.tokenListCacheBucket.bucketName,
