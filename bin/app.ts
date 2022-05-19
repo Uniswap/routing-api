@@ -62,10 +62,12 @@ export class RoutingAPIPipeline extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
 
+    const code = CodePipelineSource.gitHub('Uniswap/routing-api', 'main', {
+      authentication: SecretValue.secretsManager('github-token-2'),
+    })
+
     const synthStep = new CodeBuildStep('Synth', {
-      input: CodePipelineSource.gitHub('Uniswap/routing-api', 'main', {
-        authentication: SecretValue.secretsManager('github-token-2'),
-      }),
+      input: code,
       buildEnvironment: {
         environmentVariables: {
           NPM_TOKEN: {
@@ -129,7 +131,7 @@ export class RoutingAPIPipeline extends Stack {
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
 
-    this.addIntegTests(synthStep, betaUsEast2Stage, betaUsEast2AppStage)
+    this.addIntegTests(code, betaUsEast2Stage, betaUsEast2AppStage)
 
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
@@ -147,7 +149,7 @@ export class RoutingAPIPipeline extends Stack {
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
 
-    this.addIntegTests(synthStep, prodUsEast2Stage, prodUsEast2AppStage)
+    this.addIntegTests(code, prodUsEast2Stage, prodUsEast2AppStage)
 
     const slackChannel = chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(
       this,
@@ -162,7 +164,7 @@ export class RoutingAPIPipeline extends Stack {
   }
 
   private addIntegTests(
-    sourceArtifact: cdk.pipelines.CodeBuildStep,
+    sourceArtifact: cdk.pipelines.CodePipelineSource,
     routingAPIStage: RoutingAPIStage,
     applicationStage: cdk.pipelines.StageDeployment
   ) {
