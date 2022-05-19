@@ -1,9 +1,9 @@
 import { ChainId } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import { Construct } from 'constructs'
 import _ from 'lodash'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
-import { Construct } from 'constructs'
 
 export const NAMESPACE = 'Uniswap'
 
