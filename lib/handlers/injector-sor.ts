@@ -108,7 +108,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const url = process.env.JSON_RPC_PROVIDER!
 
-        log.info({url: url, id: process.env.PROJECT_ID}, `generated rpc url`)
+        log.info({ url: url, id: process.env.PROJECT_ID }, `generated rpc url`)
 
         let timeout: number
         switch (chainId) {

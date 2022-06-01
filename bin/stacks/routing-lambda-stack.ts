@@ -1,3 +1,4 @@
+import { ChainId, ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
@@ -10,7 +11,6 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { ChainId, ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
@@ -41,7 +41,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       jsonRpcProvider,
-      jsonRpcProviderOverride
+      jsonRpcProviderOverride,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -70,8 +70,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     }
 
     jsonRpcProviderOverride.forEach((url: string, chainId: ChainId) => {
-      (env as any)[`JSON_RPC_PROVIDER_${ID_TO_NETWORK_NAME(chainId).toUpperCase}`] = url
-    });
+      ;(env as any)[`JSON_RPC_PROVIDER_${ID_TO_NETWORK_NAME(chainId).toUpperCase}`] = url
+    })
 
     this.routingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'RoutingLambda2', {
       role: lambdaRole,

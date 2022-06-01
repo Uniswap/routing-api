@@ -47,7 +47,7 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_secret,
       hosted_zone,
       jsonRpcProvider,
-      jsonRpcProviderOverride
+      jsonRpcProviderOverride,
     } = props
 
     const {
@@ -78,7 +78,7 @@ export class RoutingAPIStack extends cdk.Stack {
         ethGasStationInfoUrl,
         chatbotSNSArn,
         jsonRpcProvider,
-        jsonRpcProviderOverride
+        jsonRpcProviderOverride,
       }
     )
 

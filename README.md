@@ -14,35 +14,44 @@ The best way to develop and test the API is to deploy your own instance to AWS.
 
 1. Install and configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) and [AWS CDK V1](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html).
 2. Create .env file in the root directory of the project with:
+
    ```
    JSON_RPC_PROVIDER = '<JSON_RPC_PROVIDER>'
    THROTTLE_PER_FIVE_MINS = '' # Optional
    ```
 
    To override the default JSON_RPC_PROVIDER for a specific chain, set up a connection by specifying the environment variable
+
    ```
    JSON_RPC_PROVIDER_{CHAIN} = '<JSON_RPC_PROVIDER>'
    ```
 
    For example, specifying a provider for Optimism :
+
    ```
    JSON_RPC_PROVIDER_OPTIMISM = '<JSON_RPC_PROVIDER>'
    ```
+
 3. Install and build the package
+
    ```
    npm install && npm run build
    ```
 
 4. To deploy the API run:
+
    ```
    cdk deploy RoutingAPIStack
    ```
 
    This will deploy to the default account your AWS CLI is configured for. Once complete it will output something like:
+
    ```
    RoutingAPIStack.Url = https://...
    ```
+
    You can then try it out:
+
    ```
    curl --request GET '<INSERT_YOUR_URL_HERE>/quote?tokenInAddress=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&tokenInChainId=1&tokenOutAddress=0x1f9840a85d5af5bf1d1762f925bdaddc4201f984&tokenOutChainId=1&amount=100&type=exactIn'
    ```
