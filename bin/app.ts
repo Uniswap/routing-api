@@ -1,3 +1,4 @@
+import { ChainId } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, SecretValue, Stack, StackProps, Stage, StageProps } from 'aws-cdk-lib'
 import * as chatbot from 'aws-cdk-lib/aws-chatbot'
@@ -19,7 +20,8 @@ export class RoutingAPIStage extends Stage {
     scope: Construct,
     id: string,
     props: StageProps & {
-      infuraProjectId: string
+      jsonRpcProvider: string
+      jsonRpcProviderOverride: Map<ChainId, string>
       provisionedConcurrency: number
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
@@ -32,7 +34,8 @@ export class RoutingAPIStage extends Stage {
   ) {
     super(scope, id, props)
     const {
-      infuraProjectId,
+      jsonRpcProvider,
+      jsonRpcProviderOverride,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -44,7 +47,8 @@ export class RoutingAPIStage extends Stage {
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
-      infuraProjectId,
+      jsonRpcProvider,
+      jsonRpcProviderOverride,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -93,8 +97,8 @@ export class RoutingAPIPipeline extends Stack {
     // Secrets are stored in secrets manager in the pipeline account. Accounts we deploy to
     // have been granted permissions to access secrets via resource policies.
 
-    const infuraProjectId = sm.Secret.fromSecretAttributes(this, 'InfuraProjectId', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:infuraProjectId-UlSwK2',
+    const jsonRpcProvider = sm.Secret.fromSecretAttributes(this, 'jsonRpcProvider', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:jsonRpcProvider-UlSwK2',
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
@@ -119,6 +123,8 @@ export class RoutingAPIPipeline extends Stack {
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
+      jsonRpcProvider: jsonRpcProvider.secretValue.toString(),
+      jsonRpcProviderOverride: new Map<ChainId, string>(),
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       stage: STAGE.BETA,
@@ -126,7 +132,6 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
-      infuraProjectId: infuraProjectId.secretValue.toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -136,7 +141,8 @@ export class RoutingAPIPipeline extends Stack {
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
-      infuraProjectId: infuraProjectId.secretValue.toString(),
+      jsonRpcProvider: jsonRpcProvider.secretValue.toString(),
+      jsonRpcProviderOverride: new Map<ChainId, string>(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
@@ -204,7 +210,8 @@ const app = new cdk.App()
 
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
-  infuraProjectId: process.env.PROJECT_ID!,
+  jsonRpcProvider: process.env.JSON_RPC_PROVIDER!,
+  jsonRpcProviderOverride: new Map<ChainId, string>(),
   provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 0,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,

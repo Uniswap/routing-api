@@ -6,7 +6,6 @@ import {
   CachingV3PoolProvider,
   ChainId,
   EIP1559GasPriceProvider,
-  ID_TO_PROVIDER,
   IGasPriceProvider,
   IMetric,
   ITokenListProvider,
@@ -107,7 +106,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
-        const url = ID_TO_PROVIDER(chainId) ?? process.env.JSON_RPC_PROVIDER
+        const url = process.env.JSON_RPC_PROVIDER!
+
+        log.info({url: url, id: process.env.PROJECT_ID}, `generated rpc url`)
 
         let timeout: number
         switch (chainId) {

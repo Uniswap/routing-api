@@ -19,14 +19,12 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    THROTTLE_PER_FIVE_MINS = '' # Optional
    ```
 
-   To run on chains other than mainnet set up a connection by specifying the environment variable
-
+   To override the default JSON_RPC_PROVIDER for a specific chain, set up a connection by specifying the environment variable
    ```
    JSON_RPC_PROVIDER_{CHAIN} = '<JSON_RPC_PROVIDER>'
    ```
 
    For example, specifying a provider for Optimism :
-
    ```
    JSON_RPC_PROVIDER_OPTIMISM = '<JSON_RPC_PROVIDER>'
    ```
@@ -34,10 +32,12 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    ```
    npm install && npm run build
    ```
+
 4. To deploy the API run:
    ```
    cdk deploy RoutingAPIStack
    ```
+
    This will deploy to the default account your AWS CLI is configured for. Once complete it will output something like:
    ```
    RoutingAPIStack.Url = https://...

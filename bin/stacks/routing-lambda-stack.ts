@@ -10,16 +10,20 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
+import { ChainId, ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
   poolCacheKey: string
-  infuraProjectId: string
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
   chatbotSNSArn?: string
+
+  // JSON RPC ENDPOINTS
+  jsonRpcProvider: string
+  jsonRpcProviderOverride: Map<ChainId, string>
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -32,11 +36,12 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
-      infuraProjectId,
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
+      jsonRpcProvider,
+      jsonRpcProviderOverride
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -53,6 +58,21 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
     const region = cdk.Stack.of(this).region
 
+    const env = {
+      VERSION: '2',
+      JSON_RPC_PROVIDER: jsonRpcProvider,
+      NODE_OPTIONS: '--enable-source-maps',
+      POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
+      POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
+      POOL_CACHE_KEY: poolCacheKey,
+      TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
+      ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+    }
+
+    jsonRpcProviderOverride.forEach((url: string, chainId: ChainId) => {
+      (env as any)[`JSON_RPC_PROVIDER_${ID_TO_NETWORK_NAME(chainId).toUpperCase}`] = url
+    });
+
     this.routingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'RoutingLambda2', {
       role: lambdaRole,
       runtime: aws_lambda.Runtime.NODEJS_14_X,
@@ -65,16 +85,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         sourceMap: true,
       },
       description: 'Routing Lambda',
-      environment: {
-        VERSION: '2',
-        NODE_OPTIONS: '--enable-source-maps',
-        POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
-        POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
-        POOL_CACHE_KEY: poolCacheKey,
-        TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
-        ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        PROJECT_ID: infuraProjectId,
-      },
+      environment: env,
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
@@ -97,16 +108,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         sourceMap: true,
       },
       description: 'Route to Ratio Lambda',
-      environment: {
-        VERSION: '2',
-        NODE_OPTIONS: '--enable-source-maps',
-        POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
-        POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
-        POOL_CACHE_KEY: poolCacheKey,
-        PROJECT_ID: infuraProjectId,
-        TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
-        ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-      },
+      environment: env,
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,

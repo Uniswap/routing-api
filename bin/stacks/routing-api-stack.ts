@@ -1,3 +1,4 @@
+import { ChainId } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
@@ -20,7 +21,8 @@ export class RoutingAPIStack extends cdk.Stack {
     parent: Construct,
     name: string,
     props: cdk.StackProps & {
-      infuraProjectId: string
+      jsonRpcProvider: string
+      jsonRpcProviderOverride: Map<ChainId, string>
       provisionedConcurrency: number
       throttlingOverride?: string
       ethGasStationInfoUrl: string
@@ -35,7 +37,6 @@ export class RoutingAPIStack extends cdk.Stack {
     super(parent, name, props)
 
     const {
-      infuraProjectId,
       provisionedConcurrency,
       throttlingOverride,
       ethGasStationInfoUrl,
@@ -45,6 +46,8 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      jsonRpcProvider,
+      jsonRpcProviderOverride
     } = props
 
     const {
@@ -70,11 +73,12 @@ export class RoutingAPIStack extends cdk.Stack {
         poolCacheBucket,
         poolCacheBucket2,
         poolCacheKey,
-        infuraProjectId,
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,
         chatbotSNSArn,
+        jsonRpcProvider,
+        jsonRpcProviderOverride
       }
     )
 
