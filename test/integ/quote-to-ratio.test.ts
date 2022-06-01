@@ -730,6 +730,7 @@ describe('quote-to-ratio', async function () {
     (c) =>
       c != ChainId.POLYGON &&
       c != ChainId.RINKEBY &&
+      c != ChainId.OPTIMISM &&
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&

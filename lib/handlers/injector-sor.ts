@@ -177,7 +177,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 multicallChunk: 45,
               },
               {
-                baseBlockOffset: -20,
+                baseBlockOffset: -25,
                 rollback: {
                   enabled: true,
                   attemptsBeforeRollback: 1,
