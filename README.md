@@ -15,8 +15,20 @@ The best way to develop and test the API is to deploy your own instance to AWS.
 1. Install and configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) and [AWS CDK V1](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html).
 2. Create .env file in the root directory of the project with:
    ```
-   PROJECT_ID = '' # Infura Project Id
+   JSON_RPC_PROVIDER = '<JSON_RPC_PROVIDER>'
    THROTTLE_PER_FIVE_MINS = '' # Optional
+   ```
+
+   To run on chains other than mainnet set up a connection by specifying the environment variable
+
+   ```
+   JSON_RPC_PROVIDER_{CHAIN} = '<JSON_RPC_PROVIDER>'
+   ```
+
+   For example, specifying a provider for Optimism :
+
+   ```
+   JSON_RPC_PROVIDER_OPTIMISM = '<JSON_RPC_PROVIDER>'
    ```
 3. Install and build the package
    ```
