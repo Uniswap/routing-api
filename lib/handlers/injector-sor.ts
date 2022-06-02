@@ -110,17 +110,18 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         const chainName = ID_TO_NETWORK_NAME(chainId)
         const providerName = process.env.PROVIDER_NAME
         const projectId = process.env.PROJECT_ID
-        const url = ():string=> {
-            switch(providerName) {
-              case('infura'):
-                return `https://${chainName}.infura.io/v3/${projectId}`
-              case('moralis'):
-                throw Error("Fatal: Moralis Provider Not Supported")
-              default:
-                throw Error("Fatal: Unknown Provider Not Supported")
-            }
-        };
-
+        let url = "";
+        switch(providerName) {
+          case('infura'):
+            url = `https://${chainName}.infura.io/v3/${projectId}`
+            break
+          case('alchemy'):
+            // todo: add logic to generate alchemy rpc urls
+          case('moralis'):
+            // todo: todo: add logic to generate moralis rpc urls
+          default:
+            throw Error("Fatal: Unknown Provider Not Supported")
+        }
 
         let timeout: number
         switch (chainId) {

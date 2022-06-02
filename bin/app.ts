@@ -19,7 +19,8 @@ export class RoutingAPIStage extends Stage {
     scope: Construct,
     id: string,
     props: StageProps & {
-      infuraProjectId: string
+      providerName: string
+      projectId: string
       provisionedConcurrency: number
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
@@ -32,7 +33,8 @@ export class RoutingAPIStage extends Stage {
   ) {
     super(scope, id, props)
     const {
-      infuraProjectId,
+      providerName,
+      projectId,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -44,7 +46,8 @@ export class RoutingAPIStage extends Stage {
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
-      infuraProjectId,
+      providerName,
+      projectId,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -126,7 +129,8 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
-      infuraProjectId: infuraProjectId.secretValue.toString(),
+      providerName: 'infura',
+      projectId: infuraProjectId.secretValue.toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -136,7 +140,8 @@ export class RoutingAPIPipeline extends Stack {
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
-      infuraProjectId: infuraProjectId.secretValue.toString(),
+      providerName: 'infura',
+      projectId: infuraProjectId.secretValue.toString(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
