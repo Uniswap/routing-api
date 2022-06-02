@@ -108,9 +108,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const chainName = ID_TO_NETWORK_NAME(chainId)
-        // updated chainNames to match infura strings
+        const providerName = process.env.PROVIDER_NAME
         const projectId = process.env.PROJECT_ID
-        const url = `https://${chainName}.infura.io/v3/${projectId}`
+        const url = ():string=> {
+            switch(providerName) {
+              case('infura'):
+                return `https://${chainName}.infura.io/v3/${projectId}`
+              case('moralis'):
+                throw Error("Fatal: Moralis Provider Not Supported")
+              default:
+                throw Error("Fatal: Unknown Provider Not Supported")
+            }
+        };
+
 
         let timeout: number
         switch (chainId) {

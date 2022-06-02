@@ -204,7 +204,8 @@ const app = new cdk.App()
 
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
-  infuraProjectId: process.env.PROJECT_ID!,
+  providerName : process.env.PROVIDER_NAME!,
+  projectId: process.env.PROJECT_ID!,
   provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 0,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,

@@ -20,7 +20,8 @@ export class RoutingAPIStack extends cdk.Stack {
     parent: Construct,
     name: string,
     props: cdk.StackProps & {
-      infuraProjectId: string
+      providerName: string
+      projectId: string
       provisionedConcurrency: number
       throttlingOverride?: string
       ethGasStationInfoUrl: string
@@ -35,7 +36,8 @@ export class RoutingAPIStack extends cdk.Stack {
     super(parent, name, props)
 
     const {
-      infuraProjectId,
+      providerName,
+      projectId,
       provisionedConcurrency,
       throttlingOverride,
       ethGasStationInfoUrl,
@@ -70,7 +72,8 @@ export class RoutingAPIStack extends cdk.Stack {
         poolCacheBucket,
         poolCacheBucket2,
         poolCacheKey,
-        infuraProjectId,
+        providerName,
+        projectId,
         tokenListCacheBucket,
         provisionedConcurrency,
         ethGasStationInfoUrl,

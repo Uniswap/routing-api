@@ -15,7 +15,8 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
   poolCacheKey: string
-  infuraProjectId: string
+  providerName: string
+  projectId: string
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
@@ -32,7 +33,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
-      infuraProjectId,
+      providerName,
+      projectId,
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
@@ -73,7 +75,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        PROJECT_ID: infuraProjectId,
+        PROVIDER_NAME: providerName,
+        PROJECT_ID: projectId,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
@@ -103,7 +106,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
-        PROJECT_ID: infuraProjectId,
+        PROVIDER_NAME: providerName,
+        PROJECT_ID: projectId,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
       },
