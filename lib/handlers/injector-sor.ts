@@ -6,7 +6,6 @@ import {
   CachingV3PoolProvider,
   ChainId,
   EIP1559GasPriceProvider,
-  ID_TO_NETWORK_NAME,
   IGasPriceProvider,
   IMetric,
   ITokenListProvider,
@@ -107,44 +106,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
-        const providerName = process.env.PROVIDER_NAME!
-        const projectId = process.env.PROJECT_ID
-        const chainName = ID_TO_NETWORK_NAME(chainId)
-        let url = "";
-        switch(providerName) {
-          case('infura'):
-            url = `https://${chainName}.infura.io/v3/${projectId}`
-            break
-          case('alchemy'):
-            switch(chainId) {
-              // Eth RPC format
-              case(ChainId.MAINNET):
-              case(ChainId.GÖRLI):
-                url = `https://eth-${chainName}.alchemyapi.io/v2/${projectId}`
-                break
-              // Polygon RPC format
-              case(ChainId.POLYGON):
-              case(ChainId.POLYGON_MUMBAI):
-                url = `https://${chainName}.g.alchemy.com/v2/${projectId}`
-                break
-              case(ChainId.ARBITRUM_ONE):
-                url = `https://arb-mainnet.g.alchemy.com/v2/${projectId}`
-                break
-              case(ChainId.ARBITRUM_RINKEBY):
-                url = `https://arb-rinkeby.g.alchemy.com/v2/${projectId}`
-                break
-              case(ChainId.OPTIMISM):
-                url = `https://opt-mainnet.g.alchemy.com/v2/${projectId}`
-                break
-              case(ChainId.OPTIMISTIC_KOVAN):
-                url = `https://opt-kovan.g.alchemy.com/v2/${projectId}`
-                break
-              default:
-                log.fatal({provider: 'alchemy', chainId: chainId},`RPC url could not be generated. Chain not supported for the specified provider.`)
-            }
-            break
-          default:
-            log.fatal({provider: providerName, chainId: chainId},`Web3 provider not supported.`)
+        const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
+        log.info({url:url}, `GENERATED URL`)
+
+        if(typeof(url)==undefined) {
+          log.fatal({'chainId':chainId}, `Fatal: No Web3 RPC endpoint set for chain`)
         }
 
         let timeout: number

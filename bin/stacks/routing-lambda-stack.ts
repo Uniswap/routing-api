@@ -15,8 +15,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
   poolCacheKey: string
-  providerName: string
-  projectId: string
+  jsonRpcProviders: {[chainName: string]:string}
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
@@ -33,8 +32,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
-      providerName,
-      projectId,
+      jsonRpcProviders,
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
@@ -75,8 +73,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        PROVIDER_NAME: providerName,
-        PROJECT_ID: projectId,
+        ...jsonRpcProviders
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
@@ -106,10 +103,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
-        PROVIDER_NAME: providerName,
-        PROJECT_ID: projectId,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+        ...jsonRpcProviders,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
