@@ -212,22 +212,6 @@ export class RoutingAPIPipeline extends Stack {
 
 const app = new cdk.App()
 
-console.log(process.env.WEB3_RPC_1!)
-
-console.log({
-  WEB3_RPC_1: process.env.WEB3_RPC_1!,
-  WEB3_RPC_3: process.env.WEB3_RPC_3!,
-  WEB3_RPC_4: process.env.WEB3_RPC_4!,
-  WEB3_RPC_5: process.env.WEB3_RPC_5!,
-  WEB3_RPC_42: process.env.WEB3_RPC_42!,
-  WEB3_RPC_10: process.env.WEB3_RPC_10!,
-  WEB3_RPC_69: process.env.WEB3_RPC_69!,
-  WEB3_RPC_42161: process.env.WEB3_RPC_42161!,
-  WEB3_RPC_421611: process.env.WEB3_RPC_421611!,
-  WEB3_RPC_137: process.env.WEB3_RPC_137!,
-  WEB3_RPC_80001: process.env.WEB3_RPC_80001!,
-})
-
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: {
