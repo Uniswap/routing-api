@@ -96,7 +96,8 @@ export class RoutingAPIPipeline extends Stack {
     // have been granted permissions to access secrets via resource policies.
 
     const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-M18pZP',
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+      //backup Arn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {

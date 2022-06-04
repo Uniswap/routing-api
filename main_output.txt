@@ -1,0 +1,450 @@
+
+> @uniswap/routing-api@0.1.0 integ-test
+> ts-mocha -p tsconfig.cdk.json -r dotenv/config test/integ/**/*.test.ts
+
+
+
+  quote-to-ratio
+    erc20 -> erc20 low volume trade token0Excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (3172ms)
+    erc20 -> erc20 high volume trade token0Excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (2018ms)
+    erc20 -> erc20 low volume trade token1Excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (2954ms)
+    erc20 -> erc20 high volume trade token1Excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (2498ms)
+    erc20 -> erc20 range order position token0 excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (3945ms)
+    erc20 -> erc20 range order position token1 excess
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (5331ms)
+    erc20 -> eth
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (6614ms)
+    eth -> erc20
+      ✓ generates a legitimate trade with routing-api
+      ✓ executes properly at the contract level (3690ms)
+    when adding to an existing position
+      ✓ first mint new position (4740ms)
+      ✓ generates a legitimate trade with routing-api (1815ms)
+      ✓ successfully executes at the contract level (1137ms)
+    4xx Error response
+      ✓ when both balances are 0 (126ms)
+      ✓ when max iterations is 0 (95ms)
+      ✓ when ratio is already fulfilled with token1 (275ms)
+      ✓ when ratio is already fulfilled with token0 (134ms)
+      ✓ amount exceeds uint256 (132ms)
+      ✓ with unknown token (229ms)
+      ✓ when tokens are the same (99ms)
+      ✓ when token are out of order (236ms)
+      ✓ when tick is not a multiple of target pool tick spacing (251ms)
+    mainnet 2xx
+      ✓ WETH -> erc20 (1983ms)
+      ✓ erc20 -> erc20 (1735ms)
+      ✓ ETH -> erc20 (1944ms)
+    ropsten 2xx
+      ✓ WETH -> erc20 (3890ms)
+      ✓ erc20 -> erc20 (4196ms)
+      ✓ ETH -> erc20 (2352ms)
+    kovan 2xx
+      ✓ WETH -> erc20 (1024ms)
+      ✓ erc20 -> erc20 (917ms)
+      ✓ ETH -> erc20 (1072ms)
+    arbitrum-mainnet 2xx
+      1) WETH -> erc20
+      2) erc20 -> erc20
+      3) ETH -> erc20
+
+  quote
+    mainnet alpha exactIn 2xx
+      ✓ erc20 -> erc20 no recipient/deadline/slippage (1890ms)
+      ✓ erc20 -> erc20 gas price specified (1637ms)
+      ✓ erc20 -> erc20 by address (1330ms)
+      ✓ erc20 -> erc20 one by address one by symbol (1534ms)
+      + simulate swap
+        ✓ erc20 -> erc20 (4109ms)
+        ✓ erc20 -> erc20 (1574ms)
+        ✓ erc20 -> eth (5337ms)
+        ✓ erc20 -> eth large trade (4151ms)
+        ✓ eth -> erc20 (4470ms)
+        ✓ weth -> erc20 (3916ms)
+        ✓ erc20 -> weth (1416ms)
+        ✓ erc20 -> erc20 v3 only (1607ms)
+        ✓ erc20 -> erc20 v2 only (2756ms)
+        ✓ erc20 -> erc20 forceCrossProtocol (2550ms)
+    mainnet alpha exactIn 4xx
+      ✓ field is missing in body (141ms)
+      - amount is too big to find route
+      ✓ amount is too big for uint256 (99ms)
+      ✓ amount is negative (252ms)
+      ✓ amount is decimal (247ms)
+      ✓ symbol doesnt exist (234ms)
+      ✓ tokens are the same symbol (255ms)
+      ✓ tokens are the same symbol and address (242ms)
+      ✓ tokens are the same address (251ms)
+      ✓ one of recipient/deadline/slippage is missing (239ms)
+      ✓ recipient is an invalid address (128ms)
+      ✓ unsupported chain (318ms)
+    mainnet alpha exactOut 2xx
+      ✓ erc20 -> erc20 no recipient/deadline/slippage (1533ms)
+      ✓ erc20 -> erc20 gas price specified (1566ms)
+      ✓ erc20 -> erc20 by address (1133ms)
+      ✓ erc20 -> erc20 one by address one by symbol (1594ms)
+      + simulate swap
+        ✓ erc20 -> erc20 (1999ms)
+        ✓ erc20 -> erc20 (1559ms)
+        ✓ erc20 -> eth (1428ms)
+        ✓ erc20 -> eth large trade (1273ms)
+        ✓ eth -> erc20 (1775ms)
+        ✓ weth -> erc20 (2839ms)
+        ✓ erc20 -> weth (1301ms)
+        ✓ erc20 -> erc20 v3 only (1373ms)
+        ✓ erc20 -> erc20 v2 only (1022ms)
+        ✓ erc20 -> erc20 forceCrossProtocol (2010ms)
+    mainnet alpha exactOut 4xx
+      ✓ field is missing in body (98ms)
+      - amount is too big to find route
+      ✓ amount is too big for uint256 (95ms)
+      ✓ amount is negative (242ms)
+      ✓ amount is decimal (319ms)
+      ✓ symbol doesnt exist (250ms)
+      ✓ tokens are the same symbol (295ms)
+      ✓ tokens are the same symbol and address (126ms)
+      ✓ tokens are the same address (278ms)
+      ✓ one of recipient/deadline/slippage is missing (271ms)
+      ✓ recipient is an invalid address (242ms)
+      ✓ unsupported chain (244ms)
+    mainnet legacy exactIn 2xx
+      ✓ erc20 -> erc20 no recipient/deadline/slippage (605ms)
+      ✓ erc20 -> erc20 gas price specified (408ms)
+      ✓ erc20 -> erc20 by address (451ms)
+      ✓ erc20 -> erc20 one by address one by symbol (468ms)
+      + simulate swap
+        ✓ erc20 -> erc20 (4270ms)
+        ✓ erc20 -> erc20 (1108ms)
+        ✓ erc20 -> eth (1887ms)
+        ✓ erc20 -> eth large trade (3541ms)
+        ✓ eth -> erc20 (1600ms)
+        ✓ weth -> erc20 (2190ms)
+        ✓ erc20 -> weth (681ms)
+    mainnet legacy exactIn 4xx
+      ✓ field is missing in body (262ms)
+      - amount is too big to find route
+      ✓ amount is too big for uint256 (243ms)
+      ✓ amount is negative (274ms)
+      ✓ amount is decimal (130ms)
+      ✓ symbol doesnt exist (115ms)
+      ✓ tokens are the same symbol (107ms)
+      ✓ tokens are the same symbol and address (272ms)
+      ✓ tokens are the same address (245ms)
+      ✓ one of recipient/deadline/slippage is missing (282ms)
+      ✓ recipient is an invalid address (108ms)
+      ✓ unsupported chain (107ms)
+    mainnet legacy exactOut 2xx
+      ✓ erc20 -> erc20 no recipient/deadline/slippage (478ms)
+      ✓ erc20 -> erc20 gas price specified (1537ms)
+      ✓ erc20 -> erc20 by address (480ms)
+      ✓ erc20 -> erc20 one by address one by symbol (334ms)
+      + simulate swap
+        ✓ erc20 -> erc20 (954ms)
+        ✓ erc20 -> erc20 (800ms)
+        ✓ erc20 -> eth (697ms)
+        ✓ erc20 -> eth large trade (778ms)
+        ✓ eth -> erc20 (912ms)
+        ✓ weth -> erc20 (798ms)
+        ✓ erc20 -> weth (1312ms)
+    mainnet legacy exactOut 4xx
+      ✓ field is missing in body (116ms)
+      - amount is too big to find route
+      ✓ amount is too big for uint256 (131ms)
+      ✓ amount is negative (244ms)
+      ✓ amount is decimal (131ms)
+      ✓ symbol doesnt exist (487ms)
+      ✓ tokens are the same symbol (232ms)
+      ✓ tokens are the same symbol and address (244ms)
+      ✓ tokens are the same address (120ms)
+      ✓ one of recipient/deadline/slippage is missing (114ms)
+      ✓ recipient is an invalid address (237ms)
+      ✓ unsupported chain (259ms)
+    mainnet exactIn 2xx
+      ✓ WETH -> erc20 (934ms)
+      ✓ erc20 -> erc20 (937ms)
+      ✓ ETH -> erc20 (1518ms)
+      ✓ has quoteGasAdjusted values (938ms)
+    mainnet exactOut 2xx
+      ✓ WETH -> erc20 (873ms)
+      ✓ erc20 -> erc20 (883ms)
+      ✓ ETH -> erc20 (1396ms)
+      ✓ has quoteGasAdjusted values (1230ms)
+    rinkeby exactIn 2xx
+      ✓ WETH -> erc20 (2557ms)
+      ✓ erc20 -> erc20 (1153ms)
+      ✓ ETH -> erc20 (1916ms)
+      ✓ has quoteGasAdjusted values (1025ms)
+    rinkeby exactOut 2xx
+      ✓ WETH -> erc20 (1734ms)
+      ✓ erc20 -> erc20 (1644ms)
+      ✓ ETH -> erc20 (1022ms)
+      ✓ has quoteGasAdjusted values (1635ms)
+    ropsten exactIn 2xx
+      ✓ WETH -> erc20 (2571ms)
+      ✓ erc20 -> erc20 (1938ms)
+      ✓ ETH -> erc20 (4029ms)
+      ✓ has quoteGasAdjusted values (426658ms)
+    ropsten exactOut 2xx
+      ✓ WETH -> erc20 (3788ms)
+      ✓ erc20 -> erc20 (2662ms)
+      ✓ ETH -> erc20 (3175ms)
+      ✓ has quoteGasAdjusted values (2232ms)
+    kovan exactIn 2xx
+      ✓ WETH -> erc20 (1206ms)
+      ✓ erc20 -> erc20 (769ms)
+      ✓ ETH -> erc20 (1815ms)
+      ✓ has quoteGasAdjusted values (713ms)
+    kovan exactOut 2xx
+      ✓ WETH -> erc20 (1034ms)
+      ✓ erc20 -> erc20 (641ms)
+      ✓ ETH -> erc20 (999ms)
+      ✓ has quoteGasAdjusted values (617ms)
+    optimism-mainnet exactIn 2xx
+      4) WETH -> erc20
+      5) erc20 -> erc20
+      6) ETH -> erc20
+      7) has quoteGasAdjusted values
+    optimism-mainnet exactOut 2xx
+      8) WETH -> erc20
+      9) erc20 -> erc20
+      10) ETH -> erc20
+      11) has quoteGasAdjusted values
+    arbitrum-mainnet exactIn 2xx
+      12) WETH -> erc20
+      13) erc20 -> erc20
+      14) ETH -> erc20
+      15) has quoteGasAdjusted values
+    arbitrum-mainnet exactOut 2xx
+      16) WETH -> erc20
+      17) erc20 -> erc20
+      18) ETH -> erc20
+      19) has quoteGasAdjusted values
+    polygon-mainnet exactIn 2xx
+      20) WMATIC -> erc20
+      21) erc20 -> erc20
+      22) MATIC -> erc20
+      23) has quoteGasAdjusted values
+    polygon-mainnet exactOut 2xx
+      24) WMATIC -> erc20
+      25) erc20 -> erc20
+      26) MATIC -> erc20
+      27) has quoteGasAdjusted values
+    goerli exactIn 2xx
+      ✓ WETH -> erc20 (4398ms)
+      ✓ erc20 -> erc20 (927ms)
+      ✓ ETH -> erc20 (490ms)
+      ✓ has quoteGasAdjusted values (736ms)
+    goerli exactOut 2xx
+      ✓ WETH -> erc20 (602ms)
+      ✓ erc20 -> erc20 (725ms)
+      ✓ ETH -> erc20 (400ms)
+      ✓ has quoteGasAdjusted values (569ms)
+
+
+  171 passing (13m)
+  4 pending
+  27 failing
+
+  1) quote-to-ratio
+       arbitrum-mainnet 2xx
+         WETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"7e621"}
+      at Context.<anonymous> (test/integ/quote-to-ratio.test.ts:800:11)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  2) quote-to-ratio
+       arbitrum-mainnet 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"76078"}
+      at Context.<anonymous> (test/integ/quote-to-ratio.test.ts:853:11)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  3) quote-to-ratio
+       arbitrum-mainnet 2xx
+         ETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"7197a"}
+      at Context.<anonymous> (test/integ/quote-to-ratio.test.ts:883:11)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  4) quote
+       optimism-mainnet exactIn 2xx
+         WETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"be497"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  5) quote
+       optimism-mainnet exactIn 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"9fcf4"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  6) quote
+       optimism-mainnet exactIn 2xx
+         ETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"af8e8"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  7) quote
+       optimism-mainnet exactIn 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"e0412"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  8) quote
+       optimism-mainnet exactOut 2xx
+         WETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"bc61a"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  9) quote
+       optimism-mainnet exactOut 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"58b9e"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  10) quote
+       optimism-mainnet exactOut 2xx
+         ETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"a2cb9"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  11) quote
+       optimism-mainnet exactOut 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"message":"Internal server error"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  12) quote
+       arbitrum-mainnet exactIn 2xx
+         WETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"c5330"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  13) quote
+       arbitrum-mainnet exactIn 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"4da9c"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  14) quote
+       arbitrum-mainnet exactIn 2xx
+         ETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"c4899"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  15) quote
+       arbitrum-mainnet exactIn 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"message":"Internal server error"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  16) quote
+       arbitrum-mainnet exactOut 2xx
+         WETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"f8f94"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  17) quote
+       arbitrum-mainnet exactOut 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"6fcb1"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  18) quote
+       arbitrum-mainnet exactOut 2xx
+         ETH -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"3c6ad"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  19) quote
+       arbitrum-mainnet exactOut 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"message":"Internal server error"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  20) quote
+       polygon-mainnet exactIn 2xx
+         WMATIC -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"ebfb0"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  21) quote
+       polygon-mainnet exactIn 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"20cfb"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  22) quote
+       polygon-mainnet exactIn 2xx
+         MATIC -> erc20:
+     AssertionError [ERR_ASSERTION]: {"message":"Internal server error"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  23) quote
+       polygon-mainnet exactIn 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"aae26"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  24) quote
+       polygon-mainnet exactOut 2xx
+         WMATIC -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"41a01"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1135:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  25) quote
+       polygon-mainnet exactOut 2xx
+         erc20 -> erc20:
+     AssertionError [ERR_ASSERTION]: {"message":"Internal server error"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1157:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  26) quote
+       polygon-mainnet exactOut 2xx
+         MATIC -> erc20:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"7570e"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1178:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+  27) quote
+       polygon-mainnet exactOut 2xx
+         has quoteGasAdjusted values:
+     AssertionError [ERR_ASSERTION]: {"errorCode":"INTERNAL_ERROR","detail":"Unexpected error","id":"7aa2c"}
+      at Context.<anonymous> (test/integ/quote.test.ts:1209:13)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+
+
+

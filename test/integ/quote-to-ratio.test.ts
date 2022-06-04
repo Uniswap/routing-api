@@ -736,6 +736,7 @@ describe('quote-to-ratio', async function () {
       c != ChainId.ARBITRUM_RINKEBY &&
       c != ChainId.GÖRLI
   )) {
+    console.log(chain)
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
 
@@ -797,6 +798,8 @@ describe('quote-to-ratio', async function () {
 
           expect(status).to.equal(200)
         } catch (err) {
+          console.log(err)
+          console.log("#".repeat(100))
           fail(JSON.stringify(err.response.data))
         }
       })
