@@ -797,8 +797,6 @@ describe('quote-to-ratio', async function () {
 
           expect(status).to.equal(200)
         } catch (err) {
-          console.log(err)
-          console.log("#".repeat(100))
           fail(JSON.stringify(err.response.data))
         }
       })
