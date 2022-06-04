@@ -109,7 +109,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
         log.info({url:url}, `GENERATED URL`)
 
-        if(typeof(url)==undefined) {
+        if(typeof(url)==undefined||url=="") {
           log.fatal({'chainId':chainId}, `Fatal: No Web3 RPC endpoint set for chain`)
         }
 
