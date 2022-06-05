@@ -114,7 +114,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             dependencies: {} as ContainerDependencies}
           // This router instance will not be able to route through any chain
           // for which RPC URL is not set
-          // This will be handled at the quote.ts and quote-to-ratio.ts
+          // This should be handled 
         }
 
         let timeout: number

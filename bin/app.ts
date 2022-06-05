@@ -105,7 +105,7 @@ export class RoutingAPIPipeline extends Stack {
       When switching to the backups,
       we must set the multicall chunk size to 50 so that optimism
       does not bug out on Alchemy's end
-      /*
+      */
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
