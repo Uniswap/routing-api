@@ -6,7 +6,6 @@ import {
   CachingV3PoolProvider,
   ChainId,
   EIP1559GasPriceProvider,
-  ID_TO_NETWORK_NAME,
   IGasPriceProvider,
   IMetric,
   ITokenListProvider,
@@ -107,10 +106,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
-        const chainName = ID_TO_NETWORK_NAME(chainId)
-        // updated chainNames to match infura strings
-        const projectId = process.env.PROJECT_ID
-        const url = `https://${chainName}.infura.io/v3/${projectId}`
+        const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
+
+        if (!url) {
+          log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
+          return { chainId, dependencies: {} as ContainerDependencies }
+          // This router instance will not be able to route through any chain
+          // for which RPC URL is not set
+          // For now, if RPC URL is not set for a chain, a request to route
+          // on the chain will return Err 500
+        }
 
         let timeout: number
         switch (chainId) {

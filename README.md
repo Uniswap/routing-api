@@ -13,10 +13,22 @@ The develop on the Routing API you must have an AWS account where you can deploy
 The best way to develop and test the API is to deploy your own instance to AWS.
 
 1. Install and configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) and [AWS CDK V1](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html).
-2. Create .env file in the root directory of the project with:
+2. Create .env file in the root directory of the project with :
    ```
-   PROJECT_ID = '' # Infura Project Id
    THROTTLE_PER_FIVE_MINS = '' # Optional
+   WEB_RPC_{CHAIN ID} = { RPC Provider}
+   # RPC Providers must be set for the following CHAIN IDs:
+   # MAINNET = 1
+   # ROPSTEN = 3
+   # RINKEBY = 4
+   # GÖRLI = 5
+   # KOVAN = 42
+   # OPTIMISM = 10
+   # OPTIMISTIC_KOVAN = 69
+   # ARBITRUM_ONE = 42161
+   # ARBITRUM_RINKEBY = 421611
+   # POLYGON = 137
+   # POLYGON_MUMBAI = 80001
    ```
 3. Install and build the package
    ```

@@ -1,3 +1,4 @@
+import { ChainId } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, SecretValue, Stack, StackProps, Stage, StageProps } from 'aws-cdk-lib'
 import * as chatbot from 'aws-cdk-lib/aws-chatbot'
@@ -8,6 +9,7 @@ import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pip
 import { Construct } from 'constructs'
 import dotenv from 'dotenv'
 import 'source-map-support/register'
+import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
 dotenv.config()
@@ -19,7 +21,7 @@ export class RoutingAPIStage extends Stage {
     scope: Construct,
     id: string,
     props: StageProps & {
-      infuraProjectId: string
+      jsonRpcProviders: { [chainName: string]: string }
       provisionedConcurrency: number
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
@@ -32,7 +34,7 @@ export class RoutingAPIStage extends Stage {
   ) {
     super(scope, id, props)
     const {
-      infuraProjectId,
+      jsonRpcProviders,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -44,7 +46,7 @@ export class RoutingAPIStage extends Stage {
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
-      infuraProjectId,
+      jsonRpcProviders,
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
@@ -93,8 +95,19 @@ export class RoutingAPIPipeline extends Stack {
     // Secrets are stored in secrets manager in the pipeline account. Accounts we deploy to
     // have been granted permissions to access secrets via resource policies.
 
-    const infuraProjectId = sm.Secret.fromSecretAttributes(this, 'InfuraProjectId', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:infuraProjectId-UlSwK2',
+    const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
+      // The main secrets use our Infura RPC urls
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+      /*
+      The backup secrets mostly use our Alchemy RPC urls
+      However Alchemy does not support Rinkeby, Ropsten, and Kovan
+      So those chains are set to our Infura RPC urls
+      When switching to the backups,
+      we must set the multicall chunk size to 50 so that optimism
+      does not bug out on Alchemy's end
+      */
+      //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
@@ -116,9 +129,17 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:hosted-zone-JmPDNV',
     })
 
+    // Parse AWS Secret
+    let jsonRpcProviders = {} as { [chainId: string]: string }
+    SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
+      const key = `WEB3_RPC_${chainId}`
+      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+    })
+
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
+      jsonRpcProviders: jsonRpcProviders,
       provisionedConcurrency: 20,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       stage: STAGE.BETA,
@@ -126,7 +147,6 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
-      infuraProjectId: infuraProjectId.secretValue.toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -136,7 +156,7 @@ export class RoutingAPIPipeline extends Stack {
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
-      infuraProjectId: infuraProjectId.secretValue.toString(),
+      jsonRpcProviders: jsonRpcProviders,
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
@@ -204,7 +224,19 @@ const app = new cdk.App()
 
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
-  infuraProjectId: process.env.PROJECT_ID!,
+  jsonRpcProviders: {
+    WEB3_RPC_1: process.env.WEB3_RPC_1!,
+    WEB3_RPC_3: process.env.WEB3_RPC_3!,
+    WEB3_RPC_4: process.env.WEB3_RPC_4!,
+    WEB3_RPC_5: process.env.WEB3_RPC_5!,
+    WEB3_RPC_42: process.env.WEB3_RPC_42!,
+    WEB3_RPC_10: process.env.WEB3_RPC_10!,
+    WEB3_RPC_69: process.env.WEB3_RPC_69!,
+    WEB3_RPC_42161: process.env.WEB3_RPC_42161!,
+    WEB3_RPC_421611: process.env.WEB3_RPC_421611!,
+    WEB3_RPC_137: process.env.WEB3_RPC_137!,
+    WEB3_RPC_80001: process.env.WEB3_RPC_80001!,
+  },
   provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 0,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
