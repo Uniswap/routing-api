@@ -96,8 +96,16 @@ export class RoutingAPIPipeline extends Stack {
     // have been granted permissions to access secrets via resource policies.
 
     const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
+      // The main secrets use our Infura RPC urls
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
-      //backup Arn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
+      /*
+      The backup secrets mostly use our Alchemy RPC urls
+      However Alchemy does not support Rinkeby, Ropsten, and Kovan
+      So those chains are set to our Infura RPC urls
+      When switching to the backups,
+      we must set the multicall chunk size to 50 for optimism
+      /*
+      //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
@@ -124,7 +132,7 @@ export class RoutingAPIPipeline extends Stack {
     SUPPORTED_CHAINS
           .forEach((chainId:ChainId)=>{
             const key = `WEB3_RPC_${chainId}`
-            jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key) as unknown as string
+            jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
 
     // Beta us-east-2

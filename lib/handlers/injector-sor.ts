@@ -107,9 +107,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
-        log.info({url:url}, `GENERATED URL`)
 
-        if(typeof(url)==undefined||url=="") {
+        if(!url) {
           log.fatal({'chainId':chainId}, `Fatal: No Web3 RPC endpoint set for chain`)
         }
 
@@ -165,7 +164,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 maxTimeout: 1000,
               },
               {
-                multicallChunk: 110,
+                multicallChunk: 40,
                 gasLimitPerCall: 1_200_000,
                 quoteMinSuccessRate: 0.1,
               },
