@@ -108,10 +108,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
         const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
 
-        if(!url) {
-          log.fatal({'chainId':chainId}, `Fatal: No Web3 RPC endpoint set for chain`)
-          return {chainId,
-            dependencies: {} as ContainerDependencies}
+        if (!url) {
+          log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
+          return { chainId, dependencies: {} as ContainerDependencies }
           // This router instance will not be able to route through any chain
           // for which RPC URL is not set
           // For now, if RPC URL is not set for a chain, a request to route

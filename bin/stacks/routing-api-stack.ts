@@ -20,7 +20,7 @@ export class RoutingAPIStack extends cdk.Stack {
     parent: Construct,
     name: string,
     props: cdk.StackProps & {
-      jsonRpcProviders: {[chainName: string]:string}
+      jsonRpcProviders: { [chainName: string]: string }
       provisionedConcurrency: number
       throttlingOverride?: string
       ethGasStationInfoUrl: string

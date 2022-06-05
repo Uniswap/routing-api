@@ -21,7 +21,7 @@ export class RoutingAPIStage extends Stage {
     scope: Construct,
     id: string,
     props: StageProps & {
-      jsonRpcProviders: {[chainName: string]:string}
+      jsonRpcProviders: { [chainName: string]: string }
       provisionedConcurrency: number
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
@@ -97,7 +97,8 @@ export class RoutingAPIPipeline extends Stack {
 
     const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
       // The main secrets use our Infura RPC urls
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+      secretCompleteArn:
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
       /*
       The backup secrets mostly use our Alchemy RPC urls
       However Alchemy does not support Rinkeby, Ropsten, and Kovan
@@ -129,11 +130,10 @@ export class RoutingAPIPipeline extends Stack {
     })
 
     // Parse AWS Secret
-    let jsonRpcProviders = {} as {[chainId:string]:string}
-    SUPPORTED_CHAINS
-          .forEach((chainId:ChainId)=>{
-            const key = `WEB3_RPC_${chainId}`
-            jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+    let jsonRpcProviders = {} as { [chainId: string]: string }
+    SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
+      const key = `WEB3_RPC_${chainId}`
+      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
 
     // Beta us-east-2
