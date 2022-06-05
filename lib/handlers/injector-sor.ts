@@ -110,6 +110,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         if(!url) {
           log.fatal({'chainId':chainId}, `Fatal: No Web3 RPC endpoint set for chain`)
+          return {chainId,
+            dependencies: {} as ContainerDependencies}
+          // This router instance will not be able to route through any chain
+          // for which RPC URL is not set
+          // This will be handled at the quote.ts and quote-to-ratio.ts
         }
 
         let timeout: number
@@ -164,7 +169,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 maxTimeout: 1000,
               },
               {
-                multicallChunk: 40,
+                multicallChunk: 110,
                 gasLimitPerCall: 1_200_000,
                 quoteMinSuccessRate: 0.1,
               },
