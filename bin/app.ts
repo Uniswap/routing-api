@@ -132,6 +132,7 @@ export class RoutingAPIPipeline extends Stack {
     // Parse AWS Secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
+      // TODO: Change this to `JSON_RPC_PROVIDER_${}` to be consistent with SOR
       const key = `WEB3_RPC_${chainId}`
       jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
@@ -237,10 +238,6 @@ const jsonRpcProviders = {
   WEB3_RPC_42220: process.env.JSON_RPC_PROVIDER_42220!,
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
 }
-
-console.log("DSFSDFLKSDD")
-console.log(process.env)
-console.log(process.env['JSON_RPC_PROVIDER_1'])
 
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
