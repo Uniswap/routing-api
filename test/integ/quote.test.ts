@@ -2,6 +2,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
 import {
   ChainId,
+  CUSD_CELO,
+  CUSD_CELO_ALFAJORES,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
@@ -26,7 +28,7 @@ import { QuoteQueryParams } from '../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../lib/handlers/schema'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_ON, getAmount, getAmountFromToken, UNI_GORLI, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -1073,11 +1075,11 @@ describe('quote', function () {
     }
   }
 
-  const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
+  const TEST_ERC20_1: { [chainId in ChainId]: null|Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
-    [ChainId.GÖRLI]: UNI_GORLI,
+    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
@@ -1085,8 +1087,13 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: CUSD_CELO,
+    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: null,
+    [ChainId.GNOSIS]: null,
   }
-  const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
+
+  const TEST_ERC20_2: { [chainId in ChainId]: Token|null } = {
     [ChainId.MAINNET]: DAI_ON(1),
     [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
@@ -1098,6 +1105,10 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: CUSD_CELO,
+    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: null,
+    [ChainId.GNOSIS]: null,
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -1108,6 +1119,8 @@ describe('quote', function () {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
       const erc2 = TEST_ERC20_2[chain]
+
+      if(erc1 == null || erc2 == null) continue;
 
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
@@ -1131,7 +1144,7 @@ describe('quote', function () {
             const { status } = response
 
             expect(status).to.equal(200)
-          } catch (err) {
+          } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
         })
@@ -1153,7 +1166,7 @@ describe('quote', function () {
             const { status } = response
 
             expect(status).to.equal(200)
-          } catch (err) {
+          } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
         })
@@ -1174,7 +1187,7 @@ describe('quote', function () {
             const { status } = response
 
             expect(status).to.equal(200, JSON.stringify(response.data))
-          } catch (err) {
+          } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
         })
@@ -1205,7 +1218,7 @@ describe('quote', function () {
             } else {
               expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
             }
-          } catch (err) {
+          } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
         })
