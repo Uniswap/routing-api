@@ -702,7 +702,7 @@ describe('quote-to-ratio', async function () {
     }
   })
 
-  const TEST_ERC20_1: { [chainId in ChainId]: null|Token } = {
+  const TEST_ERC20_1: { [chainId in ChainId]: null | Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
@@ -720,7 +720,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.GNOSIS]: null,
   }
 
-  const TEST_ERC20_2: { [chainId in ChainId]: Token|null } = {
+  const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
     [ChainId.MAINNET]: DAI_ON(1),
     [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
@@ -757,7 +757,7 @@ describe('quote-to-ratio', async function () {
     const erc2 = TEST_ERC20_2[chain]
 
     // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
-    if(erc1 == null || erc2 == null) continue;
+    if (erc1 == null || erc2 == null) continue
 
     describe(`${ID_TO_NETWORK_NAME(chain)} 2xx`, function () {
       // Help with test flakiness by retrying.

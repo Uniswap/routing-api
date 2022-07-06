@@ -268,7 +268,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               )
               return subgraphProvider
             } catch (err) {
-              log.error({err},"AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider")
+              log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
               return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
             }
           })(),
