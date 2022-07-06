@@ -1,7 +1,11 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
 import {
+  CEUR_CELO,
+  CEUR_CELO_ALFAJORES,
   ChainId,
+  CUSD_CELO,
+  CUSD_CELO_ALFAJORES,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
@@ -698,7 +702,7 @@ describe('quote-to-ratio', async function () {
     }
   })
 
-  const TEST_ERC20_1: { [chainId in ChainId]: Token } = {
+  const TEST_ERC20_1: { [chainId in ChainId]: null | Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
     [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
@@ -710,8 +714,13 @@ describe('quote-to-ratio', async function () {
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: CUSD_CELO,
+    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: null,
+    [ChainId.GNOSIS]: null,
   }
-  const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
+
+  const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
     [ChainId.MAINNET]: DAI_ON(1),
     [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
     [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
@@ -723,6 +732,10 @@ describe('quote-to-ratio', async function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: CEUR_CELO,
+    [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: null,
+    [ChainId.GNOSIS]: null,
   }
 
   for (const chain of _.filter(
@@ -734,10 +747,17 @@ describe('quote-to-ratio', async function () {
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
-      c != ChainId.GÖRLI
+      c != ChainId.GÖRLI &&
+      c != ChainId.MOONBEAM &&
+      c != ChainId.GNOSIS &&
+      c != ChainId.CELO &&
+      c != ChainId.CELO_ALFAJORES
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
+
+    // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
+    if (erc1 == null || erc2 == null) continue
 
     describe(`${ID_TO_NETWORK_NAME(chain)} 2xx`, function () {
       // Help with test flakiness by retrying.
@@ -757,13 +777,13 @@ describe('quote-to-ratio', async function () {
         if (erc1.sortsBefore(wrappedNative)) {
           currency0 = erc1
           currency1 = wrappedNative
-          currency0Balance = parseAmount('1000', currency0).quotient.toString()
+          currency0Balance = parseAmount('10', currency0).quotient.toString()
           currency1Balance = parseAmount('0.5', currency1).quotient.toString()
         } else {
           currency0 = wrappedNative
           currency1 = erc1
           currency0Balance = parseAmount('0.5', currency0).quotient.toString()
-          currency1Balance = parseAmount('1000', currency1).quotient.toString()
+          currency1Balance = parseAmount('10', currency1).quotient.toString()
         }
 
         if (erc1.sortsBefore(erc2)) {
@@ -796,7 +816,7 @@ describe('quote-to-ratio', async function () {
           const { status } = response
 
           expect(status).to.equal(200)
-        } catch (err) {
+        } catch (err: any) {
           fail(JSON.stringify(err.response.data))
         }
       })
@@ -849,7 +869,7 @@ describe('quote-to-ratio', async function () {
           const { status } = response
 
           expect(status).to.equal(200)
-        } catch (err) {
+        } catch (err: any) {
           fail(JSON.stringify(err.response.data))
         }
       })
@@ -879,7 +899,7 @@ describe('quote-to-ratio', async function () {
           const { status } = response
 
           expect(status).to.equal(200)
-        } catch (err) {
+        } catch (err: any) {
           fail(JSON.stringify(err.response.data))
         }
       })
