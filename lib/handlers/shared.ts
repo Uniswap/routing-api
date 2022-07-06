@@ -105,6 +105,7 @@ export async function tokenStringToCurrency(
   if (
     tokenRaw == NativeCurrencyName.ETHER ||
     tokenRaw == NativeCurrencyName.MATIC ||
+    tokenRaw == NativeCurrencyName.CELO ||
     tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
   ) {
     token = nativeOnChain(chainId)

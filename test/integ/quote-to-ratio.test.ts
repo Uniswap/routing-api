@@ -1,6 +1,8 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
 import {
+  CEUR_CELO,
+  CEUR_CELO_ALFAJORES,
   ChainId,
   CUSD_CELO,
   CUSD_CELO_ALFAJORES,
@@ -730,8 +732,8 @@ describe('quote-to-ratio', async function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
-    [ChainId.CELO]: CUSD_CELO,
-    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
+    [ChainId.CELO]: CEUR_CELO,
+    [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
   }
@@ -747,7 +749,9 @@ describe('quote-to-ratio', async function () {
       c != ChainId.ARBITRUM_RINKEBY &&
       c != ChainId.GÖRLI &&
       c != ChainId.MOONBEAM &&
-      c != ChainId.GNOSIS
+      c != ChainId.GNOSIS &&
+      c != ChainId.CELO &&
+      c != ChainId.CELO_ALFAJORES
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
@@ -773,13 +777,13 @@ describe('quote-to-ratio', async function () {
         if (erc1.sortsBefore(wrappedNative)) {
           currency0 = erc1
           currency1 = wrappedNative
-          currency0Balance = parseAmount('1000', currency0).quotient.toString()
+          currency0Balance = parseAmount('10', currency0).quotient.toString()
           currency1Balance = parseAmount('0.5', currency1).quotient.toString()
         } else {
           currency0 = wrappedNative
           currency1 = erc1
           currency0Balance = parseAmount('0.5', currency0).quotient.toString()
-          currency1Balance = parseAmount('1000', currency1).quotient.toString()
+          currency1Balance = parseAmount('10', currency1).quotient.toString()
         }
 
         if (erc1.sortsBefore(erc2)) {

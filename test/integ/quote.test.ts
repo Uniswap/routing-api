@@ -1,6 +1,8 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
 import {
+  CEUR_CELO,
+  CEUR_CELO_ALFAJORES,
   ChainId,
   CUSD_CELO,
   CUSD_CELO_ALFAJORES,
@@ -1105,8 +1107,8 @@ describe('quote', function () {
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
-    [ChainId.CELO]: CUSD_CELO,
-    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
+    [ChainId.CELO]: CEUR_CELO,
+    [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
   }
@@ -1178,7 +1180,7 @@ describe('quote', function () {
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '100'),
+            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '10'),
             type,
           }
 

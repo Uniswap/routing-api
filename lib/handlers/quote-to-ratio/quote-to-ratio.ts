@@ -203,7 +203,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         token1,
         feeAmount,
       })
-      return { statusCode: 400, errorCode: 'POOL_NOT_FOUND' }
+      return { statusCode: 400, errorCode: poolAccessor.getAllPools().length.toString() }
     }
     const position = new Position({
       pool,
