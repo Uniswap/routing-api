@@ -1117,7 +1117,7 @@ describe('quote', function () {
   for (const chain of _.filter(
     SUPPORTED_CHAINS,
     (c) =>
-      c != ChainId.CELO && c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI && c != ChainId.ARBITRUM_RINKEBY
+      c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI && c != ChainId.ARBITRUM_RINKEBY
   )) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
