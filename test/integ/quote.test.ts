@@ -1116,7 +1116,8 @@ describe('quote', function () {
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
   for (const chain of _.filter(
     SUPPORTED_CHAINS,
-    (c) => c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI && c != ChainId.ARBITRUM_RINKEBY
+    (c) =>
+      c != ChainId.CELO && c != ChainId.OPTIMISTIC_KOVAN && c != ChainId.POLYGON_MUMBAI && c != ChainId.ARBITRUM_RINKEBY
   )) {
     for (const type of ['exactIn', 'exactOut']) {
       const erc1 = TEST_ERC20_1[chain]
