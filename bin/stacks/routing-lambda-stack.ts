@@ -25,6 +25,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly routeToRatioLambda: aws_lambda_nodejs.NodejsFunction
   public readonly routingLambdaAlias: aws_lambda.Alias
+  public readonly tenderlySimulationLambda: aws_lambda_nodejs.NodejsFunction
 
   constructor(scope: Construct, name: string, props: RoutingLambdaStackProps) {
     super(scope, name, props)
@@ -74,6 +75,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         ...jsonRpcProviders,
+        TENDERLY_BASE_URL: process.env.TENDERLY_BASE_URL!,
+        TENDERLY_USER: process.env.TENDERLY_USER!,
+        TENDERLY_PROJECT: process.env.TENDERLY_PROJECT!
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(

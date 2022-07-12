@@ -137,11 +137,19 @@ describe('quote', function () {
       tokenOutChainId: 1,
       amount: await getAmount(1, 'exactIn', 'USDC', 'USDT', '100'),
       type: 'exactIn',
+      simulate: false,
+      //recipient: '0x63946551716781C32f0269F87DC08521818b6292',
+      //slippageTolerance: '5',
+      //deadline: '400',
     }
+    console.log("ASADFKLDSJKLDSFJSKDL")
 
     const {
       data: { blockNumber },
     } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
+
+    console.log("SDKLJFDSKLFJSDKLFJSDL")
+    console.log(blockNumber)
 
     block = parseInt(blockNumber) - 10
 
@@ -177,9 +185,13 @@ describe('quote', function () {
 
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
             const {
-              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasUseEstimate, simulatedTxReceipt },
               status,
             } = response
+            
+            console.log(methodParameters)
+            console.log(gasUseEstimate)
+            console.log(simulatedTxReceipt)
 
             expect(status).to.equal(200)
             expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)

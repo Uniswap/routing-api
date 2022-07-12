@@ -1,5 +1,6 @@
 import BaseJoi from '@hapi/joi'
 import { SUPPORTED_CHAINS } from '../../injector-sor'
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 const Joi = BaseJoi.extend((joi) => ({
   base: joi.array(),
@@ -19,13 +20,8 @@ const Joi = BaseJoi.extend((joi) => ({
   },
 }))
 
-export const QuoteQueryParamsJoi = Joi.object({
-  tokenInAddress: Joi.string().alphanum().max(42).required(),
-  tokenInChainId: Joi.number()
-    .valid(...SUPPORTED_CHAINS.values())
-    .required(),
-  tokenOutAddress: Joi.string().alphanum().max(42).required(),
-  tokenOutChainId: Joi.number()
+export const TenderlySimulationQueryParamsJoi = Joi.object({
+  chainId: Joi.number()
     .valid(...SUPPORTED_CHAINS.values())
     .required(),
   amount: Joi.string()
@@ -48,20 +44,15 @@ export const QuoteQueryParamsJoi = Joi.object({
   protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3')).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
-export type QuoteQueryParams = {
-  tokenInAddress: string
-  tokenInChainId: number
-  tokenOutAddress: string
-  tokenOutChainId: number
-  amount: string
-  type: string
-  recipient?: string
-  slippageTolerance?: string
-  deadline?: string
-  algorithm?: string
-  gasPriceWei?: string
-  minSplits?: number
-  forceCrossProtocol?: boolean
-  protocols?: string[] | string
-  simulate?: boolean
+export type TenderlySimulationQueryParams = {
+  chainId: number
+  hexData: string
+  blockNumber: number
 }
+
+export type TenderlySimulationResponse = {
+    simulationTxReceipt: TransactionReceipt
+    chainId: number
+    blockNumber: number
+    requestId: string
+  }

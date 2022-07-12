@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi'
 import { MethodParameters } from '@uniswap/v3-sdk'
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export type TokenInRoute = {
   address: string
@@ -76,4 +77,5 @@ export type QuoteResponse = {
   route: Array<V3PoolInRoute[] | V2PoolInRoute[]>
   routeString: string
   methodParameters?: MethodParameters
+  simulatedTxReceipt?: TransactionReceipt
 }

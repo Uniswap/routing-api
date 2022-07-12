@@ -239,6 +239,14 @@ const jsonRpcProviders = {
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
 }
 
+const tenderly_creds = {
+  TENDERLY_BASE_URL: process.env.TENDERLY_BASE_URL!,
+  TENDERLY_USER: process.env.TENDERLY_USER!,
+  TENDERLY_PROJECT: process.env.TENDERLY_PROJECT!,
+  TENDERLY_ACCESS_KEY: process.env.TENDERLY_ACCESS_KEY!,
+}
+
+console.log(tenderly_creds)
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: jsonRpcProviders,
@@ -251,6 +259,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
   hosted_zone: process.env.HOSTED_ZONE!,
+  tenderly_creds: tenderly_creds
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

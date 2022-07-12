@@ -22,6 +22,9 @@ import {
   tokenStringToCurrency,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
+import { MethodParameters } from '@uniswap/v3-sdk'
+import { BigNumber } from 'ethers'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -33,7 +36,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    const {
+    let {
       requestQueryParams: {
         tokenInAddress,
         tokenInChainId,
@@ -47,6 +50,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         minSplits,
         forceCrossProtocol,
         protocols: protocolsStr,
+        simulate: simulate,
       },
       requestInjected: {
         router,
@@ -58,11 +62,10 @@ export class QuoteHandler extends APIGLambdaHandler<
         v3PoolProvider: v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
+        simulationProvider,
       },
     } = params
-
-    // Parse user provided token address/symbol to Currency object.
-    const before = Date.now()
+    let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
@@ -153,10 +156,14 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }
+    } else {
+      // Can't simulate without swapParams set
+      simulate = false
     }
 
-    let swapRoute: SwapRoute | null
+    let swapRoute: SwapRoute | null = null
     let amount: CurrencyAmount<Currency>
+    let simulatedTxReceipt: TransactionReceipt | undefined = undefined
 
     let tokenPairSymbol = ''
     let tokenPairSymbolChain = ''
@@ -194,7 +201,20 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        router
+          .route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+          .then(async (resp)=>{
+            swapRoute = resp
+            if(simulate && swapRoute!.methodParameters) {
+              simulationProvider?.simulateTx(1, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
+              log.info(simulationProvider?.simulateTx)
+              log.info(methodParameters)
+              before = Date.now()
+              const simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
+              metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+              log.info(simulatedTxReceipt)
+            }
+        })
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
@@ -218,7 +238,20 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+        router
+          .route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+          .then(resp=>{swapRoute = resp as SwapRoute})
+          .then(async()=>{
+            if(simulate && swapRoute?.methodParameters) {
+              simulationProvider?.simulateTx(1, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
+              log.info(simulationProvider?.simulateTx)
+              log.info(methodParameters)
+              before = Date.now()
+              simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
+              metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+              log.info(simulatedTxReceipt)
+            }
+          });
         break
       default:
         throw new Error('Invalid swap type')
@@ -252,7 +285,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-    } = swapRoute
+    } = swapRoute as SwapRoute
 
     const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
 
@@ -382,6 +415,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
+      simulatedTxReceipt: simulatedTxReceipt
     }
 
     return {

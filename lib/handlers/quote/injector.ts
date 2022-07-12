@@ -16,6 +16,7 @@ import { BigNumber } from 'ethers'
 import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor'
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
+import { TenderlyProvider } from '../tenderly-sim/tenderly-sim'
 import { QuoteQueryParams } from './schema/quote-schema'
 
 export class QuoteHandlerInjector extends InjectorSOR<
@@ -119,6 +120,13 @@ export class QuoteHandlerInjector extends InjectorSOR<
         break
     }
 
+    const tenderlySimulator: TenderlyProvider = new TenderlyProvider(
+      process.env.TENDERLY_BASE_URL!,
+      process.env.TENDERLY_USER!,
+      process.env.TENDERLY_PROJECT!,
+      process.env.TENDERLY_ACCESS_KEY!
+    )
+
     return {
       chainId: chainIdEnum,
       id: quoteId,
@@ -129,6 +137,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
+      simulationProvider: tenderlySimulator
     }
   }
 }

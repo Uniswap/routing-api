@@ -30,6 +30,7 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderly_creds?: {TENDERLY_BASE_URL:string,TENDERLY_USER:string,TENDERLY_PROJECT:string,TENDERLY_ACCESS_KEY:string}
     }
   ) {
     super(parent, name, props)
