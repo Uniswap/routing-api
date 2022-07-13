@@ -91,25 +91,27 @@ export class QuoteHandlerInjector extends InjectorSOR<
     let router
     switch (algorithm) {
       case 'legacy':
-        v3QuoteProvider = v3QuoteProvider ?? new V3QuoteProvider(
-          chainId,
-          provider,
-          multicallProvider,
-          {
-            retries: 2,
-            minTimeout: 100,
-            maxTimeout: 1000,
-          },
-          {
-            multicallChunk: 210,
-            gasLimitPerCall: 705_000,
-            quoteMinSuccessRate: 0.15,
-          },
-          {
-            gasLimitOverride: 2_000_000,
-            multicallChunk: 70,
-          }
-        )
+        v3QuoteProvider =
+          v3QuoteProvider ??
+          new V3QuoteProvider(
+            chainId,
+            provider,
+            multicallProvider,
+            {
+              retries: 2,
+              minTimeout: 100,
+              maxTimeout: 1000,
+            },
+            {
+              multicallChunk: 210,
+              gasLimitPerCall: 705_000,
+              quoteMinSuccessRate: 0.15,
+            },
+            {
+              gasLimitOverride: 2_000_000,
+              multicallChunk: 70,
+            }
+          )
         router = new LegacyRouter({
           chainId,
           multicall2Provider: multicallProvider,
