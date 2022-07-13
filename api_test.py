@@ -5,8 +5,22 @@ ROUTE = 'https://vc02kvm3ei.execute-api.us-east-1.amazonaws.com/prod/quote?token
 import requests
 import time
 
-TOTAL_TIME_TO_ROUTE = 0
-for i in range(100):
-  
-  r = requests.get(ROUTE_AND_SIMULATE)
+WITHOUT_SIMULATE = WITH_SIMULATE = 0
+start = time.time()
+for i in range(50):
+  start = time.time()
+  r = requests.get(ROUTE)
+  WITHOUT_SIMULATE += time.time()-start
   print(r.json())
+  time.sleep(3)
+end = time.time()
+
+for i in range(50):
+  start = time.time()
+  r = requests.get(ROUTE_AND_SIMULATE)
+  WITH_SIMULATE += time.time()-start
+  print(r.json())
+  time.sleep(3)
+end = time.time()
+
+print("TOTAL TIME TO ROUTE WITHOUT SIMULATE: {}\nTOTAL TIME TO ROUTE WITH SIMULATE: {}".format(WITHOUT_SIMULATE, WITH_SIMULATE))
