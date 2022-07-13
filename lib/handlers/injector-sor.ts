@@ -303,7 +303,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     )
 
     for (const { chainId, dependencies } of dependenciesByChainArray) {
-      dependenciesByChain[chainId] = dependencies as ContainerDependencies
+      dependenciesByChain[chainId] = dependencies
     }
 
     return {
