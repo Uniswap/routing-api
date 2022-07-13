@@ -1,5 +1,0 @@
-UNISWAP_ROUTING_API=https://vc02kvm3ei.execute-api.us-east-1.amazonaws.com/prod/
-ARCHIVE_NODE_RPC=https://mainnet.infura.io/v3/c75a0117c6cd4c84a4a8bf62ac9979e7
-JSON_RPC_PROVIDER_1 = https://mainnet.infura.io/v3/c75a0117c6cd4c84a4a8bf62ac9979e7
-JSON_RPC_PROVIDER_42220 = https://young-cool-hill.celo-mainnet.quiknode.pro/9151cf5d793850c3dbfeee624437a0fdc1be741e/
-JSON_RPC_PROVIDER_44787 = https://alfajores-forno.celo-testnet.org
