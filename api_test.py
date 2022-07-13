@@ -1,9 +1,12 @@
 tokenInAddress = '0x2ba592F78dB6436527729929AAf6c908497cB200'
 tokenOutAddress = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
 chainId = 1
-recipient = 0x63946551716781c32f0269f87dc08521818b6292
+amount = 1
+type = 'exactIn'
+recipient = '0x63946551716781c32f0269f87dc08521818b6292'
+N = 1
 
-ROUTE_AND_SIMULATE = 'https://vc02kvm3ei.execute-api.us-east-1.amazonaws.com/prod/quote?tokenInAddress=0x6B175474E89094C44Da98b954EedeAC495271d0F&tokenInChainId={}&tokenOutAddress=0x1f9840a85d5af5bf1d1762f925bdaddc4201f984&tokenOutChainId=1&amount=1&type=exactIn&recipient=0x63946551716781c32f0269f87dc08521818b6292&slippageTolerance=5&deadline=360&simulate=true'
+ROUTE_AND_SIMULATE = 'https://vc02kvm3ei.execute-api.us-east-1.amazonaws.com/prod/quote?tokenInAddress={}&tokenInChainId={}&tokenOutAddress={}&tokenOutChainId={}&amount={}&type={}&recipient={}&slippageTolerance=5&deadline=360&simulate=true'.format(tokenInAddress, chainId, tokenOutAddress, chainId, amount, type, recipient)
 
 ROUTE = 'https://vc02kvm3ei.execute-api.us-east-1.amazonaws.com/prod/quote?tokenInAddress=0x6B175474E89094C44Da98b954EedeAC495271d0F&tokenInChainId=1&tokenOutAddress=0x1f9840a85d5af5bf1d1762f925bdaddc4201f984&tokenOutChainId=1&amount=1&type=exactIn&recipient=0x63946551716781c32f0269f87dc08521818b6292&slippageTolerance=5&deadline=360&simulate=false'
 
@@ -12,7 +15,7 @@ import time
 
 WITHOUT_SIMULATE = WITH_SIMULATE = 0
 start = time.time()
-for i in range(50):
+for _ in range(N):
   start = time.time()
   r = requests.get(ROUTE)
   WITHOUT_SIMULATE += time.time()-start
@@ -20,7 +23,7 @@ for i in range(50):
   time.sleep(3)
 end = time.time()
 
-for i in range(50):
+for _ in range(N):
   start = time.time()
   r = requests.get(ROUTE_AND_SIMULATE)
   WITH_SIMULATE += time.time()-start
