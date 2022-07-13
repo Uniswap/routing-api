@@ -36,7 +36,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
+    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei, simulate } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -49,6 +49,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       amount,
       type,
       algorithm,
+      tenderlySimulate: simulate,
     })
     setGlobalLogger(log)
 
@@ -120,12 +121,25 @@ export class QuoteHandlerInjector extends InjectorSOR<
         break
     }
 
-    const tenderlySimulator: TenderlyProvider = new TenderlyProvider(
-      process.env.TENDERLY_BASE_URL!,
-      process.env.TENDERLY_USER!,
-      process.env.TENDERLY_PROJECT!,
-      process.env.TENDERLY_ACCESS_KEY!
-    )
+    let tenderlySimulator: TenderlyProvider|undefined = undefined
+
+    log.info({params:requestQueryParams},"SHOULD SIMULATE?")
+    if(simulate) {
+      log.info({simulate:simulate}, "MAKING SIMULATOR")
+      tenderlySimulator = new TenderlyProvider(
+        process.env.TENDERLY_BASE_URL!,
+        process.env.TENDERLY_USER!,
+        process.env.TENDERLY_PROJECT!,
+        process.env.TENDERLY_ACCESS_KEY!
+      )
+      log.info({
+        sim:tenderlySimulator,
+        a:process.env.TENDERLY_BASE_URL!,
+        b:process.env.TENDERLY_USER!,
+        c:process.env.TENDERLY_PROJECT!,
+        d:process.env.TENDERLY_ACCESS_KEY!
+      }, "MADE SIMULATOR")
+    }
 
     return {
       chainId: chainIdEnum,

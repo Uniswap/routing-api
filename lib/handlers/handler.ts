@@ -142,6 +142,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
           const containerInjected = await injector.getContainerInjected()
 
           let requestInjected: RInj
+          log.info({requestQueryParams:requestQueryParams}, "QUERYPARAMS")
           try {
             requestInjected = await injector.getRequestInjected(
               containerInjected,

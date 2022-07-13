@@ -18,6 +18,7 @@ dotenv.config()
     slippageTolerance: '5',
     deadline: '360',
     algorithm: 'alpha',
+    simulate: true
   }
 
   const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(

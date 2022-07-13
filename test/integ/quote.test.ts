@@ -108,6 +108,7 @@ describe('quote', function () {
       from: alice.address,
       gasPrice: BigNumber.from(2000000000000),
       type: 1,
+      simulate: false
     }
 
     const transactionResponse: providers.TransactionResponse = await alice.sendTransaction(transaction)
@@ -142,14 +143,10 @@ describe('quote', function () {
       //slippageTolerance: '5',
       //deadline: '400',
     }
-    console.log("ASADFKLDSJKLDSFJSKDL")
 
     const {
       data: { blockNumber },
     } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
-
-    console.log("SDKLJFDSKLFJSDKLFJSDL")
-    console.log(blockNumber)
 
     block = parseInt(blockNumber) - 10
 
@@ -179,6 +176,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -232,6 +230,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -281,6 +280,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -325,6 +325,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -383,6 +384,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -421,6 +423,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -458,6 +461,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              simulate: true
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -672,6 +676,7 @@ describe('quote', function () {
             amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
+              simulate: true
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -704,6 +709,7 @@ describe('quote', function () {
             amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
             type,
             algorithm,
+            simulate: true,
             gasPriceWei: '60000000000',
           }
 
@@ -745,6 +751,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -780,6 +787,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -815,6 +823,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -838,6 +847,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+            simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -867,6 +877,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -890,6 +901,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -913,6 +925,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -936,6 +949,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -959,6 +973,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -982,6 +997,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -1005,6 +1021,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
           await callAndExpectFail(quoteReq, {
             status: 400,
@@ -1026,6 +1043,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
           await callAndExpectFail(quoteReq, {
             status: 400,
@@ -1048,6 +1066,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           await callAndExpectFail(quoteReq, {
@@ -1072,6 +1091,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+              simulate: true
           }
 
           const chains = SUPPORTED_CHAINS.values()

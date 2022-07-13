@@ -20,6 +20,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
   chatbotSNSArn?: string
+  tenderlyCreds: { [key:string]: string }
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -38,6 +39,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
+      tenderlyCreds,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -75,9 +77,10 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         ...jsonRpcProviders,
-        TENDERLY_BASE_URL: process.env.TENDERLY_BASE_URL!,
-        TENDERLY_USER: process.env.TENDERLY_USER!,
-        TENDERLY_PROJECT: process.env.TENDERLY_PROJECT!
+        TENDERLY_BASE_URL: tenderlyCreds['TENDERLY_BASE_URL'],
+        TENDERLY_USER: tenderlyCreds['TENDERLY_USER'],
+        TENDERLY_PROJECT: tenderlyCreds['TENDERLY_PROJECT'],
+        TENDERLY_ACCESS_KEY: tenderlyCreds['TENDERLY_ACCESS_KEY'],
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(

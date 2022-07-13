@@ -23,8 +23,6 @@ import {
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { MethodParameters } from '@uniswap/v3-sdk'
-import { BigNumber } from 'ethers'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -50,7 +48,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         minSplits,
         forceCrossProtocol,
         protocols: protocolsStr,
-        simulate: simulate,
+        simulate,
       },
       requestInjected: {
         router,
@@ -65,6 +63,10 @@ export class QuoteHandler extends APIGLambdaHandler<
         simulationProvider,
       },
     } = params
+    log.info({
+      simulationProvider:simulationProvider,
+      router:router
+    },"STARTED")
     let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
@@ -201,20 +203,27 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        router
-          .route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
-          .then(async (resp)=>{
-            swapRoute = resp
-            if(simulate && swapRoute!.methodParameters) {
-              simulationProvider?.simulateTx(1, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
-              log.info(simulationProvider?.simulateTx)
-              log.info(methodParameters)
-              before = Date.now()
-              const simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
-              metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
-              log.info(simulatedTxReceipt)
-            }
-        })
+        try{
+          swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        } catch(err) {
+          log.info({err:err})
+        }
+        if(!swapRoute) {
+          return {
+            statusCode: 404,
+            errorCode: 'NO_ROUTE',
+            detail: 'No route found',
+          }
+        }
+
+        let callData = "";
+        if(simulate && swapRoute.methodParameters) {
+          callData = swapRoute.methodParameters!.calldata as string
+          before = Date.now()
+          simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, recipient!, swapRoute.blockNumber.toNumber())
+          metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+          log.info({simulatedTxReceipt:simulatedTxReceipt},'Simulated Tx Via Tenderly')
+        }
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
@@ -238,36 +247,19 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        router
-          .route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
-          .then(resp=>{swapRoute = resp as SwapRoute})
-          .then(async()=>{
-            if(simulate && swapRoute?.methodParameters) {
-              simulationProvider?.simulateTx(1, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
-              log.info(simulationProvider?.simulateTx)
-              log.info(methodParameters)
-              before = Date.now()
-              simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, (methodParameters as MethodParameters).calldata!, (blockNumber as BigNumber).toNumber())
-              metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
-              log.info(simulatedTxReceipt)
-            }
-          });
+        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_OUTPUT, swapParams, routingConfig) as SwapRoute;
+        if(simulate && swapRoute.methodParameters) {
+          before = Date.now()
+          callData = swapRoute.methodParameters?.calldata as string
+          simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, recipient!, swapRoute.blockNumber.toNumber())
+          metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+        }
         break
       default:
         throw new Error('Invalid swap type')
     }
 
-    if (!swapRoute) {
-      log.info(
-        {
-          type,
-          tokenIn: currencyIn,
-          tokenOut: currencyOut,
-          amount: amount.quotient.toString(),
-        },
-        `No route found. 404`
-      )
-
+    if(!swapRoute) {
       return {
         statusCode: 404,
         errorCode: 'NO_ROUTE',
@@ -398,6 +390,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
+    log.info({tx:simulatedTxReceipt},"OKAY FINALLY HERE")
+
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -415,7 +409,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
-      simulatedTxReceipt: simulatedTxReceipt
+      simulatedTxReceipt: simulatedTxReceipt?.gasUsed.toHexString()
     }
 
     return {

@@ -2,9 +2,8 @@ import { log } from "@uniswap/smart-order-router";
 import axios from "axios";
 //import { fork } from "child_process";
 import * as dotenv from "dotenv";
-import { ethers } from "ethers";
+import { BigNumber, ethers, providers } from "ethers";
 import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers"
-
 
 // Swap Router Contract
 const V3_ROUTER2_ADDRESS = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
@@ -19,28 +18,45 @@ export const POST_TENDERLY_FORK_API_URL = (TENDERLY_BASE_URL:string, TENDERLY_US
 dotenv.config();
 
 export interface ISimulator {
-    simulateTx: (chainId:number, hexData: string, blockNumber: number)=>Promise<TransactionReceipt>
+    simulateTx: (chainId:number, hexData: string, fromAddress:string, blockNumber: number)=>Promise<TransactionReceipt>
 }
 export class TenderlyProvider implements ISimulator {
     TENDERLY_BASE_URL:string
     TENDERLY_USER:string
     TENDERLY_PROJECT:string
     TENDERLY_ACCESS_KEY:string
-    CACHED_FORKS = new Map<{ chainId: number; blockNumber: number }, { provider: JsonRpcProvider; contract: ethers.Contract }>()
+    CACHED_FORKS = new Map<{ chainId: number; blockNumber: number }, { fork: JsonRpcProvider; contract: ethers.Contract }>()
     constructor(TENDERLY_BASE_URL:string, TENDERLY_USER:string, TENDERLY_PROJECT:string, TENDERLY_ACCESS_KEY:string) {
         this.TENDERLY_BASE_URL = TENDERLY_BASE_URL
         this.TENDERLY_USER = TENDERLY_USER
         this.TENDERLY_PROJECT = TENDERLY_PROJECT
         this,TENDERLY_ACCESS_KEY = TENDERLY_ACCESS_KEY
     }
-    public async simulateTx(chainId:number, hexData:string, blockNumber:number):Promise<TransactionReceipt> {
+    public async simulateTx(chainId:number, hexData:string, fromAddress:string, blockNumber:number):Promise<TransactionReceipt> {
+      log.info("HERE")
       const {
-        provider,
+        fork,
         contract, //V3 router contract instance
       } = await this.getFork({chainId, blockNumber})
-      log.info(hexData)
+      log.info({provider:fork,contract:contract},"GOT FORK")
+
+      const transaction = {
+        data: hexData,
+        to: contract.address,
+        value: BigNumber.from(0),
+        from: fromAddress,
+        gasPrice: ethers.utils.hexValue(1),
+        gasLimit: ethers.utils.hexValue(30000000),
+        type: 1,
+      }
+  
+      const transactionResponse: providers.TransactionResponse = await fork.getSigner(fromAddress).sendTransaction(transaction)
+      const txReceipt = await transactionResponse.wait()
+      return txReceipt
       
+      /*
       const unsignedTx = await contract.populateTransaction[`multicall(uint256,bytes[])`](Date.now()+1000*60*3 as number,hexData)
+      log.info({provider:fork,contract:contract},"GOT CONTRACT")
       const txParams = [{
         network_id:chainId.toString(),
         to:contract.address,
@@ -50,11 +66,11 @@ export class TenderlyProvider implements ISimulator {
         gasPrice: ethers.utils.hexValue(1),
         value: ethers.utils.hexValue(0)
       }]
-      log.info("THERE")
-      const txHash = await provider.send('eth_sendTransaction', txParams)
-      return provider.getTransactionReceipt(txHash)
+      const txHash = await fork.send('eth_sendTransaction', txParams)
+      return fork.getTransactionReceipt(txHash)
+      */
     }
-    private async getFork(params: {chainId:number, blockNumber:number}):Promise<{provider:JsonRpcProvider, contract:ethers.Contract}> {
+    private async getFork(params: {chainId:number, blockNumber:number}):Promise<{fork:JsonRpcProvider, contract:ethers.Contract}> {
       if(!this.CACHED_FORKS.has(params)) {
         // Assume Fork does not yet exist
         const fork = await this.createFork(params.blockNumber)
@@ -62,9 +78,9 @@ export class TenderlyProvider implements ISimulator {
           const v3_router2 = new ethers.Contract(
             V3_ROUTER2_ADDRESS,
             V3_ROUTER_ABI.abi,
-            fork.getSigner()
+            fork
           );
-          this.CACHED_FORKS.set(params, {provider:fork, contract:v3_router2})
+          this.CACHED_FORKS.set(params, {fork:fork, contract:v3_router2})
         } catch (err) {
             log.error(err)
             throw new Error("failed to initialize v3 router contract")
