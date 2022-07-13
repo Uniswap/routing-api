@@ -91,6 +91,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
     let router
     switch (algorithm) {
       case 'legacy':
+        if(!v3QuoteProvider) {
+          throw new Error("V3 Quote Provider not set for Legacy Routings")
+        }
         router = new LegacyRouter({
           chainId,
           multicall2Provider: multicallProvider,

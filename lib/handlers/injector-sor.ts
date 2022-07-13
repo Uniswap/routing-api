@@ -76,7 +76,7 @@ export type ContainerDependencies = {
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   multicallProvider: UniswapMulticallProvider
-  v3QuoteProvider: V3QuoteProvider
+  v3QuoteProvider?: V3QuoteProvider
   v2QuoteProvider: V2QuoteProvider
 }
 
@@ -157,7 +157,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        let quoteProvider: V3QuoteProvider|undefined
+        let quoteProvider: V3QuoteProvider|undefined = undefined
         switch (chainId) {
           case ChainId.OPTIMISM:
           case ChainId.OPTIMISTIC_KOVAN:
@@ -227,8 +227,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               }
             )
             break
-          default:
-            quoteProvider = undefined
         }
 
         const v3PoolProvider = new CachingV3PoolProvider(
