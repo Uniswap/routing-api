@@ -8,6 +8,7 @@ import {
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
+  V3QuoteProvider,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
@@ -17,7 +18,6 @@ import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
 import { QuoteQueryParams } from './schema/quote-schema'
-
 export class QuoteHandlerInjector extends InjectorSOR<
   IRouter<AlphaRouterConfig | LegacyRoutingConfig>,
   QuoteQueryParams
@@ -75,13 +75,13 @@ export class QuoteHandlerInjector extends InjectorSOR<
       tokenListProvider,
       v3SubgraphProvider,
       blockedTokenListProvider,
-      v3QuoteProvider,
       v2PoolProvider,
       v2QuoteProvider,
       v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
     } = dependencies[chainIdEnum]!
 
+    let v3QuoteProvider = dependencies[chainIdEnum]!.v3QuoteProvider
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
@@ -91,6 +91,27 @@ export class QuoteHandlerInjector extends InjectorSOR<
     let router
     switch (algorithm) {
       case 'legacy':
+        v3QuoteProvider =
+          v3QuoteProvider ??
+          new V3QuoteProvider(
+            chainId,
+            provider,
+            multicallProvider,
+            {
+              retries: 2,
+              minTimeout: 100,
+              maxTimeout: 1000,
+            },
+            {
+              multicallChunk: 210,
+              gasLimitPerCall: 705_000,
+              quoteMinSuccessRate: 0.15,
+            },
+            {
+              gasLimitOverride: 2_000_000,
+              multicallChunk: 70,
+            }
+          )
         router = new LegacyRouter({
           chainId,
           multicall2Provider: multicallProvider,
