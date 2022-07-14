@@ -38,7 +38,7 @@ export const chainProtocols = [
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 2),
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 2, 480000), // Bump from 360_000 (6 min) to 480_000 (8 min)
   },
   // Currently there is no working V2 subgraph for Rinkeby, Ropsten, Gorli or Kovan, so we use static providers.
 ]
