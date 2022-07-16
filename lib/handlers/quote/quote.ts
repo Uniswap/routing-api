@@ -227,7 +227,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
-
         log.info(
           {
             amountOut: amount.toExact(),
@@ -251,6 +250,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         if(simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
+          log.info({callData:callData},"CALLDATA")
           simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, recipient!, swapRoute.blockNumber.toNumber())
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
