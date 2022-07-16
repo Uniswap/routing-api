@@ -250,7 +250,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         if(simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
-          log.info({callData:callData},"CALLDATA")
           simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, recipient!, swapRoute.blockNumber.toNumber())
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
