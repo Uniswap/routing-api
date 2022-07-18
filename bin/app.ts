@@ -30,6 +30,7 @@ export class RoutingAPIStage extends Stage {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderlyCreds?: { [key: string]: string }
     }
   ) {
     super(scope, id, props)
@@ -111,6 +112,11 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
+    //TODO: Add AWS secrets and update this
+    const tenderlyAuth = sm.Secret.fromSecretAttributes(this, 'TenderlyAuth', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
+    })
+
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
     })
@@ -138,6 +144,14 @@ export class RoutingAPIPipeline extends Stack {
       jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
 
+    // Parse AWS Secret
+    let tenderlyCreds = {
+      TENDERLY_ACCESS_KEY: tenderlyAuth.secretValueFromJson('key').toString(),
+      TENDERLY_BASE_URL: tenderlyAuth.secretValueFromJson('base-url').toString(),
+      TENDERLY_USER: tenderlyAuth.secretValueFromJson('user').toString(),
+      TENDERLY_PROJECT: tenderlyAuth.secretValueFromJson('project').toString(),
+    }
+
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
@@ -149,6 +163,7 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyCreds: tenderlyCreds,
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -167,6 +182,7 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyCreds: tenderlyCreds,
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)

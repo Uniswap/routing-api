@@ -7,7 +7,6 @@ import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers"
 
 // Swap Router Contract
 const V3_ROUTER2_ADDRESS = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
-const V3_ROUTER_ABI = require('../../abis/v3_router2_abi.json')
 
 // API for GET+DELETE
 export const TENDERLY_FORK_API_URL = (FORK_ID:string):string=> `https://rpc.tenderly.co/fork/${FORK_ID}`
@@ -15,86 +14,60 @@ export const TENDERLY_FORK_API_URL = (FORK_ID:string):string=> `https://rpc.tend
 // API For POST
 export const POST_TENDERLY_FORK_API_URL = (TENDERLY_BASE_URL:string, TENDERLY_USER:string, TENDERLY_PROJECT:string)=>`${TENDERLY_BASE_URL}/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/fork`
 
+export const APPROVE_TOKEN_FOR_TRANSFER = "0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+
 dotenv.config();
 
 export interface ISimulator {
-    simulateTx: (chainId:number, hexData: string, fromAddress:string, blockNumber: number)=>Promise<TransactionReceipt>
+    simulateTx: (chainId:number, hexData: string, tokenInAddress:string, fromAddress:string, blockNumber: number)=>Promise<TransactionReceipt>
 }
 export class TenderlyProvider implements ISimulator {
     TENDERLY_BASE_URL:string
     TENDERLY_USER:string
     TENDERLY_PROJECT:string
     TENDERLY_ACCESS_KEY:string
-    CACHED_FORKS = new Map<{ chainId: number; blockNumber: number }, { fork: JsonRpcProvider; contract: ethers.Contract }>()
+    CACHED_FORKS = new Map<{ chainId: number; blockNumber: number }, JsonRpcProvider>()
     constructor(TENDERLY_BASE_URL:string, TENDERLY_USER:string, TENDERLY_PROJECT:string, TENDERLY_ACCESS_KEY:string) {
         this.TENDERLY_BASE_URL = TENDERLY_BASE_URL
         this.TENDERLY_USER = TENDERLY_USER
         this.TENDERLY_PROJECT = TENDERLY_PROJECT
-        this,TENDERLY_ACCESS_KEY = TENDERLY_ACCESS_KEY
+        this.TENDERLY_ACCESS_KEY = TENDERLY_ACCESS_KEY
     }
-    public async simulateTx(chainId:number, hexData:string, fromAddress:string, blockNumber:number):Promise<TransactionReceipt> {
-      log.info("HERE")
-      hexData;
-      const {
-        fork,
-        contract, //V3 router contract instance
-      } = await this.getFork({chainId, blockNumber})
-
-      /*
-      const unsignedTx = await contract.populateTransaction[`multicall(uint256,bytes[])`](Date.now()+1000*60*3 as number,hexData)
-      log.info({provider:fork,contract:contract},"GOT CONTRACT")
-      const txParams = [{
-        network_id:chainId.toString(),
-        to:contract.address,
-        from:'0x63946551716781C32f0269F87DC08521818b6292',
-        data:unsignedTx.data,
-        gas: ethers.utils.hexValue(30000000),
-        gasPrice: ethers.utils.hexValue(1),
-        value: ethers.utils.hexValue(0)
-      }]
-      const txHash = await fork.send('eth_sendTransaction', txParams)
-      return fork.getTransactionReceipt(txHash)
-      
-      const checkAllowance = (tokenAddress:string):{}=>{
-        return {
-          data: '0x571ac8b00000000000000000000000001f9840a85d5af5bf1d1762f925bdaddc4201f984',
-          to: contract.address,
-          value: BigNumber.from(0),
-          from: fromAddress,
-          gasPrice: ethers.utils.hexValue(1),
-          gasLimit: ethers.utils.hexValue(30000000),
-          type: 1,
-        }
-      }
-      */
+    public async simulateTx(chainId:number, hexData:string, tokenInAddress:string, fromAddress:string, blockNumber:number):Promise<TransactionReceipt> {
+      log.info(
+        {
+          hexData:hexData,
+          fromAddress:fromAddress,
+          chainId:chainId,
+          tokenInAddress:tokenInAddress,
+          blockNumber:blockNumber
+        },
+        "Simulating transaction via Tenderly"
+      )
+      const fork = await this.getFork({chainId, blockNumber})
 
       const approve = {
-        data: '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        data: APPROVE_TOKEN_FOR_TRANSFER,
+        to: tokenInAddress,
         value: BigNumber.from(0),
         from: fromAddress,
         gasPrice: ethers.utils.hexValue(1),
         gasLimit: ethers.utils.hexValue(30000000),
         type: 1,
       }
-
 
       const swap = {
         data: hexData,
-        to: contract.address,
+        to: V3_ROUTER2_ADDRESS,
         value: BigNumber.from(0),
         from: fromAddress,
         gasPrice: ethers.utils.hexValue(1),
         gasLimit: ethers.utils.hexValue(30000000),
         type: 1,
       }
-
-
-      log.info({swapPayload:swap},"Swap")
   
-      const approveMaxResponse: providers.TransactionResponse = await fork.getSigner(fromAddress).sendTransaction(approve)
-      const approveMaxReceipt = await approveMaxResponse.wait();
-      log.info({approveMaxReceipt:approveMaxReceipt}, "approvaMax");
+      const approveResponse: providers.TransactionResponse = await fork.getSigner(fromAddress).sendTransaction(approve)
+      approveResponse.wait()
 
       const swapResponse: providers.TransactionResponse = await fork.getSigner(fromAddress).sendTransaction(swap)
       const swapReceipt = await swapResponse.wait()
@@ -102,40 +75,25 @@ export class TenderlyProvider implements ISimulator {
       return swapReceipt
     }
   
-    private async getFork(params: {chainId:number, blockNumber:number}):Promise<{fork:JsonRpcProvider, contract:ethers.Contract}> {
-      if(!this.CACHED_FORKS.has(params)) {
-        // Assume Fork does not yet exist
-        const fork = await this.createFork(params.blockNumber)
-        try {
-          const v3_router2 = new ethers.Contract(
-            V3_ROUTER2_ADDRESS,
-            V3_ROUTER_ABI.abi,
-            fork
-          );
-          this.CACHED_FORKS.set(params, {fork:fork, contract:v3_router2})
-        } catch (err) {
-            log.error(err)
-            throw new Error("failed to initialize v3 router contract")
-        }
-      }
-      return this.CACHED_FORKS.get(params)!
+    private async getFork(params: {chainId:number, blockNumber:number}):Promise<JsonRpcProvider> {
+      log.info({params:params}, "Getting Tenderly Fork")
+      // Assume Fork of the block does not yet exist in our tenderly project
+      // TODO implement storage and management of tenderly forks
+      const fork = await this.createFork(params)
+      return fork
     }
-    private createFork(blockNumber:number):Promise<JsonRpcProvider> {
+    private createFork(params: {chainId:number, blockNumber:number}):Promise<JsonRpcProvider> {
+      log.info({params:params}, "Creating Tenderly Fork")
       const opts = {
         headers: {
-            'X-Access-Key': 'trIEjRmH141TMqq-rl-wmc0oVn9hqeOP',
+            'X-Access-Key': this.TENDERLY_ACCESS_KEY,
         }
       }
       const body = {
-        "network_id": "1",
-        "block_number": blockNumber,
+        "network_id": params.chainId,
+        "block_number": params.blockNumber,
         "simulation_type": "quick",
         "save_if_fails": true,
-        "state_objects": {
-          "balanceOf": {
-            "0x63946551716781C32f0269F87DC08521818b6292": 9999999999
-          }
-        }
       }
       return axios
           .post(POST_TENDERLY_FORK_API_URL(this.TENDERLY_BASE_URL, this.TENDERLY_USER, this.TENDERLY_PROJECT), body, opts)
