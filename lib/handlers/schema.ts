@@ -37,28 +37,30 @@ export type V2PoolInRoute = {
   amountOut?: string
 }
 
-export const QuoteResponseSchemaJoi = Joi.object().keys({
-  quoteId: Joi.string().required(),
-  amount: Joi.string().required(),
-  amountDecimals: Joi.string().required(),
-  quote: Joi.string().required(),
-  quoteDecimals: Joi.string().required(),
-  quoteGasAdjusted: Joi.string().required(),
-  quoteGasAdjustedDecimals: Joi.string().required(),
-  gasUseEstimateQuote: Joi.string().required(),
-  gasUseEstimateQuoteDecimals: Joi.string().required(),
-  gasUseEstimate: Joi.string().required(),
-  gasUseEstimateUSD: Joi.string().required(),
-  gasPriceWei: Joi.string().required(),
-  blockNumber: Joi.string().required(),
-  route: Joi.array().items(Joi.any()).required(),
-  routeString: Joi.string().required(),
-  methodParameters: Joi.object({
-    calldata: Joi.string().required(),
-    value: Joi.string().required(),
-  }).optional(),
-  simulatedTxReceipt: Joi.string().optional(),
-}).optional()
+export const QuoteResponseSchemaJoi = Joi.object()
+  .keys({
+    quoteId: Joi.string().required(),
+    amount: Joi.string().required(),
+    amountDecimals: Joi.string().required(),
+    quote: Joi.string().required(),
+    quoteDecimals: Joi.string().required(),
+    quoteGasAdjusted: Joi.string().required(),
+    quoteGasAdjustedDecimals: Joi.string().required(),
+    gasUseEstimateQuote: Joi.string().required(),
+    gasUseEstimateQuoteDecimals: Joi.string().required(),
+    gasUseEstimate: Joi.string().required(),
+    gasUseEstimateUSD: Joi.string().required(),
+    gasPriceWei: Joi.string().required(),
+    blockNumber: Joi.string().required(),
+    route: Joi.array().items(Joi.any()).required(),
+    routeString: Joi.string().required(),
+    methodParameters: Joi.object({
+      calldata: Joi.string().required(),
+      value: Joi.string().required(),
+    }).optional(),
+    simulatedTxReceipt: Joi.string().optional(),
+  })
+  .optional()
 
 export type QuoteResponse = {
   quoteId: string

@@ -56,7 +56,7 @@ export class RoutingAPIStage extends Stage {
       pinata_key,
       pinata_secret,
       hosted_zone,
-      tenderlyCreds
+      tenderlyCreds,
     })
     this.url = url
   }
@@ -275,7 +275,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
   hosted_zone: process.env.HOSTED_ZONE!,
-  tenderlyCreds: tenderlyCreds
+  tenderlyCreds: tenderlyCreds,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
