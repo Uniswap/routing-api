@@ -63,10 +63,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         simulationProvider,
       },
     } = params
-    log.info({
-      simulationProvider:simulationProvider,
-      router:router
-    },"STARTED")
     let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(

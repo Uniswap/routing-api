@@ -1,6 +1,5 @@
 import Joi from '@hapi/joi'
 import { MethodParameters } from '@uniswap/v3-sdk'
-//import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export type TokenInRoute = {
   address: string
