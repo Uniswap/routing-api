@@ -20,7 +20,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
   chatbotSNSArn?: string
-  tenderlyCreds: { [key:string]: string }
+  tenderlyCreds: { [key: string]: string }
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction

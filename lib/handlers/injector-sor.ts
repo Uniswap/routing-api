@@ -63,7 +63,7 @@ export interface RequestInjected<Router> extends BaseRInj {
   tokenProvider: ITokenProvider
   tokenListProvider: ITokenListProvider
   router: Router
-  simulationProvider: ISimulator|undefined
+  simulationProvider: ISimulator | undefined
 }
 
 export type ContainerDependencies = {

@@ -1,3 +1,4 @@
+import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
@@ -22,7 +23,6 @@ import {
   tokenStringToCurrency,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -201,12 +201,12 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        try{
+        try {
           swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
-        } catch(err) {
-          log.info({err:err}, "failed routing!")
+        } catch (err) {
+          log.info({ err: err }, 'failed routing!')
         }
-        if(!swapRoute) {
+        if (!swapRoute) {
           return {
             statusCode: 404,
             errorCode: 'NO_ROUTE',
@@ -214,11 +214,17 @@ export class QuoteHandler extends APIGLambdaHandler<
           }
         }
 
-        let callData = "";
-        if(simulate && swapRoute.methodParameters) {
+        let callData = ''
+        if (simulate && swapRoute.methodParameters) {
           callData = swapRoute.methodParameters!.calldata
           before = Date.now()
-          simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, tokenInAddress, recipient!, swapRoute.blockNumber.toNumber())
+          simulatedTxReceipt = await simulationProvider!.simulateTx(
+            chainId,
+            callData,
+            tokenInAddress,
+            recipient!,
+            swapRoute.blockNumber.toNumber()
+          )
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
         break
@@ -243,18 +249,24 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig);
-        if(swapRoute == null) {
+        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+        if (swapRoute == null) {
           return {
             statusCode: 404,
             errorCode: 'NO_ROUTE',
             detail: 'No route found',
           }
         }
-        if(simulate && swapRoute.methodParameters) {
+        if (simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
-          simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, tokenInAddress, recipient!, swapRoute.blockNumber.toNumber())
+          simulatedTxReceipt = await simulationProvider!.simulateTx(
+            chainId,
+            callData,
+            tokenInAddress,
+            recipient!,
+            swapRoute.blockNumber.toNumber()
+          )
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
         break
@@ -402,7 +414,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
-      simulatedTxReceipt: simulatedTxReceipt?.gasUsed.toHexString()
+      simulatedTxReceipt: simulatedTxReceipt?.gasUsed.toHexString(),
     }
 
     return {

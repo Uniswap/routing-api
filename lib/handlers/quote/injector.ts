@@ -36,7 +36,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei, simulate } = requestQueryParams
+    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei, simulate } =
+      requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -142,9 +143,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
         break
     }
 
-    let tenderlySimulator: TenderlyProvider|undefined = undefined
+    let tenderlySimulator: TenderlyProvider | undefined = undefined
 
-    if(simulate) {
+    if (simulate) {
       tenderlySimulator = new TenderlyProvider(
         process.env.TENDERLY_BASE_URL!,
         process.env.TENDERLY_USER!,
@@ -163,7 +164,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
-      simulationProvider: tenderlySimulator
+      simulationProvider: tenderlySimulator,
     }
   }
 }

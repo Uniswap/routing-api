@@ -123,7 +123,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
-      simulationProvider:undefined,
+      simulationProvider: undefined,
     }
   }
 }
