@@ -1,7 +1,5 @@
 import { log } from "@uniswap/smart-order-router";
 import axios from "axios";
-//import { fork } from "child_process";
-import * as dotenv from "dotenv";
 import { BigNumber, ethers, providers } from "ethers";
 import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers"
 
@@ -15,8 +13,6 @@ export const TENDERLY_FORK_API_URL = (FORK_ID:string):string=> `https://rpc.tend
 export const POST_TENDERLY_FORK_API_URL = (TENDERLY_BASE_URL:string, TENDERLY_USER:string, TENDERLY_PROJECT:string)=>`${TENDERLY_BASE_URL}/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/fork`
 
 export const APPROVE_TOKEN_FOR_TRANSFER = "0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-
-dotenv.config();
 
 export interface ISimulator {
     simulateTx: (chainId:number, hexData: string, tokenInAddress:string, fromAddress:string, blockNumber: number)=>Promise<TransactionReceipt>
@@ -71,6 +67,8 @@ export class TenderlyProvider implements ISimulator {
 
       const swapResponse: providers.TransactionResponse = await fork.getSigner(fromAddress).sendTransaction(swap)
       const swapReceipt = await swapResponse.wait()
+
+      log.info({simulatedTxReceipt:swapReceipt},'Simulated Tx Via Tenderly')
       
       return swapReceipt
     }

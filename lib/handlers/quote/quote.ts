@@ -220,7 +220,6 @@ export class QuoteHandler extends APIGLambdaHandler<
           before = Date.now()
           simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, tokenInAddress, recipient!, swapRoute.blockNumber.toNumber())
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
-          log.info({simulatedTxReceipt:simulatedTxReceipt},'Simulated Tx Via Tenderly')
         }
         break
       case 'exactOut':
@@ -261,14 +260,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         break
       default:
         throw new Error('Invalid swap type')
-    }
-
-    if(!swapRoute) {
-      return {
-        statusCode: 404,
-        errorCode: 'NO_ROUTE',
-        detail: 'No route found',
-      }
     }
 
     const {
