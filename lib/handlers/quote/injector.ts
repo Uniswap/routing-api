@@ -49,7 +49,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       amount,
       type,
       algorithm,
-      tenderlySimulate: simulate,
+      simulate: simulate,
     })
     setGlobalLogger(log)
 

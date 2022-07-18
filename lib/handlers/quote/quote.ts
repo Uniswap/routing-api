@@ -34,7 +34,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    let {
+    const {
       requestQueryParams: {
         tokenInAddress,
         tokenInChainId,
@@ -156,9 +156,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }
-    } else {
-      // Can't simulate without swapParams set
-      simulate = false
     }
 
     let swapRoute: SwapRoute | null = null

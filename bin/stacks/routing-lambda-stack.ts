@@ -26,7 +26,6 @@ export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly routeToRatioLambda: aws_lambda_nodejs.NodejsFunction
   public readonly routingLambdaAlias: aws_lambda.Alias
-  public readonly tenderlySimulationLambda: aws_lambda_nodejs.NodejsFunction
 
   constructor(scope: Construct, name: string, props: RoutingLambdaStackProps) {
     super(scope, name, props)
