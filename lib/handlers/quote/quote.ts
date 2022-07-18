@@ -63,6 +63,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         simulationProvider,
       },
     } = params
+
+    // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
@@ -202,7 +204,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         try{
           swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
         } catch(err) {
-          log.info({err:err})
+          log.info({err:err}, "failed routing!")
         }
         if(!swapRoute) {
           return {
@@ -242,7 +244,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_OUTPUT, swapParams, routingConfig);
+        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig);
         if(swapRoute == null) {
           return {
             statusCode: 404,
