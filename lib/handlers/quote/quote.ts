@@ -214,7 +214,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
         let callData = "";
         if(simulate && swapRoute.methodParameters) {
-          callData = swapRoute.methodParameters!.calldata as string
+          callData = swapRoute.methodParameters!.calldata
           before = Date.now()
           simulatedTxReceipt = await simulationProvider!.simulateTx(chainId, callData, tokenInAddress, recipient!, swapRoute.blockNumber.toNumber())
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
@@ -242,7 +242,14 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_OUTPUT, swapParams, routingConfig) as SwapRoute;
+        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_OUTPUT, swapParams, routingConfig);
+        if(swapRoute == null) {
+          return {
+            statusCode: 404,
+            errorCode: 'NO_ROUTE',
+            detail: 'No route found',
+          }
+        }
         if(simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
@@ -272,7 +279,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-    } = swapRoute as SwapRoute
+    }: SwapRoute = swapRoute
 
     const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
 
@@ -384,8 +391,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         routeResponse.push(curRoute)
       }
     }
-
-    log.info({tx:simulatedTxReceipt},"OKAY FINALLY HERE")
 
     const result: QuoteResponse = {
       methodParameters,
