@@ -4,8 +4,8 @@ import {
   ChainId,
   ITokenListProvider,
   ITokenProvider,
-  NativeCurrencyName,
   nativeOnChain,
+  NATIVE_NAMES_BY_ID,
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
@@ -102,12 +102,7 @@ export async function tokenStringToCurrency(
 
   let token: Currency | undefined = undefined
 
-  if (
-    tokenRaw == NativeCurrencyName.ETHER ||
-    tokenRaw == NativeCurrencyName.MATIC ||
-    tokenRaw == NativeCurrencyName.CELO ||
-    tokenRaw.toLowerCase() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-  ) {
+  if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
     token = nativeOnChain(chainId)
   } else if (isAddress(tokenRaw)) {
     token = await tokenListProvider.getTokenByAddress(tokenRaw)
