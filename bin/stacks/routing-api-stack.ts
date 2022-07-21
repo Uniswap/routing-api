@@ -189,7 +189,41 @@ export class RoutingAPIStack extends cdk.Stack {
     })
     quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration)
 
-    const apiAlarm5xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-5XXAlarm', {
+    // All alarms default to GreaterThanOrEqualToThreshold for when to be triggered.
+    const apiAlarm5xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-5XXAlarm', {
+      alarmName: 'RoutingAPI-SEV2-5XX',
+      metric: api.metricServerError({
+        period: Duration.minutes(5),
+        // For this metric 'avg' represents error rate.
+        statistic: 'avg',
+      }),
+      threshold: 0.25,
+      // Beta has much less traffic so is more susceptible to transient errors.
+      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
+    })
+
+    const apiAlarm4xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-4XXAlarm', {
+      alarmName: 'RoutingAPI-SEV2-4XX',
+      metric: api.metricClientError({
+        period: Duration.minutes(5),
+        statistic: 'avg',
+      }),
+      threshold: 0.95,
+      evaluationPeriods: 3,
+    })
+
+    const apiAlarmLatencySev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Latency', {
+      alarmName: 'RoutingAPI-SEV2-Latency',
+      metric: api.metricLatency({
+        period: Duration.minutes(5),
+        statistic: 'p90',
+      }),
+      threshold: 12000,
+      evaluationPeriods: 3,
+    })
+
+    const apiAlarm5xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-5XXAlarm', {
+      alarmName: 'RoutingAPI-SEV3-5XX',
       metric: api.metricServerError({
         period: Duration.minutes(5),
         // For this metric 'avg' represents error rate.
@@ -200,7 +234,8 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
     })
 
-    const apiAlarm4xx = new aws_cloudwatch.Alarm(this, 'RoutingAPI-4XXAlarm', {
+    const apiAlarm4xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-4XXAlarm', {
+      alarmName: 'RoutingAPI-SEV3-4XX',
       metric: api.metricClientError({
         period: Duration.minutes(5),
         statistic: 'avg',
@@ -209,7 +244,8 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
-    const apiAlarmLatency = new aws_cloudwatch.Alarm(this, 'RoutingAPI-Latency', {
+    const apiAlarmLatencySev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Latency', {
+      alarmName: 'RoutingAPI-SEV3-Latency',
       metric: api.metricLatency({
         period: Duration.minutes(5),
         statistic: 'p90',
@@ -220,9 +256,12 @@ export class RoutingAPIStack extends cdk.Stack {
 
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
-      apiAlarm5xx.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarm4xx.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarmLatency.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarm4xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarmLatencySev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
     }
 
     this.url = new CfnOutput(this, 'Url', {
