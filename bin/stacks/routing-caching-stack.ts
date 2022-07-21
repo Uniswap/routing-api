@@ -172,7 +172,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
       })
 
       new aws_events.Rule(this, 'ScheduleCleanIpfsPoolCache', {
-        schedule: aws_events.Schedule.rate(Duration.minutes(15)),
+        schedule: aws_events.Schedule.rate(Duration.minutes(30)),
         targets: [new aws_events_targets.LambdaFunction(this.ipfsCleanPoolCachingLambda)],
       })
     }

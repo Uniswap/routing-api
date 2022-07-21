@@ -40,43 +40,50 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
       pageOffset: 0,
     }
 
+    let result;
     try {
-      const result = await pinata.pinList(filters)
+      result = await pinata.pinList(filters)
       // 3 requests per second is max allowed by Pinata API. We ensure we do not exceed 2 requests per second to give a buffer.
       await delay(500)
+    } catch (err) {
+      log.error({ err }, `Error on pinList. ${JSON.stringify(err)}. Waiting one minute.`)
+      await delay(60000)
+      continue;
+    }
 
-      if (count == 1) {
-        // set count
-        count = result.count
-        log.info(
-          { startDate, endDate },
-          `Overall pins count between ${startDate.toDateString()} and ${endDate.toDateString()}: ${count}`
-        )
-      }
+    if (count == 1) {
+      // set count
+      count = result.count
+      log.info(
+        { startDate, endDate },
+        `Overall pins count between ${startDate.toDateString()} and ${endDate.toDateString()}: ${count}`
+      )
+    }
 
-      for (let i = 0; i < result.rows.length; i += 1) {
-        const { ipfs_pin_hash: hash, date_pinned: datePinned } = result.rows[i]
+    for (let i = 0; i < result.rows.length; i += 1) {
+      const { ipfs_pin_hash: hash, date_pinned: datePinned } = result.rows[i]
 
-        try {
-          const response = await pinata.unpin(hash)
+      try {
+        const response = await pinata.unpin(hash)
 
-          // 3 requests per second is max allowed by Pinata API. We ensure we do not exceed 2 requests per second to give a buffer.
-          await delay(500)
+        // 3 requests per second is max allowed by Pinata API. We ensure we do not exceed 2 requests per second to give a buffer.
+        await delay(500)
 
-          unpinned += 1
-          log.info({ response, hash }, `Unpinned: ${hash} pinned at ${datePinned}`)
-        } catch (err) {
-          log.error({ err }, `Error. Unpinned ${unpinned} so far. Waiting one minute.`)
+        unpinned += 1
+        log.info({ response, hash }, `Unpinned: ${hash} pinned at ${datePinned}`)
+      } catch (err: any) {
+        if (err.reason == 'CURRENT_USER_HAS_NOT_PINNED_CID') {
+          log.error({ err }, `Error ${err.reason} - Unpinned ${unpinned} so far. Skipping current pin`)
+        } else {
+          log.error({ err }, `Error ${err.reason} - Unpinned ${unpinned} so far. Waiting one minute`)
           await delay(60000)
           // set i back one since it was an unsuccessful unpin
           i -= 1
         }
-        log.info(`Unpinned ${unpinned} out of ${result.rows.length} from current page.`)
       }
-    } catch (err) {
-      log.error({ err }, `Error ${JSON.stringify(err)}. Waiting one minute.`)
-      await delay(60000)
+      log.info(`Unpinned ${unpinned} out of ${result.rows.length} from current page.`)
     }
+    
   }
 
   log.info(`Unpinned all ${unpinned} pins out of ${count} in the date range.`)
