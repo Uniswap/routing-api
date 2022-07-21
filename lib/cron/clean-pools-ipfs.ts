@@ -10,7 +10,6 @@ const START_MONTHS_AGO = 2
 const END_MONTHS_AGO = 1
 
 const PAGE_SIZE = 1000
-const DRY_RUN = true
 
 const pinata = pinataSDK(process.env.PINATA_API_KEY!, process.env.PINATA_API_SECRET!)
 
@@ -56,12 +55,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
       }
 
       for (let i = 0; i < result.rows.length; i += 1) {
-        const { ipfs_pin_hash: hash } = result.rows[i]
-
-        if (DRY_RUN) {
-          log.info({ r: result.rows[i] }, `DRY_RUN: Would have unpinned ${result.rows[i]}`)
-          continue
-        }
+        const { ipfs_pin_hash: hash, date_pinned: datePinned } = result.rows[i]
 
         try {
           const response = await pinata.unpin(hash)
@@ -70,7 +64,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
           await delay(500)
 
           unpinned += 1
-          log.info({ response, hash }, `Unpinned: ${hash}`)
+          log.info({ response, hash }, `Unpinned: ${hash} pinned at ${datePinned}`)
         } catch (err) {
           log.error({ err }, `Error. Unpinned ${unpinned} so far. Waiting one minute.`)
           await delay(60000)
@@ -80,7 +74,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
         log.info(`Unpinned ${unpinned} out of ${result.rows.length} from current page.`)
       }
     } catch (err) {
-      log.error(`Error ${err}`)
+      log.error({ err }, `Error ${JSON.stringify(err)}. Waiting one minute.`)
       await delay(60000)
     }
   }
