@@ -40,7 +40,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
       pageOffset: 0,
     }
 
-    let result;
+    let result
     try {
       result = await pinata.pinList(filters)
       // 3 requests per second is max allowed by Pinata API. We ensure we do not exceed 2 requests per second to give a buffer.
@@ -48,7 +48,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     } catch (err) {
       log.error({ err }, `Error on pinList. ${JSON.stringify(err)}. Waiting one minute.`)
       await delay(60000)
-      continue;
+      continue
     }
 
     if (count == 1) {
@@ -83,7 +83,6 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
       }
       log.info(`Unpinned ${unpinned} out of ${result.rows.length} from current page.`)
     }
-    
   }
 
   log.info(`Unpinned all ${unpinned} pins out of ${count} in the date range.`)
