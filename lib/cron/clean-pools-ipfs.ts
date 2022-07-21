@@ -21,7 +21,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     level: 'info',
     requestId: event.id,
   })
-  
+
   const now = new Date()
   const startDate = new Date(now.getFullYear(), now.getMonth() - START_MONTHS_AGO, now.getDate())
   const endDate = new Date(now.getFullYear(), now.getMonth() - END_MONTHS_AGO, now.getDate())
