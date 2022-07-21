@@ -15,7 +15,7 @@ const pinata = pinataSDK(process.env.PINATA_API_KEY!, process.env.PINATA_API_SEC
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
   const log: Logger = bunyan.createLogger({
-    name: 'RoutingLambda',
+    name: 'IPFSPoolCacheLambda',
     serializers: bunyan.stdSerializers,
     level: 'info',
     requestId: event.id,
