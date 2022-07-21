@@ -220,7 +220,7 @@ export class RoutingAPIStack extends cdk.Stack {
       threshold: 12000,
       evaluationPeriods: 3,
     })
-    
+
     const apiAlarm5xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-5XXAlarm', {
       alarmName: 'RoutingAPI-SEV3-5XX',
       metric: api.metricServerError({
