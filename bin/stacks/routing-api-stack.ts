@@ -189,6 +189,7 @@ export class RoutingAPIStack extends cdk.Stack {
     })
     quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration)
 
+    // All alarms default to GreaterThanOrEqualToThreshold for when to be triggered.
     const apiAlarm5xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-5XXAlarm', {
       alarmName: 'RoutingAPI-SEV2-5XX',
       metric: api.metricServerError({
