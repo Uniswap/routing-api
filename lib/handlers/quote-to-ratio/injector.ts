@@ -69,7 +69,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<
     const chainId = token0ChainId
     const chainIdEnum = ID_TO_CHAIN_ID(chainId)
 
-    const { dependencies } = containerInjected
+    const { dependencies, simulationProvider } = containerInjected
 
     if (!dependencies[chainIdEnum]) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
@@ -123,6 +123,7 @@ export class QuoteToRatioHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
+      simulationProvider,
     }
   }
 }

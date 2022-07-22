@@ -47,6 +47,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         minSplits,
         forceCrossProtocol,
         protocols: protocolsStr,
+        simulate,
       },
       requestInjected: {
         router,
@@ -58,11 +59,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         v3PoolProvider: v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
+        simulationProvider
       },
     } = params
 
     // Parse user provided token address/symbol to Currency object.
-    const before = Date.now()
+    let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
@@ -155,8 +157,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    let swapRoute: SwapRoute | null
+    let swapRoute: SwapRoute | null = null
     let amount: CurrencyAmount<Currency>
+    let simulatedGasEstimate: number | undefined = undefined
 
     let tokenPairSymbol = ''
     let tokenPairSymbolChain = ''
@@ -194,11 +197,39 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        try {
+          swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        } catch (err) {
+          log.info({ err: err }, 'failed routing!')
+        }
+        if (!swapRoute) {
+          return {
+            statusCode: 404,
+            errorCode: 'NO_ROUTE',
+            detail: 'No route found',
+          }
+        }
+
+        let callData = ''
+        if (simulate && swapRoute.methodParameters) {
+          callData = swapRoute.methodParameters!.calldata
+          before = Date.now()
+          const resp:number|Error = await simulationProvider!.simulateTransaction(
+            chainId,
+            callData,
+            tokenInAddress,
+            recipient!,
+            swapRoute.blockNumber.toNumber(),
+            swapRoute.estimatedGasUsed.toNumber()
+          )
+          if (!(resp instanceof(Error))) {
+            simulatedGasEstimate = resp
+          }
+          metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+        }
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
-
         log.info(
           {
             amountOut: amount.toExact(),
@@ -219,27 +250,32 @@ export class QuoteHandler extends APIGLambdaHandler<
         )
 
         swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+        if (swapRoute == null) {
+          return {
+            statusCode: 404,
+            errorCode: 'NO_ROUTE',
+            detail: 'No route found',
+          }
+        }
+        if (simulate && swapRoute.methodParameters) {
+          before = Date.now()
+          callData = swapRoute.methodParameters?.calldata as string
+          const resp:number|Error = await simulationProvider!.simulateTransaction(
+            chainId,
+            callData,
+            tokenInAddress,
+            recipient!,
+            swapRoute.blockNumber.toNumber()
+          )
+          log.info({resp:resp},"GOT HERE")
+          if (!(resp instanceof(Error))) {
+            simulatedGasEstimate = resp
+          }
+          metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
+        }
         break
       default:
         throw new Error('Invalid swap type')
-    }
-
-    if (!swapRoute) {
-      log.info(
-        {
-          type,
-          tokenIn: currencyIn,
-          tokenOut: currencyOut,
-          amount: amount.quotient.toString(),
-        },
-        `No route found. 404`
-      )
-
-      return {
-        statusCode: 404,
-        errorCode: 'NO_ROUTE',
-        detail: 'No route found',
-      }
     }
 
     const {
@@ -252,7 +288,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-    } = swapRoute
+    }: SwapRoute = swapRoute
 
     const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
 
@@ -382,6 +418,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
+      simulatedGasEstimate,
     }
 
     return {

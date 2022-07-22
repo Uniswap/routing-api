@@ -30,6 +30,7 @@ export class RoutingAPIStage extends Stage {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderlyCreds?: { [key: string]: string }
     }
   ) {
     super(scope, id, props)
@@ -55,6 +56,7 @@ export class RoutingAPIStage extends Stage {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      tenderlyCreds,
     })
     this.url = url
   }
@@ -110,6 +112,11 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
+    //TODO: Add AWS secrets and update this
+    const tenderlyAuth = sm.Secret.fromSecretAttributes(this, 'TenderlyAuth', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
+    })
+
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
     })
@@ -137,6 +144,14 @@ export class RoutingAPIPipeline extends Stack {
       jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
 
+    // Parse AWS Secret
+    let tenderlyCreds = {
+      TENDERLY_ACCESS_KEY: tenderlyAuth.secretValueFromJson('key').toString(),
+      TENDERLY_BASE_URL: tenderlyAuth.secretValueFromJson('base-url').toString(),
+      TENDERLY_USER: tenderlyAuth.secretValueFromJson('user').toString(),
+      TENDERLY_PROJECT: tenderlyAuth.secretValueFromJson('project').toString(),
+    }
+
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
@@ -148,6 +163,7 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyCreds: tenderlyCreds,
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -166,6 +182,7 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyCreds: tenderlyCreds,
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -239,6 +256,13 @@ const jsonRpcProviders = {
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
 }
 
+const tenderlyCreds = {
+  TENDERLY_BASE_URL: process.env.TENDERLY_BASE_URL!,
+  TENDERLY_USER: process.env.TENDERLY_USER!,
+  TENDERLY_PROJECT: process.env.TENDERLY_PROJECT!,
+  TENDERLY_ACCESS_KEY: process.env.TENDERLY_ACCESS_KEY!,
+}
+
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: jsonRpcProviders,
@@ -251,6 +275,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
   hosted_zone: process.env.HOSTED_ZONE!,
+  tenderlyCreds: tenderlyCreds,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
