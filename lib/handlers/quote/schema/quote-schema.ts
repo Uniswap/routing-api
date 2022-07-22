@@ -46,8 +46,10 @@ export const QuoteQueryParamsJoi = Joi.object({
   minSplits: Joi.number().max(7).optional(),
   forceCrossProtocol: Joi.boolean().optional(),
   protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3')).optional(),
-  simulate: Joi.boolean().optional()
-}).and('recipient', 'slippageTolerance', 'deadline').with('simulate', 'recipient')
+  simulate: Joi.boolean().optional(),
+})
+  .and('recipient', 'slippageTolerance', 'deadline')
+  .with('simulate', 'recipient')
 
 export type QuoteQueryParams = {
   tokenInAddress: string

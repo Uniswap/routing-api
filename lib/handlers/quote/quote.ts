@@ -59,7 +59,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         v3PoolProvider: v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
-        simulationProvider
+        simulationProvider,
       },
     } = params
 
@@ -214,7 +214,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         if (simulate && swapRoute.methodParameters) {
           callData = swapRoute.methodParameters!.calldata
           before = Date.now()
-          const resp:number|Error = await simulationProvider!.simulateTransaction(
+          const resp: number | Error = await simulationProvider!.simulateTransaction(
             chainId,
             callData,
             tokenInAddress,
@@ -222,7 +222,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             swapRoute.blockNumber.toNumber(),
             swapRoute.estimatedGasUsed.toNumber()
           )
-          if (!(resp instanceof(Error))) {
+          if (!(resp instanceof Error)) {
             simulatedGasEstimate = resp
           }
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
@@ -260,15 +260,15 @@ export class QuoteHandler extends APIGLambdaHandler<
         if (simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
-          const resp:number|Error = await simulationProvider!.simulateTransaction(
+          const resp: number | Error = await simulationProvider!.simulateTransaction(
             chainId,
             callData,
             tokenInAddress,
             recipient!,
             swapRoute.blockNumber.toNumber()
           )
-          log.info({resp:resp},"GOT HERE")
-          if (!(resp instanceof(Error))) {
+          log.info({ resp: resp }, 'GOT HERE')
+          if (!(resp instanceof Error)) {
             simulatedGasEstimate = resp
           }
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)

@@ -14,11 +14,8 @@ export const POST_TENDERLY_FORK_API_URL = (
   TENDERLY_PROJECT: string
 ) => `${TENDERLY_BASE_URL}/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/fork`
 
-export const TENDERLY_BATCH_SIMULATE = (
-  TENDERLY_BASE_URL: string,
-  TENDERLY_USER: string,
-  TENDERLY_PROJECT: string
-) => `${TENDERLY_BASE_URL}/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/simulate-batch`
+export const TENDERLY_BATCH_SIMULATE = (TENDERLY_BASE_URL: string, TENDERLY_USER: string, TENDERLY_PROJECT: string) =>
+  `${TENDERLY_BASE_URL}/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/simulate-batch`
 
 export const APPROVE_TOKEN_FOR_TRANSFER =
   '0x095ea7b300000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
@@ -32,7 +29,7 @@ export interface ISimulator {
     blockNumber: number,
     // For the HeuristicFallback Implementation
     fallback?: number
-  ) => Promise<number|Error>|number
+  ) => Promise<number | Error> | number
 }
 export class TenderlyProvider implements ISimulator {
   TENDERLY_BASE_URL: string
@@ -52,8 +49,8 @@ export class TenderlyProvider implements ISimulator {
     tokenInAddress: string,
     fromAddress: string,
     blockNumber: number,
-    fallback?: number,
-  ): Promise<number|Error> {
+    fallback?: number
+  ): Promise<number | Error> {
     log.info(
       {
         hexData: hexData,
@@ -69,9 +66,9 @@ export class TenderlyProvider implements ISimulator {
       network_id: chainId,
       input: APPROVE_TOKEN_FOR_TRANSFER,
       to: tokenInAddress,
-      value: "0",
+      value: '0',
       from: fromAddress,
-      gasPrice: "0",
+      gasPrice: '0',
       gas: 30000000,
     }
 
@@ -79,14 +76,14 @@ export class TenderlyProvider implements ISimulator {
       network_id: chainId,
       input: hexData,
       to: V3_ROUTER2_ADDRESS,
-      value: "0",
+      value: '0',
       from: fromAddress,
-      gasPrice: "0",
+      gasPrice: '0',
       gas: 30000000,
       type: 1,
     }
 
-    const body = {"simulations": [approve, swap]}
+    const body = { simulations: [approve, swap] }
     body
     const opts = {
       headers: {
@@ -96,16 +93,16 @@ export class TenderlyProvider implements ISimulator {
     const url = TENDERLY_BATCH_SIMULATE(this.TENDERLY_BASE_URL, this.TENDERLY_USER, this.TENDERLY_PROJECT)
     let resp: any
     try {
-      resp=await axios.post(url, body, opts)
-    } catch(error) {
+      resp = await axios.post(url, body, opts)
+    } catch (error) {
       log.info(`Failed to Simulate Via Tenderly!`)
-      if(!fallback) {
+      if (!fallback) {
         return new Error('`Failed to Simulate Via Tenderly! No fallback set!`')
       }
       log.info(`Defaulting to fallback return value of: ${fallback}s.`)
       return fallback
     }
-    log.info({resp:resp.data.simulation_results}, 'Simulated Transaction Via Tenderly')
+    log.info({ resp: resp.data.simulation_results }, 'Simulated Transaction Via Tenderly')
     return resp.data.simulation_results[1].transaction.gas_used as number
   }
 }

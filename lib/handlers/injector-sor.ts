@@ -85,7 +85,7 @@ export type ContainerDependencies = {
 export interface ContainerInjected {
   dependencies: {
     [chainId in ChainId]?: ContainerDependencies
-  },
+  }
   simulationProvider: ISimulator
 }
 
