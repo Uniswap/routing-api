@@ -58,7 +58,7 @@ export const QuoteResponseSchemaJoi = Joi.object()
       calldata: Joi.string().required(),
       value: Joi.string().required(),
     }).optional(),
-    simulatedTxReceipt: Joi.string().optional(),
+    simulatedGasEstimate: Joi.number().optional(),
   })
   .optional()
 
@@ -79,5 +79,5 @@ export type QuoteResponse = {
   route: Array<V3PoolInRoute[] | V2PoolInRoute[]>
   routeString: string
   methodParameters?: MethodParameters
-  simulatedTxReceipt?: string
+  simulatedGasEstimate?: number
 }

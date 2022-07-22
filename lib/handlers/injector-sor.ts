@@ -36,7 +36,7 @@ import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
-import { ISimulator } from './tenderly-sim/tenderly-sim'
+import { ISimulator, TenderlyProvider } from './tenderly-sim/tenderly-sim'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -63,7 +63,7 @@ export interface RequestInjected<Router> extends BaseRInj {
   tokenProvider: ITokenProvider
   tokenListProvider: ITokenListProvider
   router: Router
-  simulationProvider: ISimulator | undefined
+  simulationProvider: ISimulator
 }
 
 export type ContainerDependencies = {
@@ -85,7 +85,8 @@ export type ContainerDependencies = {
 export interface ContainerInjected {
   dependencies: {
     [chainId in ChainId]?: ContainerDependencies
-  }
+  },
+  simulationProvider: ISimulator
 }
 
 export abstract class InjectorSOR<Router, QueryParams> extends Injector<
@@ -107,6 +108,14 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const dependenciesByChain: {
       [chainId in ChainId]?: ContainerDependencies
     } = {}
+
+    const tenderlySimulator: TenderlyProvider = new TenderlyProvider(
+      process.env.TENDERLY_BASE_URL!,
+      process.env.TENDERLY_USER!,
+      process.env.TENDERLY_PROJECT!,
+      process.env.TENDERLY_ACCESS_KEY!,
+      50
+    )
 
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
@@ -310,6 +319,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     return {
       dependencies: dependenciesByChain,
+      simulationProvider: tenderlySimulator,
     }
   }
 }

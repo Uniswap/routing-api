@@ -1,4 +1,3 @@
-import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
@@ -60,7 +59,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         v3PoolProvider: v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
-        simulationProvider,
+        simulationProvider
       },
     } = params
 
@@ -160,7 +159,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     let swapRoute: SwapRoute | null = null
     let amount: CurrencyAmount<Currency>
-    let simulatedTxReceipt: TransactionReceipt | undefined = undefined
+    let simulatedGasEstimate: number | undefined = undefined
 
     let tokenPairSymbol = ''
     let tokenPairSymbolChain = ''
@@ -215,13 +214,17 @@ export class QuoteHandler extends APIGLambdaHandler<
         if (simulate && swapRoute.methodParameters) {
           callData = swapRoute.methodParameters!.calldata
           before = Date.now()
-          simulatedTxReceipt = await simulationProvider!.simulateTx(
+          const resp:number|Error = await simulationProvider!.simulateTransaction(
             chainId,
             callData,
             tokenInAddress,
             recipient!,
-            swapRoute.blockNumber.toNumber()
+            swapRoute.blockNumber.toNumber(),
+            swapRoute.estimatedGasUsed.toNumber()
           )
+          if (!(resp instanceof(Error))) {
+            simulatedGasEstimate = resp
+          }
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
         break
@@ -257,13 +260,17 @@ export class QuoteHandler extends APIGLambdaHandler<
         if (simulate && swapRoute.methodParameters) {
           before = Date.now()
           callData = swapRoute.methodParameters?.calldata as string
-          simulatedTxReceipt = await simulationProvider!.simulateTx(
+          const resp:number|Error = await simulationProvider!.simulateTransaction(
             chainId,
             callData,
             tokenInAddress,
             recipient!,
             swapRoute.blockNumber.toNumber()
           )
+          log.info({resp:resp},"GOT HERE")
+          if (!(resp instanceof(Error))) {
+            simulatedGasEstimate = resp
+          }
           metric.putMetric('SimulateTransaction', Date.now() - before, MetricLoggerUnit.Milliseconds)
         }
         break
@@ -411,7 +418,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
-      simulatedTxReceipt: simulatedTxReceipt?.gasUsed.toHexString(),
+      simulatedGasEstimate,
     }
 
     return {
