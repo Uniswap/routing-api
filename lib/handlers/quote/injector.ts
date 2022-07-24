@@ -5,10 +5,11 @@ import {
   IRouter,
   LegacyRouter,
   LegacyRoutingConfig,
+  OnChainQuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
-  V3QuoteProvider,
+  V3Route,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
@@ -93,7 +94,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       case 'legacy':
         v3QuoteProvider =
           v3QuoteProvider ??
-          new V3QuoteProvider(
+          new OnChainQuoteProvider<V3Route>(
             chainId,
             provider,
             multicallProvider,

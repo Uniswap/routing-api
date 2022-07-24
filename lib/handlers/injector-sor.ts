@@ -17,6 +17,7 @@ import {
   LegacyGasPriceProvider,
   NodeJSCache,
   OnChainGasPriceProvider,
+  OnChainQuoteProvider,
   setGlobalLogger,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
@@ -25,7 +26,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
-  V3QuoteProvider,
+  V3Route,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -76,7 +77,7 @@ export type ContainerDependencies = {
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   multicallProvider: UniswapMulticallProvider
-  v3QuoteProvider?: V3QuoteProvider
+  v3QuoteProvider?: OnChainQuoteProvider<V3Route>
   v2QuoteProvider: V2QuoteProvider
 }
 
@@ -157,11 +158,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
-        let quoteProvider: V3QuoteProvider | undefined = undefined
+        let quoteProvider: OnChainQuoteProvider<V3Route> | undefined = undefined
         switch (chainId) {
           case ChainId.OPTIMISM:
           case ChainId.OPTIMISTIC_KOVAN:
-            quoteProvider = new V3QuoteProvider(
+            quoteProvider = new OnChainQuoteProvider<V3Route>(
               chainId,
               provider,
               multicall2Provider,
@@ -195,7 +196,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
           case ChainId.ARBITRUM_ONE:
           case ChainId.ARBITRUM_RINKEBY:
-            quoteProvider = new V3QuoteProvider(
+            quoteProvider = new OnChainQuoteProvider<V3Route>(
               chainId,
               provider,
               multicall2Provider,

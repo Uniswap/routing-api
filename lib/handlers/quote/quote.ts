@@ -10,6 +10,7 @@ import {
   SwapOptions,
   SwapRoute,
 } from '@uniswap/smart-order-router'
+import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -254,29 +255,29 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
     } = swapRoute
 
-    const routeResponse: Array<V3PoolInRoute[] | V2PoolInRoute[]> = []
+    const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
 
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      if (subRoute.protocol == Protocol.V3) {
-        const pools = subRoute.route.pools
-        const curRoute: V3PoolInRoute[] = []
-        for (let i = 0; i < pools.length; i++) {
-          const nextPool = pools[i]
-          const tokenIn = tokenPath[i]
-          const tokenOut = tokenPath[i + 1]
+      const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
+      const curRoute: (V3PoolInRoute | V2PoolInRoute)[] = []
+      for (let i = 0; i < pools.length; i++) {
+        const nextPool = pools[i]
+        const tokenIn = tokenPath[i]
+        const tokenOut = tokenPath[i + 1]
 
-          let edgeAmountIn = undefined
-          if (i == 0) {
-            edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
-          }
+        let edgeAmountIn = undefined
+        if (i == 0) {
+          edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
+        }
 
-          let edgeAmountOut = undefined
-          if (i == pools.length - 1) {
-            edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
-          }
+        let edgeAmountOut = undefined
+        if (i == pools.length - 1) {
+          edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
+        }
 
+        if (nextPool instanceof Pool) {
           curRoute.push({
             type: 'v3-pool',
             address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
@@ -299,27 +300,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountIn: edgeAmountIn,
             amountOut: edgeAmountOut,
           })
-        }
-
-        routeResponse.push(curRoute)
-      } else if (subRoute.protocol == Protocol.V2) {
-        const pools = subRoute.route.pairs
-        const curRoute: V2PoolInRoute[] = []
-        for (let i = 0; i < pools.length; i++) {
-          const nextPool = pools[i]
-          const tokenIn = tokenPath[i]
-          const tokenOut = tokenPath[i + 1]
-
-          let edgeAmountIn = undefined
-          if (i == 0) {
-            edgeAmountIn = type == 'exactIn' ? amount.quotient.toString() : quote.quotient.toString()
-          }
-
-          let edgeAmountOut = undefined
-          if (i == pools.length - 1) {
-            edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
-          }
-
+        } else {
           const reserve0 = nextPool.reserve0
           const reserve1 = nextPool.reserve1
 
@@ -360,9 +341,9 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountOut: edgeAmountOut,
           })
         }
-
-        routeResponse.push(curRoute)
       }
+
+      routeResponse.push(curRoute)
     }
 
     const result: QuoteResponse = {
