@@ -47,6 +47,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         deadline,
         minSplits,
         forceCrossProtocol,
+        disableMixedRoutesConsideration,
         protocols: protocolsStr,
       },
       requestInjected: {
@@ -125,6 +126,9 @@ export class QuoteHandler extends APIGLambdaHandler<
           case 'v3':
             protocols.push(Protocol.V3)
             break
+          case 'mixed':
+            protocols.push(Protocol.MIXED)
+            break
           default:
             return {
               statusCode: 400,
@@ -141,6 +145,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
+      ...(disableMixedRoutesConsideration ? { disableMixedRoutesConsideration } : {}),
       protocols,
     }
 

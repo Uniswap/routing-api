@@ -62,5 +62,6 @@ export type QuoteQueryParams = {
   gasPriceWei?: string
   minSplits?: number
   forceCrossProtocol?: boolean
+  disableMixedRoutesConsideration?: boolean
   protocols?: string[] | string
 }
