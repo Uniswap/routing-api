@@ -648,6 +648,97 @@ describe('quote', function () {
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
               }
             })
+
+            if (type === 'exactIn') {
+              it.only(`erc20 -> erc20 disableMixedRoutesConsideration not specified for likely mixedRoute`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  protocols: 'v2,v3',
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const {
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+
+                let hasV3Pool = false
+                let hasV2Pool = false
+                for (const r of route) {
+                  for (const pool of r) {
+                    if (pool.type == 'v3-pool') {
+                      hasV3Pool = true
+                    }
+                    if (pool.type == 'v2-pool') {
+                      hasV2Pool = true
+                    }
+                  }
+                }
+                expect(hasV3Pool && hasV2Pool).to.be.true
+
+                /// since we only get the routeString back, we can check if there's V3 + V2
+                expect(routeString.includes('[V2 + V3]'))
+              })
+
+              it.only(`erc20 -> erc20 disableMixedRoutesConsideration true for likely mixedRoute`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  disableMixedRoutesConsideration: true,
+                  protocols: 'v2,v3',
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const {
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+
+                /// since we only get the routeString back, we can check if there's V3 + V2
+                expect(!routeString.includes('[V2 + V3]'))
+              })
+            }
           }
         })
 
@@ -1125,7 +1216,7 @@ describe('quote', function () {
       // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
       if (erc1 == null || erc2 == null) continue
 
-      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
+      xdescribe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
         this.retries(1)
         const wrappedNative = WNATIVE_ON(chain)
