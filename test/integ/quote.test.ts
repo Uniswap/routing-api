@@ -650,7 +650,7 @@ describe('quote', function () {
             })
 
             if (type === 'exactIn') {
-              it.only(`erc20 -> erc20 disableMixedRoutesConsideration not specified for likely mixedRoute`, async () => {
+              it(`erc20 -> erc20 disableMixedRoutesConsideration not specified for likely mixedRoute`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -701,7 +701,7 @@ describe('quote', function () {
                 expect(routeString.includes('[V2 + V3]'))
               })
 
-              it.only(`erc20 -> erc20 disableMixedRoutesConsideration true for likely mixedRoute`, async () => {
+              it(`erc20 -> erc20 disableMixedRoutesConsideration true for likely mixedRoute`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -721,7 +721,7 @@ describe('quote', function () {
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
                 const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
                 } = response
 
