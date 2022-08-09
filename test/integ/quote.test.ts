@@ -650,7 +650,7 @@ describe('quote', function () {
             })
 
             if (type === 'exactIn') {
-              it(`erc20 -> erc20 disableMixedRoutesConsideration not specified for likely mixedRoute`, async () => {
+              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -697,11 +697,10 @@ describe('quote', function () {
                 }
                 expect(hasV3Pool && hasV2Pool).to.be.true
 
-                /// since we only get the routeString back, we can check if there's V3 + V2
-                expect(routeString.includes('[V2 + V3]'))
+                expect(!routeString.includes('[V2 + V3]'))
               })
 
-              it(`erc20 -> erc20 disableMixedRoutesConsideration true for likely mixedRoute`, async () => {
+              it(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -713,8 +712,8 @@ describe('quote', function () {
                   slippageTolerance: SLIPPAGE,
                   deadline: '360',
                   algorithm: 'alpha',
-                  disableMixedRoutesConsideration: true,
-                  protocols: 'v2,v3',
+                  forceMixedRoutes: true,
+                  protocols: 'v2,v3,mixed',
                 }
 
                 const queryParams = qs.stringify(quoteReq)
@@ -736,7 +735,7 @@ describe('quote', function () {
                 expect(methodParameters).to.not.be.undefined
 
                 /// since we only get the routeString back, we can check if there's V3 + V2
-                expect(!routeString.includes('[V2 + V3]'))
+                expect(routeString.includes('[V2 + V3]'))
               })
             }
           }

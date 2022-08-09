@@ -45,7 +45,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .optional(),
   minSplits: Joi.number().max(7).optional(),
   forceCrossProtocol: Joi.boolean().optional(),
-  disableMixedRoutesConsideration: Joi.boolean().optional(),
+  forceMixedRoutes: Joi.boolean().optional(),
   protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3', 'mixed')).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
@@ -63,6 +63,6 @@ export type QuoteQueryParams = {
   gasPriceWei?: string
   minSplits?: number
   forceCrossProtocol?: boolean
-  disableMixedRoutesConsideration?: boolean
+  forceMixedRoutes?: boolean
   protocols?: string[] | string
 }

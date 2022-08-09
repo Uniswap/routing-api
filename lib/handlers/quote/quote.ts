@@ -47,7 +47,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         deadline,
         minSplits,
         forceCrossProtocol,
-        disableMixedRoutesConsideration,
+        forceMixedRoutes,
         protocols: protocolsStr,
       },
       requestInjected: {
@@ -145,7 +145,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
-      ...(disableMixedRoutesConsideration ? { disableMixedRoutesConsideration } : {}),
+      ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
     }
 
