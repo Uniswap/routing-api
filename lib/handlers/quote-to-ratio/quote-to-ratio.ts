@@ -144,7 +144,6 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
       /// @notice We don't want to query for mixedRoutes in routeToRatio
-      disableMixedRoutesConsideration: true,
     }
 
     let addLiquidityOptions: CondensedAddLiquidityOptions
