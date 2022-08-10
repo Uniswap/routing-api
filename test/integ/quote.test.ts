@@ -651,7 +651,7 @@ describe('quote', function () {
 
             /// Tests for routes likely to result in MixedRoutes being returned
             if (type === 'exactIn') {
-              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3`, async () => {
+              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -670,7 +670,7 @@ describe('quote', function () {
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
                 const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
                 } = response
 
@@ -683,20 +683,6 @@ describe('quote', function () {
                 }
 
                 expect(methodParameters).to.not.be.undefined
-
-                let hasV3Pool = false
-                let hasV2Pool = false
-                for (const r of route) {
-                  for (const pool of r) {
-                    if (pool.type == 'v3-pool') {
-                      hasV3Pool = true
-                    }
-                    if (pool.type == 'v2-pool') {
-                      hasV2Pool = true
-                    }
-                  }
-                }
-                expect(hasV3Pool && hasV2Pool).to.be.true
 
                 expect(!routeString.includes('[V2 + V3]'))
               })
