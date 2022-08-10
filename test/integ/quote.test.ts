@@ -717,13 +717,13 @@ describe('quote', function () {
                   protocols: 'v2,v3',
                 }
 
-                const queryParams = qs.stringify(quoteReq)
-
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                const { status } = response
-
-                /// no route found
-                expect(status).to.equal(404)
+                await callAndExpectFail(quoteReq, {
+                  status: 404,
+                  data: {
+                    detail: 'No route found',
+                    errorCode: 'NO_ROUTE',
+                  },
+                })
               })
 
               it(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
