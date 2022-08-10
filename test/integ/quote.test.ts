@@ -1227,7 +1227,7 @@ describe('quote', function () {
       // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
       if (erc1 == null || erc2 == null) continue
 
-      xdescribe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
         this.retries(1)
         const wrappedNative = WNATIVE_ON(chain)
