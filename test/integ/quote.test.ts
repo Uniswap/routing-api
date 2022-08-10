@@ -720,36 +720,10 @@ describe('quote', function () {
                 const queryParams = qs.stringify(quoteReq)
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
-                  status,
-                } = response
+                const { status } = response
 
-                expect(status).to.equal(200)
-
-                if (type == 'exactIn') {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-                } else {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-                }
-
-                expect(methodParameters).to.not.be.undefined
-
-                let hasV3Pool = false
-                let hasV2Pool = false
-                for (const r of route) {
-                  for (const pool of r) {
-                    if (pool.type == 'v3-pool') {
-                      hasV3Pool = true
-                    }
-                    if (pool.type == 'v2-pool') {
-                      hasV2Pool = true
-                    }
-                  }
-                }
-                expect(hasV3Pool && hasV2Pool).to.be.true
-
-                expect(!routeString.includes('[V2 + V3]'))
+                /// no route found
+                expect(status).to.equal(404)
               })
 
               it(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
