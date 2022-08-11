@@ -268,6 +268,11 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               view: 'timeSeries',
               stacked: false,
               metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
+                [NAMESPACE, `MixedAndV3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `MixedAndV3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `MixedAndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `MixedSplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                [NAMESPACE, `MixedRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
                 [NAMESPACE, `V3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
                 [NAMESPACE, `V3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
                 [NAMESPACE, `V3RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
