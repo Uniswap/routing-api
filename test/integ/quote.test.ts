@@ -648,6 +648,108 @@ describe('quote', function () {
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
               }
             })
+
+            /// Tests for routes likely to result in MixedRoutes being returned
+            if (type === 'exactIn') {
+              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  protocols: 'v2,v3',
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const {
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+
+                expect(!routeString.includes('[V2 + V3]'))
+              })
+
+              it(`erc20 -> erc20 forceMixedRoutes true for v2,v3`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  forceMixedRoutes: true,
+                  protocols: 'v2,v3',
+                }
+
+                await callAndExpectFail(quoteReq, {
+                  status: 404,
+                  data: {
+                    detail: 'No route found',
+                    errorCode: 'NO_ROUTE',
+                  },
+                })
+              })
+
+              it(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  forceMixedRoutes: true,
+                  protocols: 'v2,v3,mixed',
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const {
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+
+                /// since we only get the routeString back, we can check if there's V3 + V2
+                expect(routeString.includes('[V2 + V3]'))
+              })
+            }
           }
         })
 

@@ -140,7 +140,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       }
     }
 
-    const routingConfig = {
+    const routingConfig: AlphaRouterConfig = {
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
     }

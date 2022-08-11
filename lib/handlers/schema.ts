@@ -73,7 +73,7 @@ export type QuoteResponse = {
   gasUseEstimateUSD: string
   gasPriceWei: string
   blockNumber: string
-  route: Array<V3PoolInRoute[] | V2PoolInRoute[]>
+  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
   routeString: string
   methodParameters?: MethodParameters
 }

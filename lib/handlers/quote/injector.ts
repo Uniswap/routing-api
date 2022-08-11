@@ -5,10 +5,10 @@ import {
   IRouter,
   LegacyRouter,
   LegacyRoutingConfig,
+  OnChainQuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
-  V3QuoteProvider,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
@@ -81,7 +81,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       gasPriceProvider: gasPriceProviderOnChain,
     } = dependencies[chainIdEnum]!
 
-    let v3QuoteProvider = dependencies[chainIdEnum]!.v3QuoteProvider
+    let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
@@ -91,9 +91,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
     let router
     switch (algorithm) {
       case 'legacy':
-        v3QuoteProvider =
-          v3QuoteProvider ??
-          new V3QuoteProvider(
+        onChainQuoteProvider =
+          onChainQuoteProvider ??
+          new OnChainQuoteProvider(
             chainId,
             provider,
             multicallProvider,
@@ -116,7 +116,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           chainId,
           multicall2Provider: multicallProvider,
           poolProvider: v3PoolProvider,
-          quoteProvider: v3QuoteProvider,
+          quoteProvider: onChainQuoteProvider,
           tokenProvider,
         })
         break
@@ -128,7 +128,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v3SubgraphProvider,
           multicall2Provider: multicallProvider,
           v3PoolProvider,
-          v3QuoteProvider,
+          onChainQuoteProvider,
           gasPriceProvider,
           v3GasModelFactory: new V3HeuristicGasModelFactory(),
           blockedTokenListProvider,
