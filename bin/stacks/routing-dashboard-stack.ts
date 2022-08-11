@@ -241,6 +241,11 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               view: 'timeSeries',
               stacked: false,
               metrics: [
+                [NAMESPACE, 'MixedAndV3AndV2SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'MixedAndV3SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'MixedAndV2SplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'MixedSplitRoute', 'Service', 'RoutingAPI'],
+                [NAMESPACE, 'MixedRoute', 'Service', 'RoutingAPI'],
                 [NAMESPACE, 'V3AndV2SplitRoute', 'Service', 'RoutingAPI'],
                 [NAMESPACE, 'V3SplitRoute', 'Service', 'RoutingAPI'],
                 [NAMESPACE, 'V3Route', 'Service', 'RoutingAPI'],
