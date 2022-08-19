@@ -57,7 +57,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
-  }).optional()
+  }).optional(),
 })
 
 export type QuoteResponse = {
