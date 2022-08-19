@@ -30,6 +30,9 @@ export class RoutingAPIStage extends Stage {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderlyUser: string,
+      tenderlyProject: string,
+      tenderlyAccessKey: string,
     }
   ) {
     super(scope, id, props)
@@ -43,6 +46,9 @@ export class RoutingAPIStage extends Stage {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -55,6 +61,9 @@ export class RoutingAPIStage extends Stage {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey
     })
     this.url = url
   }
@@ -110,6 +119,17 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
+    const tenderlyUser = sm.Secret.fromSecretAttributes(this, 'TenderlyUser', {
+      secretCompleteArn: '',
+    })
+    const tenderlyProject = sm.Secret.fromSecretAttributes(this, 'TenderlyProject', {
+      secretCompleteArn: '',
+    })
+
+    const tenderlyAccessKey = sm.Secret.fromSecretAttributes(this, 'TenderlyAccessKey', {
+      secretCompleteArn: '',
+    })
+
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:eth-gas-station-info-url-ulGncX',
     })
@@ -148,6 +168,9 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyUser: tenderlyUser.secretValue.toString(),
+      tenderlyProject: tenderlyProject.secretValue.toString(),
+      tenderlyAccessKey: tenderlyAccessKey.secretValue.toString()
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -166,6 +189,9 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
+      tenderlyUser: tenderlyUser.secretValue.toString(),
+      tenderlyProject: tenderlyProject.secretValue.toString(),
+      tenderlyAccessKey: tenderlyAccessKey.secretValue.toString()
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -251,6 +277,9 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
   hosted_zone: process.env.HOSTED_ZONE!,
+  tenderlyUser: process.env.TENDERLY_USER!,
+  tenderlyProject: process.env.TENDERLY_PROJECT!,
+  tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

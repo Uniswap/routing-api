@@ -49,6 +49,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   gasUseEstimateQuoteDecimals: Joi.string().required(),
   gasUseEstimate: Joi.string().required(),
   gasUseEstimateUSD: Joi.string().required(),
+  simulationError: Joi.boolean().optional(),
   gasPriceWei: Joi.string().required(),
   blockNumber: Joi.string().required(),
   route: Joi.array().items(Joi.any()).required(),
@@ -56,7 +57,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
-  }).optional(),
+  }).optional()
 })
 
 export type QuoteResponse = {
@@ -71,6 +72,7 @@ export type QuoteResponse = {
   gasUseEstimateQuote: string
   gasUseEstimateQuoteDecimals: string
   gasUseEstimateUSD: string
+  simulationError?: boolean,
   gasPriceWei: string
   blockNumber: string
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>

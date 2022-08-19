@@ -49,6 +49,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         forceCrossProtocol,
         forceMixedRoutes,
         protocols: protocolsStr,
+        simulate,
       },
       requestInjected: {
         router,
@@ -159,6 +160,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }
+      if(simulate) {
+        swapParams.simulate = {fromAddress:simulate}
+      }
     }
 
     let swapRoute: SwapRoute | null
@@ -200,7 +204,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        try {
+          swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+          log.info({swapRoute:swapRoute}, "good")
+        } catch(err) {
+          log.info({err:err}, "shit")
+          throw(err)
+        }
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))

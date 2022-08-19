@@ -158,7 +158,7 @@ describe('quote', function () {
   for (const algorithm of ['alpha', 'legacy']) {
     for (const type of ['exactIn', 'exactOut']) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
-        describe(`+ simulate swap`, () => {
+        describe(`+ Execute Swap`, () => {
           it(`erc20 -> erc20`, async () => {
             const quoteReq: QuoteQueryParams = {
               tokenInAddress: 'USDC',
@@ -753,145 +753,365 @@ describe('quote', function () {
           }
         })
 
-        it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: 'USDC',
-            tokenInChainId: 1,
-            tokenOutAddress: 'USDT',
-            tokenOutChainId: 1,
-            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-            type,
-            algorithm,
-          }
+        if(algorithm == 'alpha') {
+          describe(`+ Simulate Swap + Execute Swap`, ()=>{
+            it(`erc20 -> erc20`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'USDT',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+              }
 
-          const queryParams = qs.stringify(quoteReq)
+              const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const {
-            data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
-            status,
-          } = response
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const {
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                status,
+              } = response
 
-          expect(status).to.equal(200)
-          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+              expect(status).to.equal(200)
+              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
 
-          if (type == 'exactIn') {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-          } else {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-          }
+              if (type == 'exactIn') {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+              } else {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+              }
 
-          expect(methodParameters).to.be.undefined
-        })
+              expect(methodParameters).to.not.be.undefined
 
-        it(`erc20 -> erc20 gas price specified`, async () => {
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: 'USDC',
-            tokenInChainId: 1,
-            tokenOutAddress: 'USDT',
-            tokenOutChainId: 1,
-            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-            type,
-            algorithm,
-            gasPriceWei: '60000000000',
-          }
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                methodParameters!,
+                USDC_MAINNET,
+                USDT_MAINNET
+              )
 
-          const queryParams = qs.stringify(quoteReq)
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+              }
+            })
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const {
-            data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
-            status,
-          } = response
+            it(`erc20 -> erc20`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'USDT',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+              }
 
-          expect(status).to.equal(200)
+              const queryParams = qs.stringify(quoteReq)
 
-          if (algorithm == 'alpha') {
-            expect(gasPriceWei).to.equal('60000000000')
-          }
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const {
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                status,
+              } = response
 
-          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+              expect(status).to.equal(200)
+              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
 
-          if (type == 'exactIn') {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-          } else {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-          }
+              if (type == 'exactIn') {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+              } else {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+              }
 
-          expect(methodParameters).to.be.undefined
-        })
+              expect(methodParameters).to.not.be.undefined
 
-        it(`erc20 -> erc20 by address`, async () => {
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-            tokenInChainId: 1, // DAI
-            tokenOutAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            tokenOutChainId: 1, // USDC
-            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
-            type,
-            recipient: alice.address,
-            slippageTolerance: SLIPPAGE,
-            deadline: '360',
-            algorithm,
-          }
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                methodParameters!,
+                USDC_MAINNET,
+                USDT_MAINNET
+              )
 
-          const queryParams = qs.stringify(quoteReq)
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+              }
+            })
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            it(`erc20 -> eth`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'ETH',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+              }
 
-          const {
-            data: { quoteDecimals, quoteGasAdjustedDecimals },
-            status,
-          } = response
+              const queryParams = qs.stringify(quoteReq)
 
-          expect(status).to.equal(200)
-          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const {
+                data: { quote, methodParameters },
+                status,
+              } = response
 
-          if (type == 'exactIn') {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-          } else {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-          }
+              expect(status).to.equal(200)
+              expect(methodParameters).to.not.be.undefined
 
-          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-        })
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                methodParameters!,
+                USDC_MAINNET,
+                Ether.onChain(1)
+              )
 
-        it(`erc20 -> erc20 one by address one by symbol`, async () => {
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-            tokenInChainId: 1,
-            tokenOutAddress: 'USDC',
-            tokenOutChainId: 1,
-            amount: await getAmount(1, type, 'DAI', 'USDC', '100'),
-            type,
-            recipient: alice.address,
-            slippageTolerance: SLIPPAGE,
-            deadline: '360',
-            algorithm,
-          }
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
+              } else {
+                // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+              }
+            })
 
-          const queryParams = qs.stringify(quoteReq)
+            it(`erc20 -> eth large trade`, async () => {
+              // Trade of this size almost always results in splits.
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'ETH',
+                tokenOutChainId: 1,
+                amount:
+                  type == 'exactIn'
+                    ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
+                    : await getAmount(1, type, 'USDC', 'ETH', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+              }
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-          const {
-            data: { quoteDecimals, quoteGasAdjustedDecimals },
-            status,
-          } = response
+              const queryParams = qs.stringify(quoteReq)
 
-          expect(status).to.equal(200)
-          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
 
-          if (type == 'exactIn') {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-          } else {
-            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-          }
+              expect(status).to.equal(200)
+              expect(data.methodParameters).to.not.be.undefined
 
-          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-        })
-      })
+              expect(data.route).to.not.be.undefined
+
+              const amountInEdgesTotal = _(data.route)
+                .flatMap((route) => route[0]!)
+                .filter((pool) => !!pool.amountIn)
+                .map((pool) => BigNumber.from(pool.amountIn))
+                .reduce((cur, total) => total.add(cur), BigNumber.from(0))
+              const amountIn = BigNumber.from(data.quote)
+              expect(amountIn.eq(amountInEdgesTotal))
+
+              const amountOutEdgesTotal = _(data.route)
+                .flatMap((route) => route[0]!)
+                .filter((pool) => !!pool.amountOut)
+                .map((pool) => BigNumber.from(pool.amountOut))
+                .reduce((cur, total) => total.add(cur), BigNumber.from(0))
+              const amountOut = BigNumber.from(data.quote)
+              expect(amountOut.eq(amountOutEdgesTotal))
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                USDC_MAINNET,
+                Ether.onChain(1)
+              )
+
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
+              } else {
+                // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+              }
+            })
+
+            it(`eth -> erc20`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'ETH',
+                tokenInChainId: 1,
+                tokenOutAddress: 'UNI',
+                tokenOutChainId: 1,
+                amount:
+                  type == 'exactIn'
+                    ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                    : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0'
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+
+              expect(status).to.equal(200)
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                Ether.onChain(1),
+                UNI_MAINNET
+              )
+
+              if (type == 'exactIn') {
+                // We've swapped 10 ETH + gas costs
+                expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+                // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
+              }
+            })
+
+            it(`weth -> erc20`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'WETH',
+                tokenInChainId: 1,
+                tokenOutAddress: 'DAI',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e'
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+              console.log(data)
+
+              expect(status).to.equal(200)
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                WETH9[1]!,
+                DAI_MAINNET
+              )
+
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+              }
+            })
+
+            it(`erc20 -> weth`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'WETH',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+              console.log(response)
+
+              expect(status).to.equal(200)
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                USDC_MAINNET,
+                WETH9[1]!
+              )
+
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+              }
+            })
+          })
+
+
+
+          it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: 'USDC',
+              tokenInChainId: 1,
+              tokenOutAddress: 'USDT',
+              tokenOutChainId: 1,
+              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+              type,
+              algorithm,
+              simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const {
+              data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              status,
+            } = response
+
+            expect(status).to.equal(200)
+            expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+            expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+            if (type == 'exactIn') {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+            } else {
+              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+            }
+
+            expect(methodParameters).to.be.undefined
+          })
+        }})
 
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 4xx`, () => {
         it(`field is missing in body`, async () => {
@@ -1250,6 +1470,7 @@ describe('quote', function () {
 
             expect(status).to.equal(200)
           } catch (err: any) {
+            console.log("WTF", err)
             fail(JSON.stringify(err.response.data))
           }
         })
