@@ -1017,7 +1017,6 @@ describe('quote', function () {
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
-              console.log(data)
 
               expect(status).to.equal(200)
               expect(data.methodParameters).to.not.be.undefined
@@ -1056,7 +1055,6 @@ describe('quote', function () {
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
-              console.log(response)
 
               expect(status).to.equal(200)
               expect(data.methodParameters).to.not.be.undefined
@@ -1470,7 +1468,6 @@ describe('quote', function () {
 
             expect(status).to.equal(200)
           } catch (err: any) {
-            console.log("WTF", err)
             fail(JSON.stringify(err.response.data))
           }
         })

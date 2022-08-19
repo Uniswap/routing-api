@@ -241,7 +241,15 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        const simulator = new FallbackTenderlySimulator('http://api.tenderly.co', process.env.TENDERLY_USER!, process.env.TENDERLY_PROJECT!, process.env.TENDERLY_ACCESS_KEY!, provider, v2PoolProvider, v3PoolProvider)
+        const simulator = new FallbackTenderlySimulator(
+          'http://api.tenderly.co',
+          process.env.TENDERLY_USER!,
+          process.env.TENDERLY_PROJECT!,
+          process.env.TENDERLY_ACCESS_KEY!,
+          provider,
+          v2PoolProvider,
+          v3PoolProvider
+        )
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {
@@ -303,7 +311,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2PoolProvider,
             v2QuoteProvider: new V2QuoteProvider(),
             v2SubgraphProvider,
-            simulator
+            simulator,
           },
         }
       })

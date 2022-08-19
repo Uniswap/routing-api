@@ -160,8 +160,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }
-      if(simulate) {
-        swapParams.simulate = {fromAddress:simulate}
+      if (simulate) {
+        swapParams.simulate = { fromAddress: simulate }
       }
     }
 
@@ -206,10 +206,10 @@ export class QuoteHandler extends APIGLambdaHandler<
 
         try {
           swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
-          log.info({swapRoute:swapRoute}, "good")
-        } catch(err) {
-          log.info({err:err}, "shit")
-          throw(err)
+          log.info({ swapRoute: swapRoute }, 'good')
+        } catch (err) {
+          log.info({ err: err }, 'shit')
+          throw err
         }
         break
       case 'exactOut':

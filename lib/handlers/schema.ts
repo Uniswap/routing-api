@@ -72,7 +72,7 @@ export type QuoteResponse = {
   gasUseEstimateQuote: string
   gasUseEstimateQuoteDecimals: string
   gasUseEstimateUSD: string
-  simulationError?: boolean,
+  simulationError?: boolean
   gasPriceWei: string
   blockNumber: string
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
