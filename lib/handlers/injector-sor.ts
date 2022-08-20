@@ -161,7 +161,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
         // 200*725k < 150m
         let quoteProvider: OnChainQuoteProvider | undefined = undefined
-
         switch (chainId) {
           case ChainId.OPTIMISM:
           case ChainId.OPTIMISTIC_KOVAN:
