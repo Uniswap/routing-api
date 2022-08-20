@@ -164,7 +164,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         swapParams.simulate = { fromAddress: simulate }
       }
     }
-    log.info(swapParams, 'PARAMS')
 
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
@@ -230,7 +229,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         )
 
         swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
-        log.info('HEY', swapRoute?.simulationError)
         break
       default:
         throw new Error('Invalid swap type')

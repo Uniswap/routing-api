@@ -252,8 +252,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           v3PoolProvider
         )
 
-        log.info({ simulator: simulator }, 'BRUH')
-
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {
             try {
