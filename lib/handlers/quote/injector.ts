@@ -31,7 +31,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
     log: Logger,
     metricsLogger: MetricsLogger
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
-    log.info("Poopbucket")
+    log.info('Poopbucket')
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO
