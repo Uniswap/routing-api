@@ -767,7 +767,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
+                simulateFromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -818,7 +818,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
+                simulateFromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -868,7 +868,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
+                simulateFromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -914,7 +914,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
+                simulateFromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -974,7 +974,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0'
+                simulateFromAddress:'0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -1013,7 +1013,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e'
+                simulateFromAddress:'0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e'
               }
       
               const queryParams = qs.stringify(quoteReq)
@@ -1051,7 +1051,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                fromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
+                simulateFromAddress:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
       
               const queryParams = qs.stringify(quoteReq)

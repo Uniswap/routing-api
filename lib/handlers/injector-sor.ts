@@ -240,8 +240,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        let simulator: ISimulator
-        simulator = new FallbackTenderlySimulator(
+        const simulator = new FallbackTenderlySimulator(
           'http://api.tenderly.co',
           process.env.TENDERLY_USER!,
           process.env.TENDERLY_PROJECT!,

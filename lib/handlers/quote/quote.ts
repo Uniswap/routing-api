@@ -49,7 +49,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         forceCrossProtocol,
         forceMixedRoutes,
         protocols: protocolsStr,
-        fromAddress,
+        simulateFromAddress,
       },
       requestInjected: {
         router,
@@ -160,8 +160,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         recipient: recipient,
         slippageTolerance: slippageTolerancePercent,
       }
-      if (fromAddress) {
-        swapParams.simulate = { fromAddress: fromAddress }
+      if (simulateFromAddress) {
+        swapParams.simulate = { fromAddress: simulateFromAddress }
       }
     }
 

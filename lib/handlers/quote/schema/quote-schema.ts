@@ -47,7 +47,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   forceCrossProtocol: Joi.boolean().optional(),
   forceMixedRoutes: Joi.boolean().optional(),
   protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3', 'mixed')).optional(),
-  fromAddress: Joi.string().optional(),
+  simulateFromAddress: Joi.string().alphanum().max(42).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -66,5 +66,5 @@ export type QuoteQueryParams = {
   forceCrossProtocol?: boolean
   forceMixedRoutes?: boolean
   protocols?: string[] | string
-  fromAddress?: string
+  simulateFromAddress?: string
 }
