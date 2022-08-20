@@ -1077,41 +1077,7 @@ describe('quote', function () {
               }
             })
           })
-      
-      
-      
-          it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDT',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-              type,
-              algorithm,
-            }
-      
-            const queryParams = qs.stringify(quoteReq)
-      
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-            const {
-              data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
-              status,
-            } = response
-            expect(status).to.equal(200)
-            expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-            expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-      
-            if (type == 'exactIn') {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-            } else {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-            }
-      
-            expect(methodParameters).to.be.undefined
-          })
         }
-
         it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
