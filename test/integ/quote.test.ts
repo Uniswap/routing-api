@@ -767,18 +767,19 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+                simulate:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
                 status,
               } = response
 
               expect(status).to.equal(200)
+              expect(simulationError).to.be.undefined
               expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
               expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
 
@@ -817,18 +818,18 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+                simulate:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
                 status,
               } = response
-
               expect(status).to.equal(200)
+              expect(simulationError).to.be.undefined
               expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
               expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
 
@@ -867,18 +868,19 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+                simulate:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const {
-                data: { quote, methodParameters },
+                data: { quote, methodParameters, simulationError },
                 status,
               } = response
 
               expect(status).to.equal(200)
+              expect(simulationError).to.be.undefined
               expect(methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -912,7 +914,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+                simulate:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -921,6 +923,7 @@ describe('quote', function () {
               const { data, status } = response
 
               expect(status).to.equal(200)
+              expect(data.simulationError).to.be.undefined
               expect(data.methodParameters).to.not.be.undefined
 
               expect(data.route).to.not.be.undefined
@@ -978,8 +981,8 @@ describe('quote', function () {
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
-
               expect(status).to.equal(200)
+              expect(data.simulationError).to.be.undefined
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1017,8 +1020,8 @@ describe('quote', function () {
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
-
               expect(status).to.equal(200)
+              expect(data.simulationError).to.be.undefined
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1048,15 +1051,15 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
+                simulate:'0xf584f8728b874a6a5c7a8d4d387c9aae9172d621'
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
-
               expect(status).to.equal(200)
+              expect(data.simulationError).to.be.undefined
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1086,7 +1089,6 @@ describe('quote', function () {
               amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
               type,
               algorithm,
-              simulate:'0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -1096,7 +1098,6 @@ describe('quote', function () {
               data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
               status,
             } = response
-
             expect(status).to.equal(200)
             expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
             expect(parseFloat(quoteDecimals)).to.be.lessThan(110)

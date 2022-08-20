@@ -119,15 +119,8 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
-    const tenderlyUser = sm.Secret.fromSecretAttributes(this, 'TenderlyUser', {
-      secretCompleteArn: '',
-    })
-    const tenderlyProject = sm.Secret.fromSecretAttributes(this, 'TenderlyProject', {
-      secretCompleteArn: '',
-    })
-
-    const tenderlyAccessKey = sm.Secret.fromSecretAttributes(this, 'TenderlyAccessKey', {
-      secretCompleteArn: '',
+    const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyUser', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-1:644039819003:secret:tenderly-PCQqC0',
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
@@ -168,9 +161,9 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
-      tenderlyUser: tenderlyUser.secretValue.toString(),
-      tenderlyProject: tenderlyProject.secretValue.toString(),
-      tenderlyAccessKey: tenderlyAccessKey.secretValue.toString()
+      tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
+      tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
+      tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -189,9 +182,9 @@ export class RoutingAPIPipeline extends Stack {
       pinata_key: pinataApi.secretValueFromJson('pinata-api-key').toString(),
       pinata_secret: pinataSecret.secretValueFromJson('secret').toString(),
       hosted_zone: hostedZone.secretValueFromJson('zone').toString(),
-      tenderlyUser: tenderlyUser.secretValue.toString(),
-      tenderlyProject: tenderlyProject.secretValue.toString(),
-      tenderlyAccessKey: tenderlyAccessKey.secretValue.toString()
+      tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
+      tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
+      tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)

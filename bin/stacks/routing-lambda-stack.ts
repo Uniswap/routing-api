@@ -81,7 +81,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
-        TEDNERLY_ACCESS_KEY: tenderlyAccessKey,
+        TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         ...jsonRpcProviders,
       },
       layers: [
