@@ -120,7 +120,7 @@ export class RoutingAPIPipeline extends Stack {
     })
 
     const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyCreds', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:tenderly-creds-rL0idu',
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:tenderly-api-creds-bvJbwI',
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
