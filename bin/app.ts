@@ -12,6 +12,7 @@ import 'source-map-support/register'
 import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
+
 dotenv.config()
 
 export class RoutingAPIStage extends Stage {
@@ -119,8 +120,8 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
-    const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyUser', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-1:644039819003:secret:tenderly-PCQqC0',
+    const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyCreds', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:tenderly-5AAZy2',
     })
 
     const ethGasStationInfoUrl = sm.Secret.fromSecretAttributes(this, 'ETHGasStationUrl', {
