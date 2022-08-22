@@ -65,7 +65,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     } = params
 
     // Parse user provided token address/symbol to Currency object.
-    const before = Date.now()
+    let before = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
@@ -161,9 +161,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         slippageTolerance: slippageTolerancePercent,
       }
       if (simulateFromAddress) {
+        metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
         swapParams.simulate = { fromAddress: simulateFromAddress }
       }
     }
+
+    before = Date.now()
 
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
@@ -264,6 +267,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationError,
     } = swapRoute
+
+    if(simulationError) {
+      metric.putMetric('FailedSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
+    } else {
+      metric.putMetric('SuccessfulSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
+    }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
 
