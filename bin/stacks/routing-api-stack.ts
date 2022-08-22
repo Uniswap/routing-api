@@ -30,6 +30,9 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderlyUser: string
+      tenderlyProject: string
+      tenderlyAccessKey: string
     }
   ) {
     super(parent, name, props)
@@ -45,6 +48,9 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
     } = props
 
     const {
@@ -75,6 +81,9 @@ export class RoutingAPIStack extends cdk.Stack {
         provisionedConcurrency,
         ethGasStationInfoUrl,
         chatbotSNSArn,
+        tenderlyUser,
+        tenderlyProject,
+        tenderlyAccessKey,
       }
     )
 

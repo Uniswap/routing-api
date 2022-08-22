@@ -19,6 +19,9 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
   ethGasStationInfoUrl: string
+  tenderlyUser: string
+  tenderlyProject: string
+  tenderlyAccessKey: string
   chatbotSNSArn?: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -37,6 +40,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       provisionedConcurrency,
       ethGasStationInfoUrl,
       chatbotSNSArn,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -73,6 +79,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+        TENDERLY_USER: tenderlyUser,
+        TENDERLY_PROJECT: tenderlyProject,
+        TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         ...jsonRpcProviders,
       },
       layers: [
