@@ -50,7 +50,7 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
       tenderlyUser,
       tenderlyProject,
-      tenderlyAccessKey
+      tenderlyAccessKey,
     } = props
 
     const {
@@ -83,7 +83,7 @@ export class RoutingAPIStack extends cdk.Stack {
         chatbotSNSArn,
         tenderlyUser,
         tenderlyProject,
-        tenderlyAccessKey
+        tenderlyAccessKey,
       }
     )
 

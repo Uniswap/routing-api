@@ -30,9 +30,9 @@ export class RoutingAPIStage extends Stage {
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
-      tenderlyUser: string,
-      tenderlyProject: string,
-      tenderlyAccessKey: string,
+      tenderlyUser: string
+      tenderlyProject: string
+      tenderlyAccessKey: string
     }
   ) {
     super(scope, id, props)
@@ -48,7 +48,7 @@ export class RoutingAPIStage extends Stage {
       hosted_zone,
       tenderlyUser,
       tenderlyProject,
-      tenderlyAccessKey
+      tenderlyAccessKey,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -63,7 +63,7 @@ export class RoutingAPIStage extends Stage {
       hosted_zone,
       tenderlyUser,
       tenderlyProject,
-      tenderlyAccessKey
+      tenderlyAccessKey,
     })
     this.url = url
   }
@@ -272,7 +272,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   hosted_zone: process.env.HOSTED_ZONE!,
   tenderlyUser: process.env.TENDERLY_USER!,
   tenderlyProject: process.env.TENDERLY_PROJECT!,
-  tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!
+  tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
