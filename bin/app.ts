@@ -12,7 +12,6 @@ import 'source-map-support/register'
 import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
-
 dotenv.config()
 
 export class RoutingAPIStage extends Stage {
