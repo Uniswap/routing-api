@@ -263,6 +263,20 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
+    const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
+      alarmName: 'RoutingAPI-SEV3-Simulation',
+      metric: api.metric('SimulationFailed'),
+      threshold: 0.95,
+      evaluationPeriods: 3,
+    })
+
+    const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
+      alarmName: 'RoutingAPI-SEV3-Simulation',
+      metric: api.metric('SimulationFailed'),
+      threshold: 0.8,
+      evaluationPeriods: 3,
+    })
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -271,6 +285,8 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      simulationAlarmSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
     }
 
     this.url = new CfnOutput(this, 'Url', {

@@ -269,9 +269,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     } = swapRoute
 
     if (simulationError) {
-      metric.putMetric('FailedSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
+      metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
     } else if (simulateFromAddress) {
-      metric.putMetric('SuccessfulSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
+      metric.putMetric('SimulationSuccessful', 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
