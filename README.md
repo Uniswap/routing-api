@@ -48,12 +48,12 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    ```
 
 ### Tenderly Simulation
-
 1. To get a more accurate estimate of the transaction's gas cost, request a tenderly simulation along with the swap. This is done by setting the optional queryparam "simulateFromAddress". For example:
-
 ```
 curl --request GET '<INSERT_YOUR_URL_HERE>/quote?tokenInAddress=<0x...>&simulateFromAddress=<FROM_ADDRESS>&...'
 ```
+2. In the response body, the gasUseEstimate (gasLimit), gasUseEstimateQuote, quoteGasAdjusted, and gasUseEstimateUSD will be updated with estimated generated with tenderly gasLimit estimate. These fields are already present even without Tenderly Simulation, however they are simply heuristics. The Tenderly Gas Estimates will be more accurate.
+3. If the simulation fails, there will be one more field present in the response body: simulationError. If this field is set and it is set to true, that means the Tenderly Simulation failed. The gaseUseEstimate, gasUseEstimateQuote, etc. fields will still be included, however they will be heuristic values rather then Tenderly Estimates. These heuristic values are not reliable for sending transactions on chain.
 
 ### Integration Tests
 
