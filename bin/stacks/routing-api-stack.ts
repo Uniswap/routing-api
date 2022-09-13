@@ -265,14 +265,14 @@ export class RoutingAPIStack extends cdk.Stack {
 
     const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
       alarmName: 'RoutingAPI-SEV3-Simulation',
-      metric: api.metric("SimulationFailed"),
+      metric: api.metric('SimulationFailed'),
       threshold: 0.95,
       evaluationPeriods: 3,
     })
 
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
       alarmName: 'RoutingAPI-SEV3-Simulation',
-      metric: api.metric("SimulationFailed"),
+      metric: api.metric('SimulationFailed'),
       threshold: 0.8,
       evaluationPeriods: 3,
     })

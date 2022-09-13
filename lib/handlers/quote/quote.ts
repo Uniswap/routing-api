@@ -270,8 +270,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     if (simulationError) {
       metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
-    } else if(simulateFromAddress) {
-        metric.putMetric('SimulationSuccessful', 1, MetricLoggerUnit.Count)
+    } else if (simulateFromAddress) {
+      metric.putMetric('SimulationSuccessful', 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
