@@ -270,7 +270,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     if (simulationError) {
       metric.putMetric('FailedSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
-    } else {
+    } else if(simulateFromAddress) {
       metric.putMetric('SuccessfulSimulation', Date.now() - before, MetricLoggerUnit.Milliseconds)
     }
 
