@@ -276,7 +276,7 @@ export class RoutingAPIStack extends cdk.Stack {
       threshold: 0.8,
       evaluationPeriods: 3,
     })
-    
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
