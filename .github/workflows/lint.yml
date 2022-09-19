@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  checks: write
+
 jobs:
   run-linters:
     name: Run linters 2
