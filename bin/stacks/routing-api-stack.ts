@@ -365,7 +365,7 @@ export class RoutingAPIStack extends cdk.Stack {
             period: Duration.minutes(5),
             statistic: 'sum'
           }),
-          response400: api.metric(`GET_Quote_400_ChainId: ${chainId.toString()}`, {
+          response400: api.metric(`GET_QUOTE_400_CHAINID: ${chainId.toString()}`, {
             period: Duration.minutes(5),
             statistic: 'sum'
           })
