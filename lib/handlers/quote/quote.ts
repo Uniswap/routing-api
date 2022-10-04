@@ -391,7 +391,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     metric.putMetric(`GET_Quote_200_ChainId: ${chainId}`, 1, MetricLoggerUnit.Count)
-
     return {
       statusCode: 200,
       body: result,

@@ -359,16 +359,16 @@ export class RoutingAPIStack extends cdk.Stack {
     SUPPORTED_CHAINS.forEach(chainId => {
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
-        expression: "100*(response200/invocations)",
+        expression: "100*(response400/invocations)",
         usingMetrics: {
-          invocations: api.metric(`GET_Quote_400_ChainId: ${chainId.toString()}`, {
+          invocations: api.metric(`GET_Quote_Requested_ChainId: ${chainId.toString()}`, {
             period: Duration.minutes(5),
             statistic: 'sum'
           }),
-          response200: api.metric(`GET_Quote_Requested_ChainId: ${chainId.toString()}`, {
+          response400: api.metric(`GET_Quote_400_ChainId: ${chainId.toString()}`, {
             period: Duration.minutes(5),
             statistic: 'sum'
-          }),
+          })
         }
       })
       const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
