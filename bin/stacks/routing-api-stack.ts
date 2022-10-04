@@ -328,7 +328,7 @@ export class RoutingAPIStack extends cdk.Stack {
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
-            metricName: `GET_Quote_Requested_ChainId: ${chainId.toString()}`,
+            metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
@@ -336,7 +336,7 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
           response200: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
-            metricName: `GET_Quote_200_ChainId: ${chainId.toString()}`,
+            metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
@@ -361,7 +361,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const metric = new MathExpression({
         expression: "100*(response400/invocations)",
         usingMetrics: {
-          invocations: api.metric(`GET_Quote_Requested_ChainId: ${chainId.toString()}`, {
+          invocations: api.metric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`, {
             period: Duration.minutes(5),
             statistic: 'sum'
           }),
