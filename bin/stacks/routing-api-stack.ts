@@ -268,7 +268,7 @@ export class RoutingAPIStack extends cdk.Stack {
     const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
       alarmName: 'RoutingAPI-SEV2-Simulation',
       metric: new MathExpression({
-        expression: "100*(simulationFailed/simulationRequested)",
+        expression: '100*(simulationFailed/simulationRequested)',
         usingMetrics: {
           simulationRequested: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -276,7 +276,7 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -284,9 +284,9 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
-        }
+        },
       }),
       threshold: 40,
       evaluationPeriods: 2,
@@ -295,7 +295,7 @@ export class RoutingAPIStack extends cdk.Stack {
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
       alarmName: 'RoutingAPI-SEV3-Simulation',
       metric: new MathExpression({
-        expression: "100*(simulationFailed/simulationRequested)",
+        expression: '100*(simulationFailed/simulationRequested)',
         usingMetrics: {
           simulationRequested: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -303,7 +303,7 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -311,9 +311,9 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
-        }
+        },
       }),
       threshold: 20,
       evaluationPeriods: 2,
@@ -321,10 +321,10 @@ export class RoutingAPIStack extends cdk.Stack {
 
     // Alarms for 200 rate being too low for each chain
     const percent2XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach(chainId => {
+    SUPPORTED_CHAINS.forEach((chainId) => {
       const alarmName = `RoutingAPI-SEV3-2XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
-        expression: "100*(response200/invocations)",
+        expression: '100*(response200/invocations)',
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -332,7 +332,7 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
           response200: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -340,36 +340,36 @@ export class RoutingAPIStack extends cdk.Stack {
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
-        }
+        },
       })
       const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
         alarmName,
         metric,
         threshold: 20,
         evaluationPeriods: 2,
-        comparisonOperator: aws_cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD
+        comparisonOperator: aws_cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
       })
       percent2XXByChainAlarm.push(alarm)
     })
 
     // Alarms for high 400 error rate for each chain
     const percent4XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach(chainId => {
+    SUPPORTED_CHAINS.forEach((chainId) => {
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
-        expression: "100*(response400/invocations)",
+        expression: '100*(response400/invocations)',
         usingMetrics: {
           invocations: api.metric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`, {
             period: Duration.minutes(5),
-            statistic: 'sum'
+            statistic: 'sum',
           }),
           response400: api.metric(`GET_QUOTE_400_CHAINID: ${chainId.toString()}`, {
             period: Duration.minutes(5),
-            statistic: 'sum'
-          })
-        }
+            statistic: 'sum',
+          }),
+        },
       })
       const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
         alarmName,
@@ -391,10 +391,10 @@ export class RoutingAPIStack extends cdk.Stack {
       simulationAlarmSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
-      percent2XXByChainAlarm.forEach(alarm => {
+      percent2XXByChainAlarm.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
-      percent4XXByChainAlarm.forEach(alarm => {
+      percent4XXByChainAlarm.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }
