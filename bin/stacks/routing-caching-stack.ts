@@ -182,7 +182,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         period: Duration.minutes(60),
         statistic: 'sum',
       }),
-      threshold: 5,
+      threshold: 9,
       evaluationPeriods: 1,
     })
 
@@ -208,7 +208,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
             period: Duration.minutes(60),
             statistic: 'sum',
           }),
-          threshold: 5,
+          threshold: 9,
           evaluationPeriods: 1,
         })
 
