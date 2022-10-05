@@ -1551,6 +1551,9 @@ describe('quote', function () {
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
+      c != ChainId.KOVAN &&
+      c != ChainId.RINKEBY &&
+      c != ChainId.ROPSTEN &&
       c != ChainId.GÖRLI
   )) {
     for (const type of ['exactIn', 'exactOut']) {
