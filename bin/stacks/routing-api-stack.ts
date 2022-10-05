@@ -1,4 +1,4 @@
-import { SUPPORTED_CHAINS, ChainId } from '@uniswap/smart-order-router'
+import { ChainId, SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
@@ -23,7 +23,7 @@ export const CHAINS_NOT_MONITORED: ChainId[] = [
   ChainId.OPTIMISTIC_KOVAN,
   ChainId.GÖRLI,
   ChainId.POLYGON_MUMBAI,
-];
+]
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
