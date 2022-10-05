@@ -751,7 +751,9 @@ describe('quote-to-ratio', async function () {
       c != ChainId.MOONBEAM &&
       c != ChainId.GNOSIS &&
       c != ChainId.CELO &&
-      c != ChainId.CELO_ALFAJORES
+      c != ChainId.CELO_ALFAJORES &&
+      c != ChainId.KOVAN &&
+      c != ChainId.ROPSTEN
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
