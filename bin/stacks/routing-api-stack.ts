@@ -1,4 +1,4 @@
-import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
+import { ChainId, SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
@@ -14,6 +14,16 @@ import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
+
+export const CHAINS_NOT_MONITORED: ChainId[] = [
+  ChainId.RINKEBY,
+  ChainId.ARBITRUM_RINKEBY,
+  ChainId.ROPSTEN,
+  ChainId.KOVAN,
+  ChainId.OPTIMISTIC_KOVAN,
+  ChainId.GÖRLI,
+  ChainId.POLYGON_MUMBAI,
+]
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -322,6 +332,9 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for 200 rate being too low for each chain
     const percent2XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
     SUPPORTED_CHAINS.forEach((chainId) => {
+      if (!CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
       const alarmName = `RoutingAPI-SEV3-2XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
         expression: '100*(response200/invocations)',
@@ -357,6 +370,9 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for high 400 error rate for each chain
     const percent4XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
     SUPPORTED_CHAINS.forEach((chainId) => {
+      if (!CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
         expression: '100*(response400/invocations)',
