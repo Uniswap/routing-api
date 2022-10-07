@@ -33,6 +33,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly tokenListCacheBucket: aws_s3.Bucket
   public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly ipfsCleanPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
+  public readonly poolCacheLambdaNameArray: string[]
 
   constructor(scope: Construct, name: string, props: RoutingCachingStackProps) {
     super(scope, name, props)
@@ -145,6 +146,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
         lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       }
+      this.poolCacheLambdaNameArray.push(lambda.functionName)
     }
 
     if (stage == STAGE.BETA || stage == STAGE.PROD) {

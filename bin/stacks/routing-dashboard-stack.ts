@@ -7,9 +7,12 @@ import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
 export const NAMESPACE = 'Uniswap'
 
+export type LambdaWidget = { type: string; x: number; y: number; width: number; height: number; properties: { view: string; stacked: boolean; metrics: string[][]; region: string; title: string; stat: string } }
+
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
   routingLambdaName: string
+  poolCacheLambdaNameArray: string[]
   ipfsPoolCacheLambdaName?: string
 }
 
@@ -17,7 +20,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
 
     // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
@@ -75,11 +78,40 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     })
 
+    const poolCacheLambdaWidgetArray: LambdaWidget[] = []
+    poolCacheLambdaNameArray.forEach(poolCacheLambdaName => {
+      poolCacheLambdaWidgetArray.push({
+        type: 'metric',
+        x: 0,
+        y: 66,
+        width: 24,
+        height: 9,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            ['AWS/Lambda', 'Errors', 'FunctionName', poolCacheLambdaName],
+            ['.', 'Invocations', '.', '.'],
+            ...(ipfsPoolCacheLambdaName
+              ? [
+                  ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                  ['.', 'Invocations', '.', '.'],
+                ]
+              : []),
+          ],
+          region: region,
+          title: 'Pool Cache Lambda Error/Invocations | 5min',
+          stat: 'Sum',
+        },
+      },)
+    });
+
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: [
+          ...poolCacheLambdaWidgetArray,
           {
             height: 6,
             width: 24,

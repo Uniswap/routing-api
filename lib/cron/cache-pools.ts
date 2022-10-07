@@ -11,8 +11,10 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   const protocol = process.env.protocol! as Protocol
   const timeout = parseInt(process.env.timeout!)
   // Don't retry for V2 as it will timeout and throw 500
-  const provider = chainProtocols.find(element => (element.protocol == protocol && element.chainId == chainId))!.provider
-    protocol === Protocol.V3 ? new V3SubgraphProvider(chainId, 3, timeout) : new V2SubgraphProvider(chainId, 0, timeout)
+  const provider = chainProtocols.find(
+    (element) => element.protocol == protocol && element.chainId == chainId
+  )!.provider
+  protocol === Protocol.V3 ? new V3SubgraphProvider(chainId, 3, timeout) : new V2SubgraphProvider(chainId, 0, timeout)
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
