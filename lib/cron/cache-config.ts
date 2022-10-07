@@ -30,11 +30,10 @@ export const chainProtocols = [
   // Currently there is no working V3 subgraph for Optimism so we use a static provider.
   // V2.
 
-  // decreased retries from 3 to 1 because lambda timeout is 15 minutes
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 600000,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 1, 600000),
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 800000),
   },
 ]

@@ -1,4 +1,3 @@
-import { Protocol } from '@uniswap/router-sdk'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -116,6 +115,23 @@ export class RoutingCachingStack extends cdk.NestedStack {
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
+      const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`, {
+        metric: new MathExpression({
+          expression: '100*(errors/invocations)',
+          usingMetrics: {
+            invocations: lambda.metricInvocations({
+              period: Duration.minutes(60),
+              statistic: 'sum',
+            }),
+            errors: lambda.metricErrors({
+              period: Duration.minutes(60),
+              statistic: 'sum',
+            }),
+          },
+        }),
+        threshold: 50,
+        evaluationPeriods: 1,
+      })
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`, {
         metric: lambda.metricThrottles({
           period: Duration.minutes(5),
@@ -125,27 +141,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
         evaluationPeriods: 1,
       })
       if (chatBotTopic) {
+        lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
         lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-        if(protocol !== Protocol.V2) {
-          const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`, {
-            metric: new MathExpression({
-              expression: '100*(errors/invocations)',
-              usingMetrics: {
-                invocations: lambda.metricInvocations({
-                  period: Duration.minutes(60),
-                  statistic: 'sum',
-                }),
-                errors: lambda.metricErrors({
-                  period: Duration.minutes(60),
-                  statistic: 'sum',
-                }),
-              },
-            }),
-            threshold: 50,
-            evaluationPeriods: 1,
-          })
-          lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-        }
       }
     }
 
