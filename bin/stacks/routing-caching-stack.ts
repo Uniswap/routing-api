@@ -131,7 +131,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           },
         }),
         threshold: protocol===Protocol.V3 ? 50 : 85,
-        evaluationPeriods: protocol===Protocol.V3 ? 1 : 5,
+        evaluationPeriods: protocol===Protocol.V3 ? 6 : 30,
       })
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`, {
         metric: lambda.metricThrottles({
