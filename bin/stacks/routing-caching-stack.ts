@@ -33,17 +33,14 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly tokenListCacheBucket: aws_s3.Bucket
   public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly ipfsCleanPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
-  public readonly poolCacheLambdaNameArray: string[]
+  public readonly poolCacheLambdaNameArray: string[] = []
 
   constructor(scope: Construct, name: string, props: RoutingCachingStackProps) {
     super(scope, name, props)
 
     const { chatbotSNSArn } = props
 
-    let chatBotTopic: cdk.aws_sns.ITopic | undefined
-    if(chatbotSNSArn) {
-      chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
-    }
+    const chatBotTopic = chatbotSNSArn ? aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn) : undefined
 
     // TODO: Remove and swap to the new bucket below. Kept around for the rollout, but all requests will go to bucket 2.
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
