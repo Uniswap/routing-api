@@ -1,3 +1,4 @@
+import { Protocol } from '@uniswap/router-sdk'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -129,8 +130,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
             }),
           },
         }),
-        threshold: 75,
-        evaluationPeriods: 1,
+        threshold: protocol===Protocol.V3 ? 50 : 85,
+        evaluationPeriods: protocol===Protocol.V3 ? 1 : 5,
       })
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`, {
         metric: lambda.metricThrottles({
