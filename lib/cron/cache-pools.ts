@@ -14,7 +14,6 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   const provider = chainProtocols.find(
     (element) => element.protocol == protocol && element.chainId == chainId
   )!.provider
-  protocol === Protocol.V3 ? new V3SubgraphProvider(chainId, 3, timeout) : new V2SubgraphProvider(chainId, 0, timeout)
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
