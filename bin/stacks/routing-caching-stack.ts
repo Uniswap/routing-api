@@ -118,10 +118,9 @@ export class RoutingCachingStack extends cdk.NestedStack {
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
-      const severity = protocol === Protocol.V2 ? 'SEV4' : 'SEV3'
       const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
         this,
-        `RoutingAPI-${severity}-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
+        `RoutingAPI-SEV4-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
         {
           metric: new MathExpression({
             expression: '100*(errors/invocations)',
