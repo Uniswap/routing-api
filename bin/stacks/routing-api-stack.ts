@@ -69,8 +69,8 @@ export class RoutingAPIStack extends cdk.Stack {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
+      poolCacheLambdaNameArray,
       tokenListCacheBucket,
-      poolCacheLambda,
       ipfsPoolCachingLambda,
     } = new RoutingCachingStack(this, 'RoutingCachingStack', {
       chatbotSNSArn,
@@ -186,7 +186,7 @@ export class RoutingAPIStack extends cdk.Stack {
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
       routingLambdaName: routingLambda.functionName,
-      poolCacheLambdaName: poolCacheLambda.functionName,
+      poolCacheLambdaNameArray,
       ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
     })
 

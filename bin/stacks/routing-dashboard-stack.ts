@@ -7,10 +7,19 @@ import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
 export const NAMESPACE = 'Uniswap'
 
+export type LambdaWidget = {
+  type: string
+  x: number
+  y: number
+  width: number
+  height: number
+  properties: { view: string; stacked: boolean; metrics: string[][]; region: string; title: string; stat: string }
+}
+
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
   routingLambdaName: string
-  poolCacheLambdaName: string
+  poolCacheLambdaNameArray: string[]
   ipfsPoolCacheLambdaName?: string
 }
 
@@ -18,7 +27,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaName, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
 
     // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
@@ -76,11 +85,39 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     })
 
+    const poolCacheLambdaMetrics: string[][] = []
+    poolCacheLambdaNameArray.forEach((poolCacheLambdaName) => {
+      poolCacheLambdaMetrics.push(['AWS/Lambda', `${poolCacheLambdaName}Errors`, 'FunctionName', poolCacheLambdaName])
+      poolCacheLambdaMetrics.push(['.', `${poolCacheLambdaName}Invocations`, '.', '.'])
+    })
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: [
+          {
+            type: 'metric',
+            x: 0,
+            y: 66,
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                ...poolCacheLambdaMetrics,
+                ...(ipfsPoolCacheLambdaName
+                  ? [
+                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                      ['.', 'Invocations', '.', '.'],
+                    ]
+                  : []),
+              ],
+              region: region,
+              title: 'Pool Cache Lambda Error/Invocations | 5min',
+              stat: 'Sum',
+            },
+          },
           {
             height: 6,
             width: 24,
@@ -399,30 +436,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region: region,
               title: 'Routing Lambda Provisioned Concurrency | 5min',
               stat: 'Average',
-            },
-          },
-          {
-            type: 'metric',
-            x: 0,
-            y: 66,
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                ['AWS/Lambda', 'Errors', 'FunctionName', poolCacheLambdaName],
-                ['.', 'Invocations', '.', '.'],
-                ...(ipfsPoolCacheLambdaName
-                  ? [
-                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                      ['.', 'Invocations', '.', '.'],
-                    ]
-                  : []),
-              ],
-              region: region,
-              title: 'Pool Cache Lambda Error/Invocations | 5min',
-              stat: 'Sum',
             },
           },
         ],
