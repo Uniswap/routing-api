@@ -84,61 +84,73 @@ export class RoutingCachingStack extends cdk.NestedStack {
     )
 
     // Spin up a new pool cache lambda for each config in chain X protocol
-    for(let i=0; i<chainProtocols.length; i++) {
+    for (let i = 0; i < chainProtocols.length; i++) {
       const { protocol, chainId, timeout } = chainProtocols[i]
-      const lambda = new aws_lambda_nodejs.NodejsFunction(this, `PoolCacheLambda-ChainId${chainId}-Protocol${protocol}`, {
-        role: lambdaRole,
-        runtime: aws_lambda.Runtime.NODEJS_14_X,
-        entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
-        handler: 'handler',
-        timeout: Duration.seconds(900),
-        memorySize: 1024,
-        bundling: {
-          minify: true,
-          sourceMap: true,
-        },
-        description: `Pool Cache Lambda for Chain with ChainId ${chainId} and Protocol ${protocol}`,
-        layers: [lambdaLayerVersion],
-        tracing: aws_lambda.Tracing.ACTIVE,
-        environment: {
-          POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
-          POOL_CACHE_BUCKET_2: this.poolCacheBucket2.bucketName,
-          POOL_CACHE_KEY: this.poolCacheKey,
-          chainId: chainId.toString(),
-          protocol,
-          timeout: timeout.toString(),
-        },
-      })
+      const lambda = new aws_lambda_nodejs.NodejsFunction(
+        this,
+        `PoolCacheLambda-ChainId${chainId}-Protocol${protocol}`,
+        {
+          role: lambdaRole,
+          runtime: aws_lambda.Runtime.NODEJS_14_X,
+          entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
+          handler: 'handler',
+          timeout: Duration.seconds(900),
+          memorySize: 1024,
+          bundling: {
+            minify: true,
+            sourceMap: true,
+          },
+          description: `Pool Cache Lambda for Chain with ChainId ${chainId} and Protocol ${protocol}`,
+          layers: [lambdaLayerVersion],
+          tracing: aws_lambda.Tracing.ACTIVE,
+          environment: {
+            POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
+            POOL_CACHE_BUCKET_2: this.poolCacheBucket2.bucketName,
+            POOL_CACHE_KEY: this.poolCacheKey,
+            chainId: chainId.toString(),
+            protocol,
+            timeout: timeout.toString(),
+          },
+        }
+      )
       new aws_events.Rule(this, `SchedulePoolCache-ChainId${chainId}-Protocol${protocol}`, {
         schedule: aws_events.Schedule.rate(Duration.minutes(15)),
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
-      const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`, {
-        metric: new MathExpression({
-          expression: '100*(errors/invocations)',
-          usingMetrics: {
-            invocations: lambda.metricInvocations({
-              period: Duration.minutes(60),
-              statistic: 'sum',
-            }),
-            errors: lambda.metricErrors({
-              period: Duration.minutes(60),
-              statistic: 'sum',
-            }),
-          },
-        }),
-        threshold: protocol===Protocol.V3 ? 50 : 85,
-        evaluationPeriods: protocol===Protocol.V3 ? 12 : 60,
-      })
-      const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`, {
-        metric: lambda.metricThrottles({
-          period: Duration.minutes(5),
-          statistic: 'sum',
-        }),
-        threshold: 5,
-        evaluationPeriods: 1,
-      })
+      const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
+        this,
+        `RoutingAPI-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
+        {
+          metric: new MathExpression({
+            expression: '100*(errors/invocations)',
+            usingMetrics: {
+              invocations: lambda.metricInvocations({
+                period: Duration.minutes(60),
+                statistic: 'sum',
+              }),
+              errors: lambda.metricErrors({
+                period: Duration.minutes(60),
+                statistic: 'sum',
+              }),
+            },
+          }),
+          threshold: protocol === Protocol.V3 ? 50 : 85,
+          evaluationPeriods: protocol === Protocol.V3 ? 12 : 60,
+        }
+      )
+      const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(
+        this,
+        `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`,
+        {
+          metric: lambda.metricThrottles({
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          threshold: 5,
+          evaluationPeriods: 1,
+        }
+      )
       if (chatBotTopic) {
         lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
         lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))

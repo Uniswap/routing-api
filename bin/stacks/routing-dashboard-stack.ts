@@ -7,7 +7,14 @@ import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
 export const NAMESPACE = 'Uniswap'
 
-export type LambdaWidget = { type: string; x: number; y: number; width: number; height: number; properties: { view: string; stacked: boolean; metrics: string[][]; region: string; title: string; stat: string } }
+export type LambdaWidget = {
+  type: string
+  x: number
+  y: number
+  width: number
+  height: number
+  properties: { view: string; stacked: boolean; metrics: string[][]; region: string; title: string; stat: string }
+}
 
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
@@ -79,7 +86,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     })
 
     const poolCacheLambdaMetrics: string[][] = []
-    poolCacheLambdaNameArray.forEach(poolCacheLambdaName => {
+    poolCacheLambdaNameArray.forEach((poolCacheLambdaName) => {
       poolCacheLambdaMetrics.push(['AWS/Lambda', `${poolCacheLambdaName}Errors`, 'FunctionName', poolCacheLambdaName])
       poolCacheLambdaMetrics.push(['.', `${poolCacheLambdaName}Invocations`, '.', '.'])
     })
