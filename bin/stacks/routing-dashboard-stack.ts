@@ -10,7 +10,6 @@ export const NAMESPACE = 'Uniswap'
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
   routingLambdaName: string
-  poolCacheLambdaName: string
   ipfsPoolCacheLambdaName?: string
 }
 
@@ -18,7 +17,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaName, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName } = props
     const region = cdk.Stack.of(this).region
 
     // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
@@ -399,30 +398,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region: region,
               title: 'Routing Lambda Provisioned Concurrency | 5min',
               stat: 'Average',
-            },
-          },
-          {
-            type: 'metric',
-            x: 0,
-            y: 66,
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                ['AWS/Lambda', 'Errors', 'FunctionName', poolCacheLambdaName],
-                ['.', 'Invocations', '.', '.'],
-                ...(ipfsPoolCacheLambdaName
-                  ? [
-                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                      ['.', 'Invocations', '.', '.'],
-                    ]
-                  : []),
-              ],
-              region: region,
-              title: 'Pool Cache Lambda Error/Invocations | 5min',
-              stat: 'Sum',
             },
           },
         ],
