@@ -78,40 +78,39 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     })
 
-    const poolCacheLambdaWidgetArray: LambdaWidget[] = []
+    const poolCacheLambdaMetrics: string[][] = []
     poolCacheLambdaNameArray.forEach(poolCacheLambdaName => {
-      poolCacheLambdaWidgetArray.push({
-        type: 'metric',
-        x: 0,
-        y: 66,
-        width: 24,
-        height: 9,
-        properties: {
-          view: 'timeSeries',
-          stacked: false,
-          metrics: [
-            ['AWS/Lambda', 'Errors', 'FunctionName', poolCacheLambdaName],
-            ['.', 'Invocations', '.', '.'],
-            ...(ipfsPoolCacheLambdaName
-              ? [
-                  ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                  ['.', 'Invocations', '.', '.'],
-                ]
-              : []),
-          ],
-          region: region,
-          title: 'Pool Cache Lambda Error/Invocations | 5min',
-          stat: 'Sum',
-        },
-      },)
-    });
-
+      poolCacheLambdaMetrics.push(['AWS/Lambda', `${poolCacheLambdaName}Errors`, 'FunctionName', poolCacheLambdaName])
+      poolCacheLambdaMetrics.push(['.', `${poolCacheLambdaName}Invocations`, '.', '.'])
+    })
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: [
-          ...poolCacheLambdaWidgetArray,
+          {
+            type: 'metric',
+            x: 0,
+            y: 66,
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                ...poolCacheLambdaMetrics,
+                ...(ipfsPoolCacheLambdaName
+                  ? [
+                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                      ['.', 'Invocations', '.', '.'],
+                    ]
+                  : []),
+              ],
+              region: region,
+              title: 'Pool Cache Lambda Error/Invocations | 5min',
+              stat: 'Sum',
+            },
+          },
           {
             height: 6,
             width: 24,
