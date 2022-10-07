@@ -33,7 +33,7 @@ export const chainProtocols = [
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
-    timeout: 800000,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 1, 800000),
+    timeout: 840000,
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 0, 840000),
   },
 ]

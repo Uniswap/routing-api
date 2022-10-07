@@ -4,14 +4,15 @@ import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
+import { chainProtocols } from './cache-config'
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
   const chainId: ChainId = parseInt(process.env.chainId!)
   const protocol = process.env.protocol! as Protocol
   const timeout = parseInt(process.env.timeout!)
   // Don't retry for V2 as it will timeout and throw 500
-  const provider =
-    protocol === Protocol.V3 ? new V3SubgraphProvider(chainId, 3, timeout) : new V2SubgraphProvider(chainId, 1, timeout)
+  const provider = chainProtocols.find(element => (element.protocol == protocol && element.chainId == chainId))!.provider
+    protocol === Protocol.V3 ? new V3SubgraphProvider(chainId, 3, timeout) : new V2SubgraphProvider(chainId, 0, timeout)
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
