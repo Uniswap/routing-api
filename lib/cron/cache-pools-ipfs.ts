@@ -4,6 +4,7 @@ import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
 import fs from 'fs'
+import _ from 'lodash'
 import path from 'path'
 import { chainProtocols } from './cache-config'
 
@@ -54,20 +55,22 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     throw err
   }
 
-  for (const { chainId, protocol, provider } of chainProtocols) {
-    const ipfsFilename = `${ID_TO_NETWORK_NAME(chainId)}.json`
-    log.info(`Getting ${protocol} pools for chain ${chainId}`)
-    const pools = await provider.getPools()
-    log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}. Will save with filename ${ipfsFilename}`)
-    const poolString = JSON.stringify(pools)
+  await Promise.all(
+    _.map(chainProtocols, async ({ protocol, chainId, provider }) => {
+      const ipfsFilename = `${ID_TO_NETWORK_NAME(chainId)}.json`
+      log.info(`Getting ${protocol} pools for chain ${chainId}`)
+      const pools = await provider.getPools()
+      log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}. Will save with filename ${ipfsFilename}`)
+      const poolString = JSON.stringify(pools)
 
-    // create directory and file for the chain and protocol
-    // e.g: /tmp/temp/v1/pools/v3/mainnet.json
-    const parentDirectory = path.join(DIRECTORY, protocol.toLowerCase())
-    const fullPath = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
-    fs.mkdirSync(parentDirectory, { recursive: true })
-    fs.writeFileSync(fullPath, poolString)
-  }
+      // create directory and file for the chain and protocol
+      // e.g: /tmp/temp/v1/pools/v3/mainnet.json
+      const parentDirectory = path.join(DIRECTORY, protocol.toLowerCase())
+      const fullPath = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
+      fs.mkdirSync(parentDirectory, { recursive: true })
+      fs.writeFileSync(fullPath, poolString)
+    })
+  )
 
   // pins everything under '/tmp/` which should include mainnet.txt and rinkeby.txt
   // only have to pin once for all chains
