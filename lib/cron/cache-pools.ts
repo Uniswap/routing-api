@@ -1,5 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { ChainId } from '@uniswap/smart-order-router'
+import { ChainId, setGlobalLogger } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -19,6 +19,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     level: 'info',
     requestId: event.id,
   })
+  setGlobalLogger(log)
 
   const s3 = new S3()
 
