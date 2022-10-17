@@ -299,8 +299,8 @@ export class RoutingAPIStack extends cdk.Stack {
         },
       }),
       threshold: 40,
-      evaluationPeriods: 3,
-      datapointsToAlarm: 2
+      evaluationPeriods: 5,
+      datapointsToAlarm: 4
     })
 
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
@@ -327,8 +327,8 @@ export class RoutingAPIStack extends cdk.Stack {
         },
       }),
       threshold: 20,
-      evaluationPeriods: 3,
-      datapointsToAlarm: 2
+      evaluationPeriods: 5,
+      datapointsToAlarm: 4
     })
 
     // Alarms for 200 rate being too low for each chain
