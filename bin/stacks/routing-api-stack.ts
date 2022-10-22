@@ -300,6 +300,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }),
       threshold: 40,
       evaluationPeriods: 2,
+      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
 
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
@@ -327,6 +328,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }),
       threshold: 20,
       evaluationPeriods: 2,
+      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
 
     // Alarms for 200 rate being too low for each chain
