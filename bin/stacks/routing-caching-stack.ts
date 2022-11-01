@@ -123,7 +123,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         `RoutingAPI-SEV4-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
         {
           metric: new MathExpression({
-            expression: '100*(errors/invocations)',
+            expression: '(invocations - errors) < 1',
             usingMetrics: {
               invocations: lambda.metricInvocations({
                 period: Duration.minutes(60),
