@@ -9,7 +9,7 @@ import {
   FallbackTenderlySimulator,
   IGasPriceProvider,
   IMetric,
-  ISimulator,
+  Simulator,
   ITokenListProvider,
   ITokenProvider,
   IV2PoolProvider,
@@ -80,7 +80,7 @@ export type ContainerDependencies = {
   multicallProvider: UniswapMulticallProvider
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
-  simulator: ISimulator
+  simulator: Simulator
 }
 
 export interface ContainerInjected {
