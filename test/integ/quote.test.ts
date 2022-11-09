@@ -868,7 +868,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
+                simulateFromAddress: '0x55fe002aeff02f77364de339a1292923a15844b8',
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -914,7 +914,7 @@ describe('quote', function () {
                 slippageTolerance: SLIPPAGE,
                 deadline: '360',
                 algorithm,
-                simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
+                simulateFromAddress: '0x55fe002aeff02f77364de339a1292923a15844b8',
               }
 
               const queryParams = qs.stringify(quoteReq)
