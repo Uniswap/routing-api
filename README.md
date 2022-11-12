@@ -29,6 +29,9 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    # ARBITRUM_RINKEBY = 421611
    # POLYGON = 137
    # POLYGON_MUMBAI = 80001
+   TENDERLY_USER = '' # For enabling Tenderly simulations
+   TENDERLY_PROJECT = '' # For enabling Tenderly simulations
+   TENDERLY_ACCESS_KEY = '' # For enabling Tenderly simulations
    ```
 3. Install and build the package
    ```
@@ -49,7 +52,7 @@ The best way to develop and test the API is to deploy your own instance to AWS.
 
 ### Tenderly Simulation
 
-1. To get a more accurate estimate of the transaction's gas cost, request a tenderly simulation along with the swap. This is done by setting the optional queryparam "simulateFromAddress". For example:
+1. To get a more accurate estimate of the transaction's gas cost, request a tenderly simulation along with the swap. This is done by setting the optional query param "simulateFromAddress". For example:
 
 ```
 curl --request GET '<INSERT_YOUR_URL_HERE>/quote?tokenInAddress=<0x...>&simulateFromAddress=<FROM_ADDRESS>&...'

@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { MethodParameters } from '@uniswap/v3-sdk'
+import { MethodParameters } from '@uniswap/smart-order-router'
 
 export type TokenInRoute = {
   address: string
@@ -57,6 +57,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
+    to: Joi.string().required()
   }).optional(),
 })
 

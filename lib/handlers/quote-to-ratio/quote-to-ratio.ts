@@ -9,6 +9,7 @@ import {
   SwapAndAddConfig,
   SwapAndAddOptions,
   SwapToRatioStatus,
+  SwapType,
 } from '@uniswap/smart-order-router'
 import { Position } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -162,6 +163,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     if (slippageTolerance && deadline && recipient) {
       swapAndAddOptions = {
         swapOptions: {
+          type: SwapType.SWAP_ROUTER_02,
           deadline: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: parseSlippageTolerance(slippageTolerance),
