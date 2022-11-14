@@ -286,7 +286,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `Simulation Requested`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
@@ -294,7 +293,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `SimulationFailed`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
@@ -315,7 +313,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `Simulation Requested`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
@@ -323,7 +320,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `SimulationFailed`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
@@ -349,7 +345,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           response200: new aws_cloudwatch.Metric({
@@ -357,7 +352,6 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
