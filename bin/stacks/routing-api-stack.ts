@@ -346,7 +346,7 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
+            period: Duration.minutes(60),
             statistic: 'sum',
           }),
           response200: new aws_cloudwatch.Metric({
@@ -354,7 +354,7 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(30),
+            period: Duration.minutes(60),
             statistic: 'sum',
           }),
         },
