@@ -279,13 +279,14 @@ export class RoutingAPIStack extends cdk.Stack {
       alarmName: 'RoutingAPI-SEV2-Simulation',
       metric: new MathExpression({
         expression: '100*(simulationFailed/simulationRequested)',
+        period: Duration.minutes(30),
         usingMetrics: {
           simulationRequested: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
             metricName: `Simulation Requested`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(5),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
@@ -293,7 +294,7 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `SimulationFailed`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(5),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
@@ -307,13 +308,14 @@ export class RoutingAPIStack extends cdk.Stack {
       alarmName: 'RoutingAPI-SEV3-Simulation',
       metric: new MathExpression({
         expression: '100*(simulationFailed/simulationRequested)',
+        period: Duration.minutes(30),
         usingMetrics: {
           simulationRequested: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
             metricName: `Simulation Requested`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(5),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           simulationFailed: new aws_cloudwatch.Metric({
@@ -321,7 +323,7 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `SimulationFailed`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(5),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
@@ -340,13 +342,14 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV3-2XXAlarm-ChainId: ${chainId.toString()}`
       const metric = new MathExpression({
         expression: '100*(response200/invocations)',
+        period: Duration.minutes(30),
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
             metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(60),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
           response200: new aws_cloudwatch.Metric({
@@ -354,7 +357,7 @@ export class RoutingAPIStack extends cdk.Stack {
             metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
-            period: Duration.minutes(60),
+            period: Duration.minutes(30),
             statistic: 'sum',
           }),
         },
