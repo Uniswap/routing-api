@@ -482,6 +482,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString: routeAmountsToString(route),
       quoteId,
+      simulationStatus: 'UNATTEMPTED',
     }
 
     return {

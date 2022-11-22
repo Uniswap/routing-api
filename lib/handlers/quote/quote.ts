@@ -27,6 +27,7 @@ import {
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
+import { simulationStatusToString } from './util/simulation'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -437,6 +438,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute)
     }
 
+    
+
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -450,7 +453,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
-      simulationError: simulationStatus == SimulationStatus.Succeeded ? false : true,
+      simulationStatus: simulationStatusToString(simulationStatus, log),
+      simulationError: (simulationStatus == SimulationStatus.Succeeded || simulationStatus == SimulationStatus.Unattempted) ? false : true,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
       routeString: routeAmountsToString(route),
