@@ -348,7 +348,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     } else if (simulationStatus == SimulationStatus.NotApproved) {
       metric.putMetric('SimulationNotApproved', 1, MetricLoggerUnit.Count)
     } else if (simulationStatus == SimulationStatus.NotSupported) {
-        metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
+      metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
@@ -455,8 +455,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
-      simulationStatus: simulationStatus? simulationStatusToString(simulationStatus, log): undefined,
-      simulationError: (simulationStatus === undefined || simulationStatus == SimulationStatus.Succeeded) ? false : true,
+      simulationStatus: simulationStatus ? simulationStatusToString(simulationStatus, log) : undefined,
+      simulationError: simulationStatus === undefined || simulationStatus == SimulationStatus.Succeeded ? false : true,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
       routeString: routeAmountsToString(route),

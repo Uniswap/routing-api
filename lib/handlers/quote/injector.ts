@@ -33,7 +33,16 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei, skipTenderlySimulation } = requestQueryParams
+    const {
+      tokenInAddress,
+      tokenInChainId,
+      tokenOutAddress,
+      amount,
+      type,
+      algorithm,
+      gasPriceWei,
+      skipTenderlySimulation,
+    } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,

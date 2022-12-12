@@ -250,7 +250,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           process.env.TENDERLY_ACCESS_KEY!,
           v2PoolProvider,
           v3PoolProvider,
-          provider,
+          provider
         )
 
         const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
@@ -259,7 +259,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           chainId,
           provider,
           tenderlySimulator,
-          ethEstimateGasSimulator,
+          ethEstimateGasSimulator
         )
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
