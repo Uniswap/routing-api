@@ -2047,8 +2047,7 @@ describe('quote', function () {
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
   for (const chain of _.filter(
-    [],
-    //SUPPORTED_CHAINS,
+    SUPPORTED_CHAINS,
     (c) =>
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
