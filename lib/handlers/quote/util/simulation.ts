@@ -7,8 +7,12 @@ export const simulationStatusToString = (simulationStatus: SimulationStatus, log
       return 'SUCCESS'
     case SimulationStatus.Failed:
       return 'FAILED'
-    case SimulationStatus.Unattempted:
-      return 'UNATTEMPTED'
+    case SimulationStatus.NotApproved:
+      return 'NOTAPPROVED'
+    case SimulationStatus.InsufficientBalance:
+      return 'INSUFFICIENTBALANCE'
+    case SimulationStatus.NotSupported:
+      return 'NOTSUPPORTED'
     default:
       log.error(`Unknown simulation status ${simulationStatus}`)
       return ''

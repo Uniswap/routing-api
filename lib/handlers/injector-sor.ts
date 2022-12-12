@@ -6,10 +6,11 @@ import {
   CachingV3PoolProvider,
   ChainId,
   EIP1559GasPriceProvider,
+  EthEstimateGasSimulator,
+  TenderlySimulator,
   FallbackTenderlySimulator,
   IGasPriceProvider,
   IMetric,
-  Simulator,
   ITokenListProvider,
   ITokenProvider,
   IV2PoolProvider,
@@ -80,7 +81,8 @@ export type ContainerDependencies = {
   multicallProvider: UniswapMulticallProvider
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
-  simulator: Simulator
+  ethEstimateGasSimulator: EthEstimateGasSimulator
+  fallbackTenderlySimulator: FallbackTenderlySimulator
 }
 
 export interface ContainerInjected {
@@ -240,15 +242,24 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        const simulator = new FallbackTenderlySimulator(
+        const tenderlySimulator = new TenderlySimulator(
           chainId,
           'http://api.tenderly.co',
           process.env.TENDERLY_USER!,
           process.env.TENDERLY_PROJECT!,
           process.env.TENDERLY_ACCESS_KEY!,
-          provider,
           v2PoolProvider,
-          v3PoolProvider
+          v3PoolProvider,
+          provider,
+        )
+
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
+
+        const fallbackTenderlySimulator = new FallbackTenderlySimulator(
+          chainId,
+          provider,
+          tenderlySimulator,
+          ethEstimateGasSimulator,
         )
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
@@ -311,7 +322,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2PoolProvider,
             v2QuoteProvider: new V2QuoteProvider(),
             v2SubgraphProvider,
-            simulator,
+            ethEstimateGasSimulator,
+            fallbackTenderlySimulator,
           },
         }
       })

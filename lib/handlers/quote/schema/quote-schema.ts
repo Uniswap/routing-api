@@ -48,6 +48,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   forceMixedRoutes: Joi.boolean().optional(),
   protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3', 'mixed')).optional(),
   simulateFromAddress: Joi.string().alphanum().max(42).optional(),
+  skipTenderlySimulation: Joi.boolean().optional(),
   permitSignature: Joi.string().optional(),
   permitNonce: Joi.string().optional(),
   permitExpiration: Joi.number().optional(),
@@ -76,6 +77,7 @@ export type QuoteQueryParams = {
   forceMixedRoutes?: boolean
   protocols?: string[] | string
   simulateFromAddress?: string
+  skipTenderlySimulation?: boolean
   permitSignature?: string
   permitNonce?: string
   permitExpiration?: string

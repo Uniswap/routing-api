@@ -33,7 +33,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const quoteId = requestId.substring(0, 5)
     const logLevel = bunyan.INFO
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
+    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei, skipTenderlySimulation } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -77,7 +77,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2QuoteProvider,
       v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
-      simulator,
+      ethEstimateGasSimulator,
+      fallbackTenderlySimulator,
     } = dependencies[chainIdEnum]!
 
     let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
@@ -86,6 +87,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
       gasPriceProvider = new StaticGasPriceProvider(gasPriceWeiBN)
     }
+
+    const simulator = skipTenderlySimulation ? ethEstimateGasSimulator : fallbackTenderlySimulator
 
     let router
     switch (algorithm) {

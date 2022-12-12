@@ -50,7 +50,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   gasUseEstimate: Joi.string().required(),
   gasUseEstimateUSD: Joi.string().required(),
   simulationError: Joi.boolean().optional(),
-  simulationStatus: Joi.string().required(),
+  simulationStatus: Joi.string().optional(),
   gasPriceWei: Joi.string().required(),
   blockNumber: Joi.string().required(),
   route: Joi.array().items(Joi.any()).required(),
@@ -75,7 +75,7 @@ export type QuoteResponse = {
   gasUseEstimateQuoteDecimals: string
   gasUseEstimateUSD: string
   simulationError?: boolean
-  simulationStatus: string
+  simulationStatus?: string
   gasPriceWei: string
   blockNumber: string
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>

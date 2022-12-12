@@ -1443,6 +1443,130 @@ describe('quote', function () {
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
               }
             })
+
+            it(`eth -> erc20 skipping tenderly simulation`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'ETH',
+                tokenInChainId: 1,
+                tokenOutAddress: 'UNI',
+                tokenOutChainId: 1,
+                amount:
+                  type == 'exactIn'
+                    ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                    : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
+                skipTenderlySimulation: true,
+                enableUniversalRouter: true,
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+              expect(status).to.equal(200)
+              expect(data.simulationError).to.equal(false)
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                Ether.onChain(1),
+                UNI_MAINNET
+              )
+
+              if (type == 'exactIn') {
+                // We've swapped 10 ETH + gas costs
+                expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+                // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
+              }
+            })
+
+            it(`weth -> erc20 skipping tenderly simulation`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'WETH',
+                tokenInChainId: 1,
+                tokenOutAddress: 'DAI',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulateFromAddress: '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e',
+                skipTenderlySimulation: true,
+                enableUniversalRouter: true,
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+              expect(status).to.equal(200)
+              expect(data.simulationStatus).to.equal('NOTAPPROVED')
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                WETH9[1]!,
+                DAI_MAINNET
+              )
+
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+              }
+            })
+
+            it(`erc20 -> weth skipping tenderly simulation`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'WETH',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
+                skipTenderlySimulation: true,
+                enableUniversalRouter: true,
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const { data, status } = response
+              expect(status).to.equal(200)
+              expect(data.simulationStatus).to.equal('NOTAPPROVED')
+              expect(data.methodParameters).to.not.be.undefined
+
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                data.methodParameters!,
+                USDC_MAINNET,
+                WETH9[1]!
+              )
+
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+              }
+            })
           })
         }
         it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
@@ -1923,7 +2047,8 @@ describe('quote', function () {
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
   for (const chain of _.filter(
-    SUPPORTED_CHAINS,
+    [],
+    //SUPPORTED_CHAINS,
     (c) =>
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
