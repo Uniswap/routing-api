@@ -1510,7 +1510,7 @@ describe('quote', function () {
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
               expect(status).to.equal(200)
-              expect(data.simulationStatus).to.equal('NOTAPPROVED')
+              expect(data.simulationStatus).to.equal('NOT_APPROVED')
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1550,7 +1550,7 @@ describe('quote', function () {
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
               expect(status).to.equal(200)
-              expect(data.simulationStatus).to.equal('NOTAPPROVED')
+              expect(data.simulationStatus).to.equal('NOT_APPROVED')
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
