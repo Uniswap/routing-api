@@ -456,7 +456,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
       simulationStatus: simulationStatus ? simulationStatusToString(simulationStatus, log) : undefined,
-      simulationError: (simulationStatus === undefined || simulationStatus == SimulationStatus.Succeeded) ? false : true,
+      simulationError: simulationStatus === undefined || simulationStatus == SimulationStatus.Succeeded ? false : true,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
       routeString: routeAmountsToString(route),
