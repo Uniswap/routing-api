@@ -100,7 +100,7 @@ const MAX_UINT160 = '0xffffffffffffffffffffffffffffffffffffffff'
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
-  this.retries(1)
+  this.retries(0)
 
   this.timeout('500s')
 
@@ -139,7 +139,7 @@ describe('quote', function () {
         currencyIn.wrapped.address,
         UNIVERSAL_ROUTER_ADDRESS,
         MAX_UINT160,
-        2000000000
+        100000000000000
       )
       await approveNarwhal.wait()
     }
@@ -303,14 +303,14 @@ describe('quote', function () {
           })
 
           it(`erc20 -> erc20 with permit`, async () => {
-            const amount = await getAmount(1, type, 'USDC', 'USDT', '100')
+            const amount = await getAmount(1, type, 'USDC', 'USDT', '10')
 
             const nonce = nextPermitNonce()
 
             const permit: PermitSingle = {
               details: {
                 token: USDC_MAINNET.address,
-                amount: amount,
+                amount: '15000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
                 expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
                 nonce,
               },
@@ -350,8 +350,8 @@ describe('quote', function () {
             } = response
 
             expect(status).to.equal(200)
-            expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-            expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+            expect(parseFloat(quoteDecimals)).to.be.greaterThan(9)
+            expect(parseFloat(quoteDecimals)).to.be.lessThan(11)
 
             if (type == 'exactIn') {
               expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
@@ -370,10 +370,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('10')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10')
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
             }
           })
@@ -490,7 +490,7 @@ describe('quote', function () {
             const permit: PermitSingle = {
               details: {
                 token: USDC_MAINNET.address,
-                amount: amount,
+                amount: '1500000000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
                 expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
                 nonce,
               },
@@ -1103,7 +1103,7 @@ describe('quote', function () {
             })
 
             if (isTesterPKEnvironmentSet()) {
-              it(`erc20 -> erc20 with permit`, async () => {
+              it(`erc20 -> erc20 with permit with tester pk`, async () => {
                 // This test requires a private key with at least 10 USDC
                 // at FORK_BLOCK time.
                 const amount = await getAmount(1, type, 'USDC', 'USDT', '10')
@@ -1942,7 +1942,7 @@ describe('quote', function () {
 
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
-        this.retries(1)
+        this.retries(0)
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {

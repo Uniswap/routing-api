@@ -7,6 +7,8 @@ import {
   ChainId,
   EIP1559GasPriceProvider,
   FallbackTenderlySimulator,
+  TenderlySimulator,
+  EthEstimateGasSimulator,
   IGasPriceProvider,
   IMetric,
   Simulator,
@@ -240,16 +242,21 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        const simulator = new FallbackTenderlySimulator(
+        const tenderlySimulator = new TenderlySimulator(
           chainId,
           'http://api.tenderly.co',
           process.env.TENDERLY_USER!,
           process.env.TENDERLY_PROJECT!,
           process.env.TENDERLY_ACCESS_KEY!,
-          provider,
           v2PoolProvider,
-          v3PoolProvider
+          v3PoolProvider,
+          provider,
+          { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
+
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
+
+        const simulator = new FallbackTenderlySimulator(chainId, provider, tenderlySimulator, ethEstimateGasSimulator)
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {

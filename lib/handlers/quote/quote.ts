@@ -343,8 +343,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
     } else if (simulationStatus == SimulationStatus.Succeeded) {
       metric.putMetric('SimulationSuccessful', 1, MetricLoggerUnit.Count)
-    } else if (simulationStatus == SimulationStatus.Unattempted) {
-      metric.putMetric('SimulationUnattempted', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.InsufficientBalance) {
+      metric.putMetric('SimulationInsufficientBalance', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.NotApproved) {
+      metric.putMetric('SimulationNotApproved', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.NotSupported) {
+      metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
@@ -438,8 +442,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute)
     }
 
-    
-
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -454,7 +456,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
       simulationStatus: simulationStatusToString(simulationStatus, log),
-      simulationError: (simulationStatus == SimulationStatus.Succeeded || simulationStatus == SimulationStatus.Unattempted) ? false : true,
+      simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
       routeString: routeAmountsToString(route),
