@@ -1901,6 +1901,7 @@ describe('quote', function () {
     [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.ARBITRUM_GOERLI]: null,
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
@@ -1919,6 +1920,7 @@ describe('quote', function () {
     [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.ARBITRUM_GOERLI]: null,
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -1928,6 +1930,8 @@ describe('quote', function () {
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
+      c != ChainId.ARBITRUM_GOERLI &&
+      c != ChainId.CELO_ALFAJORES &&
       c != ChainId.KOVAN &&
       c != ChainId.RINKEBY &&
       c != ChainId.ROPSTEN &&

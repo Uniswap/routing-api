@@ -712,6 +712,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.ARBITRUM_GOERLI]: null,
     [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: CUSD_CELO,
@@ -736,6 +737,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.ARBITRUM_GOERLI]: null,
   }
 
   for (const chain of _.filter(
@@ -747,6 +749,7 @@ describe('quote-to-ratio', async function () {
       c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
+      c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.GÖRLI &&
       c != ChainId.MOONBEAM &&
       c != ChainId.GNOSIS &&

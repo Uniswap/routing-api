@@ -50,6 +50,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISTIC_KOVAN,
   ChainId.ARBITRUM_ONE,
   ChainId.ARBITRUM_RINKEBY,
+  ChainId.ARBITRUM_GOERLI,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.GÖRLI,
