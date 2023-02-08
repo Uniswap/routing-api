@@ -75,9 +75,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       },
     } = params
     // Sets ChainId Dimension for metrics
-    metric.putDimensions({ChainId: `${chainId}`})
+    metric.putDimensions({ ChainId: `${chainId}` })
 
-    metric.putMetric("GET_QUOTE_REQUESTED", 1, MetricLoggerUnit.Count)
+    metric.putMetric('GET_QUOTE_REQUESTED', 1, MetricLoggerUnit.Count)
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
@@ -101,7 +101,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
     if (!currencyIn) {
-      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
+      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_INVALID',
@@ -110,7 +110,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!currencyOut) {
-      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
+      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_OUT_INVALID',
@@ -119,7 +119,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (tokenInChainId != tokenOutChainId) {
-      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
+      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
@@ -128,7 +128,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (currencyIn.equals(currencyOut)) {
-      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
+      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_OUT_SAME',
@@ -466,7 +466,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteId,
     }
 
-    metric.putMetric("GET_QUOTE_200", 1, MetricLoggerUnit.Count)
+    metric.putMetric('GET_QUOTE_200', 1, MetricLoggerUnit.Count)
     return {
       statusCode: 200,
       body: result,
