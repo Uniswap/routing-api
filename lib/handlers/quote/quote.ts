@@ -74,7 +74,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+    // Sets ChainId Dimension for metrics
+    metric.putDimensions({"ChainId": `${chainId}`})
+    metric.putMetric("Count", 1, MetricLoggerUnit.Count)
+
+    metric.putMetric("GET_QUOTE_REQUESTED", 1, MetricLoggerUnit.Count)
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
@@ -98,7 +102,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
     if (!currencyIn) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_INVALID',
@@ -107,7 +111,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!currencyOut) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_OUT_INVALID',
@@ -116,7 +120,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (tokenInChainId != tokenOutChainId) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
@@ -125,13 +129,16 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (currencyIn.equals(currencyOut)) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric("GET_QUOTE_400", 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_OUT_SAME',
         detail: `tokenIn and tokenOut must be different`,
       }
     }
+
+    // Track pairs
+    metric.putMetric(`${currencyIn.symbol}->${currencyOut.symbol}`, 1, MetricLoggerUnit.Count)
 
     let protocols: Protocol[] = []
     if (protocolsStr) {
@@ -463,7 +470,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteId,
     }
 
-    metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+    metric.putMetric("GET_QUOTE_200", 1, MetricLoggerUnit.Count)
     return {
       statusCode: 200,
       body: result,
