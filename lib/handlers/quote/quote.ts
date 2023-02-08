@@ -75,8 +75,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       },
     } = params
     // Sets ChainId Dimension for metrics
-    metric.putDimensions({"ChainId": `${chainId}`})
-    metric.putMetric("Count", 1, MetricLoggerUnit.Count)
+    metric.putDimensions({ChainId: `${chainId}`})
 
     metric.putMetric("GET_QUOTE_REQUESTED", 1, MetricLoggerUnit.Count)
 
@@ -136,9 +135,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         detail: `tokenIn and tokenOut must be different`,
       }
     }
-
-    // Track pairs
-    metric.putMetric(`${currencyIn.symbol}->${currencyOut.symbol}`, 1, MetricLoggerUnit.Count)
 
     let protocols: Protocol[] = []
     if (protocolsStr) {
