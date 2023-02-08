@@ -75,7 +75,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       },
     } = params
     // Sets ChainId Dimension for metrics
-    metric.putDimensions({ ChainId: `${chainId}` })
+    metric.putDimensions({ ChainId: chainId.toString() })
 
     metric.putMetric('GET_QUOTE_REQUESTED', 1, MetricLoggerUnit.Count)
 
