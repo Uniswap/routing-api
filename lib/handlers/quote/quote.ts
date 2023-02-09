@@ -103,19 +103,11 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     // Validations
     if (!currencyIn) {
-      return this.getQuoteError(
-        'TOKEN_IN_INVALID',
-        `Could not find token with address "${tokenInAddress}"`,
-        metric
-      )
+      return this.getQuoteError('TOKEN_IN_INVALID', `Could not find token with address "${tokenInAddress}"`, metric)
     }
 
     if (!currencyOut) {
-      return this.getQuoteError(
-        'TOKEN_OUT_INVALID',
-        `Could not find token with address "${tokenOutAddress}"`,
-        metric
-      )
+      return this.getQuoteError('TOKEN_OUT_INVALID', `Could not find token with address "${tokenOutAddress}"`, metric)
     }
 
     if (tokenInChainId != tokenOutChainId) {
@@ -127,11 +119,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (currencyIn.equals(currencyOut)) {
-      return this.getQuoteError(
-        'TOKEN_IN_OUT_SAME',
-        'tokenIn and tokenOut must be different',
-        metric
-      )
+      return this.getQuoteError('TOKEN_IN_OUT_SAME', 'tokenIn and tokenOut must be different', metric)
     }
 
     let protocols: Protocol[] = []
