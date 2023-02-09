@@ -12,6 +12,7 @@ import {
   SwapOptions,
   SwapType,
   SimulationStatus,
+  IMetric,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -100,40 +101,37 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
+    // Validations
     if (!currencyIn) {
-      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_INVALID',
-        detail: `Could not find token with address "${tokenInAddress}"`,
-      }
+      return this.getQuoteError(
+        'TOKEN_IN_INVALID',
+        `Could not find token with address "${tokenInAddress}"`,
+        metric
+      )
     }
 
     if (!currencyOut) {
-      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_OUT_INVALID',
-        detail: `Could not find token with address "${tokenOutAddress}"`,
-      }
+      return this.getQuoteError(
+        'TOKEN_OUT_INVALID',
+        `Could not find token with address "${tokenOutAddress}"`,
+        metric
+      )
     }
 
     if (tokenInChainId != tokenOutChainId) {
-      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_CHAINS_DIFFERENT',
-        detail: `Cannot request quotes for tokens on different chains`,
-      }
+      return this.getQuoteError(
+        'TOKEN_CHAINS_DIFFERENT',
+        'Cannot request quotes for tokens on different chains',
+        metric
+      )
     }
 
     if (currencyIn.equals(currencyOut)) {
-      metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_OUT_SAME',
-        detail: `tokenIn and tokenOut must be different`,
-      }
+      return this.getQuoteError(
+        'TOKEN_IN_OUT_SAME',
+        'tokenIn and tokenOut must be different',
+        metric
+      )
     }
 
     let protocols: Protocol[] = []
@@ -150,11 +148,12 @@ export class QuoteHandler extends APIGLambdaHandler<
             protocols.push(Protocol.MIXED)
             break
           default:
-            return {
-              statusCode: 400,
-              errorCode: 'INVALID_PROTOCOL',
-              detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
-            }
+            // Return Error 400
+            return this.getQuoteError(
+              'INVALID_PROTOCOL',
+              `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
+              metric
+            )
         }
       }
     } else if (!forceCrossProtocol) {
@@ -470,6 +469,17 @@ export class QuoteHandler extends APIGLambdaHandler<
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  private getQuoteError(errorCode: string, detail: string, metric: IMetric): ErrorResponse {
+    metric.putDimensions({ ErrorCode: errorCode })
+    metric.putMetric('GET_QUOTE_400', 1, MetricLoggerUnit.Count)
+
+    return {
+      statusCode: 400,
+      errorCode: errorCode,
+      detail: detail,
     }
   }
 
