@@ -12,6 +12,7 @@ import {
   SwapOptions,
   SwapType,
   SimulationStatus,
+  IMetric,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -464,9 +465,28 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+    this.logRouteVolumeMetrics(metric, currencyIn, currencyOut, type, chainId, amount)
+
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  private logRouteVolumeMetrics(
+    metric: IMetric,
+    currencyIn: Currency,
+    currencyOut: Currency,
+    tradeType: "exactIn" | "exactOut",
+    chainId: number,
+    amount: CurrencyAmount<Currency>
+  ) {
+    const PAIRS_TO_TRACK = ["WETH/USDC", "USDC/WETH", "USDT/WETH", "WETH/USDT", "USDC/USDT", "USDT/USDC", "WMATIC/USDC", "USDC/WMATIC"]
+    const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+    if (PAIRS_TO_TRACK.includes(tradingPair)) {
+      metric.putDimensions({ Service: 'RoutingAPI', TradingPair: tradingPair, TradeType: tradeType, ChainId: chainId.toString() })
+      metric.putMetric("GET_QUOTE_AMOUNT", Number(amount.toExact()), MetricLoggerUnit.None)
     }
   }
 
