@@ -468,7 +468,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
-    this.logRouteVolumeMetrics(metric, currencyIn, currencyOut, type, chainId, amount, routeString)
+    this.logRouteMetrics(metric, currencyIn, currencyOut, type, chainId, amount, routeString)
 
     return {
       statusCode: 200,
@@ -476,7 +476,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
   }
 
-  private logRouteVolumeMetrics(
+  private logRouteMetrics(
     metric: IMetric,
     currencyIn: Currency,
     currencyOut: Currency,
@@ -484,7 +484,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     chainId: number,
     amount: CurrencyAmount<Currency>,
     routeString: string
-  ) {
+  ): void {
     const PAIRS_TO_TRACK = [
       'WETH/USDC',
       'USDC/WETH',
