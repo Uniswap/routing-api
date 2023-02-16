@@ -462,7 +462,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
-      routeString: routeString,
+      routeString,
       quoteId,
     }
 
