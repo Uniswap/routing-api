@@ -486,7 +486,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
 
     if (PAIRS_TO_TRACK.includes(tradingPair)) {
-      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType}_CHAIN_${chainId}`, Number(amount.toExact()), MetricLoggerUnit.None)
+      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`, Number(amount.toExact()), MetricLoggerUnit.None)
     }
   }
 
