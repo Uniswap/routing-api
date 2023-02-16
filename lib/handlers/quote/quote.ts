@@ -484,9 +484,9 @@ export class QuoteHandler extends APIGLambdaHandler<
   ) {
     const PAIRS_TO_TRACK = ["WETH/USDC", "USDC/WETH", "USDT/WETH", "WETH/USDT", "USDC/USDT", "USDT/USDC", "WMATIC/USDC", "USDC/WMATIC"]
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+
     if (PAIRS_TO_TRACK.includes(tradingPair)) {
-      metric.putDimensions({ Service: 'RoutingAPI', TradingPair: tradingPair, TradeType: tradeType, ChainId: chainId.toString() })
-      metric.putMetric("GET_QUOTE_AMOUNT", Number(amount.toExact()), MetricLoggerUnit.None)
+      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType}_CHAIN_${chainId}`, Number(amount.toExact()), MetricLoggerUnit.None)
     }
   }
 
