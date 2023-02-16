@@ -480,20 +480,39 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric: IMetric,
     currencyIn: Currency,
     currencyOut: Currency,
-    tradeType: "exactIn" | "exactOut",
+    tradeType: 'exactIn' | 'exactOut',
     chainId: number,
     amount: CurrencyAmount<Currency>,
     routeString: string
   ) {
-    const PAIRS_TO_TRACK = ["WETH/USDC", "USDC/WETH", "USDT/WETH", "WETH/USDT", "USDC/USDT", "USDT/USDC", "WMATIC/USDC", "USDC/WMATIC"]
+    const PAIRS_TO_TRACK = [
+      'WETH/USDC',
+      'USDC/WETH',
+      'USDT/WETH',
+      'WETH/USDT',
+      'USDC/USDT',
+      'USDT/USDC',
+      'WMATIC/USDC',
+      'USDC/WMATIC',
+    ]
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
 
     if (PAIRS_TO_TRACK.includes(tradingPair)) {
-      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`, Number(amount.toExact()), MetricLoggerUnit.None)
+      metric.putMetric(
+        `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+        Number(amount.toExact()),
+        MetricLoggerUnit.None
+      )
       // Create a hashcode from the routeString, this will indicate that a different route is being used
       // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
-      const routeStringHash = Math.abs(routeString.split('').reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0))
-      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`, Number(amount.toExact()), MetricLoggerUnit.None)
+      const routeStringHash = Math.abs(
+        routeString.split('').reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0)
+      )
+      metric.putMetric(
+        `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`,
+        Number(amount.toExact()),
+        MetricLoggerUnit.None
+      )
     }
   }
 
