@@ -443,6 +443,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute)
     }
 
+    const routeString = routeAmountsToString(route)
+
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -460,13 +462,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
-      routeString: routeAmountsToString(route),
+      routeString: routeString,
       quoteId,
     }
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
-    this.logRouteVolumeMetrics(metric, currencyIn, currencyOut, type, chainId, amount)
+    this.logRouteVolumeMetrics(metric, currencyIn, currencyOut, type, chainId, amount, routeString)
 
     return {
       statusCode: 200,
@@ -480,13 +482,18 @@ export class QuoteHandler extends APIGLambdaHandler<
     currencyOut: Currency,
     tradeType: "exactIn" | "exactOut",
     chainId: number,
-    amount: CurrencyAmount<Currency>
+    amount: CurrencyAmount<Currency>,
+    routeString: string
   ) {
     const PAIRS_TO_TRACK = ["WETH/USDC", "USDC/WETH", "USDT/WETH", "WETH/USDT", "USDC/USDT", "USDT/USDC", "WMATIC/USDC", "USDC/WMATIC"]
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
 
     if (PAIRS_TO_TRACK.includes(tradingPair)) {
       metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`, Number(amount.toExact()), MetricLoggerUnit.None)
+      // Create a hashcode from the routeString, this will indicate that a different route is being used
+      // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
+      const routeStringHash = Math.abs(routeString.split('').reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0))
+      metric.putMetric(`GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`, Number(amount.toExact()), MetricLoggerUnit.None)
     }
   }
 
