@@ -523,11 +523,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       const routeStringHash = Math.abs(
         routeString.split('').reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0)
       )
-      metric.putMetric(
-        `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`,
-        Number(amount.toExact()),
-        MetricLoggerUnit.None
-      )
       // Log the chose route
       log.info(
         {
