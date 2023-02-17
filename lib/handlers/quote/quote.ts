@@ -29,6 +29,7 @@ import {
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
+import Logger from 'bunyan'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -468,7 +469,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
-    this.logRouteMetrics(metric, currencyIn, currencyOut, type, chainId, amount, routeString)
+    this.logRouteMetrics(log, metric, currencyIn, currencyOut, tokenInAddress, tokenOutAddress, type, chainId, amount, routeString)
 
     return {
       statusCode: 200,
@@ -477,9 +478,12 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   private logRouteMetrics(
+    log: Logger,
     metric: IMetric,
     currencyIn: Currency,
     currencyOut: Currency,
+    tokenInAddress: string,
+    tokenOutAddress: string,
     tradeType: 'exactIn' | 'exactOut',
     chainId: number,
     amount: CurrencyAmount<Currency>,
@@ -512,6 +516,20 @@ export class QuoteHandler extends APIGLambdaHandler<
         `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`,
         Number(amount.toExact()),
         MetricLoggerUnit.None
+      )
+      // Log the chose route
+      log.info(
+        {
+          tradingPair,
+          tokenInAddress,
+          tokenOutAddress,
+          tradeType,
+          amount: amount.toExact(),
+          routeString,
+          routeStringHash,
+          chainId,
+        },
+        `Tracked Route for pair [${tradingPair}/${tradeType.toUpperCase()}] on chain [${chainId}] with route hash [${routeStringHash}] for amount [${amount.toExact()}]`
       )
     }
   }
