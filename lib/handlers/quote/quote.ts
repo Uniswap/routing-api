@@ -12,6 +12,7 @@ import {
   SwapOptions,
   SwapType,
   SimulationStatus,
+  IMetric,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -28,6 +29,7 @@ import {
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
+import Logger from 'bunyan'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -442,6 +444,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute)
     }
 
+    const routeString = routeAmountsToString(route)
+
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -459,14 +463,85 @@ export class QuoteHandler extends APIGLambdaHandler<
       simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
-      routeString: routeAmountsToString(route),
+      routeString,
       quoteId,
     }
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+    this.logRouteMetrics(
+      log,
+      metric,
+      currencyIn,
+      currencyOut,
+      tokenInAddress,
+      tokenOutAddress,
+      type,
+      chainId,
+      amount,
+      routeString
+    )
+
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  private logRouteMetrics(
+    log: Logger,
+    metric: IMetric,
+    currencyIn: Currency,
+    currencyOut: Currency,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    tradeType: 'exactIn' | 'exactOut',
+    chainId: number,
+    amount: CurrencyAmount<Currency>,
+    routeString: string
+  ): void {
+    const PAIRS_TO_TRACK = [
+      'WETH/USDC',
+      'USDC/WETH',
+      'USDT/WETH',
+      'WETH/USDT',
+      'USDC/USDT',
+      'USDT/USDC',
+      'WMATIC/USDC',
+      'USDC/WMATIC',
+    ]
+    const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+
+    if (PAIRS_TO_TRACK.includes(tradingPair)) {
+      metric.putMetric(
+        `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+        Number(amount.toExact()),
+        MetricLoggerUnit.None
+      )
+      // Create a hashcode from the routeString, this will indicate that a different route is being used
+      // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
+      const routeStringHash = Math.abs(
+        routeString.split('').reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0)
+      )
+      metric.putMetric(
+        `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}_BUCKET_${routeStringHash}`,
+        Number(amount.toExact()),
+        MetricLoggerUnit.None
+      )
+      // Log the chose route
+      log.info(
+        {
+          tradingPair,
+          tokenInAddress,
+          tokenOutAddress,
+          tradeType,
+          amount: amount.toExact(),
+          routeString,
+          routeStringHash,
+          chainId,
+        },
+        `Tracked Route for pair [${tradingPair}/${tradeType.toUpperCase()}] on chain [${chainId}] with route hash [${routeStringHash}] for amount [${amount.toExact()}]`
+      )
     }
   }
 
