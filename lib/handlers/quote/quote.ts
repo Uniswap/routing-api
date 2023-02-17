@@ -469,7 +469,18 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
-    this.logRouteMetrics(log, metric, currencyIn, currencyOut, tokenInAddress, tokenOutAddress, type, chainId, amount, routeString)
+    this.logRouteMetrics(
+      log,
+      metric,
+      currencyIn,
+      currencyOut,
+      tokenInAddress,
+      tokenOutAddress,
+      type,
+      chainId,
+      amount,
+      routeString
+    )
 
     return {
       statusCode: 200,
