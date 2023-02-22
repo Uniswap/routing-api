@@ -2,8 +2,8 @@
 export type WidgetType = 'text' | 'metric'
 
 export type Widget = {
-  type: WidgetType,
-  width: number,
-  height: number,
+  type: WidgetType
+  width: number
+  height: number
   properties: any // TODO: Either find an SDK that already defines models for the widgets, or define them ourselves
 }

@@ -501,7 +501,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     amount: CurrencyAmount<Currency>,
     routeString: string
   ): void {
-
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
 
     if (PAIRS_TO_TRACK.includes(tradingPair)) {

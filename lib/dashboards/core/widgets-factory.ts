@@ -1,5 +1,5 @@
-import { Widget } from "./model/widget";
+import { Widget } from './model/widget'
 
 export interface WidgetsFactory {
-    generateWidgets(): Widget[]
+  generateWidgets(): Widget[]
 }
