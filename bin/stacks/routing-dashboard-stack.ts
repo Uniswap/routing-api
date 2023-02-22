@@ -444,10 +444,10 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     })
 
     const pairsPerChainToTrackInDashboard: [ChainId, string[]][] = [
-      [ChainId.MAINNET, ['WETH/USDC', 'WETH/USDC']],
-      [ChainId.OPTIMISM, ['WETH/USDC', 'WETH/USDC']],
-      [ChainId.ARBITRUM_ONE, ['WETH/USDC', 'WETH/USDC']],
-      [ChainId.POLYGON, ['WETH/USDC', 'WETH/USDC', 'WMATIC/USDC', 'USDC/WMATIC']]
+      [ChainId.MAINNET, ['WETH/USDC', 'USDC/WETH']],
+      [ChainId.OPTIMISM, ['WETH/USDC', 'USDC/WETH']],
+      [ChainId.ARBITRUM_ONE, ['WETH/USDC', 'USDC/WETH']],
+      [ChainId.POLYGON, ['WETH/USDC', 'USDC/WETH', 'WMATIC/USDC', 'USDC/WMATIC']]
     ]
 
     const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, pairsPerChainToTrackInDashboard)

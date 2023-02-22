@@ -3,8 +3,8 @@ import { expect } from 'chai'
 import { ChainId } from '@uniswap/smart-order-router'
 
 const pairsToTrackPerChain: [ChainId, string[]][] = [
-  [ChainId.MAINNET, ['WETH/USDC', 'WETH/USDC']],
-  [ChainId.OPTIMISM, ['WETH/USDC', 'WETH/USDC']]
+  [ChainId.MAINNET, ['WETH/USDC', 'USDC/WETH']],
+  [ChainId.OPTIMISM, ['WETH/USDC', 'USDC/WETH']]
 ]
 const quoteAmountsWidgets = new QuoteAmountsWidgets('Uniswap', 'us-west-1', pairsToTrackPerChain)
 
