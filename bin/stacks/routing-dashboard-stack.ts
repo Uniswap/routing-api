@@ -5,7 +5,6 @@ import { Construct } from 'constructs'
 import _ from 'lodash'
 import { QuoteAmountsWidgets } from '../../lib/dashboards/quote-amounts-widgets'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
-import { PAIRS_TO_TRACK } from '../../lib/handlers/quote/util/pairs-to-track'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -444,13 +443,27 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       }),
     })
 
-    const pairsToTrackInDashboard = [
-      'WETH/USDC',
-      'WETH/USDC'
-    ].filter(x => PAIRS_TO_TRACK.includes(x)) // Constrain to only allow pairs that are actually tracked
-    const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, SUPPORTED_CHAINS, pairsToTrackInDashboard)
+    const pairsPerChainToTrackInDashboard = [
+      {
+        key: ChainId.MAINNET,
+        value: ['WETH/USDC','WETH/USDC']
+      },
+      {
+        key: ChainId.OPTIMISM,
+        value: ['WETH/USDC','WETH/USDC']
+      },
+      {
+        key: ChainId.ARBITRUM_ONE,
+        value: ['WETH/USDC','WETH/USDC']
+      },
+      {
+        key: ChainId.POLYGON,
+        value: ['WETH/USDC','WETH/USDC', 'WMATIC/USDC', 'USDC/WMATIC']
+      }
+    ]
+    const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, pairsPerChainToTrackInDashboard)
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
-      dashboardName: "RoutingAPITrackedQuoteAmountsDashboard",
+      dashboardName: "RoutingAPITrackedPairsDashboard",
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: quoteAmountsWidgets.generateWidgets()

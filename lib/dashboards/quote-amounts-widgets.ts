@@ -3,21 +3,24 @@ import _ from 'lodash'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
 
+type Map<K, V> = {
+  key: K,
+  value: V
+}
+
 export class QuoteAmountsWidgets implements WidgetsFactory {
-  supportedChains: ChainId[]
-  trackedPairs: string[]
   region: string
   namespace: string
+  pairsToTrackPerChain: Map<ChainId, string[]>[]
 
-  constructor(namespace: string, region: string, supportedChains: ChainId[], trackedPairs: string[]) {
-    this.supportedChains = supportedChains
-    this.trackedPairs = trackedPairs
+  constructor(namespace: string, region: string, pairsToTrackPerChain: Map<ChainId, string[]>[]) {
     this.region = region
     this.namespace = namespace
+    this.pairsToTrackPerChain = pairsToTrackPerChain
   }
 
   generateWidgets(): Widget[] {
-    return _.flatMap(this.supportedChains, (chainId: ChainId) => [
+    return _.flatMap(this.pairsToTrackPerChain, ({key: chainId, value: pairs}: Map<ChainId, string[]>) => [
       {
         type: 'text',
         width: 24,
@@ -26,12 +29,12 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
           markdown: `# ${ID_TO_NETWORK_NAME(chainId)} - ChainId: ${chainId}`
         }
       },
-      ...this.generateChartWidgetsForAllPairs(chainId)
+      ...this.generateChatWidgetsForTrackedPairs(chainId, pairs)
     ])
   }
 
-  private generateChartWidgetsForAllPairs(chainId: ChainId): Widget[] {
-    return _.flatMap(this.trackedPairs, (pair: string) =>
+  private generateChatWidgetsForTrackedPairs(chainId: ChainId, pairs: string[]): Widget[] {
+    return _.flatMap(pairs, (pair: string) =>
       this.generateChartWidgetsForPair(pair, chainId)
     )
   }
