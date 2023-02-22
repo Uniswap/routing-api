@@ -447,7 +447,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       [ChainId.MAINNET, ['WETH/USDC', 'USDC/WETH']],
       [ChainId.OPTIMISM, ['WETH/USDC', 'USDC/WETH']],
       [ChainId.ARBITRUM_ONE, ['WETH/USDC', 'USDC/WETH']],
-      [ChainId.POLYGON, ['WETH/USDC', 'USDC/WETH', 'WMATIC/USDC', 'USDC/WMATIC']]
+      [ChainId.POLYGON, ['WETH/USDC', 'USDC/WETH', 'WMATIC/USDC', 'USDC/WMATIC']],
     ]
 
     const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, pairsPerChainToTrackInDashboard)

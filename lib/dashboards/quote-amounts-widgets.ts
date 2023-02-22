@@ -5,7 +5,7 @@ import { WidgetsFactory } from './core/widgets-factory'
 
 enum TradeTypes {
   ExactIn = 'ExactIn',
-  ExactOut = 'ExactOut'
+  ExactOut = 'ExactOut',
 }
 
 export class QuoteAmountsWidgets implements WidgetsFactory {
@@ -96,7 +96,7 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
             ['...', this.generateStatWithLabel(50000, 100000, pair, tradeType)],
             ['...', this.generateStatWithLabel(100000, 500000, pair, tradeType)],
             ['...', this.generateStatWithLabel(500000, 1000000, pair, tradeType)],
-            ['...', this.generateStatWithLabel(1000000, -1, pair, tradeType)]
+            ['...', this.generateStatWithLabel(1000000, -1, pair, tradeType)],
           ],
           region: this.region,
           title: `Distribution of quotes ${pair}/${tradeType}`,
@@ -108,20 +108,25 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
     return widgets
   }
 
-  private generateStatWithLabel(min: number, max: number, pair: string, tradeType: TradeTypes): {stat: string, label: string} {
+  private generateStatWithLabel(
+    min: number,
+    max: number,
+    pair: string,
+    tradeType: TradeTypes
+  ): { stat: string; label: string } {
     const tokens = pair.split('/')
     const maxNormalized = max > 0 ? max.toString() : ''
 
-    switch(tradeType) {
+    switch (tradeType) {
       case TradeTypes.ExactIn:
         return {
           stat: `PR(${min}:${maxNormalized})`,
-          label: `${min} to ${max} ${tokens[0]}`
+          label: `${min} to ${max} ${tokens[0]}`,
         }
       case TradeTypes.ExactOut:
         return {
           stat: `PR(${min}:${maxNormalized})`,
-          label: `${min} to ${max} ${tokens[1]}`
+          label: `${min} to ${max} ${tokens[1]}`,
         }
     }
   }
