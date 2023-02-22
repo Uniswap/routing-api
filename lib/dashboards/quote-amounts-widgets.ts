@@ -58,7 +58,7 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
             [ this.namespace, `GET_QUOTE_AMOUNT_${pair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`, "Service", "RoutingAPI" ],
           ],
           region: this.region,
-          title: 'Number of requested quotes',
+          title: `Number of requested quotes ${pair}/${tradeType}`,
           period: 300,
           stat: "SampleCount"
         }
@@ -85,7 +85,7 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
             [ "...", { "stat": "PR(1000000:)" } ]
           ],
           region: this.region,
-          title: 'Distribution of quotes',
+          title: `Distribution of quotes ${pair}/${tradeType}`,
           period: 300
         }
       }
