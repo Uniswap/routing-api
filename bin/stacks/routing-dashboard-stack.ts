@@ -447,7 +447,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     const pairsToTrackInDashboard = [
       'WETH/USDC',
       'WETH/USDC'
-    ].filter(PAIRS_TO_TRACK.includes) // Constrain to only allow pairs that are actually tracked
+    ].filter(x => PAIRS_TO_TRACK.includes(x)) // Constrain to only allow pairs that are actually tracked
     const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, SUPPORTED_CHAINS, pairsToTrackInDashboard)
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
       dashboardName: "RoutingAPITrackedQuoteAmountsDashboard",
