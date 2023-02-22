@@ -443,24 +443,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       }),
     })
 
-    const pairsPerChainToTrackInDashboard = [
-      {
-        key: ChainId.MAINNET,
-        value: ['WETH/USDC', 'WETH/USDC'],
-      },
-      {
-        key: ChainId.OPTIMISM,
-        value: ['WETH/USDC', 'WETH/USDC'],
-      },
-      {
-        key: ChainId.ARBITRUM_ONE,
-        value: ['WETH/USDC', 'WETH/USDC'],
-      },
-      {
-        key: ChainId.POLYGON,
-        value: ['WETH/USDC', 'WETH/USDC', 'WMATIC/USDC', 'USDC/WMATIC'],
-      },
+    const pairsPerChainToTrackInDashboard: [ChainId, string[]][] = [
+      [ChainId.MAINNET, ['WETH/USDC', 'WETH/USDC']],
+      [ChainId.OPTIMISM, ['WETH/USDC', 'WETH/USDC']],
+      [ChainId.ARBITRUM_ONE, ['WETH/USDC', 'WETH/USDC']],
+      [ChainId.POLYGON, ['WETH/USDC', 'WETH/USDC', 'WMATIC/USDC', 'USDC/WMATIC']]
     ]
+
     const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, pairsPerChainToTrackInDashboard)
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
       dashboardName: 'RoutingAPITrackedPairsDashboard',

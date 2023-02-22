@@ -3,11 +3,6 @@ import _ from 'lodash'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
 
-type Map<K, V> = {
-  key: K
-  value: V
-}
-
 enum TradeTypes {
   ExactIn = 'ExactIn',
   ExactOut = 'ExactOut'
@@ -16,16 +11,16 @@ enum TradeTypes {
 export class QuoteAmountsWidgets implements WidgetsFactory {
   region: string
   namespace: string
-  pairsToTrackPerChain: Map<ChainId, string[]>[]
+  pairsToTrackPerChain: [ChainId, string[]][]
 
-  constructor(namespace: string, region: string, pairsToTrackPerChain: Map<ChainId, string[]>[]) {
+  constructor(namespace: string, region: string, pairsToTrackPerChain: [ChainId, string[]][]) {
     this.region = region
     this.namespace = namespace
     this.pairsToTrackPerChain = pairsToTrackPerChain
   }
 
   generateWidgets(): Widget[] {
-    return _.flatMap(this.pairsToTrackPerChain, ({ key: chainId, value: pairs }: Map<ChainId, string[]>) => [
+    return _.flatMap(this.pairsToTrackPerChain, ([chainId, pairs]: [ChainId, string[]]) => [
       {
         type: 'text',
         width: 24,
