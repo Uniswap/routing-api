@@ -72,7 +72,7 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
         height: 9,
         properties: {
           view: 'timeSeries',
-          stacked: false,
+          stacked: true,
           metrics: [
             [ this.namespace, `GET_QUOTE_AMOUNT_${pair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`, "Service", "RoutingAPI", { "stat": "PR(0:10)" } ],
             [ "...", { "stat": "PR(10:50)" } ],
