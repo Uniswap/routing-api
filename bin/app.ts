@@ -107,7 +107,7 @@ export class RoutingAPIPipeline extends Stack {
     const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
       // The main secrets use our Infura RPC urls
       secretCompleteArn:
-        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-quicknode-DgYA62',
       /*
       The backup secrets mostly use our Alchemy RPC urls
       However Alchemy does not support Rinkeby, Ropsten, and Kovan
