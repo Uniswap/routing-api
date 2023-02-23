@@ -30,6 +30,7 @@ import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
+import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -500,16 +501,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     amount: CurrencyAmount<Currency>,
     routeString: string
   ): void {
-    const PAIRS_TO_TRACK = [
-      'WETH/USDC',
-      'USDC/WETH',
-      'USDT/WETH',
-      'WETH/USDT',
-      'USDC/USDT',
-      'USDT/USDC',
-      'WMATIC/USDC',
-      'USDC/WMATIC',
-    ]
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
 
     if (PAIRS_TO_TRACK.includes(tradingPair)) {
