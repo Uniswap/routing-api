@@ -23,20 +23,21 @@ export class QuoteAmountsWidgetsFactory implements WidgetsFactory {
     return widgets
   }
 
-  private generateChartWidgetsFromPairsByTradeType(chainId: ChainId, pairsByTradeType: Map<TradeType, string[]>): Widget[] {
+  private generateChartWidgetsFromPairsByTradeType(
+    chainId: ChainId,
+    pairsByTradeType: Map<TradeType, string[]>
+  ): Widget[] {
     const pairsByTradeTypeEntries = Array.from(pairsByTradeType.entries())
-    
+
     const widgets = _.flatMap(pairsByTradeTypeEntries, ([tradeType, pairs]: [TradeType, string[]]) =>
-      this.generateChartWidgetsFromPairs(chainId, tradeType, pairs) 
+      this.generateChartWidgetsFromPairs(chainId, tradeType, pairs)
     )
 
     return widgets
   }
 
   private generateChartWidgetsFromPairs(chainId: ChainId, tradeType: TradeType, pairs: string[]): Widget[] {
-    return _.flatMap(pairs, (pair: string) =>
-      this.generateChartWidgetsFromPair(chainId, tradeType, pair)
-    )
+    return _.flatMap(pairs, (pair: string) => this.generateChartWidgetsFromPair(chainId, tradeType, pair))
   }
 
   private generateChartWidgetsFromPair(chainId: ChainId, tradeType: TradeType, pair: string): Widget[] {
@@ -63,7 +64,7 @@ export class QuoteAmountsWidgetsFactory implements WidgetsFactory {
               `GET_QUOTE_AMOUNT_${pair}_${tradeTypeLabel.toUpperCase()}_CHAIN_${chainId}`,
               'Service',
               'RoutingAPI',
-              { label: `${pair}/${tradeTypeLabel.toUpperCase()} Quotes` }
+              { label: `${pair}/${tradeTypeLabel.toUpperCase()} Quotes` },
             ],
           ],
           region: this.region,
