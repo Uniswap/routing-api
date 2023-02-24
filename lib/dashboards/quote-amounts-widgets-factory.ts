@@ -45,9 +45,9 @@ export class QuoteAmountsWidgetsFactory implements WidgetsFactory {
       {
         type: 'text',
         width: 24,
-        height: 1,
+        height: 2,
         properties: {
-          markdown: `# ${ID_TO_NETWORK_NAME(chainId)} - ChainId: ${chainId} /n## ${pair} - ${tradeTypeLabel}`,
+          markdown: `# ${ID_TO_NETWORK_NAME(chainId)} - ChainId: ${chainId}\n## ${pair} - ${tradeTypeLabel}`,
         },
       },
       {
@@ -63,6 +63,7 @@ export class QuoteAmountsWidgetsFactory implements WidgetsFactory {
               `GET_QUOTE_AMOUNT_${pair}_${tradeTypeLabel.toUpperCase()}_CHAIN_${chainId}`,
               'Service',
               'RoutingAPI',
+              { label: `${pair}/${tradeTypeLabel.toUpperCase()} Quotes` }
             ],
           ],
           region: this.region,
