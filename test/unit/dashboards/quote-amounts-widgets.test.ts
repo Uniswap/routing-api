@@ -1,12 +1,7 @@
-import { QuoteAmountsWidgets } from '../../../lib/dashboards/quote-amounts-widgets'
+import { QuoteAmountsWidgetsFactory } from '../../../lib/dashboards/quote-amounts-widgets-factory'
 import { expect } from 'chai'
-import { ChainId } from '@uniswap/smart-order-router'
 
-const pairsToTrackPerChain: [ChainId, string[]][] = [
-  [ChainId.MAINNET, ['WETH/USDC', 'USDC/WETH']],
-  [ChainId.OPTIMISM, ['WETH/USDC', 'USDC/WETH']],
-]
-const quoteAmountsWidgets = new QuoteAmountsWidgets('Uniswap', 'us-west-1', pairsToTrackPerChain)
+const quoteAmountsWidgets = new QuoteAmountsWidgetsFactory('Uniswap', 'us-west-1')
 
 describe('Test widgets', () => {
   it('works', () => {

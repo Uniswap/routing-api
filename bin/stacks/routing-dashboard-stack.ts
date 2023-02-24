@@ -3,7 +3,7 @@ import * as cdk from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { Construct } from 'constructs'
 import _ from 'lodash'
-import { QuoteAmountsWidgets } from '../../lib/dashboards/quote-amounts-widgets'
+import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-widgets-factory'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
 export const NAMESPACE = 'Uniswap'
@@ -443,14 +443,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       }),
     })
 
-    const pairsPerChainToTrackInDashboard: [ChainId, string[]][] = [
-      [ChainId.MAINNET, ['WETH/USDC', 'USDC/WETH']],
-      [ChainId.OPTIMISM, ['WETH/USDC', 'USDC/WETH']],
-      [ChainId.ARBITRUM_ONE, ['WETH/USDC', 'USDC/WETH']],
-      [ChainId.POLYGON, ['WETH/USDC', 'USDC/WETH', 'WMATIC/USDC', 'USDC/WMATIC']],
-    ]
-
-    const quoteAmountsWidgets = new QuoteAmountsWidgets(NAMESPACE, region, pairsPerChainToTrackInDashboard)
+    const quoteAmountsWidgets = new QuoteAmountsWidgetsFactory(NAMESPACE, region)
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
       dashboardName: 'RoutingAPITrackedPairsDashboard',
       dashboardBody: JSON.stringify({

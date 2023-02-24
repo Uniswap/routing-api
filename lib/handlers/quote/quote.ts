@@ -13,6 +13,7 @@ import {
   SwapType,
   SimulationStatus,
   IMetric,
+  ChainId,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -497,13 +498,14 @@ export class QuoteHandler extends APIGLambdaHandler<
     tokenInAddress: string,
     tokenOutAddress: string,
     tradeType: 'exactIn' | 'exactOut',
-    chainId: number,
+    chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string
   ): void {
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+    const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
 
-    if (PAIRS_TO_TRACK.includes(tradingPair)) {
+    if (PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)?.includes(tradingPair)) {
       metric.putMetric(
         `GET_QUOTE_AMOUNT_${tradingPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
         Number(amount.toExact()),
