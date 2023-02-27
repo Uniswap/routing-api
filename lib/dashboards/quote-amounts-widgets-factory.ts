@@ -1,51 +1,54 @@
+import { TradeType } from '@uniswap/sdk-core'
 import { ChainId, ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 import _ from 'lodash'
+import { PAIRS_TO_TRACK } from '../handlers/quote/util/pairs-to-track'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
 
-enum TradeTypes {
-  ExactIn = 'ExactIn',
-  ExactOut = 'ExactOut',
-}
-
-export class QuoteAmountsWidgets implements WidgetsFactory {
+export class QuoteAmountsWidgetsFactory implements WidgetsFactory {
   region: string
   namespace: string
-  pairsToTrackPerChain: [ChainId, string[]][]
 
-  constructor(namespace: string, region: string, pairsToTrackPerChain: [ChainId, string[]][]) {
+  constructor(namespace: string, region: string) {
     this.region = region
     this.namespace = namespace
-    this.pairsToTrackPerChain = pairsToTrackPerChain
   }
 
   generateWidgets(): Widget[] {
-    return _.flatMap(this.pairsToTrackPerChain, ([chainId, pairs]: [ChainId, string[]]) => [
+    const pairsToTrackEntries = Array.from(PAIRS_TO_TRACK.entries())
+    const widgets: Widget[] = _.flatMap(pairsToTrackEntries, ([chainId, pairsByTradeType]) => {
+      return this.generateChartWidgetsFromPairsByTradeType(chainId, pairsByTradeType)
+    })
+
+    return widgets
+  }
+
+  private generateChartWidgetsFromPairsByTradeType(
+    chainId: ChainId,
+    pairsByTradeType: Map<TradeType, string[]>
+  ): Widget[] {
+    const pairsByTradeTypeEntries = Array.from(pairsByTradeType.entries())
+
+    const widgets = _.flatMap(pairsByTradeTypeEntries, ([tradeType, pairs]: [TradeType, string[]]) =>
+      this.generateChartWidgetsFromPairs(chainId, tradeType, pairs)
+    )
+
+    return widgets
+  }
+
+  private generateChartWidgetsFromPairs(chainId: ChainId, tradeType: TradeType, pairs: string[]): Widget[] {
+    return _.flatMap(pairs, (pair: string) => this.generateChartWidgetsFromPair(chainId, tradeType, pair))
+  }
+
+  private generateChartWidgetsFromPair(chainId: ChainId, tradeType: TradeType, pair: string): Widget[] {
+    const tradeTypeLabel = this.tradeTypeToString(tradeType)
+    const widgets: Widget[] = [
       {
         type: 'text',
         width: 24,
-        height: 1,
+        height: 2,
         properties: {
-          markdown: `# ${ID_TO_NETWORK_NAME(chainId)} - ChainId: ${chainId}`,
-        },
-      },
-      ...this.generateChatWidgetsForTrackedPairs(chainId, pairs),
-    ])
-  }
-
-  private generateChatWidgetsForTrackedPairs(chainId: ChainId, pairs: string[]): Widget[] {
-    return _.flatMap(pairs, (pair: string) => this.generateChartWidgetsForPair(pair, chainId))
-  }
-
-  private generateChartWidgetsForPair(pair: string, chainId: ChainId): Widget[] {
-    const tradeTypes = [TradeTypes.ExactIn, TradeTypes.ExactOut]
-    const widgets: Widget[] = _.flatMap(tradeTypes, (tradeType: TradeTypes) => [
-      {
-        type: 'text',
-        width: 24,
-        height: 1,
-        properties: {
-          markdown: `## ${pair} - ${tradeType}`,
+          markdown: `# ${ID_TO_NETWORK_NAME(chainId)} - ChainId: ${chainId}\n## ${pair} - ${tradeTypeLabel}`,
         },
       },
       {
@@ -58,13 +61,14 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
           metrics: [
             [
               this.namespace,
-              `GET_QUOTE_AMOUNT_${pair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+              `GET_QUOTE_AMOUNT_${pair}_${tradeTypeLabel.toUpperCase()}_CHAIN_${chainId}`,
               'Service',
               'RoutingAPI',
+              { label: `${pair}/${tradeTypeLabel.toUpperCase()} Quotes` },
             ],
           ],
           region: this.region,
-          title: `Number of requested quotes ${pair}/${tradeType}`,
+          title: `Number of requested quotes ${pair}/${tradeTypeLabel}`,
           period: 300,
           stat: 'SampleCount',
         },
@@ -79,7 +83,7 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
           metrics: [
             [
               this.namespace,
-              `GET_QUOTE_AMOUNT_${pair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+              `GET_QUOTE_AMOUNT_${pair}_${tradeTypeLabel.toUpperCase()}_CHAIN_${chainId}`,
               'Service',
               'RoutingAPI',
               this.generateStatWithLabel(0, 1, pair, tradeType),
@@ -99,31 +103,39 @@ export class QuoteAmountsWidgets implements WidgetsFactory {
             ['...', this.generateStatWithLabel(1000000, -1, pair, tradeType)],
           ],
           region: this.region,
-          title: `Distribution of quotes ${pair}/${tradeType}`,
+          title: `Distribution of quotes ${pair}/${tradeTypeLabel}`,
           period: 300,
         },
       },
-    ])
+    ]
 
     return widgets
+  }
+
+  private tradeTypeToString(tradeType: TradeType) {
+    if (tradeType == TradeType.EXACT_INPUT) {
+      return 'ExactIn'
+    } else {
+      return 'ExactOut'
+    }
   }
 
   private generateStatWithLabel(
     min: number,
     max: number,
     pair: string,
-    tradeType: TradeTypes
+    tradeType: TradeType
   ): { stat: string; label: string } {
     const tokens = pair.split('/')
     const maxNormalized = max > 0 ? max.toString() : ''
 
     switch (tradeType) {
-      case TradeTypes.ExactIn:
+      case TradeType.EXACT_INPUT:
         return {
           stat: `PR(${min}:${maxNormalized})`,
           label: `${min} to ${max} ${tokens[0]}`,
         }
-      case TradeTypes.ExactOut:
+      case TradeType.EXACT_OUTPUT:
         return {
           stat: `PR(${min}:${maxNormalized})`,
           label: `${min} to ${max} ${tokens[1]}`,
