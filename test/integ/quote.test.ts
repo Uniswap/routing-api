@@ -1923,7 +1923,7 @@ describe('quote', function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
-    [ChainId.BSC]: USDT_ON(ChainId.BSC)
+    [ChainId.BSC]: USDT_ON(ChainId.BSC),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
