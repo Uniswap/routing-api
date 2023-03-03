@@ -758,7 +758,7 @@ describe('quote-to-ratio', async function () {
       c != ChainId.CELO &&
       c != ChainId.CELO_ALFAJORES &&
       c != ChainId.KOVAN &&
-      c != ChainId.ROPSTEN && 
+      c != ChainId.ROPSTEN &&
       /// @dev We can enable for BSC after more pools are created
       c != ChainId.BSC
   )) {
