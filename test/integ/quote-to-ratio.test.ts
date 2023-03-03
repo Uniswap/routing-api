@@ -38,7 +38,7 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-import { DAI_ON, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import { DAI_ON, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -719,6 +719,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.BSC]: USDC_ON(ChainId.BSC),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
@@ -738,6 +739,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
+    [ChainId.BSC]: USDT_ON(ChainId.BSC),
   }
 
   for (const chain of _.filter(
@@ -756,7 +758,9 @@ describe('quote-to-ratio', async function () {
       c != ChainId.CELO &&
       c != ChainId.CELO_ALFAJORES &&
       c != ChainId.KOVAN &&
-      c != ChainId.ROPSTEN
+      c != ChainId.ROPSTEN &&
+      /// @dev We can enable for BSC after more pools are created
+      c != ChainId.BSC
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]

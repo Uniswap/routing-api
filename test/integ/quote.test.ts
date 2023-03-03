@@ -11,7 +11,7 @@ import {
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
   parseAmount,
-  SWAP_ROUTER_02_ADDRESS,
+  SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
   USDT_MAINNET,
   WBTC_MAINNET,
@@ -37,7 +37,7 @@ import { QuoteResponse } from '../../lib/handlers/schema'
 import { Permit2__factory } from '../../lib/types/ext'
 import { resetAndFundAtBlock } from '../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../utils/getBalanceAndApprove'
-import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -117,7 +117,8 @@ describe('quote', function () {
     methodParameters: MethodParameters,
     currencyIn: Currency,
     currencyOut: Currency,
-    permit?: boolean
+    permit?: boolean,
+    chainId = ChainId.MAINNET
   ): Promise<{
     tokenInAfter: CurrencyAmount<Currency>
     tokenInBefore: CurrencyAmount<Currency>
@@ -131,7 +132,7 @@ describe('quote', function () {
     const tokenOutBefore = await getBalance(alice, currencyOut)
 
     // Approve SwapRouter02 in case we request calldata for it instead of Universal Router
-    await getBalanceAndApprove(alice, SWAP_ROUTER_02_ADDRESS, currencyIn)
+    await getBalanceAndApprove(alice, SWAP_ROUTER_02_ADDRESSES(chainId), currencyIn)
 
     // If not using permit do a regular approval allowing narwhal max balance.
     if (!permit) {
@@ -285,7 +286,7 @@ describe('quote', function () {
             }
 
             expect(methodParameters).to.not.be.undefined
-            expect(methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESS)
+            expect(methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               methodParameters!,
@@ -614,7 +615,7 @@ describe('quote', function () {
 
             expect(status).to.equal(200)
             expect(data.methodParameters).to.not.be.undefined
-            expect(data.methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESS)
+            expect(data.methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
 
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               data.methodParameters!,
@@ -1085,7 +1086,7 @@ describe('quote', function () {
               }
 
               expect(methodParameters).to.not.be.undefined
-              expect(methodParameters!.to).to.equal(SWAP_ROUTER_02_ADDRESS)
+              expect(methodParameters!.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
                 methodParameters!,
@@ -1902,6 +1903,7 @@ describe('quote', function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
+    [ChainId.BSC]: USDC_ON(ChainId.BSC),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
@@ -1921,6 +1923,7 @@ describe('quote', function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
+    [ChainId.BSC]: USDT_ON(ChainId.BSC),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.

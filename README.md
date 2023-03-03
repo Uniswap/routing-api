@@ -29,6 +29,7 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    # ARBITRUM_RINKEBY = 421611
    # POLYGON = 137
    # POLYGON_MUMBAI = 80001
+   # BSC = 56
    TENDERLY_USER = '' # For enabling Tenderly simulations
    TENDERLY_PROJECT = '' # For enabling Tenderly simulations
    TENDERLY_ACCESS_KEY = '' # For enabling Tenderly simulations
