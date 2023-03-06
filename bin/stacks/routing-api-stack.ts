@@ -275,6 +275,11 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
+    // Simulations can fail for valid reasons. For example, if the simulation reverts due
+    // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
+    // account for the fees taken during transfer when we show the user the quote).
+    //
+    // For this reason we set the alarm threshold high to avoid unnecessary pages.
     const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
       alarmName: 'RoutingAPI-SEV2-Simulation',
       metric: new MathExpression({
@@ -297,7 +302,7 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
         },
       }),
-      threshold: 40,
+      threshold: 75,
       evaluationPeriods: 2,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
@@ -324,7 +329,7 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
         },
       }),
-      threshold: 20,
+      threshold: 50,
       evaluationPeriods: 2,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
