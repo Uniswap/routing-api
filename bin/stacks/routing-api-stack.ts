@@ -279,34 +279,7 @@ export class RoutingAPIStack extends cdk.Stack {
     // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
     // account for the fees taken during transfer when we show the user the quote).
     //
-    // For this reason we set the alarm threshold high to avoid unnecessary pages.
-    const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
-      alarmName: 'RoutingAPI-SEV2-Simulation',
-      metric: new MathExpression({
-        expression: '100*(simulationFailed/simulationRequested)',
-        period: Duration.minutes(30),
-        usingMetrics: {
-          simulationRequested: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `Simulation Requested`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          simulationFailed: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `SimulationFailed`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      }),
-      threshold: 75,
-      evaluationPeriods: 2,
-      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-    })
-
+    // For this reason we only alert on SEV3 to avoid unnecessary pages.
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
       alarmName: 'RoutingAPI-SEV3-Simulation',
       metric: new MathExpression({
@@ -329,8 +302,8 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
         },
       }),
-      threshold: 50,
-      evaluationPeriods: 2,
+      threshold: 75,
+      evaluationPeriods: 3,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
 
