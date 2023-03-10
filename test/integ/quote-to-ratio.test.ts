@@ -710,6 +710,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.OPTIMISM_GOERLI]: USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.ARBITRUM_GOERLI]: null,
@@ -730,6 +731,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.OPTIMISM_GOERLI]: DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
@@ -749,6 +751,7 @@ describe('quote-to-ratio', async function () {
       c != ChainId.RINKEBY &&
       c != ChainId.OPTIMISM &&
       c != ChainId.OPTIMISTIC_KOVAN &&
+      c != ChainId.OPTIMISM_GOERLI &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
       c != ChainId.ARBITRUM_GOERLI &&
