@@ -10,6 +10,7 @@ import {
   DAI_KOVAN,
   DAI_MAINNET,
   DAI_OPTIMISM,
+  DAI_OPTIMISM_GOERLI,
   DAI_OPTIMISTIC_KOVAN,
   DAI_POLYGON,
   DAI_POLYGON_MUMBAI,
@@ -24,6 +25,7 @@ import {
   USDC_KOVAN,
   USDC_MAINNET,
   USDC_OPTIMISM,
+  USDC_OPTIMISM_GOERLI,
   USDC_OPTIMISTIC_KOVAN,
   USDC_POLYGON,
   USDC_POLYGON_MUMBAI,
@@ -92,6 +94,8 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_KOVAN
     case ChainId.OPTIMISM:
       return DAI_OPTIMISM
+    case ChainId.OPTIMISM_GOERLI:
+      return DAI_OPTIMISM_GOERLI
     case ChainId.OPTIMISTIC_KOVAN:
       return DAI_OPTIMISTIC_KOVAN
     case ChainId.ARBITRUM_ONE:
@@ -150,6 +154,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_KOVAN
     case ChainId.OPTIMISM:
       return USDC_OPTIMISM
+    case ChainId.OPTIMISM_GOERLI:
+      return USDC_OPTIMISM_GOERLI
     case ChainId.OPTIMISTIC_KOVAN:
       return USDC_OPTIMISTIC_KOVAN
     case ChainId.ARBITRUM_ONE:
