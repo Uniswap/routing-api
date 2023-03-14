@@ -1960,7 +1960,7 @@ describe('quote', function () {
             tokenInChainId: chain,
             tokenOutAddress: erc1.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, wrappedNative, erc1, '10'),
+            amount: await getAmountFromToken(type, wrappedNative, erc1, '1'),
             type,
             enableUniversalRouter: true,
           }
@@ -2005,7 +2005,7 @@ describe('quote', function () {
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '10'),
+            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '1'),
             type,
             enableUniversalRouter: true,
           }
