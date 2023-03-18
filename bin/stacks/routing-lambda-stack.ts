@@ -45,7 +45,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
-      cachedRoutesDynamoDb
+      cachedRoutesDynamoDb,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {

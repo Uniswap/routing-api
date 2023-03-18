@@ -99,7 +99,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tenderlyUser,
         tenderlyProject,
         tenderlyAccessKey,
-        cachedRoutesDynamoDb
+        cachedRoutesDynamoDb,
       }
     )
 

@@ -15,7 +15,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       partitionKey: { name: 'pairTradeTypeChainId', type: AttributeType.STRING },
       sortKey: { name: 'protocolsAmountBlockNumber', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
-      timeToLiveAttribute: 'ttl'
-    });
+      timeToLiveAttribute: 'ttl',
+    })
   }
 }

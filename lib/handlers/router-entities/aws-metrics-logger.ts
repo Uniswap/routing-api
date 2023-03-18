@@ -13,6 +13,6 @@ export class AWSMetricsLogger implements IMetric {
   }
 
   public setProperty(key: string, value: unknown): void {
-    this.awsMetricLogger.setProperty(key, value);
+    this.awsMetricLogger.setProperty(key, value)
   }
 }
