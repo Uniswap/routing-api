@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@middy/core": "^2.4.1",
+    "@middy/core": "^4.2.6",
     "@middy/http-error-handler": "^2.4.1",
     "@middy/http-json-body-parser": "^2.4.1",
     "@middy/http-urlencode-path-parser": "^2.4.1",
