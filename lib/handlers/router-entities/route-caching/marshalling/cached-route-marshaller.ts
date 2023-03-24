@@ -16,9 +16,9 @@ export class CachedRouteMarshaller {
   }
 
   public static unmarshal(marshalledCachedRoute: MarshalledCachedRoute): CachedRoute<V3Route | V2Route | MixedRoute> {
-    return new CachedRoute<V3Route | V2Route | MixedRoute>(
-      RouteMarshaller.unmarshal(marshalledCachedRoute.route),
-      marshalledCachedRoute.percent
-    )
+    return new CachedRoute<V3Route | V2Route | MixedRoute>({
+      route: RouteMarshaller.unmarshal(marshalledCachedRoute.route),
+      percent: marshalledCachedRoute.percent
+    })
   }
 }

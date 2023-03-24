@@ -30,17 +30,16 @@ export class CachedRoutesMarshaller {
     }
   }
 
-  // public static unmarshal(marshalledCachedRoutes: ICachedRoutes): CachedRoutes {
-  //   const cachedRoutes = new CachedRoutes(
-  //     marshalledCachedRoutes.routes.map((route) => CachedRoutesMarshaller.unmarshal(route)),
-  //     marshalledCachedRoutes.chainId,
-  //     TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenIn),
-  //     TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenOut),
-  //     marshalledCachedRoutes.protocolsCovered,
-  //     marshalledCachedRoutes.blockNumber,
-  //     marshalledCachedRoutes.tradeType
-  //   )
-  //
-  //   cachedRoutes.blocksToLive = marshalledCachedRoutes.blocksToLive;
-  // }
+  public static unmarshal(marshalledCachedRoutes: MarshalledCachedRoutes): CachedRoutes {
+    return new CachedRoutes({
+      routes: marshalledCachedRoutes.routes.map((route) => CachedRouteMarshaller.unmarshal(route)),
+      chainId: marshalledCachedRoutes.chainId,
+      tokenIn: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenIn),
+      tokenOut: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenOut),
+      protocolsCovered: marshalledCachedRoutes.protocolsCovered,
+      blockNumber: marshalledCachedRoutes.blockNumber,
+      tradeType: marshalledCachedRoutes.tradeType,
+      blocksToLive: marshalledCachedRoutes.blocksToLive
+    })
+  }
 }
