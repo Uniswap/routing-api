@@ -6,23 +6,23 @@ import { MarshalledPool, PoolMarshaller } from './pool-marshaller'
 import { Pool } from '@uniswap/v3-sdk'
 
 export interface MarshalledV2Route {
-  protocol: Protocol,
-  input: MarshalledToken,
-  output: MarshalledToken,
+  protocol: Protocol
+  input: MarshalledToken
+  output: MarshalledToken
   pairs: MarshalledPair[]
 }
 
 export interface MarshalledV3Route {
-  protocol: Protocol,
-  input: MarshalledToken,
-  output: MarshalledToken,
+  protocol: Protocol
+  input: MarshalledToken
+  output: MarshalledToken
   pools: MarshalledPool[]
 }
 
 export interface MarshalledMixedRoute {
-  protocol: Protocol,
-  input: MarshalledToken,
-  output: MarshalledToken,
+  protocol: Protocol
+  input: MarshalledToken
+  output: MarshalledToken
   pools: (MarshalledPool | MarshalledPair)[]
 }
 
@@ -35,14 +35,14 @@ export class RouteMarshaller {
         protocol: Protocol.V2,
         input: TokenMarshaller.marshal(route.input),
         output: TokenMarshaller.marshal(route.output),
-        pairs: route.pairs.map((pair) => PairMarshaller.marshal(pair))
+        pairs: route.pairs.map((pair) => PairMarshaller.marshal(pair)),
       }
     } else if (route.protocol === Protocol.V3) {
       return {
         protocol: Protocol.V3,
         input: TokenMarshaller.marshal(route.input),
         output: TokenMarshaller.marshal(route.output),
-        pools: route.pools.map((pool) => PoolMarshaller.marshal(pool))
+        pools: route.pools.map((pool) => PoolMarshaller.marshal(pool)),
       }
     } else {
       return {
@@ -55,7 +55,7 @@ export class RouteMarshaller {
           } else {
             return PairMarshaller.marshal(tpool)
           }
-        })
+        }),
       }
     }
   }
@@ -85,11 +85,7 @@ export class RouteMarshaller {
         }
       })
 
-      return new MixedRoute(
-        tpools,
-        TokenMarshaller.unmarshal(route.input),
-        TokenMarshaller.unmarshal(route.output)
-      )
+      return new MixedRoute(tpools, TokenMarshaller.unmarshal(route.input), TokenMarshaller.unmarshal(route.output))
     }
   }
 }

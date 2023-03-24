@@ -1,11 +1,11 @@
 import { Token } from '@uniswap/sdk-core'
 
 export interface MarshalledToken {
-  chainId: number;
-  address: string;
-  decimals: number;
-  symbol?: string;
-  name?: string;
+  chainId: number
+  address: string
+  decimals: number
+  symbol?: string
+  name?: string
 }
 
 export class TokenMarshaller {
@@ -15,7 +15,7 @@ export class TokenMarshaller {
       address: token.address,
       decimals: token.decimals,
       symbol: token.symbol,
-      name: token.name
+      name: token.name,
     }
   }
 

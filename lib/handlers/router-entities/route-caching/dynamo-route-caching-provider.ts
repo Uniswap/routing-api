@@ -36,7 +36,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     protocols: Protocol[]
   ): Promise<CachedRoutes | undefined> {
     const [tokenIn, tokenOut] = this.determineTokenInOut(amount, quoteToken, tradeType)
-    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId);
+    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
@@ -55,7 +55,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           ':sk': { S: sk },
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
-        Limit: 1 // Only retrieve the most recent item
+        Limit: 1, // Only retrieve the most recent item
       }
 
       try {
@@ -90,22 +90,26 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const putParams = {
         TableName: this.tableName,
         Item: {
-          pairTradeTypeChainId: { S: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}` },
-          protocolsAmountBlockNumber: { S: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}` },
+          pairTradeTypeChainId: {
+            S: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
+          },
+          protocolsAmountBlockNumber: {
+            S: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          },
           item: { B: Buffer.from(JSON.stringify(CachedRoutesMarshaller.marshal(cachedRoutes))) },
-          ttl: { N: ttl.toString() }
-        }
+          ttl: { N: ttl.toString() },
+        },
       }
 
       try {
         await this.ddbClient.put(putParams).promise()
-        return true;
+        return true
       } catch (error) {
         // log error, maybe?
-        return false;
+        return false
       }
     } else {
-      return false;
+      return false
     }
   }
 
@@ -117,7 +121,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     _protocols: Protocol[]
   ): Promise<CacheMode> {
     const [tokenIn, tokenOut] = this.determineTokenInOut(amount, quoteToken, tradeType)
-    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId);
+    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
@@ -136,7 +140,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     )
   }
 
-  private getCachedRoutesStrategy(tokenIn: Token, tokenOut: Token, tradeType: TradeType, chainId: ChainId): CachedRoutesStrategy | undefined {
+  private getCachedRoutesStrategy(
+    tokenIn: Token,
+    tokenOut: Token,
+    tradeType: TradeType,
+    chainId: ChainId
+  ): CachedRoutesStrategy | undefined {
     const pairTradeTypeChainId = new PairTradeTypeChainId({
       tokenIn: tokenIn.address,
       tokenOut: tokenOut.address,
@@ -147,7 +156,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId)
   }
 
-  private determineTokenInOut(amount: CurrencyAmount<Currency>, quoteToken: Token, tradeType: TradeType): [Token, Token] {
+  private determineTokenInOut(
+    amount: CurrencyAmount<Currency>,
+    quoteToken: Token,
+    tradeType: TradeType
+  ): [Token, Token] {
     if (tradeType == TradeType.EXACT_INPUT) {
       return [amount.currency.wrapped, quoteToken]
     } else {

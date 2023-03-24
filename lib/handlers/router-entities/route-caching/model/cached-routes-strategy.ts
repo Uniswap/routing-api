@@ -8,9 +8,7 @@ export class CachedRoutesStrategy {
 
   constructor(cachedRoutesParameters: CachedRoutesParameters[]) {
     this.buckets = cachedRoutesParameters.map((params) => params.bucket).sort()
-    this.cachingParameters = new Map(cachedRoutesParameters.map((params) =>
-      [params.bucket, params]
-    ))
+    this.cachingParameters = new Map(cachedRoutesParameters.map((params) => [params.bucket, params]))
   }
 
   public getCachingParameters(amount: CurrencyAmount<Currency>): CachedRoutesParameters | undefined {
@@ -30,7 +28,7 @@ export class CachedRoutesStrategy {
         if (cachingParameter) {
           this.cachedCachingParameters.set(amount, cachingParameter)
 
-          return cachingParameter;
+          return cachingParameter
         }
       }
 

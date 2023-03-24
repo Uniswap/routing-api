@@ -3,15 +3,15 @@ import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/
 import { MarshalledRoute, RouteMarshaller } from './route-marshaller'
 
 export interface MarshalledCachedRoute {
-  route: MarshalledRoute;
-  percent: number;
+  route: MarshalledRoute
+  percent: number
 }
 
 export class CachedRouteMarshaller {
   public static marshal(cachedRoute: CachedRoute<V3Route | V2Route | MixedRoute>): MarshalledCachedRoute {
     return {
       route: RouteMarshaller.marshal(cachedRoute.route),
-      percent: cachedRoute.percent
+      percent: cachedRoute.percent,
     }
   }
 

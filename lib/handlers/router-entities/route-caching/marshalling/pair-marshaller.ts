@@ -3,8 +3,8 @@ import { CurrencyAmountMarshaller, MarshalledCurrencyAmount } from './currency-a
 import { Protocol } from '@uniswap/router-sdk'
 
 export interface MarshalledPair {
-  protocol: Protocol,
-  currencyAmountA: MarshalledCurrencyAmount,
+  protocol: Protocol
+  currencyAmountA: MarshalledCurrencyAmount
   tokenAmountB: MarshalledCurrencyAmount
 }
 
@@ -13,7 +13,7 @@ export class PairMarshaller {
     return {
       protocol: Protocol.V2,
       currencyAmountA: CurrencyAmountMarshaller.marshal(pair.reserve0),
-      tokenAmountB: CurrencyAmountMarshaller.marshal(pair.reserve1)
+      tokenAmountB: CurrencyAmountMarshaller.marshal(pair.reserve1),
     }
   }
 

@@ -14,7 +14,7 @@ export class PairTradeTypeChainId {
   tradeType: TradeType
   chainId: ChainId
 
-  constructor({tokenIn, tokenOut, tradeType, chainId}: PairTradeTypeChainIdArgs) {
+  constructor({ tokenIn, tokenOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
     this.tokenIn = tokenIn
     this.tokenOut = tokenOut
     this.tradeType = tradeType

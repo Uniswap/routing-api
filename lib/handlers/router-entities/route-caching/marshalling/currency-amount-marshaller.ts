@@ -2,8 +2,8 @@ import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { MarshalledToken, TokenMarshaller } from './token-marshaller'
 
 export interface MarshalledCurrencyAmount {
-  currency: MarshalledToken,
-  numerator: string,
+  currency: MarshalledToken
+  numerator: string
   denominator: string
 }
 
@@ -12,7 +12,7 @@ export class CurrencyAmountMarshaller {
     return {
       currency: TokenMarshaller.marshal(currencyAmount.currency),
       numerator: currencyAmount.numerator.toString(),
-      denominator: currencyAmount.denominator.toString()
+      denominator: currencyAmount.denominator.toString(),
     }
   }
 

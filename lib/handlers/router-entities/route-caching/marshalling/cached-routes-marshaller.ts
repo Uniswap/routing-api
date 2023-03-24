@@ -6,14 +6,14 @@ import { MarshalledToken, TokenMarshaller } from './token-marshaller'
 import { CachedRouteMarshaller, MarshalledCachedRoute } from './cached-route-marshaller'
 
 export interface MarshalledCachedRoutes {
-  routes: MarshalledCachedRoute[];
-  chainId: ChainId;
-  tokenIn: MarshalledToken;
-  tokenOut: MarshalledToken;
-  protocolsCovered: Protocol[];
-  blockNumber: number;
-  tradeType: TradeType;
-  blocksToLive: number;
+  routes: MarshalledCachedRoute[]
+  chainId: ChainId
+  tokenIn: MarshalledToken
+  tokenOut: MarshalledToken
+  protocolsCovered: Protocol[]
+  blockNumber: number
+  tradeType: TradeType
+  blocksToLive: number
 }
 
 export class CachedRoutesMarshaller {
@@ -26,7 +26,7 @@ export class CachedRoutesMarshaller {
       protocolsCovered: cachedRoutes.protocolsCovered,
       blockNumber: cachedRoutes.blockNumber,
       tradeType: cachedRoutes.tradeType,
-      blocksToLive: cachedRoutes.blocksToLive
+      blocksToLive: cachedRoutes.blocksToLive,
     }
   }
 
