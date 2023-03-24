@@ -61,10 +61,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       try {
         const result = await this.ddbClient.query(queryParams).promise()
         if (result.Items && result.Items.length > 0) {
-          const binaryValue = result.Items[0]?.item?.B
-          const binaryBuffer = Buffer.from(binaryValue)
-          const rawJson = JSON.parse(binaryBuffer.toString())
-          const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(rawJson)
+          const resultBinary = result.Items[0]?.item?.B
+          const cachedRoutesBuffer = Buffer.from(resultBinary)
+          const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
+          const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
 
           return cachedRoutes
         } else {
@@ -86,6 +86,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (cachingParameters) {
       // TTL is 10 minutes from now. 600 seconds  = 10 minutes
       const ttl = Math.floor(Date.now() / 1000) + 600
+      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
+      const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
 
       const putParams = {
         TableName: this.tableName,
@@ -96,7 +98,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           protocolsAmountBlockNumber: {
             S: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
           },
-          item: { B: Buffer.from(JSON.stringify(CachedRoutesMarshaller.marshal(cachedRoutes))) },
+          item: { B: Buffer.from(jsonCachedRoutes) },
           ttl: { N: ttl.toString() },
         },
       }
