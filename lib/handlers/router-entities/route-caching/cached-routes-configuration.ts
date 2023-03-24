@@ -1,30 +1,8 @@
 import { TradeType } from '@uniswap/sdk-core'
 import { CacheMode, ChainId } from '@uniswap/smart-order-router'
-import { CachedRoutesParameters, CachedRoutesStrategy } from './model/cached-routes-strategy'
-
-export class PairTradeTypeChainId {
-  tokenIn: string
-  tokenOut: string
-  tradeType: TradeType
-  chainId: ChainId
-
-  constructor({
-    tokenIn,
-    tokenOut,
-    tradeType,
-    chainId,
-  }: {
-    tokenIn: string
-    tokenOut: string
-    tradeType: TradeType
-    chainId: ChainId
-  }) {
-    this.tokenIn = tokenIn
-    this.tokenOut = tokenOut
-    this.tradeType = tradeType
-    this.chainId = chainId
-  }
-}
+import { CachedRoutesStrategy } from './model/cached-routes-strategy'
+import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
+import { CachedRoutesParameters } from './model/cached-routes-parameters'
 
 // Manual definition for cached routes.
 export const CACHED_ROUTES_CONFIGURATION: Map<PairTradeTypeChainId, CachedRoutesStrategy> = new Map([
@@ -35,16 +13,14 @@ export const CACHED_ROUTES_CONFIGURATION: Map<PairTradeTypeChainId, CachedRoutes
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
     }),
-    new CachedRoutesStrategy(
-      new Map([
-        [1, new CachedRoutesParameters({ blocksToLive: 2, cacheMode: CacheMode.Tapcompare })],
-        [5, new CachedRoutesParameters({ blocksToLive: 2, cacheMode: CacheMode.Tapcompare })],
-        [10, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [50, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [100, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [500, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-      ])
-    ),
+    new CachedRoutesStrategy([
+      new CachedRoutesParameters({bucket: 1,  blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 5, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 10, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+    ]),
   ],
   [
     new PairTradeTypeChainId({
@@ -53,17 +29,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<PairTradeTypeChainId, CachedRoutes
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
     }),
-    new CachedRoutesStrategy(
-      new Map([
-        [100, new CachedRoutesParameters({ blocksToLive: 2, cacheMode: CacheMode.Tapcompare })],
-        [500, new CachedRoutesParameters({ blocksToLive: 2, cacheMode: CacheMode.Tapcompare })],
-        [2500, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [5000, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [10000, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [50000, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [100000, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-        [500000, new CachedRoutesParameters({ blocksToLive: 1, cacheMode: CacheMode.Tapcompare })],
-      ])
-    ),
+    new CachedRoutesStrategy([
+      new CachedRoutesParameters({bucket: 100,  blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 500, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 2500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 5000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 10000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 50000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 100000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      new CachedRoutesParameters({bucket: 500000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+    ]),
   ],
 ])

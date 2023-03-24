@@ -2,7 +2,8 @@ import { CachedRoutes, CacheMode, ChainId, IRouteCachingProvider } from '@uniswa
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
-import { CACHED_ROUTES_CONFIGURATION, PairTradeTypeChainId } from './cached-routes-configuration'
+import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
+import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private ddbClient: DynamoDB.DocumentClient
@@ -24,9 +25,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const configuration = CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId)?.getCachingParameters(amount)
 
     if (configuration) {
-      return Promise.resolve(configuration[1].blocksToLive)
+      return Promise.resolve(configuration.blocksToLive)
+    } else {
+      return Promise.resolve(0)
     }
-    return Promise.resolve(0)
   }
 
   protected _getCachedRoute(
@@ -69,8 +71,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const configuration = CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId)?.getCachingParameters(amount)
 
     if (configuration) {
-      return Promise.resolve(configuration[1].cacheMode)
+      return Promise.resolve(configuration.cacheMode)
+    } else {
+      return Promise.resolve(CacheMode.Darkmode)
     }
-    return Promise.resolve(CacheMode.Darkmode)
   }
 }
