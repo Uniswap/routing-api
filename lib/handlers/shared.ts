@@ -4,8 +4,9 @@ import {
   ChainId,
   ITokenListProvider,
   ITokenProvider,
-  nativeOnChain,
+  MapWithLowerCaseKey,
   NATIVE_NAMES_BY_ID,
+  nativeOnChain,
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
@@ -26,7 +27,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topN: 2,
           topNDirectSwaps: 2,
           topNTokenInOut: 2,
-          topNSecondHop: 2,
+          topNSecondHop: 1,
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 3,
         },
@@ -54,7 +55,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topN: 2,
           topNDirectSwaps: 2,
           topNTokenInOut: 2,
-          topNSecondHop: 2,
+          topNSecondHop: 1,
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 2,
         },
@@ -78,7 +79,10 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topN: 2,
           topNDirectSwaps: 2,
           topNTokenInOut: 3,
-          topNSecondHop: 2,
+          topNSecondHop: 1,
+          topNSecondHopForTokenAddress: new MapWithLowerCaseKey<number>([
+            ['0x5f98805a4e8be255a32880fdec7f6728c6568ba0', 2], // LUSD
+          ]),
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 5,
         },
