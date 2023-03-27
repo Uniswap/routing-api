@@ -4,15 +4,14 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesParameters } from './model/cached-routes-parameters'
 
-// Manual definition for cached routes.
-export const CACHED_ROUTES_CONFIGURATION: Map<PairTradeTypeChainId, CachedRoutesStrategy> = new Map([
+export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = new Map([
   [
     new PairTradeTypeChainId({
       tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
       tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
-    }),
+    }).toString(),
     new CachedRoutesStrategy([
       new CachedRoutesParameters({ bucket: 1, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
       new CachedRoutesParameters({ bucket: 5, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
@@ -28,7 +27,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<PairTradeTypeChainId, CachedRoutes
       tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', //WETH
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
-    }),
+    }).toString(),
     new CachedRoutesStrategy([
       new CachedRoutesParameters({ bucket: 100, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
       new CachedRoutesParameters({ bucket: 500, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),

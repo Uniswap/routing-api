@@ -15,9 +15,13 @@ export class PairTradeTypeChainId {
   chainId: ChainId
 
   constructor({ tokenIn, tokenOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
-    this.tokenIn = tokenIn
-    this.tokenOut = tokenOut
+    this.tokenIn = tokenIn.toLowerCase()
+    this.tokenOut = tokenOut.toLowerCase()
     this.tradeType = tradeType
     this.chainId = chainId
+  }
+
+  public toString(): string {
+    return `${this.tokenIn.toLowerCase()}/${this.tokenOut.toLowerCase()}/${this.tradeType}/${this.chainId}`
   }
 }

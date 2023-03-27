@@ -1,4 +1,4 @@
-import { CachedRoutes, CacheMode, ChainId, IRouteCachingProvider } from '@uniswap/smart-order-router'
+import { CachedRoutes, CacheMode, ChainId, IRouteCachingProvider, log } from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
@@ -127,8 +127,36 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
+      log.info(
+        {
+          cachedRoutesStrategy: cachedRoutesStrategy,
+          cachingParameters: cachingParameters,
+          tokenIn: tokenIn.address,
+          tokenOut: tokenOut.address,
+          pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
+          chainId,
+          tradeType,
+          amount: amount.toExact()
+        },
+        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
+      )
+
       return Promise.resolve(cachingParameters.cacheMode)
     } else {
+      log.info(
+        {
+          cachedRoutesStrategy: cachedRoutesStrategy,
+          cachingParameters: cachingParameters,
+          tokenIn: tokenIn.address,
+          tokenOut: tokenOut.address,
+          pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
+          chainId,
+          tradeType,
+          amount: amount.toExact()
+        },
+        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
+      )
+
       return Promise.resolve(CacheMode.Darkmode)
     }
   }
@@ -149,13 +177,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     chainId: ChainId
   ): CachedRoutesStrategy | undefined {
     const pairTradeTypeChainId = new PairTradeTypeChainId({
-      tokenIn: tokenIn.address,
-      tokenOut: tokenOut.address,
+      tokenIn: tokenIn.address.toLowerCase(),
+      tokenOut: tokenOut.address.toLowerCase(),
       tradeType: tradeType,
       chainId: chainId,
     })
 
-    return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId)
+    log.info({pairTradeTypeChainId}, `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}`)
+
+    return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString())
   }
 
   private determineTokenInOut(
