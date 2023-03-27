@@ -22,6 +22,6 @@ export class PairTradeTypeChainId {
   }
 
   public toString(): string {
-    return `${this.tokenIn.toLowerCase()}/${this.tokenOut.toLowerCase()}/${this.tradeType}/${this.chainId}`
+    return `${this.tokenIn}/${this.tokenOut}/${this.tradeType}/${this.chainId}`
   }
 }

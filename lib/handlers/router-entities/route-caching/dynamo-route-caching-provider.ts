@@ -177,8 +177,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     chainId: ChainId
   ): CachedRoutesStrategy | undefined {
     const pairTradeTypeChainId = new PairTradeTypeChainId({
-      tokenIn: tokenIn.address.toLowerCase(),
-      tokenOut: tokenOut.address.toLowerCase(),
+      tokenIn: tokenIn.address,
+      tokenOut: tokenOut.address,
       tradeType: tradeType,
       chainId: chainId,
     })
