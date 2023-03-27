@@ -78,8 +78,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
 
         if (result.Items && result.Items.length > 0) {
-          const resultBinary = result.Items[0]?.item?.B
-          const cachedRoutesBuffer = Buffer.from(resultBinary)
+          const itemBinary = result.Items[0]?.item
+          const cachedRoutesBuffer = Buffer.from(itemBinary)
           const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
           const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
 
