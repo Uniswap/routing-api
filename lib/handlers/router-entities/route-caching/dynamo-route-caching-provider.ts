@@ -7,14 +7,26 @@ import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from './marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 
+interface ConstructorParams {
+  cachedRoutesTableName: string
+  ttl_minutes?: number
+}
+
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private ddbClient: DynamoDB.DocumentClient
   private tableName: string
+  /**
+   * Time to live of each element in minutes from now.
+   * @private
+   */
+  private ttl_minutes: number
 
-  constructor(cachedRoutesTableName: string) {
+  constructor({cachedRoutesTableName, ttl_minutes=10}: ConstructorParams) {
     super()
     this.ddbClient = new DynamoDB.DocumentClient()
     this.tableName = cachedRoutesTableName
+    // We will evict cache entries from DynamoDB every 10 minutes, this is used to control the size of the database.
+    this.ttl_minutes = ttl_minutes
   }
 
   protected _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
@@ -51,27 +63,34 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           '#sk': 'protocolsAmountBlockNumber',
         },
         ExpressionAttributeValues: {
-          ':pk': { S: pk },
-          ':sk': { S: sk },
+          ':pk': pk,
+          ':sk': sk,
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: 1, // Only retrieve the most recent item
       }
 
       try {
+        log.info({ queryParams }, `[DynamoRouteCachingProvider] Attempting to get route from cache.`)
+
         const result = await this.ddbClient.query(queryParams).promise()
+
+        log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
+
         if (result.Items && result.Items.length > 0) {
           const resultBinary = result.Items[0]?.item?.B
           const cachedRoutesBuffer = Buffer.from(resultBinary)
           const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
           const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
 
+          log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
+
           return cachedRoutes
         } else {
-          // No items found
+          log.info(`[DynamoRouteCachingProvider] No items found in the query response.`)
         }
       } catch (error) {
-        // Error calling DynamoDB
+        log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from cache`)
       }
     }
 
@@ -85,29 +104,28 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     if (cachingParameters) {
       // TTL is 10 minutes from now. 600 seconds  = 10 minutes
-      const ttl = Math.floor(Date.now() / 1000) + 600
+      const ttl = Math.floor(Date.now() / 1000) + (60 * this.ttl_minutes)
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
       const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
 
       const putParams = {
         TableName: this.tableName,
         Item: {
-          pairTradeTypeChainId: {
-            S: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          },
-          protocolsAmountBlockNumber: {
-            S: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
-          },
-          item: { B: Buffer.from(jsonCachedRoutes) },
-          ttl: { N: ttl.toString() },
+          pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
+          protocolsAmountBlockNumber:`${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          item: Buffer.from(jsonCachedRoutes),
+          ttl: ttl,
         },
       }
 
+      log.info({ putParams, cachedRoutes, jsonCachedRoutes },`[DynamoRouteCachingProvider] Attempting to insert route to cache`)
+
       try {
         await this.ddbClient.put(putParams).promise()
+        log.info(`[DynamoRouteCachingProvider] Cached route inserted to cache`)
         return true
       } catch (error) {
-        // log error, maybe?
+        log.error({ error, putParams },`[DynamoRouteCachingProvider] Cached route failed to insert`)
         return false
       }
     } else {
@@ -115,7 +133,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     }
   }
 
-  getCacheMode(
+  public async getCacheMode(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
@@ -129,7 +147,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (cachingParameters) {
       log.info(
         {
-          cachedRoutesStrategy: cachedRoutesStrategy,
           cachingParameters: cachingParameters,
           tokenIn: tokenIn.address,
           tokenOut: tokenOut.address,
@@ -141,12 +158,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
       )
 
-      return Promise.resolve(cachingParameters.cacheMode)
+      return cachingParameters.cacheMode
     } else {
       log.info(
         {
-          cachedRoutesStrategy: cachedRoutesStrategy,
-          cachingParameters: cachingParameters,
           tokenIn: tokenIn.address,
           tokenOut: tokenOut.address,
           pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
@@ -157,7 +172,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
       )
 
-      return Promise.resolve(CacheMode.Darkmode)
+      return CacheMode.Darkmode
     }
   }
 
