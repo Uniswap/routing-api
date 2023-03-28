@@ -1,6 +1,6 @@
 import {
   CachedRoutesParameters,
-  CachedRoutesStrategy
+  CachedRoutesStrategy,
 } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { CacheMode, ChainId } from '@uniswap/smart-order-router'
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
@@ -23,7 +23,7 @@ describe('CachedRoutesStrategy', () => {
 
   describe('#getCachingParameters', () => {
     it('find the first parameters that fits the amount', () => {
-      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * (10 ** WETH.decimals))
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
       const cachingParameters = strategy.getCachingParameters(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
@@ -31,7 +31,7 @@ describe('CachedRoutesStrategy', () => {
     })
 
     it('find the parameters, searching in the middle buckets', () => {
-      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 42 * (10 ** WETH.decimals))
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 42 * 10 ** WETH.decimals)
       const cachingParameters = strategy.getCachingParameters(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
@@ -39,7 +39,7 @@ describe('CachedRoutesStrategy', () => {
     })
 
     it('looks for parameters in higher buckets', () => {
-      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 500 * (10 ** WETH.decimals))
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 500 * 10 ** WETH.decimals)
       const cachingParameters = strategy.getCachingParameters(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
@@ -47,7 +47,7 @@ describe('CachedRoutesStrategy', () => {
     })
 
     it('returns undefined once we are out of range', () => {
-      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 501 * (10 ** WETH.decimals))
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 501 * 10 ** WETH.decimals)
       const cachingParameters = strategy.getCachingParameters(currencyAmount)
 
       expect(cachingParameters).to.be.undefined

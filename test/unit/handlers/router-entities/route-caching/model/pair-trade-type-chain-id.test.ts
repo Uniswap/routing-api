@@ -15,7 +15,9 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(`${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`)
+      expect(pairTradeTypeChainId.toString()).to.eq(
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
+      )
     })
 
     it('token addresses are converted to lowercase', () => {
@@ -26,7 +28,9 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(`${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`)
+      expect(pairTradeTypeChainId.toString()).to.eq(
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
+      )
     })
 
     it('works with ExactOutput too', () => {
@@ -37,7 +41,9 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(`${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.MAINNET}`)
+      expect(pairTradeTypeChainId.toString()).to.eq(
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.MAINNET}`
+      )
     })
 
     it('works with other chains', () => {
@@ -48,7 +54,9 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.ARBITRUM_ONE,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(`${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.ARBITRUM_ONE}`)
+      expect(pairTradeTypeChainId.toString()).to.eq(
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.ARBITRUM_ONE}`
+      )
     })
   })
 })

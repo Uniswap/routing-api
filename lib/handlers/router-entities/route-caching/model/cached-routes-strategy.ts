@@ -17,7 +17,7 @@ export class CachedRoutesStrategy {
   constructor(cachedRoutesParameters: CachedRoutesParameters[]) {
     // It is important that we sort the buckets in ascendant order for the algorithm to work correctly.
     // For a strange reason the `.sort()` function was comparing the number as strings, so I had to pass a compareFn.
-    this.buckets = cachedRoutesParameters.map((params) => params.bucket).sort((a, b) => a-b)
+    this.buckets = cachedRoutesParameters.map((params) => params.bucket).sort((a, b) => a - b)
 
     // Create a Map<bucket, CachedRouteParameters> for easy lookup once we find a bucket.
     this.cachingParameters = new Map(cachedRoutesParameters.map((params) => [params.bucket, params]))
@@ -36,8 +36,12 @@ export class CachedRoutesStrategy {
     // e.g.3. If amount = 1001 then bucket = undefined
     const bucket = this.buckets.find((bucket: number) => {
       // Create a CurrencyAmount object to compare the amount with the bucket.
-      const bucketCurrency = CurrencyAmount.fromRawAmount(amount.currency, bucket * (10 ** amount.currency.decimals))
-      log.info(`Looking for ${amount.currency.symbol} bucket for ${amount.toExact()}. Currently checking ${bucketCurrency.toExact()}`)
+      const bucketCurrency = CurrencyAmount.fromRawAmount(amount.currency, bucket * 10 ** amount.currency.decimals)
+      log.info(
+        `Looking for ${
+          amount.currency.symbol
+        } bucket for ${amount.toExact()}. Currently checking ${bucketCurrency.toExact()}`
+      )
 
       // Given that the array of buckets is sorted, we want to find the first bucket that makes the amount lessThanOrEqual to the bucket
       // refer to the examples above

@@ -291,7 +291,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           })(),
         ])
 
-        const routeCachingProvider = new DynamoRouteCachingProvider({ cachedRoutesTableName : CACHED_ROUTES_DB! })
+        const routeCachingProvider = new DynamoRouteCachingProvider({ cachedRoutesTableName: CACHED_ROUTES_DB! })
 
         return {
           chainId,

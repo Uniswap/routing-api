@@ -39,7 +39,7 @@ export class CachedRoutesMarshaller {
       protocolsCovered: marshalledCachedRoutes.protocolsCovered,
       blockNumber: marshalledCachedRoutes.blockNumber,
       tradeType: marshalledCachedRoutes.tradeType,
-      blocksToLive: marshalledCachedRoutes.blocksToLive
+      blocksToLive: marshalledCachedRoutes.blocksToLive,
     })
   }
 }

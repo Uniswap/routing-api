@@ -3,7 +3,7 @@ import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { CacheMode, ChainId } from '@uniswap/smart-order-router'
 import {
   CACHED_ROUTES_CONFIGURATION,
-  PairTradeTypeChainId
+  PairTradeTypeChainId,
 } from '../../../../../lib/handlers/router-entities/route-caching'
 
 describe('CachedRoutesConfiguration', () => {
@@ -21,7 +21,7 @@ describe('CachedRoutesConfiguration', () => {
 
     expect(fetchedStrategy).to.not.be.undefined
 
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * (10 ** WETH.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(1)
@@ -40,7 +40,7 @@ describe('CachedRoutesConfiguration', () => {
 
     expect(fetchedStrategy).to.not.be.undefined
 
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * (10 ** WETH.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(1)
@@ -58,7 +58,7 @@ describe('CachedRoutesConfiguration', () => {
 
     expect(fetchedStrategy).to.not.be.undefined
 
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 38 * (10 ** WETH.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 38 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(50)

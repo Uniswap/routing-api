@@ -24,7 +24,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly tableName: string
   private readonly ttl_minutes: number
 
-  constructor({ cachedRoutesTableName, ttl_minutes = 5}: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttl_minutes = 5 }: ConstructorParams) {
     super()
     this.ddbClient = new DynamoDB.DocumentClient()
     this.tableName = cachedRoutesTableName
@@ -138,7 +138,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     if (cachingParameters) {
       // TTL is ttl_minutes from now. multiply ttl_minutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + (60 * this.ttl_minutes)
+      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttl_minutes
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
       // Convert the marshalledCachedRoutes to JSON string
@@ -150,13 +150,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          protocolsBucketBlockNumber:`${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
           item: binaryCachedRoutes,
           ttl: ttl,
         },
       }
 
-      log.info({ putParams, cachedRoutes, jsonCachedRoutes },`[DynamoRouteCachingProvider] Attempting to insert route to cache`)
+      log.info(
+        { putParams, cachedRoutes, jsonCachedRoutes },
+        `[DynamoRouteCachingProvider] Attempting to insert route to cache`
+      )
 
       try {
         await this.ddbClient.put(putParams).promise()
@@ -164,7 +167,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
         return true
       } catch (error) {
-        log.error({ error, putParams },`[DynamoRouteCachingProvider] Cached route failed to insert`)
+        log.error({ error, putParams }, `[DynamoRouteCachingProvider] Cached route failed to insert`)
 
         return false
       }
@@ -205,9 +208,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
           chainId,
           tradeType,
-          amount: amount.toExact()
+          amount: amount.toExact(),
         },
-        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
+        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
+          tokenOut.symbol
+        }/${tradeType}/${chainId}`
       )
 
       return cachingParameters.cacheMode
@@ -219,9 +224,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
           chainId,
           tradeType,
-          amount: amount.toExact()
+          amount: amount.toExact(),
         },
-        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol}/${tradeType}/${chainId}`
+        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
+          tokenOut.symbol
+        }/${tradeType}/${chainId}`
       )
 
       return CacheMode.Darkmode
@@ -265,7 +272,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId: chainId,
     })
 
-    log.info({pairTradeTypeChainId}, `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}`)
+    log.info(
+      { pairTradeTypeChainId },
+      `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}`
+    )
 
     return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString())
   }
