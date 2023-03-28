@@ -8,15 +8,18 @@ interface PairTradeTypeChainIdArgs {
   chainId: ChainId
 }
 
+/**
+ * Class used to model the key in the `CACHED_ROUTES_CONFIGURATION`.
+ */
 export class PairTradeTypeChainId {
-  tokenIn: string
-  tokenOut: string
-  tradeType: TradeType
-  chainId: ChainId
+  private tokenIn: string
+  private tokenOut: string
+  private tradeType: TradeType
+  private chainId: ChainId
 
   constructor({ tokenIn, tokenOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
-    this.tokenIn = tokenIn.toLowerCase()
-    this.tokenOut = tokenOut.toLowerCase()
+    this.tokenIn = tokenIn.toLowerCase() // All token addresses should be lower case for normalization.
+    this.tokenOut = tokenOut.toLowerCase() // All token addresses should be lower case for normalization.
     this.tradeType = tradeType
     this.chainId = chainId
   }

@@ -4,6 +4,14 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesParameters } from './model/cached-routes-parameters'
 
+/**
+ * This is the main configuration for the caching strategies of routes.
+ *
+ * The keys of maps is generated out of calling the `toString` method in the `PairTradeTypeChainId` class,
+ * this way we can guarantee the correct format of the key.
+ *
+ * The values are an object of type `CachedRoutesStrategy` which is initialized with an array of `CachedRoutesParamteres`
+ */
 export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = new Map([
   [
     new PairTradeTypeChainId({

@@ -8,27 +8,37 @@ import { CachedRoutesMarshaller } from './marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 
 interface ConstructorParams {
+  /**
+   * The TableName for the DynamoDB Table. This is wired in from the CDK definition.
+   */
   cachedRoutesTableName: string
+  /**
+   * The amount of minutes that a CachedRoute should live in the database.
+   * This is used to limit the database growth, and DynamoDB will automatically delete expired entries.
+   */
   ttl_minutes?: number
 }
 
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
-  private ddbClient: DynamoDB.DocumentClient
-  private tableName: string
-  /**
-   * Time to live of each element in minutes from now.
-   * @private
-   */
-  private ttl_minutes: number
+  private readonly ddbClient: DynamoDB.DocumentClient
+  private readonly tableName: string
+  private readonly ttl_minutes: number
 
-  constructor({ cachedRoutesTableName, ttl_minutes = 10 }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttl_minutes = 5}: ConstructorParams) {
     super()
     this.ddbClient = new DynamoDB.DocumentClient()
     this.tableName = cachedRoutesTableName
-    // We will evict cache entries from DynamoDB every 10 minutes, this is used to control the size of the database.
     this.ttl_minutes = ttl_minutes
   }
 
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Given a CachedRoutesStrategy (from CACHED_ROUTES_CONFIGURATION) we will find the BlocksToLive associated to the bucket.
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @protected
+   */
   protected async _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
@@ -40,6 +50,17 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     }
   }
 
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Fetch the most recent entry from the DynamoDB table for that pair, tradeType, chainId, protocols and bucket
+   *
+   * @param chainId
+   * @param amount
+   * @param quoteToken
+   * @param tradeType
+   * @param protocols
+   * @protected
+   */
   protected async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
@@ -52,19 +73,20 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
-      const pk = `${tokenIn.address}/${tokenOut.address}/${tradeType}/${chainId}`
-      const sk = `${protocols}/${cachingParameters.bucket}/`
+      const partitionKey = `${tokenIn.address}/${tokenOut.address}/${tradeType}/${chainId}`
+      const partialSortKey = `${protocols}/${cachingParameters.bucket}/`
 
       const queryParams = {
         TableName: this.tableName,
+        // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
         ExpressionAttributeNames: {
           '#pk': 'pairTradeTypeChainId',
-          '#sk': 'protocolsAmountBlockNumber',
+          '#sk': 'protocolsBucketBlockNumber',
         },
         ExpressionAttributeValues: {
-          ':pk': pk,
-          ':sk': sk,
+          ':pk': partitionKey,
+          ':sk': partialSortKey,
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: 1, // Only retrieve the most recent item
@@ -78,9 +100,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
 
         if (result.Items && result.Items.length > 0) {
+          // If we got a response with more than 1 item, we extract the binary field from the response
           const itemBinary = result.Items[0]?.item
+          // Then we convert it into a Buffer
           const cachedRoutesBuffer = Buffer.from(itemBinary)
+          // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
           const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
+          // Finally we unmarshal that JSON into a `CachedRoutes` object
           const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
 
           log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
@@ -98,22 +124,34 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @protected
+   */
   protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
-      // TTL is 10 minutes from now. 600 seconds  = 10 minutes
+      // TTL is ttl_minutes from now. multiply ttl_minutes times 60 to convert to seconds, since ttl is in seconds.
       const ttl = Math.floor(Date.now() / 1000) + (60 * this.ttl_minutes)
+      // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
+      // Convert the marshalledCachedRoutes to JSON string
       const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
+      // Encode the jsonCachedRoutes into Binary
+      const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
       const putParams = {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          protocolsAmountBlockNumber:`${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
-          item: Buffer.from(jsonCachedRoutes),
+          protocolsBucketBlockNumber:`${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          item: binaryCachedRoutes,
           ttl: ttl,
         },
       }
@@ -123,16 +161,30 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       try {
         await this.ddbClient.put(putParams).promise()
         log.info(`[DynamoRouteCachingProvider] Cached route inserted to cache`)
+
         return true
       } catch (error) {
         log.error({ error, putParams },`[DynamoRouteCachingProvider] Cached route failed to insert`)
+
         return false
       }
     } else {
+      // No CachingParameters found, return false to indicate the route was not cached.
+
       return false
     }
   }
 
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Obtains the CacheMode from the CachingStrategy, if not found, then return Darkmode.
+   *
+   * @param chainId
+   * @param amount
+   * @param quoteToken
+   * @param tradeType
+   * @param _protocols
+   */
   public async getCacheMode(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
@@ -176,6 +228,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     }
   }
 
+  /**
+   * Helper function to fetch the CachingStrategy using CachedRoutes as input
+   *
+   * @param cachedRoutes
+   * @private
+   */
   private getCachedRoutesStrategyFromCachedRoutes(cachedRoutes: CachedRoutes): CachedRoutesStrategy | undefined {
     return this.getCachedRoutesStrategy(
       cachedRoutes.tokenIn,
@@ -185,6 +243,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     )
   }
 
+  /**
+   * Helper function to obtain the Caching strategy from the CACHED_ROUTES_CONFIGURATION
+   *
+   * @param tokenIn
+   * @param tokenOut
+   * @param tradeType
+   * @param chainId
+   * @private
+   */
   private getCachedRoutesStrategy(
     tokenIn: Token,
     tokenOut: Token,
@@ -203,6 +270,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString())
   }
 
+  /**
+   * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
+   *
+   * @param amount
+   * @param quoteToken
+   * @param tradeType
+   * @private
+   */
   private determineTokenInOut(
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
