@@ -21,7 +21,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    */
   private ttl_minutes: number
 
-  constructor({cachedRoutesTableName, ttl_minutes=10}: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttl_minutes = 10 }: ConstructorParams) {
     super()
     this.ddbClient = new DynamoDB.DocumentClient()
     this.tableName = cachedRoutesTableName
@@ -29,14 +29,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     this.ttl_minutes = ttl_minutes
   }
 
-  protected _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
+  protected async _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
-      return Promise.resolve(cachingParameters.blocksToLive)
+      return cachingParameters.blocksToLive
     } else {
-      return Promise.resolve(0)
+      return 0
     }
   }
 
