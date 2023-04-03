@@ -160,7 +160,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered.sort()}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered.sort()}/${cachingParameters.bucket}/${
+            cachedRoutes.blockNumber
+          }`,
           item: binaryCachedRoutes,
           ttl: ttl,
         },
