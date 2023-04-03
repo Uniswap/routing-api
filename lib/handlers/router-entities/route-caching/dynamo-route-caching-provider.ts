@@ -292,11 +292,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType
-  ): { tokenIn: Token, tokenOut: Token } {
+  ): { tokenIn: Token; tokenOut: Token } {
     if (tradeType == TradeType.EXACT_INPUT) {
       return { tokenIn: amount.currency.wrapped, tokenOut: quoteToken }
     } else {
-      return {tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
+      return { tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
     }
   }
 }
