@@ -26,7 +26,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   constructor({ cachedRoutesTableName, ttlMinutes = 5 }: ConstructorParams) {
     super()
-    this.ddbClient = new DynamoDB.DocumentClient()
+    // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
+    this.ddbClient = new DynamoDB.DocumentClient({
+      maxRetries: 2,
+      retryDelayOptions: {
+        base: 50,
+      },
+      httpOptions: {
+        timeout: 200,
+      },
+    })
     this.tableName = cachedRoutesTableName
     this.ttlMinutes = ttlMinutes
   }
