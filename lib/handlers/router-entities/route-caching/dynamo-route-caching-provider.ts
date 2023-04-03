@@ -14,7 +14,7 @@ interface ConstructorParams {
   cachedRoutesTableName: string
   /**
    * The amount of minutes that a CachedRoute should live in the database.
-   * This is used to limit the database growth, and DynamoDB will automatically delete expired entries.
+   * This is used to limit the database growth, Dynamo will automatically delete expired entries.
    */
   ttlMinutes?: number
 }
@@ -33,7 +33,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   /**
    * Implementation of the abstract method defined in `IRouteCachingProvider`
-   * Given a CachedRoutesStrategy (from CACHED_ROUTES_CONFIGURATION) we will find the BlocksToLive associated to the bucket.
+   * Given a CachedRoutesStrategy (from CACHED_ROUTES_CONFIGURATION),
+   * we will find the BlocksToLive associated to the bucket.
    *
    * @param cachedRoutes
    * @param amount

@@ -62,31 +62,36 @@ export class RouteMarshaller {
   }
 
   public static unmarshal(marshalledRoute: MarshalledRoute): V3Route | V2Route | MixedRoute {
-    if (marshalledRoute.protocol === Protocol.V2) {
-      const route = marshalledRoute as MarshalledV2Route
-      return new V2Route(
-        route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
-        TokenMarshaller.unmarshal(route.input),
-        TokenMarshaller.unmarshal(route.output)
-      )
-    } else if (marshalledRoute.protocol === Protocol.V3) {
-      const route = marshalledRoute as MarshalledV3Route
-      return new V3Route(
-        route.pools.map((marshalledPool) => PoolMarshaller.unmarshal(marshalledPool)),
-        TokenMarshaller.unmarshal(route.input),
-        TokenMarshaller.unmarshal(route.output)
-      )
-    } else {
-      const route = marshalledRoute as MarshalledMixedRoute
-      const tpools = route.pools.map((tpool) => {
-        if (tpool.protocol === Protocol.V2) {
-          return PairMarshaller.unmarshal(tpool as MarshalledPair)
-        } else {
-          return PoolMarshaller.unmarshal(tpool as MarshalledPool)
-        }
-      })
+    switch (marshalledRoute.protocol) {
+      case Protocol.V2:
+        const v2Route = marshalledRoute as MarshalledV2Route
+        return new V2Route(
+          v2Route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
+          TokenMarshaller.unmarshal(v2Route.input),
+          TokenMarshaller.unmarshal(v2Route.output)
+        )
+      case Protocol.V3:
+        const v3Route = marshalledRoute as MarshalledV3Route
+        return new V3Route(
+          v3Route.pools.map((marshalledPool) => PoolMarshaller.unmarshal(marshalledPool)),
+          TokenMarshaller.unmarshal(v3Route.input),
+          TokenMarshaller.unmarshal(v3Route.output)
+        )
+      case Protocol.MIXED:
+        const mixedRoute = marshalledRoute as MarshalledMixedRoute
+        const tpools = mixedRoute.pools.map((tpool) => {
+          if (tpool.protocol === Protocol.V2) {
+            return PairMarshaller.unmarshal(tpool as MarshalledPair)
+          } else {
+            return PoolMarshaller.unmarshal(tpool as MarshalledPool)
+          }
+        })
 
-      return new MixedRoute(tpools, TokenMarshaller.unmarshal(route.input), TokenMarshaller.unmarshal(route.output))
+        return new MixedRoute(
+          tpools,
+          TokenMarshaller.unmarshal(mixedRoute.input),
+          TokenMarshaller.unmarshal(mixedRoute.output)
+        )
     }
   }
 }
