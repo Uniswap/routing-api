@@ -30,33 +30,34 @@ export type MarshalledRoute = MarshalledV2Route | MarshalledV3Route | Marshalled
 
 export class RouteMarshaller {
   public static marshal(route: V3Route | V2Route | MixedRoute): MarshalledRoute {
-    if (route.protocol === Protocol.V2) {
-      return {
-        protocol: Protocol.V2,
-        input: TokenMarshaller.marshal(route.input),
-        output: TokenMarshaller.marshal(route.output),
-        pairs: route.pairs.map((pair) => PairMarshaller.marshal(pair)),
-      }
-    } else if (route.protocol === Protocol.V3) {
-      return {
-        protocol: Protocol.V3,
-        input: TokenMarshaller.marshal(route.input),
-        output: TokenMarshaller.marshal(route.output),
-        pools: route.pools.map((pool) => PoolMarshaller.marshal(pool)),
-      }
-    } else {
-      return {
-        protocol: Protocol.MIXED,
-        input: TokenMarshaller.marshal(route.input),
-        output: TokenMarshaller.marshal(route.output),
-        pools: route.pools.map((tpool) => {
-          if (tpool instanceof Pool) {
-            return PoolMarshaller.marshal(tpool)
-          } else {
-            return PairMarshaller.marshal(tpool)
-          }
-        }),
-      }
+    switch (route.protocol) {
+      case Protocol.V2:
+        return {
+          protocol: Protocol.V2,
+          input: TokenMarshaller.marshal(route.input),
+          output: TokenMarshaller.marshal(route.output),
+          pairs: route.pairs.map((pair) => PairMarshaller.marshal(pair)),
+        }
+      case Protocol.V3:
+        return {
+          protocol: Protocol.V3,
+          input: TokenMarshaller.marshal(route.input),
+          output: TokenMarshaller.marshal(route.output),
+          pools: route.pools.map((pool) => PoolMarshaller.marshal(pool)),
+        }
+      case Protocol.MIXED:
+        return {
+          protocol: Protocol.MIXED,
+          input: TokenMarshaller.marshal(route.input),
+          output: TokenMarshaller.marshal(route.output),
+          pools: route.pools.map((tpool) => {
+            if (tpool instanceof Pool) {
+              return PoolMarshaller.marshal(tpool)
+            } else {
+              return PairMarshaller.marshal(tpool)
+            }
+          }),
+        }
     }
   }
 

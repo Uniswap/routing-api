@@ -24,7 +24,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyProject: string
   tenderlyAccessKey: string
   chatbotSNSArn?: string
-  cachedRoutesDynamoDb: aws_dynamodb.Table
+  cachedRoutesDynamoDb?: aws_dynamodb.Table
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -59,7 +59,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
-    cachedRoutesDynamoDb.grantReadWriteData(lambdaRole)
+    cachedRoutesDynamoDb?.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -86,7 +86,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
-        CACHED_ROUTES_DB: cachedRoutesDynamoDb.tableName,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
         ...jsonRpcProviders,
       },
       layers: [
@@ -119,7 +119,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        CACHED_ROUTES_DB: cachedRoutesDynamoDb.tableName,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
         ...jsonRpcProviders,
       },
       layers: [

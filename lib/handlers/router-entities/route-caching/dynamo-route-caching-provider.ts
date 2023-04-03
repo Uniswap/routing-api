@@ -16,19 +16,19 @@ interface ConstructorParams {
    * The amount of minutes that a CachedRoute should live in the database.
    * This is used to limit the database growth, and DynamoDB will automatically delete expired entries.
    */
-  ttl_minutes?: number
+  ttlMinutes?: number
 }
 
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly tableName: string
-  private readonly ttl_minutes: number
+  private readonly ttlMinutes: number
 
-  constructor({ cachedRoutesTableName, ttl_minutes = 5 }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttlMinutes = 5 }: ConstructorParams) {
     super()
     this.ddbClient = new DynamoDB.DocumentClient()
     this.tableName = cachedRoutesTableName
-    this.ttl_minutes = ttl_minutes
+    this.ttlMinutes = ttlMinutes
   }
 
   /**
@@ -68,7 +68,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     tradeType: TradeType,
     protocols: Protocol[]
   ): Promise<CachedRoutes | undefined> {
-    const [tokenIn, tokenOut] = this.determineTokenInOut(amount, quoteToken, tradeType)
+    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
@@ -137,8 +137,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
-      // TTL is ttl_minutes from now. multiply ttl_minutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttl_minutes
+      // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
+      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttlMinutes
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
       // Convert the marshalledCachedRoutes to JSON string
@@ -195,7 +195,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     tradeType: TradeType,
     _protocols: Protocol[]
   ): Promise<CacheMode> {
-    const [tokenIn, tokenOut] = this.determineTokenInOut(amount, quoteToken, tradeType)
+    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
@@ -292,11 +292,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType
-  ): [Token, Token] {
+  ): { tokenIn: Token, tokenOut: Token } {
     if (tradeType == TradeType.EXACT_INPUT) {
-      return [amount.currency.wrapped, quoteToken]
+      return { tokenIn: amount.currency.wrapped, tokenOut: quoteToken }
     } else {
-      return [quoteToken, amount.currency.wrapped]
+      return {tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
     }
   }
 }
