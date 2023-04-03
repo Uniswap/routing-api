@@ -1,6 +1,5 @@
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { CachedRoutesParameters } from './cached-routes-parameters'
-import { log } from '@uniswap/smart-order-router'
 
 /**
  * Models out the strategy for categorizing cached routes into buckets by amount traded
@@ -37,11 +36,6 @@ export class CachedRoutesStrategy {
     const bucket = this.buckets.find((bucket: number) => {
       // Create a CurrencyAmount object to compare the amount with the bucket.
       const bucketCurrency = CurrencyAmount.fromRawAmount(amount.currency, bucket * 10 ** amount.currency.decimals)
-      log.info(
-        `Looking for ${
-          amount.currency.symbol
-        } bucket for ${amount.toExact()}. Currently checking ${bucketCurrency.toExact()}`
-      )
 
       // Given that the array of buckets is sorted, we want to find the first bucket that makes the amount lessThanOrEqual to the bucket
       // refer to the examples above
