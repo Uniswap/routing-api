@@ -84,7 +84,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     if (cachingParameters) {
       const partitionKey = `${tokenIn.address}/${tokenOut.address}/${tradeType}/${chainId}`
-      const partialSortKey = `${protocols}/${cachingParameters.bucket}/`
+      const partialSortKey = `${protocols.sort()}/${cachingParameters.bucket}/`
 
       const queryParams = {
         TableName: this.tableName,
@@ -160,7 +160,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered}/${cachingParameters.bucket}/${cachedRoutes.blockNumber}`,
+          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered.sort()}/${cachingParameters.bucket}/${
+            cachedRoutes.blockNumber
+          }`,
           item: binaryCachedRoutes,
           ttl: ttl,
         },
