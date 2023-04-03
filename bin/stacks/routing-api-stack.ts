@@ -14,6 +14,7 @@ import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
+import { RoutingDatabaseStack } from './routing-database-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [
   ChainId.RINKEBY,
@@ -81,6 +82,8 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     })
 
+    const { cachedRoutesDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
+
     const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
       this,
       'RoutingLambdaStack',
@@ -96,6 +99,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tenderlyUser,
         tenderlyProject,
         tenderlyAccessKey,
+        cachedRoutesDynamoDb,
       }
     )
 

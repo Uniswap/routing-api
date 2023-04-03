@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
+import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
@@ -23,6 +24,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyProject: string
   tenderlyAccessKey: string
   chatbotSNSArn?: string
+  cachedRoutesDynamoDb?: aws_dynamodb.Table
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -43,6 +45,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      cachedRoutesDynamoDb,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -56,6 +59,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
+    cachedRoutesDynamoDb?.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -82,6 +86,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
         ...jsonRpcProviders,
       },
       layers: [
@@ -114,6 +119,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
         ...jsonRpcProviders,
       },
       layers: [

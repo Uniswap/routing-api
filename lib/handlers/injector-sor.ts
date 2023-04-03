@@ -30,6 +30,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
+  IRouteCachingProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -40,6 +41,7 @@ import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
+import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -85,6 +87,7 @@ export type ContainerDependencies = {
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
+  routeCachingProvider?: IRouteCachingProvider
 }
 
 export interface ContainerInjected {
@@ -107,7 +110,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     })
     setGlobalLogger(log)
 
-    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } = process.env
+    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET, CACHED_ROUTES_TABLE_NAME } = process.env
 
     const dependenciesByChain: {
       [chainId in ChainId]?: ContainerDependencies
@@ -288,6 +291,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           })(),
         ])
 
+        let routeCachingProvider: IRouteCachingProvider | undefined = undefined
+        if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+          routeCachingProvider = new DynamoRouteCachingProvider({ cachedRoutesTableName: CACHED_ROUTES_TABLE_NAME })
+        }
+
         return {
           chainId,
           dependencies: {
@@ -321,6 +329,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2QuoteProvider: new V2QuoteProvider(),
             v2SubgraphProvider,
             simulator,
+            routeCachingProvider,
           },
         }
       })
