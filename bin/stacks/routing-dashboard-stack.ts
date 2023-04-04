@@ -5,6 +5,7 @@ import { Construct } from 'constructs'
 import _ from 'lodash'
 import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-widgets-factory'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
+import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -449,6 +450,15 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: quoteAmountsWidgets.generateWidgets(),
+      }),
+    })
+
+    const cachedRoutesWidgets = new CachedRoutesWidgetsFactory(NAMESPACE, region, routingLambdaName)
+    new aws_cloudwatch.CfnDashboard(this, 'CachedRoutesPerformanceDashboard', {
+      dashboardName: 'CachedRoutesPerformanceDashboard',
+      dashboardBody: JSON.stringify({
+        periodOverride: 'inherit',
+        widgets: cachedRoutesWidgets.generateWidgets(),
       }),
     })
 
