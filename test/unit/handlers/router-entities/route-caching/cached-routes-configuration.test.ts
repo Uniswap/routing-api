@@ -58,10 +58,10 @@ describe('CachedRoutesConfiguration', () => {
 
     expect(fetchedStrategy).to.not.be.undefined
 
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 38 * 10 ** WETH.decimals)
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 5 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
 
-    expect(cachingParameters?.bucket).to.eq(50)
+    expect(cachingParameters?.bucket).to.eq(5)
   })
 
   it('returns undefined when strategy doesnt exist', () => {
