@@ -1,5 +1,5 @@
 // Non-exhaustive list of Widget types, update list as we deem necessary
-export type WidgetType = 'text' | 'metric'
+export type WidgetType = 'text' | 'metric' | 'log'
 
 export type Widget = {
   type: WidgetType
