@@ -55,6 +55,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           period: 300,
           stat: 'Sum',
         },
+      },
       {
         type: 'metric',
         width: 24,
