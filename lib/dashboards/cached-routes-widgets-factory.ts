@@ -43,6 +43,28 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           metrics: [
             [
               this.namespace,
+              'GetCachedRoute_hit_livemode',
+              'Service',
+              'RoutingAPI',
+              { label: 'Cache Hit' },
+            ],
+            ['.', 'GetCachedRoute_miss_livemode', '.', '.', { label: 'Cache Miss' }]
+          ],
+          region: this.region,
+          title: 'Cache Hit and Miss of Cachemode.Livemode',
+          period: 300,
+          stat: 'Sum',
+        },
+      {
+        type: 'metric',
+        width: 24,
+        height: 6,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [
+              this.namespace,
               'GetCachedRoute_hit_tapcompare',
               'Service',
               'RoutingAPI',
@@ -51,7 +73,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             ['.', 'GetCachedRoute_miss_tapcompare', '.', '.', { label: 'Cache Miss' }]
           ],
           region: this.region,
-          title: 'Cache Hit and Miss absolute numbers',
+          title: 'Cache Hit and Miss of cachemode.Tapcompare',
           period: 300,
           stat: 'Sum',
         },
