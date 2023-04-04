@@ -6,6 +6,7 @@ import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from './marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
+import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 
 interface ConstructorParams {
   /**
@@ -24,7 +25,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly tableName: string
   private readonly ttlMinutes: number
 
-  constructor({ cachedRoutesTableName, ttlMinutes = 5 }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttlMinutes = 2 }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -83,8 +84,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
 
     if (cachingParameters) {
-      const partitionKey = `${tokenIn.address}/${tokenOut.address}/${tradeType}/${chainId}`
-      const partialSortKey = `${protocols.sort()}/${cachingParameters.bucket}/`
+      const partitionKey = new PairTradeTypeChainId({
+        tokenIn: tokenIn.address,
+        tokenOut: tokenOut.address,
+        tradeType,
+        chainId,
+      })
+      const partialSortKey = new ProtocolsBucketBlockNumber({
+        protocols,
+        bucket: cachingParameters.bucket,
+      })
 
       const queryParams = {
         TableName: this.tableName,
@@ -95,8 +104,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           '#sk': 'protocolsBucketBlockNumber',
         },
         ExpressionAttributeValues: {
-          ':pk': partitionKey,
-          ':sk': partialSortKey,
+          ':pk': partitionKey.toString(),
+          ':sk': partialSortKey.protocolsBucketPartialKey(),
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: 1, // Only retrieve the most recent item
@@ -156,13 +165,19 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       // Encode the jsonCachedRoutes into Binary
       const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
+      // Primary Key object
+      const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
+      const sortKey = new ProtocolsBucketBlockNumber({
+        protocols: cachedRoutes.protocolsCovered,
+        bucket: cachingParameters.bucket,
+        blockNumber: cachedRoutes.blockNumber,
+      })
+
       const putParams = {
         TableName: this.tableName,
         Item: {
-          pairTradeTypeChainId: `${cachedRoutes.tokenIn.address}/${cachedRoutes.tokenOut.address}/${cachedRoutes.tradeType}/${cachedRoutes.chainId}`,
-          protocolsBucketBlockNumber: `${cachedRoutes.protocolsCovered.sort()}/${cachingParameters.bucket}/${
-            cachedRoutes.blockNumber
-          }`,
+          pairTradeTypeChainId: partitionKey.toString(),
+          protocolsBucketBlockNumber: sortKey.fullKey(),
           item: binaryCachedRoutes,
           ttl: ttl,
         },
