@@ -16,7 +16,7 @@ describe('PairTradeTypeChainId', () => {
       })
 
       expect(pairTradeTypeChainId.toString()).to.eq(
-        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/ExactIn/${ChainId.MAINNET}`
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
       )
     })
 
@@ -29,7 +29,7 @@ describe('PairTradeTypeChainId', () => {
       })
 
       expect(pairTradeTypeChainId.toString()).to.eq(
-        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/ExactIn/${ChainId.MAINNET}`
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
       )
     })
 
@@ -42,7 +42,7 @@ describe('PairTradeTypeChainId', () => {
       })
 
       expect(pairTradeTypeChainId.toString()).to.eq(
-        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/ExactOut/${ChainId.MAINNET}`
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.MAINNET}`
       )
     })
 
@@ -55,7 +55,7 @@ describe('PairTradeTypeChainId', () => {
       })
 
       expect(pairTradeTypeChainId.toString()).to.eq(
-        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/ExactOut/${ChainId.ARBITRUM_ONE}`
+        `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.ARBITRUM_ONE}`
       )
     })
   })

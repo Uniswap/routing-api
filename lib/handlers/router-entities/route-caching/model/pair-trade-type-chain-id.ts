@@ -25,15 +25,7 @@ export class PairTradeTypeChainId {
   }
 
   public toString(): string {
-    return `${this.tokenIn}/${this.tokenOut}/${this.tradeTypeStr()}/${this.chainId}`
-  }
-
-  private tradeTypeStr(): string {
-    if (this.tradeType == TradeType.EXACT_INPUT) {
-      return 'ExactIn'
-    } else {
-      return 'ExactOut'
-    }
+    return `${this.tokenIn}/${this.tokenOut}/${this.tradeType}/${this.chainId}`
   }
 
   public static fromCachedRoutes(cachedRoutes: CachedRoutes): PairTradeTypeChainId {

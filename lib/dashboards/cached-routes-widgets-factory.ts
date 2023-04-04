@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
-import { CACHED_ROUTES_CONFIGURATION } from '../handlers/router-entities/route-caching'
+import { CACHED_ROUTES_PAIRS } from '../handlers/router-entities/route-caching'
 
 export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   region: string
@@ -16,7 +16,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
 
   generateWidgets(): Widget[] {
     const cacheHitMissMetrics = this.generateCacheHitMissMetricsWidgets();
-    const quoteDiffMetrics = _.flatMap(Array.from(CACHED_ROUTES_CONFIGURATION.keys()), (pair) =>
+    const quoteDiffMetrics = _.flatMap(CACHED_ROUTES_PAIRS, (pair) =>
       this.generateQuoteDiffWidgetsFromPair(pair)
     )
 
