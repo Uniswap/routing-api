@@ -15,12 +15,10 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   }
 
   generateWidgets(): Widget[] {
-    const cacheHitMissMetrics = this.generateCacheHitMissMetricsWidgets();
-    const quoteDiffMetrics = _.flatMap(CACHED_ROUTES_PAIRS, (pair) =>
-      this.generateQuoteDiffWidgetsFromPair(pair)
-    )
+    const cacheHitMissMetrics = this.generateCacheHitMissMetricsWidgets()
+    const quoteDiffMetrics = _.flatMap(CACHED_ROUTES_PAIRS, (pair) => this.generateQuoteDiffWidgetsFromPair(pair))
 
-    return cacheHitMissMetrics.concat(quoteDiffMetrics);
+    return cacheHitMissMetrics.concat(quoteDiffMetrics)
   }
 
   private generateCacheHitMissMetricsWidgets(): Widget[] {
@@ -41,14 +39,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           view: 'timeSeries',
           stacked: false,
           metrics: [
-            [
-              this.namespace,
-              'GetCachedRoute_hit_livemode',
-              'Service',
-              'RoutingAPI',
-              { label: 'Cache Hit' },
-            ],
-            ['.', 'GetCachedRoute_miss_livemode', '.', '.', { label: 'Cache Miss' }]
+            [this.namespace, 'GetCachedRoute_hit_livemode', 'Service', 'RoutingAPI', { label: 'Cache Hit' }],
+            ['.', 'GetCachedRoute_miss_livemode', '.', '.', { label: 'Cache Miss' }],
           ],
           region: this.region,
           title: 'Cache Hit and Miss of Cachemode.Livemode',
@@ -64,14 +56,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           view: 'timeSeries',
           stacked: false,
           metrics: [
-            [
-              this.namespace,
-              'GetCachedRoute_hit_tapcompare',
-              'Service',
-              'RoutingAPI',
-              { label: 'Cache Hit' },
-            ],
-            ['.', 'GetCachedRoute_miss_tapcompare', '.', '.', { label: 'Cache Miss' }]
+            [this.namespace, 'GetCachedRoute_hit_tapcompare', 'Service', 'RoutingAPI', { label: 'Cache Hit' }],
+            ['.', 'GetCachedRoute_miss_tapcompare', '.', '.', { label: 'Cache Miss' }],
           ],
           region: this.region,
           title: 'Cache Hit and Miss of cachemode.Tapcompare',
@@ -79,7 +65,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           stat: 'Sum',
         },
       },
-    ];
+    ]
   }
 
   private generateQuoteDiffWidgetsFromPair(pair: string): Widget[] {
@@ -99,15 +85,14 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
         properties: {
           view: 'timeSeries',
           stacked: false,
-          query:
-            `SOURCE '/aws/lambda/${this.lambdaName}' 
+          query: `SOURCE '/aws/lambda/${this.lambdaName}' 
             | fields @timestamp, pair, quoteGasAdjustedDiff, quoteDiff 
             | filter msg like 'Comparing' and pair = '${pair}' 
             | stats sum(quoteDiff) as QuoteDiff, sum(quoteGasAdjustedDiff) as QuoteGasAdjustedDiff by bin(1m)`,
           region: this.region,
-          title: `Quote Differences for ${pair}`
-        }
-      }
-    ];
+          title: `Quote Differences for ${pair}`,
+        },
+      },
+    ]
   }
 }
