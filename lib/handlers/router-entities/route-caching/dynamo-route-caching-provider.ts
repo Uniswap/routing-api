@@ -88,11 +88,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         tokenIn: tokenIn.address,
         tokenOut: tokenOut.address,
         tradeType,
-        chainId
+        chainId,
       })
       const partialSortKey = new ProtocolsBucketBlockNumber({
         protocols,
-        bucket: cachingParameters.bucket
+        bucket: cachingParameters.bucket,
       })
 
       const queryParams = {
@@ -170,7 +170,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const sortKey = new ProtocolsBucketBlockNumber({
         protocols: cachedRoutes.protocolsCovered,
         bucket: cachingParameters.bucket,
-        blockNumber: cachedRoutes.blockNumber
+        blockNumber: cachedRoutes.blockNumber,
       })
 
       const putParams = {

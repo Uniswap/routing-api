@@ -33,7 +33,7 @@ export class PairTradeTypeChainId {
       tokenIn: cachedRoutes.tokenIn.address,
       tokenOut: cachedRoutes.tokenOut.address,
       tradeType: cachedRoutes.tradeType,
-      chainId: cachedRoutes.chainId
+      chainId: cachedRoutes.chainId,
     })
   }
 }
