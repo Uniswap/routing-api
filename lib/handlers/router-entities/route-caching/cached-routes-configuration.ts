@@ -6,10 +6,7 @@ import { CachedRoutesParameters } from './model/cached-routes-parameters'
 
 // Used for building a dashboard to track the performance of these routes
 // Keep this in sync with the configuration below.
-export const CACHED_ROUTES_PAIRS = [
-  'WETH/USDC/ExactIn/1',
-  'USDC/WETH/ExactIn/1'
-]
+export const CACHED_ROUTES_PAIRS = ['WETH/USDC/ExactIn/1', 'USDC/WETH/ExactIn/1']
 
 /**
  * This is the main configuration for the caching strategies of routes.

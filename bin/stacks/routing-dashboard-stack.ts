@@ -458,8 +458,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       dashboardName: 'CachedRoutesPerformanceDashboard',
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
-        widgets: cachedRoutesWidgets.generateWidgets()
-      })
+        widgets: cachedRoutesWidgets.generateWidgets(),
+      }),
     })
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIQuoteProviderDashboard', {
