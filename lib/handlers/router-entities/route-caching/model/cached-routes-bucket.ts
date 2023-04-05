@@ -1,6 +1,6 @@
 import { CacheMode } from '@uniswap/smart-order-router'
 
-interface CachedRoutesParametersArgs {
+interface CachedRoutesBucketsArgs {
   /**
    * The bucket for these parameters, this bucket is defined in total units.
    * e.g. if bucket = 1 and currency (in CachedRoutesStrategy) is WETH, then this is 1 WETH.
@@ -16,12 +16,12 @@ interface CachedRoutesParametersArgs {
   cacheMode: CacheMode
 }
 
-export class CachedRoutesParameters {
+export class CachedRoutesBucket {
   public readonly bucket: number
   public readonly blocksToLive: number
   public readonly cacheMode: CacheMode
 
-  constructor({ bucket, blocksToLive, cacheMode }: CachedRoutesParametersArgs) {
+  constructor({ bucket, blocksToLive, cacheMode }: CachedRoutesBucketsArgs) {
     this.bucket = bucket
     this.blocksToLive = blocksToLive
     this.cacheMode = cacheMode

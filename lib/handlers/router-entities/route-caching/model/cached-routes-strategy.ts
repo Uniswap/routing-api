@@ -1,32 +1,51 @@
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import { CachedRoutesParameters } from './cached-routes-parameters'
+import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
+import { CachedRoutesBucket } from './cached-routes-bucket'
+import { CacheMode, ChainId } from '@uniswap/smart-order-router'
+
+interface CachedRoutesStrategyArgs {
+  pair: string
+  tradeType: TradeType
+  chainId: ChainId
+  buckets: CachedRoutesBucket[]
+}
 
 /**
  * Models out the strategy for categorizing cached routes into buckets by amount traded
  */
 export class CachedRoutesStrategy {
-  private cachingParameters: Map<number, CachedRoutesParameters>
+  readonly pair: string
+  readonly tradeType: TradeType
+  readonly chainId: ChainId
+  readonly willTapcompare: boolean
   private buckets: number[]
+  private bucketsMap: Map<number, CachedRoutesBucket>
 
   /**
    * The constructor receives an array of `CachedRoutesParameters`, the extracts and sorts the buckets,
    * and creates a Map<bucket, CachedRouteParameters>
-   * @param cachedRoutesParameters
+   * @param buckets
    */
-  constructor(cachedRoutesParameters: CachedRoutesParameters[]) {
+  constructor({pair, tradeType, chainId, buckets}: CachedRoutesStrategyArgs) {
+    this.pair = pair
+    this.tradeType = tradeType
+    this.chainId = chainId
+
+    // Used for deciding to show metrics in the dashboard related to Tapcompare
+    this.willTapcompare = buckets.find((bucket) => bucket.cacheMode == CacheMode.Tapcompare) != undefined
+
     // It is important that we sort the buckets in ascendant order for the algorithm to work correctly.
     // For a strange reason the `.sort()` function was comparing the number as strings, so I had to pass a compareFn.
-    this.buckets = cachedRoutesParameters.map((params) => params.bucket).sort((a, b) => a - b)
+    this.buckets = buckets.map((params) => params.bucket).sort((a, b) => a - b)
 
     // Create a Map<bucket, CachedRouteParameters> for easy lookup once we find a bucket.
-    this.cachingParameters = new Map(cachedRoutesParameters.map((params) => [params.bucket, params]))
+    this.bucketsMap = new Map(buckets.map((params) => [params.bucket, params]))
   }
 
   /**
    * Given an amount, we will search the bucket that has a cached route for that amount based on the CachedRoutesParameters array
    * @param amount
    */
-  public getCachingParameters(amount: CurrencyAmount<Currency>): CachedRoutesParameters | undefined {
+  public getCachingParameters(amount: CurrencyAmount<Currency>): CachedRoutesBucket | undefined {
     // Find the first bucket which is greater or equal than the amount.
     // If no bucket is found it means it's not supposed to be cached.
     // e.g. let buckets = [10, 50, 100, 500, 1000]
@@ -44,7 +63,7 @@ export class CachedRoutesStrategy {
 
     if (bucket) {
       // if a bucket was found, return the CachedRoutesParameters associated to that bucket.
-      return this.cachingParameters.get(bucket)
+      return this.bucketsMap.get(bucket)
     }
 
     return undefined
