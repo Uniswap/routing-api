@@ -25,7 +25,7 @@ describe('CachedRoutesConfiguration', () => {
     const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(1)
-    expect(cachingParameters?.cacheMode).to.eq(CacheMode.Tapcompare)
+    expect(cachingParameters?.cacheMode).to.eq(CacheMode.Livemode)
   })
 
   it('can find the strategy, even if token has different capitalization', () => {

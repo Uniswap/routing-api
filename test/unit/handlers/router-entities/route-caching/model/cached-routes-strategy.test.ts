@@ -1,9 +1,6 @@
-import {
-  CachedRoutesBucket,
-  CachedRoutesStrategy,
-} from '../../../../../../lib/handlers/router-entities/route-caching'
+import { CachedRoutesBucket, CachedRoutesStrategy } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { CacheMode, ChainId } from '@uniswap/smart-order-router'
-import { CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 
 describe('CachedRoutesStrategy', () => {
@@ -11,14 +8,19 @@ describe('CachedRoutesStrategy', () => {
   let strategy: CachedRoutesStrategy
 
   beforeEach(() => {
-    strategy = new CachedRoutesStrategy({pair : [
-      new CachedRoutesBucket({ bucket: 1, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
-      new CachedRoutesBucket({ bucket: 5, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
-      new CachedRoutesBucket({ bucket: 10, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      new CachedRoutesBucket({ bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      new CachedRoutesBucket({ bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      new CachedRoutesBucket({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-    ]})
+    strategy = new CachedRoutesStrategy({
+      pair: 'WETH/USD',
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 1, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 5, blocksToLive: 2, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 10, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      ]
+    })
   })
 
   describe('#getCachingParameters', () => {
