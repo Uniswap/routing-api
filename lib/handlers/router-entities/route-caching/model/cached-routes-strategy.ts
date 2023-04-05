@@ -14,7 +14,7 @@ interface CachedRoutesStrategyArgs {
  */
 export class CachedRoutesStrategy {
   readonly pair: string
-  readonly tradeType: TradeType
+  readonly _tradeType: TradeType
   readonly chainId: ChainId
   readonly willTapcompare: boolean
   private buckets: number[]
@@ -27,7 +27,7 @@ export class CachedRoutesStrategy {
    */
   constructor({pair, tradeType, chainId, buckets}: CachedRoutesStrategyArgs) {
     this.pair = pair
-    this.tradeType = tradeType
+    this._tradeType = tradeType
     this.chainId = chainId
 
     // Used for deciding to show metrics in the dashboard related to Tapcompare
@@ -39,6 +39,21 @@ export class CachedRoutesStrategy {
 
     // Create a Map<bucket, CachedRouteParameters> for easy lookup once we find a bucket.
     this.bucketsMap = new Map(buckets.map((params) => [params.bucket, params]))
+  }
+
+  public get tradeType(): string {
+    return this._tradeType == TradeType.EXACT_INPUT ? 'ExactIn' : 'ExactOut'
+  }
+
+  public readablePairTradeTypeChainId(): string {
+    return `${this.pair.toUpperCase()}/${this.tradeType}/${this.chainId}`
+  }
+
+  public bucketPairs(): [number, number][] {
+    return this.buckets
+      .slice(0, -1)
+      .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
+      .concat([[this.buckets.slice(-1)[0], -1]]);
   }
 
   /**
