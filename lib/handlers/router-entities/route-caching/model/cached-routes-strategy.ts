@@ -21,8 +21,9 @@ export class CachedRoutesStrategy {
   private bucketsMap: Map<number, CachedRoutesBucket>
 
   /**
-   * The constructor receives an array of `CachedRoutesParameters`, the extracts and sorts the buckets,
-   * and creates a Map<bucket, CachedRouteParameters>
+   * @param pair
+   * @param tradeType
+   * @param chainId
    * @param buckets
    */
   constructor({pair, tradeType, chainId, buckets}: CachedRoutesStrategyArgs) {
