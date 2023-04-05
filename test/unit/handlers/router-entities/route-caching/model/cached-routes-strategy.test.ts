@@ -19,7 +19,7 @@ describe('CachedRoutesStrategy', () => {
         new CachedRoutesBucket({ bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      ]
+      ],
     })
   })
 

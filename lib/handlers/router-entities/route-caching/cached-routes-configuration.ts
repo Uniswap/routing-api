@@ -38,7 +38,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
         new CachedRoutesBucket({ bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         // new CachedRoutesParameters({ bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         // new CachedRoutesParameters({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      ]
+      ],
     }),
   ],
   [
@@ -63,7 +63,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
         // new CachedRoutesParameters({ bucket: 50000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         // new CachedRoutesParameters({ bucket: 100000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         // new CachedRoutesParameters({ bucket: 500000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-      ]
+      ],
     }),
   ],
 ])

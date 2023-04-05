@@ -26,7 +26,7 @@ export class CachedRoutesStrategy {
    * @param chainId
    * @param buckets
    */
-  constructor({pair, tradeType, chainId, buckets}: CachedRoutesStrategyArgs) {
+  constructor({ pair, tradeType, chainId, buckets }: CachedRoutesStrategyArgs) {
     this.pair = pair
     this._tradeType = tradeType
     this.chainId = chainId
@@ -57,9 +57,7 @@ export class CachedRoutesStrategy {
       .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
     const lastBucket: [number, number][] = [[this.buckets.slice(-1)[0], -1]]
 
-    return firstBucket
-      .concat(middleBuckets)
-      .concat(lastBucket)
+    return firstBucket.concat(middleBuckets).concat(lastBucket)
   }
 
   /**
