@@ -51,14 +51,15 @@ export class CachedRoutesStrategy {
   }
 
   public bucketPairs(): [number, number][] {
-    const bucketsSlice = this.buckets
+    const firstBucket: [number, number][] = [[0, this.buckets[0]]]
+    const middleBuckets: [number, number][] = this.buckets
       .slice(0, -1)
-
-    bucketsSlice.unshift(0)
-
-    return bucketsSlice
       .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
-      .concat([[this.buckets.slice(-1)[0], -1]]);
+    const lastBucket: [number, number][] = [[this.buckets.slice(-1)[0], -1]]
+
+    return firstBucket
+      .concat(middleBuckets)
+      .concat(lastBucket)
   }
 
   /**

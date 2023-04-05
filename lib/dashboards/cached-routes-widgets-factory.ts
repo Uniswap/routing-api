@@ -30,7 +30,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       {
         type: 'text',
         width: 24,
-        height: 2,
+        height: 1,
         properties: {
           markdown: `# Overall Cache Hit/Miss`,
         },
@@ -80,7 +80,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       {
         type: 'text',
         width: 24,
-        height: 2,
+        height: 1,
         properties: {
           markdown: `# Cached Routes Performance for ${pairTradeTypeChainId}`,
         },
