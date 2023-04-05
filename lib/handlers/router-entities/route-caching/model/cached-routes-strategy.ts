@@ -38,7 +38,7 @@ export class CachedRoutesStrategy {
     // For a strange reason the `.sort()` function was comparing the number as strings, so I had to pass a compareFn.
     this.buckets = buckets.map((params) => params.bucket).sort((a, b) => a - b)
 
-    // Create a Map<bucket, CachedRouteParameters> for easy lookup once we find a bucket.
+    // Create a Map<bucket, CachedRoutesBucket> for easy lookup once we find a bucket.
     this.bucketsMap = new Map(buckets.map((params) => [params.bucket, params]))
   }
 
@@ -51,20 +51,24 @@ export class CachedRoutesStrategy {
   }
 
   public bucketPairs(): [number, number][] {
-    const firstBucket: [number, number][] = [[0, this.buckets[0]]]
-    const middleBuckets: [number, number][] = this.buckets
-      .slice(0, -1)
-      .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
-    const lastBucket: [number, number][] = [[this.buckets.slice(-1)[0], -1]]
+    if (this.buckets.length > 0) {
+      const firstBucket: [number, number][] = [[0, this.buckets[0]]]
+      const middleBuckets: [number, number][] = this.buckets.length > 1 ? this.buckets
+        .slice(0, -1)
+        .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!]) : []
+      const lastBucket: [number, number][] = [[this.buckets.slice(-1)[0], -1]]
 
-    return firstBucket.concat(middleBuckets).concat(lastBucket)
+      return firstBucket.concat(middleBuckets).concat(lastBucket)
+    } else {
+      return []
+    }
   }
 
   /**
-   * Given an amount, we will search the bucket that has a cached route for that amount based on the CachedRoutesParameters array
+   * Given an amount, we will search the bucket that has a cached route for that amount based on the CachedRoutesBucket array
    * @param amount
    */
-  public getCachingParameters(amount: CurrencyAmount<Currency>): CachedRoutesBucket | undefined {
+  public getCachingBucket(amount: CurrencyAmount<Currency>): CachedRoutesBucket | undefined {
     // Find the first bucket which is greater or equal than the amount.
     // If no bucket is found it means it's not supposed to be cached.
     // e.g. let buckets = [10, 50, 100, 500, 1000]
@@ -81,7 +85,7 @@ export class CachedRoutesStrategy {
     })
 
     if (bucket) {
-      // if a bucket was found, return the CachedRoutesParameters associated to that bucket.
+      // if a bucket was found, return the CachedRoutesBucket associated to that bucket.
       return this.bucketsMap.get(bucket)
     }
 

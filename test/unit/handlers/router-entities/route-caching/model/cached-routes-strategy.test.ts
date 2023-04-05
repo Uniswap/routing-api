@@ -23,26 +23,26 @@ describe('CachedRoutesStrategy', () => {
     })
   })
 
-  describe('#getCachingParameters', () => {
-    it('find the first parameters that fits the amount', () => {
+  describe('#getCachingBucket', () => {
+    it('find the first bucket that fits the amount', () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
-      const cachingParameters = strategy.getCachingParameters(currencyAmount)
+      const cachingParameters = strategy.getCachingBucket(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
       expect(cachingParameters?.bucket).to.eq(1)
     })
 
-    it('find the parameters, searching in the middle buckets', () => {
+    it('find the bucket, searching in the middle amounts', () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 42 * 10 ** WETH.decimals)
-      const cachingParameters = strategy.getCachingParameters(currencyAmount)
+      const cachingParameters = strategy.getCachingBucket(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
       expect(cachingParameters?.bucket).to.eq(50)
     })
 
-    it('looks for parameters in higher buckets', () => {
+    it('looks for bucket in higher amounts', () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 500 * 10 ** WETH.decimals)
-      const cachingParameters = strategy.getCachingParameters(currencyAmount)
+      const cachingParameters = strategy.getCachingBucket(currencyAmount)
 
       expect(cachingParameters).to.not.be.undefined
       expect(cachingParameters?.bucket).to.eq(500)
@@ -50,7 +50,7 @@ describe('CachedRoutesStrategy', () => {
 
     it('returns undefined once we are out of range', () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 501 * 10 ** WETH.decimals)
-      const cachingParameters = strategy.getCachingParameters(currencyAmount)
+      const cachingParameters = strategy.getCachingBucket(currencyAmount)
 
       expect(cachingParameters).to.be.undefined
     })
