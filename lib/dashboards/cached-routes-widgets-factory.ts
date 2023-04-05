@@ -26,8 +26,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     let wildcardStrategiesWidgets: Widget[] = []
     if (wildcardStrategies.length > 0) {
       wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) => {
-        const tokenIn = cacheStrategy.pair.split('/')[0]
-        const tokenOut = cacheStrategy.pair.split('/')[1]
+        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*','Any')
+        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*','Any')
 
         return this.generateTapcompareMetrics(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
       })
