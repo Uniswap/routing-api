@@ -51,8 +51,12 @@ export class CachedRoutesStrategy {
   }
 
   public bucketPairs(): [number, number][] {
-    return this.buckets
+    const bucketsSlice = this.buckets
       .slice(0, -1)
+
+    bucketsSlice.unshift(0)
+
+    return bucketsSlice
       .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
       .concat([[this.buckets.slice(-1)[0], -1]]);
   }
