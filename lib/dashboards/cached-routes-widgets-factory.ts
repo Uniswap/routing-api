@@ -77,6 +77,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     const getQuoteMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
       cacheStrategy.chainId
     }`
+    const tokenIn = cacheStrategy.pair.split('/')[0]
+    const tokenOut = cacheStrategy.pair.split('/')[1]
 
     const quoteAmountsMetrics: Widget[] = [
       {
@@ -141,9 +143,9 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             properties: {
               view: 'table',
               query: `SOURCE '/aws/lambda/${this.lambdaName}'
-            | fields @timestamp, pair, quoteGasAdjustedDiff as diff, amount
-            | filter msg like 'Comparing quotes between Chain and Cache' and pair = '${pairTradeTypeChainId}' and diff != 0 
-            | sot diff desc`,
+            | fields @timestamp, pair, quoteGasAdjustedDiff as diffIn${tokenOut}, amount as amountIn${tokenIn}
+            | filter msg like 'Comparing quotes between Chain and Cache' and pair = '${pairTradeTypeChainId}' and quoteGasAdjustedDiff != 0 
+            | sort quoteGasAdjustedDiff desc`,
               region: this.region,
               title: `Quote Differences and Amounts for ${pairTradeTypeChainId}`,
             },
