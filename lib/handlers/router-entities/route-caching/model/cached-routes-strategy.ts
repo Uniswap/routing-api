@@ -53,9 +53,10 @@ export class CachedRoutesStrategy {
   public bucketPairs(): [number, number][] {
     if (this.buckets.length > 0) {
       const firstBucket: [number, number][] = [[0, this.buckets[0]]]
-      const middleBuckets: [number, number][] = this.buckets.length > 1 ? this.buckets
-        .slice(0, -1)
-        .map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!]) : []
+      const middleBuckets: [number, number][] =
+        this.buckets.length > 1
+          ? this.buckets.slice(0, -1).map((bucket, i): [number, number] => [bucket, this.buckets[i + 1]!])
+          : []
       const lastBucket: [number, number][] = [[this.buckets.slice(-1)[0], -1]]
 
       return firstBucket.concat(middleBuckets).concat(lastBucket)
