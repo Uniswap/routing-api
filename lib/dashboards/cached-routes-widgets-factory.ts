@@ -83,14 +83,13 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
         width: 24,
         height: 8,
         properties: {
-          view: 'timeSeries',
-          stacked: false,
-          query: `SOURCE '/aws/lambda/${this.lambdaName}' 
-            | fields @timestamp, pair, quoteGasAdjustedDiff, quoteDiff 
-            | filter msg like 'Comparing' and pair = '${pair}' 
-            | stats sum(quoteDiff) as QuoteDiff, sum(quoteGasAdjustedDiff) as QuoteGasAdjustedDiff by bin(1m)`,
+          view: 'table',
+          query: `SOURCE '/aws/lambda/${this.lambdaName}'
+            | fields @timestamp, pair, quoteGasAdjustedDiff as diff, amount
+            | filter msg like 'Comparing quotes between Chain and Cache' and pair = '${pair}' and diff != 0 
+            | sot diff desc`,
           region: this.region,
-          title: `Quote Differences for ${pair}`,
+          title: `Quote Differences and Amounts for ${pair}`,
         },
       },
     ]
