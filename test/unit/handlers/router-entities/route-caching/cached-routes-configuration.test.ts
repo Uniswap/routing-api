@@ -22,10 +22,10 @@ describe('CachedRoutesConfiguration', () => {
     expect(fetchedStrategy).to.not.be.undefined
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
-    const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
+    const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(1)
-    expect(cachingParameters?.cacheMode).to.eq(CacheMode.Tapcompare)
+    expect(cachingParameters?.cacheMode).to.eq(CacheMode.Livemode)
   })
 
   it('can find the strategy, even if token has different capitalization', () => {
@@ -41,7 +41,7 @@ describe('CachedRoutesConfiguration', () => {
     expect(fetchedStrategy).to.not.be.undefined
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
-    const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
+    const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(1)
   })
@@ -59,7 +59,7 @@ describe('CachedRoutesConfiguration', () => {
     expect(fetchedStrategy).to.not.be.undefined
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 5 * 10 ** WETH.decimals)
-    const cachingParameters = fetchedStrategy?.getCachingParameters(currencyAmount)
+    const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
     expect(cachingParameters?.bucket).to.eq(5)
   })

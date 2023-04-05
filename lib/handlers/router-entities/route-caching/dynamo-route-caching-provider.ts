@@ -52,7 +52,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    */
   protected async _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
-    const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
+    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
 
     if (cachingParameters) {
       return cachingParameters.blocksToLive
@@ -81,7 +81,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): Promise<CachedRoutes | undefined> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
-    const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
+    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
 
     if (cachingParameters) {
       const partitionKey = new PairTradeTypeChainId({
@@ -153,7 +153,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    */
   protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
-    const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
+    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
 
     if (cachingParameters) {
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
@@ -224,7 +224,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): Promise<CacheMode> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
-    const cachingParameters = cachedRoutesStrategy?.getCachingParameters(amount)
+    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
 
     if (cachingParameters) {
       log.info(

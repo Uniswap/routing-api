@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
-import { CACHED_ROUTES_PAIRS } from '../handlers/router-entities/route-caching'
+import { CACHED_ROUTES_CONFIGURATION, CachedRoutesStrategy } from '../handlers/router-entities/route-caching'
+import { TradeType } from '@uniswap/sdk-core'
 
 export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   region: string
@@ -16,7 +17,10 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
 
   generateWidgets(): Widget[] {
     const cacheHitMissMetrics = this.generateCacheHitMissMetricsWidgets()
-    const quoteDiffMetrics = _.flatMap(CACHED_ROUTES_PAIRS, (pair) => this.generateQuoteDiffWidgetsFromPair(pair))
+
+    const quoteDiffMetrics = _.flatMap(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (cacheStrategy) => {
+      return this.generateQuoteDiffWidgetsFromPair(cacheStrategy)
+    })
 
     return cacheHitMissMetrics.concat(quoteDiffMetrics)
   }
@@ -26,7 +30,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       {
         type: 'text',
         width: 24,
-        height: 2,
+        height: 1,
         properties: {
           markdown: `# Overall Cache Hit/Miss`,
         },
@@ -68,31 +72,107 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     ]
   }
 
-  private generateQuoteDiffWidgetsFromPair(pair: string): Widget[] {
-    return [
+  private generateQuoteDiffWidgetsFromPair(cacheStrategy: CachedRoutesStrategy): Widget[] {
+    const pairTradeTypeChainId = cacheStrategy.readablePairTradeTypeChainId()
+    const getQuoteMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
+      cacheStrategy.chainId
+    }`
+
+    const quoteAmountsMetrics: Widget[] = [
       {
         type: 'text',
         width: 24,
-        height: 2,
+        height: 1,
         properties: {
-          markdown: `# Quote Differences for ${pair}`,
+          markdown: `# Cached Routes Performance for ${pairTradeTypeChainId}`,
         },
       },
       {
-        type: 'log',
+        type: 'metric',
         width: 24,
-        height: 8,
+        height: 6,
         properties: {
           view: 'timeSeries',
           stacked: false,
-          query: `SOURCE '/aws/lambda/${this.lambdaName}' 
-            | fields @timestamp, pair, quoteGasAdjustedDiff, quoteDiff 
-            | filter msg like 'Comparing' and pair = '${pair}' 
-            | stats sum(quoteDiff) as QuoteDiff, sum(quoteGasAdjustedDiff) as QuoteGasAdjustedDiff by bin(1m)`,
+          metrics: [
+            [
+              this.namespace,
+              getQuoteMetricName,
+              'Service',
+              'RoutingAPI',
+              { label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Quotes` },
+            ],
+          ],
           region: this.region,
-          title: `Quote Differences for ${pair}`,
+          title: `Number of requested quotes`,
+          period: 300,
+          stat: 'SampleCount',
+        },
+      },
+      {
+        type: 'metric',
+        width: 24,
+        height: 9,
+        properties: {
+          view: 'timeSeries',
+          stacked: true,
+          metrics: cacheStrategy
+            .bucketPairs()
+            .map((bucket) => [
+              this.namespace,
+              getQuoteMetricName,
+              'Service',
+              'RoutingAPI',
+              this.generateStatWithLabel(bucket, cacheStrategy.pair, cacheStrategy._tradeType),
+            ]),
+          region: this.region,
+          title: `Distribution of quotes ${pairTradeTypeChainId}`,
+          period: 300,
         },
       },
     ]
+
+    const tapcompareMetrics: Widget[] = cacheStrategy.willTapcompare
+      ? [
+          {
+            type: 'log',
+            width: 24,
+            height: 8,
+            properties: {
+              view: 'table',
+              query: `SOURCE '/aws/lambda/${this.lambdaName}'
+            | fields @timestamp, pair, quoteGasAdjustedDiff as diff, amount
+            | filter msg like 'Comparing quotes between Chain and Cache' and pair = '${pairTradeTypeChainId}' and diff != 0 
+            | sot diff desc`,
+              region: this.region,
+              title: `Quote Differences and Amounts for ${pairTradeTypeChainId}`,
+            },
+          },
+        ]
+      : []
+
+    return quoteAmountsMetrics.concat(tapcompareMetrics)
+  }
+
+  private generateStatWithLabel(
+    [min, max]: [number, number],
+    pair: string,
+    tradeType: TradeType
+  ): { stat: string; label: string } {
+    const tokens = pair.split('/')
+    const maxNormalized = max > 0 ? max.toString() : ''
+
+    switch (tradeType) {
+      case TradeType.EXACT_INPUT:
+        return {
+          stat: `PR(${min}:${maxNormalized})`,
+          label: `${min} to ${max} ${tokens[0]}`,
+        }
+      case TradeType.EXACT_OUTPUT:
+        return {
+          stat: `PR(${min}:${maxNormalized})`,
+          label: `${min} to ${max} ${tokens[1]}`,
+        }
+    }
   }
 }
