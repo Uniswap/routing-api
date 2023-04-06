@@ -28,7 +28,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
         const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
         const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
 
-        return this.generateTapcompareMetrics(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
+        return this.generateTapcompareWidgets(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
       })
 
       wildcardStrategiesWidgets.unshift({
@@ -158,7 +158,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     let tapcompareMetrics: Widget[] = []
 
     if (cacheStrategy.willTapcompare) {
-      tapcompareMetrics = this.generateTapcompareMetrics(tokenIn, tokenOut, pairTradeTypeChainId)
+      tapcompareMetrics = this.generateTapcompareWidgets(tokenIn, tokenOut, pairTradeTypeChainId)
     }
 
     return quoteAmountsMetrics.concat(tapcompareMetrics)
@@ -186,7 +186,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     }
   }
 
-  private generateTapcompareMetrics(tokenIn: string, tokenOut: string, pairTradeTypeChainId: string): Widget[] {
+  private generateTapcompareWidgets(tokenIn: string, tokenOut: string, pairTradeTypeChainId: string): Widget[] {
     // Escape the pairTradeTypeChainId in order to be used for matching against wildcards too
     const escapedPairTradeTypeChainId = pairTradeTypeChainId
       .replace(/\//g, '\\/') // Escape forward slashes
