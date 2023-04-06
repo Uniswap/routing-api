@@ -18,16 +18,15 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   generateWidgets(): Widget[] {
     const cacheHitMissWidgets = this.generateCacheHitMissMetricsWidgets()
 
-    const [wildcardStrategies, strategies] = _.partition(
-      Array.from(CACHED_ROUTES_CONFIGURATION.values()),
-      (strategy) => strategy.pair.includes('*')
+    const [wildcardStrategies, strategies] = _.partition(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (strategy) =>
+      strategy.pair.includes('*')
     )
 
     let wildcardStrategiesWidgets: Widget[] = []
     if (wildcardStrategies.length > 0) {
       wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) => {
-        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*','TokenIn')
-        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*','TokenOut')
+        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
+        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
 
         return this.generateTapcompareMetrics(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
       })
@@ -192,8 +191,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   private generateTapcompareMetrics(tokenIn: string, tokenOut: string, pairTradeTypeChainId: string): Widget[] {
     // Escape the pairTradeTypeChainId in order to be used for matching against wildcards too
     const escapedPairTradeTypeChainId = pairTradeTypeChainId
-      .replace(/\//g, '\\/')   // Escape forward slashes
-      .replace(/\*/g, '.*')   // Replace * with .* to match against any character in the pair
+      .replace(/\//g, '\\/') // Escape forward slashes
+      .replace(/\*/g, '.*') // Replace * with .* to match against any character in the pair
 
     const widget: Widget[] = [
       {

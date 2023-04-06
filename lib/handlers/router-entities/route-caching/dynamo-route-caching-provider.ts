@@ -313,7 +313,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()} or ${withWildcard.toString()}`
     )
 
-    return CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ?? CACHED_ROUTES_CONFIGURATION.get(withWildcard.toString())
+    return (
+      CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ??
+      CACHED_ROUTES_CONFIGURATION.get(withWildcard.toString())
+    )
   }
 
   /**
