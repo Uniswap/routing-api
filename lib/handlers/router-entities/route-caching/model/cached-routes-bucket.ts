@@ -9,7 +9,7 @@ interface CachedRoutesBucketsArgs {
   /**
    * For the cached route associated to this bucket, how many blocks should the cached route be valid for.
    */
-  blocksToLive: number
+  blocksToLive?: number
   /**
    * The CacheMode associated to this bucket. Setting it to `Livemode` will enable caching the route for this bucket
    */
@@ -21,9 +21,9 @@ export class CachedRoutesBucket {
   public readonly blocksToLive: number
   public readonly cacheMode: CacheMode
 
-  constructor({ bucket, blocksToLive, cacheMode }: CachedRoutesBucketsArgs) {
+  constructor({ bucket, blocksToLive = 1, cacheMode }: CachedRoutesBucketsArgs) {
     this.bucket = bucket
-    this.blocksToLive = blocksToLive
+    this.blocksToLive = blocksToLive // by default this value is 1, which means it's only cached in the current block.
     this.cacheMode = cacheMode
   }
 }
