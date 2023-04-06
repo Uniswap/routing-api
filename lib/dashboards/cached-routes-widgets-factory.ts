@@ -41,9 +41,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       })
     }
 
-    const strategiesWidgets = _.flatMap(strategies, (cacheStrategy) =>
-      this.generateWidgetsForStrategies(cacheStrategy)
-    )
+    const strategiesWidgets = _.flatMap(strategies, (cacheStrategy) => this.generateWidgetsForStrategies(cacheStrategy))
 
     return cacheHitMissWidgets.concat(wildcardStrategiesWidgets).concat(strategiesWidgets)
   }
