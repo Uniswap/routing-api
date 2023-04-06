@@ -26,8 +26,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     let wildcardStrategiesWidgets: Widget[] = []
     if (wildcardStrategies.length > 0) {
       wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) => {
-        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*','Any')
-        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*','Any')
+        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*','TokenIn')
+        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*','TokenOut')
 
         return this.generateTapcompareMetrics(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
       })
@@ -203,7 +203,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
         properties: {
           view: 'table',
           query: `SOURCE '/aws/lambda/${this.lambdaName}'
-            | fields @timestamp, pair, quoteGasAdjustedDiff as diffIn${tokenOut}, amount as amountIn${tokenIn}
+            | fields @timestamp, pair, quoteGasAdjustedDiff as diffOf${tokenOut}, amount as amountOf${tokenIn}
             | filter msg like 'Comparing quotes between Chain and Cache' and pair like /${escapedPairTradeTypeChainId}/ and quoteGasAdjustedDiff != 0 
             | sort quoteGasAdjustedDiff desc`,
           region: this.region,
