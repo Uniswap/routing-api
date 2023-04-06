@@ -26,8 +26,8 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
       buckets: [
-        new CachedRoutesBucket({ bucket: 1, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
-        new CachedRoutesBucket({ bucket: 2, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
+        new CachedRoutesBucket({ bucket: 1, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 2, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 3, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 5, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 8, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
