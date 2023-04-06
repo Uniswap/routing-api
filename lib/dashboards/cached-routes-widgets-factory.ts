@@ -16,13 +16,34 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   }
 
   generateWidgets(): Widget[] {
-    const cacheHitMissMetrics = this.generateCacheHitMissMetricsWidgets()
+    const cacheHitMissWidgets = this.generateCacheHitMissMetricsWidgets()
 
-    const quoteDiffMetrics = _.flatMap(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (cacheStrategy) => {
-      return this.generateQuoteDiffWidgetsFromPair(cacheStrategy)
-    })
+    const [wildcardStrategies, strategies] = _.partition(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (strategy) =>
+      strategy.pair.includes('*')
+    )
 
-    return cacheHitMissMetrics.concat(quoteDiffMetrics)
+    let wildcardStrategiesWidgets: Widget[] = []
+    if (wildcardStrategies.length > 0) {
+      wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) => {
+        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
+        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
+
+        return this.generateTapcompareWidgets(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
+      })
+
+      wildcardStrategiesWidgets.unshift({
+        type: 'text',
+        width: 24,
+        height: 1,
+        properties: {
+          markdown: `# Wildcard pairs`,
+        },
+      })
+    }
+
+    const strategiesWidgets = _.flatMap(strategies, (cacheStrategy) => this.generateWidgetsForStrategies(cacheStrategy))
+
+    return cacheHitMissWidgets.concat(wildcardStrategiesWidgets).concat(strategiesWidgets)
   }
 
   private generateCacheHitMissMetricsWidgets(): Widget[] {
@@ -72,7 +93,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     ]
   }
 
-  private generateQuoteDiffWidgetsFromPair(cacheStrategy: CachedRoutesStrategy): Widget[] {
+  private generateWidgetsForStrategies(cacheStrategy: CachedRoutesStrategy): Widget[] {
     const pairTradeTypeChainId = cacheStrategy.readablePairTradeTypeChainId()
     const getQuoteMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
       cacheStrategy.chainId
@@ -134,24 +155,11 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       },
     ]
 
-    const tapcompareMetrics: Widget[] = cacheStrategy.willTapcompare
-      ? [
-          {
-            type: 'log',
-            width: 24,
-            height: 8,
-            properties: {
-              view: 'table',
-              query: `SOURCE '/aws/lambda/${this.lambdaName}'
-            | fields @timestamp, pair, quoteGasAdjustedDiff as diffIn${tokenOut}, amount as amountIn${tokenIn}
-            | filter msg like 'Comparing quotes between Chain and Cache' and pair = '${pairTradeTypeChainId}' and quoteGasAdjustedDiff != 0 
-            | sort quoteGasAdjustedDiff desc`,
-              region: this.region,
-              title: `Quote Differences and Amounts for ${pairTradeTypeChainId}`,
-            },
-          },
-        ]
-      : []
+    let tapcompareMetrics: Widget[] = []
+
+    if (cacheStrategy.willTapcompare) {
+      tapcompareMetrics = this.generateTapcompareWidgets(tokenIn, tokenOut, pairTradeTypeChainId)
+    }
 
     return quoteAmountsMetrics.concat(tapcompareMetrics)
   }
@@ -176,5 +184,31 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           label: `${min} to ${max} ${tokens[1]}`,
         }
     }
+  }
+
+  private generateTapcompareWidgets(tokenIn: string, tokenOut: string, pairTradeTypeChainId: string): Widget[] {
+    // Escape the pairTradeTypeChainId in order to be used for matching against wildcards too
+    const escapedPairTradeTypeChainId = pairTradeTypeChainId
+      .replace(/\//g, '\\/') // Escape forward slashes
+      .replace(/\*/g, '.*') // Replace * with .* to match against any character in the pair
+
+    const widget: Widget[] = [
+      {
+        type: 'log',
+        width: 24,
+        height: 8,
+        properties: {
+          view: 'table',
+          query: `SOURCE '/aws/lambda/${this.lambdaName}'
+            | fields @timestamp, pair, quoteGasAdjustedDiff as diffOf${tokenOut}, amount as amountOf${tokenIn}
+            | filter msg like 'Comparing quotes between Chain and Cache' and pair like /${escapedPairTradeTypeChainId}/ and quoteGasAdjustedDiff != 0 
+            | sort quoteGasAdjustedDiff desc`,
+          region: this.region,
+          title: `Quote Differences and Amounts for ${pairTradeTypeChainId}`,
+        },
+      },
+    ]
+
+    return widget
   }
 }

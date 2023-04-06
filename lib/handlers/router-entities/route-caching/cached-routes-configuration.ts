@@ -4,10 +4,6 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesBucket } from './model/cached-routes-bucket'
 
-// Used for building a dashboard to track the performance of these routes
-// Keep this in sync with the configuration below.
-export const CACHED_ROUTES_PAIRS = ['WETH/USDC/ExactIn/1', 'USDC/WETH/ExactIn/1']
-
 /**
  * This is the main configuration for the caching strategies of routes.
  *
@@ -32,19 +28,20 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       buckets: [
         new CachedRoutesBucket({ bucket: 1, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
         new CachedRoutesBucket({ bucket: 2, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
+        new CachedRoutesBucket({ bucket: 3, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 5, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 10, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 30, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 50, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 100, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 8, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 13, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 21, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 34, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 55, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
       ],
     }),
   ],
   [
     new PairTradeTypeChainId({
       tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', //WETH
+      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
     }).toString(),
@@ -53,14 +50,38 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
       buckets: [
-        new CachedRoutesBucket({ bucket: 500, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
-        new CachedRoutesBucket({ bucket: 1000, blocksToLive: 1, cacheMode: CacheMode.Livemode }),
-        new CachedRoutesBucket({ bucket: 3000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 5000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 10000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 50000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 100000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
-        new CachedRoutesBucket({ bucket: 500000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 1_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 2_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 3_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 8_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 13_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 21_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 34_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 55_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 89_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 144_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 233_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 377_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 610_000, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+      tokenOut: '*', // ANY TOKEN
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: 'WETH/*',
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 1, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 2, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 3, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
+        new CachedRoutesBucket({ bucket: 5, blocksToLive: 1, cacheMode: CacheMode.Tapcompare }),
       ],
     }),
   ],
