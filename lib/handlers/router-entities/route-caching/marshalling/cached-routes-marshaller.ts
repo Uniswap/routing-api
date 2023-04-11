@@ -13,6 +13,7 @@ export interface MarshalledCachedRoutes {
   protocolsCovered: Protocol[]
   blockNumber: number
   tradeType: TradeType
+  originalAmount: string
   blocksToLive: number
 }
 
@@ -26,6 +27,7 @@ export class CachedRoutesMarshaller {
       protocolsCovered: cachedRoutes.protocolsCovered,
       blockNumber: cachedRoutes.blockNumber,
       tradeType: cachedRoutes.tradeType,
+      originalAmount: cachedRoutes.originalAmount,
       blocksToLive: cachedRoutes.blocksToLive,
     }
   }
@@ -39,6 +41,7 @@ export class CachedRoutesMarshaller {
       protocolsCovered: marshalledCachedRoutes.protocolsCovered,
       blockNumber: marshalledCachedRoutes.blockNumber,
       tradeType: marshalledCachedRoutes.tradeType,
+      originalAmount: marshalledCachedRoutes.originalAmount,
       blocksToLive: marshalledCachedRoutes.blocksToLive,
     })
   }
