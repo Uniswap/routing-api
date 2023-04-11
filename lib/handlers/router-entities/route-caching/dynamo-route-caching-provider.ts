@@ -352,7 +352,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @private
    */
   private isAllowedInCache(cachingBucket: CachedRoutesBucket, cachedRoutes: CachedRoutes): boolean {
-    return (cachingBucket.maxSplits <= 0 || cachedRoutes.routes.length <= cachingBucket.maxSplits) &&
+    return (
+      (cachingBucket.maxSplits <= 0 || cachedRoutes.routes.length <= cachingBucket.maxSplits) &&
       cachedRoutes.routes.some((route) => route.protocol != Protocol.V2)
+    )
   }
 }
