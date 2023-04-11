@@ -342,19 +342,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   /**
    * Helper function that based on the CachingBucket can determine if the route is allowed in cache.
-   * There are 3 conditions, currently:
+   * There are 2 conditions, currently:
    * 1. `cachingBucket.maxSplits <= 0` indicate that any number of maxSplits is allowed
    * 2. `cachedRoutes.routes.length <= maxSplits` to test that there are fewer splits than allowed
-   * 3. There has to be at least one route that is not V2 (Given that V2 pools index take time to update)
    *
    * @param cachingBucket
    * @param cachedRoutes
    * @private
    */
   private isAllowedInCache(cachingBucket: CachedRoutesBucket, cachedRoutes: CachedRoutes): boolean {
-    return (
-      (cachingBucket.maxSplits <= 0 || cachedRoutes.routes.length <= cachingBucket.maxSplits) &&
-      cachedRoutes.routes.some((route) => route.protocol != Protocol.V2)
-    )
+    return cachingBucket.maxSplits <= 0 || cachedRoutes.routes.length <= cachingBucket.maxSplits
   }
 }
