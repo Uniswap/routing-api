@@ -59,7 +59,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       {
         type: 'metric',
         width: 24,
-        height: 6,
+        height: 7,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -80,12 +80,18 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           title: 'Cache Hit and Miss Rates of Cachemode.Livemode',
           period: 300,
           stat: 'Sum',
+          yAxis: {
+            left: {
+              min: 0,
+              max: 100,
+            },
+          },
         },
       },
       {
         type: 'metric',
         width: 24,
-        height: 6,
+        height: 7,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -106,6 +112,12 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           title: 'Cache Hit and Miss Rates of cachemode.Tapcompare',
           period: 300,
           stat: 'Sum',
+          yAxis: {
+            left: {
+              min: 0,
+              max: 100,
+            },
+          },
         },
       },
     ]
