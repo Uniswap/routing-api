@@ -84,7 +84,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             left: {
               min: 0,
               max: 100,
-            }
+            },
           },
         },
       },
@@ -116,7 +116,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             left: {
               min: 0,
               max: 100,
-            }
+            },
           },
         },
       },
