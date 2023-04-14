@@ -82,9 +82,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): Promise<CachedRoutes | undefined> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
-    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
+    const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
 
-    if (cachingParameters) {
+    if (cachingBucket) {
       const partitionKey = new PairTradeTypeChainId({
         tokenIn: tokenIn.address,
         tokenOut: tokenOut.address,
@@ -93,7 +93,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       })
       const partialSortKey = new ProtocolsBucketBlockNumber({
         protocols,
-        bucket: cachingParameters.bucket,
+        bucket: cachingBucket.bucket,
       })
 
       const queryParams = {
@@ -109,7 +109,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           ':sk': partialSortKey.protocolsBucketPartialKey(),
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
-        Limit: 1, // Only retrieve the most recent item
+        Limit: Math.max(cachingBucket.withLastNCachedRoutes, 1),
       }
 
       try {
@@ -120,14 +120,28 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
 
         if (result.Items && result.Items.length > 0) {
-          // If we got a response with more than 1 item, we extract the binary field from the response
-          const itemBinary = result.Items[0]?.item
-          // Then we convert it into a Buffer
-          const cachedRoutesBuffer = Buffer.from(itemBinary)
-          // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
-          const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
-          // Finally we unmarshal that JSON into a `CachedRoutes` object
-          const cachedRoutes: CachedRoutes = CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+          const cachedRoutesArr: CachedRoutes[] = result.Items.map((record) => {
+            // If we got a response with more than 1 item, we extract the binary field from the response
+            const itemBinary = record.item
+            // Then we convert it into a Buffer
+            const cachedRoutesBuffer = Buffer.from(itemBinary)
+            // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
+            const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
+            // Finally we unmarshal that JSON into a `CachedRoutes` object
+            return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+          })
+
+          const cachedRoutes = cachedRoutesArr.slice(1, -1).reduce((prev, curr) => new CachedRoutes({
+            routes: prev.routes.concat(curr.routes),
+            chainId: prev.chainId,
+            tokenIn: prev.tokenIn,
+            tokenOut: prev.tokenOut,
+            protocolsCovered: prev.protocolsCovered,
+            blockNumber: Math.max(prev.blockNumber, curr.blockNumber),
+            tradeType: prev.tradeType,
+            originalAmount: `${prev.originalAmount}, ${curr.originalAmount}`,
+            blocksToLive: prev.blocksToLive
+          }), cachedRoutesArr[0])
 
           log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
