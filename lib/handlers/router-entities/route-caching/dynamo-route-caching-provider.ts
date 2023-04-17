@@ -287,9 +287,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         }/${tradeType}/${chainId}`
       )
 
-      // TODO(mcervera): Reenable after testing
-      // return cachingParameters.cacheMode
-      return CacheMode.Tapcompare // Disabling live caches while testing a significant change
+      return cachingParameters.cacheMode
     } else {
       log.info(
         {
