@@ -146,13 +146,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           cachedRoutesArr.forEach((cachedRoutes) => {
             cachedRoutes.routes.forEach((cachedRoute) => {
-              // Using a map to remove duplicates (NOTE: This might still retain duplicated routes with different percent split)
-              routesMap.set(this.cachedRouteId(cachedRoute), cachedRoute)
+              // we use the stringified route as identifier
+              const routeId = routeToString(cachedRoute.route)
+              // Using a map to remove duplicates, we will the different percents of different routes.
+              if (!routesMap.has(routeId)) routesMap.set(routeId, cachedRoute)
             })
             // Find the latest blockNumber
             blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
             // Keep track of all the originalAmounts
-            originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount}`
+            originalAmount = originalAmount == '' ? cachedRoutes.originalAmount :`${originalAmount}, ${cachedRoutes.originalAmount}`
           })
 
           const first = cachedRoutesArr[0]
@@ -183,11 +185,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // We only get here if we didn't find a cachedRoutes
     return undefined
-  }
-
-  // TODO(mcervera): This could be a method inside the `CachedRoute` class in SOR.
-  private cachedRouteId(cachedRoute: CachedRoute<V3Route | V2Route | MixedRoute>): string {
-    return `[${cachedRoute.percent}%] ${routeToString(cachedRoute.route)}`
   }
 
   /**
