@@ -5,7 +5,7 @@ import {
   ChainId,
   IRouteCachingProvider,
   log,
-  routeToString
+  routeToString,
 } from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -167,7 +167,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             blockNumber,
             tradeType: first.tradeType,
             originalAmount,
-            blocksToLive: first.blocksToLive
+            blocksToLive: first.blocksToLive,
           })
 
           log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)

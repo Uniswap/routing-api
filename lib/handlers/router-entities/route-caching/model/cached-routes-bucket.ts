@@ -33,7 +33,13 @@ export class CachedRoutesBucket {
   public readonly maxSplits: number
   public readonly withLastNCachedRoutes: number
 
-  constructor({ bucket, blocksToLive = 1, cacheMode, maxSplits = 0, withLastNCachedRoutes = 1}: CachedRoutesBucketsArgs) {
+  constructor({
+    bucket,
+    blocksToLive = 1,
+    cacheMode,
+    maxSplits = 0,
+    withLastNCachedRoutes = 1,
+  }: CachedRoutesBucketsArgs) {
     this.bucket = bucket
     this.blocksToLive = blocksToLive // by default this value is 1, which means it's only cached in the current block.
     this.cacheMode = cacheMode
