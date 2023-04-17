@@ -5,7 +5,7 @@ import {
   ChainId,
   IRouteCachingProvider,
   log,
-  routeToString,
+  routeToString
 } from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -286,7 +286,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         }/${tradeType}/${chainId}`
       )
 
-      return cachingParameters.cacheMode
+      // TODO(mcervera): Reenable after testing
+      // return cachingParameters.cacheMode
+      return CacheMode.Tapcompare // Disabling live caches while testing a significant change
     } else {
       log.info(
         {
