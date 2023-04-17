@@ -1,4 +1,12 @@
-import { CachedRoutes, CacheMode, ChainId, IRouteCachingProvider, log } from '@uniswap/smart-order-router'
+import {
+  CachedRoute,
+  CachedRoutes,
+  CacheMode,
+  ChainId,
+  IRouteCachingProvider,
+  log,
+  routeToString
+} from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
@@ -8,6 +16,7 @@ import { CachedRoutesMarshaller } from './marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 import { CachedRoutesBucket } from './model'
+import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 
 interface ConstructorParams {
   /**
@@ -131,17 +140,35 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
           })
 
-          const cachedRoutes = cachedRoutesArr.slice(1, -1).reduce((prev, curr) => new CachedRoutes({
-            routes: prev.routes.concat(curr.routes),
-            chainId: prev.chainId,
-            tokenIn: prev.tokenIn,
-            tokenOut: prev.tokenOut,
-            protocolsCovered: prev.protocolsCovered,
-            blockNumber: Math.max(prev.blockNumber, curr.blockNumber),
-            tradeType: prev.tradeType,
-            originalAmount: `${prev.originalAmount}, ${curr.originalAmount}`,
-            blocksToLive: prev.blocksToLive
-          }), cachedRoutesArr[0])
+          const routesMap: Map<string, CachedRoute<V3Route | V2Route | MixedRoute>> = new Map()
+          var blockNumber: number = 0
+          var originalAmount: string = ''
+
+          cachedRoutesArr.forEach((cachedRoutes) => {
+            cachedRoutes.routes.forEach((cachedRoute) => {
+              // Using a map to remove duplicates (NOTE: This might still retain duplicated routes with different percent split)
+              routesMap.set(this.cachedRouteId(cachedRoute), cachedRoute)
+            })
+            // Find the latest blockNumber
+            blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
+            // Keep track of all the originalAmounts
+            originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount}`
+          })
+
+          const first = cachedRoutesArr[0]
+
+          // Build a new CachedRoutes object with the values calculated earlier
+          const cachedRoutes = new CachedRoutes({
+            routes: Array.from(routesMap.values()),
+            chainId: first.chainId,
+            tokenIn: first.tokenIn,
+            tokenOut: first.tokenOut,
+            protocolsCovered: first.protocolsCovered,
+            blockNumber,
+            tradeType: first.tradeType,
+            originalAmount,
+            blocksToLive: first.blocksToLive
+          })
 
           log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
@@ -156,6 +183,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // We only get here if we didn't find a cachedRoutes
     return undefined
+  }
+
+  // TODO(mcervera): This could be a method inside the `CachedRoute` class in SOR.
+  private cachedRouteId(cachedRoute: CachedRoute<V3Route | V2Route | MixedRoute>): string {
+    return `[${cachedRoute.percent}%] ${routeToString(cachedRoute.route)}`
   }
 
   /**
