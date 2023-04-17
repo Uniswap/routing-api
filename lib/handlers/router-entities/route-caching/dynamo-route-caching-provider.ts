@@ -5,7 +5,7 @@ import {
   ChainId,
   IRouteCachingProvider,
   log,
-  routeToString
+  routeToString,
 } from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -154,7 +154,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             // Find the latest blockNumber
             blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
             // Keep track of all the originalAmounts
-            originalAmount = originalAmount == '' ? cachedRoutes.originalAmount :`${originalAmount}, ${cachedRoutes.originalAmount}`
+            originalAmount =
+              originalAmount == '' ? cachedRoutes.originalAmount : `${originalAmount}, ${cachedRoutes.originalAmount}`
           })
 
           const first = cachedRoutesArr[0]
