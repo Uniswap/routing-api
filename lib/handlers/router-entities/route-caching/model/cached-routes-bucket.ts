@@ -19,6 +19,11 @@ interface CachedRoutesBucketsArgs {
    * A value of 1 indicates that at most there can only be 1 split in the route in order to be cached.
    */
   maxSplits?: number
+  /**
+   * When fetching the CachedRoutes, we could opt for using the last N routes, from the last N blocks
+   * This way we would query the price for all the recent routes that have been cached as the best routes
+   */
+  withLastNCachedRoutes?: number
 }
 
 export class CachedRoutesBucket {
@@ -26,11 +31,19 @@ export class CachedRoutesBucket {
   public readonly blocksToLive: number
   public readonly cacheMode: CacheMode
   public readonly maxSplits: number
+  public readonly withLastNCachedRoutes: number
 
-  constructor({ bucket, blocksToLive = 1, cacheMode, maxSplits = 0 }: CachedRoutesBucketsArgs) {
+  constructor({
+    bucket,
+    blocksToLive = 1,
+    cacheMode,
+    maxSplits = 0,
+    withLastNCachedRoutes = 1,
+  }: CachedRoutesBucketsArgs) {
     this.bucket = bucket
     this.blocksToLive = blocksToLive // by default this value is 1, which means it's only cached in the current block.
     this.cacheMode = cacheMode
     this.maxSplits = maxSplits // by default this value is 0, which means that any number of splits are allowed
+    this.withLastNCachedRoutes = withLastNCachedRoutes
   }
 }
