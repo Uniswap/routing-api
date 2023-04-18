@@ -134,12 +134,13 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
       buckets: [
-        // Small amounts are more likely to produce a misquote greater than 1%, so we are setting the cachemode as Darkmode
-        // This is likely because of the latency of indexing the v2 and v3 pools from different providers
-        // We should be able to lift this once we can guarantee all pools and pairs states are stable within the same block
-        new CachedRoutesBucket({ bucket: 0.1, cacheMode: CacheMode.Darkmode }),
-        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
-        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
+        // Disabling low buckets in order to test the new configuration
+        new CachedRoutesBucket({ bucket: 0.0001, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
+        new CachedRoutesBucket({ bucket: 0.001, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
+        new CachedRoutesBucket({ bucket: 0.01, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
+        new CachedRoutesBucket({ bucket: 0.1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 2, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 3, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 4, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
