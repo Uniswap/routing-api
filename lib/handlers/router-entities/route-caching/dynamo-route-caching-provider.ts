@@ -154,8 +154,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             // Find the latest blockNumber
             blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
             // Keep track of all the originalAmounts
-            originalAmount =
-              originalAmount === '' ? cachedRoutes.originalAmount : `${originalAmount}, ${cachedRoutes.originalAmount}`
+            if (originalAmount === '') {
+              originalAmount = `${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
+            } else {
+              originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
+            }
           })
 
           const first = cachedRoutesArr[0]
