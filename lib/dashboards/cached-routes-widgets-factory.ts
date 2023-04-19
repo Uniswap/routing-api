@@ -18,11 +18,29 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   generateWidgets(): Widget[] {
     const cacheHitMissWidgets = this.generateCacheHitMissMetricsWidgets()
 
-    const strategiesWidgets = _.flatMap(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (cacheStrategy) =>
-      this.generateWidgetsForStrategies(cacheStrategy)
+    const [wildcardStrategies, strategies] = _.partition(Array.from(CACHED_ROUTES_CONFIGURATION.values()), (strategy) =>
+      strategy.pair.includes('*')
     )
 
-    return cacheHitMissWidgets.concat(strategiesWidgets)
+    let wildcardStrategiesWidgets: Widget[] = []
+    if (wildcardStrategies.length > 0) {
+      wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) =>
+        this.generateWidgetsForStrategies(cacheStrategy)
+      )
+
+      wildcardStrategiesWidgets.unshift({
+        type: 'text',
+        width: 24,
+        height: 1,
+        properties: {
+          markdown: `# Wildcard pairs`,
+        },
+      })
+    }
+
+    const strategiesWidgets = _.flatMap(strategies, (cacheStrategy) => this.generateWidgetsForStrategies(cacheStrategy))
+
+    return cacheHitMissWidgets.concat(wildcardStrategiesWidgets).concat(strategiesWidgets)
   }
 
   private generateCacheHitMissMetricsWidgets(): Widget[] {
