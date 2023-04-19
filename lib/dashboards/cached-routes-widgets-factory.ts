@@ -24,12 +24,9 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
 
     let wildcardStrategiesWidgets: Widget[] = []
     if (wildcardStrategies.length > 0) {
-      wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) => {
-        const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
-        const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
-
-        return this.generateTapcompareWidgets(tokenIn, tokenOut, cacheStrategy.readablePairTradeTypeChainId())
-      })
+      wildcardStrategiesWidgets = _.flatMap(wildcardStrategies, (cacheStrategy) =>
+        this.generateWidgetsForStrategies(cacheStrategy)
+      )
 
       wildcardStrategiesWidgets.unshift({
         type: 'text',
@@ -128,8 +125,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
     const getQuoteMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
       cacheStrategy.chainId
     }`
-    const tokenIn = cacheStrategy.pair.split('/')[0]
-    const tokenOut = cacheStrategy.pair.split('/')[1]
+    const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
+    const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenIn')
 
     const quoteAmountsMetrics: Widget[] = [
       {
