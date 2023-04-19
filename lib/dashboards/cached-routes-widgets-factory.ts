@@ -227,7 +227,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
         properties: {
           view: 'table',
           query: `SOURCE '/aws/lambda/${this.lambdaName}'
-            | fields @timestamp, pair, quoteGasAdjustedDiff as diffOf${tokenOut}, amount as amountOf${tokenIn}, quoteGasAdjustedDiff * (amount/quoteGasAdjustedFromChain) as diffIn${tokenIn}Terms, diffIn${tokenIn}Terms / amount * 100 as misquotePercent, originalAmount
+            | fields @timestamp, pair, amount as amountOf${tokenIn}, quoteDiff as diffOf${tokenOut}, quoteDiff * (amount/quoteFromChain) as diffIn${tokenIn}Terms, diffIn${tokenIn}Terms / amount * 100 as misquotePercent, quoteGasAdjustedDiff as diffGasAdjustedOf${tokenOut}, quoteGasAdjustedDiff * (amount/quoteGasAdjustedFromChain) as diffGasAdjustedIn${tokenIn}Terms, diffGasAdjustedIn${tokenIn}Terms / amount * 100 as misquoteGasAdjustedPercent, gasUsedDiff, originalAmount
             | filter msg like 'Comparing quotes between Chain and Cache' and pair like /${escapedPairTradeTypeChainId}/ and quoteGasAdjustedDiff != 0 
             | sort misquotePercent desc`,
           region: this.region,
