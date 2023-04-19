@@ -134,10 +134,9 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
       buckets: [
-        // Disabling low buckets in order to test the new configuration
-        new CachedRoutesBucket({ bucket: 0.0001, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
-        new CachedRoutesBucket({ bucket: 0.001, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
-        new CachedRoutesBucket({ bucket: 0.01, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 25 }),
+        // Any amounts lower than 0.01 in Mainnet are likely to be heavily influenced by the gas prices. Darkmoding everything below 0.01
+        new CachedRoutesBucket({ bucket: 0.01, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 0.05, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 0.1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
