@@ -508,8 +508,16 @@ export class QuoteHandler extends APIGLambdaHandler<
     const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
     const pairsTracked = PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)
 
-    if (pairsTracked?.includes(tradingPair) || pairsTracked?.includes(wildcardInPair) || pairsTracked?.includes(wildcardOutPair)) {
-      const metricPair = pairsTracked?.includes(tradingPair) ? tradingPair : pairsTracked?.includes(wildcardInPair) ? wildcardInPair : wildcardOutPair
+    if (
+      pairsTracked?.includes(tradingPair) ||
+      pairsTracked?.includes(wildcardInPair) ||
+      pairsTracked?.includes(wildcardOutPair)
+    ) {
+      const metricPair = pairsTracked?.includes(tradingPair)
+        ? tradingPair
+        : pairsTracked?.includes(wildcardInPair)
+        ? wildcardInPair
+        : wildcardOutPair
 
       metric.putMetric(
         `GET_QUOTE_AMOUNT_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
