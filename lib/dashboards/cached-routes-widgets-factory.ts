@@ -160,6 +160,11 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           title: `Number of requested quotes`,
           period: 300,
           stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+            },
+          },
         },
       },
       {
@@ -192,6 +197,11 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           title: `Latency of API for requested pair`,
           period: 300,
           stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+            },
+          },
         },
       },
       {
