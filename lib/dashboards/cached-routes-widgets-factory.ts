@@ -142,8 +142,8 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       },
       {
         type: 'metric',
-        width: 24,
-        height: 6,
+        width: 12,
+        height: 9,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -165,6 +165,27 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               min: 0,
             },
           },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 9,
+        properties: {
+          view: 'timeSeries',
+          stacked: true,
+          metrics: cacheStrategy
+            .bucketPairs()
+            .map((bucket) => [
+              this.namespace,
+              getQuoteAmountMetricName,
+              'Service',
+              'RoutingAPI',
+              this.generateStatWithLabel(bucket, cacheStrategy.pair, cacheStrategy._tradeType),
+            ]),
+          region: this.region,
+          title: `Distribution of quotes ${pairTradeTypeChainId}`,
+          period: 300,
         },
       },
       {
@@ -202,27 +223,6 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               min: 0,
             },
           },
-        },
-      },
-      {
-        type: 'metric',
-        width: 24,
-        height: 9,
-        properties: {
-          view: 'timeSeries',
-          stacked: true,
-          metrics: cacheStrategy
-            .bucketPairs()
-            .map((bucket) => [
-              this.namespace,
-              getQuoteAmountMetricName,
-              'Service',
-              'RoutingAPI',
-              this.generateStatWithLabel(bucket, cacheStrategy.pair, cacheStrategy._tradeType),
-            ]),
-          region: this.region,
-          title: `Distribution of quotes ${pairTradeTypeChainId}`,
-          period: 300,
         },
       },
     ]
