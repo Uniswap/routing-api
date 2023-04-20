@@ -82,6 +82,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
+    const startTime = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
@@ -474,6 +475,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     this.logRouteMetrics(
       log,
       metric,
+      startTime,
       currencyIn,
       currencyOut,
       tokenInAddress,
@@ -493,6 +495,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   private logRouteMetrics(
     log: Logger,
     metric: IMetric,
+    startTime: number,
     currencyIn: Currency,
     currencyOut: Currency,
     tokenInAddress: string,
@@ -523,6 +526,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         `GET_QUOTE_AMOUNT_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
         Number(amount.toExact()),
         MetricLoggerUnit.None
+      )
+
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
       )
       // Create a hashcode from the routeString, this will indicate that a different route is being used
       // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
