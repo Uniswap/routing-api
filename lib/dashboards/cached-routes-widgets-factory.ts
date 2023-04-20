@@ -122,12 +122,12 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
 
   private generateWidgetsForStrategies(cacheStrategy: CachedRoutesStrategy): Widget[] {
     const pairTradeTypeChainId = cacheStrategy.readablePairTradeTypeChainId()
-    const getQuoteAmountMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
-      cacheStrategy.chainId
-    }`
-    const getQuoteLatencyMetricName = `GET_QUOTE_LATENCY_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
-      cacheStrategy.chainId
-    }`
+    const getQuoteAmountMetricName = `GET_QUOTE_AMOUNT_${
+      cacheStrategy.pair
+    }_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${cacheStrategy.chainId}`
+    const getQuoteLatencyMetricName = `GET_QUOTE_LATENCY_${
+      cacheStrategy.pair
+    }_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${cacheStrategy.chainId}`
     const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
     const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
 
@@ -177,13 +177,16 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               'RoutingAPI',
               { stat: 'p99.999', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.999` },
             ],
-            [ '...', { stat: 'p99.99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.99` } ],
-            [ '...', { stat: 'p99.9', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.9` } ],
-            [ '...', { stat: 'p99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99` } ],
-            [ '...', { stat: 'p95', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P95` } ],
-            [ '...', { stat: 'p90', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P90` } ],
-            [ '...', { stat: 'p50', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Median` } ],
-            [ '...', { stat: 'Average', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Average` } ],
+            ['...', { stat: 'p99.99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.99` }],
+            ['...', { stat: 'p99.9', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.9` }],
+            ['...', { stat: 'p99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99` }],
+            ['...', { stat: 'p95', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P95` }],
+            ['...', { stat: 'p90', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P90` }],
+            ['...', { stat: 'p50', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Median` }],
+            [
+              '...',
+              { stat: 'Average', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Average` },
+            ],
           ],
           region: this.region,
           title: `Latency of API for requested pair`,
