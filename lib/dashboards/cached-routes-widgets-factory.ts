@@ -122,9 +122,12 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
 
   private generateWidgetsForStrategies(cacheStrategy: CachedRoutesStrategy): Widget[] {
     const pairTradeTypeChainId = cacheStrategy.readablePairTradeTypeChainId()
-    const getQuoteMetricName = `GET_QUOTE_AMOUNT_${cacheStrategy.pair}_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${
-      cacheStrategy.chainId
-    }`
+    const getQuoteAmountMetricName = `GET_QUOTE_AMOUNT_${
+      cacheStrategy.pair
+    }_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${cacheStrategy.chainId}`
+    const getQuoteLatencyMetricName = `GET_QUOTE_LATENCY_${
+      cacheStrategy.pair
+    }_${cacheStrategy.tradeType.toUpperCase()}_CHAIN_${cacheStrategy.chainId}`
     const tokenIn = cacheStrategy.pair.split('/')[0].replace('*', 'TokenIn')
     const tokenOut = cacheStrategy.pair.split('/')[1].replace('*', 'TokenOut')
 
@@ -147,7 +150,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           metrics: [
             [
               this.namespace,
-              getQuoteMetricName,
+              getQuoteAmountMetricName,
               'Service',
               'RoutingAPI',
               { label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Quotes` },
@@ -155,6 +158,38 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           ],
           region: this.region,
           title: `Number of requested quotes`,
+          period: 300,
+          stat: 'SampleCount',
+        },
+      },
+      {
+        type: 'metric',
+        width: 24,
+        height: 6,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [
+              this.namespace,
+              getQuoteLatencyMetricName,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p99.999', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.999` },
+            ],
+            ['...', { stat: 'p99.99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.99` }],
+            ['...', { stat: 'p99.9', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99.9` }],
+            ['...', { stat: 'p99', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P99` }],
+            ['...', { stat: 'p95', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P95` }],
+            ['...', { stat: 'p90', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} P90` }],
+            ['...', { stat: 'p50', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Median` }],
+            [
+              '...',
+              { stat: 'Average', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Average` },
+            ],
+          ],
+          region: this.region,
+          title: `Latency of API for requested pair`,
           period: 300,
           stat: 'SampleCount',
         },
@@ -170,7 +205,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             .bucketPairs()
             .map((bucket) => [
               this.namespace,
-              getQuoteMetricName,
+              getQuoteAmountMetricName,
               'Service',
               'RoutingAPI',
               this.generateStatWithLabel(bucket, cacheStrategy.pair, cacheStrategy._tradeType),
