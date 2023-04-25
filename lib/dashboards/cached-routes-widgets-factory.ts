@@ -62,13 +62,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           stacked: false,
           metrics: [
             [{ expression: 'SUM(METRICS())', label: 'Requests', id: 'e1' }],
-            [
-              this.namespace,
-              'GetCachedRoute_hit_livemode',
-              'Service',
-              'RoutingAPI',
-              { label: 'Cache Hit', id: 'm1' },
-            ],
+            [this.namespace, 'GetCachedRoute_hit_livemode', 'Service', 'RoutingAPI', { label: 'Cache Hit', id: 'm1' }],
             ['.', 'GetCachedRoute_miss_livemode', '.', '.', { label: 'Cache Miss', id: 'm2' }],
           ],
           region: this.region,
@@ -189,7 +183,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               'Service',
               'RoutingAPI',
               { label: 'Misquote' },
-            ]
+            ],
           ],
           region: this.region,
           title: 'Total number of Misquotes from Tapcompare',
@@ -218,7 +212,13 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               'RoutingAPI',
               { label: 'Cache Hit', id: 'm1', visible: false },
             ],
-            ['.', 'TapcompareCachedRoute_quoteGasAdjustedDiffPercent', '.', '.', { label: 'Cache Miss', id: 'm2', stat: 'SampleCount', visible: false }],
+            [
+              '.',
+              'TapcompareCachedRoute_quoteGasAdjustedDiffPercent',
+              '.',
+              '.',
+              { label: 'Cache Miss', id: 'm2', stat: 'SampleCount', visible: false },
+            ],
           ],
           region: this.region,
           title: 'Misquote rate from Tapcompare',
