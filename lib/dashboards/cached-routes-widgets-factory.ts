@@ -192,7 +192,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             ]
           ],
           region: this.region,
-          title: 'Cache Hit, Miss and Total requests of Cachemode.Tapcompare',
+          title: 'Total number of Misquotes from Tapcompare',
           period: 300,
           stat: 'SampleCount',
           yAxis: {
@@ -221,7 +221,7 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
             ['.', 'TapcompareCachedRoute_quoteGasAdjustedDiffPercent', '.', '.', { label: 'Cache Miss', id: 'm2', stat: 'SampleCount', visible: false }],
           ],
           region: this.region,
-          title: 'Cache Hit and Miss Rates of cachemode.Tapcompare',
+          title: 'Misquote rate from Tapcompare',
           period: 300,
           stat: 'Sum',
           yAxis: {
