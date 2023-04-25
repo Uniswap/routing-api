@@ -55,7 +55,36 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       },
       {
         type: 'metric',
-        width: 24,
+        width: 12,
+        height: 7,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [{ expression: 'SUM(METRICS())', label: 'Requests', id: 'e1' }],
+            [
+              this.namespace,
+              'GetCachedRoute_hit_livemode',
+              'Service',
+              'RoutingAPI',
+              { label: 'Cache Hit', id: 'm1' },
+            ],
+            ['.', 'GetCachedRoute_miss_livemode', '.', '.', { label: 'Cache Miss', id: 'm2' }],
+          ],
+          region: this.region,
+          title: 'Cache Hit, Miss and Total requests of Cachemode.Livemode',
+          period: 300,
+          stat: 'Sum',
+          yAxis: {
+            left: {
+              min: 0,
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
         height: 7,
         properties: {
           view: 'timeSeries',
@@ -87,7 +116,36 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
       },
       {
         type: 'metric',
-        width: 24,
+        width: 12,
+        height: 7,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [{ expression: 'SUM(METRICS())', label: 'Requests', id: 'e1' }],
+            [
+              this.namespace,
+              'GetCachedRoute_hit_tapcompare',
+              'Service',
+              'RoutingAPI',
+              { label: 'Cache Hit', id: 'm1' },
+            ],
+            ['.', 'GetCachedRoute_miss_tapcompare', '.', '.', { label: 'Cache Miss', id: 'm2' }],
+          ],
+          region: this.region,
+          title: 'Cache Hit, Miss and Total requests of Cachemode.Tapcompare',
+          period: 300,
+          stat: 'Sum',
+          yAxis: {
+            left: {
+              min: 0,
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
         height: 7,
         properties: {
           view: 'timeSeries',
@@ -104,6 +162,63 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               { label: 'Cache Hit', id: 'm1', visible: false },
             ],
             ['.', 'GetCachedRoute_miss_tapcompare', '.', '.', { label: 'Cache Miss', id: 'm2', visible: false }],
+          ],
+          region: this.region,
+          title: 'Cache Hit and Miss Rates of cachemode.Tapcompare',
+          period: 300,
+          stat: 'Sum',
+          yAxis: {
+            left: {
+              min: 0,
+              max: 100,
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 7,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [
+              this.namespace,
+              'TapcompareCachedRoute_quoteGasAdjustedDiffPercent',
+              'Service',
+              'RoutingAPI',
+              { label: 'Misquote' },
+            ]
+          ],
+          region: this.region,
+          title: 'Cache Hit, Miss and Total requests of Cachemode.Tapcompare',
+          period: 300,
+          stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 7,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: [
+            [{ expression: 'm2/m1 * 100', label: 'Misquote Rate', id: 'e1' }],
+            [
+              this.namespace,
+              'GetCachedRoute_hit_tapcompare',
+              'Service',
+              'RoutingAPI',
+              { label: 'Cache Hit', id: 'm1', visible: false },
+            ],
+            ['.', 'TapcompareCachedRoute_quoteGasAdjustedDiffPercent', '.', '.', { label: 'Cache Miss', id: 'm2', stat: 'SampleCount', visible: false }],
           ],
           region: this.region,
           title: 'Cache Hit and Miss Rates of cachemode.Tapcompare',
