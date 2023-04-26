@@ -290,10 +290,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         }/${tradeType}/${chainId}`
       )
 
-      // TODO(mcervera): Re-enable cache after collecting metrics
-      // return cachingParameters.cacheMode
-      // We will collect metrics on latency improvements for a few hours, so we will force every cache to be Tapcompare
-      return CacheMode.Tapcompare
+      return cachingParameters.cacheMode
     } else {
       log.info(
         {
