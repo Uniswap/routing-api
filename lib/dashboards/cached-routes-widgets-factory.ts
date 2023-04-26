@@ -227,7 +227,6 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
           yAxis: {
             left: {
               min: 0,
-              max: 100,
             },
           },
         },
