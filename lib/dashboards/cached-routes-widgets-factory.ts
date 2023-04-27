@@ -327,6 +327,10 @@ export class CachedRoutesWidgetsFactory implements WidgetsFactory {
               '...',
               { stat: 'Average', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Average` },
             ],
+            [
+              '...',
+              { stat: 'Minimum', label: `${cacheStrategy.pair}/${cacheStrategy.tradeType.toUpperCase()} Minimum` },
+            ],
           ],
           region: this.region,
           title: `Latency of API for requested pair`,
