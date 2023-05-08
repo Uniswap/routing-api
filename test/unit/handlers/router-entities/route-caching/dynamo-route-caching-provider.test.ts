@@ -38,7 +38,7 @@ export const UNI_MAINNET = new Token(
   'Uniswap'
 )
 
-describe('DynamoRouteCache', async () => {
+describe('DynamoRouteCachingProvider', async () => {
   setupTables(routeTable)
 
   it('No routes cached in db returns undefined', async () => {
