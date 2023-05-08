@@ -38,12 +38,12 @@ export const UNI_MAINNET = new Token(
   'Uniswap'
 )
 
-describe('RouteRepository', async () => {
+describe('DynamoRouteCache', async () => {
   setupTables(routeTable)
 
-  it('No token in db returns null', async () => {
-    const routeRepository = new DynamoRouteCachingProvider({ cachedRoutesTableName: routeTable.TableName })
-    const route = await routeRepository.getCachedRoute(
+  it('No routes cached in db returns undefined', async () => {
+    const dynamoRouteCache = new DynamoRouteCachingProvider({ cachedRoutesTableName: routeTable.TableName })
+    const route = await dynamoRouteCache.getCachedRoute(
       1,
       CurrencyAmount.fromRawAmount(UNI_MAINNET, JSBI.BigInt(1)),
       UNI_MAINNET,
