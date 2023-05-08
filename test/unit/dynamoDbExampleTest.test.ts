@@ -31,19 +31,26 @@ const routeTable = {
 }
 
 export const UNI_MAINNET = new Token(
-    ChainId.MAINNET,
-    '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-    18,
-    'UNI',
-    'Uniswap'
-  )
+  ChainId.MAINNET,
+  '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+  18,
+  'UNI',
+  'Uniswap'
+)
 
 describe('RouteRepository', async () => {
   setupTables(routeTable)
 
   it('No token in db returns null', async () => {
     const routeRepository = new DynamoRouteCachingProvider({ cachedRoutesTableName: routeTable.TableName })
-    const route = await routeRepository.getCachedRoute(1, CurrencyAmount.fromRawAmount(UNI_MAINNET, JSBI.BigInt(1)), UNI_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], 1)
+    const route = await routeRepository.getCachedRoute(
+      1,
+      CurrencyAmount.fromRawAmount(UNI_MAINNET, JSBI.BigInt(1)),
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      1
+    )
     expect(route).to.be.undefined
   })
 })
