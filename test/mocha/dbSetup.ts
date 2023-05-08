@@ -6,7 +6,7 @@ const createTable = async (table: DynamoDB.Types.CreateTableInput) => {
 
   await ddb.createTable(table).promise()
 }
- 
+
 const getDdbOrDie = (): DynamoDB => {
   const ddb = (global as any)['__DYNAMODB_CLIENT__'] as DynamoDB
 
