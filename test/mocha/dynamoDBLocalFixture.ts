@@ -12,21 +12,25 @@ let dbInstance: ChildProcess | undefined
 ;(global as any)['__DYNAMODB_LOCAL__'] = true
 
 export const mochaGlobalSetup = async () => {
-  console.log('Starting DynamoDB')
-  dbInstance = await DDBLocal.launch(dbPort, null)
-  console.log('Started DynamoDB')
+  try {
+    console.log('Starting DynamoDB')
+    dbInstance = await DDBLocal.launch(dbPort, null)
+    console.log('Started DynamoDB')
 
-  const ddb = new DynamoDB({
-    endpoint: `localhost:${dbPort}`,
-    sslEnabled: false,
-    region: 'local',
-  })
+    const ddb = new DynamoDB({
+      endpoint: `localhost:${dbPort}`,
+      sslEnabled: false,
+      region: 'local',
+    })
 
-  dbConnectionSetup()
+    dbConnectionSetup()
 
-  exportDDBInstance(ddb)
+    exportDDBInstance(ddb)
 
-  await deleteAllTables()
+    await deleteAllTables()
+  } catch (e) {
+    console.log('Error instantiating DynamoDB', e)
+  }
 }
 
 // Overrides the default config to use the local instance of DynamoDB in tests
