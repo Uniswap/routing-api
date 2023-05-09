@@ -136,10 +136,10 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       buckets: [
         // Any amounts lower than 0.015 in Mainnet are likely to be heavily influenced by the gas prices. Darkmoding everything below 0.01
         new CachedRoutesBucket({ bucket: 0.015, cacheMode: CacheMode.Darkmode }), // Intentionally Darkmoded
-        new CachedRoutesBucket({ bucket: 0.05, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 0.05, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 0.1, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
-        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
-        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 2, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 3, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 4, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
