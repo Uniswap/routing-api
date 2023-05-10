@@ -53,7 +53,7 @@ export const TEST_POOL = new Pool(
 
 const TEST_V3_ROUTE = new V3Route([TEST_POOL], WETH, USDC_MAINNET)
 
-const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_V3_ROUTE, percent: 100})
+const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_V3_ROUTE, percent: 100 })
 const TEST_CACHED_ROUTES = new CachedRoutes({
   routes: [TEST_CACHED_ROUTE],
   chainId: TEST_CACHED_ROUTE.route.chainId,
@@ -84,7 +84,13 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
-    const cacheMode = await dynamoRouteCache.getCacheMode(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3])
+    const cacheMode = await dynamoRouteCache.getCacheMode(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3]
+    )
     // Cache needs to be in Livemode for it to be actively caching routes.
     expect(cacheMode).to.equal(CacheMode.Livemode)
 
@@ -92,8 +98,14 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(insertedIntoCache).to.be.true
 
     // Fetches route successfully from cache when it has been cached.
-    const route = await dynamoRouteCache.getCachedRoute(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], TEST_CACHED_ROUTES.blockNumber)
+    const route = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
     expect(route).to.not.be.undefined
   })
-
 })
