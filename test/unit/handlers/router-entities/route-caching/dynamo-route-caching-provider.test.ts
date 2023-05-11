@@ -51,7 +51,6 @@ const TEST_WETH_USDC_POOL = new Pool(
   -69633
 )
 
-
 const TEST_WETH_UNI_POOL = new Pool(
   WETH,
   UNI_MAINNET,
@@ -129,7 +128,14 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Livemode)
 
     // Fetches route successfully from cache when it has been cached.
-    const route = await dynamoRouteCache.getCachedRoute(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], TEST_CACHED_ROUTES.blockNumber)
+    const route = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
     expect(route).to.not.be.undefined
   })
 
