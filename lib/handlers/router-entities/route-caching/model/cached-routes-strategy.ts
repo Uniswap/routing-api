@@ -79,7 +79,7 @@ export class CachedRoutesStrategy {
     const bucket = this.buckets.find((bucket: number) => {
       // Create a CurrencyAmount object to compare the amount with the bucket.
       const bucketCurrency = CurrencyAmount.fromRawAmount(amount.currency, bucket * 10 ** amount.currency.decimals)
-      
+
       // Given that the array of buckets is sorted, we want to find the first bucket that makes the amount lessThanOrEqual to the bucket
       // refer to the examples above
       return amount.lessThan(bucketCurrency) || amount.equalTo(bucketCurrency)
