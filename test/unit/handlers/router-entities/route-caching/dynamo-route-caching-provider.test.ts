@@ -8,7 +8,7 @@ import { CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { WNATIVE_ON } from '../../../../utils/tokens'
-import { CacheMode, CachedRoute, CachedRoutes, ChainId, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
+import { CacheMode, CachedRoute, CachedRoutes, ChainId, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 
 chai.use(chaiAsPromised)
 
@@ -42,7 +42,7 @@ const TEST_ROUTE_TABLE = {
 
 const WETH = WNATIVE_ON(ChainId.MAINNET)
 
-export const TEST_POOL = new Pool(
+const TEST_WETH_USDC_POOL = new Pool(
   WETH,
   USDC_MAINNET,
   FeeAmount.HIGH,
@@ -51,9 +51,30 @@ export const TEST_POOL = new Pool(
   -69633
 )
 
-const TEST_V3_ROUTE = new V3Route([TEST_POOL], WETH, USDC_MAINNET)
 
-const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_V3_ROUTE, percent: 100})
+const TEST_WETH_UNI_POOL = new Pool(
+  WETH,
+  UNI_MAINNET,
+  FeeAmount.HIGH,
+  '2437312313659959819381354528',
+  '10272714736694327408',
+  -69633
+)
+
+const TEST_UNI_USDC_POOL = new Pool(
+  UNI_MAINNET,
+  USDC_MAINNET,
+  FeeAmount.HIGH,
+  '2437312313659959819381354528',
+  '10272714736694327408',
+  -69633
+)
+
+const TEST_WETH_USDC_V3_ROUTE = new V3Route([TEST_WETH_USDC_POOL], WETH, USDC_MAINNET)
+const TEST_WETH_UNI_V3_ROUTE = new V3Route([TEST_WETH_UNI_POOL], WETH, UNI_MAINNET)
+const TEST_UNI_USDC_ROUTE = new V3Route([TEST_UNI_USDC_POOL], UNI_MAINNET, USDC_MAINNET)
+
+const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_WETH_USDC_V3_ROUTE, percent: 100})
 const TEST_CACHED_ROUTES = new CachedRoutes({
   routes: [TEST_CACHED_ROUTE],
   chainId: TEST_CACHED_ROUTE.route.chainId,
@@ -62,38 +83,86 @@ const TEST_CACHED_ROUTES = new CachedRoutes({
   protocolsCovered: [TEST_CACHED_ROUTE.protocol],
   blockNumber: 0,
   tradeType: TradeType.EXACT_INPUT,
-  originalAmount: '10',
+  originalAmount: '1',
   blocksToLive: 5,
 })
+
+const TEST_CACHED_ROUTE_2 = new CachedRoute({ route: TEST_WETH_UNI_V3_ROUTE, percent: 100})
+const TEST_CACHED_ROUTES_2 = new CachedRoutes({
+  routes: [TEST_CACHED_ROUTE_2],
+  chainId: TEST_CACHED_ROUTE_2.route.chainId,
+  tokenIn: WETH,
+  tokenOut: UNI_MAINNET,
+  protocolsCovered: [TEST_CACHED_ROUTE_2.protocol],
+  blockNumber: 0,
+  tradeType: TradeType.EXACT_INPUT,
+  originalAmount: '1',
+  blocksToLive: 5,
+})
+
+const TEST_UNCACHED_ROUTE = new CachedRoute({ route: TEST_UNI_USDC_ROUTE, percent: 100})
+const TEST_UNCACHED_ROUTES = new CachedRoutes({
+  routes: [TEST_UNCACHED_ROUTE],
+  chainId: TEST_UNCACHED_ROUTE.route.chainId,
+  tokenIn: UNI_MAINNET,
+  tokenOut: USDC_MAINNET,
+  protocolsCovered: [TEST_UNCACHED_ROUTE.protocol],
+  blockNumber: 0,
+  tradeType: TradeType.EXACT_INPUT,
+  originalAmount: '1',
+  blocksToLive: 5,
+}) 
 
 describe('DynamoRouteCachingProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
   const dynamoRouteCache = new DynamoRouteCachingProvider({ cachedRoutesTableName: TEST_ROUTE_TABLE.TableName })
-  const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1))
-
-  it('No routes cached in db returns undefined', async () => {
-    const route = await dynamoRouteCache.getCachedRoute(
-      1,
-      CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(1)),
-      USDC_MAINNET,
-      TradeType.EXACT_INPUT,
-      [Protocol.V3],
-      1
-    )
-    expect(route).to.be.undefined
-  })
 
   it('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt( 1 * 10 ** WETH.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3])
-    // Cache needs to be in Livemode for it to be actively caching routes.
     expect(cacheMode).to.equal(CacheMode.Livemode)
 
     const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
     expect(insertedIntoCache).to.be.true
 
+    const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(TEST_CACHED_ROUTES, currencyAmount)
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Livemode)
+
     // Fetches route successfully from cache when it has been cached.
     const route = await dynamoRouteCache.getCachedRoute(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], TEST_CACHED_ROUTES.blockNumber)
     expect(route).to.not.be.undefined
+  })
+
+  it('Caches routes properly for a token pair that has its cache configured to Tapcompare', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt( 1 * 10 ** WETH.decimals))
+    const cacheMode = await dynamoRouteCache.getCacheMode(ChainId.MAINNET, currencyAmount, UNI_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3])
+    expect(cacheMode).to.equal(CacheMode.Tapcompare)
+
+    const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES_2, currencyAmount)
+    expect(insertedIntoCache).to.be.true
+
+    const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(TEST_CACHED_ROUTES_2, currencyAmount)
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Tapcompare)
+
+    // Fetches route successfully from cache, since cache is active in Tapcompare mode. 
+    const route = await dynamoRouteCache.getCachedRoute(ChainId.MAINNET, currencyAmount, UNI_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], TEST_CACHED_ROUTES_2.blockNumber)
+    expect(route).to.not.be.undefined
+  })
+
+  it('Does not cache routes for a token pair that has its cache configured in the default Darkmode', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(UNI_MAINNET, JSBI.BigInt( 1 * 10 ** UNI_MAINNET.decimals))
+    const cacheMode = await dynamoRouteCache.getCacheMode(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3])
+    expect(cacheMode).to.equal(CacheMode.Darkmode)
+
+    const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_UNCACHED_ROUTES, currencyAmount)
+    expect(insertedIntoCache).to.be.false
+
+    const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(TEST_UNCACHED_ROUTES, currencyAmount)
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Darkmode)
+
+    // Fetches nothing from the cache since cache is in Darkmode. 
+    const route = await dynamoRouteCache.getCachedRoute(ChainId.MAINNET, currencyAmount, USDC_MAINNET, TradeType.EXACT_INPUT, [Protocol.V3], TEST_CACHED_ROUTES.blockNumber)
+    expect(route).to.be.undefined
   })
 
 })
