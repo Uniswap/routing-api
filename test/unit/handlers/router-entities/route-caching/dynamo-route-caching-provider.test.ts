@@ -43,8 +43,8 @@ const TEST_ROUTE_TABLE = {
     },
   ],
   ProvisionedThroughput: {
-    ReadCapacityUnits: 5,
-    WriteCapacityUnits: 5,
+    ReadCapacityUnits: 1,
+    WriteCapacityUnits: 1,
   },
 }
 
