@@ -55,7 +55,7 @@ const TEST_WETH_USDC_POOL = new Pool(
   USDC_MAINNET,
   FeeAmount.HIGH,
   /* sqrtRatio */ '2437312313659959819381354528',
-  /* liquidity */  '10272714736694327408',
+  /* liquidity */ '10272714736694327408',
   /* tickCurrent */ -69633
 )
 
@@ -64,7 +64,7 @@ const TEST_WETH_UNI_POOL = new Pool(
   UNI_MAINNET,
   FeeAmount.HIGH,
   /* sqrtRatio */ '2437312313659959819381354528',
-  /* liquidity */  '10272714736694327408',
+  /* liquidity */ '10272714736694327408',
   /* tickCurrent */ -69633
 )
 
@@ -73,7 +73,7 @@ const TEST_UNI_USDC_POOL = new Pool(
   USDC_MAINNET,
   FeeAmount.HIGH,
   /* sqrtRatio */ '2437312313659959819381354528',
-  /* liquidity */  '10272714736694327408',
+  /* liquidity */ '10272714736694327408',
   /* tickCurrent */ -69633
 )
 
