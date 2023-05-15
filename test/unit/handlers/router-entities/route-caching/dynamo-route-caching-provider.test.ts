@@ -59,8 +59,8 @@ const TEST_WETH_USDC_POOL = new Pool(
   /* tickCurrent */ -69633
 )
 
-const TEST_WETH_UNI_POOL = new Pool(
-  WETH,
+const TEST_USDC_UNI_POOL = new Pool(
+  USDC_MAINNET,
   UNI_MAINNET,
   FeeAmount.HIGH,
   /* sqrtRatio */ '2437312313659959819381354528',
@@ -78,7 +78,7 @@ const TEST_UNI_USDC_POOL = new Pool(
 )
 
 const TEST_WETH_USDC_V3_ROUTE = new V3Route([TEST_WETH_USDC_POOL], WETH, USDC_MAINNET)
-const TEST_WETH_UNI_V3_ROUTE = new V3Route([TEST_WETH_UNI_POOL], WETH, UNI_MAINNET)
+const TEST_USDC_UNI_V3_ROUTE = new V3Route([TEST_USDC_UNI_POOL], USDC_MAINNET, UNI_MAINNET)
 const TEST_UNI_USDC_ROUTE = new V3Route([TEST_UNI_USDC_POOL], UNI_MAINNET, USDC_MAINNET)
 
 const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_WETH_USDC_V3_ROUTE, percent: 100 })
@@ -94,11 +94,11 @@ const TEST_CACHED_ROUTES = new CachedRoutes({
   blocksToLive: 5,
 })
 
-const TEST_CACHED_ROUTE_2 = new CachedRoute({ route: TEST_WETH_UNI_V3_ROUTE, percent: 100 })
+const TEST_CACHED_ROUTE_2 = new CachedRoute({ route: TEST_USDC_UNI_V3_ROUTE, percent: 100 })
 const TEST_CACHED_ROUTES_2 = new CachedRoutes({
   routes: [TEST_CACHED_ROUTE_2],
   chainId: TEST_CACHED_ROUTE_2.route.chainId,
-  tokenIn: WETH,
+  tokenIn: USDC_MAINNET,
   tokenOut: UNI_MAINNET,
   protocolsCovered: [TEST_CACHED_ROUTE_2.protocol],
   blockNumber: 0,
@@ -157,7 +157,7 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Tapcompare', async () => {
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(1 * 10 ** USDC_MAINNET.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
