@@ -147,4 +147,28 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       ],
     }),
   ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+      tokenOut: '*', // ANY TOKEN
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: 'USDC/*',
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 3_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 8_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 13_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 21_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 34_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 55_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 89_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+      ],
+    }),
+  ],
 ])
