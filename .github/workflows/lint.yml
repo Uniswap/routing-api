@@ -1,9 +1,5 @@
 name: Lint
 
-permissions:
-  actions: write
-  contents: write
-
 on:
   push:
     branches:
@@ -29,7 +25,7 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
-          github_token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prettier: true
-          auto_fix: true
+          auto_fix: false
           prettier_extensions: 'css,html,js,json,jsx,md,sass,scss,ts,tsx,vue,yaml,yml,sol'
