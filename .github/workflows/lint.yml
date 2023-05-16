@@ -13,6 +13,7 @@ jobs:
 
     permissions:
       actions: write
+      contents: write
   
     steps:
       - name: Check out Git repository
