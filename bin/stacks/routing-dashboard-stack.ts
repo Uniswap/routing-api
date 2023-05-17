@@ -3,7 +3,9 @@ import * as cdk from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { Construct } from 'constructs'
 import _ from 'lodash'
+import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-widgets-factory'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
+import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -439,6 +441,24 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
         ],
+      }),
+    })
+
+    const quoteAmountsWidgets = new QuoteAmountsWidgetsFactory(NAMESPACE, region)
+    new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
+      dashboardName: 'RoutingAPITrackedPairsDashboard',
+      dashboardBody: JSON.stringify({
+        periodOverride: 'inherit',
+        widgets: quoteAmountsWidgets.generateWidgets(),
+      }),
+    })
+
+    const cachedRoutesWidgets = new CachedRoutesWidgetsFactory(NAMESPACE, region, routingLambdaName)
+    new aws_cloudwatch.CfnDashboard(this, 'CachedRoutesPerformanceDashboard', {
+      dashboardName: 'CachedRoutesPerformanceDashboard',
+      dashboardBody: JSON.stringify({
+        periodOverride: 'inherit',
+        widgets: cachedRoutesWidgets.generateWidgets(),
       }),
     })
 

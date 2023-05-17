@@ -14,6 +14,7 @@ import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
+import { RoutingDatabaseStack } from './routing-database-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [
   ChainId.RINKEBY,
@@ -81,6 +82,8 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     })
 
+    const { cachedRoutesDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
+
     const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
       this,
       'RoutingLambdaStack',
@@ -96,6 +99,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tenderlyUser,
         tenderlyProject,
         tenderlyAccessKey,
+        cachedRoutesDynamoDb,
       }
     )
 
@@ -275,33 +279,11 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
-    const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
-      alarmName: 'RoutingAPI-SEV2-Simulation',
-      metric: new MathExpression({
-        expression: '100*(simulationFailed/simulationRequested)',
-        period: Duration.minutes(30),
-        usingMetrics: {
-          simulationRequested: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `Simulation Requested`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          simulationFailed: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `SimulationFailed`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      }),
-      threshold: 40,
-      evaluationPeriods: 2,
-      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-    })
-
+    // Simulations can fail for valid reasons. For example, if the simulation reverts due
+    // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
+    // account for the fees taken during transfer when we show the user the quote).
+    //
+    // For this reason we only alert on SEV3 to avoid unnecessary pages.
     const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
       alarmName: 'RoutingAPI-SEV3-Simulation',
       metric: new MathExpression({
@@ -324,8 +306,8 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
         },
       }),
-      threshold: 20,
-      evaluationPeriods: 2,
+      threshold: 75,
+      evaluationPeriods: 3,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
 
@@ -403,7 +385,6 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      simulationAlarmSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
       percent2XXByChainAlarm.forEach((alarm) => {

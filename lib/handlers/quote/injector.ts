@@ -3,9 +3,7 @@ import {
   AlphaRouterConfig,
   ID_TO_CHAIN_ID,
   IRouter,
-  LegacyRouter,
   LegacyRoutingConfig,
-  OnChainQuoteProvider,
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
@@ -80,6 +78,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
       simulator,
+      routeCachingProvider,
     } = dependencies[chainIdEnum]!
 
     let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
@@ -91,36 +90,6 @@ export class QuoteHandlerInjector extends InjectorSOR<
 
     let router
     switch (algorithm) {
-      case 'legacy':
-        onChainQuoteProvider =
-          onChainQuoteProvider ??
-          new OnChainQuoteProvider(
-            chainId,
-            provider,
-            multicallProvider,
-            {
-              retries: 2,
-              minTimeout: 100,
-              maxTimeout: 1000,
-            },
-            {
-              multicallChunk: 210,
-              gasLimitPerCall: 705_000,
-              quoteMinSuccessRate: 0.15,
-            },
-            {
-              gasLimitOverride: 2_000_000,
-              multicallChunk: 70,
-            }
-          )
-        router = new LegacyRouter({
-          chainId,
-          multicall2Provider: multicallProvider,
-          poolProvider: v3PoolProvider,
-          quoteProvider: onChainQuoteProvider,
-          tokenProvider,
-        })
-        break
       case 'alpha':
       default:
         router = new AlphaRouter({
@@ -138,6 +107,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v2QuoteProvider,
           v2SubgraphProvider,
           simulator,
+          routeCachingProvider,
         })
         break
     }

@@ -1,14 +1,19 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
+import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
+import { PermitSingle } from '@uniswap/permit2-sdk'
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   IRouter,
-  LegacyRoutingConfig,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapOptions,
   SwapRoute,
+  SwapOptions,
+  SwapType,
+  SimulationStatus,
+  IMetric,
+  ChainId,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -23,10 +28,14 @@ import {
   tokenStringToCurrency,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
+import { utils } from 'ethers'
+import { simulationStatusToString } from './util/simulation'
+import Logger from 'bunyan'
+import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
-  RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>,
+  RequestInjected<IRouter<AlphaRouterConfig>>,
   void,
   QuoteQueryParams,
   QuoteResponse
@@ -50,6 +59,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         forceMixedRoutes,
         protocols: protocolsStr,
         simulateFromAddress,
+        permitSignature,
+        permitNonce,
+        permitExpiration,
+        permitAmount,
+        permitSigDeadline,
+        enableUniversalRouter,
       },
       requestInjected: {
         router,
@@ -67,6 +82,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
+    const startTime = Date.now()
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
@@ -160,11 +176,64 @@ export class QuoteHandler extends APIGLambdaHandler<
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     if (slippageTolerance && deadline && recipient) {
       const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
-      swapParams = {
-        deadline: parseDeadline(deadline),
-        recipient: recipient,
-        slippageTolerance: slippageTolerancePercent,
+
+      // TODO: Remove once universal router is no longer behind a feature flag.
+      if (enableUniversalRouter) {
+        swapParams = {
+          type: SwapType.UNIVERSAL_ROUTER,
+          deadlineOrPreviousBlockhash: parseDeadline(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        }
+      } else {
+        swapParams = {
+          type: SwapType.SWAP_ROUTER_02,
+          deadline: parseDeadline(deadline),
+          recipient: recipient,
+          slippageTolerance: slippageTolerancePercent,
+        }
       }
+
+      if (
+        enableUniversalRouter &&
+        permitSignature &&
+        permitNonce &&
+        permitExpiration &&
+        permitAmount &&
+        permitSigDeadline
+      ) {
+        const permit: PermitSingle = {
+          details: {
+            token: currencyIn.wrapped.address,
+            amount: permitAmount,
+            expiration: permitExpiration,
+            nonce: permitNonce,
+          },
+          spender: UNIVERSAL_ROUTER_ADDRESS(chainId),
+          sigDeadline: permitSigDeadline,
+        }
+
+        swapParams.inputTokenPermit = {
+          ...permit,
+          signature: permitSignature,
+        }
+      } else if (
+        !enableUniversalRouter &&
+        permitSignature &&
+        ((permitNonce && permitExpiration) || (permitAmount && permitSigDeadline))
+      ) {
+        const { v, r, s } = utils.splitSignature(permitSignature)
+
+        swapParams.inputTokenPermit = {
+          v: v as 0 | 1 | 27 | 28,
+          r,
+          s,
+          ...(permitNonce && permitExpiration
+            ? { nonce: permitNonce!, expiry: permitExpiration! }
+            : { amount: permitAmount!, deadline: permitSigDeadline! }),
+        }
+      }
+
       if (simulateFromAddress) {
         metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
         swapParams.simulate = { fromAddress: simulateFromAddress }
@@ -206,6 +275,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             tokenPairSymbolChain,
             type,
             routingConfig: routingConfig,
+            swapParams,
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
             currencyOut.symbol
@@ -230,6 +300,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             tokenPairSymbolChain,
             type,
             routingConfig: routingConfig,
+            swapParams,
           },
           `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
             currencyIn.symbol
@@ -270,13 +341,19 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasPriceWei,
       methodParameters,
       blockNumber,
-      simulationError,
+      simulationStatus,
     } = swapRoute
 
-    if (simulationError) {
+    if (simulationStatus == SimulationStatus.Failed) {
       metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
-    } else if (simulateFromAddress) {
+    } else if (simulationStatus == SimulationStatus.Succeeded) {
       metric.putMetric('SimulationSuccessful', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.InsufficientBalance) {
+      metric.putMetric('SimulationInsufficientBalance', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.NotApproved) {
+      metric.putMetric('SimulationNotApproved', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.NotSupported) {
+      metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
@@ -370,6 +447,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeResponse.push(curRoute)
     }
 
+    const routeString = routeAmountsToString(route)
+
     const result: QuoteResponse = {
       methodParameters,
       blockNumber: blockNumber.toString(),
@@ -383,17 +462,96 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
-      simulationError,
+      simulationStatus: simulationStatusToString(simulationStatus, log),
+      simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
-      routeString: routeAmountsToString(route),
+      routeString,
       quoteId,
     }
 
     metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+    this.logRouteMetrics(
+      log,
+      metric,
+      startTime,
+      currencyIn,
+      currencyOut,
+      tokenInAddress,
+      tokenOutAddress,
+      type,
+      chainId,
+      amount,
+      routeString
+    )
+
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  private logRouteMetrics(
+    log: Logger,
+    metric: IMetric,
+    startTime: number,
+    currencyIn: Currency,
+    currencyOut: Currency,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    tradeType: 'exactIn' | 'exactOut',
+    chainId: ChainId,
+    amount: CurrencyAmount<Currency>,
+    routeString: string
+  ): void {
+    const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+    const wildcardInPair = `${currencyIn.symbol}/*`
+    const wildcardOutPair = `*/${currencyOut.symbol}`
+    const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
+    const pairsTracked = PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)
+
+    if (
+      pairsTracked?.includes(tradingPair) ||
+      pairsTracked?.includes(wildcardInPair) ||
+      pairsTracked?.includes(wildcardOutPair)
+    ) {
+      const metricPair = pairsTracked?.includes(tradingPair)
+        ? tradingPair
+        : pairsTracked?.includes(wildcardInPair)
+        ? wildcardInPair
+        : wildcardOutPair
+
+      metric.putMetric(
+        `GET_QUOTE_AMOUNT_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+        Number(amount.toExact()),
+        MetricLoggerUnit.None
+      )
+
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
+      // Create a hashcode from the routeString, this will indicate that a different route is being used
+      // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
+      const routeStringHash = Math.abs(
+        routeString.split('').reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0)
+      )
+      // Log the chose route
+      log.info(
+        {
+          tradingPair,
+          tokenInAddress,
+          tokenOutAddress,
+          tradeType,
+          amount: amount.toExact(),
+          routeString,
+          routeStringHash,
+          chainId,
+        },
+        `Tracked Route for pair [${tradingPair}/${tradeType.toUpperCase()}] on chain [${chainId}] with route hash [${routeStringHash}] for amount [${amount.toExact()}]`
+      )
     }
   }
 

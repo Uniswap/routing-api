@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { MethodParameters } from '@uniswap/v3-sdk'
+import { MethodParameters } from '@uniswap/smart-order-router'
 
 export type TokenInRoute = {
   address: string
@@ -50,6 +50,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   gasUseEstimate: Joi.string().required(),
   gasUseEstimateUSD: Joi.string().required(),
   simulationError: Joi.boolean().optional(),
+  simulationStatus: Joi.string().required(),
   gasPriceWei: Joi.string().required(),
   blockNumber: Joi.string().required(),
   route: Joi.array().items(Joi.any()).required(),
@@ -57,6 +58,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
+    to: Joi.string().required(),
   }).optional(),
 })
 
@@ -73,6 +75,7 @@ export type QuoteResponse = {
   gasUseEstimateQuoteDecimals: string
   gasUseEstimateUSD: string
   simulationError?: boolean
+  simulationStatus: string
   gasPriceWei: string
   blockNumber: string
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>

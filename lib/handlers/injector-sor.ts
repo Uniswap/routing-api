@@ -7,6 +7,8 @@ import {
   ChainId,
   EIP1559GasPriceProvider,
   FallbackTenderlySimulator,
+  TenderlySimulator,
+  EthEstimateGasSimulator,
   IGasPriceProvider,
   IMetric,
   Simulator,
@@ -28,6 +30,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
+  IRouteCachingProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -38,6 +41,7 @@ import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
+import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -48,11 +52,13 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISTIC_KOVAN,
   ChainId.ARBITRUM_ONE,
   ChainId.ARBITRUM_RINKEBY,
+  ChainId.ARBITRUM_GOERLI,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.GÖRLI,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
+  ChainId.BSC,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -81,6 +87,7 @@ export type ContainerDependencies = {
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
+  routeCachingProvider?: IRouteCachingProvider
 }
 
 export interface ContainerInjected {
@@ -103,7 +110,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     })
     setGlobalLogger(log)
 
-    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET } = process.env
+    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET, CACHED_ROUTES_TABLE_NAME } = process.env
 
     const dependenciesByChain: {
       [chainId in ChainId]?: ContainerDependencies
@@ -240,15 +247,21 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
-        const simulator = new FallbackTenderlySimulator(
+        const tenderlySimulator = new TenderlySimulator(
+          chainId,
           'http://api.tenderly.co',
           process.env.TENDERLY_USER!,
           process.env.TENDERLY_PROJECT!,
           process.env.TENDERLY_ACCESS_KEY!,
-          provider,
           v2PoolProvider,
-          v3PoolProvider
+          v3PoolProvider,
+          provider,
+          { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
+
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
+
+        const simulator = new FallbackTenderlySimulator(chainId, provider, tenderlySimulator, ethEstimateGasSimulator)
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {
@@ -277,6 +290,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             }
           })(),
         ])
+
+        let routeCachingProvider: IRouteCachingProvider | undefined = undefined
+        if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+          routeCachingProvider = new DynamoRouteCachingProvider({ cachedRoutesTableName: CACHED_ROUTES_TABLE_NAME })
+        }
 
         return {
           chainId,
@@ -311,6 +329,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2QuoteProvider: new V2QuoteProvider(),
             v2SubgraphProvider,
             simulator,
+            routeCachingProvider,
           },
         }
       })

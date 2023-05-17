@@ -108,6 +108,7 @@ export class RoutingAPIPipeline extends Stack {
       // The main secrets use our Infura RPC urls
       secretCompleteArn:
         'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+
       /*
       The backup secrets mostly use our Alchemy RPC urls
       However Alchemy does not support Rinkeby, Ropsten, and Kovan
@@ -154,7 +155,7 @@ export class RoutingAPIPipeline extends Stack {
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
       jsonRpcProviders: jsonRpcProviders,
-      provisionedConcurrency: 20,
+      provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       stage: STAGE.BETA,
       route53Arn: route53Arn.secretValueFromJson('arn').toString(),
@@ -252,10 +253,12 @@ const jsonRpcProviders = {
   WEB3_RPC_69: process.env.JSON_RPC_PROVIDER_69!,
   WEB3_RPC_42161: process.env.JSON_RPC_PROVIDER_42161!,
   WEB3_RPC_421611: process.env.JSON_RPC_PROVIDER_421611!,
+  WEB3_RPC_421613: process.env.JSON_RPC_PROVIDER_421613!,
   WEB3_RPC_137: process.env.JSON_RPC_PROVIDER_137!,
   WEB3_RPC_80001: process.env.JSON_RPC_PROVIDER_80001!,
   WEB3_RPC_42220: process.env.JSON_RPC_PROVIDER_42220!,
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
+  WEB3_RPC_56: process.env.JSON_RPC_PROVIDER_56!,
 }
 
 // Local dev stack

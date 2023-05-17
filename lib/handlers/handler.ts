@@ -119,6 +119,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
             requestId: context.awsRequestId,
           })
 
+          const requestStart = Date.now()
           log.info({ event, context }, 'Request started.')
 
           let requestBody: ReqBody
@@ -185,7 +186,10 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
                 body: response,
               }
             } else {
-              log.info({ requestBody, requestQueryParams }, 'Handler returned 200')
+              log.info(
+                { requestBody, requestQueryParams, requestDuration: Date.now() - requestStart },
+                'Handler returned 200'
+              )
               ;({ body, statusCode } = handleRequestResult)
             }
           } catch (err) {

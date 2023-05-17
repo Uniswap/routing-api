@@ -38,7 +38,7 @@ import { getBalance, getBalanceAndApprove, getBalanceOfAddress } from '../utils/
 import { minimumAmountOut } from '../utils/minimumAmountOut'
 import { getTestParamsFromEvents, parseEvents } from '../utils/parseEvents'
 import { FeeAmount, getMaxTick, getMinTick, TICK_SPACINGS } from '../utils/ticks'
-import { DAI_ON, UNI_MAINNET, USDC_ON, WNATIVE_ON } from '../utils/tokens'
+import { DAI_ON, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../utils/tokens'
 
 const { ethers } = hre
 
@@ -710,14 +710,17 @@ describe('quote-to-ratio', async function () {
     [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.OPTIMISM_GOERLI]: USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
+    [ChainId.ARBITRUM_GOERLI]: null,
     [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: CUSD_CELO,
     [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.BSC]: USDC_ON(ChainId.BSC),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
@@ -728,6 +731,7 @@ describe('quote-to-ratio', async function () {
     [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
+    [ChainId.OPTIMISM_GOERLI]: DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
@@ -736,6 +740,8 @@ describe('quote-to-ratio', async function () {
     [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
+    [ChainId.ARBITRUM_GOERLI]: null,
+    [ChainId.BSC]: USDT_ON(ChainId.BSC),
   }
 
   for (const chain of _.filter(
@@ -745,20 +751,24 @@ describe('quote-to-ratio', async function () {
       c != ChainId.RINKEBY &&
       c != ChainId.OPTIMISM &&
       c != ChainId.OPTIMISTIC_KOVAN &&
+      c != ChainId.OPTIMISM_GOERLI &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_RINKEBY &&
+      c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.GÖRLI &&
       c != ChainId.MOONBEAM &&
       c != ChainId.GNOSIS &&
       c != ChainId.CELO &&
       c != ChainId.CELO_ALFAJORES &&
       c != ChainId.KOVAN &&
-      c != ChainId.ROPSTEN
+      c != ChainId.ROPSTEN &&
+      /// @dev We can enable for BSC after more pools are created
+      c != ChainId.BSC
   )) {
     const erc1 = TEST_ERC20_1[chain]
     const erc2 = TEST_ERC20_2[chain]
 
-    // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
+    // This is for Gnosis, Moonbeam, and Arbitrum Goerli which we don't have RPC Providers yet
     if (erc1 == null || erc2 == null) continue
 
     describe(`${ID_TO_NETWORK_NAME(chain)} 2xx`, function () {
