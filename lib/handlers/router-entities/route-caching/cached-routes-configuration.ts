@@ -138,12 +138,34 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
         new CachedRoutesBucket({ bucket: 0.015, cacheMode: CacheMode.Darkmode }), // Intentionally Darkmoded
         new CachedRoutesBucket({ bucket: 0.05, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
         new CachedRoutesBucket({ bucket: 0.1, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
-        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
-        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 20 }),
-        new CachedRoutesBucket({ bucket: 2, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
-        new CachedRoutesBucket({ bucket: 3, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
-        new CachedRoutesBucket({ bucket: 4, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
-        new CachedRoutesBucket({ bucket: 5, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
+        new CachedRoutesBucket({ bucket: 0.5, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 20 }),
+        new CachedRoutesBucket({ bucket: 2, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 15 }),
+        new CachedRoutesBucket({ bucket: 3, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 15 }),
+        new CachedRoutesBucket({ bucket: 4, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 15 }),
+        new CachedRoutesBucket({ bucket: 5, cacheMode: CacheMode.Livemode, withLastNCachedRoutes: 15 }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+      tokenOut: '*', // ANY TOKEN
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: 'USDC/*',
+      tradeType: TradeType.EXACT_INPUT,
+      chainId: ChainId.MAINNET,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 100, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 300, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 600, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 3_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 8_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 13_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
       ],
     }),
   ],
