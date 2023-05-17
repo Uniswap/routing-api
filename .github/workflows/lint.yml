@@ -15,11 +15,9 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v2
 
-      - name: Set up node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-          registry-url: https://registry.npmjs.org
+      - name: Set the correct Node version using nvm
+        shell: bash -l {0} 
+        run: nvm install
 
       - name: Install dependencies
         run: npm ci
@@ -29,5 +27,5 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           prettier: true
-          auto_fix: true
+          auto_fix: false
           prettier_extensions: 'css,html,js,json,jsx,md,sass,scss,ts,tsx,vue,yaml,yml,sol'
