@@ -6,7 +6,7 @@ It deploys an API to AWS that uses @uniswap/smart-order-router to search for the
 
 ## Development
 
-The develop on the Routing API you must have an AWS account where you can deploy your API for testing.
+To develop on the Routing API you must have an AWS account where you can deploy your API for testing.
 
 ### Deploying the API
 
