@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { TickMath } from '@uniswap/v3-sdk'
+import { TickMath } from '@pollum-io/v2-sdk'
 import { SUPPORTED_CHAINS } from '../../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, TokenInRoute } from '../../schema'
 

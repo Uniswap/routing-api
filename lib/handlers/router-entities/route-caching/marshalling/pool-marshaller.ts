@@ -1,7 +1,7 @@
-import { Pool } from '@uniswap/v3-sdk'
-import { FeeAmount } from '@uniswap/v3-sdk/dist/constants'
+import { Pool } from '@pollum-io/v2-sdk'
+import { FeeAmount } from '@pollum-io/v2-sdk/dist/constants'
 import { MarshalledToken, TokenMarshaller } from './token-marshaller'
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@pollum-io/router-sdk'
 
 export interface MarshalledPool {
   protocol: Protocol
@@ -16,7 +16,7 @@ export interface MarshalledPool {
 export class PoolMarshaller {
   public static marshal(pool: Pool): MarshalledPool {
     return {
-      protocol: Protocol.V3,
+      protocol: Protocol.V2,
       token0: TokenMarshaller.marshal(pool.token0),
       token1: TokenMarshaller.marshal(pool.token1),
       fee: pool.fee,

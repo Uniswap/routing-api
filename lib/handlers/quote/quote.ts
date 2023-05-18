@@ -1,8 +1,8 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
+import { Protocol } from '@pollum-io/router-sdk'
+import { UNIVERSAL_ROUTER_ADDRESS } from '@pollum-io/universal-router-sdk'
 import { PermitSingle } from '@uniswap/permit2-sdk'
-import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, TradeType } from '@pollum-io/sdk-core'
 import {
   AlphaRouterConfig,
   IRouter,
@@ -14,8 +14,8 @@ import {
   SimulationStatus,
   IMetric,
   ChainId,
-} from '@uniswap/smart-order-router'
-import { Pool } from '@uniswap/v3-sdk'
+} from '@pollum-io/smart-order-router'
+import { Pool } from '@pollum-io/v2-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -141,11 +141,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     if (protocolsStr) {
       for (const protocolStr of protocolsStr) {
         switch (protocolStr.toLowerCase()) {
+          case 'v1':
+            protocols.push(Protocol.V1)
+            break
           case 'v2':
             protocols.push(Protocol.V2)
-            break
-          case 'v3':
-            protocols.push(Protocol.V3)
             break
           case 'mixed':
             protocols.push(Protocol.MIXED)
@@ -159,7 +159,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
       }
     } else if (!forceCrossProtocol) {
-      protocols = [Protocol.V3]
+      protocols = [Protocol.V2]
     }
 
     const routingConfig: AlphaRouterConfig = {
@@ -276,8 +276,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
-            currencyOut.symbol
+          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${currencyOut.symbol
           }. Chain: ${chainId}`
         )
 
@@ -301,8 +300,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
-            currencyIn.symbol
+          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${currencyIn.symbol
           }. Chain: ${chainId}`
         )
 
@@ -360,7 +358,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
+      const pools = subRoute.protocol == Protocol.V1 ? subRoute.route.pairs : subRoute.route.pools
       const curRoute: (V3PoolInRoute | V2PoolInRoute)[] = []
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i]

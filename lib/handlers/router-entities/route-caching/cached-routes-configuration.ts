@@ -1,5 +1,5 @@
-import { TradeType } from '@uniswap/sdk-core'
-import { CacheMode, ChainId } from '@uniswap/smart-order-router'
+import { TradeType } from '@pollum-io/sdk-core'
+import { CacheMode, ChainId } from '@pollum-io/smart-order-router'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesBucket } from './model/cached-routes-bucket'
@@ -19,15 +19,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-      tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+      tokenIn: '0x4200000000000000000000000000000000000006', // WETH
+      tokenOut: '0x2Be160796F509CC4B1d76fc97494D56CF109C3f1', // USDC
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/USDC',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.2, cacheMode: CacheMode.Livemode }),
         new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Livemode }),
@@ -46,15 +46,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+      tokenIn: '0x2Be160796F509CC4B1d76fc97494D56CF109C3f1', // USDC
+      tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'USDC/WETH',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
       buckets: [
         new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Livemode }),
         new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Livemode }),
@@ -73,15 +73,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-      tokenOut: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+      tokenIn: '0x4200000000000000000000000000000000000006', // WETH
+      tokenOut: '0xb97915AED8B5996dE24Ce760EC8DE5A91E820dF7', // USDT
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/USDT',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.2, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare }),
@@ -100,15 +100,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+      tokenIn: '0xb97915AED8B5996dE24Ce760EC8DE5A91E820dF7', // USDT
+      tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'USDT/WETH',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
       buckets: [
         new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Tapcompare }),
@@ -124,15 +124,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   ],
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+      tokenIn: '0x4200000000000000000000000000000000000006', // WETH
       tokenOut: '*', // ANY TOKEN
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/*',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.MAINNET,
+      chainId: ChainId.ROLLUX_TANENBAUM,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.0025, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 0.006, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),

@@ -1,5 +1,5 @@
 import pinataSDK from '@pinata/sdk'
-import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
+import { ID_TO_NETWORK_NAME } from '@pollum-io/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -59,13 +59,16 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
     _.map(chainProtocols, async ({ protocol, chainId, provider }) => {
       const ipfsFilename = `${ID_TO_NETWORK_NAME(chainId)}.json`
       log.info(`Getting ${protocol} pools for chain ${chainId}`)
+      // @ts-ignore
       const pools = await provider.getPools()
       log.info(`Got ${pools.length} ${protocol} pools for chain ${chainId}. Will save with filename ${ipfsFilename}`)
       const poolString = JSON.stringify(pools)
 
       // create directory and file for the chain and protocol
       // e.g: /tmp/temp/v1/pools/v3/mainnet.json
+      // @ts-ignore
       const parentDirectory = path.join(DIRECTORY, protocol.toLowerCase())
+      // @ts-ignore
       const fullPath = path.join(DIRECTORY, protocol.toLowerCase(), ipfsFilename)
       fs.mkdirSync(parentDirectory, { recursive: true })
       fs.writeFileSync(fullPath, poolString)
@@ -89,7 +92,7 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   }
 
   // link resulting hash to DNS
-  const domain = process.env.STAGE == 'prod' ? 'api.uniswap.org' : 'beta.api.uniswap.org'
+  const domain = process.env.STAGE == 'prod' ? 'api.pegasys.fi' : 'beta.api.pegasys.fi'
   var params = {
     ChangeBatch: {
       Changes: [

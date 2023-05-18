@@ -1,5 +1,5 @@
-import { TradeType } from '@uniswap/sdk-core'
-import { CachedRoutes, ChainId } from '@uniswap/smart-order-router'
+import { TradeType } from '@pollum-io/sdk-core'
+import { CachedRoutes, ChainId } from '@pollum-io/smart-order-router'
 
 interface PairTradeTypeChainIdArgs {
   tokenIn: string

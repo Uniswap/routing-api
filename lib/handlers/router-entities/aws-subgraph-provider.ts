@@ -1,4 +1,4 @@
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@pollum-io/router-sdk'
 import {
   ChainId,
   IV2SubgraphProvider,
@@ -6,7 +6,7 @@ import {
   log,
   V2SubgraphPool,
   V3SubgraphPool,
-} from '@uniswap/smart-order-router'
+} from '@pollum-io/smart-order-router'
 import { S3 } from 'aws-sdk'
 import NodeCache from 'node-cache'
 import { S3_POOL_CACHE_KEY } from '../../util/pool-cache-key'
@@ -78,12 +78,12 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
 
 export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> implements IV3SubgraphProvider {
   constructor(chainId: ChainId, bucket: string, baseKey: string) {
-    super(chainId, Protocol.V3, bucket, baseKey)
+    super(chainId, Protocol.V2, bucket, baseKey)
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
     const s3 = new S3()
-    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
+    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
 
     return new V3AWSSubgraphProvider(chainId, bucket, baseKey)
   }
@@ -91,12 +91,12 @@ export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> i
 
 export class V2AWSSubgraphProvider extends AWSSubgraphProvider<V2SubgraphPool> implements IV2SubgraphProvider {
   constructor(chainId: ChainId, bucket: string, key: string) {
-    super(chainId, Protocol.V2, bucket, key)
+    super(chainId, Protocol.V1, bucket, key)
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V2AWSSubgraphProvider> {
     const s3 = new S3()
-    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
+    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V1)
 
     return new V2AWSSubgraphProvider(chainId, bucket, baseKey)
   }

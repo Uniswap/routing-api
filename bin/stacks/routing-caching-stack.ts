@@ -1,4 +1,4 @@
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@pollum-io/router-sdk'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -107,8 +107,10 @@ export class RoutingCachingStack extends cdk.NestedStack {
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_2: this.poolCacheBucket2.bucketName,
             POOL_CACHE_KEY: this.poolCacheKey,
+            // @ts-ignore
             chainId: chainId.toString(),
             protocol,
+            // @ts-ignore
             timeout: timeout.toString(),
           },
         }
@@ -135,8 +137,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
               }),
             },
           }),
-          threshold: protocol === Protocol.V3 ? 50 : 85,
-          evaluationPeriods: protocol === Protocol.V3 ? 12 : 144,
+          threshold: protocol === Protocol.V2 ? 50 : 85,
+          evaluationPeriods: protocol === Protocol.V2 ? 12 : 144,
         }
       )
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(

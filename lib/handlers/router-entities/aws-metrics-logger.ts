@@ -1,4 +1,4 @@
-import { IMetric, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { IMetric, MetricLoggerUnit } from '@pollum-io/smart-order-router'
 import { MetricsLogger as AWSEmbeddedMetricsLogger } from 'aws-embedded-metrics'
 
 export class AWSMetricsLogger implements IMetric {

@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
-import { CondensedAddLiquidityOptions, Protocol } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
+import { CondensedAddLiquidityOptions, Protocol } from '@pollum-io/router-sdk'
+import { Currency, CurrencyAmount, Fraction } from '@pollum-io/sdk-core'
 import {
   AlphaRouterConfig,
   ISwapToRatio,
@@ -10,8 +10,8 @@ import {
   SwapAndAddOptions,
   SwapToRatioStatus,
   SwapType,
-} from '@uniswap/smart-order-router'
-import { Position } from '@uniswap/v3-sdk'
+} from '@pollum-io/smart-order-router'
+import { Position } from '@pollum-io/v2-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -286,7 +286,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      if (subRoute.protocol == Protocol.V3) {
+      if (subRoute.protocol == Protocol.V2) {
         const pools = subRoute.route.pools
         const curRoute: V3PoolInRoute[] = []
         for (let i = 0; i < pools.length; i++) {
@@ -329,7 +329,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         }
 
         routeResponse.push(curRoute)
-      } else if (subRoute.protocol == Protocol.V2) {
+      } else if (subRoute.protocol == Protocol.V1) {
         const pools = subRoute.route.pairs
         const curRoute: V2PoolInRoute[] = []
         for (let i = 0; i < pools.length; i++) {

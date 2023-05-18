@@ -1,4 +1,4 @@
-import { ChainId, SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
+import { ChainId, SUPPORTED_CHAINS } from '@pollum-io/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
@@ -17,13 +17,6 @@ import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [
-  ChainId.RINKEBY,
-  ChainId.ARBITRUM_RINKEBY,
-  ChainId.ROPSTEN,
-  ChainId.KOVAN,
-  ChainId.OPTIMISTIC_KOVAN,
-  ChainId.GÖRLI,
-  ChainId.POLYGON_MUMBAI,
 ]
 
 export class RoutingAPIStack extends cdk.Stack {

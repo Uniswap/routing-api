@@ -1,5 +1,5 @@
-import { Protocol } from '@uniswap/router-sdk'
-import { ChainId, setGlobalLogger } from '@uniswap/smart-order-router'
+import { Protocol } from '@pollum-io/router-sdk'
+import { ChainId, setGlobalLogger } from '@pollum-io/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -11,7 +11,9 @@ const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) 
   const protocol = process.env.protocol! as Protocol
   // Don't retry for V2 as it will timeout and throw 500
   const provider = chainProtocols.find(
+    // @ts-ignore
     (element) => element.protocol == protocol && element.chainId == chainId
+    // @ts-ignore
   )!.provider
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',

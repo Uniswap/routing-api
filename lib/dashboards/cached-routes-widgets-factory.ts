@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { Widget } from './core/model/widget'
 import { WidgetsFactory } from './core/widgets-factory'
 import { CACHED_ROUTES_CONFIGURATION, CachedRoutesStrategy } from '../handlers/router-entities/route-caching'
-import { TradeType } from '@uniswap/sdk-core'
+import { TradeType } from '@pollum-io/sdk-core'
 
 export class CachedRoutesWidgetsFactory implements WidgetsFactory {
   region: string
