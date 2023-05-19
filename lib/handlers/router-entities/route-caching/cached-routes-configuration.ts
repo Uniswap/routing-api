@@ -20,14 +20,14 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   [
     new PairTradeTypeChainId({
       tokenIn: '0x4200000000000000000000000000000000000006', // WETH
-      tokenOut: '0x2Be160796F509CC4B1d76fc97494D56CF109C3f1', // USDC
+      tokenOut: '0xdBB59E294A93487822d1d7e164609Cd59d396fb5', // USDC
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/USDC',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.2, cacheMode: CacheMode.Livemode }),
         new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Livemode }),
@@ -46,15 +46,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0x2Be160796F509CC4B1d76fc97494D56CF109C3f1', // USDC
+      tokenIn: '0xdBB59E294A93487822d1d7e164609Cd59d396fb5', // USDC
       tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'USDC/WETH',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
       buckets: [
         new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Livemode }),
         new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Livemode }),
@@ -74,14 +74,14 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   [
     new PairTradeTypeChainId({
       tokenIn: '0x4200000000000000000000000000000000000006', // WETH
-      tokenOut: '0xb97915AED8B5996dE24Ce760EC8DE5A91E820dF7', // USDT
+      tokenOut: '0x4DFc340487bbec780bA8458e614b732d7226AE8f', // USDT
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/USDT',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.2, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 1, cacheMode: CacheMode.Tapcompare }),
@@ -100,15 +100,15 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xb97915AED8B5996dE24Ce760EC8DE5A91E820dF7', // USDT
+      tokenIn: '0x4DFc340487bbec780bA8458e614b732d7226AE8f', // USDT
       tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'USDT/WETH',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
       buckets: [
         new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Tapcompare }),
         new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Tapcompare }),
@@ -127,12 +127,12 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tokenIn: '0x4200000000000000000000000000000000000006', // WETH
       tokenOut: '*', // ANY TOKEN
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
       pair: 'WETH/*',
       tradeType: TradeType.EXACT_INPUT,
-      chainId: ChainId.ROLLUX_TANENBAUM,
+      chainId: ChainId.ROLLUX,
       buckets: [
         new CachedRoutesBucket({ bucket: 0.0025, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),
         new CachedRoutesBucket({ bucket: 0.006, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 15 }),

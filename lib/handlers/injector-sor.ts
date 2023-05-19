@@ -43,8 +43,8 @@ import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 
-export const SUPPORTED_CHAINS: ChainId[] = [ChainId.ROLLUX_TANENBAUM]
-const DEFAULT_TOKEN_LIST = 'https://static.luxy.io/ipfs/QmPg3CUHkt8xxuzA3XkFGdSV9wvdnbW4VDkr2RQY6m1WKy'
+export const SUPPORTED_CHAINS: ChainId[] = [ChainId.ROLLUX_TANENBAUM, ChainId.ROLLUX]
+const DEFAULT_TOKEN_LIST = 'https://gateway.pinata.cloud/ipfs/QmTD2QoWACBXdJ78R6EwK7qUkGpLw7x6Ffvcq1FSQ2NRYo'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
@@ -154,6 +154,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         let quoteProvider: OnChainQuoteProvider | undefined = undefined
         switch (chainId) {
           case ChainId.ROLLUX_TANENBAUM:
+          case ChainId.ROLLUX:
             quoteProvider = new OnChainQuoteProvider(
               chainId,
               provider,
@@ -239,7 +240,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           v2PoolProvider,
           v3PoolProvider,
           provider,
-          { [ChainId.ROLLUX_TANENBAUM]: 2.5 }
+          { [ChainId.ROLLUX]: 2.5 }
         )
 
         const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)

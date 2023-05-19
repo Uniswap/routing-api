@@ -276,7 +276,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${currencyOut.symbol
+          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
+            currencyOut.symbol
           }. Chain: ${chainId}`
         )
 
@@ -300,7 +301,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${currencyIn.symbol
+          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
+            currencyIn.symbol
           }. Chain: ${chainId}`
         )
 

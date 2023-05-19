@@ -2,16 +2,16 @@ import { Protocol } from '@pollum-io/router-sdk'
 import {
   ChainId,
   // V2SubgraphProvider,
-  V3SubgraphProvider
+  V3SubgraphProvider,
 } from '@pollum-io/smart-order-router'
 
 export const chainProtocols = [
   // V3.
   {
     protocol: Protocol.V2,
-    chainId: ChainId.ROLLUX_TANENBAUM,
+    chainId: ChainId.ROLLUX,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.ROLLUX_TANENBAUM, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.ROLLUX, 3, 90000),
   },
   // {
   //   protocol: Protocol.V2,
