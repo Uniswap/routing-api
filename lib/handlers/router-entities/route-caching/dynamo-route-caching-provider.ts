@@ -354,7 +354,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId: chainId,
     })
 
-    const withWildcardExactIOut = new PairTradeTypeChainId({
+    const withWildcardExactOut = new PairTradeTypeChainId({
       tokenIn: '*',
       tokenOut: tokenOut.address,
       tradeType: TradeType.EXACT_OUTPUT,
@@ -364,13 +364,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     log.info(
       { pairTradeTypeChainId },
       `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}
-      or ${withWildcardExactIn.toString()} or ${withWildcardExactIOut.toString()}`
+      or ${withWildcardExactIn.toString()} or ${withWildcardExactOut.toString()}`
     )
 
     return (
       CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ??
       CACHED_ROUTES_CONFIGURATION.get(withWildcardExactIn.toString()) ??
-      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactIOut.toString())
+      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactOut.toString())
     )
   }
 
