@@ -219,4 +219,16 @@ describe('DynamoRouteCachingProvider', async () => {
     )
     expect(route).to.be.undefined
   })
+
+  it('Finds the CacheMode from a wildcard exact output configuration', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(100 * 10 ** WETH.decimals))
+    const cacheMode = await dynamoRouteCache.getCacheMode(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_OUTPUT,
+      [Protocol.V3]
+    )
+    expect(cacheMode).to.equal(CacheMode.Tapcompare)
+  })
 })
