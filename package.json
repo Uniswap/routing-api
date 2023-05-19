@@ -78,7 +78,7 @@
     "@uniswap/permit2-sdk": "^1.2.0",
     "@pollum-io/router-sdk": "0.0.2",
     "@pollum-io/sdk-core": "0.0.3",
-    "@pollum-io/smart-order-router": "0.0.7",
+    "@pollum-io/smart-order-router": "0.0.8",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "@pollum-io/universal-router-sdk": "0.0.2",
     "@pollum-io/v1-sdk": "0.0.2",

@@ -25,7 +25,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
-      pair: 'WETH/USDC',
+      pair: 'WSYS/USDC',
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
       buckets: [
@@ -52,7 +52,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
-      pair: 'USDC/WETH',
+      pair: 'USDC/WSYS',
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
       buckets: [
@@ -79,7 +79,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
-      pair: 'WETH/USDT',
+      pair: 'WSYS/USDT',
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
       buckets: [
@@ -106,7 +106,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
-      pair: 'USDT/WETH',
+      pair: 'USDT/WSYS',
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
       buckets: [
@@ -130,7 +130,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       chainId: ChainId.ROLLUX,
     }).toString(),
     new CachedRoutesStrategy({
-      pair: 'WETH/*',
+      pair: 'WSYS/*',
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
       buckets: [
