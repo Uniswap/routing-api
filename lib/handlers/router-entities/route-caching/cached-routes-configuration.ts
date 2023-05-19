@@ -171,6 +171,8 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   ],
   /**
    * NOTE: Only Cache configuration for Pricing below this comment
+   * These configurations are influenced by the frontend configuration:
+   * https://github.com/Uniswap/interface/blob/main/src/hooks/useUSDPrice.ts#L15
    */
   [
     new PairTradeTypeChainId({
