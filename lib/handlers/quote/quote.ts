@@ -506,8 +506,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     routeString: string
   ): void {
     const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
-    const wildcardInPair = `${currencyIn.symbol}/*`
-    const wildcardOutPair = `*/${currencyOut.symbol}`
+    const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
+    const wildcardOutPair = `*/${currencyOut.wrapped.symbol}`
     const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
     const pairsTracked = PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)
 
