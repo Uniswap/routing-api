@@ -347,23 +347,30 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId: chainId,
     })
 
-    // We support looking for any token paired with tokenIn when tradeType is ExactIn
-    // We could also support the inverse for tokenOut and ExactOut, but those quotes don't have enough requests
-    const withWildcard = new PairTradeTypeChainId({
+    const withWildcardExactIn = new PairTradeTypeChainId({
       tokenIn: tokenIn.address,
       tokenOut: '*',
       tradeType: TradeType.EXACT_INPUT,
       chainId: chainId,
     })
 
+    const withWildcardExactIOut = new PairTradeTypeChainId({
+      tokenIn: '*',
+      tokenOut: tokenOut.address,
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: chainId,
+    })
+
     log.info(
       { pairTradeTypeChainId },
-      `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()} or ${withWildcard.toString()}`
+      `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}
+      or ${withWildcardExactIn.toString()} or ${withWildcardExactIOut.toString()}`
     )
 
     return (
       CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ??
-      CACHED_ROUTES_CONFIGURATION.get(withWildcard.toString())
+      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactIn.toString()) ??
+      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactIOut.toString())
     )
   }
 

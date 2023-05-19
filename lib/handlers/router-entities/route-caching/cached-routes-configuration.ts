@@ -169,4 +169,94 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       ],
     }),
   ],
+  /**
+   * NOTE: Only Cache configuration for Pricing below this comment
+   * These configurations are influenced by the frontend configuration:
+   * https://github.com/Uniswap/interface/blob/main/src/hooks/useUSDPrice.ts#L15
+   */
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '*', // ANY TOKEN
+      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.MAINNET,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: '*/WETH',
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.MAINNET,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 99, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 101, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 3 }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '*', // ANY TOKEN
+      tokenOut: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.ARBITRUM_ONE,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: '*/WETH',
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.ARBITRUM_ONE,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 9, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 11, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 3 }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '*', // ANY TOKEN
+      tokenOut: '0x4200000000000000000000000000000000000006', // WETH
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.OPTIMISM,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: '*/WETH',
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.OPTIMISM,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 9, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 11, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 3 }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '*', // ANY TOKEN
+      tokenOut: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.POLYGON,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: '*/WMATIC',
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.POLYGON,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 9999, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 10001, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 3 }),
+      ],
+    }),
+  ],
+  [
+    new PairTradeTypeChainId({
+      tokenIn: '*', // ANY TOKEN
+      tokenOut: '0x471ece3750da237f93b8e339c536989b8978a438', // CELO
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.CELO,
+    }).toString(),
+    new CachedRoutesStrategy({
+      pair: '*/CELO',
+      tradeType: TradeType.EXACT_OUTPUT,
+      chainId: ChainId.CELO,
+      buckets: [
+        new CachedRoutesBucket({ bucket: 9, cacheMode: CacheMode.Darkmode }),
+        new CachedRoutesBucket({ bucket: 11, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 3 }),
+      ],
+    }),
+  ],
 ])
