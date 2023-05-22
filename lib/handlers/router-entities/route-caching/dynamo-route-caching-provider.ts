@@ -5,7 +5,7 @@ import {
   ChainId,
   IRouteCachingProvider,
   log,
-  routeToString
+  routeToString,
 } from '@uniswap/smart-order-router'
 import { DynamoDB } from 'aws-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -348,7 +348,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     })
 
     let withWildcard: PairTradeTypeChainId
-    if(tradeType === TradeType.EXACT_INPUT) {
+    if (tradeType === TradeType.EXACT_INPUT) {
       withWildcard = new PairTradeTypeChainId({
         tokenIn: tokenIn.address,
         tokenOut: '*',
