@@ -159,9 +159,10 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.MAINNET,
       buckets: [
-        new CachedRoutesBucket({ bucket: 100, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 100, cacheMode: CacheMode.Darkmode, withLastNCachedRoutes: 10 }),
         new CachedRoutesBucket({ bucket: 300, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
-        new CachedRoutesBucket({ bucket: 600, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 500, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
+        new CachedRoutesBucket({ bucket: 750, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
         new CachedRoutesBucket({ bucket: 1_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
         new CachedRoutesBucket({ bucket: 3_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),
         new CachedRoutesBucket({ bucket: 8_000, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 10 }),

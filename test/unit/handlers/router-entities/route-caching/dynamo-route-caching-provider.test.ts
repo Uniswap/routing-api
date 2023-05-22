@@ -157,7 +157,7 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Tapcompare', async () => {
-    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(1 * 10 ** USDC_MAINNET.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(200 * 10 ** USDC_MAINNET.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
