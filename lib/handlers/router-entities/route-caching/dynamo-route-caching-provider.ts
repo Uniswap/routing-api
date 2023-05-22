@@ -347,30 +347,32 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId: chainId,
     })
 
-    const withWildcardExactIn = new PairTradeTypeChainId({
-      tokenIn: tokenIn.address,
-      tokenOut: '*',
-      tradeType: TradeType.EXACT_INPUT,
-      chainId: chainId,
-    })
-
-    const withWildcardExactOut = new PairTradeTypeChainId({
-      tokenIn: '*',
-      tokenOut: tokenOut.address,
-      tradeType: TradeType.EXACT_OUTPUT,
-      chainId: chainId,
-    })
+    let withWildcard: PairTradeTypeChainId
+    if (tradeType === TradeType.EXACT_INPUT) {
+      withWildcard = new PairTradeTypeChainId({
+        tokenIn: tokenIn.address,
+        tokenOut: '*',
+        tradeType: TradeType.EXACT_INPUT,
+        chainId: chainId,
+      })
+    } else {
+      withWildcard = new PairTradeTypeChainId({
+        tokenIn: '*',
+        tokenOut: tokenOut.address,
+        tradeType: TradeType.EXACT_OUTPUT,
+        chainId: chainId,
+      })
+    }
 
     log.info(
       { pairTradeTypeChainId },
       `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}
-      or ${withWildcardExactIn.toString()} or ${withWildcardExactOut.toString()}`
+      or ${withWildcard.toString()}`
     )
 
     return (
       CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ??
-      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactIn.toString()) ??
-      CACHED_ROUTES_CONFIGURATION.get(withWildcardExactOut.toString())
+      CACHED_ROUTES_CONFIGURATION.get(withWildcard.toString())
     )
   }
 
