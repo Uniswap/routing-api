@@ -157,7 +157,7 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Tapcompare', async () => {
-    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(1 * 10 ** USDC_MAINNET.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(200 * 10 ** USDC_MAINNET.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
@@ -221,14 +221,14 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Finds the CacheMode from a wildcard exact output configuration', async () => {
-    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(100 * 10 ** WETH.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(100 * 10 ** WETH.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
-      USDC_MAINNET,
+      WETH,
       TradeType.EXACT_OUTPUT,
       [Protocol.V3]
     )
-    expect(cacheMode).to.equal(CacheMode.Tapcompare)
+    expect(cacheMode).to.equal(CacheMode.Darkmode)
   })
 })
