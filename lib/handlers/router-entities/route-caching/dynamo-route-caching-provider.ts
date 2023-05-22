@@ -347,7 +347,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId: chainId,
     })
 
-    let withWildcard: PairTradeTypeChainId | undefined = undefined
+    let withWildcard: PairTradeTypeChainId
     if(tradeType == TradeType.EXACT_INPUT) {
       withWildcard = new PairTradeTypeChainId({
         tokenIn: tokenIn.address,
