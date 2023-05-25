@@ -8,8 +8,7 @@ export class DynamoPoolProvider implements IV3PoolProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly tableName: string
   private readonly ttlMinutes: number
-  private POOL_CACHE_KEY = (chainId: ChainId, address: string) =>
-    `pool-${chainId}-${address}`
+  private POOL_CACHE_KEY = (chainId: ChainId, address: string) => `pool-${chainId}-${address}`
 
   constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider) {
     this.ddbClient = new DynamoDB.DocumentClient({
