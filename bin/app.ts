@@ -54,6 +54,7 @@ export class RoutingAPIStage extends Stage {
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
       jsonRpcProviders,
       provisionedConcurrency,
+      throttlingOverride: stage == STAGE.BETA ? '3000' : undefined,
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
