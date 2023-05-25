@@ -8,10 +8,10 @@ export class DynamoPoolProvider implements IV3PoolProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly tableName: string
   private readonly ttlMinutes: number
-  private POOL_CACHE_KEY = (chainId: ChainId, address: string, blockNumber: number) =>
-    `pool-${chainId}-${address}-${blockNumber}`
+  private POOL_CACHE_KEY = (chainId: ChainId, address: string) =>
+    `pool-${chainId}-${address}`
 
-  constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider, private cache: ICache<Pool>) {
+  constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider) {
     this.ddbClient = new DynamoDB.DocumentClient({
       maxRetries: 1,
       retryDelayOptions: {
@@ -56,7 +56,7 @@ export class DynamoPoolProvider implements IV3PoolProvider {
       const getParams = {
         TableName: this.tableName,
         Key: {
-          poolAddress: this.POOL_CACHE_KEY(this.chainId, poolAddress, (await providerConfig?.blockNumber) ?? 0),
+          poolAddress: this.POOL_CACHE_KEY(this.chainId, poolAddress),
           blockNumber: (await providerConfig?.blockNumber) ?? 0,
         },
       }
@@ -86,7 +86,7 @@ export class DynamoPoolProvider implements IV3PoolProvider {
           const putParams = {
             TableName: this.tableName,
             Item: {
-              poolAddress: this.POOL_CACHE_KEY(this.chainId, address, (await providerConfig?.blockNumber) ?? 0),
+              poolAddress: this.POOL_CACHE_KEY(this.chainId, address),
               blockNumber: (await providerConfig?.blockNumber) ?? 0,
               item: binaryCachedPool,
               ttl: this.ttlMinutes,
