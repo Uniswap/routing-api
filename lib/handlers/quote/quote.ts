@@ -73,7 +73,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         chainId,
         tokenProvider,
         tokenListProvider,
-        v3PoolProvider: v3PoolProvider,
+        v3PoolProvider:  v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
       },
