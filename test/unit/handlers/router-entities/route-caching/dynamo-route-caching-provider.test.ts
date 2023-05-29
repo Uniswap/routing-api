@@ -229,6 +229,6 @@ describe('DynamoRouteCachingProvider', async () => {
       TradeType.EXACT_OUTPUT,
       [Protocol.V3]
     )
-    expect(cacheMode).to.equal(CacheMode.Darkmode)
+    expect(cacheMode).to.equal(CacheMode.Tapcompare)
   })
 })
