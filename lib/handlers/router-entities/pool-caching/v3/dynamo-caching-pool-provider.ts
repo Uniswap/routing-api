@@ -2,24 +2,15 @@ import { ChainId, IV3PoolProvider, V3PoolAccessor } from '@uniswap/smart-order-r
 import { Token } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
-import { DynamoDB } from 'aws-sdk'
+import { IDynamoCache } from '../../cache-dynamo'
+import { DynamoCachingV3Pool } from './cache-dynamo-pool'
 
-export class DynamoPoolProvider implements IV3PoolProvider {
-  private readonly ddbClient: DynamoDB.DocumentClient
-  private readonly tableName: string
-  private readonly ttlMinutes: number
-  private POOL_CACHE_KEY = (chainId: ChainId, address: string) => `pool-${chainId}-${address}`
+export class DynamoDBCachingV3PoolProvider implements IV3PoolProvider {
+  private readonly dynamoCache: IDynamoCache<string, number, Pool>
+  private readonly POOL_CACHE_KEY = (chainId: ChainId, address: string) => `pool-${chainId}-${address}`
 
-  constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider) {
-    this.ddbClient = new DynamoDB.DocumentClient({
-      maxRetries: 1,
-      retryDelayOptions: {
-        base: 20,
-      },
-      httpOptions: {
-        timeout: 100,
-      },
-    })
+  constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider, tableName: string) {
+    this.dynamoCache = new DynamoCachingV3Pool({ tableName })
   }
 
   public getPoolAddress(
@@ -42,6 +33,7 @@ export class DynamoPoolProvider implements IV3PoolProvider {
     const poolsToGetTokenPairs: Array<[Token, Token, FeeAmount]> = []
     const poolsToGetAddresses: string[] = []
     const poolAddressToPool: { [poolAddress: string]: Pool } = {}
+    const blockNumber: number | undefined = await providerConfig?.blockNumber
 
     for (const [tokenA, tokenB, feeAmount] of tokenPairs) {
       const { poolAddress, token0, token1 } = this.getPoolAddress(tokenA, tokenB, feeAmount)
@@ -52,18 +44,8 @@ export class DynamoPoolProvider implements IV3PoolProvider {
 
       poolAddressSet.add(poolAddress)
 
-      const getParams = {
-        TableName: this.tableName,
-        Key: {
-          poolAddress: this.POOL_CACHE_KEY(this.chainId, poolAddress),
-          blockNumber: (await providerConfig?.blockNumber) ?? 0,
-        },
-      }
-      const cachedPoolBinary = (await this.ddbClient.get(getParams).promise()).Item?.item
-      const cachedPoolBuffer = Buffer.from(cachedPoolBinary)
-      // TODO unmarshall the pool object
-      const cachedPool: Pool = JSON.parse(cachedPoolBuffer.toString())
-
+      const partitionKey = this.POOL_CACHE_KEY(this.chainId, poolAddress)
+      const cachedPool = await this.dynamoCache.get(partitionKey, blockNumber)
       if (cachedPool) {
         poolAddressToPool[poolAddress] = cachedPool
         continue
@@ -79,20 +61,9 @@ export class DynamoPoolProvider implements IV3PoolProvider {
         const pool = poolAccessor.getPoolByAddress(address)
         if (pool) {
           poolAddressToPool[address] = pool
-          // TODO: marshall the pool object
-          const binaryCachedPool: Buffer = Buffer.from(JSON.stringify(pool))
 
-          const putParams = {
-            TableName: this.tableName,
-            Item: {
-              poolAddress: this.POOL_CACHE_KEY(this.chainId, address),
-              blockNumber: (await providerConfig?.blockNumber) ?? 0,
-              item: binaryCachedPool,
-              ttl: this.ttlMinutes,
-            },
-          }
-
-          this.ddbClient.put(putParams)
+          const partitionKey = this.POOL_CACHE_KEY(this.chainId, address)
+          await this.dynamoCache.set(pool, partitionKey, blockNumber)
         }
       }
     }
