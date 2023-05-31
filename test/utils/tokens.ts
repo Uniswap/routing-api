@@ -16,6 +16,7 @@ import {
   DAI_POLYGON_MUMBAI,
   DAI_RINKEBY_1,
   DAI_ROPSTEN,
+  DAI_SEPOLIA,
   log,
   NodeJSCache,
   USDC_ARBITRUM,
@@ -31,6 +32,7 @@ import {
   USDC_POLYGON_MUMBAI,
   USDC_RINKEBY,
   USDC_ROPSTEN,
+  USDC_SEPOLIA,
   USDT_ARBITRUM,
   USDT_ARBITRUM_RINKEBY,
   USDT_BSC,
@@ -90,6 +92,8 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_RINKEBY_1
     case ChainId.GÖRLI:
       return DAI_GÖRLI
+    case ChainId.SEPOLIA:
+      return DAI_SEPOLIA
     case ChainId.KOVAN:
       return DAI_KOVAN
     case ChainId.OPTIMISM:
@@ -150,6 +154,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_RINKEBY
     case ChainId.GÖRLI:
       return USDC_GÖRLI
+    case ChainId.SEPOLIA:
+      return USDC_SEPOLIA
     case ChainId.KOVAN:
       return USDC_KOVAN
     case ChainId.OPTIMISM:
