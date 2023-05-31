@@ -1,6 +1,7 @@
-import { DynamoCaching, DynamoCachingProps } from '../../cache-dynamo'
+import { DynamoCaching, DynamoCachingProps } from '../cache-dynamo'
 import { Pool } from '@uniswap/v3-sdk'
 import { log } from '@uniswap/smart-order-router'
+import { PoolMarshaller } from '../../../marshalling/pool-marshaller'
 
 interface DynamoCachingV3PoolProps extends DynamoCachingProps {}
 
@@ -31,8 +32,8 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
 
       if (cachedPoolBinary) {
         const cachedPoolBuffer: Buffer = Buffer.from(cachedPoolBinary)
-        // TODO unmarshall the pool object
-        return JSON.parse(cachedPoolBuffer.toString())
+        const marshalledPool = JSON.parse(cachedPoolBuffer.toString())
+        return PoolMarshaller.unmarshal(marshalledPool)
       } else {
         return undefined
       }
@@ -41,14 +42,10 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
     }
   }
 
-  override async has(partitionKey: string, sortKey?: number): Promise<boolean> {
-    return Promise.resolve((await this.get(partitionKey, sortKey)) !== undefined)
-  }
-
-  override async set(value: Pool, partitionKey: string, sortKey?: number): Promise<boolean> {
+  override async set(pool: Pool, partitionKey: string, sortKey?: number): Promise<boolean> {
     if (sortKey) {
-      // TODO: marshall the pool object
-      const binaryCachedPool: Buffer = Buffer.from(JSON.stringify(value))
+      const marshalledPool = PoolMarshaller.marshal(pool)
+      const binaryCachedPool: Buffer = Buffer.from(JSON.stringify(marshalledPool))
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
       const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttlMinutes
 

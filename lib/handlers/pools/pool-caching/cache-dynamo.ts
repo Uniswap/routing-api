@@ -3,7 +3,6 @@ import { DynamoDB } from 'aws-sdk'
 export interface IDynamoCache<TPKey, TSortKey, TVal> {
   get(partitionKey: TPKey, sortKey?: TSortKey): Promise<TVal | undefined>
   set(value: TVal, partitionKey: TPKey, sortKey?: TSortKey): Promise<boolean>
-  has(partitionKey: TPKey, sortKey?: TSortKey): Promise<boolean>
 }
 
 export interface DynamoCachingProps {
@@ -33,6 +32,4 @@ export abstract class DynamoCaching<TPKey, TSortKey, TVal> implements IDynamoCac
   abstract get(partitionKey: TPKey, sortKey?: TSortKey): Promise<TVal | undefined>
 
   abstract set(value: TVal, partitionKey: TPKey, sortKey?: TSortKey): Promise<boolean>
-
-  abstract has(partitionKey: TPKey, sortKey?: TSortKey): Promise<boolean>
 }

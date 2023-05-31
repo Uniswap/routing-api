@@ -1,6 +1,6 @@
 import { Pool } from '@uniswap/v3-sdk'
 import { FeeAmount } from '@uniswap/v3-sdk/dist/constants'
-import { MarshalledToken, TokenMarshaller } from './token-marshaller'
+import { MarshalledToken, TokenMarshaller } from '../router-entities/route-caching/marshalling/token-marshaller'
 import { Protocol } from '@uniswap/router-sdk'
 
 export interface MarshalledPool {
@@ -21,7 +21,7 @@ export class PoolMarshaller {
       token1: TokenMarshaller.marshal(pool.token1),
       fee: pool.fee,
       sqrtRatioX96: pool.sqrtRatioX96.toString(),
-      liquidity: pool.sqrtRatioX96.toString(),
+      liquidity: pool.liquidity.toString(),
       tickCurrent: pool.tickCurrent,
     }
   }
