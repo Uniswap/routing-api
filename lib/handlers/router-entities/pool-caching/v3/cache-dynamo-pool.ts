@@ -49,6 +49,8 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
     if (sortKey) {
       // TODO: marshall the pool object
       const binaryCachedPool: Buffer = Buffer.from(JSON.stringify(value))
+      // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
+      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttlMinutes
 
       const putParams = {
         TableName: this.tableName,
@@ -56,7 +58,7 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
           poolAddress: partitionKey,
           blockNumber: sortKey,
           item: binaryCachedPool,
-          ttl: this.ttlMinutes,
+          ttl: ttl,
         },
       }
 

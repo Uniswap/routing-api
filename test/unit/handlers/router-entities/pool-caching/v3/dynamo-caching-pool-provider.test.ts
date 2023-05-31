@@ -10,6 +10,7 @@ import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { expect } from 'chai'
 import { DynamoCachingV3Pool } from '../../../../../../lib/handlers/router-entities/pool-caching/v3/cache-dynamo-pool'
+import { log } from '@uniswap/smart-order-router'
 
 const TEST_ROUTE_TABLE = {
   TableName: 'PoolCachingV3',
@@ -79,6 +80,7 @@ describe('DynamoDBCachingV3PoolProvider', async () => {
     // First ensure the dynamo cache doesn't have the pools yet
     for (const pool of SUPPORTED_POOLS) {
       const poolAddress = getMockedV3PoolProvider().getPoolAddress(pool.token0, pool.token1, pool.fee).poolAddress
+      log.info(`check if pool pool-${ChainId.GÖRLI}-${poolAddress} block ${blockNumber} contains the cache`)
       const hasCachedPool = await dynamoCache.has(`pool-${ChainId.GÖRLI}-${poolAddress}`, blockNumber)
       expect(hasCachedPool).equals(false)
     }
@@ -91,6 +93,7 @@ describe('DynamoDBCachingV3PoolProvider', async () => {
     // Then ensure the dynamo cache has the pools yet
     for (const pool of SUPPORTED_POOLS) {
       const poolAddress = getMockedV3PoolProvider().getPoolAddress(pool.token0, pool.token1, pool.fee).poolAddress
+      log.info(`check if pool pool-${ChainId.GÖRLI}-${poolAddress} block ${blockNumber} contains the cache`)
       const hasCachedPool = await dynamoCache.has(`pool-${ChainId.GÖRLI}-${poolAddress}`, blockNumber)
       expect(hasCachedPool).equals(false)
     }
