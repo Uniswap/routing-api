@@ -17,7 +17,7 @@ export const USDC_WETH_LOW = new Pool(
   FeeAmount.LOW,
   encodeSqrtRatioX96(1, 1),
   500,
-  0,
+  0
 )
 export const WETH9_USDT_LOW = new Pool(
   WRAPPED_NATIVE_CURRENCY[1]!,

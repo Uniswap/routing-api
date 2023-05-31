@@ -9,7 +9,6 @@ import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers
 import { expect } from 'chai'
 import { DynamoCachingV3Pool } from '../../../../../../lib/handlers/pools/pool-caching/v3/cache-dynamo-pool'
 import { log } from '@uniswap/smart-order-router'
-import { has } from 'lodash'
 
 const TEST_ROUTE_TABLE = {
   TableName: 'PoolCachingV3',
