@@ -1,7 +1,5 @@
 import { setupTables } from '../../../../../mocha/dbSetup'
-import {
-  DynamoDBCachingV3PoolProvider
-} from '../../../../../../lib/handlers/router-entities/pool-caching/v3/dynamo-caching-pool-provider'
+import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/router-entities/pool-caching/v3/dynamo-caching-pool-provider'
 import { ChainId } from '@uniswap/smart-order-router/build/main/util/chains'
 import { getMockedV3PoolProvider } from '../../../../../test-utils/mocked-dependencies'
 import { SUPPORTED_POOLS } from '../../../../../test-utils/mocked-data'
@@ -44,7 +42,11 @@ describe('DynamoDBCachingV3PoolProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
 
   it('caches pools properly with a given block number', async () => {
-    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(ChainId.GÖRLI, getMockedV3PoolProvider(), TEST_ROUTE_TABLE.TableName)
+    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(
+      ChainId.GÖRLI,
+      getMockedV3PoolProvider(),
+      TEST_ROUTE_TABLE.TableName
+    )
     const dynamoCache = new DynamoCachingV3Pool({ tableName: TEST_ROUTE_TABLE.TableName })
 
     const providerConfig: ProviderConfig = { blockNumber: 111 }
@@ -71,7 +73,11 @@ describe('DynamoDBCachingV3PoolProvider', async () => {
   })
 
   it('caches do not cache when no block number', async () => {
-    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(ChainId.GÖRLI, getMockedV3PoolProvider(), TEST_ROUTE_TABLE.TableName)
+    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(
+      ChainId.GÖRLI,
+      getMockedV3PoolProvider(),
+      TEST_ROUTE_TABLE.TableName
+    )
     const dynamoCache = new DynamoCachingV3Pool({ tableName: TEST_ROUTE_TABLE.TableName })
 
     const providerConfig: ProviderConfig = { blockNumber: undefined }
