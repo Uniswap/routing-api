@@ -1,7 +1,12 @@
 import { DynamoCaching, DynamoCachingProps } from '../cache-dynamo'
 import { Pool } from '@uniswap/v3-sdk'
 import { log } from '@uniswap/smart-order-router'
-import { PoolMarshaller } from '../../../marshalling/pool-marshaller'
+import { PoolMarshaller } from '../../../marshalling'
+import {
+  TTLAttributeName,
+  V3PoolsDynamoDbPartitionKeyName,
+  V3PoolsDynamoDbSortKeyName,
+} from '../../../../../bin/stacks/routing-database-stack'
 
 interface DynamoCachingV3PoolProps extends DynamoCachingProps {}
 
@@ -15,8 +20,8 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
       const getParams = {
         TableName: this.tableName,
         Key: {
-          poolAddress: partitionKey,
-          blockNumber: sortKey,
+          [V3PoolsDynamoDbPartitionKeyName]: partitionKey,
+          [V3PoolsDynamoDbSortKeyName]: sortKey,
         },
       }
 
@@ -52,10 +57,10 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
       const putParams = {
         TableName: this.tableName,
         Item: {
-          poolAddress: partitionKey,
-          blockNumber: sortKey,
+          [V3PoolsDynamoDbPartitionKeyName]: partitionKey,
+          [V3PoolsDynamoDbSortKeyName]: sortKey,
           item: binaryCachedPool,
-          ttl: ttl,
+          [TTLAttributeName]: ttl,
         },
       }
 
