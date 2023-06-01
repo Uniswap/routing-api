@@ -5,13 +5,13 @@ import { Construct } from 'constructs'
 
 export interface RoutingDatabaseStackProps extends cdk.NestedStackProps {}
 
+export const V3PoolsDynamoDbTableName = 'V3PoolsCachingDB'
 export const V3PoolsDynamoDbPartitionKeyName = 'poolAddress'
 export const V3PoolsDynamoDbSortKeyName = 'blockNumber'
-
 export const TTLAttributeName = 'ttl'
 
 export const V3PoolsDynamoDbProps: aws_dynamodb.TableProps = {
-  tableName: 'V3PoolsCachingDB',
+  tableName: V3PoolsDynamoDbTableName,
   partitionKey: { name: V3PoolsDynamoDbPartitionKeyName, type: AttributeType.STRING },
   sortKey: { name: V3PoolsDynamoDbSortKeyName, type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
@@ -35,6 +35,6 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     })
 
     // Creates a DynamoDB Table for storing the cached v3 pools
-    this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, 'V3PoolsCachingDB', V3PoolsDynamoDbProps)
+    this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, V3PoolsDynamoDbTableName, V3PoolsDynamoDbProps)
   }
 }
