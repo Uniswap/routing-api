@@ -11,7 +11,7 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { V3PoolsDynamoDbTableName } from './routing-database-stack'
+import { DynamoDBTableProps } from './routing-database-stack'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
@@ -90,8 +90,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
-        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
-        CACHED_V3_POOLS_TABLE_NAME: V3PoolsDynamoDbTableName,
+        CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+        CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         ...jsonRpcProviders,
       },
       layers: [
@@ -124,8 +124,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_KEY: poolCacheKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
-        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb?.tableName ?? '',
-        CACHED_V3_POOLS_TABLE_NAME: V3PoolsDynamoDbTableName,
+        CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+        CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         ...jsonRpcProviders,
       },
       layers: [

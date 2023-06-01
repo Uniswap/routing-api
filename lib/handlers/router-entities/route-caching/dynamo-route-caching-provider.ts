@@ -111,8 +111,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
         ExpressionAttributeNames: {
-          '#pk': [DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName],
-          '#sk': [DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName],
+          '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
+          '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName,
         },
         ExpressionAttributeValues: {
           ':pk': partitionKey.toString(),
