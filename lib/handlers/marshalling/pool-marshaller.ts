@@ -21,7 +21,7 @@ export class PoolMarshaller {
       token1: TokenMarshaller.marshal(pool.token1),
       fee: pool.fee,
       sqrtRatioX96: pool.sqrtRatioX96.toString(),
-      liquidity: pool.sqrtRatioX96.toString(),
+      liquidity: pool.liquidity.toString(),
       tickCurrent: pool.tickCurrent,
     }
   }
