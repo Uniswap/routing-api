@@ -5,17 +5,18 @@ import { Construct } from 'constructs'
 
 export interface RoutingDatabaseStackProps extends cdk.NestedStackProps {}
 
-export const V3PoolsDynamoDbTableName = 'V3PoolsCachingDB'
-export const V3PoolsDynamoDbPartitionKeyName = 'poolAddress'
-export const V3PoolsDynamoDbSortKeyName = 'blockNumber'
-export const TTLAttributeName = 'ttl'
-
-export const V3PoolsDynamoDbProps: aws_dynamodb.TableProps = {
-  tableName: V3PoolsDynamoDbTableName,
-  partitionKey: { name: V3PoolsDynamoDbPartitionKeyName, type: AttributeType.STRING },
-  sortKey: { name: V3PoolsDynamoDbSortKeyName, type: AttributeType.STRING },
-  billingMode: BillingMode.PAY_PER_REQUEST,
-  timeToLiveAttribute: TTLAttributeName,
+export const DynamoDBTableProps = {
+  CacheRouteDynamoDbTable: {
+    Name: 'RouteCachingDB',
+    PartitionKeyName: 'pairTradeTypeChainId',
+    SortKeyName: 'protocolsBucketBlockNumber',
+  },
+  V3PoolsDynamoDbTable: {
+    Name: 'V3PoolsCachingDB',
+    PartitionKeyName: 'poolAddress',
+    SortKeyName: 'blockNumber',
+  },
+  TTLAttributeName: 'ttl',
 }
 
 export class RoutingDatabaseStack extends cdk.NestedStack {
@@ -26,15 +27,21 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     super(scope, name, props)
 
     // Creates a DynamoDB Table for storing the cached routes
-    this.cachedRoutesDynamoDb = new aws_dynamodb.Table(this, 'RouteCachingDB', {
-      tableName: 'RouteCachingDB',
-      partitionKey: { name: 'pairTradeTypeChainId', type: AttributeType.STRING },
-      sortKey: { name: 'protocolsBucketBlockNumber', type: AttributeType.STRING },
+    this.cachedRoutesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CacheRouteDynamoDbTable.Name, {
+      tableName: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+      partitionKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
+      sortKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName, type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
-      timeToLiveAttribute: TTLAttributeName,
+      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
     // Creates a DynamoDB Table for storing the cached v3 pools
-    this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, V3PoolsDynamoDbTableName, V3PoolsDynamoDbProps)
+    this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.V3PoolsDynamoDbTable.Name, {
+      tableName: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
+      partitionKey: { name: DynamoDBTableProps.V3PoolsDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
+      sortKey: { name: DynamoDBTableProps.V3PoolsDynamoDbTable.SortKeyName, type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+    })
   }
 }
