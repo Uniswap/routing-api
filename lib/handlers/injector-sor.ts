@@ -43,7 +43,7 @@ import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
-import { TrafficSwitchPoolProvider } from '../../test/unit/handlers/pools/provider-migration/traffic-switch-pool-provider'
+import { TrafficSwitchPoolProvider } from './pools/provider-migration/v3/traffic-switch-pool-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
