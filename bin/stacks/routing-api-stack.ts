@@ -5,7 +5,6 @@ import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
-import * as sm from 'aws-cdk-lib/aws-secretsmanager'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
@@ -59,6 +58,7 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
+      internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
@@ -131,13 +131,6 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
 
-    const internalApiKeySecret = new sm.Secret(this, 'routing-api-internal-api-key-secret', {
-      generateSecretString: {
-        excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
-      },
-    });
-    const internalApiKeyValue = internalApiKeySecret.secretValue.toString();
-
     const ipThrottlingACL = new aws_waf.CfnWebACL(this, 'RoutingAPIIPThrottlingACL', {
       defaultAction: { allow: {} },
       scope: 'REGIONAL',
@@ -159,29 +152,29 @@ export class RoutingAPIStack extends cdk.Stack {
           priority: 0,
           statement: {
             byteMatchStatement: {
-              searchString: internalApiKeyValue,
+              searchString: internalApiKey,
               fieldToMatch: {
                 singleHeader: {
                   name: 'x-api-key',
-                }
+                },
               },
               textTransformations: [
                 {
                   priority: 0,
-                  type: 'NONE'
-                }
+                  type: 'NONE',
+                },
               ],
-              positionalConstraint: 'EXACTLY'
-            }
+              positionalConstraint: 'EXACTLY',
+            },
           },
           action: {
-            allow: {}
+            allow: {},
           },
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
             metricName: 'internal-api-key-unthrottled',
-          }
+          },
         },
         {
           name: 'ip',
