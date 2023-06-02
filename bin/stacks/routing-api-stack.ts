@@ -5,6 +5,7 @@ import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
+import * as sm from 'aws-cdk-lib/aws-secretsmanager'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
@@ -39,6 +40,7 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
       stage: string
+      internalApiKey?: string
       route53Arn?: string
       pinata_key?: string
       pinata_secret?: string
@@ -129,6 +131,13 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
 
+    const internalApiKeySecret = new sm.Secret(this, 'routing-api-internal-api-key-secret', {
+      generateSecretString: {
+        excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+      },
+    });
+    const internalApiKeyValue = internalApiKeySecret.secretValue.toString();
+
     const ipThrottlingACL = new aws_waf.CfnWebACL(this, 'RoutingAPIIPThrottlingACL', {
       defaultAction: { allow: {} },
       scope: 'REGIONAL',
@@ -146,8 +155,37 @@ export class RoutingAPIStack extends cdk.Stack {
       name: 'RoutingAPIIPThrottling',
       rules: [
         {
-          name: 'ip',
+          name: 'internal-api-key-unthrottled',
           priority: 0,
+          statement: {
+            byteMatchStatement: {
+              searchString: internalApiKeyValue,
+              fieldToMatch: {
+                singleHeader: {
+                  name: 'x-api-key',
+                }
+              },
+              textTransformations: [
+                {
+                  priority: 0,
+                  type: 'NONE'
+                }
+              ],
+              positionalConstraint: 'EXACTLY'
+            }
+          },
+          action: {
+            allow: {}
+          },
+          visibilityConfig: {
+            sampledRequestsEnabled: true,
+            cloudWatchMetricsEnabled: true,
+            metricName: 'internal-api-key-unthrottled',
+          }
+        },
+        {
+          name: 'ip',
+          priority: 1,
           statement: {
             rateBasedStatement: {
               // Limit is per 5 mins, i.e. 120 requests every 5 mins

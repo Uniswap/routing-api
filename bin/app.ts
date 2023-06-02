@@ -26,6 +26,7 @@ export class RoutingAPIStage extends Stage {
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
       stage: string
+      internalApiKey?: string
       route53Arn?: string
       pinata_key?: string
       pinata_secret?: string
@@ -42,6 +43,7 @@ export class RoutingAPIStage extends Stage {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
+      internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
@@ -57,6 +59,7 @@ export class RoutingAPIStage extends Stage {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
+      internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
@@ -143,6 +146,10 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:hosted-zone-JmPDNV',
     })
 
+    const internalApiKey = sm.Secret.fromSecretAttributes(this, 'internal-api-key', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
+    })
+
     // Parse AWS Secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
@@ -155,6 +162,7 @@ export class RoutingAPIPipeline extends Stack {
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
       env: { account: '145079444317', region: 'us-east-2' },
       jsonRpcProviders: jsonRpcProviders,
+      internalApiKey: internalApiKey.secretValue.toString(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       stage: STAGE.BETA,
@@ -270,6 +278,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
   stage: STAGE.LOCAL,
+  internalApiKey: 'test-api-key',
   route53Arn: process.env.ROLE_ARN,
   pinata_key: process.env.PINATA_API_KEY!,
   pinata_secret: process.env.PINATA_API_SECRET!,
