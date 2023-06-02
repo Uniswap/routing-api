@@ -148,37 +148,8 @@ export class RoutingAPIStack extends cdk.Stack {
       name: 'RoutingAPIIPThrottling',
       rules: [
         {
-          name: 'internal-api-key-unthrottled',
-          priority: 0,
-          statement: {
-            byteMatchStatement: {
-              searchString: internalApiKey,
-              fieldToMatch: {
-                singleHeader: {
-                  name: 'x-api-key',
-                },
-              },
-              textTransformations: [
-                {
-                  priority: 0,
-                  type: 'NONE',
-                },
-              ],
-              positionalConstraint: 'EXACTLY',
-            },
-          },
-          action: {
-            allow: {},
-          },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: 'internal-api-key-unthrottled',
-          },
-        },
-        {
           name: 'ip',
-          priority: 1,
+          priority: 0,
           statement: {
             rateBasedStatement: {
               // Limit is per 5 mins, i.e. 120 requests every 5 mins
@@ -190,6 +161,27 @@ export class RoutingAPIStack extends cdk.Stack {
               forwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'MATCH',
+              },
+              scopeDownStatement: {
+                notStatement: {
+                  statement: {
+                    byteMatchStatement: {
+                      fieldToMatch: {
+                        singleHeader: {
+                          name: 'x-api-key',
+                        },
+                      },
+                      positionalConstraint: 'EXACTLY',
+                      searchString: internalApiKey,
+                      textTransformations: [
+                        {
+                          type: 'NONE',
+                          priority: 0,
+                        },
+                      ],
+                    },
+                  },
+                },
               },
             },
           },
