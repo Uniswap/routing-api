@@ -17,7 +17,6 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
-import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 
 interface ConstructorParams {
   /**
@@ -111,8 +110,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
         ExpressionAttributeNames: {
-          '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
-          '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName,
+          '#pk': 'pairTradeTypeChainId',
+          '#sk': 'protocolsBucketBlockNumber',
         },
         ExpressionAttributeValues: {
           ':pk': partitionKey.toString(),
