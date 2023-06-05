@@ -225,10 +225,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const putParams = {
         TableName: this.tableName,
         Item: {
-          [DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName]: partitionKey.toString(),
-          [DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName]: sortKey.fullKey(),
+          pairTradeTypeChainId: partitionKey.toString(),
+          protocolsBucketBlockNumber: sortKey.fullKey(),
           item: binaryCachedRoutes,
-          [DynamoDBTableProps.TTLAttributeName]: ttl,
+          ttl: ttl,
         },
       }
 

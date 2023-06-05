@@ -16,8 +16,8 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
       const getParams = {
         TableName: this.tableName,
         Key: {
-          [DynamoDBTableProps.V3PoolsDynamoDbTable.PartitionKeyName]: partitionKey,
-          [DynamoDBTableProps.V3PoolsDynamoDbTable.SortKeyName]: sortKey,
+          poolAddress: partitionKey,
+          blockNumber: sortKey,
         },
       }
 
@@ -53,10 +53,10 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
       const putParams = {
         TableName: this.tableName,
         Item: {
-          [DynamoDBTableProps.V3PoolsDynamoDbTable.PartitionKeyName]: partitionKey,
-          [DynamoDBTableProps.V3PoolsDynamoDbTable.SortKeyName]: sortKey,
+          poolAddress: partitionKey,
+          blockNumber: sortKey,
           item: binaryCachedPool,
-          [DynamoDBTableProps.TTLAttributeName]: ttl,
+          ttl: ttl,
         },
       }
 
