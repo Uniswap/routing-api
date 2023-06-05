@@ -183,6 +183,7 @@ export class RoutingAPIPipeline extends Stack {
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
       env: { account: '606857263320', region: 'us-east-2' },
       jsonRpcProviders: jsonRpcProviders,
+      internalApiKey: internalApiKey.secretValue.toString(),
       provisionedConcurrency: 100,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
