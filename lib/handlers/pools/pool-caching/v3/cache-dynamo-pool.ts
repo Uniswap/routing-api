@@ -2,7 +2,6 @@ import { DynamoCaching, DynamoCachingProps } from '../cache-dynamo'
 import { Pool } from '@uniswap/v3-sdk'
 import { log } from '@uniswap/smart-order-router'
 import { PoolMarshaller } from '../../../marshalling'
-import { DynamoDBTableProps } from '../../../../../bin/stacks/routing-database-stack'
 
 interface DynamoCachingV3PoolProps extends DynamoCachingProps {}
 
