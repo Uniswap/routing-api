@@ -228,7 +228,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           [DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName]: partitionKey.toString(),
           [DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName]: sortKey.fullKey(),
           item: binaryCachedRoutes,
-          ttl: ttl,
+          [DynamoDBTableProps.TTLAttributeName]: ttl,
         },
       }
 
