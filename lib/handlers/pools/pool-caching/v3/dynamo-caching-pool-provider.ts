@@ -10,7 +10,7 @@ export class DynamoDBCachingV3PoolProvider implements IV3PoolProvider {
   private readonly POOL_CACHE_KEY = (chainId: ChainId, address: string) => `pool-${chainId}-${address}`
 
   constructor(protected chainId: ChainId, protected poolProvider: IV3PoolProvider, tableName: string) {
-    this.dynamoCache = new DynamoCachingV3Pool({ tableName })
+    this.dynamoCache = new DynamoCachingV3Pool({ tableName, ttlMinutes: 1 })
   }
 
   public getPoolAddress(

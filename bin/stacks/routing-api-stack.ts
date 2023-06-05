@@ -39,6 +39,7 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
       stage: string
+      internalApiKey?: string
       route53Arn?: string
       pinata_key?: string
       pinata_secret?: string
@@ -57,6 +58,7 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
+      internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
@@ -159,6 +161,27 @@ export class RoutingAPIStack extends cdk.Stack {
               forwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'MATCH',
+              },
+              scopeDownStatement: {
+                notStatement: {
+                  statement: {
+                    byteMatchStatement: {
+                      fieldToMatch: {
+                        singleHeader: {
+                          name: 'x-api-key',
+                        },
+                      },
+                      positionalConstraint: 'EXACTLY',
+                      searchString: internalApiKey,
+                      textTransformations: [
+                        {
+                          type: 'NONE',
+                          priority: 0,
+                        },
+                      ],
+                    },
+                  },
+                },
               },
             },
           },
