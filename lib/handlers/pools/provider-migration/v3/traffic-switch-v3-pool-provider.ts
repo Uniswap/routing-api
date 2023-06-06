@@ -10,14 +10,14 @@ export type TrafficSwitchPoolProviderProps = {
   sourceOfTruthPoolProvider: IV3PoolProvider
 }
 
-export class TrafficSwitchPoolProvider implements IV3PoolProvider {
+export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
   private readonly currentPoolProvider: IV3PoolProvider
   private readonly targetPoolProvider: IV3PoolProvider
   private readonly sourceOfTruthPoolProvider: IV3PoolProvider
 
-  private readonly SHOULD_SWITCH_TRAFFIC = () =>
+  protected readonly SHOULD_SWITCH_TRAFFIC = () =>
     POOL_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchPercentage > this.getRandomPercentage()
-  private readonly SHOULD_SAMPLE_TRAFFIC = () =>
+  protected readonly SHOULD_SAMPLE_TRAFFIC = () =>
     POOL_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingPercentage > this.getRandomPercentage()
 
   constructor({ currentPoolProvider, targetPoolProvider, sourceOfTruthPoolProvider }: TrafficSwitchPoolProviderProps) {
