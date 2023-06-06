@@ -242,22 +242,22 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
         }
 
-        const sourceOfTruthV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
-        const currentV3PoolProvider = new CachingV3PoolProvider(
+        const noCacheV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
+        const inMemoryCachingV3PoolProvider = new CachingV3PoolProvider(
           chainId,
-          sourceOfTruthV3PoolProvider,
+          noCacheV3PoolProvider,
           new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
         )
-        const targetV3PoolProvider = new DynamoDBCachingV3PoolProvider(
+        const dynamoCachingV3PoolProvider = new DynamoDBCachingV3PoolProvider(
           chainId,
-          sourceOfTruthV3PoolProvider,
+          noCacheV3PoolProvider,
           'V3PoolsCachingDB'
         )
 
         const v3PoolProvider = new TrafficSwitchPoolProvider({
-          currentPoolProvider: currentV3PoolProvider,
-          targetPoolProvider: targetV3PoolProvider,
-          sourceOfTruthPoolProvider: sourceOfTruthV3PoolProvider,
+          currentPoolProvider: inMemoryCachingV3PoolProvider,
+          targetPoolProvider: dynamoCachingV3PoolProvider,
+          sourceOfTruthPoolProvider: noCacheV3PoolProvider,
         })
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
