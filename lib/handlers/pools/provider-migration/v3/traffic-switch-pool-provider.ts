@@ -1,4 +1,4 @@
-import { IV3PoolProvider, V3PoolAccessor } from '@uniswap/smart-order-router'
+import { IV3PoolProvider, log, metric, MetricLoggerUnit, V3PoolAccessor } from '@uniswap/smart-order-router'
 import { Token } from '@uniswap/sdk-core'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
@@ -46,16 +46,20 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
     const currentProviderPools = await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
     const targetProviderPools = await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
 
+    metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)
     const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
     if (sampleTraffic) {
+      metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_SAMPLING', 1, MetricLoggerUnit.None)
       // If we need to sample the traffic, we don't want to make it a blocking I/O
       this.sampleTraffic(tokenPairs, currentProviderPools, targetProviderPools, providerConfig)
     }
 
     const switchTraffic = this.SHOULD_SWITCH_TRAFFIC()
-    if (switchTraffic) {
+    if (!switchTraffic) {
+      metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_CURRENT', 1, MetricLoggerUnit.None)
       return currentProviderPools
     } else {
+      metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TARGET', 1, MetricLoggerUnit.None)
       return targetProviderPools
     }
   }
@@ -71,27 +75,35 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
     truthProviderPools.getAllPools().forEach((pool: Pool) => {
       const currentProviderPool = currentProviderPools.getPool(pool.token0, pool.token1, pool.fee)
       if (!currentProviderPool) {
-        // TODO: emit current inaccurate metric
+        // We don't expect missing pool, but export metric in case we see any
+        metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_MISSING', 1, MetricLoggerUnit.None)
+        log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the current pool provider.`)
       } else {
         const sameQuote = currentProviderPool.token0Price.scalar.equalTo(pool.token0Price.scalar)
 
         if (!sameQuote) {
-          // TODO: emit current inaccurate metric
+          log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
+            current ${currentProviderPool.token0Price.scalar} vs truth ${pool.token0Price.scalar}.`)
+          metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
-          // TODO: emit current accurate metric
+          metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
         }
       }
 
       const targetProviderPool = targetProviderPools.getPool(pool.token0, pool.token1, pool.fee)
       if (!targetProviderPool) {
-        // TODO: emit target inaccurate metric
+        // We don't expect missing pool, but export metric in case we see any
+        metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_MISSING', 1, MetricLoggerUnit.None)
+        log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the target pool provider.`)
       } else {
         const sameQuote = targetProviderPool.token0Price.scalar.equalTo(targetProviderPool.token0Price.scalar)
 
         if (!sameQuote) {
-          // TODO: emit target inaccurate metric
+          log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
+            target ${targetProviderPool.token0Price.scalar} vs truth ${pool.token0Price.scalar}.`)
+          metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
-          // TODO: emit target inaccurate metric
+          metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
         }
       }
     })
