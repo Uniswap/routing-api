@@ -77,7 +77,9 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
       if (!currentProviderPool) {
         // We don't expect missing pool, but export metric in case we see any
         metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_MISSING', 1, MetricLoggerUnit.None)
-        log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the current pool provider.`)
+        log.info(
+          `v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the current pool provider.`
+        )
       } else {
         const sameQuote = currentProviderPool.token0Price.scalar.equalTo(pool.token0Price.scalar)
 
@@ -94,7 +96,9 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
       if (!targetProviderPool) {
         // We don't expect missing pool, but export metric in case we see any
         metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_MISSING', 1, MetricLoggerUnit.None)
-        log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the target pool provider.`)
+        log.info(
+          `v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the target pool provider.`
+        )
       } else {
         const sameQuote = targetProviderPool.token0Price.scalar.equalTo(targetProviderPool.token0Price.scalar)
 
