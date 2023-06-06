@@ -44,12 +44,13 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
 
   async getPools(tokenPairs: [Token, Token, FeeAmount][], providerConfig?: ProviderConfig): Promise<V3PoolAccessor> {
     const currentProviderPools = await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
-    const targetProviderPools = await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
 
     metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)
     const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
     if (sampleTraffic) {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_SAMPLING', 1, MetricLoggerUnit.None)
+      const targetProviderPools = await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
+
       // If we need to sample the traffic, we don't want to make it a blocking I/O
       this.sampleTraffic(tokenPairs, currentProviderPools, targetProviderPools, providerConfig)
     }
@@ -60,7 +61,7 @@ export class TrafficSwitchPoolProvider implements IV3PoolProvider {
       return currentProviderPools
     } else {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TARGET', 1, MetricLoggerUnit.None)
-      return targetProviderPools
+      return await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
     }
   }
 
