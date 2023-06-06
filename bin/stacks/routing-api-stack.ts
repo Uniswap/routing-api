@@ -334,43 +334,6 @@ export class RoutingAPIStack extends cdk.Stack {
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
 
-    // Alarms for 200 rate being too low for each chain
-    const percent2XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach((chainId) => {
-      if (CHAINS_NOT_MONITORED.includes(chainId)) {
-        return
-      }
-      const alarmName = `RoutingAPI-SEV3-2XXAlarm-ChainId: ${chainId.toString()}`
-      const metric = new MathExpression({
-        expression: '100*(response200/invocations)',
-        period: Duration.minutes(30),
-        usingMetrics: {
-          invocations: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response200: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      })
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        threshold: 20,
-        evaluationPeriods: 2,
-        comparisonOperator: aws_cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-      })
-      percent2XXByChainAlarm.push(alarm)
-    })
-
     // Alarms for high 400 error rate for each chain
     const percent4XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
     SUPPORTED_CHAINS.forEach((chainId) => {
@@ -410,9 +373,6 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
-      percent2XXByChainAlarm.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
       percent4XXByChainAlarm.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
