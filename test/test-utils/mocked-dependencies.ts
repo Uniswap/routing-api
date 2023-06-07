@@ -6,11 +6,13 @@ import {
   USDC_DAI_LOW,
   USDC_DAI_MEDIUM,
   USDC_WETH_LOW,
-  WETH9_USDT_LOW
+  WETH9_USDT_LOW,
 } from './mocked-data'
 import sinon from 'sinon'
 
-export function getMockedV3PoolProvider(pools: Pool[] = [USDC_DAI_LOW, USDC_DAI_MEDIUM, USDC_WETH_LOW, WETH9_USDT_LOW, DAI_USDT_LOW]): V3PoolProvider {
+export function getMockedV3PoolProvider(
+  pools: Pool[] = [USDC_DAI_LOW, USDC_DAI_MEDIUM, USDC_WETH_LOW, WETH9_USDT_LOW, DAI_USDT_LOW]
+): V3PoolProvider {
   const mockV3PoolProvider = sinon.createStubInstance(V3PoolProvider)
 
   mockV3PoolProvider.getPools.resolves(buildMockV3PoolAccessor(pools))
@@ -28,25 +30,25 @@ export const TEST_ROUTE_TABLE = {
   KeySchema: [
     {
       AttributeName: 'poolAddress',
-      KeyType: 'HASH'
+      KeyType: 'HASH',
     },
     {
       AttributeName: 'blockNumber',
-      KeyType: 'RANGE'
-    }
+      KeyType: 'RANGE',
+    },
   ],
   AttributeDefinitions: [
     {
       AttributeName: 'poolAddress',
-      AttributeType: 'S'
+      AttributeType: 'S',
     },
     {
       AttributeName: 'blockNumber',
-      AttributeType: 'N'
-    }
+      AttributeType: 'N',
+    },
   ],
   ProvisionedThroughput: {
     ReadCapacityUnits: 1,
-    WriteCapacityUnits: 1
-  }
+    WriteCapacityUnits: 1,
+  },
 }

@@ -1,7 +1,5 @@
 import { setupTables } from '../../../../../mocha/dbSetup'
-import {
-  DynamoDBCachingV3PoolProvider
-} from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
+import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
 import { ChainId } from '@uniswap/smart-order-router/build/main/util/chains'
 import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
 import { SUPPORTED_POOLS } from '../../../../../test-utils/mocked-data'
