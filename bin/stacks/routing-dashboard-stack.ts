@@ -98,33 +98,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
         periodOverride: 'inherit',
         widgets: [
           {
-            type: 'metric',
-            x: 0,
-            y: 66,
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                ...poolCacheLambdaMetrics,
-                ...(ipfsPoolCacheLambdaName
-                  ? [
-                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                      ['.', 'Invocations', '.', '.'],
-                    ]
-                  : []),
-              ],
-              region: region,
-              title: 'Pool Cache Lambda Error/Invocations | 5min',
-              stat: 'Sum',
-            },
-          },
-          {
             height: 6,
             width: 24,
-            y: 0,
-            x: 0,
             type: 'metric',
             properties: {
               metrics: [
@@ -143,8 +118,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             height: 6,
             width: 24,
-            y: 6,
-            x: 0,
             type: 'metric',
             properties: {
               metrics: [
@@ -191,8 +164,52 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             height: 6,
             width: 24,
-            y: 12,
-            x: 0,
+            type: 'metric',
+            properties: {
+              metrics: SUPPORTED_CHAINS.map((chainId) =>
+                [NAMESPACE, `GET_QUOTE_500_CHAINID: ${chainId}`, 'Service', 'RoutingAPI']
+              ),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: '5XX Errors by Chain | 5min',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: 'Errors',
+                },
+              },
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            type: 'metric',
+            properties: {
+              metrics: SUPPORTED_CHAINS.map((chainId) =>
+                [NAMESPACE, `GET_QUOTE_400_CHAINID: ${chainId}`, 'Service', 'RoutingAPI']
+              ),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: '4XX Errors by Chain | 5min',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: 'Errors',
+                },
+              },
+            },
+          },
+          {
+            height: 6,
+            width: 24,
             type: 'metric',
             properties: {
               metrics: [['AWS/ApiGateway', 'Latency', 'ApiName', apiName]],
@@ -206,8 +223,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 18,
             width: 24,
             height: 6,
             properties: {
@@ -227,8 +242,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 25,
             width: 24,
             height: 6,
             properties: {
@@ -250,8 +263,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 26,
             width: 24,
             height: 6,
             properties: {
@@ -273,8 +284,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 24,
             width: 24,
             height: 6,
             properties: {
@@ -300,8 +309,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 30,
             width: 24,
             height: 6,
             properties: {
@@ -327,8 +334,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 36,
             width: 24,
             height: 6,
             properties: {
@@ -347,8 +352,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           {
             height: 12,
             width: 24,
-            y: 42,
-            x: 0,
             type: 'metric',
             properties: {
               metrics: [
@@ -373,8 +376,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 48,
             width: 24,
             height: 9,
             properties: {
@@ -398,8 +399,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 54,
             width: 24,
             height: 9,
             properties: {
@@ -423,8 +422,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           },
           {
             type: 'metric',
-            x: 0,
-            y: 60,
             width: 24,
             height: 9,
             properties: {
@@ -438,6 +435,27 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region: region,
               title: 'Routing Lambda Provisioned Concurrency | 5min',
               stat: 'Average',
+            },
+          },
+          {
+            type: 'metric',
+            width: 24,
+            height: 9,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: [
+                ...poolCacheLambdaMetrics,
+                ...(ipfsPoolCacheLambdaName
+                  ? [
+                    ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                    ['.', 'Invocations', '.', '.'],
+                  ]
+                  : []),
+              ],
+              region: region,
+              title: 'Pool Cache Lambda Error/Invocations | 5min',
+              stat: 'Sum',
             },
           },
         ],
