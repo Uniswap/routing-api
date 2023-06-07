@@ -1,6 +1,6 @@
 import { DynamoCaching, DynamoCachingProps } from '../cache-dynamo'
 import { Pool } from '@uniswap/v3-sdk'
-import { log } from '@uniswap/smart-order-router'
+import { log, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { PoolMarshaller } from '../../../marshalling/pool-marshaller'
 
 interface DynamoCachingV3PoolProps extends DynamoCachingProps {}
@@ -31,13 +31,16 @@ export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
       )?.Item?.item
 
       if (cachedPoolBinary) {
+        metric.putMetric('V3_DYNAMO_CACHING_POOL_HIT_IN_TABLE', 1, MetricLoggerUnit.None)
         const cachedPoolBuffer: Buffer = Buffer.from(cachedPoolBinary)
         const marshalledPool = JSON.parse(cachedPoolBuffer.toString())
         return PoolMarshaller.unmarshal(marshalledPool)
       } else {
+        metric.putMetric('V3_DYNAMO_CACHING_POOL_MISS_NOT_IN_TABLE', 1, MetricLoggerUnit.None)
         return undefined
       }
     } else {
+      metric.putMetric('V3_DYNAMO_CACHING_POOL_MISS_NO_BLOCK_NUMBER', 1, MetricLoggerUnit.None)
       return undefined
     }
   }
