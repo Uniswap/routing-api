@@ -285,7 +285,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
         } catch (error) {
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-          log.error({ error }, "Internal Server Error")
+          log.error({ error }, 'Internal Server Error')
           throw error
         }
         break
@@ -316,7 +316,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
         } catch (error) {
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-          log.error({ error }, "Internal Server Error")
+          log.error({ error }, 'Internal Server Error')
           throw error
         }
         break
