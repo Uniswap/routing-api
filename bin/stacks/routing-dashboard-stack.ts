@@ -166,9 +166,12 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             width: 24,
             type: 'metric',
             properties: {
-              metrics: SUPPORTED_CHAINS.map((chainId) =>
-                [NAMESPACE, `GET_QUOTE_500_CHAINID: ${chainId}`, 'Service', 'RoutingAPI']
-              ),
+              metrics: SUPPORTED_CHAINS.map((chainId) => [
+                NAMESPACE,
+                `GET_QUOTE_500_CHAINID: ${chainId}`,
+                'Service',
+                'RoutingAPI',
+              ]),
               view: 'timeSeries',
               stacked: false,
               region,
@@ -189,9 +192,12 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             width: 24,
             type: 'metric',
             properties: {
-              metrics: SUPPORTED_CHAINS.map((chainId) =>
-                [NAMESPACE, `GET_QUOTE_400_CHAINID: ${chainId}`, 'Service', 'RoutingAPI']
-              ),
+              metrics: SUPPORTED_CHAINS.map((chainId) => [
+                NAMESPACE,
+                `GET_QUOTE_400_CHAINID: ${chainId}`,
+                'Service',
+                'RoutingAPI',
+              ]),
               view: 'timeSeries',
               stacked: false,
               region,
@@ -448,9 +454,9 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ...poolCacheLambdaMetrics,
                 ...(ipfsPoolCacheLambdaName
                   ? [
-                    ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                    ['.', 'Invocations', '.', '.'],
-                  ]
+                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                      ['.', 'Invocations', '.', '.'],
+                    ]
                   : []),
               ],
               region: region,
