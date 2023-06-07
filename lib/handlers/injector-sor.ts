@@ -183,7 +183,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               },
               {
                 multicallChunk: 110,
-                gasLimitPerCall: 1_200_000,
+                gasLimitPerCall: 2_000_000,
                 quoteMinSuccessRate: 0.1,
               },
               {
