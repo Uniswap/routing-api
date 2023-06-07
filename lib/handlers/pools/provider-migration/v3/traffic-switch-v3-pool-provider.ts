@@ -63,11 +63,11 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
     if (switchTraffic) {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TARGET', 1, MetricLoggerUnit.None)
 
-      return targetProviderPools ?? await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
+      return targetProviderPools ?? (await this.targetPoolProvider.getPools(tokenPairs, providerConfig))
     } else {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_CURRENT', 1, MetricLoggerUnit.None)
 
-      return currentProviderPools ?? await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
+      return currentProviderPools ?? (await this.currentPoolProvider.getPools(tokenPairs, providerConfig))
     }
   }
 
