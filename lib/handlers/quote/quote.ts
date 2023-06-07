@@ -281,8 +281,13 @@ export class QuoteHandler extends APIGLambdaHandler<
             currencyOut.symbol
           }. Chain: ${chainId}`
         )
-
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        try {
+          swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        } catch (error) {
+          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          log.error({ error }, "Internal Server Error")
+          throw error
+        }
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
@@ -307,7 +312,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+        try {
+          swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
+        } catch (error) {
+          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          log.error({ error }, "Internal Server Error")
+          throw error
+        }
         break
       default:
         throw new Error('Invalid swap type')
