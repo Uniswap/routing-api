@@ -2,7 +2,8 @@ import { IV3PoolProvider, log, metric, MetricLoggerUnit, V3PoolAccessor } from '
 import { Token } from '@uniswap/sdk-core'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
-import { POOL_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from './pool-provider-traffic-switch-configuration'
+import { POOL_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/pool-provider-traffic-switch-configuration'
+import JSBI from 'jsbi'
 
 export type TrafficSwitchPoolProviderProps = {
   currentPoolProvider: IV3PoolProvider
@@ -43,25 +44,30 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
   }
 
   async getPools(tokenPairs: [Token, Token, FeeAmount][], providerConfig?: ProviderConfig): Promise<V3PoolAccessor> {
-    const currentProviderPools = await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
+    const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
+    const switchTraffic = this.SHOULD_SWITCH_TRAFFIC()
+    let currentProviderPools
+    let targetProviderPools
 
     metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)
-    const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
+
     if (sampleTraffic) {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_SAMPLING', 1, MetricLoggerUnit.None)
-      const targetProviderPools = await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
 
+      currentProviderPools = await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
+      targetProviderPools = await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
       // If we need to sample the traffic, we don't want to make it a blocking I/O
       this.sampleTraffic(tokenPairs, currentProviderPools, targetProviderPools, providerConfig)
     }
 
-    const switchTraffic = this.SHOULD_SWITCH_TRAFFIC()
-    if (!switchTraffic) {
-      metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_CURRENT', 1, MetricLoggerUnit.None)
-      return currentProviderPools
-    } else {
+    if (switchTraffic) {
       metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_TARGET', 1, MetricLoggerUnit.None)
-      return await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
+
+      return targetProviderPools ?? await this.targetPoolProvider.getPools(tokenPairs, providerConfig)
+    } else {
+      metric.putMetric('V3_POOL_PROVIDER_POOL_TRAFFIC_CURRENT', 1, MetricLoggerUnit.None)
+
+      return currentProviderPools ?? await this.currentPoolProvider.getPools(tokenPairs, providerConfig)
     }
   }
 
@@ -82,11 +88,11 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
           `v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the current pool provider.`
         )
       } else {
-        const sameQuote = currentProviderPool.token0Price.scalar.equalTo(pool.token0Price.scalar)
+        const sameQuote = JSBI.equal(currentProviderPool.sqrtRatioX96, pool.sqrtRatioX96)
 
         if (!sameQuote) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
-            current ${currentProviderPool.token0Price.scalar} vs truth ${pool.token0Price.scalar}.`)
+            current ${currentProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
           metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
           metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
@@ -101,11 +107,11 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
           `v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} not found in the target pool provider.`
         )
       } else {
-        const sameQuote = targetProviderPool.token0Price.scalar.equalTo(targetProviderPool.token0Price.scalar)
+        const sameQuote = JSBI.equal(targetProviderPool.sqrtRatioX96, pool.sqrtRatioX96)
 
         if (!sameQuote) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
-            target ${targetProviderPool.token0Price.scalar} vs truth ${pool.token0Price.scalar}.`)
+            target ${targetProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
