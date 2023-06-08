@@ -206,11 +206,40 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ],
                 ['...', { stat: 'p99.9', label: `${ID_TO_NETWORK_NAME(chainId)} P99.9` }],
                 ['...', { stat: 'p99', label: `${ID_TO_NETWORK_NAME(chainId)} P99` }],
-                ['...', { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` }],
+              ]),
+              region,
+              title: `P99.X Latency by Chain`,
+              period: 300,
+              setPeriodToTimeRange: true,
+              stat: 'SampleCount',
+              yAxis: {
+                left: {
+                  min: 0,
+                  showUnits: false,
+                  label: 'Milliseconds',
+                },
+              },
+            },
+          },
+          {
+            type: 'metric',
+            width: 12,
+            height: 8,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` },
+                ],
                 ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90` }],
               ]),
               region,
-              title: `P9X Latency by Chain`,
+              title: `P95 & P90 Latency by Chain`,
               period: 300,
               setPeriodToTimeRange: true,
               stat: 'SampleCount',
@@ -239,10 +268,39 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
                 ],
                 ['...', { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` }],
-                ['...', { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` }],
               ]),
               region,
-              title: `Average and Minimum Latency by Chain`,
+              title: `Average and Median Latency by Chain`,
+              period: 300,
+              setPeriodToTimeRange: true,
+              stat: 'SampleCount',
+              yAxis: {
+                left: {
+                  min: 0,
+                  showUnits: false,
+                  label: 'Milliseconds',
+                },
+              },
+            },
+          },
+          {
+            type: 'metric',
+            width: 12,
+            height: 8,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
+                ],
+              ]),
+              region,
+              title: `Minimum Latency by Chain`,
               period: 300,
               setPeriodToTimeRange: true,
               stat: 'SampleCount',
@@ -306,8 +364,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
           {
-            height: 6,
-            width: 24,
+            height: 8,
+            width: 12,
             type: 'metric',
             properties: {
               metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
@@ -316,13 +374,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                     expression: `(m500c${chainId} / mreqc${chainId}) * 100`,
                     label: `5XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
                     id: `e1c${chainId}`,
-                  },
-                ],
-                [
-                  {
-                    expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
-                    label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
-                    id: `e2c${chainId}`,
                   },
                 ],
                 [
@@ -339,6 +390,42 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   '.',
                   { id: `m500c${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
                 ],
+              ]),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: '5XX Error Rates by Chain',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: '%',
+                },
+              },
+            },
+          },
+          {
+            height: 8,
+            width: 12,
+            type: 'metric',
+            properties: {
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  {
+                    expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
+                    label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                    id: `e2c${chainId}`,
+                  },
+                ],
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+                ],
                 [
                   '.',
                   `GET_QUOTE_400_CHAINID: ${chainId}`,
@@ -352,7 +439,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Sum',
               period: 300,
-              title: '5XX/4XX Error Rates by Chain',
+              title: '4XX Error Rates by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
