@@ -42,6 +42,8 @@ import { BaseRInj, Injector } from './handler'
 import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
+import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
+import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traffic-switch-v3-pool-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -240,11 +242,23 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
         }
 
-        const v3PoolProvider = new CachingV3PoolProvider(
+        const noCacheV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
+        const inMemoryCachingV3PoolProvider = new CachingV3PoolProvider(
           chainId,
-          new V3PoolProvider(chainId, multicall2Provider),
+          noCacheV3PoolProvider,
           new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
         )
+        const dynamoCachingV3PoolProvider = new DynamoDBCachingV3PoolProvider(
+          chainId,
+          noCacheV3PoolProvider,
+          'V3PoolsCachingDB'
+        )
+
+        const v3PoolProvider = new TrafficSwitchV3PoolProvider({
+          currentPoolProvider: inMemoryCachingV3PoolProvider,
+          targetPoolProvider: dynamoCachingV3PoolProvider,
+          sourceOfTruthPoolProvider: noCacheV3PoolProvider,
+        })
 
         const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
 
