@@ -40,7 +40,38 @@ export class QuoteHandler extends APIGLambdaHandler<
   QuoteQueryParams,
   QuoteResponse
 > {
+
   public async handleRequest(
+    params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
+  ): Promise<Response<QuoteResponse> | ErrorResponse> {
+    const { chainId, metric } = params.requestInjected
+
+    const result = await this.handleRequestInternal(params)
+
+    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+    switch (result.statusCode) {
+      case 200:
+      case 202:
+        metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+        break
+      case 400:
+      case 403:
+      case 404:
+      case 408:
+      case 409:
+        metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+        break
+      case 500:
+        metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+        break
+    }
+
+    return result
+
+  }
+
+  public async handleRequestInternal(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
@@ -78,7 +109,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
@@ -103,7 +133,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
     if (!currencyIn) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_INVALID',
@@ -112,7 +141,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!currencyOut) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_OUT_INVALID',
@@ -121,7 +149,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (tokenInChainId != tokenOutChainId) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
@@ -130,7 +157,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (currencyIn.equals(currencyOut)) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_OUT_SAME',
@@ -281,13 +307,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             currencyOut.symbol
           }. Chain: ${chainId}`
         )
-        try {
-          swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
-        } catch (error) {
-          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-          log.error({ error }, 'Internal Server Error')
-          throw error
-        }
+
+        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
@@ -312,13 +333,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        try {
-          swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
-        } catch (error) {
-          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-          log.error({ error }, 'Internal Server Error')
-          throw error
-        }
+        swapRoute = await router.route(amount, currencyIn, TradeType.EXACT_OUTPUT, swapParams, routingConfig)
         break
       default:
         throw new Error('Invalid swap type')
@@ -480,8 +495,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
     }
-
-    metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
     this.logRouteMetrics(
       log,
