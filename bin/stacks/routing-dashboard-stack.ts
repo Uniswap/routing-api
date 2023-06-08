@@ -6,6 +6,7 @@ import _ from 'lodash'
 import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-widgets-factory'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
+import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -125,7 +126,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
                 'Service',
                 'RoutingAPI',
-                { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}` },
+                { id: `mreqc${chainId}`, label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}` },
               ]),
               view: 'timeSeries',
               stacked: false,
@@ -151,9 +152,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 [
                   {
                     expression: `(m200c${chainId} / (mreqc${chainId} - m400c${chainId})) * 100`,
-                    label: `Success Rate on ${chainId}`,
+                    label: `Success Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
                     id: `e1c${chainId}`,
-                    color: '#2ca02c',
                   },
                 ],
                 [
@@ -247,18 +247,16 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
                 [
                   {
-                    expression: `(m500-${chainId} / mreq-${chainId}) * 100`,
-                    label: `5XX Error Rate on ${chainId}`,
-                    id: `e1-${chainId}`,
-                    color: '#ff7f0e',
+                    expression: `(m500c${chainId} / mreqc${chainId}) * 100`,
+                    label: `5XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                    id: `e1c${chainId}`,
                   },
                 ],
                 [
                   {
-                    expression: `(m400-${chainId} / mreq-${chainId}) * 100`,
-                    label: `4XX Error Rate on ${chainId}`,
-                    id: `e2-${chainId}`,
-                    color: '#2ca02c',
+                    expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
+                    label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                    id: `e2c${chainId}`,
                   },
                 ],
                 [
@@ -266,21 +264,21 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
                   'Service',
                   'RoutingAPI',
-                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_500_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m500-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
+                  { id: `m500c${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_400_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
+                  { id: `m400c${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
                 ],
               ]),
               view: 'timeSeries',
