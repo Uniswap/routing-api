@@ -121,6 +121,52 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             width: 24,
             type: 'metric',
             properties: {
+              metrics: [
+                [
+                  {
+                    expression: 'm1 * 100',
+                    label: '5XX Error Rate',
+                    id: 'e1',
+                    color: '#ff7f0e',
+                  },
+                ],
+                [
+                  {
+                    expression: 'm2 * 100',
+                    label: '4XX Error Rate',
+                    id: 'e2',
+                    color: '#2ca02c',
+                  },
+                ],
+                [
+                  'AWS/ApiGateway',
+                  '5XXError',
+                  'ApiName',
+                  'Routing API',
+                  { id: 'm1', label: '5XXError', visible: false },
+                ],
+                ['.', '4XXError', '.', '.', { id: 'm2', visible: false }],
+              ],
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Average',
+              period: 300,
+              title: '5XX/4XX Error Rates | 5min',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: '%',
+                },
+              },
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            type: 'metric',
+            properties: {
               metrics: SUPPORTED_CHAINS.map((chainId) => [
                 NAMESPACE,
                 `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
@@ -184,52 +230,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'Sum',
               period: 300,
               title: 'Success Rates by Chain | 5min',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
-                },
-              },
-            },
-          },
-          {
-            height: 6,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: [
-                [
-                  {
-                    expression: 'm1 * 100',
-                    label: '5XX Error Rate',
-                    id: 'e1',
-                    color: '#ff7f0e',
-                  },
-                ],
-                [
-                  {
-                    expression: 'm2 * 100',
-                    label: '4XX Error Rate',
-                    id: 'e2',
-                    color: '#2ca02c',
-                  },
-                ],
-                [
-                  'AWS/ApiGateway',
-                  '5XXError',
-                  'ApiName',
-                  'Routing API',
-                  { id: 'm1', label: '5XXError', visible: false },
-                ],
-                ['.', '4XXError', '.', '.', { id: 'm2', visible: false }],
-              ],
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Average',
-              period: 300,
-              title: '5XX/4XX Error Rates | 5min',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
