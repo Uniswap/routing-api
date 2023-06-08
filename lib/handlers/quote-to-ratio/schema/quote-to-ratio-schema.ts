@@ -114,7 +114,7 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
       chainId: Joi.number()
         .valid(...SUPPORTED_CHAINS.values())
         .required(),
-      symbol: Joi.string().alphanum().required(),
+      symbol: Joi.string().required(),
       decimals: Joi.number().required(),
     }),
     tokenOut: Joi.object({
@@ -122,7 +122,7 @@ export const QuotetoRatioResponseSchemaJoi = QuoteResponseSchemaJoi.keys({
       chainId: Joi.number()
         .valid(...SUPPORTED_CHAINS.values())
         .required(),
-      symbol: Joi.string().alphanum().required(),
+      symbol: Joi.string().required(),
       decimals: Joi.number().required(),
     }),
     sqrtRatioX96: Joi.string().alphanum().required(),
