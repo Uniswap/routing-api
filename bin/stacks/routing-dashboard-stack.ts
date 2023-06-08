@@ -120,6 +120,84 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             width: 24,
             type: 'metric',
             properties: {
+              metrics: SUPPORTED_CHAINS.map((chainId) => [
+                NAMESPACE,
+                `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+                'Service',
+                'RoutingAPI',
+                { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}` }
+              ]),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: 'Requests by Chain | 5min',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: 'Requests',
+                },
+              },
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            type: 'metric',
+            properties: {
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  {
+                    expression: `(m200-${chainId} / (mreq-${chainId} - m400-${chainId})) * 100`,
+                    label: `Success Rate on ${chainId}`,
+                    id: `e1-${chainId}`,
+                    color: '#2ca02c',
+                  },
+                ],
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false }
+                ],
+                [
+                  '.',
+                  `GET_QUOTE_200_CHAINID: ${chainId}`,
+                  '.',
+                  '.',
+                  { id: `m200-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false }
+                ],
+                [
+                  '.',
+                  `GET_QUOTE_400_CHAINID: ${chainId}`,
+                  '.',
+                  '.',
+                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false }
+                ]
+              ]),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: 'Success Rates by Chain | 5min',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: '%',
+                },
+              },
+            },
+          },
+          {
+            height: 6,
+            width: 24,
+            type: 'metric',
+            properties: {
               metrics: [
                 [
                   {
@@ -166,49 +244,56 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             width: 24,
             type: 'metric',
             properties: {
-              metrics: SUPPORTED_CHAINS.map((chainId) => [
-                NAMESPACE,
-                `GET_QUOTE_500_CHAINID: ${chainId}`,
-                'Service',
-                'RoutingAPI',
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  {
+                    expression: `(m500-${chainId} / mreq-${chainId}) * 100`,
+                    label: `5XX Error Rate on ${chainId}`,
+                    id: `e1-${chainId}`,
+                    color: '#ff7f0e',
+                  },
+                ],
+                [
+                  {
+                    expression: `(m400-${chainId} / mreq-${chainId}) * 100`,
+                    label: `4XX Error Rate on ${chainId}`,
+                    id: `e2-${chainId}`,
+                    color: '#2ca02c',
+                  },
+                ],
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false }
+                ],
+                [
+                  '.',
+                  `GET_QUOTE_500_CHAINID: ${chainId}`,
+                  '.',
+                  '.',
+                  { id: `m500-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false }
+                ],
+                [
+                  '.',
+                  `GET_QUOTE_400_CHAINID: ${chainId}`,
+                  '.',
+                  '.',
+                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false }
+                ]
               ]),
               view: 'timeSeries',
               stacked: false,
               region,
               stat: 'Sum',
               period: 300,
-              title: '5XX Errors by Chain | 5min',
+              title: '5XX/4XX Error Rates by Chain | 5min',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
                   showUnits: false,
-                  label: 'Errors',
-                },
-              },
-            },
-          },
-          {
-            height: 6,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: SUPPORTED_CHAINS.map((chainId) => [
-                NAMESPACE,
-                `GET_QUOTE_400_CHAINID: ${chainId}`,
-                'Service',
-                'RoutingAPI',
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: '4XX Errors by Chain | 5min',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: 'Errors',
+                  label: '%',
                 },
               },
             },
