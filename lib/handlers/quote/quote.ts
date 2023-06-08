@@ -43,7 +43,6 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-
     const { chainId, metric } = params.requestInjected
     const startTime = Date.now()
 
@@ -77,11 +76,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     // This metric is logged here to guarantee it is counted in the same millisecond as the other metrics.
     metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
-    metric.putMetric(
-      `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
-      Date.now() - startTime,
-      MetricLoggerUnit.Milliseconds
-    )
+    metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
     return result
   }

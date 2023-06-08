@@ -218,7 +218,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 left: {
                   min: 0,
                   showUnits: false,
-                  label: "Milliseconds"
+                  label: 'Milliseconds',
                 },
               },
             },
@@ -238,14 +238,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   'RoutingAPI',
                   { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
                 ],
-                [
-                  '...',
-                  { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` },
-                ],
-                [
-                  '...',
-                  { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
-                ],
+                ['...', { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` }],
+                ['...', { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` }],
               ]),
               region,
               title: `Average and Minimum Latency by Chain`,
@@ -256,7 +250,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 left: {
                   min: 0,
                   showUnits: false,
-                  label: "Milliseconds"
+                  label: 'Milliseconds',
                 },
               },
             },
