@@ -54,6 +54,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       // This metric is logged after calling the internal handler to correlate with the status metrics
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
       switch (result.statusCode) {
         case 200:
@@ -79,16 +80,15 @@ export class QuoteHandler extends APIGLambdaHandler<
           break
       }
     } catch (err) {
-      // This metric is logged in this catch block, because otherwise it isn't logged in the try block.
+      // These metric are logged in this catch block, because otherwise it isn't logged in the try block.
       // We are also avoiding using the `finally` block as it appears to increase latencies
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
       throw err
     }
-
-    metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
     return result
   }
