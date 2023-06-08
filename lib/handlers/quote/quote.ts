@@ -52,8 +52,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     try {
       result = await this.handleRequestInternal(params)
 
-      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-
       switch (result.statusCode) {
         case 200:
         case 202:
@@ -71,11 +69,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           break
       }
     } catch (err) {
-      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
       throw err
     }
+
+    // This metric is logged here to guarantee it is counted in the same millisecond as the other metrics.
+    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
     metric.putMetric(
       `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
