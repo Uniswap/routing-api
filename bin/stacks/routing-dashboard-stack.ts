@@ -113,7 +113,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Sum',
               period: 300,
-              title: 'Total Requests/Responses | 5min',
+              title: 'Total Requests/Responses',
             },
           },
           {
@@ -152,7 +152,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Average',
               period: 300,
-              title: '5XX/4XX Error Rates | 5min',
+              title: '5XX/4XX Error Rates',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
@@ -163,7 +163,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
           {
-            height: 6,
+            height: 8,
             width: 24,
             type: 'metric',
             properties: {
@@ -179,12 +179,84 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Sum',
               period: 300,
-              title: 'Requests by Chain | 5min',
+              title: 'Requests by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
                   showUnits: false,
                   label: 'Requests',
+                },
+              },
+            },
+          },
+          {
+            type: 'metric',
+            width: 12,
+            height: 8,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { stat: 'p99.99', label: `${ID_TO_NETWORK_NAME(chainId)} P99.99` },
+                ],
+                ['...', { stat: 'p99.9', label: `${ID_TO_NETWORK_NAME(chainId)} P99.9` }],
+                ['...', { stat: 'p99', label: `${ID_TO_NETWORK_NAME(chainId)} P99` }],
+                ['...', { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` }],
+                ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90` }],
+              ]),
+              region,
+              title: `P9X Latency by Chain`,
+              period: 300,
+              setPeriodToTimeRange: true,
+              stat: 'SampleCount',
+              yAxis: {
+                left: {
+                  min: 0,
+                  showUnits: false,
+                  label: "Milliseconds"
+                },
+              },
+            },
+          },
+          {
+            type: 'metric',
+            width: 12,
+            height: 8,
+            properties: {
+              view: 'timeSeries',
+              stacked: false,
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
+                ],
+                [
+                  '...',
+                  { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` },
+                ],
+                [
+                  '...',
+                  { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
+                ],
+              ]),
+              region,
+              title: `Average and Minimum Latency by Chain`,
+              period: 300,
+              setPeriodToTimeRange: true,
+              stat: 'SampleCount',
+              yAxis: {
+                left: {
+                  min: 0,
+                  showUnits: false,
+                  label: "Milliseconds"
                 },
               },
             },
@@ -229,7 +301,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Sum',
               period: 300,
-              title: 'Success Rates by Chain | 5min',
+              title: 'Success Rates by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
@@ -286,7 +358,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'Sum',
               period: 300,
-              title: '5XX/4XX Error Rates by Chain | 5min',
+              title: '5XX/4XX Error Rates by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
@@ -307,7 +379,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               period: 300,
               stat: 'p90',
-              title: 'Latency p90 | 5min',
+              title: 'Latency p90',
             },
           },
           {
@@ -460,7 +532,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               region,
               stat: 'p90',
               period: 300,
-              title: 'Latency Breakdown | 5min',
+              title: 'Latency Breakdown',
             },
           },
           {
@@ -482,7 +554,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ['.', 'V3topbybasewithtokenout', '.', '.'],
               ],
               region: region,
-              title: 'p95 V3 Top N Pools Used From Sources in Best Route | 5min',
+              title: 'p95 V3 Top N Pools Used From Sources in Best Route',
               stat: 'p95',
             },
           },
@@ -505,7 +577,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ['.', 'V2topbybasewithtokenout', '.', '.'],
               ],
               region: region,
-              title: 'p95 V2 Top N Pools Used From Sources in Best Route | 5min',
+              title: 'p95 V2 Top N Pools Used From Sources in Best Route',
               stat: 'p95',
             },
           },
@@ -522,7 +594,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
               ],
               region: region,
-              title: 'Routing Lambda Provisioned Concurrency | 5min',
+              title: 'Routing Lambda Provisioned Concurrency',
               stat: 'Average',
             },
           },
@@ -543,7 +615,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   : []),
               ],
               region: region,
-              title: 'Pool Cache Lambda Error/Invocations | 5min',
+              title: 'Pool Cache Lambda Error/Invocations',
               stat: 'Sum',
             },
           },
