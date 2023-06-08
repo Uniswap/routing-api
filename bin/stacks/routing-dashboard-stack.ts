@@ -125,7 +125,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
                 'Service',
                 'RoutingAPI',
-                { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}` }
+                { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}` },
               ]),
               view: 'timeSeries',
               stacked: false,
@@ -161,22 +161,22 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
                   'Service',
                   'RoutingAPI',
-                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false }
+                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_200_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m200-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false }
+                  { id: `m200-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_400_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false }
-                ]
+                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
+                ],
               ]),
               view: 'timeSeries',
               stacked: false,
@@ -266,22 +266,22 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
                   'Service',
                   'RoutingAPI',
-                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false }
+                  { id: `mreq-${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_500_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m500-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false }
+                  { id: `m500-${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
                 ],
                 [
                   '.',
                   `GET_QUOTE_400_CHAINID: ${chainId}`,
                   '.',
                   '.',
-                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false }
-                ]
+                  { id: `m400-${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
+                ],
               ]),
               view: 'timeSeries',
               stacked: false,
