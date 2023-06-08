@@ -206,8 +206,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ],
                 ['...', { stat: 'p99.9', label: `${ID_TO_NETWORK_NAME(chainId)} P99.9` }],
                 ['...', { stat: 'p99', label: `${ID_TO_NETWORK_NAME(chainId)} P99` }],
-                ['...', { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` }],
-                ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90` }],
               ]),
               region,
               title: `P99.X Latency by Chain`,
