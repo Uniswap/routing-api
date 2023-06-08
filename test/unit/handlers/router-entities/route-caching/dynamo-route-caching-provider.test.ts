@@ -59,9 +59,9 @@ const TEST_WETH_USDC_POOL = new Pool(
   /* tickCurrent */ -69633
 )
 
-const TEST_USDC_UNI_POOL = new Pool(
+const TEST_USDC_WETH_POOL = new Pool(
   USDC_MAINNET,
-  UNI_MAINNET,
+  WETH,
   FeeAmount.HIGH,
   /* sqrtRatio */ '2437312313659959819381354528',
   /* liquidity */ '10272714736694327408',
@@ -78,7 +78,7 @@ const TEST_UNI_USDC_POOL = new Pool(
 )
 
 const TEST_WETH_USDC_V3_ROUTE = new V3Route([TEST_WETH_USDC_POOL], WETH, USDC_MAINNET)
-const TEST_USDC_UNI_V3_ROUTE = new V3Route([TEST_USDC_UNI_POOL], USDC_MAINNET, UNI_MAINNET)
+const TEST_USDC_WETH_V3_ROUTE = new V3Route([TEST_USDC_WETH_POOL], USDC_MAINNET, WETH)
 const TEST_UNI_USDC_ROUTE = new V3Route([TEST_UNI_USDC_POOL], UNI_MAINNET, USDC_MAINNET)
 
 const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_WETH_USDC_V3_ROUTE, percent: 100 })
@@ -94,15 +94,15 @@ const TEST_CACHED_ROUTES = new CachedRoutes({
   blocksToLive: 5,
 })
 
-const TEST_CACHED_ROUTE_2 = new CachedRoute({ route: TEST_USDC_UNI_V3_ROUTE, percent: 100 })
+const TEST_CACHED_ROUTE_2 = new CachedRoute({ route: TEST_USDC_WETH_V3_ROUTE, percent: 100 })
 const TEST_CACHED_ROUTES_2 = new CachedRoutes({
   routes: [TEST_CACHED_ROUTE_2],
   chainId: TEST_CACHED_ROUTE_2.route.chainId,
   tokenIn: USDC_MAINNET,
-  tokenOut: UNI_MAINNET,
+  tokenOut: WETH,
   protocolsCovered: [TEST_CACHED_ROUTE_2.protocol],
   blockNumber: 0,
-  tradeType: TradeType.EXACT_INPUT,
+  tradeType: TradeType.EXACT_OUTPUT,
   originalAmount: '1',
   blocksToLive: 5,
 })
@@ -157,12 +157,12 @@ describe('DynamoRouteCachingProvider', async () => {
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Tapcompare', async () => {
-    const currencyAmount = CurrencyAmount.fromRawAmount(USDC_MAINNET, JSBI.BigInt(1200 * 10 ** USDC_MAINNET.decimals))
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(100 * 10 ** WETH.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
-      UNI_MAINNET,
-      TradeType.EXACT_INPUT,
+      USDC_MAINNET,
+      TradeType.EXACT_OUTPUT,
       [Protocol.V3]
     )
     expect(cacheMode).to.equal(CacheMode.Tapcompare)
@@ -180,8 +180,8 @@ describe('DynamoRouteCachingProvider', async () => {
     const route = await dynamoRouteCache.getCachedRoute(
       ChainId.MAINNET,
       currencyAmount,
-      UNI_MAINNET,
-      TradeType.EXACT_INPUT,
+      USDC_MAINNET,
+      TradeType.EXACT_OUTPUT,
       [Protocol.V3],
       TEST_CACHED_ROUTES_2.blockNumber
     )
