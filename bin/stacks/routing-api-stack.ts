@@ -4,7 +4,7 @@ import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
-import { MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
+import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
@@ -363,6 +363,40 @@ export class RoutingAPIStack extends cdk.Stack {
       percent4XXByChainAlarm.push(alarm)
     })
 
+    // Alarms for high 500 error rate for each chain
+    const successRateByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
+    SUPPORTED_CHAINS.forEach((chainId) => {
+      if (CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
+      const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
+      const metric = new MathExpression({
+        expression: '100*(response200/(invocations-response400))',
+        usingMetrics: {
+          invocations: api.metric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          response400: api.metric(`GET_QUOTE_400_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          response200: api.metric(`GET_QUOTE_200_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+        },
+      })
+      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        alarmName,
+        metric,
+        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+        threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
+        evaluationPeriods: 2,
+      })
+      successRateByChainAlarm.push(alarm)
+    })
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -374,6 +408,9 @@ export class RoutingAPIStack extends cdk.Stack {
       simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
       percent4XXByChainAlarm.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      successRateByChainAlarm.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }

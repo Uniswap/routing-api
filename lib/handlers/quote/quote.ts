@@ -43,6 +43,47 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
+    const { chainId, metric } = params.requestInjected
+    const startTime = Date.now()
+
+    let result: Response<QuoteResponse> | ErrorResponse
+
+    try {
+      result = await this.handleRequestInternal(params)
+
+      switch (result.statusCode) {
+        case 200:
+        case 202:
+          metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+        case 400:
+        case 403:
+        case 404:
+        case 408:
+        case 409:
+          metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+        case 500:
+          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+      }
+    } catch (err) {
+      metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+      throw err
+    }
+
+    // This metric is logged here to guarantee it is counted in the same millisecond as the other metrics.
+    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+    metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+
+    return result
+  }
+
+  private async handleRequestInternal(
+    params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
+  ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
       requestQueryParams: {
         tokenInAddress,
@@ -78,7 +119,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
@@ -103,7 +143,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
     if (!currencyIn) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_INVALID',
@@ -112,7 +151,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (!currencyOut) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_OUT_INVALID',
@@ -121,7 +159,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (tokenInChainId != tokenOutChainId) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
@@ -130,7 +167,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     if (currencyIn.equals(currencyOut)) {
-      metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_OUT_SAME',
@@ -469,8 +505,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
     }
-
-    metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
     this.logRouteMetrics(
       log,
