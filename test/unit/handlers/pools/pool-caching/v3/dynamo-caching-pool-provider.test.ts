@@ -1,7 +1,7 @@
 import { setupTables } from '../../../../../mocha/dbSetup'
 import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
 import { ChainId } from '@uniswap/smart-order-router/build/main/util/chains'
-import { getMockedV3PoolProvider } from '../../../../../test-utils/mocked-dependencies'
+import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
 import { SUPPORTED_POOLS } from '../../../../../test-utils/mocked-data'
 import { Token } from '@uniswap/sdk-core'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
@@ -9,34 +9,6 @@ import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers
 import { expect } from 'chai'
 import { DynamoCachingV3Pool } from '../../../../../../lib/handlers/pools/pool-caching/v3/cache-dynamo-pool'
 import { log } from '@uniswap/smart-order-router'
-
-const TEST_ROUTE_TABLE = {
-  TableName: 'PoolCachingV3',
-  KeySchema: [
-    {
-      AttributeName: 'poolAddress',
-      KeyType: 'HASH',
-    },
-    {
-      AttributeName: 'blockNumber',
-      KeyType: 'RANGE',
-    },
-  ],
-  AttributeDefinitions: [
-    {
-      AttributeName: 'poolAddress',
-      AttributeType: 'S',
-    },
-    {
-      AttributeName: 'blockNumber',
-      AttributeType: 'N',
-    },
-  ],
-  ProvisionedThroughput: {
-    ReadCapacityUnits: 1,
-    WriteCapacityUnits: 1,
-  },
-}
 
 describe('DynamoDBCachingV3PoolProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
