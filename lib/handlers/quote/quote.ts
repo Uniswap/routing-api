@@ -40,7 +40,6 @@ export class QuoteHandler extends APIGLambdaHandler<
   QuoteQueryParams,
   QuoteResponse
 > {
-
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
@@ -68,7 +67,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     return result
-
   }
 
   public async handleRequestInternal(
