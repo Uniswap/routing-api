@@ -14,6 +14,7 @@ import {
   SimulationStatus,
   IMetric,
   ChainId,
+  ID_TO_NETWORK_NAME,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -43,13 +44,17 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    const { chainId, metric } = params.requestInjected
+    const { chainId, metric, log } = params.requestInjected
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
 
     try {
       result = await this.handleRequestInternal(params)
+
+      // This metric is logged after calling the internal handler to correlate with the status metrics
+      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
       switch (result.statusCode) {
         case 200:
@@ -62,20 +67,27 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 408:
         case 409:
           metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          log.error(
+            {
+              errorCode: result?.errorCode,
+              detail: result?.detail,
+            },
+            `Quote 4XX Error on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${result?.errorCode}'`
+          )
           break
         case 500:
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
           break
       }
     } catch (err) {
+      // These metric are logged in this catch block, because otherwise it isn't logged in the try block.
+      // We are also avoiding using the `finally` block as it appears to increase latencies
+      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
 
       throw err
-    } finally {
-      // This metric is logged after calling the internal handler to correlate with the status metrics
-      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-
-      metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
     }
 
     return result
