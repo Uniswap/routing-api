@@ -86,7 +86,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     return result
   }
 
-  public async handleRequestInternal(
+  private async handleRequestInternal(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
