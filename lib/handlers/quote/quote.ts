@@ -45,25 +45,34 @@ export class QuoteHandler extends APIGLambdaHandler<
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const { chainId, metric } = params.requestInjected
 
-    const result = await this.handleRequestInternal(params)
+    let result: Response<QuoteResponse> | ErrorResponse
 
-    metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+    try {
+      result = await this.handleRequestInternal(params)
 
-    switch (result.statusCode) {
-      case 200:
-      case 202:
-        metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-        break
-      case 400:
-      case 403:
-      case 404:
-      case 408:
-      case 409:
-        metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-        break
-      case 500:
-        metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
-        break
+      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+      switch (result.statusCode) {
+        case 200:
+        case 202:
+          metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+        case 400:
+        case 403:
+        case 404:
+        case 408:
+        case 409:
+          metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+        case 500:
+          metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          break
+      }
+    } catch (err) {
+      metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+
+      throw err
     }
 
     return result
