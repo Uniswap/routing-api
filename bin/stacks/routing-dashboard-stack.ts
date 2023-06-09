@@ -439,7 +439,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
         },
-      }
+      },
     ])
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
