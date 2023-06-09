@@ -314,8 +314,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
             },
           },
           {
-            height: 6,
-            width: 24,
+            height: 8,
+            width: 12,
             type: 'metric',
             properties: {
               metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
@@ -354,6 +354,49 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'Sum',
               period: 300,
               title: 'Success Rates by Chain',
+              setPeriodToTimeRange: true,
+              yAxis: {
+                left: {
+                  showUnits: false,
+                  label: '%',
+                },
+              },
+            },
+          },
+          {
+            height: 8,
+            width: 12,
+            type: 'metric',
+            properties: {
+              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
+                [
+                  {
+                    expression: `(m200c${chainId} / mreqc${chainId}) * 100`,
+                    label: `Success Rate (w. 4XX) on ${ID_TO_NETWORK_NAME(chainId)}`,
+                    id: `e1c${chainId}`,
+                  },
+                ],
+                [
+                  NAMESPACE,
+                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+                  'Service',
+                  'RoutingAPI',
+                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+                ],
+                [
+                  '.',
+                  `GET_QUOTE_200_CHAINID: ${chainId}`,
+                  '.',
+                  '.',
+                  { id: `m200c${chainId}`, label: `2XX Requests on Chain ${chainId}`, visible: false },
+                ],
+              ]),
+              view: 'timeSeries',
+              stacked: false,
+              region,
+              stat: 'Sum',
+              period: 300,
+              title: 'Success Rates (w. 4XX) by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
