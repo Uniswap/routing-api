@@ -69,7 +69,9 @@ export class QuoteHandler extends APIGLambdaHandler<
               errorCode: result?.errorCode,
               detail: result?.detail,
             },
-            `Quote 4XX Error [${result?.statusCode}] on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${result?.errorCode}': ${result?.detail}`
+            `Quote 4XX Error [${result?.statusCode}] on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${
+              result?.errorCode
+            }': ${result?.detail}`
           )
           break
         case 500:
