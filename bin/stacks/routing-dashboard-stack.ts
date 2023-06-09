@@ -33,6 +33,21 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
 
+    const TESTNETS = [
+      ChainId.RINKEBY,
+      ChainId.ROPSTEN,
+      ChainId.KOVAN,
+      ChainId.OPTIMISTIC_KOVAN,
+      ChainId.ARBITRUM_RINKEBY,
+      ChainId.ARBITRUM_GOERLI,
+      ChainId.POLYGON_MUMBAI,
+      ChainId.GÖRLI,
+      ChainId.SEPOLIA,
+      ChainId.CELO_ALFAJORES,
+    ]
+
+    const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
+
     // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
     const REQUESTED_QUOTES_RULE_NAME = 'RequestedQuotes'
     const REQUESTED_QUOTES_BY_CHAIN_RULE_NAME = 'RequestedQuotesByChain'
@@ -93,11 +108,345 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       poolCacheLambdaMetrics.push(['AWS/Lambda', `${poolCacheLambdaName}Errors`, 'FunctionName', poolCacheLambdaName])
       poolCacheLambdaMetrics.push(['.', `${poolCacheLambdaName}Invocations`, '.', '.'])
     })
+
+    const perChainWidgetsForRoutingDashboard: any[] = _.flatMap([MAINNETS, TESTNETS], (chains) => [
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: chains.map((chainId) => [
+            NAMESPACE,
+            `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+            'Service',
+            'RoutingAPI',
+            { id: `mreqc${chainId}`, label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}` },
+          ]),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: 'Requests by Chain',
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Requests',
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 8,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p99.99', label: `${ID_TO_NETWORK_NAME(chainId)} P99.99` },
+            ],
+            ['...', { stat: 'p99.9', label: `${ID_TO_NETWORK_NAME(chainId)} P99.9` }],
+            ['...', { stat: 'p99', label: `${ID_TO_NETWORK_NAME(chainId)} P99` }],
+          ]),
+          region,
+          title: `P99.X Latency by Chain`,
+          period: 300,
+          setPeriodToTimeRange: true,
+          stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+              showUnits: false,
+              label: 'Milliseconds',
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 8,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` },
+            ],
+            ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90` }],
+          ]),
+          region,
+          title: `P95 & P90 Latency by Chain`,
+          period: 300,
+          setPeriodToTimeRange: true,
+          stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+              showUnits: false,
+              label: 'Milliseconds',
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 8,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
+            ],
+            ['...', { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` }],
+          ]),
+          region,
+          title: `Average and Median Latency by Chain`,
+          period: 300,
+          setPeriodToTimeRange: true,
+          stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+              showUnits: false,
+              label: 'Milliseconds',
+            },
+          },
+        },
+      },
+      {
+        type: 'metric',
+        width: 12,
+        height: 8,
+        properties: {
+          view: 'timeSeries',
+          stacked: false,
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
+            ],
+          ]),
+          region,
+          title: `Minimum Latency by Chain`,
+          period: 300,
+          setPeriodToTimeRange: true,
+          stat: 'SampleCount',
+          yAxis: {
+            left: {
+              min: 0,
+              showUnits: false,
+              label: 'Milliseconds',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 12,
+        type: 'metric',
+        properties: {
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `(m200c${chainId} / (mreqc${chainId} - m400c${chainId})) * 100`,
+                label: `Success Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e1c${chainId}`,
+              },
+            ],
+            [
+              NAMESPACE,
+              `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+            ],
+            [
+              '.',
+              `GET_QUOTE_200_CHAINID: ${chainId}`,
+              '.',
+              '.',
+              { id: `m200c${chainId}`, label: `2XX Requests on Chain ${chainId}`, visible: false },
+            ],
+            [
+              '.',
+              `GET_QUOTE_400_CHAINID: ${chainId}`,
+              '.',
+              '.',
+              { id: `m400c${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
+            ],
+          ]),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: 'Success Rates by Chain',
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: '%',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 12,
+        type: 'metric',
+        properties: {
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `(m200c${chainId} / mreqc${chainId}) * 100`,
+                label: `Success Rate (w. 4XX) on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e1c${chainId}`,
+              },
+            ],
+            [
+              NAMESPACE,
+              `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+            ],
+            [
+              '.',
+              `GET_QUOTE_200_CHAINID: ${chainId}`,
+              '.',
+              '.',
+              { id: `m200c${chainId}`, label: `2XX Requests on Chain ${chainId}`, visible: false },
+            ],
+          ]),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: 'Success Rates (w. 4XX) by Chain',
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: '%',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 12,
+        type: 'metric',
+        properties: {
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `(m500c${chainId} / mreqc${chainId}) * 100`,
+                label: `5XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e1c${chainId}`,
+              },
+            ],
+            [
+              NAMESPACE,
+              `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+            ],
+            [
+              '.',
+              `GET_QUOTE_500_CHAINID: ${chainId}`,
+              '.',
+              '.',
+              { id: `m500c${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
+            ],
+          ]),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: '5XX Error Rates by Chain',
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: '%',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 12,
+        type: 'metric',
+        properties: {
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
+                label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e2c${chainId}`,
+              },
+            ],
+            [
+              NAMESPACE,
+              `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
+            ],
+            [
+              '.',
+              `GET_QUOTE_400_CHAINID: ${chainId}`,
+              '.',
+              '.',
+              { id: `m400c${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
+            ],
+          ]),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: '4XX Error Rates by Chain',
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: '%',
+            },
+          },
+        },
+      },
+    ])
+
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
-        widgets: [
+        widgets: perChainWidgetsForRoutingDashboard.concat([
           {
             height: 6,
             width: 24,
@@ -153,336 +502,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'Average',
               period: 300,
               title: '5XX/4XX Error Rates',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
-                },
-              },
-            },
-          },
-          {
-            height: 8,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: SUPPORTED_CHAINS.map((chainId) => [
-                NAMESPACE,
-                `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-                'Service',
-                'RoutingAPI',
-                { id: `mreqc${chainId}`, label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}` },
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: 'Requests by Chain',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: 'Requests',
-                },
-              },
-            },
-          },
-          {
-            type: 'metric',
-            width: 12,
-            height: 8,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { stat: 'p99.99', label: `${ID_TO_NETWORK_NAME(chainId)} P99.99` },
-                ],
-                ['...', { stat: 'p99.9', label: `${ID_TO_NETWORK_NAME(chainId)} P99.9` }],
-                ['...', { stat: 'p99', label: `${ID_TO_NETWORK_NAME(chainId)} P99` }],
-              ]),
-              region,
-              title: `P99.X Latency by Chain`,
-              period: 300,
-              setPeriodToTimeRange: true,
-              stat: 'SampleCount',
-              yAxis: {
-                left: {
-                  min: 0,
-                  showUnits: false,
-                  label: 'Milliseconds',
-                },
-              },
-            },
-          },
-          {
-            type: 'metric',
-            width: 12,
-            height: 8,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` },
-                ],
-                ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90` }],
-              ]),
-              region,
-              title: `P95 & P90 Latency by Chain`,
-              period: 300,
-              setPeriodToTimeRange: true,
-              stat: 'SampleCount',
-              yAxis: {
-                left: {
-                  min: 0,
-                  showUnits: false,
-                  label: 'Milliseconds',
-                },
-              },
-            },
-          },
-          {
-            type: 'metric',
-            width: 12,
-            height: 8,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
-                ],
-                ['...', { stat: 'Average', label: `${ID_TO_NETWORK_NAME(chainId)} Average` }],
-              ]),
-              region,
-              title: `Average and Median Latency by Chain`,
-              period: 300,
-              setPeriodToTimeRange: true,
-              stat: 'SampleCount',
-              yAxis: {
-                left: {
-                  min: 0,
-                  showUnits: false,
-                  label: 'Milliseconds',
-                },
-              },
-            },
-          },
-          {
-            type: 'metric',
-            width: 12,
-            height: 8,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
-                ],
-              ]),
-              region,
-              title: `Minimum Latency by Chain`,
-              period: 300,
-              setPeriodToTimeRange: true,
-              stat: 'SampleCount',
-              yAxis: {
-                left: {
-                  min: 0,
-                  showUnits: false,
-                  label: 'Milliseconds',
-                },
-              },
-            },
-          },
-          {
-            height: 8,
-            width: 12,
-            type: 'metric',
-            properties: {
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  {
-                    expression: `(m200c${chainId} / (mreqc${chainId} - m400c${chainId})) * 100`,
-                    label: `Success Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
-                    id: `e1c${chainId}`,
-                  },
-                ],
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
-                ],
-                [
-                  '.',
-                  `GET_QUOTE_200_CHAINID: ${chainId}`,
-                  '.',
-                  '.',
-                  { id: `m200c${chainId}`, label: `2XX Requests on Chain ${chainId}`, visible: false },
-                ],
-                [
-                  '.',
-                  `GET_QUOTE_400_CHAINID: ${chainId}`,
-                  '.',
-                  '.',
-                  { id: `m400c${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
-                ],
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: 'Success Rates by Chain',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
-                },
-              },
-            },
-          },
-          {
-            height: 8,
-            width: 12,
-            type: 'metric',
-            properties: {
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  {
-                    expression: `(m200c${chainId} / mreqc${chainId}) * 100`,
-                    label: `Success Rate (w. 4XX) on ${ID_TO_NETWORK_NAME(chainId)}`,
-                    id: `e1c${chainId}`,
-                  },
-                ],
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
-                ],
-                [
-                  '.',
-                  `GET_QUOTE_200_CHAINID: ${chainId}`,
-                  '.',
-                  '.',
-                  { id: `m200c${chainId}`, label: `2XX Requests on Chain ${chainId}`, visible: false },
-                ],
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: 'Success Rates (w. 4XX) by Chain',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
-                },
-              },
-            },
-          },
-          {
-            height: 8,
-            width: 12,
-            type: 'metric',
-            properties: {
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  {
-                    expression: `(m500c${chainId} / mreqc${chainId}) * 100`,
-                    label: `5XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
-                    id: `e1c${chainId}`,
-                  },
-                ],
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
-                ],
-                [
-                  '.',
-                  `GET_QUOTE_500_CHAINID: ${chainId}`,
-                  '.',
-                  '.',
-                  { id: `m500c${chainId}`, label: `5XX Errors on Chain ${chainId}`, visible: false },
-                ],
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: '5XX Error Rates by Chain',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
-                },
-              },
-            },
-          },
-          {
-            height: 8,
-            width: 12,
-            type: 'metric',
-            properties: {
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId) => [
-                [
-                  {
-                    expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
-                    label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
-                    id: `e2c${chainId}`,
-                  },
-                ],
-                [
-                  NAMESPACE,
-                  `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-                  'Service',
-                  'RoutingAPI',
-                  { id: `mreqc${chainId}`, label: `Requests on Chain ${chainId}`, visible: false },
-                ],
-                [
-                  '.',
-                  `GET_QUOTE_400_CHAINID: ${chainId}`,
-                  '.',
-                  '.',
-                  { id: `m400c${chainId}`, label: `4XX Errors on Chain ${chainId}`, visible: false },
-                ],
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: '4XX Error Rates by Chain',
               setPeriodToTimeRange: true,
               yAxis: {
                 left: {
@@ -743,7 +762,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'Sum',
             },
           },
-        ],
+        ]),
       }),
     })
 
