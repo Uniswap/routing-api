@@ -86,25 +86,21 @@ export class RoutingAPIStack extends cdk.Stack {
 
     const { cachedRoutesDynamoDb, cachedV3PoolsDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
-    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(
-      this,
-      'RoutingLambdaStack',
-      {
-        poolCacheBucket,
-        poolCacheBucket2,
-        poolCacheKey,
-        jsonRpcProviders,
-        tokenListCacheBucket,
-        provisionedConcurrency,
-        ethGasStationInfoUrl,
-        chatbotSNSArn,
-        tenderlyUser,
-        tenderlyProject,
-        tenderlyAccessKey,
-        cachedRoutesDynamoDb,
-        cachedV3PoolsDynamoDb,
-      }
-    )
+    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
+      poolCacheBucket,
+      poolCacheBucket2,
+      poolCacheKey,
+      jsonRpcProviders,
+      tokenListCacheBucket,
+      provisionedConcurrency,
+      ethGasStationInfoUrl,
+      chatbotSNSArn,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
+      cachedRoutesDynamoDb,
+      cachedV3PoolsDynamoDb,
+    })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')
 
