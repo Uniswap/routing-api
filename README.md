@@ -108,7 +108,7 @@ Test the smart-order-router changes in routing-api without bumping up the versio
    mv uniswap-smart-order-router-3.12.4.tgz /tmp
    ```
 
-2. Go to routing-api root folder, and do a clean install, and run tests:
+2. Go to routing-api root folder, and do a clean install, and run tests (Note: most likely you will have to manually edit the package hash in package-lock.json):
 
    ```
    npm cache clean -f
