@@ -90,3 +90,31 @@ The integration tests fetch quotes from your deployed API, then execute the swap
    ```
    npm run integ-test
    ```
+
+### Integration Tests
+
+Test the smart-order-router changes in routing-api without bumping up the versions:
+
+1. We will need to pack smart-order-router into the local tarball. We want to do it cleanly such that all the local caches are cleaned out. Then we re-install dependencies and run tests to make sure all pass. Finally we pack to local tarball and move to a tmp folder.
+
+   ```
+   ## in the smart-order-router folder
+   npm cache clean -f
+   rm -f -r node_modules
+   rm -f -r build
+   npm install
+   npm run integ-test
+   npm pack
+   mv uniswap-smart-order-router-3.12.4.tgz /tmp
+   ```
+
+2. Go to routing-api root folder, and do a clean install, and run tests:
+
+   ```
+   npm cache clean -f
+   rm -f -r node_modules
+   rm -f -r cache
+   rm -f -r dist
+   npm install
+   npm run integ-test
+   ```
