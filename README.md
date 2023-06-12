@@ -91,7 +91,7 @@ The integration tests fetch quotes from your deployed API, then execute the swap
    npm run integ-test
    ```
 
-### Integration Tests
+### Test smart-order-router changes in routing-api
 
 Test the smart-order-router changes in routing-api without bumping up the versions:
 
