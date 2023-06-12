@@ -52,7 +52,7 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
-const SLIPPAGE = '5'
+const SLIPPAGE = '30'
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
