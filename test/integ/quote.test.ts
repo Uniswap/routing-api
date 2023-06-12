@@ -557,7 +557,7 @@ describe('quote', function () {
               amount:
                 type == 'exactIn'
                   ? await getAmount(1, type, 'ETH', 'UNI', '10')
-                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                  : await getAmount(1, type, 'ETH', 'UNI', '1000'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -585,7 +585,7 @@ describe('quote', function () {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
               // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
             }
           })
@@ -599,7 +599,7 @@ describe('quote', function () {
               amount:
                 type == 'exactIn'
                   ? await getAmount(1, type, 'ETH', 'UNI', '10')
-                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                  : await getAmount(1, type, 'ETH', 'UNI', '1000'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -628,7 +628,7 @@ describe('quote', function () {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
               // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
             }
           })
