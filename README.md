@@ -103,7 +103,8 @@ Test the smart-order-router changes in routing-api without bumping up the versio
    rm -f -r node_modules
    rm -f -r build
    npm install
-   npm run integ-test
+   npm run build
+   npm run test
    npm pack
    mv uniswap-smart-order-router-3.12.4.tgz /tmp
    ```
@@ -116,5 +117,6 @@ Test the smart-order-router changes in routing-api without bumping up the versio
    rm -f -r cache
    rm -f -r dist
    npm install
-   npm run integ-test
+   npm run build
+   npm run test
    ```
