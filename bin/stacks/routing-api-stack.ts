@@ -84,7 +84,7 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     })
 
-    const { cachedRoutesDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
+    const { cachedRoutesDynamoDb, cachedV3PoolsDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
     const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
       this,
@@ -102,6 +102,7 @@ export class RoutingAPIStack extends cdk.Stack {
         tenderlyProject,
         tenderlyAccessKey,
         cachedRoutesDynamoDb,
+        cachedV3PoolsDynamoDb,
       }
     )
 
