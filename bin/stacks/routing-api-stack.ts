@@ -86,25 +86,21 @@ export class RoutingAPIStack extends cdk.Stack {
 
     const { cachedRoutesDynamoDb, cachedV3PoolsDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
-    const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
-      this,
-      'RoutingLambdaStack',
-      {
-        poolCacheBucket,
-        poolCacheBucket2,
-        poolCacheKey,
-        jsonRpcProviders,
-        tokenListCacheBucket,
-        provisionedConcurrency,
-        ethGasStationInfoUrl,
-        chatbotSNSArn,
-        tenderlyUser,
-        tenderlyProject,
-        tenderlyAccessKey,
-        cachedRoutesDynamoDb,
-        cachedV3PoolsDynamoDb,
-      }
-    )
+    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
+      poolCacheBucket,
+      poolCacheBucket2,
+      poolCacheKey,
+      jsonRpcProviders,
+      tokenListCacheBucket,
+      provisionedConcurrency,
+      ethGasStationInfoUrl,
+      chatbotSNSArn,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
+      cachedRoutesDynamoDb,
+      cachedV3PoolsDynamoDb,
+    })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')
 
@@ -227,16 +223,6 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
     quote.addMethod('GET', lambdaIntegration)
-
-    const routeToRatioLambdaIntegration = new aws_apigateway.LambdaIntegration(routeToRatioLambda)
-
-    const quoteToRatio = api.root.addResource('quoteToRatio', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
-        allowMethods: aws_apigateway.Cors.ALL_METHODS,
-      },
-    })
-    quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration)
 
     // All alarms default to GreaterThanOrEqualToThreshold for when to be triggered.
     const apiAlarm5xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-5XXAlarm', {
