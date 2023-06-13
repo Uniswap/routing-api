@@ -104,7 +104,7 @@ describe('TrafficSwitchV3PoolProvider', async () => {
   })
 
   it('not switch traffic and sample pools with inaccurate pricing but accurate liquidity', async () => {
-    const USDC_DAI_LOW_INACCURATE = new Pool(USDC, DAI, FeeAmount.LOW, encodeSqrtRatioX96(2, 2), 9, 0)
+    const USDC_DAI_LOW_INACCURATE = new Pool(USDC, DAI, FeeAmount.LOW, encodeSqrtRatioX96(2, 2), 10, 0)
 
     spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_QUOTE_MISMATCH', 1, MetricLoggerUnit.None)
     spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_LIQUIDITY_MATCH', 1, MetricLoggerUnit.None)
