@@ -27,8 +27,11 @@ describe('TrafficSwitchV3PoolProvider', async () => {
   const spy = sinon.spy(metric, 'putMetric')
 
   it('switch traffic and sample pools with accurate pricing and liquidity', async () => {
+    spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_QUOTE_MATCH', 1, MetricLoggerUnit.None)
+    spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_LIQUIDITY_MATCH', 1, MetricLoggerUnit.None)
     spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
-    spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
+    spy.withArgs('V3_POOL_PROVIDER_POOL_TARGET_QUOTE_MATCH', 1, MetricLoggerUnit.None)
+    spy.withArgs('V3_POOL_PROVIDER_POOL_TARGET_LIQUIDITY_MATCH', 1, MetricLoggerUnit.None)
     spy.withArgs('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
     spy.withArgs('V3_POOL_PROVIDER_POOL_TRAFFIC_SAMPLING', 1, MetricLoggerUnit.None)
     spy.withArgs('V3_POOL_PROVIDER_POOL_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)

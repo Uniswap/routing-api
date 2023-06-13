@@ -127,14 +127,14 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
 
         if (!sameQuote) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
-            current ${targetProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
+            target ${targetProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
 
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_QUOTE_MISMATCH', 1, MetricLoggerUnit.None)
         }
 
         if (!sameLiquidity) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} liquidity mismatch: 
-            current ${targetProviderPool.liquidity} vs truth ${pool.liquidity}.`)
+            target ${targetProviderPool.liquidity} vs truth ${pool.liquidity}.`)
 
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_LIQUIDITY_MISMATCH', 1, MetricLoggerUnit.None)
         }
