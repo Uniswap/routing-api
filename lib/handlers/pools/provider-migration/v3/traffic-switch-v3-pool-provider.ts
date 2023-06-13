@@ -89,10 +89,24 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
         )
       } else {
         const sameQuote = JSBI.equal(currentProviderPool.sqrtRatioX96, pool.sqrtRatioX96)
+        const sameLiquidity = JSBI.equal(currentProviderPool.liquidity, pool.liquidity)
+        const accurate = sameQuote && sameLiquidity
 
         if (!sameQuote) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
             current ${currentProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
+
+          metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_QUOTE_MISMATCH', 1, MetricLoggerUnit.None)
+        }
+
+        if (!sameLiquidity) {
+          log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} liquidity mismatch: 
+            current ${currentProviderPool.liquidity} vs truth ${pool.liquidity}.`)
+
+          metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_LIQUIDITY_MISMATCH', 1, MetricLoggerUnit.None)
+        }
+
+        if (!accurate) {
           metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
           metric.putMetric('V3_POOL_PROVIDER_POOL_CURRENT_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
@@ -108,10 +122,24 @@ export class TrafficSwitchV3PoolProvider implements IV3PoolProvider {
         )
       } else {
         const sameQuote = JSBI.equal(targetProviderPool.sqrtRatioX96, pool.sqrtRatioX96)
+        const sameLiquidity = JSBI.equal(targetProviderPool.liquidity, pool.liquidity)
+        const accurate = sameQuote && sameLiquidity
 
         if (!sameQuote) {
           log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} quote mismatch: 
             target ${targetProviderPool.sqrtRatioX96} vs truth ${pool.sqrtRatioX96}.`)
+
+          metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_QUOTE_MISMATCH', 1, MetricLoggerUnit.None)
+        }
+
+        if (!sameLiquidity) {
+          log.info(`v3 Pool ${pool.token0.symbol} ${pool.token1.symbol} ${pool.fee} liquidity mismatch: 
+            target ${targetProviderPool.liquidity} vs truth ${pool.liquidity}.`)
+
+          metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_LIQUIDITY_MISMATCH', 1, MetricLoggerUnit.None)
+        }
+
+        if (!accurate) {
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MISMATCH', 1, MetricLoggerUnit.None)
         } else {
           metric.putMetric('V3_POOL_PROVIDER_POOL_TARGET_ACCURACY_MATCH', 1, MetricLoggerUnit.None)
