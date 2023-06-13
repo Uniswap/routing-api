@@ -52,7 +52,8 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
-const SLIPPAGE = '30'
+const SLIPPAGE = '5'
+const LARGE_SLIPPAGE = '10'
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
@@ -1293,7 +1294,7 @@ describe('quote', function () {
                     : await getAmount(1, type, 'ETH', 'UNI', '10000'),
                 type,
                 recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
+                slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE, // for exact out somehow the liquidation wasn't sufficient, hence higher slippage
                 deadline: '360',
                 algorithm,
                 simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
@@ -1336,7 +1337,7 @@ describe('quote', function () {
                     : await getAmount(1, type, 'ETH', 'UNI', '10000'),
                 type,
                 recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
+                slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE, // for exact out somehow the liquidation wasn't sufficient, hence higher slippage,
                 deadline: '360',
                 algorithm,
                 simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
