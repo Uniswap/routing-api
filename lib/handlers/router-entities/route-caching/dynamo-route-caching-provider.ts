@@ -17,6 +17,7 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
 interface ConstructorParams {
   /**
@@ -105,7 +106,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         bucket: cachingBucket.bucket,
       })
 
-      const queryParams = {
+      const queryParams: DocumentClient.QueryInput = {
         TableName: this.tableName,
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
@@ -119,6 +120,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: Math.max(cachingBucket.withLastNCachedRoutes, 1),
+        ConsistentRead: true,
       }
 
       try {
