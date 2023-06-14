@@ -47,13 +47,8 @@ import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traff
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
-  ChainId.RINKEBY,
-  ChainId.ROPSTEN,
-  ChainId.KOVAN,
   ChainId.OPTIMISM,
-  ChainId.OPTIMISTIC_KOVAN,
   ChainId.ARBITRUM_ONE,
-  ChainId.ARBITRUM_RINKEBY,
   ChainId.ARBITRUM_GOERLI,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
@@ -135,7 +130,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         let timeout: number
         switch (chainId) {
           case ChainId.ARBITRUM_ONE:
-          case ChainId.ARBITRUM_RINKEBY:
             timeout = 8000
             break
           default:
@@ -173,7 +167,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         let quoteProvider: OnChainQuoteProvider | undefined = undefined
         switch (chainId) {
           case ChainId.OPTIMISM:
-          case ChainId.OPTIMISTIC_KOVAN:
             quoteProvider = new OnChainQuoteProvider(
               chainId,
               provider,
@@ -207,7 +200,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             )
             break
           case ChainId.ARBITRUM_ONE:
-          case ChainId.ARBITRUM_RINKEBY:
             quoteProvider = new OnChainQuoteProvider(
               chainId,
               provider,

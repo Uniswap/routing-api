@@ -17,11 +17,6 @@ import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [
-  ChainId.RINKEBY,
-  ChainId.ARBITRUM_RINKEBY,
-  ChainId.ROPSTEN,
-  ChainId.KOVAN,
-  ChainId.OPTIMISTIC_KOVAN,
   ChainId.GÖRLI,
   ChainId.POLYGON_MUMBAI,
 ]

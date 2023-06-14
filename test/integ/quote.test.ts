@@ -1889,16 +1889,11 @@ describe('quote', function () {
 
   const TEST_ERC20_1: { [chainId in ChainId]: null | Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
-    [ChainId.ROPSTEN]: USDC_ON(ChainId.ROPSTEN),
-    [ChainId.RINKEBY]: USDC_ON(ChainId.RINKEBY),
     [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
     [ChainId.SEPOLIA]: USDC_ON(ChainId.SEPOLIA),
-    [ChainId.KOVAN]: USDC_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISTIC_KOVAN]: USDC_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.OPTIMISM_GOERLI]: USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_RINKEBY]: USDC_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: CUSD_CELO,
@@ -1911,16 +1906,11 @@ describe('quote', function () {
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
     [ChainId.MAINNET]: DAI_ON(1),
-    [ChainId.ROPSTEN]: DAI_ON(ChainId.ROPSTEN),
-    [ChainId.RINKEBY]: DAI_ON(ChainId.RINKEBY),
     [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
     [ChainId.SEPOLIA]: DAI_ON(ChainId.SEPOLIA),
-    [ChainId.KOVAN]: DAI_ON(ChainId.KOVAN),
     [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISTIC_KOVAN]: DAI_ON(ChainId.OPTIMISTIC_KOVAN),
     [ChainId.OPTIMISM_GOERLI]: DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_RINKEBY]: DAI_ON(ChainId.ARBITRUM_RINKEBY),
     [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: CEUR_CELO,
@@ -1935,14 +1925,9 @@ describe('quote', function () {
   for (const chain of _.filter(
     SUPPORTED_CHAINS,
     (c) =>
-      c != ChainId.OPTIMISTIC_KOVAN &&
       c != ChainId.POLYGON_MUMBAI &&
-      c != ChainId.ARBITRUM_RINKEBY &&
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
-      c != ChainId.KOVAN &&
-      c != ChainId.RINKEBY &&
-      c != ChainId.ROPSTEN &&
       c != ChainId.GÖRLI &&
       c != ChainId.SEPOLIA
   )) {
