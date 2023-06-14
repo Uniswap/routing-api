@@ -12,6 +12,7 @@ import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
 import { DynamoDBTableProps } from './routing-database-stack'
+import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
@@ -101,6 +102,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
+      logRetention: RetentionDays.TWO_WEEKS,
     })
 
     const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
