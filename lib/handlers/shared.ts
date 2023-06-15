@@ -13,7 +13,6 @@ import Logger from 'bunyan'
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
     case ChainId.OPTIMISM:
-    case ChainId.OPTIMISTIC_KOVAN:
       return {
         v2PoolSelection: {
           topN: 3,
@@ -41,7 +40,6 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
     // batch size and send more multicalls per quote. To reduce the amount of requests each quote sends, we
     // have to adjust the routing config so we explore fewer routes.
     case ChainId.ARBITRUM_ONE:
-    case ChainId.ARBITRUM_RINKEBY:
       return {
         v2PoolSelection: {
           topN: 3,
