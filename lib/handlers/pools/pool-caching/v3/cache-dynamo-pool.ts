@@ -6,8 +6,8 @@ import { PoolMarshaller } from '../../../marshalling/pool-marshaller'
 interface DynamoCachingV3PoolProps extends DynamoCachingProps {}
 
 export class DynamoCachingV3Pool extends DynamoCaching<string, number, Pool> {
-  constructor({ tableName }: DynamoCachingV3PoolProps) {
-    super({ tableName })
+  constructor({ tableName, ttlMinutes }: DynamoCachingV3PoolProps) {
+    super({ tableName, ttlMinutes })
   }
 
   override async get(partitionKey: string, sortKey?: number): Promise<Pool | undefined> {

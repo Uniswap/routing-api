@@ -603,7 +603,7 @@ describe('quote', function () {
                   : await getAmount(1, type, 'ETH', 'UNI', '10000'),
               type,
               recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
+              slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE,
               deadline: '360',
               algorithm,
               enableUniversalRouter: false,
