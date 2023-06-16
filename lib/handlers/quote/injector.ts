@@ -31,7 +31,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
-    const logLevel = bunyan.INFO
+    // Sample 10% of all info logs for debugging purposes.
+    // Always log error logs.
+    const logLevel = Math.random() < 0.1 ? bunyan.INFO : bunyan.ERROR
 
     const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
 
