@@ -1,10 +1,10 @@
-import type {Config} from 'jest'
+import type { Config } from 'jest'
 
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   verbose: true,
-  roots: ['./test']
+  roots: ['./test'],
 }
 
 export default config

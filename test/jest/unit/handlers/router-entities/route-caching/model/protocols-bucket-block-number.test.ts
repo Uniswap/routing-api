@@ -35,31 +35,25 @@ describe('ProtocolsBucketBlockNumber', () => {
   })
 
   describe('#protocolsBucketPartialKey', () => {
-    it(
-      'returns a string-ified version of the object without the blockNumber',
-      () => {
-        const protocolsBucketBlockNumber = new ProtocolsBucketBlockNumber({
-          protocols: [Protocol.MIXED, Protocol.V2, Protocol.V3],
-          bucket: 5,
-          blockNumber: 12345,
-        })
+    it('returns a string-ified version of the object without the blockNumber', () => {
+      const protocolsBucketBlockNumber = new ProtocolsBucketBlockNumber({
+        protocols: [Protocol.MIXED, Protocol.V2, Protocol.V3],
+        bucket: 5,
+        blockNumber: 12345,
+      })
 
-        expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
-      }
-    )
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
+    })
 
-    it(
-      'protocols are sorted, even if the original array is not, without the blockNumber',
-      () => {
-        const protocolsBucketBlockNumber = new ProtocolsBucketBlockNumber({
-          protocols: [Protocol.V3, Protocol.MIXED, Protocol.V2],
-          bucket: 5,
-          blockNumber: 12345,
-        })
+    it('protocols are sorted, even if the original array is not, without the blockNumber', () => {
+      const protocolsBucketBlockNumber = new ProtocolsBucketBlockNumber({
+        protocols: [Protocol.V3, Protocol.MIXED, Protocol.V2],
+        bucket: 5,
+        blockNumber: 12345,
+      })
 
-        expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
-      }
-    )
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
+    })
 
     it('returns the partial key even if blockNumber is undefined', () => {
       const protocolsBucketBlockNumber = new ProtocolsBucketBlockNumber({
