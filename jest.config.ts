@@ -5,7 +5,6 @@ const config: Config = {
   testEnvironment: 'node',
   verbose: true,
   roots: ['./test'],
-  testPathIgnorePatterns: [".d.ts", ".js"],
 }
 
 export default config
