@@ -1,5 +1,6 @@
 import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { ChainId } from '@uniswap/smart-order-router'
+import { describe, it, expect } from '@jest/globals'
 import {
   CACHED_ROUTES_CONFIGURATION,
   PairTradeTypeChainId,

@@ -20,16 +20,15 @@
     "fix:lint": "eslint lib --ext .ts --fix"
   },
   "devDependencies": {
+    "@jest/globals": "^29.5.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@types/aws-lambda": "^8.10.77",
     "@types/bunyan": "^1.8.6",
-    "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/expect": "^24.3.0",
     "@types/hapi__joi": "^17.1.6",
     "@types/http-errors": "^1.8.0",
-    "@types/jest": "^29.5.2",
     "@types/lodash": "^4.14.182",
     "@types/mocha": "^8.2.3",
     "@types/node": "^14.0.27",
