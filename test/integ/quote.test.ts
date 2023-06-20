@@ -1889,7 +1889,7 @@ describe('quote', function () {
 
   const TEST_ERC20_1: { [chainId in ChainId]: null | Token } = {
     [ChainId.MAINNET]: USDC_ON(1),
-    [ChainId.GÖRLI]: USDC_ON(ChainId.GÖRLI),
+    [ChainId.GOERLI]: USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: USDC_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: USDC_ON(ChainId.OPTIMISM_GOERLI),
@@ -1901,12 +1901,12 @@ describe('quote', function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
-    [ChainId.BSC]: USDC_ON(ChainId.BSC),
+    [ChainId.BNB]: USDC_ON(ChainId.BNB),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
     [ChainId.MAINNET]: DAI_ON(1),
-    [ChainId.GÖRLI]: DAI_ON(ChainId.GÖRLI),
+    [ChainId.GOERLI]: DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: DAI_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: DAI_ON(ChainId.OPTIMISM_GOERLI),
@@ -1918,7 +1918,7 @@ describe('quote', function () {
     [ChainId.MOONBEAM]: null,
     [ChainId.GNOSIS]: null,
     [ChainId.ARBITRUM_GOERLI]: null,
-    [ChainId.BSC]: USDT_ON(ChainId.BSC),
+    [ChainId.BNB]: USDT_ON(ChainId.BNB),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -1928,7 +1928,7 @@ describe('quote', function () {
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
-      c != ChainId.GÖRLI &&
+      c != ChainId.GOERLI &&
       c != ChainId.SEPOLIA
   )) {
     for (const type of ['exactIn', 'exactOut']) {
