@@ -4,7 +4,7 @@ import { ChainId } from '@uniswap/smart-order-router'
 import {
   CACHED_ROUTES_CONFIGURATION,
   PairTradeTypeChainId,
-} from '../../../../../lib/handlers/router-entities/route-caching'
+} from '../../../../../../lib/handlers/router-entities/route-caching'
 
 describe('CachedRoutesConfiguration', () => {
   const WETH = new Token(ChainId.MAINNET, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 18, 'WETH')

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { CachedRoutesWidgetsFactory } from '../../../lib/dashboards/cached-routes-widgets-factory'
+import { CachedRoutesWidgetsFactory } from '../../../../lib/dashboards/cached-routes-widgets-factory'
 
 const widgetsFactory = new CachedRoutesWidgetsFactory('Uniswap', 'us-west-1', 'lambda')
 

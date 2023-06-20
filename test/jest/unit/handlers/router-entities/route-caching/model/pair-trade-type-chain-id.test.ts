@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { PairTradeTypeChainId } from '../../../../../../lib/handlers/router-entities/route-caching'
+import { PairTradeTypeChainId } from '../../../../../../../lib/handlers/router-entities/route-caching'
 import { TradeType } from '@uniswap/sdk-core'
 import { ChainId } from '@uniswap/smart-order-router'
 describe('PairTradeTypeChainId', () => {

@@ -1,4 +1,4 @@
-import { QuoteAmountsWidgetsFactory } from '../../../lib/dashboards/quote-amounts-widgets-factory'
+import { QuoteAmountsWidgetsFactory } from '../../../../lib/dashboards/quote-amounts-widgets-factory'
 import { expect } from 'chai'
 
 const quoteAmountsWidgets = new QuoteAmountsWidgetsFactory('Uniswap', 'us-west-1')
