@@ -12,7 +12,7 @@
     "build": "run-p compile-external-types compile-v3-contract-types && tsc",
     "clean": "rm -rf dist cdk.out",
     "watch": "tsc -w",
-    "test": "ts-mocha -p tsconfig.cdk.json -r test/mocha/dynamoDBLocalFixture.ts test/mocha/unit --recursive --extension .test.ts",
+    "test": "jest test/jest/. && ts-mocha -p tsconfig.cdk.json -r test/mocha/dynamoDBLocalFixture.ts test/mocha/unit --recursive --extension .test.ts",
     "integ-test": "ts-mocha -p tsconfig.cdk.json -r dotenv/config test/mocha/integ/**/*.test.ts",
     "cdk": "cdk",
     "fix": "run-s fix:*",
