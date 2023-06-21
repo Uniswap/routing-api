@@ -141,16 +141,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         }
 
         const provider: ethers.providers.BaseProvider = new DefaultEVMClient({
-          allProviders: [new InstrumentedEVMProvider(
-            {
+          allProviders: [
+            new InstrumentedEVMProvider({
               url: {
                 url: url,
                 timeout,
               },
               network: chainId,
-              name: ProviderName.INFURA
-              }
-          )]
+              name: ProviderName.INFURA,
+            }),
+          ],
         }).getProvider()
         const jsonRpcProvider = provider as ethers.providers.JsonRpcProvider
 

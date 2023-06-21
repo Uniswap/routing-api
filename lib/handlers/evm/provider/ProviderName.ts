@@ -1,3 +1,3 @@
 export enum ProviderName {
-  INFURA = "INFURA"
+  INFURA = 'INFURA',
 }
