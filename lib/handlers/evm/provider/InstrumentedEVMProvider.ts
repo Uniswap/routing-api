@@ -46,44 +46,107 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
   }
 
   override estimateGas(transaction: Deferrable<TransactionRequest>): Promise<BigNumber> {
-    return super.estimateGas(transaction)
+    metric.putMetric(`RPC_${this.name}_ESTIMATEGAS_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.estimateGas(transaction).then(response => {
+      metric.putMetric(`RPC_${this.name}_ESTIMATEGAS_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_ESTIMATEGAS_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getBalance(
     addressOrName: string | Promise<string>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<BigNumber> {
-    return super.getBalance(addressOrName, blockTag)
+    metric.putMetric(`RPC_${this.name}_GETBALANCE_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getBalance(addressOrName, blockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETBALANCE_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETBALANCE_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getBlock(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<Block> {
-    return super.getBlock(blockHashOrBlockTag)
+    metric.putMetric(`RPC_${this.name}_GETBLOCK_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getBlock(blockHashOrBlockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCK_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCK_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getBlockNumber(): Promise<number> {
-    return super.getBlockNumber()
+    metric.putMetric(`RPC_${this.name}_GETBLOCKNUMBER_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getBlockNumber().then(response => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCKNUMBER_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCKNUMBER_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getBlockWithTransactions(
     blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
   ): Promise<BlockWithTransactions> {
-    return super.getBlockWithTransactions(blockHashOrBlockTag)
+    metric.putMetric(`RPC_${this.name}_GETBLOCKWITHTRANSACTION_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getBlockWithTransactions(blockHashOrBlockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCKWITHTRANSACTION_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETBLOCKWITHTRANSACTION_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    return super.getCode(addressOrName, blockTag)
+    metric.putMetric(`RPC_${this.name}_GETCODE_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getCode(addressOrName, blockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETCODE_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETCODE_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getGasPrice(): Promise<BigNumber> {
-    return super.getGasPrice()
+    metric.putMetric(`RPC_${this.name}_GETGASPRICE_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getGasPrice().then(response => {
+      metric.putMetric(`RPC_${this.name}_GETGASPRICE_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETGASPRICE_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getLogs(filter: Filter): Promise<Array<Log>> {
-    return super.getLogs(filter)
+    metric.putMetric(`RPC_${this.name}_GETLOGS_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getLogs(filter).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETLOGS_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETLOGS_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getNetwork(): Promise<Network> {
-    return super.getNetwork()
+    metric.putMetric(`RPC_${this.name}_GETNETWORK_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getNetwork().then(response => {
+      metric.putMetric(`RPC_${this.name}_GETNETWORK_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETNETWORK_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getStorageAt(
@@ -91,22 +154,50 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
     position: BigNumberish | Promise<BigNumberish>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<string> {
-    return super.getStorageAt(addressOrName, position, blockTag)
+    metric.putMetric(`RPC_${this.name}_GETSTORAGEAT_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getStorageAt(addressOrName, position, blockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETSTORAGEAT_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETSTORAGEAT_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getTransaction(transactionHash: string): Promise<TransactionResponse> {
-    return super.getTransaction(transactionHash)
+    metric.putMetric(`RPC_${this.name}_GETTRANSACTION_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getTransaction(transactionHash).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTION_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTION_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getTransactionCount(
     addressOrName: string | Promise<string>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<number> {
-    return super.getTransactionCount(addressOrName, blockTag)
+    metric.putMetric(`RPC_${this.name}_GETTRANSACTIONCOUNT_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getTransactionCount(addressOrName, blockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTIONCOUNT_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTIONCOUNT_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override getTransactionReceipt(transactionHash: string): Promise<TransactionReceipt> {
-    return super.getTransactionReceipt(transactionHash)
+    metric.putMetric(`RPC_${this.name}_GETTRANSACTIONRECEIPT_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.getTransactionReceipt(transactionHash).then(response => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTIONRECEIPT_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_GETTRANSACTIONRECEIPT_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override listenerCount(eventName?: EventType): number {
@@ -118,7 +209,14 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
   }
 
   override lookupAddress(address: string | Promise<string>): Promise<string | null> {
-    return super.lookupAddress(address)
+    metric.putMetric(`RPC_${this.name}_LOOKUPADDRESS_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.lookupAddress(address).then(response => {
+      metric.putMetric(`RPC_${this.name}_LOOKUPADDRESS_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_LOOKUPADDRESS_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override off(eventName: EventType, listener?: Listener): this {
@@ -146,11 +244,25 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
   }
 
   override resolveName(name: string | Promise<string>): Promise<string | null> {
-    return super.resolveName(name)
+    metric.putMetric(`RPC_${this.name}_RESOLVENAME_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.resolveName(name).then(response => {
+      metric.putMetric(`RPC_${this.name}_RESOLVENAME_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_RESOLVENAME_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
-    return super.sendTransaction(signedTransaction)
+    metric.putMetric(`RPC_${this.name}_SENDTRANSACTION_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.sendTransaction(signedTransaction).then(response => {
+      metric.putMetric(`RPC_${this.name}_SENDTRANSACTION_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_SENDTRANSACTION_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override waitForTransaction(
@@ -158,6 +270,13 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
     confirmations?: number,
     timeout?: number
   ): Promise<TransactionReceipt> {
-    return super.waitForTransaction(transactionHash, confirmations, timeout)
+    metric.putMetric(`RPC_${this.name}_WAITFORTRANSACTION_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.waitForTransaction(transactionHash, confirmations, timeout).then(response => {
+      metric.putMetric(`RPC_${this.name}_WAITFORTRANSACTION_SUCCESS`, 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric(`RPC_${this.name}_WAITFORTRANSACTION_FAILURE`, 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 }
