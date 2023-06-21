@@ -1,10 +1,10 @@
-import { expect } from 'chai'
 import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { ChainId } from '@uniswap/smart-order-router'
+import { describe, it, expect } from '@jest/globals'
 import {
   CACHED_ROUTES_CONFIGURATION,
   PairTradeTypeChainId,
-} from '../../../../../lib/handlers/router-entities/route-caching'
+} from '../../../../../../lib/handlers/router-entities/route-caching'
 
 describe('CachedRoutesConfiguration', () => {
   const WETH = new Token(ChainId.MAINNET, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 18, 'WETH')
@@ -19,12 +19,12 @@ describe('CachedRoutesConfiguration', () => {
 
     const fetchedStrategy = CACHED_ROUTES_CONFIGURATION.get(pairToLookup.toString())
 
-    expect(fetchedStrategy).to.not.be.undefined
+    expect(fetchedStrategy).toBeDefined()
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
-    expect(cachingParameters?.bucket).to.eq(1)
+    expect(cachingParameters?.bucket).toBe(1)
   })
 
   it('can find the strategy, even if token has different capitalization', () => {
@@ -37,12 +37,12 @@ describe('CachedRoutesConfiguration', () => {
 
     const fetchedStrategy = CACHED_ROUTES_CONFIGURATION.get(pairToLookup.toString())
 
-    expect(fetchedStrategy).to.not.be.undefined
+    expect(fetchedStrategy).toBeDefined()
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 1 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
-    expect(cachingParameters?.bucket).to.eq(1)
+    expect(cachingParameters?.bucket).toBe(1)
   })
 
   it('can find the strategy using a different amount', () => {
@@ -55,12 +55,12 @@ describe('CachedRoutesConfiguration', () => {
 
     const fetchedStrategy = CACHED_ROUTES_CONFIGURATION.get(pairToLookup.toString())
 
-    expect(fetchedStrategy).to.not.be.undefined
+    expect(fetchedStrategy).toBeDefined()
 
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, 5 * 10 ** WETH.decimals)
     const cachingParameters = fetchedStrategy?.getCachingBucket(currencyAmount)
 
-    expect(cachingParameters?.bucket).to.eq(5)
+    expect(cachingParameters?.bucket).toBe(5)
   })
 
   it('returns undefined when strategy doesnt exist', () => {
@@ -73,6 +73,6 @@ describe('CachedRoutesConfiguration', () => {
 
     const fetchedStrategy = CACHED_ROUTES_CONFIGURATION.get(pairToLookup.toString())
 
-    expect(fetchedStrategy).to.be.undefined
+    expect(fetchedStrategy).toBeUndefined()
   })
 })
