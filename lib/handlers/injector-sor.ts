@@ -140,14 +140,14 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const provider: ethers.providers.BaseProvider = new EVMClient({
           infuraProvider: new ethers.providers.JsonRpcProvider(
-          {
-                url: url,
-                timeout,
-              },
-              chainId
-            ),
-          chainId: chainId}
-        )
+            {
+              url: url,
+              timeout,
+            },
+            chainId
+          ),
+          chainId: chainId,
+        })
         const jsonRpcProvider = provider as ethers.providers.JsonRpcProvider
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
@@ -271,9 +271,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
 
-        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, jsonRpcProvider, v2PoolProvider, v3PoolProvider)
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(
+          chainId,
+          jsonRpcProvider,
+          v2PoolProvider,
+          v3PoolProvider
+        )
 
-        const simulator = new FallbackTenderlySimulator(chainId, jsonRpcProvider, tenderlySimulator, ethEstimateGasSimulator)
+        const simulator = new FallbackTenderlySimulator(
+          chainId,
+          jsonRpcProvider,
+          tenderlySimulator,
+          ethEstimateGasSimulator
+        )
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {

@@ -1,18 +1,26 @@
 import { ethers } from 'ethers'
 import { Listener, TransactionRequest } from '@ethersproject/providers'
-import { Block, BlockTag, BlockWithTransactions, EventType, Filter, Log, TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider'
-import { Network } from "@ethersproject/networks";
-import { Deferrable } from "@ethersproject/properties";
+import {
+  Block,
+  BlockTag,
+  BlockWithTransactions,
+  EventType,
+  Filter,
+  Log,
+  TransactionReceipt,
+  TransactionResponse,
+} from '@ethersproject/abstract-provider'
+import { Network } from '@ethersproject/networks'
+import { Deferrable } from '@ethersproject/properties'
 import { ChainId } from '@uniswap/smart-order-router'
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 
 export type EVMClientProps = {
   infuraProvider: ethers.providers.JsonRpcProvider
   chainId: ChainId
 }
 
-export
-class EVMClient extends ethers.providers.BaseProvider {
+export class EVMClient extends ethers.providers.BaseProvider {
   private infuraProvider: ethers.providers.JsonRpcProvider
 
   // delegate all non-private method calls
@@ -33,7 +41,10 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.estimateGas(transaction)
   }
 
-  override getBalance(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<BigNumber> {
+  override getBalance(
+    addressOrName: string | Promise<string>,
+    blockTag?: BlockTag | Promise<BlockTag>
+  ): Promise<BigNumber> {
     return this.infuraProvider.getBalance(addressOrName, blockTag)
   }
 
@@ -45,7 +56,9 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.getBlockNumber()
   }
 
-  override getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<BlockWithTransactions> {
+  override getBlockWithTransactions(
+    blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
+  ): Promise<BlockWithTransactions> {
     return this.infuraProvider.getBlockWithTransactions(blockHashOrBlockTag)
   }
 
@@ -65,7 +78,11 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.getNetwork()
   }
 
-  override getStorageAt(addressOrName: string | Promise<string>, position: BigNumberish | Promise<BigNumberish>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+  override getStorageAt(
+    addressOrName: string | Promise<string>,
+    position: BigNumberish | Promise<BigNumberish>,
+    blockTag?: BlockTag | Promise<BlockTag>
+  ): Promise<string> {
     return this.infuraProvider.getStorageAt(addressOrName, position, blockTag)
   }
 
@@ -73,7 +90,10 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.getTransaction(transactionHash)
   }
 
-  override getTransactionCount(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<number> {
+  override getTransactionCount(
+    addressOrName: string | Promise<string>,
+    blockTag?: BlockTag | Promise<BlockTag>
+  ): Promise<number> {
     return this.infuraProvider.getTransactionCount(addressOrName, blockTag)
   }
 
@@ -125,7 +145,11 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.sendTransaction(signedTransaction)
   }
 
-  override waitForTransaction(transactionHash: string, confirmations?: number, timeout?: number): Promise<TransactionReceipt> {
+  override waitForTransaction(
+    transactionHash: string,
+    confirmations?: number,
+    timeout?: number
+  ): Promise<TransactionReceipt> {
     return this.infuraProvider.waitForTransaction(transactionHash, confirmations, timeout)
   }
 }
