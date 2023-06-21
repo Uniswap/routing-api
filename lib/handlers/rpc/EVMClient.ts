@@ -8,11 +8,11 @@ import {
   Filter,
   Log,
   TransactionReceipt,
-  TransactionResponse,
+  TransactionResponse
 } from '@ethersproject/abstract-provider'
 import { Network } from '@ethersproject/networks'
 import { Deferrable } from '@ethersproject/properties'
-import { ChainId } from '@uniswap/smart-order-router'
+import { ChainId, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 
 export type EVMClientProps = {
@@ -30,7 +30,14 @@ export class EVMClient extends ethers.providers.BaseProvider {
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    return this.infuraProvider.call(transaction, blockTag)
+    metric.putMetric("RPC_INFURA_CALL_REQUESTED", 1, MetricLoggerUnit.Count)
+    return this.infuraProvider.call(transaction, blockTag).then(response => {
+      metric.putMetric("RPC_INFURA_CALL_SUCCESS", 1, MetricLoggerUnit.Count)
+      return response
+    }, error => {
+      metric.putMetric("RPC_INFURA_CALL_FAILURE", 1, MetricLoggerUnit.Count)
+      throw error
+    });
   }
 
   override emit(eventName: EventType, ...args: Array<any>): boolean {
