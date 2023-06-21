@@ -20,9 +20,10 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "outDir": "dist",
+    "outDir": "./dist",
     "allowJs": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": ["cdk.out", "./dist/**/*"]
 }

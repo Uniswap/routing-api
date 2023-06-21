@@ -1,6 +1,6 @@
-import { expect } from 'chai'
-import { ProtocolsBucketBlockNumber } from '../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
+import { ProtocolsBucketBlockNumber } from '../../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
 import { Protocol } from '@uniswap/router-sdk'
+import { describe, it, expect } from '@jest/globals'
 
 describe('ProtocolsBucketBlockNumber', () => {
   describe('#fullKey', () => {
@@ -11,7 +11,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.fullKey()).to.eq('MIXED,V2,V3/5/12345')
+      expect(protocolsBucketBlockNumber.fullKey()).toBe('MIXED,V2,V3/5/12345')
     })
 
     it('protocols are sorted, even if the original array is not', () => {
@@ -21,7 +21,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.fullKey()).to.eq('MIXED,V2,V3/5/12345')
+      expect(protocolsBucketBlockNumber.fullKey()).toBe('MIXED,V2,V3/5/12345')
     })
 
     it('throws an error when the bucketNumber is undefined', () => {
@@ -30,7 +30,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         bucket: 5,
       })
 
-      expect(() => protocolsBucketBlockNumber.fullKey()).to.throw('BlockNumber is necessary to create a fullKey')
+      expect(() => protocolsBucketBlockNumber.fullKey()).toThrow('BlockNumber is necessary to create a fullKey')
     })
   })
 
@@ -42,7 +42,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).to.eq('MIXED,V2,V3/5/')
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
     })
 
     it('protocols are sorted, even if the original array is not, without the blockNumber', () => {
@@ -52,7 +52,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).to.eq('MIXED,V2,V3/5/')
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
     })
 
     it('returns the partial key even if blockNumber is undefined', () => {
@@ -61,7 +61,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         bucket: 5,
       })
 
-      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).to.eq('MIXED,V2,V3/5/')
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/')
     })
   })
 })
