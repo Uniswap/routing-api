@@ -199,6 +199,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
         new CachedRoutesBucket({ bucket: 16, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
         new CachedRoutesBucket({ bucket: 30, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
         new CachedRoutesBucket({ bucket: 45, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
+        new CachedRoutesBucket({ bucket: 55, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
         new CachedRoutesBucket({ bucket: 80, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
         new CachedRoutesBucket({ bucket: 95, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
         new CachedRoutesBucket({ bucket: 110, cacheMode: CacheMode.Tapcompare, withLastNCachedRoutes: 5 }),
