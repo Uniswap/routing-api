@@ -44,6 +44,7 @@ import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
 import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traffic-switch-v3-pool-provider'
+import { EVMClient } from './rpc/EVMClient'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -71,7 +72,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 }
 
 export type ContainerDependencies = {
-  provider: ethers.providers.JsonRpcProvider
+  provider: ethers.providers.BaseProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
@@ -137,13 +138,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
         }
 
-        const provider = new ethers.providers.JsonRpcProvider(
+        const provider: ethers.providers.BaseProvider = new EVMClient({
+          infuraProvider: new ethers.providers.JsonRpcProvider(
           {
-            url: url,
-            timeout,
-          },
-          chainId
+                url: url,
+                timeout,
+              },
+              chainId
+            ),
+          chainId: chainId}
         )
+        const jsonRpcProvider = provider as ethers.providers.JsonRpcProvider
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
           chainId,
@@ -262,13 +267,13 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           process.env.TENDERLY_ACCESS_KEY!,
           v2PoolProvider,
           v3PoolProvider,
-          provider,
+          provider as ethers.providers.JsonRpcProvider,
           { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
 
-        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, jsonRpcProvider, v2PoolProvider, v3PoolProvider)
 
-        const simulator = new FallbackTenderlySimulator(chainId, provider, tenderlySimulator, ethEstimateGasSimulator)
+        const simulator = new FallbackTenderlySimulator(chainId, jsonRpcProvider, tenderlySimulator, ethEstimateGasSimulator)
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {
@@ -324,8 +329,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               chainId,
               new OnChainGasPriceProvider(
                 chainId,
-                new EIP1559GasPriceProvider(provider),
-                new LegacyGasPriceProvider(provider)
+                new EIP1559GasPriceProvider(jsonRpcProvider),
+                new LegacyGasPriceProvider(jsonRpcProvider)
               ),
               new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
             ),
