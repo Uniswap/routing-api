@@ -44,7 +44,9 @@ import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
 import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traffic-switch-v3-pool-provider'
-import { EVMClient } from './rpc/EVMClient'
+import { DefaultEVMClient } from './evm/EVMClient'
+import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
+import { ProviderName } from './evm/provider/ProviderName'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -138,16 +140,18 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
         }
 
-        const provider: ethers.providers.BaseProvider = new EVMClient({
-          infuraProvider: new ethers.providers.JsonRpcProvider(
+        const provider: ethers.providers.BaseProvider = new DefaultEVMClient({
+          allProviders: [new InstrumentedEVMProvider(
             {
-              url: url,
-              timeout,
-            },
-            chainId
-          ),
-          chainId: chainId,
-        })
+              url: {
+                url: url,
+                timeout,
+              },
+              network: chainId,
+              name: ProviderName.INFURA
+              }
+          )]
+        }).getProvider()
         const jsonRpcProvider = provider as ethers.providers.JsonRpcProvider
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(

@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { Deferrable } from '@ethersproject/properties'
 import { Listener, TransactionRequest } from '@ethersproject/providers'
 import {
   Block,
@@ -6,83 +7,83 @@ import {
   BlockWithTransactions,
   EventType,
   Filter,
-  Log,
-  TransactionReceipt,
+  Log, TransactionReceipt,
   TransactionResponse
 } from '@ethersproject/abstract-provider'
-import { Network } from '@ethersproject/networks'
-import { Deferrable } from '@ethersproject/properties'
-import { ChainId, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
+import { Network, Networkish } from '@ethersproject/networks'
+import { ConnectionInfo } from '@ethersproject/web'
+import { ProviderName } from './ProviderName'
 
-export type EVMClientProps = {
-  infuraProvider: ethers.providers.JsonRpcProvider
-  chainId: ChainId
+export type InstrumentedEVMProviderProps = {
+  url?: ConnectionInfo | string
+  network?: Networkish
+  name: ProviderName
 }
 
-export class EVMClient extends ethers.providers.BaseProvider {
-  private infuraProvider: ethers.providers.JsonRpcProvider
+export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
+  private readonly name: ProviderName
 
-  // delegate all non-private method calls
-  constructor({ infuraProvider, chainId }: EVMClientProps) {
-    super(chainId)
-    this.infuraProvider = infuraProvider
+  constructor({ url, network, name } : InstrumentedEVMProviderProps) {
+    super(url, network)
+    this.name = name
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    metric.putMetric("RPC_INFURA_CALL_REQUESTED", 1, MetricLoggerUnit.Count)
-    return this.infuraProvider.call(transaction, blockTag).then(response => {
-      metric.putMetric("RPC_INFURA_CALL_SUCCESS", 1, MetricLoggerUnit.Count)
+    metric.putMetric(`RPC_${this.name}_CALL_REQUESTED`, 1, MetricLoggerUnit.Count)
+    return super.call(transaction, blockTag).then(response => {
+      metric.putMetric(`RPC_${this.name}_CALL_SUCCESS`, 1, MetricLoggerUnit.Count)
       return response
     }, error => {
-      metric.putMetric("RPC_INFURA_CALL_FAILURE", 1, MetricLoggerUnit.Count)
+      metric.putMetric(`RPC_${this.name}_CALL_FAILURE`, 1, MetricLoggerUnit.Count)
       throw error
     });
   }
 
   override emit(eventName: EventType, ...args: Array<any>): boolean {
-    return this.infuraProvider.emit(eventName, ...args)
+    return super.emit(eventName, ...args)
   }
 
   override estimateGas(transaction: Deferrable<TransactionRequest>): Promise<BigNumber> {
-    return this.infuraProvider.estimateGas(transaction)
+    return super.estimateGas(transaction)
   }
 
   override getBalance(
     addressOrName: string | Promise<string>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<BigNumber> {
-    return this.infuraProvider.getBalance(addressOrName, blockTag)
+    return super.getBalance(addressOrName, blockTag)
   }
 
   override getBlock(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<Block> {
-    return this.infuraProvider.getBlock(blockHashOrBlockTag)
+    return super.getBlock(blockHashOrBlockTag)
   }
 
   override getBlockNumber(): Promise<number> {
-    return this.infuraProvider.getBlockNumber()
+    return super.getBlockNumber()
   }
 
   override getBlockWithTransactions(
     blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
   ): Promise<BlockWithTransactions> {
-    return this.infuraProvider.getBlockWithTransactions(blockHashOrBlockTag)
+    return super.getBlockWithTransactions(blockHashOrBlockTag)
   }
 
   override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    return this.infuraProvider.getCode(addressOrName, blockTag)
+    return super.getCode(addressOrName, blockTag)
   }
 
   override getGasPrice(): Promise<BigNumber> {
-    return this.infuraProvider.getGasPrice()
+    return super.getGasPrice()
   }
 
   override getLogs(filter: Filter): Promise<Array<Log>> {
-    return this.infuraProvider.getLogs(filter)
+    return super.getLogs(filter)
   }
 
   override getNetwork(): Promise<Network> {
-    return this.infuraProvider.getNetwork()
+    return super.getNetwork()
   }
 
   override getStorageAt(
@@ -90,66 +91,66 @@ export class EVMClient extends ethers.providers.BaseProvider {
     position: BigNumberish | Promise<BigNumberish>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<string> {
-    return this.infuraProvider.getStorageAt(addressOrName, position, blockTag)
+    return super.getStorageAt(addressOrName, position, blockTag)
   }
 
   override getTransaction(transactionHash: string): Promise<TransactionResponse> {
-    return this.infuraProvider.getTransaction(transactionHash)
+    return super.getTransaction(transactionHash)
   }
 
   override getTransactionCount(
     addressOrName: string | Promise<string>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<number> {
-    return this.infuraProvider.getTransactionCount(addressOrName, blockTag)
+    return super.getTransactionCount(addressOrName, blockTag)
   }
 
   override getTransactionReceipt(transactionHash: string): Promise<TransactionReceipt> {
-    return this.infuraProvider.getTransactionReceipt(transactionHash)
+    return super.getTransactionReceipt(transactionHash)
   }
 
   override listenerCount(eventName?: EventType): number {
-    return this.infuraProvider.listenerCount(eventName)
+    return super.listenerCount(eventName)
   }
 
   override listeners(eventName?: EventType): Array<Listener> {
-    return this.infuraProvider.listeners(eventName)
+    return super.listeners(eventName)
   }
 
   override lookupAddress(address: string | Promise<string>): Promise<string | null> {
-    return this.infuraProvider.lookupAddress(address)
+    return super.lookupAddress(address)
   }
 
   override off(eventName: EventType, listener?: Listener): this {
-    this.infuraProvider.off(eventName, listener)
+    super.off(eventName, listener)
 
     return this
   }
 
   override on(eventName: EventType, listener: Listener): this {
-    this.infuraProvider.on(eventName, listener)
+    super.on(eventName, listener)
 
     return this
   }
 
   override once(eventName: EventType, listener: Listener): this {
-    this.infuraProvider.once(eventName, listener)
+    super.once(eventName, listener)
 
     return this
   }
 
   override removeAllListeners(eventName?: EventType): this {
-    this.infuraProvider.removeAllListeners(eventName)
+    super.removeAllListeners(eventName)
 
     return this
   }
 
   override resolveName(name: string | Promise<string>): Promise<string | null> {
-    return this.infuraProvider.resolveName(name)
+    return super.resolveName(name)
   }
 
   override sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
-    return this.infuraProvider.sendTransaction(signedTransaction)
+    return super.sendTransaction(signedTransaction)
   }
 
   override waitForTransaction(
@@ -157,6 +158,6 @@ export class EVMClient extends ethers.providers.BaseProvider {
     confirmations?: number,
     timeout?: number
   ): Promise<TransactionReceipt> {
-    return this.infuraProvider.waitForTransaction(transactionHash, confirmations, timeout)
+    return super.waitForTransaction(transactionHash, confirmations, timeout)
   }
 }

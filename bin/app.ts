@@ -110,7 +110,7 @@ export class RoutingAPIPipeline extends Stack {
     const jsonRpcProvidersSecret = sm.Secret.fromSecretAttributes(this, 'RPCProviderUrls', {
       // The main secrets use our Infura RPC urls
       secretCompleteArn:
-        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-primary-ixS8mw',
+        'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-evm-urls-json-primary-ixS8mw',
 
       /*
       The backup secrets mostly use our Alchemy RPC urls
@@ -120,7 +120,7 @@ export class RoutingAPIPipeline extends Stack {
       we must set the multicall chunk size to 50 so that optimism
       does not bug out on Alchemy's end
       */
-      //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
+      //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-evm-urls-json-backup-D2sWoe
     })
 
     const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyCreds', {
@@ -231,7 +231,7 @@ export class RoutingAPIPipeline extends Stack {
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
           },
           ARCHIVE_NODE_RPC: {
-            value: 'archive-node-rpc-url-default-kms',
+            value: 'archive-node-evm-url-default-kms',
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
           },
         },
