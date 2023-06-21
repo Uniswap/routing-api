@@ -45,10 +45,6 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
     )
   }
 
-  override emit(eventName: EventType, ...args: Array<any>): boolean {
-    return super.emit(eventName, ...args)
-  }
-
   override estimateGas(transaction: Deferrable<TransactionRequest>): Promise<BigNumber> {
     metric.putMetric(`RPC_${this.name}_ESTIMATEGAS_REQUESTED`, 1, MetricLoggerUnit.Count)
     return super.estimateGas(transaction).then(
@@ -263,30 +259,6 @@ export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
         throw error
       }
     )
-  }
-
-  override off(eventName: EventType, listener?: Listener): this {
-    super.off(eventName, listener)
-
-    return this
-  }
-
-  override on(eventName: EventType, listener: Listener): this {
-    super.on(eventName, listener)
-
-    return this
-  }
-
-  override once(eventName: EventType, listener: Listener): this {
-    super.once(eventName, listener)
-
-    return this
-  }
-
-  override removeAllListeners(eventName?: EventType): this {
-    super.removeAllListeners(eventName)
-
-    return this
   }
 
   override resolveName(name: string | Promise<string>): Promise<string | null> {
