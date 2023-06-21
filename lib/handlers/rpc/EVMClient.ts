@@ -125,7 +125,7 @@ class EVMClient extends ethers.providers.BaseProvider {
     return this.infuraProvider.sendTransaction(signedTransaction)
   }
 
-  waitForTransaction(transactionHash: string, confirmations?: number, timeout?: number): Promise<TransactionReceipt> {
+  override waitForTransaction(transactionHash: string, confirmations?: number, timeout?: number): Promise<TransactionReceipt> {
     return this.infuraProvider.waitForTransaction(transactionHash, confirmations, timeout)
   }
 }
