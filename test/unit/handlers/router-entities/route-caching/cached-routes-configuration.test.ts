@@ -1,6 +1,5 @@
 import { expect } from 'chai'
-import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
-import { ChainId } from '@uniswap/smart-order-router'
+import { ChainId, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   CACHED_ROUTES_CONFIGURATION,
   PairTradeTypeChainId,

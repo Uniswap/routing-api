@@ -4,7 +4,7 @@ import 'reflect-metadata'
 import { setupTables } from '../../../../mocha/dbSetup'
 import { DynamoRouteCachingProvider } from '../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
-import { CurrencyAmount, TradeType } from '@uniswap/sdk-core'
+import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { WNATIVE_ON } from '../../../../utils/tokens'
@@ -12,7 +12,6 @@ import {
   CacheMode,
   CachedRoute,
   CachedRoutes,
-  ChainId,
   UNI_MAINNET,
   USDC_MAINNET,
   V3Route,

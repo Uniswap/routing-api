@@ -1,6 +1,6 @@
 import { CachedRoutesBucket, CachedRoutesStrategy } from '../../../../../../lib/handlers/router-entities/route-caching'
-import { CacheMode, ChainId } from '@uniswap/smart-order-router'
-import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { CacheMode } from '@uniswap/smart-order-router'
+import { ChainId, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 
 describe('CachedRoutesStrategy', () => {
