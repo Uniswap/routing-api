@@ -1,10 +1,9 @@
-import { Token } from '@uniswap/sdk-core'
+import { ChainId, Token } from '@uniswap/sdk-core'
 import {
   CachingGasStationProvider,
   CachingTokenListProvider,
   CachingTokenProviderWithFallback,
   CachingV3PoolProvider,
-  ChainId,
   EIP1559GasPriceProvider,
   FallbackTenderlySimulator,
   TenderlySimulator,
@@ -52,11 +51,12 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.ARBITRUM_GOERLI,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
-  ChainId.GÖRLI,
+  ChainId.GOERLI,
   ChainId.SEPOLIA,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
-  ChainId.BSC,
+  ChainId.BNB,
+  ChainId.AVALANCHE,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
