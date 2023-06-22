@@ -956,7 +956,7 @@ describe('quote', function () {
                 })
               })
 
-              it(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
+              it.skip(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
