@@ -74,7 +74,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 }
 
 export type ContainerDependencies = {
-  provider: ethers.providers.BaseProvider
+  provider: ethers.providers.JsonRpcProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
@@ -140,7 +140,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             break
         }
 
-        const provider: ethers.providers.BaseProvider = new DefaultEVMClient({
+        const provider = new DefaultEVMClient({
           allProviders: [
             new InstrumentedEVMProvider({
               url: {
@@ -152,7 +152,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             }),
           ],
         }).getProvider()
-        const jsonRpcProvider = provider as ethers.providers.JsonRpcProvider
 
         const tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
           chainId,
@@ -271,23 +270,13 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           process.env.TENDERLY_ACCESS_KEY!,
           v2PoolProvider,
           v3PoolProvider,
-          jsonRpcProvider,
+          provider,
           { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
 
-        const ethEstimateGasSimulator = new EthEstimateGasSimulator(
-          chainId,
-          jsonRpcProvider,
-          v2PoolProvider,
-          v3PoolProvider
-        )
+        const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
 
-        const simulator = new FallbackTenderlySimulator(
-          chainId,
-          jsonRpcProvider,
-          tenderlySimulator,
-          ethEstimateGasSimulator
-        )
+        const simulator = new FallbackTenderlySimulator(chainId, provider, tenderlySimulator, ethEstimateGasSimulator)
 
         const [v3SubgraphProvider, v2SubgraphProvider] = await Promise.all([
           (async () => {
@@ -343,8 +332,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               chainId,
               new OnChainGasPriceProvider(
                 chainId,
-                new EIP1559GasPriceProvider(jsonRpcProvider),
-                new LegacyGasPriceProvider(jsonRpcProvider)
+                new EIP1559GasPriceProvider(provider),
+                new LegacyGasPriceProvider(provider)
               ),
               new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
             ),

@@ -14,15 +14,16 @@ import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Network, Networkish } from '@ethersproject/networks'
 import { ConnectionInfo } from '@ethersproject/web'
+import { ProviderName } from './ProviderName'
 
 export type InstrumentedEVMProviderProps = {
   url?: ConnectionInfo | string
   network?: Networkish
-  name: string
+  name: ProviderName
 }
 
 export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
-  private readonly name: string
+  private readonly name: ProviderName
   private readonly metricPrefix: string
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
