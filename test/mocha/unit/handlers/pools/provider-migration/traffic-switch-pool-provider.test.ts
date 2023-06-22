@@ -1,10 +1,11 @@
 import { TrafficSwitchV3PoolProvider } from '../../../../../../lib/handlers/pools/provider-migration/v3/traffic-switch-v3-pool-provider'
 import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
+import { ChainId } from '@uniswap/smart-order-router/build/main/util/chains'
 import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
 import { CachingV3PoolProvider, MetricLoggerUnit, NodeJSCache } from '@uniswap/smart-order-router'
 import NodeCache from 'node-cache'
 import sinon from 'sinon'
-import { ChainId, Token } from '@uniswap/sdk-core'
+import { Token } from '@uniswap/sdk-core'
 import { encodeSqrtRatioX96, FeeAmount, Pool } from '@uniswap/v3-sdk'
 import {
   DAI_USDT_LOW,
@@ -37,15 +38,11 @@ describe('TrafficSwitchV3PoolProvider', async () => {
 
     const underlyingPool = getMockedV3PoolProvider()
     const inMemoryPoolCache = new CachingV3PoolProvider(
-      ChainId.GOERLI,
+      ChainId.GÖRLI,
       underlyingPool,
       new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
     )
-    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(
-      ChainId.GOERLI,
-      underlyingPool,
-      TEST_ROUTE_TABLE.TableName
-    )
+    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(ChainId.GÖRLI, underlyingPool, TEST_ROUTE_TABLE.TableName)
     const trafficSwitchProvider = new (class SwitchTrafficSwitchV3PoolProvider extends TrafficSwitchV3PoolProvider {
       override readonly SHOULD_SWITCH_TRAFFIC = () => true
       override readonly SHOULD_SAMPLE_TRAFFIC = () => true
@@ -83,15 +80,11 @@ describe('TrafficSwitchV3PoolProvider', async () => {
       DAI_USDT_LOW,
     ])
     const inMemoryPoolCache = new CachingV3PoolProvider(
-      ChainId.GOERLI,
+      ChainId.GÖRLI,
       underlyingPool,
       new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
     )
-    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(
-      ChainId.GOERLI,
-      underlyingPool,
-      TEST_ROUTE_TABLE.TableName
-    )
+    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(ChainId.GÖRLI, underlyingPool, TEST_ROUTE_TABLE.TableName)
     const trafficSwitchProvider = new (class SwitchTrafficSwitchV3PoolProvider extends TrafficSwitchV3PoolProvider {
       override readonly SHOULD_SWITCH_TRAFFIC = () => false
       override readonly SHOULD_SAMPLE_TRAFFIC = () => true
@@ -129,15 +122,11 @@ describe('TrafficSwitchV3PoolProvider', async () => {
       DAI_USDT_LOW,
     ])
     const inMemoryPoolCache = new CachingV3PoolProvider(
-      ChainId.GOERLI,
+      ChainId.GÖRLI,
       underlyingPool,
       new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
     )
-    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(
-      ChainId.GOERLI,
-      underlyingPool,
-      TEST_ROUTE_TABLE.TableName
-    )
+    const dynamoPoolCache = new DynamoDBCachingV3PoolProvider(ChainId.GÖRLI, underlyingPool, TEST_ROUTE_TABLE.TableName)
     const trafficSwitchProvider = new (class SwitchTrafficSwitchV3PoolProvider extends TrafficSwitchV3PoolProvider {
       override readonly SHOULD_SWITCH_TRAFFIC = () => false
       override readonly SHOULD_SAMPLE_TRAFFIC = () => true

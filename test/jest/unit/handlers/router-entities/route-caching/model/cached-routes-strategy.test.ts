@@ -1,10 +1,10 @@
-import { CacheMode } from '@uniswap/smart-order-router'
-import { ChainId, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   CachedRoutesBucket,
   CachedRoutesStrategy,
 } from '../../../../../../../lib/handlers/router-entities/route-caching'
+import { CacheMode, ChainId } from '@uniswap/smart-order-router'
 import { describe, it, expect } from '@jest/globals'
+import { CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 
 describe('CachedRoutesStrategy', () => {
   const WETH = new Token(ChainId.MAINNET, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 18, 'WETH')
