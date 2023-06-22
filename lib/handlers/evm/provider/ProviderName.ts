@@ -7,7 +7,7 @@ export enum ProviderName {
 
 export function deriveProviderName(url: string): string {
   for (const name in ProviderName) {
-    if (url.includes(name)) {
+    if (url.toLowerCase().includes(name.toLowerCase())) {
       return name
     }
   }
