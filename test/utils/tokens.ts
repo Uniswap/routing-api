@@ -80,7 +80,7 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_POLYGON_MUMBAI
     case ChainId.BNB:
       return DAI_BNB
-    case ChainId.AVALANCHE: 
+    case ChainId.AVALANCHE:
       return DAI_AVAX
     default:
       throw new Error(`Chain id: ${chainId} not supported`)

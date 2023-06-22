@@ -39,7 +39,7 @@ export const chainProtocols = [
     chainId: ChainId.AVALANCHE,
     timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000),
-  }, 
+  },
   // Currently there is no working V3 subgraph for Optimism so we use a static provider.
   // V2.
 
