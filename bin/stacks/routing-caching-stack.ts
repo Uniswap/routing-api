@@ -85,7 +85,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
     // Spin up a new pool cache lambda for each config in chain X protocol
     for (let i = 0; i < chainProtocols.length; i++) {
-      const { protocol, chainId, timeout, lambdaTimeoutInSeconds } = chainProtocols[i]
+      const { protocol, chainId, timeout } = chainProtocols[i]
       const lambda = new aws_lambda_nodejs.NodejsFunction(
         this,
         `PoolCacheLambda-ChainId${chainId}-Protocol${protocol}`,
@@ -94,7 +94,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           runtime: aws_lambda.Runtime.NODEJS_14_X,
           entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
           handler: 'handler',
-          timeout: Duration.seconds(lambdaTimeoutInSeconds),
+          timeout: Duration.seconds(900),
           memorySize: 1024,
           bundling: {
             minify: true,
@@ -114,7 +114,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         }
       )
       new aws_events.Rule(this, `SchedulePoolCache-ChainId${chainId}-Protocol${protocol}`, {
-        schedule: aws_events.Schedule.rate(Duration.seconds(lambdaTimeoutInSeconds)),
+        schedule: aws_events.Schedule.rate(Duration.minutes(15)),
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
