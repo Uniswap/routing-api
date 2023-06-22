@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { Construct } from 'constructs'
@@ -36,7 +36,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     const TESTNETS = [
       ChainId.ARBITRUM_GOERLI,
       ChainId.POLYGON_MUMBAI,
-      ChainId.GOERLI,
+      ChainId.GÖRLI,
       ChainId.SEPOLIA,
       ChainId.CELO_ALFAJORES,
     ]

@@ -1,11 +1,11 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { ChainId, Token } from '@uniswap/sdk-core'
+import { Token } from '@uniswap/sdk-core'
 import {
   CachingTokenListProvider,
+  ChainId,
   DAI_ARBITRUM,
-  DAI_AVAX,
-  DAI_BNB,
-  DAI_GOERLI,
+  DAI_BSC,
+  DAI_GÖRLI,
   DAI_MAINNET,
   DAI_OPTIMISM,
   DAI_OPTIMISM_GOERLI,
@@ -15,9 +15,8 @@ import {
   log,
   NodeJSCache,
   USDC_ARBITRUM,
-  USDC_AVAX,
-  USDC_BNB,
-  USDC_GOERLI,
+  USDC_BSC,
+  USDC_GÖRLI,
   USDC_MAINNET,
   USDC_OPTIMISM,
   USDC_OPTIMISM_GOERLI,
@@ -25,8 +24,8 @@ import {
   USDC_POLYGON_MUMBAI,
   USDC_SEPOLIA,
   USDT_ARBITRUM,
-  USDT_BNB,
-  USDT_GOERLI,
+  USDT_BSC,
+  USDT_GÖRLI,
   USDT_MAINNET,
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
@@ -58,14 +57,14 @@ export const UNI_MAINNET = new Token(
   'Uniswap'
 )
 
-export const UNI_GORLI = new Token(ChainId.GOERLI, '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 18, 'UNI', 'Uni token')
+export const UNI_GORLI = new Token(ChainId.GÖRLI, '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 18, 'UNI', 'Uni token')
 
 export const DAI_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return DAI_MAINNET
-    case ChainId.GOERLI:
-      return DAI_GOERLI
+    case ChainId.GÖRLI:
+      return DAI_GÖRLI
     case ChainId.SEPOLIA:
       return DAI_SEPOLIA
     case ChainId.OPTIMISM:
@@ -78,10 +77,8 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_POLYGON
     case ChainId.POLYGON_MUMBAI:
       return DAI_POLYGON_MUMBAI
-    case ChainId.BNB:
-      return DAI_BNB
-    case ChainId.AVALANCHE:
-      return DAI_AVAX
+    case ChainId.BSC:
+      return DAI_BSC
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -91,14 +88,14 @@ export const USDT_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return USDT_MAINNET
-    case ChainId.GOERLI:
-      return USDT_GOERLI
+    case ChainId.GÖRLI:
+      return USDT_GÖRLI
     case ChainId.OPTIMISM:
       return USDT_OPTIMISM
     case ChainId.ARBITRUM_ONE:
       return USDT_ARBITRUM
-    case ChainId.BNB:
-      return USDT_BNB
+    case ChainId.BSC:
+      return USDT_BSC
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -108,8 +105,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return USDC_MAINNET
-    case ChainId.GOERLI:
-      return USDC_GOERLI
+    case ChainId.GÖRLI:
+      return USDC_GÖRLI
     case ChainId.SEPOLIA:
       return USDC_SEPOLIA
     case ChainId.OPTIMISM:
@@ -122,10 +119,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_POLYGON
     case ChainId.POLYGON_MUMBAI:
       return USDC_POLYGON_MUMBAI
-    case ChainId.BNB:
-      return USDC_BNB
-    case ChainId.AVALANCHE:
-      return USDC_AVAX
+    case ChainId.BSC:
+      return USDC_BSC
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
