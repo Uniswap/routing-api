@@ -46,7 +46,7 @@ import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-ca
 import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traffic-switch-v3-pool-provider'
 import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
-import { ProviderName } from './evm/provider/ProviderName'
+import { deriveProviderName } from './evm/provider/ProviderName'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -148,7 +148,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 timeout,
               },
               network: chainId,
-              name: ProviderName.INFURA,
+              name: deriveProviderName(url),
             }),
           ],
         }).getProvider()
@@ -271,7 +271,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           process.env.TENDERLY_ACCESS_KEY!,
           v2PoolProvider,
           v3PoolProvider,
-          provider as ethers.providers.JsonRpcProvider,
+          jsonRpcProvider,
           { [ChainId.ARBITRUM_ONE]: 2.5 }
         )
 
