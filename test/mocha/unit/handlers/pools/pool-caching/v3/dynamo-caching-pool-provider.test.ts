@@ -1,12 +1,12 @@
-import { setupTables } from '../../../../../mocha/dbSetup'
-import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
-import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
-import { SUPPORTED_POOLS } from '../../../../../test-utils/mocked-data'
+import { setupTables } from '../../../../../dbSetup'
+import { DynamoDBCachingV3PoolProvider } from '../../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
+import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../../test-utils/mocked-dependencies'
+import { SUPPORTED_POOLS } from '../../../../../../test-utils/mocked-data'
 import { ChainId, Token } from '@uniswap/sdk-core'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { expect } from 'chai'
-import { DynamoCachingV3Pool } from '../../../../../../lib/handlers/pools/pool-caching/v3/cache-dynamo-pool'
+import { DynamoCachingV3Pool } from '../../../../../../../lib/handlers/pools/pool-caching/v3/cache-dynamo-pool'
 import { log } from '@uniswap/smart-order-router'
 
 describe('DynamoDBCachingV3PoolProvider', async () => {

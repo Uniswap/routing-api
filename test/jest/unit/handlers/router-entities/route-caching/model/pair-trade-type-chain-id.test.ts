@@ -1,6 +1,7 @@
-import { expect } from 'chai'
-import { PairTradeTypeChainId } from '../../../../../../lib/handlers/router-entities/route-caching'
+import { PairTradeTypeChainId } from '../../../../../../../lib/handlers/router-entities/route-caching'
 import { ChainId, TradeType } from '@uniswap/sdk-core'
+import { describe, it, expect } from '@jest/globals'
+
 describe('PairTradeTypeChainId', () => {
   const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
   const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
@@ -14,7 +15,7 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(
+      expect(pairTradeTypeChainId.toString()).toBe(
         `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
       )
     })
@@ -27,7 +28,7 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(
+      expect(pairTradeTypeChainId.toString()).toBe(
         `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_INPUT}/${ChainId.MAINNET}`
       )
     })
@@ -40,7 +41,7 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.MAINNET,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(
+      expect(pairTradeTypeChainId.toString()).toBe(
         `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.MAINNET}`
       )
     })
@@ -53,7 +54,7 @@ describe('PairTradeTypeChainId', () => {
         chainId: ChainId.ARBITRUM_ONE,
       })
 
-      expect(pairTradeTypeChainId.toString()).to.eq(
+      expect(pairTradeTypeChainId.toString()).toBe(
         `${WETH.toLowerCase()}/${USDC.toLowerCase()}/${TradeType.EXACT_OUTPUT}/${ChainId.ARBITRUM_ONE}`
       )
     })
