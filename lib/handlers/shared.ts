@@ -1,7 +1,6 @@
-import { Currency, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
-  ChainId,
   ITokenListProvider,
   ITokenProvider,
   MapWithLowerCaseKey,
