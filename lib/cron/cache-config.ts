@@ -47,6 +47,6 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 840000,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 500),
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000), // 1000 is the largest page size supported by thegraph
   },
 ]
