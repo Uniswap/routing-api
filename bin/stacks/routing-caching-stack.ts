@@ -46,11 +46,18 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
     this.poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
 
-    // Set bucket such that objects are deleted after 60 minutes. Ensure that if the cache stops
-    // updating (e.g. Subgraph down) that we stop using the cache files and will fallback to a static pool list.
     this.poolCacheBucket2.addLifecycleRule({
       enabled: true,
-      expiration: cdk.Duration.days(1),
+      // This isn't the right fix in the long run, but it will prevent the outage that we experienced when the V2 pool
+      // data expired (See https://www.notion.so/uniswaplabs/Routing-API-Mainnet-outage-V2-Subgraph-11527aab3bd540888f92b33017bf26b4 for more detail).
+      // The better short-term solution is to bake resilience into the V2SubgraphProvider (https://linear.app/uniswap/issue/ROUTE-31/use-v2-v3-fallback-provider-in-routing-api),
+      // instrument the pool cache lambda, and take measures to improve its success rate.
+
+      // Note that there is a trade-off here: we may serve stale V2 pools which can result in a suboptimal routing path if the file hasn't been recently updated.
+      // This stale data is preferred to no-data until we can implement the above measures.
+
+      // For now, choose an arbitrarily large TTL (in this case, 10 years) to prevent the key from being deleted.
+      expiration: cdk.Duration.days(365 * 10),
     })
 
     this.poolCacheKey = 'poolCache.json'
