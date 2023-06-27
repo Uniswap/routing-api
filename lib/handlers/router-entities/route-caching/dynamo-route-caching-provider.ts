@@ -16,7 +16,7 @@ import { CachedRoutesMarshaller } from './marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 import { CachedRoutesBucket } from './model'
-import { MixedRoute, V2Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
+import { MixedRoute, V1Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
 
 interface ConstructorParams {
   /**
@@ -140,7 +140,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
           })
 
-          const routesMap: Map<string, CachedRoute<V3Route | V2Route | MixedRoute>> = new Map()
+          const routesMap: Map<string, CachedRoute<V3Route | V1Route | MixedRoute>> = new Map()
           var blockNumber: number = 0
           var originalAmount: string = ''
 
@@ -282,8 +282,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           tradeType,
           amount: amount.toExact(),
         },
-        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
-          tokenOut.symbol
+        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol
         }/${tradeType}/${chainId}`
       )
 
@@ -298,8 +297,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           tradeType,
           amount: amount.toExact(),
         },
-        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
-          tokenOut.symbol
+        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${tokenOut.symbol
         }/${tradeType}/${chainId}`
       )
 

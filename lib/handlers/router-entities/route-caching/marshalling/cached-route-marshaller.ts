@@ -1,5 +1,5 @@
 import { CachedRoute } from '@pollum-io/smart-order-router'
-import { MixedRoute, V2Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
+import { MixedRoute, V1Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
 import { MarshalledRoute, RouteMarshaller } from './route-marshaller'
 
 export interface MarshalledCachedRoute {
@@ -8,15 +8,15 @@ export interface MarshalledCachedRoute {
 }
 
 export class CachedRouteMarshaller {
-  public static marshal(cachedRoute: CachedRoute<V3Route | V2Route | MixedRoute>): MarshalledCachedRoute {
+  public static marshal(cachedRoute: CachedRoute<V3Route | V1Route | MixedRoute>): MarshalledCachedRoute {
     return {
       route: RouteMarshaller.marshal(cachedRoute.route),
       percent: cachedRoute.percent,
     }
   }
 
-  public static unmarshal(marshalledCachedRoute: MarshalledCachedRoute): CachedRoute<V3Route | V2Route | MixedRoute> {
-    return new CachedRoute<V3Route | V2Route | MixedRoute>({
+  public static unmarshal(marshalledCachedRoute: MarshalledCachedRoute): CachedRoute<V3Route | V1Route | MixedRoute> {
+    return new CachedRoute<V3Route | V1Route | MixedRoute>({
       route: RouteMarshaller.unmarshal(marshalledCachedRoute.route),
       percent: marshalledCachedRoute.percent,
     })

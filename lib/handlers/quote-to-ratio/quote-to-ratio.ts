@@ -11,7 +11,7 @@ import {
   SwapToRatioStatus,
   SwapType,
 } from '@pollum-io/smart-order-router'
-import { Position } from '@pollum-io/v2-sdk'
+import { Position } from '@pollum-io/v3-sdk'
 import JSBI from 'jsbi'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
@@ -286,7 +286,7 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      if (subRoute.protocol == Protocol.V2) {
+      if (subRoute.protocol == Protocol.V3) {
         const pools = subRoute.route.pools
         const curRoute: V3PoolInRoute[] = []
         for (let i = 0; i < pools.length; i++) {
@@ -422,8 +422,8 @@ export class QuoteToRatioHandler extends APIGLambdaHandler<
         token1BalanceUpdated.numerator.toString() == '0'
           ? `0.${'0'.repeat(token1.wrapped.decimals)}`
           : new Fraction(token0BalanceUpdated.quotient.toString(), token1BalanceUpdated.quotient.toString()).toFixed(
-              token0.wrapped.decimals
-            )
+            token0.wrapped.decimals
+          )
     }
 
     const postSwapTargetPoolObject = {

@@ -137,8 +137,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
               }),
             },
           }),
-          threshold: protocol === Protocol.V2 ? 50 : 85,
-          evaluationPeriods: protocol === Protocol.V2 ? 12 : 144,
+          threshold: protocol === Protocol.V3 ? 50 : 85,
+          evaluationPeriods: protocol === Protocol.V3 ? 12 : 144,
         }
       )
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(

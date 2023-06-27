@@ -1,11 +1,11 @@
-import { MixedRoute, V2Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
+import { MixedRoute, V1Route, V3Route } from '@pollum-io/smart-order-router/build/main/routers'
 import { Protocol } from '@pollum-io/router-sdk'
 import { MarshalledToken, TokenMarshaller } from './token-marshaller'
 import { MarshalledPair, PairMarshaller } from './pair-marshaller'
 import { MarshalledPool, PoolMarshaller } from './pool-marshaller'
-import { Pool } from '@pollum-io/v2-sdk'
+import { Pool } from '@pollum-io/v3-sdk'
 
-export interface MarshalledV2Route {
+export interface MarshalledV1Route {
   protocol: Protocol
   input: MarshalledToken
   output: MarshalledToken
@@ -26,10 +26,10 @@ export interface MarshalledMixedRoute {
   pools: (MarshalledPool | MarshalledPair)[]
 }
 
-export type MarshalledRoute = MarshalledV2Route | MarshalledV3Route | MarshalledMixedRoute
+export type MarshalledRoute = MarshalledV1Route | MarshalledV3Route | MarshalledMixedRoute
 
 export class RouteMarshaller {
-  public static marshal(route: V3Route | V2Route | MixedRoute): MarshalledRoute {
+  public static marshal(route: V3Route | V1Route | MixedRoute): MarshalledRoute {
     switch (route.protocol) {
       case Protocol.V1:
         return {
@@ -38,9 +38,9 @@ export class RouteMarshaller {
           output: TokenMarshaller.marshal(route.output),
           pairs: route.pairs.map((pair) => PairMarshaller.marshal(pair)),
         }
-      case Protocol.V2:
+      case Protocol.V3:
         return {
-          protocol: Protocol.V2,
+          protocol: Protocol.V3,
           input: TokenMarshaller.marshal(route.input),
           output: TokenMarshaller.marshal(route.output),
           pools: route.pools.map((pool) => PoolMarshaller.marshal(pool)),
@@ -61,16 +61,16 @@ export class RouteMarshaller {
     }
   }
 
-  public static unmarshal(marshalledRoute: MarshalledRoute): V3Route | V2Route | MixedRoute {
+  public static unmarshal(marshalledRoute: MarshalledRoute): V3Route | V1Route | MixedRoute {
     switch (marshalledRoute.protocol) {
       case Protocol.V1:
-        const v2Route = marshalledRoute as MarshalledV2Route
-        return new V2Route(
-          v2Route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
-          TokenMarshaller.unmarshal(v2Route.input),
-          TokenMarshaller.unmarshal(v2Route.output)
+        const v1Route = marshalledRoute as MarshalledV1Route
+        return new V1Route(
+          v1Route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
+          TokenMarshaller.unmarshal(v1Route.input),
+          TokenMarshaller.unmarshal(v1Route.output)
         )
-      case Protocol.V2:
+      case Protocol.V3:
         const v3Route = marshalledRoute as MarshalledV3Route
         return new V3Route(
           v3Route.pools.map((marshalledPool) => PoolMarshaller.unmarshal(marshalledPool)),

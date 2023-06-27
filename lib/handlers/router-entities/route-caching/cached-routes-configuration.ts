@@ -20,7 +20,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   [
     new PairTradeTypeChainId({
       tokenIn: '0x4200000000000000000000000000000000000006', // WETH
-      tokenOut: '0xdBB59E294A93487822d1d7e164609Cd59d396fb5', // USDC
+      tokenOut: '0x368433CaC2A0B8D76E64681a9835502a1f2A8A30', // USDC
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
     }).toString(),
@@ -46,7 +46,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0xdBB59E294A93487822d1d7e164609Cd59d396fb5', // USDC
+      tokenIn: '0x368433CaC2A0B8D76E64681a9835502a1f2A8A30', // USDC
       tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
@@ -74,7 +74,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
   [
     new PairTradeTypeChainId({
       tokenIn: '0x4200000000000000000000000000000000000006', // WETH
-      tokenOut: '0x4DFc340487bbec780bA8458e614b732d7226AE8f', // USDT
+      tokenOut: '0x28c9c7Fb3fE3104d2116Af26cC8eF7905547349c', // USDT
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,
     }).toString(),
@@ -100,7 +100,7 @@ export const CACHED_ROUTES_CONFIGURATION: Map<string, CachedRoutesStrategy> = ne
    */
   [
     new PairTradeTypeChainId({
-      tokenIn: '0x4DFc340487bbec780bA8458e614b732d7226AE8f', // USDT
+      tokenIn: '0x28c9c7Fb3fE3104d2116Af26cC8eF7905547349c', // USDT
       tokenOut: '0x4200000000000000000000000000000000000006', // WETH
       tradeType: TradeType.EXACT_INPUT,
       chainId: ChainId.ROLLUX,

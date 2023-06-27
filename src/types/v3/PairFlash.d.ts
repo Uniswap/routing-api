@@ -25,7 +25,7 @@ interface PairFlashInterface extends ethers.utils.Interface {
     "WETH9()": FunctionFragment;
     "factory()": FunctionFragment;
     "initFlash((address,address,uint24,uint256,uint256,uint24,uint24))": FunctionFragment;
-    "pegasysV2FlashCallback(uint256,uint256,bytes)": FunctionFragment;
+    "pegasysV3FlashCallback(uint256,uint256,bytes)": FunctionFragment;
     "refundETH()": FunctionFragment;
     "swapRouter()": FunctionFragment;
     "sweepToken(address,uint256,address)": FunctionFragment;
@@ -49,7 +49,7 @@ interface PairFlashInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "pegasysV2FlashCallback",
+    functionFragment: "pegasysV3FlashCallback",
     values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "refundETH", values?: undefined): string;
@@ -70,7 +70,7 @@ interface PairFlashInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initFlash", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "pegasysV2FlashCallback",
+    functionFragment: "pegasysV3FlashCallback",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "refundETH", data: BytesLike): Result;
@@ -145,7 +145,7 @@ export class PairFlash extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    pegasysV2FlashCallback(
+    pegasysV3FlashCallback(
       fee0: BigNumberish,
       fee1: BigNumberish,
       data: BytesLike,
@@ -189,7 +189,7 @@ export class PairFlash extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  pegasysV2FlashCallback(
+  pegasysV3FlashCallback(
     fee0: BigNumberish,
     fee1: BigNumberish,
     data: BytesLike,
@@ -233,7 +233,7 @@ export class PairFlash extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    pegasysV2FlashCallback(
+    pegasysV3FlashCallback(
       fee0: BigNumberish,
       fee1: BigNumberish,
       data: BytesLike,
@@ -278,7 +278,7 @@ export class PairFlash extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    pegasysV2FlashCallback(
+    pegasysV3FlashCallback(
       fee0: BigNumberish,
       fee1: BigNumberish,
       data: BytesLike,
@@ -323,7 +323,7 @@ export class PairFlash extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    pegasysV2FlashCallback(
+    pegasysV3FlashCallback(
       fee0: BigNumberish,
       fee1: BigNumberish,
       data: BytesLike,

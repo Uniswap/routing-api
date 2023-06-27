@@ -9,9 +9,9 @@ dotenv.config()
   ; (async function () {
     const quotePost: QuoteQueryParams = {
       tokenInAddress: 'PSYS',
-      tokenInChainId: 57000,
+      tokenInChainId: 570,
       tokenOutAddress: 'WSYS',
-      tokenOutChainId: 57000,
+      tokenOutChainId: 570,
       amount: '50',
       type: 'exactIn',
       recipient: '0xc84633Af14e43F00D5aaa7A47B8d0864eE6a46FB',

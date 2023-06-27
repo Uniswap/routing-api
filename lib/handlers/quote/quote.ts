@@ -15,7 +15,7 @@ import {
   IMetric,
   ChainId,
 } from '@pollum-io/smart-order-router'
-import { Pool } from '@pollum-io/v2-sdk'
+import { Pool } from '@pollum-io/v3-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -145,7 +145,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             protocols.push(Protocol.V1)
             break
           case 'v2':
-            protocols.push(Protocol.V2)
+            protocols.push(Protocol.V3)
             break
           case 'mixed':
             protocols.push(Protocol.MIXED)
@@ -159,7 +159,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
       }
     } else if (!forceCrossProtocol) {
-      protocols = [Protocol.V2]
+      protocols = [Protocol.V3]
     }
 
     const routingConfig: AlphaRouterConfig = {
@@ -276,8 +276,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
-            currencyOut.symbol
+          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${currencyOut.symbol
           }. Chain: ${chainId}`
         )
 
@@ -301,8 +300,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
           },
-          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
-            currencyIn.symbol
+          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${currencyIn.symbol
           }. Chain: ${chainId}`
         )
 

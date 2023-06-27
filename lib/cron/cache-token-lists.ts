@@ -3,7 +3,8 @@ import { S3 } from 'aws-sdk'
 import axios from 'axios'
 import { default as bunyan, default as Logger } from 'bunyan'
 
-const TOKEN_LISTS = ['https://static.luxy.io/ipfs/QmPg3CUHkt8xxuzA3XkFGdSV9wvdnbW4VDkr2RQY6m1WKy']
+const TOKEN_LISTS = ['https://raw.githubusercontent.com/pegasys-fi/default-token-list/main/src/tokens/rollux.json',
+  'https://raw.githubusercontent.com/pegasys-fi/default-token-list/main/src/tokens/rollux-tanenbaum.json',]
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
   const log: Logger = bunyan.createLogger({

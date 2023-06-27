@@ -8,7 +8,7 @@ import {
 export const chainProtocols = [
   // V3.
   {
-    protocol: Protocol.V2,
+    protocol: Protocol.V3,
     chainId: ChainId.ROLLUX,
     timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.ROLLUX, 3, 90000),

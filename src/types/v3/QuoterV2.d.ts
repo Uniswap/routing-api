@@ -23,7 +23,7 @@ interface QuoterV2Interface extends ethers.utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
     "factory()": FunctionFragment;
-    "pegasysV2SwapCallback(int256,int256,bytes)": FunctionFragment;
+    "pegasysV3SwapCallback(int256,int256,bytes)": FunctionFragment;
     "quoteExactInput(bytes,uint256)": FunctionFragment;
     "quoteExactInputSingle((address,address,uint256,uint24,uint160))": FunctionFragment;
     "quoteExactOutput(bytes,uint256)": FunctionFragment;
@@ -33,7 +33,7 @@ interface QuoterV2Interface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "WETH9", values?: undefined): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "pegasysV2SwapCallback",
+    functionFragment: "pegasysV3SwapCallback",
     values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
@@ -72,7 +72,7 @@ interface QuoterV2Interface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "WETH9", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "pegasysV2SwapCallback",
+    functionFragment: "pegasysV3SwapCallback",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -143,7 +143,7 @@ export class QuoterV2 extends BaseContract {
 
     factory(overrides?: CallOverrides): Promise<[string]>;
 
-    pegasysV2SwapCallback(
+    pegasysV3SwapCallback(
       amount0Delta: BigNumberish,
       amount1Delta: BigNumberish,
       path: BytesLike,
@@ -189,7 +189,7 @@ export class QuoterV2 extends BaseContract {
 
   factory(overrides?: CallOverrides): Promise<string>;
 
-  pegasysV2SwapCallback(
+  pegasysV3SwapCallback(
     amount0Delta: BigNumberish,
     amount1Delta: BigNumberish,
     path: BytesLike,
@@ -235,7 +235,7 @@ export class QuoterV2 extends BaseContract {
 
     factory(overrides?: CallOverrides): Promise<string>;
 
-    pegasysV2SwapCallback(
+    pegasysV3SwapCallback(
       amount0Delta: BigNumberish,
       amount1Delta: BigNumberish,
       path: BytesLike,
@@ -312,7 +312,7 @@ export class QuoterV2 extends BaseContract {
 
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
-    pegasysV2SwapCallback(
+    pegasysV3SwapCallback(
       amount0Delta: BigNumberish,
       amount1Delta: BigNumberish,
       path: BytesLike,
@@ -359,7 +359,7 @@ export class QuoterV2 extends BaseContract {
 
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    pegasysV2SwapCallback(
+    pegasysV3SwapCallback(
       amount0Delta: BigNumberish,
       amount1Delta: BigNumberish,
       path: BytesLike,
