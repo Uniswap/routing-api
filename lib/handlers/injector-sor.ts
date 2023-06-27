@@ -44,7 +44,7 @@ import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [ChainId.ROLLUX_TANENBAUM, ChainId.ROLLUX]
-const DEFAULT_TOKEN_LIST = 'https://raw.githubusercontent.com/pegasys-fi/default-token-list/main/src/tokens/rollux.json'
+const DEFAULT_TOKEN_LIST = 'https://raw.githubusercontent.com/pegasys-fi/default-token-list/main/build/pegasys-default.tokenlist.json'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
