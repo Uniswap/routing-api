@@ -8,16 +8,12 @@ import { QuoteResponse } from '../lib/handlers/schema'
 dotenv.config()
   ; (async function () {
     const quotePost: QuoteQueryParams = {
-      tokenInAddress: 'PSYS',
-      tokenInChainId: 570,
-      tokenOutAddress: 'WSYS',
-      tokenOutChainId: 570,
-      amount: '50',
+      tokenInAddress: '0x4200000000000000000000000000000000000006',
+      tokenInChainId: 57000,
+      tokenOutAddress: '0xcca991e1bdca2846640d366116d60bc25c2815db',
+      tokenOutChainId: 57000,
+      amount: '10000',
       type: 'exactIn',
-      recipient: '0xc84633Af14e43F00D5aaa7A47B8d0864eE6a46FB',
-      slippageTolerance: '5',
-      deadline: '360',
-      algorithm: 'alpha',
     }
 
     const response: AxiosResponse<QuoteResponse> = await axios.post<QuoteResponse>(

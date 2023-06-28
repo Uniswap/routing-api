@@ -144,7 +144,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           case 'v1':
             protocols.push(Protocol.V1)
             break
-          case 'v2':
+          case 'v3':
             protocols.push(Protocol.V3)
             break
           case 'mixed':
