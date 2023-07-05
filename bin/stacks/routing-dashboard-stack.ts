@@ -7,7 +7,11 @@ import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-w
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
+<<<<<<< Updated upstream
 import { RpcProvidersWidgetsFactory } from '../../lib/dashboards/rpc-providers-widgets-factory'
+=======
+import { RpcProviderWidgetsFactory } from '../../lib/dashboards/rpc-provider-widgets-factory'
+>>>>>>> Stashed changes
 
 export const NAMESPACE = 'Uniswap'
 
@@ -438,13 +442,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     ])
 
-    const rpcProvidersWidgets = new RpcProvidersWidgetsFactory(region, NAMESPACE, MAINNETS.concat(TESTNETS)).generateWidgets()
+    const rpcProvidersWidgetsForRoutingDashboard = new RpcProvidersWidgetsFactory(region, NAMESPACE, MAINNETS.concat(TESTNETS)).generateWidgets()
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
-        widgets: rpcProvidersWidgets.concat(perChainWidgetsForRoutingDashboard).concat([
+        widgets: rpcProvidersWidgetsForRoutingDashboard.concat(perChainWidgetsForRoutingDashboard).concat([
           {
             height: 6,
             width: 24,
