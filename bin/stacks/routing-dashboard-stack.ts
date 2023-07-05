@@ -7,11 +7,7 @@ import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-w
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
-<<<<<<< Updated upstream
 import { RpcProvidersWidgetsFactory } from '../../lib/dashboards/rpc-providers-widgets-factory'
-=======
-import { RpcProviderWidgetsFactory } from '../../lib/dashboards/rpc-provider-widgets-factory'
->>>>>>> Stashed changes
 
 export const NAMESPACE = 'Uniswap'
 
