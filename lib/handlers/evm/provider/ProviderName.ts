@@ -1,6 +1,6 @@
 export enum ProviderName {
   INFURA = 'INFURA',
-  QUIKNODE = 'QUIKNODE', // quicknode RPC doesn't have letter c
+  QUIKNODE = 'QUIKNODE', // quicknode doesn't have letter c in the RPC endpoint
   FORNO = 'FORNO',
   UNKNOWN = 'UNKNOWN',
 }
