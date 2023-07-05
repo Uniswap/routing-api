@@ -46,6 +46,7 @@ import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traff
 import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { deriveProviderName } from './evm/provider/ProviderName'
+import { getRPCEndpoint } from '../../test/utils/getRPCEndpoint'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -119,7 +120,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     const dependenciesByChainArray = await Promise.all(
       _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
-        const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
+        const url = getRPCEndpoint(chainId)
 
         if (!url) {
           log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
