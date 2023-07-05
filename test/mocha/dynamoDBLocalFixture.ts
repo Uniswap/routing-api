@@ -3,8 +3,8 @@ import { ChildProcess } from 'child_process'
 import DDBLocal from 'dynamodb-local'
 import { deleteAllTables } from './dbSetup'
 
-process.env.AWS_ACCESS_KEY_ID = 'my_access_key'
-process.env.AWS_SECRET_ACCESS_KEY = 'my_secret_key'
+process.env.AWS_ACCESS_KEY_ID = 'myaccesskey'
+process.env.AWS_SECRET_ACCESS_KEY = 'mysecretkey'
 
 const dbPort = Number(process.env.DYNAMODB_LOCAL_PORT || 8000)
 
