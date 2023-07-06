@@ -3,6 +3,7 @@ import { Widget } from './core/model/widget'
 import { ChainId } from '@uniswap/sdk-core'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import _ from 'lodash'
+import { log } from '@uniswap/smart-order-router'
 
 export class RpcProvidersWidgetsFactory implements WidgetsFactory {
   region: string
@@ -37,7 +38,13 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
     const metrics = _.flatMap(chainsWithIndices, (chainIdAndIndex) => {
       const chainId = chainIdAndIndex.chainId
       const index = chainIdAndIndex.index
-      const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]!
+      const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]
+
+      if (!url) {
+        log.info(`No provider found for chain ${chainId.toString()}, skipping`)
+        return new Array<Widget>
+      }
+
       const providerName = deriveProviderName(url)
 
       const metric1 = `m${index * 2 + 1}`
