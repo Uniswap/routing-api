@@ -8,6 +8,7 @@ import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
 import { RpcProvidersWidgetsFactory } from '../../lib/dashboards/rpc-providers-widgets-factory'
+import { CfnOutput } from 'aws-cdk-lib'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -439,10 +440,19 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     ])
 
+    const missingProviderUrlsForChains = SUPPORTED_CHAINS.filter(
+      (chainId) => !jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]
+    )
+    const providerUrlsForChains = SUPPORTED_CHAINS.filter((chainId) => !missingProviderUrlsForChains.includes(chainId))
+
+    new CfnOutput(this, 'missingProviderUrlsForChains', {
+      value: missingProviderUrlsForChains.join(','),
+    })
+
     const rpcProvidersWidgetsForRoutingDashboard = new RpcProvidersWidgetsFactory(
       NAMESPACE,
       region,
-      MAINNETS.concat(TESTNETS),
+      providerUrlsForChains,
       jsonRpcProviders
     ).generateWidgets()
 

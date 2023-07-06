@@ -38,6 +38,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
       const chainId = chainIdAndIndex.chainId
       const index = chainIdAndIndex.index
       const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]!
+
       const providerName = deriveProviderName(url)
 
       const metric1 = `m${index * 2 + 1}`
