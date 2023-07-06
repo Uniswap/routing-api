@@ -7,6 +7,7 @@ import { QuoteAmountsWidgetsFactory } from '../../lib/dashboards/quote-amounts-w
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-widgets-factory'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
+import { RpcProvidersWidgetsFactory } from '../../lib/dashboards/rpc-providers-widgets-factory'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -24,13 +25,14 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
   routingLambdaName: string
   poolCacheLambdaNameArray: string[]
   ipfsPoolCacheLambdaName?: string
+  jsonRpcProviders: { [chainName: string]: string }
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName, jsonRpcProviders } = props
     const region = cdk.Stack.of(this).region
 
     const TESTNETS = [
@@ -437,327 +439,336 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     ])
 
+    const rpcProvidersWidgetsForRoutingDashboard = new RpcProvidersWidgetsFactory(
+      NAMESPACE,
+      region,
+      MAINNETS.concat(TESTNETS),
+      jsonRpcProviders
+    ).generateWidgets()
+
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
-        widgets: perChainWidgetsForRoutingDashboard.concat([
-          {
-            height: 6,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: [
-                ['AWS/ApiGateway', 'Count', 'ApiName', apiName, { label: 'Requests' }],
-                ['.', '5XXError', '.', '.', { label: '5XXError Responses', color: '#ff7f0e' }],
-                ['.', '4XXError', '.', '.', { label: '4XXError Responses', color: '#2ca02c' }],
-              ],
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Sum',
-              period: 300,
-              title: 'Total Requests/Responses',
+        widgets: perChainWidgetsForRoutingDashboard
+          .concat([
+            {
+              height: 6,
+              width: 24,
+              type: 'metric',
+              properties: {
+                metrics: [
+                  ['AWS/ApiGateway', 'Count', 'ApiName', apiName, { label: 'Requests' }],
+                  ['.', '5XXError', '.', '.', { label: '5XXError Responses', color: '#ff7f0e' }],
+                  ['.', '4XXError', '.', '.', { label: '4XXError Responses', color: '#2ca02c' }],
+                ],
+                view: 'timeSeries',
+                stacked: false,
+                region,
+                stat: 'Sum',
+                period: 300,
+                title: 'Total Requests/Responses',
+              },
             },
-          },
-          {
-            height: 6,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: [
-                [
-                  {
-                    expression: 'm1 * 100',
-                    label: '5XX Error Rate',
-                    id: 'e1',
-                    color: '#ff7f0e',
+            {
+              height: 6,
+              width: 24,
+              type: 'metric',
+              properties: {
+                metrics: [
+                  [
+                    {
+                      expression: 'm1 * 100',
+                      label: '5XX Error Rate',
+                      id: 'e1',
+                      color: '#ff7f0e',
+                    },
+                  ],
+                  [
+                    {
+                      expression: 'm2 * 100',
+                      label: '4XX Error Rate',
+                      id: 'e2',
+                      color: '#2ca02c',
+                    },
+                  ],
+                  [
+                    'AWS/ApiGateway',
+                    '5XXError',
+                    'ApiName',
+                    'Routing API',
+                    { id: 'm1', label: '5XXError', visible: false },
+                  ],
+                  ['.', '4XXError', '.', '.', { id: 'm2', visible: false }],
+                ],
+                view: 'timeSeries',
+                stacked: false,
+                region,
+                stat: 'Average',
+                period: 300,
+                title: '5XX/4XX Error Rates',
+                setPeriodToTimeRange: true,
+                yAxis: {
+                  left: {
+                    showUnits: false,
+                    label: '%',
                   },
-                ],
-                [
-                  {
-                    expression: 'm2 * 100',
-                    label: '4XX Error Rate',
-                    id: 'e2',
-                    color: '#2ca02c',
-                  },
-                ],
-                [
-                  'AWS/ApiGateway',
-                  '5XXError',
-                  'ApiName',
-                  'Routing API',
-                  { id: 'm1', label: '5XXError', visible: false },
-                ],
-                ['.', '4XXError', '.', '.', { id: 'm2', visible: false }],
-              ],
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              stat: 'Average',
-              period: 300,
-              title: '5XX/4XX Error Rates',
-              setPeriodToTimeRange: true,
-              yAxis: {
-                left: {
-                  showUnits: false,
-                  label: '%',
                 },
               },
             },
-          },
-          {
-            height: 6,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: [['AWS/ApiGateway', 'Latency', 'ApiName', apiName]],
-              view: 'timeSeries',
-              stacked: false,
-              region,
-              period: 300,
-              stat: 'p90',
-              title: 'Latency p90',
-            },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                [NAMESPACE, 'QuotesFetched', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V3QuotesFetched', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V2QuotesFetched', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'MixedQuotesFetched', 'Service', 'RoutingAPI'],
-              ],
-              region,
-              title: 'p90 Quotes Fetched Per Swap',
-              period: 300,
-              stat: 'p90',
-            },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              insightRule: {
-                maxContributorCount: 25,
-                orderBy: 'Sum',
-                ruleName: REQUESTED_QUOTES_RULE_NAME,
+            {
+              height: 6,
+              width: 24,
+              type: 'metric',
+              properties: {
+                metrics: [['AWS/ApiGateway', 'Latency', 'ApiName', apiName]],
+                view: 'timeSeries',
+                stacked: false,
+                region,
+                period: 300,
+                stat: 'p90',
+                title: 'Latency p90',
               },
-              legend: {
-                position: 'bottom',
+            },
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  [NAMESPACE, 'QuotesFetched', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V3QuotesFetched', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V2QuotesFetched', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'MixedQuotesFetched', 'Service', 'RoutingAPI'],
+                ],
+                region,
+                title: 'p90 Quotes Fetched Per Swap',
+                period: 300,
+                stat: 'p90',
               },
-              region,
-              title: 'Requested Quotes',
-              period: 300,
-              stat: 'Sum',
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              insightRule: {
-                maxContributorCount: 25,
-                orderBy: 'Sum',
-                ruleName: REQUESTED_QUOTES_BY_CHAIN_RULE_NAME,
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                insightRule: {
+                  maxContributorCount: 25,
+                  orderBy: 'Sum',
+                  ruleName: REQUESTED_QUOTES_RULE_NAME,
+                },
+                legend: {
+                  position: 'bottom',
+                },
+                region,
+                title: 'Requested Quotes',
+                period: 300,
+                stat: 'Sum',
               },
-              legend: {
-                position: 'bottom',
+            },
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                insightRule: {
+                  maxContributorCount: 25,
+                  orderBy: 'Sum',
+                  ruleName: REQUESTED_QUOTES_BY_CHAIN_RULE_NAME,
+                },
+                legend: {
+                  position: 'bottom',
+                },
+                region,
+                title: 'Requested Quotes By Chain',
+                period: 300,
+                stat: 'Sum',
               },
-              region,
-              title: 'Requested Quotes By Chain',
-              period: 300,
-              stat: 'Sum',
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                [NAMESPACE, 'MixedAndV3AndV2SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'MixedAndV3SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'MixedAndV2SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'MixedSplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'MixedRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V3AndV2SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V3SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V3Route', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V2SplitRoute', 'Service', 'RoutingAPI'],
-                [NAMESPACE, 'V2Route', 'Service', 'RoutingAPI'],
-              ],
-              region,
-              title: 'Types of routes returned across all chains',
-              period: 300,
-              stat: 'Sum',
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  [NAMESPACE, 'MixedAndV3AndV2SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'MixedAndV3SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'MixedAndV2SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'MixedSplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'MixedRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V3AndV2SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V3SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V3Route', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V2SplitRoute', 'Service', 'RoutingAPI'],
+                  [NAMESPACE, 'V2Route', 'Service', 'RoutingAPI'],
+                ],
+                region,
+                title: 'Types of routes returned across all chains',
+                period: 300,
+                stat: 'Sum',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
-                [NAMESPACE, `MixedAndV3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `MixedAndV3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `MixedAndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `MixedSplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `MixedRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `V3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `V3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `V3RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `V2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-                [NAMESPACE, `V2RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
-              ]),
-              region,
-              title: 'Types of V3 routes returned by chain',
-              period: 300,
-              stat: 'Sum',
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
+                  [NAMESPACE, `MixedAndV3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `MixedAndV3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `MixedAndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `MixedSplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `MixedRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `V3AndV2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `V3SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `V3RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `V2SplitRouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  [NAMESPACE, `V2RouteForChain${chainId}`, 'Service', 'RoutingAPI'],
+                ]),
+                region,
+                title: 'Types of V3 routes returned by chain',
+                period: 300,
+                stat: 'Sum',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 6,
-            properties: {
-              metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
-                ['Uniswap', `QuoteFoundForChain${chainId}`, 'Service', 'RoutingAPI'],
-                ['Uniswap', `QuoteRequestedForChain${chainId}`, 'Service', 'RoutingAPI'],
-              ]),
-              view: 'timeSeries',
-              stacked: false,
-              stat: 'Sum',
-              period: 300,
-              region,
-              title: 'Quote Requested/Found by Chain',
+            {
+              type: 'metric',
+              width: 24,
+              height: 6,
+              properties: {
+                metrics: _.flatMap(SUPPORTED_CHAINS, (chainId: ChainId) => [
+                  ['Uniswap', `QuoteFoundForChain${chainId}`, 'Service', 'RoutingAPI'],
+                  ['Uniswap', `QuoteRequestedForChain${chainId}`, 'Service', 'RoutingAPI'],
+                ]),
+                view: 'timeSeries',
+                stacked: false,
+                stat: 'Sum',
+                period: 300,
+                region,
+                title: 'Quote Requested/Found by Chain',
+              },
             },
-          },
-          {
-            height: 12,
-            width: 24,
-            type: 'metric',
-            properties: {
-              metrics: [
-                [NAMESPACE, 'TokenListLoad', 'Service', 'RoutingAPI', { color: '#c5b0d5' }],
-                ['.', 'GasPriceLoad', '.', '.', { color: '#17becf' }],
-                ['.', 'V3PoolsLoad', '.', '.', { color: '#e377c2' }],
-                ['.', 'V2PoolsLoad', '.', '.', { color: '#e377c2' }],
-                ['.', 'V3SubgraphPoolsLoad', '.', '.', { color: '#1f77b4' }],
-                ['.', 'V2SubgraphPoolsLoad', '.', '.', { color: '#bf77b4' }],
-                ['.', 'V3QuotesLoad', '.', '.', { color: '#2ca02c' }],
-                ['.', 'MixedQuotesLoad', '.', '.', { color: '#fefa63' }],
-                ['.', 'V2QuotesLoad', '.', '.', { color: '#7f7f7f' }],
-                ['.', 'FindBestSwapRoute', '.', '.', { color: '#d62728' }],
-              ],
-              view: 'timeSeries',
-              stacked: true,
-              region,
-              stat: 'p90',
-              period: 300,
-              title: 'Latency Breakdown',
+            {
+              height: 12,
+              width: 24,
+              type: 'metric',
+              properties: {
+                metrics: [
+                  [NAMESPACE, 'TokenListLoad', 'Service', 'RoutingAPI', { color: '#c5b0d5' }],
+                  ['.', 'GasPriceLoad', '.', '.', { color: '#17becf' }],
+                  ['.', 'V3PoolsLoad', '.', '.', { color: '#e377c2' }],
+                  ['.', 'V2PoolsLoad', '.', '.', { color: '#e377c2' }],
+                  ['.', 'V3SubgraphPoolsLoad', '.', '.', { color: '#1f77b4' }],
+                  ['.', 'V2SubgraphPoolsLoad', '.', '.', { color: '#bf77b4' }],
+                  ['.', 'V3QuotesLoad', '.', '.', { color: '#2ca02c' }],
+                  ['.', 'MixedQuotesLoad', '.', '.', { color: '#fefa63' }],
+                  ['.', 'V2QuotesLoad', '.', '.', { color: '#7f7f7f' }],
+                  ['.', 'FindBestSwapRoute', '.', '.', { color: '#d62728' }],
+                ],
+                view: 'timeSeries',
+                stacked: true,
+                region,
+                stat: 'p90',
+                period: 300,
+                title: 'Latency Breakdown',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                [NAMESPACE, 'V3top2directswappool', 'Service', 'RoutingAPI'],
-                ['.', 'V3top2ethquotetokenpool', '.', '.'],
-                ['.', 'V3topbytvl', '.', '.'],
-                ['.', 'V3topbytvlusingtokenin', '.', '.'],
-                ['.', 'V3topbytvlusingtokeninsecondhops', '.', '.'],
-                ['.', 'V2topbytvlusingtokenout', '.', '.'],
-                ['.', 'V3topbytvlusingtokenoutsecondhops', '.', '.'],
-                ['.', 'V3topbybasewithtokenin', '.', '.'],
-                ['.', 'V3topbybasewithtokenout', '.', '.'],
-              ],
-              region: region,
-              title: 'p95 V3 Top N Pools Used From Sources in Best Route',
-              stat: 'p95',
+            {
+              type: 'metric',
+              width: 24,
+              height: 9,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  [NAMESPACE, 'V3top2directswappool', 'Service', 'RoutingAPI'],
+                  ['.', 'V3top2ethquotetokenpool', '.', '.'],
+                  ['.', 'V3topbytvl', '.', '.'],
+                  ['.', 'V3topbytvlusingtokenin', '.', '.'],
+                  ['.', 'V3topbytvlusingtokeninsecondhops', '.', '.'],
+                  ['.', 'V2topbytvlusingtokenout', '.', '.'],
+                  ['.', 'V3topbytvlusingtokenoutsecondhops', '.', '.'],
+                  ['.', 'V3topbybasewithtokenin', '.', '.'],
+                  ['.', 'V3topbybasewithtokenout', '.', '.'],
+                ],
+                region: region,
+                title: 'p95 V3 Top N Pools Used From Sources in Best Route',
+                stat: 'p95',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                [NAMESPACE, 'V2top2directswappool', 'Service', 'RoutingAPI'],
-                ['.', 'V2top2ethquotetokenpool', '.', '.'],
-                ['.', 'V2topbytvl', '.', '.'],
-                ['.', 'V2topbytvlusingtokenin', '.', '.'],
-                ['.', 'V2topbytvlusingtokeninsecondhops', '.', '.'],
-                ['.', 'V2topbytvlusingtokenout', '.', '.'],
-                ['.', 'V2topbytvlusingtokenoutsecondhops', '.', '.'],
-                ['.', 'V2topbybasewithtokenin', '.', '.'],
-                ['.', 'V2topbybasewithtokenout', '.', '.'],
-              ],
-              region: region,
-              title: 'p95 V2 Top N Pools Used From Sources in Best Route',
-              stat: 'p95',
+            {
+              type: 'metric',
+              width: 24,
+              height: 9,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  [NAMESPACE, 'V2top2directswappool', 'Service', 'RoutingAPI'],
+                  ['.', 'V2top2ethquotetokenpool', '.', '.'],
+                  ['.', 'V2topbytvl', '.', '.'],
+                  ['.', 'V2topbytvlusingtokenin', '.', '.'],
+                  ['.', 'V2topbytvlusingtokeninsecondhops', '.', '.'],
+                  ['.', 'V2topbytvlusingtokenout', '.', '.'],
+                  ['.', 'V2topbytvlusingtokenoutsecondhops', '.', '.'],
+                  ['.', 'V2topbybasewithtokenin', '.', '.'],
+                  ['.', 'V2topbybasewithtokenout', '.', '.'],
+                ],
+                region: region,
+                title: 'p95 V2 Top N Pools Used From Sources in Best Route',
+                stat: 'p95',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', routingLambdaName],
-                ['.', 'ConcurrentExecutions', '.', '.'],
-                ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
-              ],
-              region: region,
-              title: 'Routing Lambda Provisioned Concurrency',
-              stat: 'Average',
+            {
+              type: 'metric',
+              width: 24,
+              height: 9,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', routingLambdaName],
+                  ['.', 'ConcurrentExecutions', '.', '.'],
+                  ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
+                ],
+                region: region,
+                title: 'Routing Lambda Provisioned Concurrency',
+                stat: 'Average',
+              },
             },
-          },
-          {
-            type: 'metric',
-            width: 24,
-            height: 9,
-            properties: {
-              view: 'timeSeries',
-              stacked: false,
-              metrics: [
-                ...poolCacheLambdaMetrics,
-                ...(ipfsPoolCacheLambdaName
-                  ? [
-                      ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                      ['.', 'Invocations', '.', '.'],
-                    ]
-                  : []),
-              ],
-              region: region,
-              title: 'Pool Cache Lambda Error/Invocations',
-              stat: 'Sum',
+            {
+              type: 'metric',
+              width: 24,
+              height: 9,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  ...poolCacheLambdaMetrics,
+                  ...(ipfsPoolCacheLambdaName
+                    ? [
+                        ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
+                        ['.', 'Invocations', '.', '.'],
+                      ]
+                    : []),
+                ],
+                region: region,
+                title: 'Pool Cache Lambda Error/Invocations',
+                stat: 'Sum',
+              },
             },
-          },
-        ]),
+          ])
+          .concat(rpcProvidersWidgetsForRoutingDashboard),
       }),
     })
 
