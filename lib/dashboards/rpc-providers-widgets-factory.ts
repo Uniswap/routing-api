@@ -37,7 +37,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
     const metrics = _.flatMap(chainsWithIndices, (chainIdAndIndex) => {
       const chainId = chainIdAndIndex.chainId
       const index = chainIdAndIndex.index
-      const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]
+      const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]!
 
       const providerName = deriveProviderName(url)
 
