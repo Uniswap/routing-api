@@ -25,13 +25,14 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
   routingLambdaName: string
   poolCacheLambdaNameArray: string[]
   ipfsPoolCacheLambdaName?: string
+  jsonRpcProviders: { [chainName: string]: string }
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName, jsonRpcProviders } = props
     const region = cdk.Stack.of(this).region
 
     const TESTNETS = [
@@ -438,13 +439,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     ])
 
-    const rpcProvidersWidgetsForRoutingDashboard = new RpcProvidersWidgetsFactory(region, NAMESPACE, MAINNETS.concat(TESTNETS)).generateWidgets()
+    const rpcProvidersWidgetsForRoutingDashboard = new RpcProvidersWidgetsFactory(NAMESPACE, region , MAINNETS.concat(TESTNETS), jsonRpcProviders).generateWidgets()
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
       dashboardName: `RoutingDashboard`,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
-        widgets: rpcProvidersWidgetsForRoutingDashboard.concat(perChainWidgetsForRoutingDashboard).concat([
+        widgets: perChainWidgetsForRoutingDashboard.concat([
           {
             height: 6,
             width: 24,
@@ -760,7 +761,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               stat: 'Sum',
             },
           },
-        ]),
+        ]).concat(rpcProvidersWidgetsForRoutingDashboard),
       }),
     })
 
