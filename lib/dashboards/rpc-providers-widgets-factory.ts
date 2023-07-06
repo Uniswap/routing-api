@@ -42,7 +42,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
 
       if (!url) {
         log.info(`No provider found for chain ${chainId.toString()}, skipping`)
-        return new Array<Widget>
+        return new Array<Widget>()
       }
 
       const providerName = deriveProviderName(url)
