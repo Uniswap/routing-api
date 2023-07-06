@@ -10,7 +10,12 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
   chains: Array<ChainId>
   jsonRpcProviders: { [chainName: string]: string }
 
-  constructor(namespace: string, region: string, chains: Array<ChainId>, jsonRpcProviders: { [chainName: string]: string }) {
+  constructor(
+    namespace: string,
+    region: string,
+    chains: Array<ChainId>,
+    jsonRpcProviders: { [chainName: string]: string }
+  ) {
     this.namespace = namespace
     this.region = region
     this.chains = chains
@@ -26,12 +31,10 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
   }
 
   private generateSuccessRatePerMethod(rpcMethod: string): Widget[] {
-    const chainsWithIndices = this.chains.map(
-      (chainId, index) => {
-        return { chainId: chainId, index: index }
-      }
-    )
-    const metrics = _.flatMap(chainsWithIndices, chainIdAndIndex => {
+    const chainsWithIndices = this.chains.map((chainId, index) => {
+      return { chainId: chainId, index: index }
+    })
+    const metrics = _.flatMap(chainsWithIndices, (chainIdAndIndex) => {
       const chainId = chainIdAndIndex.chainId
       const index = chainIdAndIndex.index
       const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]!
@@ -42,35 +45,51 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
       const expression = `e${index}`
 
       return [
-        [{
-          expression: `${metric1} / (${metric1} + ${metric2}) * 100`,
-          label: `RPC ${providerName} Chain ${chainId} ${rpcMethod} Success Rate`,
-          id: expression
-        }],
-        [this.namespace, `RPC_${providerName}_${chainId}_${rpcMethod}_SUCCESS`, "Service", "RoutingAPI", {
-          id: metric1,
-          visible: false
-        }],
-        [this.namespace, `RPC_${providerName}_${chainId}_${rpcMethod}_FAILURE`, "Service", "RoutingAPI", {
-          id: metric2,
-          visible: false
-        }]
+        [
+          {
+            expression: `${metric1} / (${metric1} + ${metric2}) * 100`,
+            label: `RPC ${providerName} Chain ${chainId} ${rpcMethod} Success Rate`,
+            id: expression,
+          },
+        ],
+        [
+          this.namespace,
+          `RPC_${providerName}_${chainId}_${rpcMethod}_SUCCESS`,
+          'Service',
+          'RoutingAPI',
+          {
+            id: metric1,
+            visible: false,
+          },
+        ],
+        [
+          this.namespace,
+          `RPC_${providerName}_${chainId}_${rpcMethod}_FAILURE`,
+          'Service',
+          'RoutingAPI',
+          {
+            id: metric2,
+            visible: false,
+          },
+        ],
       ]
     })
 
-    return [{
-      height: 6,
-      width: 12,
-      type: "metric",
-      properties: {
-        metrics: metrics,
-        view: "timeSeries",
-        stacked: false,
-        region: this.region,
-        stat: "SampleCount",
-        period: 300,
-        title: `RPC ${rpcMethod} Success Rate`
-      }
-    }]
+    return [
+      {
+        height: 6,
+        width: 12,
+        type: 'metric',
+        properties: {
+          metrics: metrics,
+          view: 'timeSeries',
+          stacked: false,
+          region: this.region,
+          stat: 'SampleCount',
+          period: 300,
+          title: `RPC ${rpcMethod} Success Rate`,
+        },
+      },
+    ]
   }
 }
