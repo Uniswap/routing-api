@@ -440,8 +440,10 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       },
     ])
 
-    const missingProviderUrlsForChains = SUPPORTED_CHAINS.filter((chainId) => !jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`])
-    const providerUrlsForChains = SUPPORTED_CHAINS.filter((chainId) => !SUPPORTED_CHAINS.includes(chainId))
+    const missingProviderUrlsForChains = SUPPORTED_CHAINS.filter(
+      (chainId) => !jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]
+    )
+    const providerUrlsForChains = SUPPORTED_CHAINS.filter((chainId) => !missingProviderUrlsForChains.includes(chainId))
 
     new CfnOutput(this, 'missingProviderUrlsForChains', {
       value: missingProviderUrlsForChains.join(','),
