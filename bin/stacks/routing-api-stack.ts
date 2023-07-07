@@ -205,7 +205,6 @@ export class RoutingAPIStack extends cdk.Stack {
       routingLambdaName: routingLambda.functionName,
       poolCacheLambdaNameArray,
       ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
-      jsonRpcProviders: jsonRpcProviders,
     })
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)
