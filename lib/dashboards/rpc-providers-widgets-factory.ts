@@ -3,6 +3,7 @@ import { Widget } from './core/model/widget'
 import { ChainId } from '@uniswap/sdk-core'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import _ from 'lodash'
+import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
 
 export class RpcProvidersWidgetsFactory implements WidgetsFactory {
   region: string
@@ -38,7 +39,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
       const chainId = chainIdAndIndex.chainId
       const index = chainIdAndIndex.index
       const url = this.jsonRpcProviders[`WEB3_RPC_${chainId.toString()}`]!
-
+      if (url === undefined) return []
       const providerName = deriveProviderName(url)
 
       const metric1 = `m${index * 2 + 1}`
@@ -49,7 +50,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
         [
           {
             expression: `${metric1} / (${metric1} + ${metric2}) * 100`,
-            label: `RPC ${providerName} Chain ${chainId} ${rpcMethod} Success Rate`,
+            label: `RPC ${providerName} Chain ${ID_TO_NETWORK_NAME(chainId)} ${rpcMethod} Success Rate`,
             id: expression,
           },
         ],
