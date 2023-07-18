@@ -1902,6 +1902,8 @@ describe('quote', function () {
     [ChainId.ARBITRUM_GOERLI]: null,
     [ChainId.BNB]: USDC_ON(ChainId.BNB),
     [ChainId.AVALANCHE]: USDC_ON(ChainId.AVALANCHE),
+    [ChainId.BASE_GOERLI]: null,
+    [ChainId.BASE]: null,
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
@@ -1920,6 +1922,8 @@ describe('quote', function () {
     [ChainId.ARBITRUM_GOERLI]: null,
     [ChainId.BNB]: USDT_ON(ChainId.BNB),
     [ChainId.AVALANCHE]: DAI_ON(ChainId.AVALANCHE),
+    [ChainId.BASE_GOERLI]: null,
+    [ChainId.BASE]: null,
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
