@@ -1,4 +1,5 @@
 import Joi from '@hapi/joi'
+import { Lambda } from 'aws-sdk'
 import { Protocol } from '@uniswap/router-sdk'
 import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { PermitSingle } from '@uniswap/permit2-sdk'
@@ -48,6 +49,24 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     let result: Response<QuoteResponse> | ErrorResponse
 
+    const invokeAsyncLambda = () => {
+      const lambda = new Lambda()
+      const lambdaParams = {
+        FunctionName: process.env.ASYNC_CACHE_LAMBDA!,
+        InvocationType: 'Event',
+        Payload: '',
+      }
+      return new Promise((resolve, reject) => {
+        lambda.invoke(lambdaParams, (err, data) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(data)
+          }
+        })
+      })
+    }
+
     try {
       result = await this.handleRequestInternal(params)
 
@@ -86,6 +105,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
     }
+
+    invokeAsyncLambda()
 
     return result
   }

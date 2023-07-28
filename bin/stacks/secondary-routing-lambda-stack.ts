@@ -9,7 +9,7 @@ import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface SecondaryRoutingLambdaStackProps extends cdk.NestedStackProps {
-    provisionedConcurrency: number
+  provisionedConcurrency: number
 }
 export class SecondaryRoutingLambdaStack extends cdk.NestedStack {
   public readonly secondaryRoutingLambda: aws_lambda_nodejs.NodejsFunction
@@ -17,9 +17,7 @@ export class SecondaryRoutingLambdaStack extends cdk.NestedStack {
 
   constructor(scope: Construct, name: string, props: SecondaryRoutingLambdaStackProps) {
     super(scope, name, props)
-    const {
-      provisionedConcurrency
-    } = props
+    const { provisionedConcurrency } = props
 
     const lambdaRole = new aws_iam.Role(this, 'SecondaryRoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),

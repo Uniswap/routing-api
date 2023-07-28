@@ -16,6 +16,7 @@ import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
+import { SecondaryRoutingLambdaStack } from './secondary-routing-lambda-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [ChainId.GOERLI, ChainId.POLYGON_MUMBAI]
 
@@ -79,6 +80,8 @@ export class RoutingAPIStack extends cdk.Stack {
 
     const { cachedRoutesDynamoDb, cachedV3PoolsDynamoDb } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
+    const { secondaryRoutingLambda } = new SecondaryRoutingLambdaStack(this, 'SecondaryRoutingLambdaStack', {})
+
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
       poolCacheBucket,
       poolCacheBucket2,
@@ -93,6 +96,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyAccessKey,
       cachedRoutesDynamoDb,
       cachedV3PoolsDynamoDb,
+      SECONDARY_ROUTING_LAMBDA: secondaryRoutingLambda.functionName,
     })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')

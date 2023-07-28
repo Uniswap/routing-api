@@ -28,6 +28,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   chatbotSNSArn?: string
   cachedRoutesDynamoDb?: aws_dynamodb.Table
   cachedV3PoolsDynamoDb?: aws_dynamodb.Table
+  SECONDARY_ROUTING_LAMBDA: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -49,6 +50,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyAccessKey,
       cachedRoutesDynamoDb,
       cachedV3PoolsDynamoDb,
+      SECONDARY_ROUTING_LAMBDA,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -80,6 +82,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       },
       description: 'Routing Lambda',
       environment: {
+        SECONDARY_ROUTING_LAMBDA,
         VERSION: '5',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
