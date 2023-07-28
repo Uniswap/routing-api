@@ -9,5 +9,5 @@ export const testHandler = async (context: Context): Promise<void> => {
     requestId: context.awsRequestId,
     query: 'secondary routing lambda',
   })
-  logger.info(`SECONDARY ROUTING LAMBDA HAS BEEN FIRED.`)
+  logger.error(`SECONDARY ROUTING LAMBDA HAS BEEN FIRED.`)
 }

@@ -52,12 +52,13 @@ export class QuoteHandler extends APIGLambdaHandler<
     const invokeAsyncLambda = () => {
       const lambda = new Lambda()
       const lambdaParams = {
-        FunctionName: process.env.ASYNC_CACHE_LAMBDA!,
+        FunctionName: process.env.SECONDARY_ROUTING_LAMBDA!,
         InvocationType: 'Event',
         Payload: '',
       }
       return new Promise((resolve, reject) => {
         lambda.invoke(lambdaParams, (err, data) => {
+          log.info('Invoked secondary routing lambda')
           if (err) {
             reject(err)
           } else {
