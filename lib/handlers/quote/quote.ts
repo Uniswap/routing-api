@@ -46,11 +46,13 @@ export class QuoteHandler extends APIGLambdaHandler<
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const { chainId, metric, log } = params.requestInjected
     const startTime = Date.now()
+    log.warn('quote request started')
 
     let result: Response<QuoteResponse> | ErrorResponse
 
     const invokeAsyncLambda = () => {
       const lambda = new Lambda()
+      log.warn(`secondary_routing_lambda: ${process.env.SECONDARY_ROUTING_LAMBDA}`)
       const lambdaParams = {
         FunctionName: process.env.SECONDARY_ROUTING_LAMBDA!,
         InvocationType: 'Event',
@@ -58,7 +60,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
       return new Promise((resolve, reject) => {
         lambda.invoke(lambdaParams, (err, data) => {
-          log.info('Invoked secondary routing lambda')
+          log.warn('Invoked secondary routing lambda')
           if (err) {
             reject(err)
           } else {
@@ -107,7 +109,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
     }
 
-    invokeAsyncLambda()
+    log.warn('Attempting to invoke secondary routing lambda')
+    await invokeAsyncLambda().then((data) => log.warn(`secondary lambda completed with ${data}`))
 
     return result
   }
