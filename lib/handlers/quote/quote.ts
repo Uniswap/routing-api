@@ -58,17 +58,18 @@ export class QuoteHandler extends APIGLambdaHandler<
         InvocationType: 'Event',
         Payload: '',
       }
-      return new Promise((resolve, reject) => {
-        lambda.invoke(lambdaParams, (err, data) => {
-          log.warn('Invoked secondary routing lambda')
-          if (err) {
-            reject(err)
-          } else {
-            resolve(data)
-          }
-        })
+      lambda.invoke(lambdaParams, (err, data) => {
+        log.warn('Invoked secondary routing lambda')
+        if (err) {
+          log.warn(`error invoking secondary routing lambda: ${err}`)
+        } else {
+          log.warn(`secondary routing lambda invoked: ${data}`)
+        }
       })
     }
+
+    log.warn('Attempting to invoke secondary routing lambda')
+    invokeAsyncLambda()
 
     try {
       result = await this.handleRequestInternal(params)
@@ -108,9 +109,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
     }
-
-    log.warn('Attempting to invoke secondary routing lambda')
-    await invokeAsyncLambda().then((data) => log.warn(`secondary lambda completed with ${data}`))
 
     return result
   }
