@@ -30,6 +30,8 @@ import {
   USDT_MAINNET,
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
+  USDC_BASE,
+  USDC_BASE_GOERLI,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -126,6 +128,10 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_BNB
     case ChainId.AVALANCHE:
       return USDC_AVAX
+    case ChainId.BASE:
+      return USDC_BASE
+    case ChainId.BASE_GOERLI:
+      return USDC_BASE_GOERLI
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }

@@ -60,6 +60,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.CELO_ALFAJORES,
   ChainId.BNB,
   ChainId.AVALANCHE,
+  ChainId.BASE,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -174,6 +175,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         // 200*725k < 150m
         let quoteProvider: OnChainQuoteProvider | undefined = undefined
         switch (chainId) {
+          case ChainId.BASE:
           case ChainId.OPTIMISM:
             quoteProvider = new OnChainQuoteProvider(
               chainId,
