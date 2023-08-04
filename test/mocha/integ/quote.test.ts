@@ -1934,8 +1934,8 @@ describe('quote', function () {
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
       c != ChainId.GOERLI &&
-      c != ChainId.SEPOLIA && 
-      c != ChainId.BASE && 
+      c != ChainId.SEPOLIA &&
+      c != ChainId.BASE &&
       c != ChainId.BASE_GOERLI
   )) {
     for (const type of ['exactIn', 'exactOut']) {
