@@ -1886,44 +1886,44 @@ describe('quote', function () {
     }
   }
 
-  const TEST_ERC20_1: { [chainId in ChainId]: null | Token } = {
-    [ChainId.MAINNET]: USDC_ON(1),
-    [ChainId.GOERLI]: USDC_ON(ChainId.GOERLI),
-    [ChainId.SEPOLIA]: USDC_ON(ChainId.SEPOLIA),
-    [ChainId.OPTIMISM]: USDC_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISM_GOERLI]: USDC_ON(ChainId.OPTIMISM_GOERLI),
-    [ChainId.ARBITRUM_ONE]: USDC_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.POLYGON]: USDC_ON(ChainId.POLYGON),
-    [ChainId.POLYGON_MUMBAI]: USDC_ON(ChainId.POLYGON_MUMBAI),
-    [ChainId.CELO]: CUSD_CELO,
-    [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
-    [ChainId.MOONBEAM]: null,
-    [ChainId.GNOSIS]: null,
-    [ChainId.ARBITRUM_GOERLI]: null,
-    [ChainId.BNB]: USDC_ON(ChainId.BNB),
-    [ChainId.AVALANCHE]: USDC_ON(ChainId.AVALANCHE),
-    [ChainId.BASE_GOERLI]: USDC_ON(ChainId.BASE_GOERLI),
-    [ChainId.BASE]: USDC_ON(ChainId.BASE),
+  const TEST_ERC20_1: { [chainId in ChainId]: () => null | Token } = {
+    [ChainId.MAINNET]: () => USDC_ON(1),
+    [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
+    [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
+    [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
+    [ChainId.ARBITRUM_ONE]: () => USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.POLYGON]: () => USDC_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: () => USDC_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: () => CUSD_CELO,
+    [ChainId.CELO_ALFAJORES]: () => CUSD_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: () => null,
+    [ChainId.GNOSIS]: () => null,
+    [ChainId.ARBITRUM_GOERLI]: () => null,
+    [ChainId.BNB]: () => USDC_ON(ChainId.BNB),
+    [ChainId.AVALANCHE]: () => USDC_ON(ChainId.AVALANCHE),
+    [ChainId.BASE_GOERLI]: () => USDC_ON(ChainId.BASE_GOERLI),
+    [ChainId.BASE]: () => USDC_ON(ChainId.BASE),
   }
 
-  const TEST_ERC20_2: { [chainId in ChainId]: Token | null } = {
-    [ChainId.MAINNET]: DAI_ON(1),
-    [ChainId.GOERLI]: DAI_ON(ChainId.GOERLI),
-    [ChainId.SEPOLIA]: DAI_ON(ChainId.SEPOLIA),
-    [ChainId.OPTIMISM]: DAI_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISM_GOERLI]: DAI_ON(ChainId.OPTIMISM_GOERLI),
-    [ChainId.ARBITRUM_ONE]: DAI_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.POLYGON]: DAI_ON(ChainId.POLYGON),
-    [ChainId.POLYGON_MUMBAI]: DAI_ON(ChainId.POLYGON_MUMBAI),
-    [ChainId.CELO]: CEUR_CELO,
-    [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
-    [ChainId.MOONBEAM]: null,
-    [ChainId.GNOSIS]: null,
-    [ChainId.ARBITRUM_GOERLI]: null,
-    [ChainId.BNB]: USDT_ON(ChainId.BNB),
-    [ChainId.AVALANCHE]: DAI_ON(ChainId.AVALANCHE),
-    [ChainId.BASE_GOERLI]: WNATIVE_ON(ChainId.BASE_GOERLI),
-    [ChainId.BASE]: WNATIVE_ON(ChainId.BASE),
+  const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
+    [ChainId.MAINNET]: () => DAI_ON(1),
+    [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
+    [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
+    [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
+    [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.POLYGON]: () => DAI_ON(ChainId.POLYGON),
+    [ChainId.POLYGON_MUMBAI]: () => DAI_ON(ChainId.POLYGON_MUMBAI),
+    [ChainId.CELO]: () => CEUR_CELO,
+    [ChainId.CELO_ALFAJORES]: () => CEUR_CELO_ALFAJORES,
+    [ChainId.MOONBEAM]: () => null,
+    [ChainId.GNOSIS]: () => null,
+    [ChainId.ARBITRUM_GOERLI]: () => null,
+    [ChainId.BNB]: () => USDT_ON(ChainId.BNB),
+    [ChainId.AVALANCHE]: () => DAI_ON(ChainId.AVALANCHE),
+    [ChainId.BASE_GOERLI]: () => WNATIVE_ON(ChainId.BASE_GOERLI),
+    [ChainId.BASE]: () => WNATIVE_ON(ChainId.BASE),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -1939,8 +1939,8 @@ describe('quote', function () {
       c != ChainId.BASE_GOERLI
   )) {
     for (const type of ['exactIn', 'exactOut']) {
-      const erc1 = TEST_ERC20_1[chain]
-      const erc2 = TEST_ERC20_2[chain]
+      const erc1 = TEST_ERC20_1[chain]()
+      const erc2 = TEST_ERC20_2[chain]()
 
       // This is for Gnosis and Moonbeam which we don't have RPC Providers yet
       if (erc1 == null || erc2 == null) continue
