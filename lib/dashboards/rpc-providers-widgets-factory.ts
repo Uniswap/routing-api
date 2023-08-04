@@ -16,10 +16,10 @@ const ID_TO_PROVIDER = (id: ChainId): string => {
     case ChainId.ARBITRUM_GOERLI:
     case ChainId.AVALANCHE:
     case ChainId.GOERLI:
-    case ChainId.BASE:
       return ProviderName.INFURA
     case ChainId.CELO:
     case ChainId.BNB:
+    case ChainId.BASE:
       return ProviderName.QUIKNODE
     case ChainId.CELO_ALFAJORES:
       return ProviderName.FORNO
