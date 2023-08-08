@@ -17,7 +17,7 @@ import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-numbe
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 
-const MINUTES_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number} = {
+const MINUTES_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 0.25,
 }
 
@@ -208,9 +208,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const chainId = cachedRoutes.chainId
     const blocksToLive = cachedRoutes.blocksToLive
     let cachedRoutesTtl = this.ttlMinutes
-    if (blocksToLive > 0 && typeof MINUTES_PER_BLOCK_BY_CHAIN_ID[chainId] === 'number') {
+    const minutesToLivePerBlock = MINUTES_PER_BLOCK_BY_CHAIN_ID[chainId]
+
+    if (blocksToLive > 0 && typeof minutesToLivePerBlock === 'number') {
       // use this.ttlMinutes as a buffer in addition to average calculated ttl for blocksToLive
-      cachedRoutesTtl = MINUTES_PER_BLOCK_BY_CHAIN_ID[chainId] * blocksToLive + this.ttlMinutes
+      cachedRoutesTtl = minutesToLivePerBlock * blocksToLive + this.ttlMinutes
     }
 
     if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
