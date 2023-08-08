@@ -17,6 +17,10 @@ import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-numbe
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 
+const MINUTES_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number} = {
+  [ChainId.MAINNET]: 0.25,
+}
+
 interface ConstructorParams {
   /**
    * The TableName for the DynamoDB Table. This is wired in from the CDK definition.
@@ -201,10 +205,17 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
+    const chainId = cachedRoutes.chainId
+    const blocksToLive = cachedRoutes.blocksToLive
+    let cachedRoutesTtl = this.ttlMinutes
+    if (blocksToLive > 0 && typeof MINUTES_PER_BLOCK_BY_CHAIN_ID[chainId] === 'number') {
+      // use this.ttlMinutes as a buffer in addition to average calculated ttl for blocksToLive
+      cachedRoutesTtl = MINUTES_PER_BLOCK_BY_CHAIN_ID[chainId] * blocksToLive + this.ttlMinutes
+    }
 
     if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttlMinutes
+      const ttl = Math.floor(Date.now() / 1000) + 60 * cachedRoutesTtl
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
       // Convert the marshalledCachedRoutes to JSON string
