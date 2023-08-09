@@ -16,6 +16,7 @@ import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 
 interface ConstructorParams {
   /**
@@ -28,13 +29,23 @@ interface ConstructorParams {
    */
   ttlMinutes?: number
 }
+interface CachedRouteDbEntry {
+  TableName: string
+  Item: {
+    pairTradeTypeChainId: string
+    protocolsBucketBlockNumber: string
+    item: Buffer
+    ttl: number
+  }
+}
 
+const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly tableName: string
   private readonly ttlMinutes: number
 
-  constructor({ cachedRoutesTableName, ttlMinutes = 2 }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttlMinutes = DEFAULT_TTL_MINUTES }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -191,20 +202,27 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
-   * Implementation of the abstract method defined in `IRouteCachingProvider`
-   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
+   * Helper function to generate the [CachedRouteDbEntry] object to be stored in the Cached Routes DynamoDB.
    *
    * @param cachedRoutes
    * @param amount
-   * @protected
+   * @public
    */
-  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+  public generateCachedRouteDbEntry(
+    cachedRoutes: CachedRoutes,
+    amount: CurrencyAmount<Currency>
+  ): CachedRouteDbEntry | null {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
+    const chainId = cachedRoutes.chainId
+    const blocksToLive = cachedRoutes.blocksToLive
+    const secondsToLivePerBlock = SECONDS_PER_BLOCK_BY_CHAIN_ID[chainId]
+    const cachedRoutesTtl =
+      blocksToLive > 0 && typeof secondsToLivePerBlock === 'number' ? secondsToLivePerBlock * blocksToLive : 0
 
     if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + 60 * this.ttlMinutes
+      const ttl = Math.floor(Date.now() / 1000) + Math.max(cachedRoutesTtl, this.ttlMinutes * 60)
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
       // Convert the marshalledCachedRoutes to JSON string
@@ -220,7 +238,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         blockNumber: cachedRoutes.blockNumber,
       })
 
-      const putParams = {
+      return {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
@@ -229,11 +247,26 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           ttl: ttl,
         },
       }
+    } else {
+      return null
+    }
+  }
 
-      log.info(
-        { putParams, cachedRoutes, jsonCachedRoutes },
-        `[DynamoRouteCachingProvider] Attempting to insert route to cache`
-      )
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @protected
+   */
+  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+    const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
+
+    if (cachedRouteDbEntry) {
+      const putParams = cachedRouteDbEntry
+
+      log.info({ putParams, cachedRoutes }, `[DynamoRouteCachingProvider] Attempting to insert route to cache`)
 
       try {
         await this.ddbClient.put(putParams).promise()
