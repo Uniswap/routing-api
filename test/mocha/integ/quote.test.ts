@@ -2003,7 +2003,7 @@ describe('quote', function () {
             tokenInChainId: chain,
             tokenOutAddress: baseErc20.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '1'),
+            amount: await getAmountFromToken(type, WNATIVE_ON(chain), baseErc20, '1'),
             type,
             enableUniversalRouter: true,
           }
