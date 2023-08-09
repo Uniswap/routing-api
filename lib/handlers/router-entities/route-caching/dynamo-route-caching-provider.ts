@@ -201,8 +201,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
-   /**
-   * Helper function to generate the [CachedRouteDbEntry] object to be stored in the Cached Routes DynamoDB. 
+  /**
+   * Helper function to generate the [CachedRouteDbEntry] object to be stored in the Cached Routes DynamoDB.
    *
    * @param cachedRoutes
    * @param amount
@@ -217,7 +217,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const chainId = cachedRoutes.chainId
     const blocksToLive = cachedRoutes.blocksToLive
     const secondsToLivePerBlock = SECONDS_PER_BLOCK_BY_CHAIN_ID[chainId]
-    const cachedRoutesTtl = (blocksToLive > 0 && typeof secondsToLivePerBlock === 'number') ? secondsToLivePerBlock * blocksToLive : 0
+    const cachedRoutesTtl =
+      blocksToLive > 0 && typeof secondsToLivePerBlock === 'number' ? secondsToLivePerBlock * blocksToLive : 0
 
     if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
@@ -265,10 +266,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (cachedRouteDbEntry) {
       const putParams = cachedRouteDbEntry
 
-      log.info(
-        { putParams, cachedRoutes },
-        `[DynamoRouteCachingProvider] Attempting to insert route to cache`
-      )
+      log.info({ putParams, cachedRoutes }, `[DynamoRouteCachingProvider] Attempting to insert route to cache`)
 
       try {
         await this.ddbClient.put(putParams).promise()

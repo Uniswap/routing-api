@@ -2,9 +2,7 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
-import {
-  DynamoRouteCachingProvider,
-} from '../../../../../../lib/handlers/router-entities/route-caching'
+import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
@@ -127,8 +125,7 @@ describe('DynamoRouteCachingProvider', async () => {
 
     if (cachedRouteDbEntry) {
       const ttlSeconds =
-        timeNow +
-        (SECONDS_PER_BLOCK_BY_CHAIN_ID[ChainId.MAINNET] as number) * TEST_CACHED_ROUTES.blocksToLive
+        timeNow + (SECONDS_PER_BLOCK_BY_CHAIN_ID[ChainId.MAINNET] as number) * TEST_CACHED_ROUTES.blocksToLive
       expect(cachedRouteDbEntry.Item.ttl).to.equal(ttlSeconds)
     }
   })
