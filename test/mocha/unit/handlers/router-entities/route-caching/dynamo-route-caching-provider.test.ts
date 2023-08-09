@@ -127,12 +127,10 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(cachedRouteDbEntry).to.not.be.null
 
     if (cachedRouteDbEntry) {
-      const { putParams } = cachedRouteDbEntry
       const ttlSeconds =
         timeNow +
-        DEFAULT_TTL_MINUTES * 60 +
         (SECONDS_PER_BLOCK_BY_CHAIN_ID[ChainId.MAINNET] as number) * TEST_CACHED_ROUTES.blocksToLive
-      expect(putParams.Item.ttl).to.equal(ttlSeconds)
+      expect(cachedRouteDbEntry.Item.ttl).to.equal(ttlSeconds)
     }
   })
 

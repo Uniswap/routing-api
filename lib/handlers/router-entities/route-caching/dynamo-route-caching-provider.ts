@@ -29,7 +29,7 @@ interface ConstructorParams {
    */
   ttlMinutes?: number
 }
-interface PutParams {
+interface CachedRouteDbEntry {
   TableName: string
   Item: {
     pairTradeTypeChainId: string
@@ -37,10 +37,6 @@ interface PutParams {
     item: Buffer
     ttl: number
   }
-}
-interface CachedRouteDbEntry {
-  putParams: PutParams
-  jsonCachedRoutes: string
 }
 
 export const DEFAULT_TTL_MINUTES = 2
@@ -205,6 +201,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
+   /**
+   * Helper function to generate the [CachedRouteDbEntry] object to be stored in the Cached Routes DynamoDB. 
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @public
+   */
   public generateCachedRouteDbEntry(
     cachedRoutes: CachedRoutes,
     amount: CurrencyAmount<Currency>
@@ -213,13 +216,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
     const chainId = cachedRoutes.chainId
     const blocksToLive = cachedRoutes.blocksToLive
-    let cachedRoutesTtl = this.ttlMinutes
     const secondsToLivePerBlock = SECONDS_PER_BLOCK_BY_CHAIN_ID[chainId]
-
-    if (blocksToLive > 0 && typeof secondsToLivePerBlock === 'number') {
-      // use this.ttlMinutes as a buffer in addition to average calculated ttl for blocksToLive
-      cachedRoutesTtl = secondsToLivePerBlock * blocksToLive + this.ttlMinutes * 60
-    }
+    const cachedRoutesTtl = (blocksToLive > 0 && typeof secondsToLivePerBlock === 'number') ? secondsToLivePerBlock * blocksToLive : 0
 
     if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
@@ -239,7 +237,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         blockNumber: cachedRoutes.blockNumber,
       })
 
-      const putParams = {
+      return {
         TableName: this.tableName,
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
@@ -248,8 +246,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           ttl: ttl,
         },
       }
-
-      return { putParams, jsonCachedRoutes }
     } else {
       return null
     }
@@ -267,10 +263,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
 
     if (cachedRouteDbEntry) {
-      const { putParams, jsonCachedRoutes } = cachedRouteDbEntry
+      const putParams = cachedRouteDbEntry
 
       log.info(
-        { putParams, cachedRoutes, jsonCachedRoutes },
+        { putParams, cachedRoutes },
         `[DynamoRouteCachingProvider] Attempting to insert route to cache`
       )
 
