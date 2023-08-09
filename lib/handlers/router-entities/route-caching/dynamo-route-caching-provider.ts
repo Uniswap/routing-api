@@ -29,13 +29,27 @@ interface ConstructorParams {
    */
   ttlMinutes?: number
 }
+interface PutParams {
+  TableName: string
+  Item: {
+    pairTradeTypeChainId: string
+    protocolsBucketBlockNumber: string
+    item: Buffer
+    ttl: number
+  }
+}
+interface CachedRouteDbEntry {
+  putParams: PutParams
+  jsonCachedRoutes: string
+}
 
+export const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly tableName: string
   private readonly ttlMinutes: number
 
-  constructor({ cachedRoutesTableName, ttlMinutes = 2 }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttlMinutes = DEFAULT_TTL_MINUTES }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -191,15 +205,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
-  /**
-   * Implementation of the abstract method defined in `IRouteCachingProvider`
-   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
-   *
-   * @param cachedRoutes
-   * @param amount
-   * @protected
-   */
-  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+  public generateCachedRouteDbEntry(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): CachedRouteDbEntry | null {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
     const chainId = cachedRoutes.chainId
@@ -239,6 +245,26 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           ttl: ttl,
         },
       }
+
+      return { putParams, jsonCachedRoutes }
+    } else {
+      return null
+    }
+  }
+
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @protected
+   */
+  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+    const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
+
+    if (cachedRouteDbEntry) {
+      const { putParams, jsonCachedRoutes } = cachedRouteDbEntry 
 
       log.info(
         { putParams, cachedRoutes, jsonCachedRoutes },

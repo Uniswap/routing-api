@@ -2,13 +2,14 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
-import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
+import { DEFAULT_TTL_MINUTES, DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
+import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../../../../../lib/handlers/shared'
 
 chai.use(chaiAsPromised)
 
@@ -115,6 +116,19 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
 describe('DynamoRouteCachingProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
   const dynamoRouteCache = new DynamoRouteCachingProvider({ cachedRoutesTableName: TEST_ROUTE_TABLE.TableName })
+
+  it('Generates cached route db entry properly with ttl based on chain id and blocks to live', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+    const timeNow = Math.floor(Date.now() / 1000) 
+    const cachedRouteDbEntry = dynamoRouteCache.generateCachedRouteDbEntry(TEST_CACHED_ROUTES, currencyAmount)
+    expect(cachedRouteDbEntry).to.not.be.null
+
+    if (cachedRouteDbEntry) {
+      const { putParams } = cachedRouteDbEntry
+      const ttlSeconds = timeNow + DEFAULT_TTL_MINUTES * 60 + (SECONDS_PER_BLOCK_BY_CHAIN_ID[ChainId.MAINNET] as number) * TEST_CACHED_ROUTES.blocksToLive
+      expect(putParams.Item.ttl).to.equal(ttlSeconds)
+    }
+  })
 
   it('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
