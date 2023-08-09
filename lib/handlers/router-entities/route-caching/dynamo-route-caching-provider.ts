@@ -205,7 +205,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
-  public generateCachedRouteDbEntry(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): CachedRouteDbEntry | null {
+  public generateCachedRouteDbEntry(
+    cachedRoutes: CachedRoutes,
+    amount: CurrencyAmount<Currency>
+  ): CachedRouteDbEntry | null {
     const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
     const chainId = cachedRoutes.chainId
@@ -264,7 +267,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
 
     if (cachedRouteDbEntry) {
-      const { putParams, jsonCachedRoutes } = cachedRouteDbEntry 
+      const { putParams, jsonCachedRoutes } = cachedRouteDbEntry
 
       log.info(
         { putParams, cachedRoutes, jsonCachedRoutes },
