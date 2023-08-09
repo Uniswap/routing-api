@@ -1994,10 +1994,14 @@ describe('quote', function () {
         })
         const native = NATIVE_CURRENCY[chain]
         it(`${native} -> erc20`, async () => {
+          // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
+          // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
+          const baseErc20 = chain == ChainId.BASE ? USDC_ON(ChainId.BASE) : erc2
+
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: native,
             tokenInChainId: chain,
-            tokenOutAddress: erc2.address,
+            tokenOutAddress: baseErc20.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, WNATIVE_ON(chain), erc2, '1'),
             type,
