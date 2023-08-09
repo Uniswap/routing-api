@@ -3,7 +3,6 @@ import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
 import {
-  DEFAULT_TTL_MINUTES,
   DynamoRouteCachingProvider,
 } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
