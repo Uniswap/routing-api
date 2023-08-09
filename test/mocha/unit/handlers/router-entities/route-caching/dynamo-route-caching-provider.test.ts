@@ -2,14 +2,16 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
-import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
+import { DynamoRouteCachingProvider, PairTradeTypeChainId } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
+import { CachedRoutesMarshaller } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../../../../../lib/handlers/shared'
+import { ProtocolsBucketBlockNumber } from '../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
 
 chai.use(chaiAsPromised)
 
@@ -126,7 +128,15 @@ describe('DynamoRouteCachingProvider', async () => {
     if (cachedRouteDbEntry) {
       const ttlSeconds =
         timeNow + (SECONDS_PER_BLOCK_BY_CHAIN_ID[ChainId.MAINNET] as number) * TEST_CACHED_ROUTES.blocksToLive
+      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(TEST_CACHED_ROUTES)
+      const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
+      const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
+
       expect(cachedRouteDbEntry.Item.ttl).to.equal(ttlSeconds)
+      expect(cachedRouteDbEntry.TableName).to.equal('RouteCachingDB')
+      expect(cachedRouteDbEntry.Item.pairTradeTypeChainId).to.equal(PairTradeTypeChainId.fromCachedRoutes(TEST_CACHED_ROUTES).toString())
+      expect(cachedRouteDbEntry.Item.protocolsBucketBlockNumber).to.equal('V3/1/0')
+      expect(cachedRouteDbEntry.Item.item).to.deep.equal(binaryCachedRoutes)
     }
   })
 
