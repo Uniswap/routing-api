@@ -2,7 +2,10 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
-import { DynamoRouteCachingProvider, PairTradeTypeChainId } from '../../../../../../lib/handlers/router-entities/route-caching'
+import {
+  DynamoRouteCachingProvider,
+  PairTradeTypeChainId,
+} from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
@@ -134,7 +137,9 @@ describe('DynamoRouteCachingProvider', async () => {
 
       expect(cachedRouteDbEntry.Item.ttl).to.equal(ttlSeconds)
       expect(cachedRouteDbEntry.TableName).to.equal('RouteCachingDB')
-      expect(cachedRouteDbEntry.Item.pairTradeTypeChainId).to.equal(PairTradeTypeChainId.fromCachedRoutes(TEST_CACHED_ROUTES).toString())
+      expect(cachedRouteDbEntry.Item.pairTradeTypeChainId).to.equal(
+        PairTradeTypeChainId.fromCachedRoutes(TEST_CACHED_ROUTES).toString()
+      )
       expect(cachedRouteDbEntry.Item.protocolsBucketBlockNumber).to.equal('V3/1/0')
       expect(cachedRouteDbEntry.Item.item).to.deep.equal(binaryCachedRoutes)
     }
