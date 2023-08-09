@@ -14,7 +14,6 @@ import { CachedRoutesMarshaller } from '../../../../../../lib/handlers/router-en
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../../../../../lib/handlers/shared'
-import { ProtocolsBucketBlockNumber } from '../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
 
 chai.use(chaiAsPromised)
 
