@@ -32,6 +32,7 @@ import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
+import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -526,7 +527,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       type,
       chainId,
       amount,
-      routeString
+      routeString,
+      swapRoute
     )
 
     return {
@@ -546,13 +548,16 @@ export class QuoteHandler extends APIGLambdaHandler<
     tradeType: 'exactIn' | 'exactOut',
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    routeString: string
+    routeString: string,
+    swapRoute: SwapRoute
   ): void {
     const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
     const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
     const wildcardOutPair = `*/${currencyOut.wrapped.symbol}`
     const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
     const pairsTracked = PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)
+
+    measureDistributionPercentChangeImpact(5, 10, swapRoute, currencyIn, currencyOut, tradeType, chainId, amount)
 
     if (
       pairsTracked?.includes(tradingPair) ||
