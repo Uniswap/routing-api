@@ -32,6 +32,7 @@ import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
+import { QUOTE_SPEED_MAP } from './config/quote-speed-config'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -115,6 +116,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitAmount,
         permitSigDeadline,
         enableUniversalRouter,
+        quoteSpeed,
       },
       requestInjected: {
         router,
@@ -214,6 +216,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
+      ...(quoteSpeed ? QUOTE_SPEED_MAP[quoteSpeed] : {})
     }
 
     let swapParams: SwapOptions | undefined = undefined
