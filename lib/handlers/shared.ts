@@ -6,7 +6,7 @@ import {
   MapWithLowerCaseKey,
   NATIVE_NAMES_BY_ID,
   nativeOnChain,
-  ProtocolPoolSelection
+  ProtocolPoolSelection,
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
@@ -99,17 +99,17 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
 }
 
 export type QuoteSpeedConfig = {
-  v2PoolSelection?: ProtocolPoolSelection;
-  v3PoolSelection?: ProtocolPoolSelection;
-  maxSwapsPerPath?: number;
-  maxSplits?: number;
-  distributionPercent?: number;
-  writeToCachedRoutes?: boolean;
+  v2PoolSelection?: ProtocolPoolSelection
+  v3PoolSelection?: ProtocolPoolSelection
+  maxSwapsPerPath?: number
+  maxSplits?: number
+  distributionPercent?: number
+  writeToCachedRoutes?: boolean
 }
 
 export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
-  'standard': {},
-  'fast': {
+  standard: {},
+  fast: {
     v2PoolSelection: {
       topN: 0,
       topNDirectSwaps: 1,
@@ -132,7 +132,6 @@ export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
     writeToCachedRoutes: false,
   },
 }
-
 
 export async function tokenStringToCurrency(
   tokenListProvider: ITokenListProvider,
