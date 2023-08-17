@@ -26,13 +26,13 @@ import {
   parseDeadline,
   parseSlippageTolerance,
   tokenStringToCurrency,
+  QUOTE_SPEED_MAP
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
-import { QUOTE_SPEED_MAP } from './config/quote-speed-config'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
