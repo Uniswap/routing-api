@@ -104,6 +104,7 @@ export type QuoteSpeedConfig = {
   maxSwapsPerPath?: number;
   maxSplits?: number;
   distributionPercent?: number;
+  writeToCachedRoutes?: boolean;
 }
 
 export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
@@ -127,7 +128,8 @@ export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
     },
     maxSwapsPerPath: 2,
     maxSplits: 2,
-    distributionPercent: 10
+    distributionPercent: 10,
+    writeToCachedRoutes: false,
   },
 }
 
