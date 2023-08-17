@@ -115,12 +115,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitAmount,
         permitSigDeadline,
         enableUniversalRouter,
-<<<<<<< Updated upstream
-=======
         maxSwapsPerPath,
         maxSplits,
         distributionPercent,
->>>>>>> Stashed changes
       },
       requestInjected: {
         router,
