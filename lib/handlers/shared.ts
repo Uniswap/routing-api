@@ -13,7 +13,7 @@ export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = 
   [ChainId.MAINNET]: 30,
 }
 
-export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
+export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId, maxSwapsPerPath?: number, maxSplits?: number, distributionPercent?: number): AlphaRouterConfig => {
   switch (chainId) {
     case ChainId.BASE:
     case ChainId.OPTIMISM:
@@ -34,10 +34,10 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 3,
         },
-        maxSwapsPerPath: 3,
+        maxSwapsPerPath: maxSwapsPerPath,
         minSplits: 1,
-        maxSplits: 7,
-        distributionPercent: 10,
+        maxSplits: maxSplits,
+        distributionPercent: distributionPercent,
         forceCrossProtocol: false,
       }
     // Arbitrum calls have lower gas limits and tend to timeout more, which causes us to reduce the multicall
@@ -61,9 +61,9 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 2,
         },
-        maxSwapsPerPath: 2,
+        maxSwapsPerPath: maxSwapsPerPath,
         minSplits: 1,
-        maxSplits: 7,
+        maxSplits: maxSplits,
         distributionPercent: 25,
         forceCrossProtocol: false,
       }
@@ -88,15 +88,57 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 5,
         },
-        maxSwapsPerPath: 3,
+        maxSwapsPerPath: maxSwapsPerPath,
         minSplits: 1,
+<<<<<<< Updated upstream
         maxSplits: 7,
         distributionPercent: 10,
+=======
+        maxSplits: maxSplits,
+        distributionPercent: distributionPercent,
+>>>>>>> Stashed changes
         forceCrossProtocol: false,
       }
   }
 }
 
+<<<<<<< Updated upstream
+=======
+export type QuoteSpeedConfig = {
+  v2PoolSelection?: ProtocolPoolSelection;
+  v3PoolSelection?: ProtocolPoolSelection;
+  maxSwapsPerPath?: number;
+  maxSplits?: number;
+  distributionPercent?: number;
+}
+
+export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
+  'standard': {},
+  'fast': {
+    v2PoolSelection: {
+      topN: 0,
+      topNDirectSwaps: 1,
+      topNTokenInOut: 2,
+      topNSecondHop: 1,
+      topNWithEachBaseToken: 2,
+      topNWithBaseToken: 2,
+    },
+    v3PoolSelection: {
+      topN: 0,
+      topNDirectSwaps: 1,
+      topNTokenInOut: 2,
+      topNSecondHop: 1,
+      topNWithEachBaseToken: 2,
+      topNWithBaseToken: 2,
+    },
+    maxSwapsPerPath: 2,
+    maxSplits: 2,
+    distributionPercent: 20
+  },
+}
+
+
+>>>>>>> Stashed changes
 export async function tokenStringToCurrency(
   tokenListProvider: ITokenListProvider,
   tokenProvider: ITokenProvider,

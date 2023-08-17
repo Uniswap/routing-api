@@ -9,7 +9,7 @@ import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
-import * as aws_waf from 'aws-cdk-lib/aws-wafv2'
+// import * as aws_waf from 'aws-cdk-lib/aws-wafv2'
 import { Construct } from 'constructs'
 import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
@@ -47,11 +47,11 @@ export class RoutingAPIStack extends cdk.Stack {
     const {
       jsonRpcProviders,
       provisionedConcurrency,
-      throttlingOverride,
+      // throttlingOverride,
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
-      internalApiKey,
+      // internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
@@ -121,6 +121,7 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
 
+    /*
     const ipThrottlingACL = new aws_waf.CfnWebACL(this, 'RoutingAPIIPThrottlingACL', {
       defaultAction: { allow: {} },
       scope: 'REGIONAL',
@@ -195,10 +196,12 @@ export class RoutingAPIStack extends cdk.Stack {
     const region = cdk.Stack.of(this).region
     const apiArn = `arn:aws:apigateway:${region}::/restapis/${api.restApiId}/stages/${api.deploymentStage.stageName}`
 
+    /*
     new aws_waf.CfnWebACLAssociation(this, 'RoutingAPIIPThrottlingAssociation', {
       resourceArn: apiArn,
       webAclArn: ipThrottlingACL.getAtt('Arn').toString(),
-    })
+    }
+     */
 
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,

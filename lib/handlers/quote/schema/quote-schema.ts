@@ -82,4 +82,10 @@ export type QuoteQueryParams = {
   permitAmount?: string
   permitSigDeadline?: string
   enableUniversalRouter?: boolean
+<<<<<<< Updated upstream
+=======
+  maxSwapsPerPath?: number,
+  maxSplits?: number,
+  distributionPercent?: number,
+>>>>>>> Stashed changes
 }

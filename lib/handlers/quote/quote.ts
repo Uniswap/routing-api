@@ -115,6 +115,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitAmount,
         permitSigDeadline,
         enableUniversalRouter,
+<<<<<<< Updated upstream
+=======
+        maxSwapsPerPath,
+        maxSplits,
+        distributionPercent,
+>>>>>>> Stashed changes
       },
       requestInjected: {
         router,
@@ -209,7 +215,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const routingConfig: AlphaRouterConfig = {
-      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId, maxSwapsPerPath, maxSplits, distributionPercent),
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
