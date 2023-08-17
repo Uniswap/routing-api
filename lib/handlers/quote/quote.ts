@@ -26,6 +26,7 @@ import {
   parseDeadline,
   parseSlippageTolerance,
   tokenStringToCurrency,
+  QUOTE_SPEED_MAP,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -115,6 +116,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitAmount,
         permitSigDeadline,
         enableUniversalRouter,
+        quoteSpeed,
       },
       requestInjected: {
         router,
@@ -214,6 +216,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
+      ...(quoteSpeed ? QUOTE_SPEED_MAP[quoteSpeed] : {}),
     }
 
     let swapParams: SwapOptions | undefined = undefined
