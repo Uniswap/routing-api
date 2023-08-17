@@ -211,6 +211,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols = [Protocol.V3]
     }
 
+    log.error(`RequestQueryParam: ${maxSwapsPerPath} ${maxSplits} ${distributionPercent}`)
     const routingConfig: AlphaRouterConfig = {
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId, maxSwapsPerPath, maxSplits, distributionPercent),
       ...(minSplits ? { minSplits } : {}),
@@ -218,6 +219,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
     }
+
+    log.error(`routing-api routingConfig: ${JSON.stringify(routingConfig)}`)
+
 
     let swapParams: SwapOptions | undefined = undefined
 

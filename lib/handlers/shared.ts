@@ -5,7 +5,7 @@ import {
   ITokenProvider,
   MapWithLowerCaseKey,
   NATIVE_NAMES_BY_ID,
-  nativeOnChain,
+  nativeOnChain
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 
