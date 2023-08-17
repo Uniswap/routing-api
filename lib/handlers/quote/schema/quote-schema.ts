@@ -57,6 +57,9 @@ export const QuoteQueryParamsJoi = Joi.object({
   permitSigDeadline: Joi.number().optional(),
   // TODO: Remove once universal router is no longer behind a feature flag.
   enableUniversalRouter: Joi.boolean().optional().default(false),
+  maxSwapsPerPath: Joi.number().optional(),
+  maxSplits: Joi.number().optional(),
+  distributionPercent: Joi.number().optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
