@@ -222,8 +222,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
 
-    log.error(`RoutingConfig: ${JSON.stringify(routingConfig)}`)
-    log.error(`Intent: ${intent}`)
+    metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     let swapParams: SwapOptions | undefined = undefined
 
