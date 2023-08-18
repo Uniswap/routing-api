@@ -42,13 +42,20 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     })
 
     // Creates a DynamoDB Table for storing the caching request flags
-    this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name, {
-      tableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-      partitionKey: { name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
-      sortKey: { name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.SortKeyName, type: AttributeType.STRING },
-      billingMode: BillingMode.PAY_PER_REQUEST,
-      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
-    })
+    this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(
+      this,
+      DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
+      {
+        tableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
+        partitionKey: {
+          name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.PartitionKeyName,
+          type: AttributeType.STRING,
+        },
+        sortKey: { name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.SortKeyName, type: AttributeType.STRING },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+      }
+    )
 
     // Creates a DynamoDB Table for storing the cached v3 pools
     this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.V3PoolsDynamoDbTable.Name, {

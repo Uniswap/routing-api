@@ -27,7 +27,7 @@ import {
   parseSlippageTolerance,
   tokenStringToCurrency,
   QUOTE_SPEED_CONFIG,
-  INTENT_SPECIFIC_CONFIG
+  INTENT_SPECIFIC_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -219,7 +219,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
-      ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {})
+      ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
 
     let swapParams: SwapOptions | undefined = undefined

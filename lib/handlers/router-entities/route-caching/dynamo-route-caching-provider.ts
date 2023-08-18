@@ -56,7 +56,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly cachingRequestFlagTableName: string
   private readonly ttlMinutes: number
 
-  constructor({ cachedRoutesTableName, cachingQuoteLambdaName, cachingRequestFlagTableName, ttlMinutes = DEFAULT_TTL_MINUTES }: ConstructorParams) {
+  constructor({
+    cachedRoutesTableName,
+    cachingQuoteLambdaName,
+    cachingRequestFlagTableName,
+    ttlMinutes = DEFAULT_TTL_MINUTES,
+  }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -129,7 +134,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const sortKey = new ProtocolsBucketBlockNumber({
         protocols,
         bucket: cachingBucket.bucket,
-        blockNumber: currentBlockNumber
+        blockNumber: currentBlockNumber,
       })
 
       if (optimistic) {
@@ -226,14 +231,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private async maybeSendCachingQuote(
     partitionKey: PairTradeTypeChainId,
     sortKey: ProtocolsBucketBlockNumber,
-    amount: CurrencyAmount<Currency>,
+    amount: CurrencyAmount<Currency>
   ): Promise<void> {
     const getParams = {
       TableName: this.cachingRequestFlagTableName,
       Key: {
         pairTradeTypeChainId: partitionKey.toString(),
-        protocolsBucketBlockNumber: sortKey.fullKey()
-      }
+        protocolsBucketBlockNumber: sortKey.fullKey(),
+      },
     }
 
     try {
@@ -251,7 +256,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private sendAsyncCachingRequest(
     partitionKey: PairTradeTypeChainId,
     sortKey: ProtocolsBucketBlockNumber,
-    amount: CurrencyAmount<Currency>,
+    amount: CurrencyAmount<Currency>
   ): void {
     const payload = {
       tokenInAddress: partitionKey.tokenIn,
@@ -261,30 +266,27 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       amount: amount.quotient.toString(),
       type: partitionKey.tradeType,
       protocols: sortKey.protocols.join(','),
-      intent: 'caching'
+      intent: 'caching',
     }
 
     const params = {
       FunctionName: this.cachingQuoteLambdaName,
       InvocationType: 'Event',
-      Payload: JSON.stringify(payload)
+      Payload: JSON.stringify(payload),
     }
 
     this.lambdaClient.invoke(params).promise()
   }
 
-  private setCachingRequestFlag(
-    partitionKey: PairTradeTypeChainId,
-    sortKey: ProtocolsBucketBlockNumber
-  ): void {
+  private setCachingRequestFlag(partitionKey: PairTradeTypeChainId, sortKey: ProtocolsBucketBlockNumber): void {
     const putParams = {
       TableName: this.cachingRequestFlagTableName,
       Item: {
         pairTradeTypeChainId: partitionKey.toString(),
         protocolsBucketBlockNumber: sortKey.fullKey(),
-        ttl: Math.floor(Date.now() / 1000) + (this.ttlMinutes * 60),
-        caching: true
-      }
+        ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
+        caching: true,
+      },
     }
 
     this.ddbClient.put(putParams).promise()
