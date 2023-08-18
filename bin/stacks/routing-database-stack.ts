@@ -12,7 +12,7 @@ export const DynamoDBTableProps = {
     SortKeyName: 'protocolsBucketBlockNumber',
   },
   CachingRequestFlagDynamoDbTable: {
-    Name: 'CachingRequestFlagDB',
+    Name: 'CacheReqFlagDB',
     PartitionKeyName: 'pairTradeTypeChainId',
     SortKeyName: 'protocolsBucketBlockNumber',
   },
