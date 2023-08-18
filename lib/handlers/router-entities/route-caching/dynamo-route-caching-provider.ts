@@ -259,14 +259,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>
   ): void {
     const payload = {
-      tokenInAddress: partitionKey.tokenIn,
-      tokenInChainId: partitionKey.chainId,
-      tokenOutAddress: partitionKey.tokenOut,
-      tokenOutChainId: partitionKey.chainId,
-      amount: amount.quotient.toString(),
-      type: partitionKey.tradeType,
-      protocols: sortKey.protocols.join(','),
-      intent: 'caching',
+      queryStringParameters: {
+        tokenInAddress: partitionKey.tokenIn,
+        tokenInChainId: partitionKey.chainId.toString(),
+        tokenOutAddress: partitionKey.tokenOut,
+        tokenOutChainId: partitionKey.chainId.toString(),
+        amount: amount.quotient.toString(),
+        type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
+        protocols: sortKey.protocols.map((protocol) => protocol.toLowerCase()).join(','),
+        intent: 'caching',
+      },
     }
 
     const params = {
@@ -274,6 +276,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       InvocationType: 'Event',
       Payload: JSON.stringify(payload),
     }
+
+    log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
 
     this.lambdaClient.invoke(params).promise()
   }
