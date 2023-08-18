@@ -27,6 +27,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyAccessKey: string
   chatbotSNSArn?: string
   cachedRoutesDynamoDb?: aws_dynamodb.Table
+  cachingRequestFlagDynamoDb?: aws_dynamodb.Table
   cachedV3PoolsDynamoDb?: aws_dynamodb.Table
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -48,6 +49,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyProject,
       tenderlyAccessKey,
       cachedRoutesDynamoDb,
+      cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
     } = props
 
@@ -63,6 +65,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
     cachedRoutesDynamoDb?.grantReadWriteData(lambdaRole)
+    cachingRequestFlagDynamoDb?.grantReadWriteData(lambdaRole)
     cachedV3PoolsDynamoDb?.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
@@ -91,6 +94,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+        CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         ...jsonRpcProviders,
       },
@@ -104,6 +108,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tracing: aws_lambda.Tracing.ACTIVE,
       logRetention: RetentionDays.TWO_WEEKS,
     })
+
+    this.routingLambda.addEnvironment('QUOTE_LAMBDA_NAME', this.routingLambda.functionName)
 
     const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
       metric: new aws_cloudwatch.MathExpression({
