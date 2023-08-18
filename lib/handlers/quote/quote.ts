@@ -118,6 +118,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         maxSwapsPerPath,
         maxSplits,
         distributionPercent,
+        topN,
+        topNDirectSwaps,
+        topNTokenInOut,
+        topNSecondHop,
+        topNWithEachBaseToken,
+        topNWithBaseToken,
       },
       requestInjected: {
         router,
@@ -211,9 +217,19 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols = [Protocol.V3]
     }
 
-    log.error(`RequestQueryParam: ${maxSwapsPerPath} ${maxSplits} ${distributionPercent}`)
     const routingConfig: AlphaRouterConfig = {
-      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId, maxSwapsPerPath, maxSplits, distributionPercent),
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(
+        chainId,
+        maxSwapsPerPath,
+        maxSplits,
+        distributionPercent,
+        topN,
+        topNDirectSwaps,
+        topNTokenInOut,
+        topNSecondHop,
+        topNWithEachBaseToken,
+        topNWithBaseToken,
+      ),
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),

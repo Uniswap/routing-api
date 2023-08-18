@@ -60,6 +60,12 @@ export const QuoteQueryParamsJoi = Joi.object({
   maxSwapsPerPath: Joi.number().optional(),
   maxSplits: Joi.number().optional(),
   distributionPercent: Joi.number().optional(),
+  topN: Joi.number().optional(),
+  topNDirectSwaps: Joi.number().optional(),
+  topNTokenInOut: Joi.number().optional(),
+  topNSecondHop: Joi.number().optional(),
+  topNWithEachBaseToken: Joi.number().optional(),
+  topNWithBaseToken: Joi.number().optional()
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -88,4 +94,10 @@ export type QuoteQueryParams = {
   maxSwapsPerPath?: number,
   maxSplits?: number,
   distributionPercent?: number,
+  topN?: number,
+  topNDirectSwaps?: number,
+  topNTokenInOut?: number,
+  topNSecondHop?: number,
+  topNWithEachBaseToken?: number,
+  topNWithBaseToken?: number,
 }
