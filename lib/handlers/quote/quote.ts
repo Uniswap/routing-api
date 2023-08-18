@@ -222,6 +222,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
 
+    log.error(`RoutingConfig: ${JSON.stringify(routingConfig)}`)
+    log.error(`Intent: ${intent}`)
+
     let swapParams: SwapOptions | undefined = undefined
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
@@ -327,6 +330,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             type,
             routingConfig: routingConfig,
             swapParams,
+            intent
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
             currencyOut.symbol
