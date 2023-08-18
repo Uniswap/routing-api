@@ -282,7 +282,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       Item: {
         pairTradeTypeChainId: partitionKey.toString(),
         protocolsBucketBlockNumber: sortKey.fullKey(),
-        ttl: this.ttlMinutes * 60,
+        ttl: Math.floor(Date.now() / 1000) + (this.ttlMinutes * 60),
         caching: true
       }
     }
