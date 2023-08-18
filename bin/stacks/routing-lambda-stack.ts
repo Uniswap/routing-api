@@ -28,6 +28,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   chatbotSNSArn?: string
   cachedRoutesDynamoDb?: aws_dynamodb.Table
   cachedV3PoolsDynamoDb?: aws_dynamodb.Table
+  unicornSecret: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -49,6 +50,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyAccessKey,
       cachedRoutesDynamoDb,
       cachedV3PoolsDynamoDb,
+      unicornSecret,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -92,6 +94,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
+        UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
       },
       layers: [

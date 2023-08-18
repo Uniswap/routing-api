@@ -117,6 +117,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitSigDeadline,
         enableUniversalRouter,
         quoteSpeed,
+        debugRoutingConfig,
+        unicornSecret
       },
       requestInjected: {
         router,
@@ -210,6 +212,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols = [Protocol.V3]
     }
 
+    let parsedDebugRoutingConfig = {}
+    if (debugRoutingConfig && unicornSecret === process.env.UNICORN_SECRET) {
+      parsedDebugRoutingConfig = JSON.parse(debugRoutingConfig)
+    }
+
     const routingConfig: AlphaRouterConfig = {
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
       ...(minSplits ? { minSplits } : {}),
@@ -217,6 +224,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
       ...(quoteSpeed ? QUOTE_SPEED_MAP[quoteSpeed] : {}),
+      ...parsedDebugRoutingConfig
     }
 
     let swapParams: SwapOptions | undefined = undefined

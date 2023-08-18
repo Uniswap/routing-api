@@ -40,6 +40,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyUser: string
       tenderlyProject: string
       tenderlyAccessKey: string
+      unicornSecret: string
     }
   ) {
     super(parent, name, props)

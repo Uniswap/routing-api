@@ -34,6 +34,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser: string
       tenderlyProject: string
       tenderlyAccessKey: string
+      unicornSecret: string
     }
   ) {
     super(scope, id, props)
@@ -51,6 +52,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      unicornSecret,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -67,6 +69,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      unicornSecret,
     })
     this.url = url
   }
@@ -123,6 +126,10 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
+    const unicornSecrets = sm.Secret.fromSecretAttributes(this, 'Unicorn', {
+      secretCompleteArn: '',
+    })
+
     const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyCreds', {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:tenderly-api-wQaI2R',
     })
@@ -173,6 +180,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
+      unicornSecret: unicornSecrets.secretValue.toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -195,6 +203,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
+      unicornSecret: unicornSecrets.secretValue.toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -289,6 +298,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   tenderlyUser: process.env.TENDERLY_USER!,
   tenderlyProject: process.env.TENDERLY_PROJECT!,
   tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
+  unicornSecret: process.env.UNICORN_SECRET!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
