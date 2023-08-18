@@ -673,6 +673,12 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   ['.', 'MixedQuotesLoad', '.', '.', { color: '#fefa63' }],
                   ['.', 'V2QuotesLoad', '.', '.', { color: '#7f7f7f' }],
                   ['.', 'FindBestSwapRoute', '.', '.', { color: '#d62728' }],
+                  [ ".", "V3OverallGetQuotesLoad", ".", ".", { color: '#aec7e8' }],
+                  [ ".", "V3OverallGetRoutesThenQuotesLoad", ".", ".", { color: '#ffbb78' }],
+                  [ ".", "V2OverallGetQuotesLoad", ".", ".", { color: '#98df8a' }],
+                  [ ".", "V2OverallGetRoutesThenQuotesLoad", ".", ".", { color: '#ff9896' }],
+                  [ ".", "MixedOverallGetRoutesThenQuotesLoad", ".", ".", { color: '#c5b0d5' }],
+                  [ ".", "MixedOverallGetQuotesLoad", ".", ".", { color: '#c49c94' }]
                 ],
                 view: 'timeSeries',
                 stacked: true,
