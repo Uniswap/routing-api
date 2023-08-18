@@ -11,6 +11,11 @@ export const DynamoDBTableProps = {
     PartitionKeyName: 'pairTradeTypeChainId',
     SortKeyName: 'protocolsBucketBlockNumber',
   },
+  CachingRequestFlagDynamoDbTable: {
+    Name: 'CacheReqFlagDB',
+    PartitionKeyName: 'pairTradeTypeChainId',
+    SortKeyName: 'protocolsBucketBlockNumber',
+  },
   V3PoolsDynamoDbTable: {
     Name: 'V3PoolsCachingDB',
     PartitionKeyName: 'poolAddress',
@@ -21,6 +26,7 @@ export const DynamoDBTableProps = {
 
 export class RoutingDatabaseStack extends cdk.NestedStack {
   public readonly cachedRoutesDynamoDb: aws_dynamodb.Table
+  public readonly cachingRequestFlagDynamoDb: aws_dynamodb.Table
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
@@ -34,6 +40,22 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
+
+    // Creates a DynamoDB Table for storing the caching request flags
+    this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(
+      this,
+      DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
+      {
+        tableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
+        partitionKey: {
+          name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.PartitionKeyName,
+          type: AttributeType.STRING,
+        },
+        sortKey: { name: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.SortKeyName, type: AttributeType.STRING },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+      }
+    )
 
     // Creates a DynamoDB Table for storing the cached v3 pools
     this.cachedV3PoolsDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.V3PoolsDynamoDbTable.Name, {
