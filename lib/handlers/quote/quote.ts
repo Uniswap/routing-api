@@ -234,6 +234,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
+      useCachedRoutes: false,
+      writeToCachedRoutes: false,
     }
 
     log.error(`routing-api routingConfig: ${JSON.stringify(routingConfig)}`)
