@@ -107,7 +107,7 @@ export type QuoteSpeedConfig = {
   writeToCachedRoutes?: boolean
 }
 
-export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
+export const QUOTE_SPEED_CONFIG: { [key: string]: QuoteSpeedConfig } = {
   standard: {},
   fast: {
     v2PoolSelection: {
@@ -130,6 +130,29 @@ export const QUOTE_SPEED_MAP: { [key: string]: QuoteSpeedConfig } = {
     maxSplits: 2,
     distributionPercent: 10,
     writeToCachedRoutes: false,
+  },
+}
+
+export type IntentSpecificConfig = {
+  useCachedRoutes?: boolean
+  optimisticCachedRoutes?: boolean
+}
+
+export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
+  caching: {
+    // When the intent is to create a cache entry, we should not use the cache
+    // useCachedRoutes: false,
+    // optimisticCachedRoutes: false,
+  },
+  quote: {
+    // When the intent is to get a quote, we should use the cache and optimistic cached routes
+    // useCachedRoutes: true,
+    // optimisticCachedRoutes: true,
+  },
+  swap: {
+    // When the intent is to prepare the swap, we can use cache, but it should not be optimistic
+    // useCachedRoutes: true,
+    // optimisticCachedRoutes: false,
   },
 }
 
