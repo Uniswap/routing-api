@@ -120,11 +120,11 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
 
 describe('DynamoRouteCachingProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
-  const dynamoRouteCache = new DynamoRouteCachingProvider({ 
+  const dynamoRouteCache = new DynamoRouteCachingProvider({
     cachedRoutesTableName: TEST_ROUTE_TABLE.TableName,
     cachingQuoteLambdaName: 'test',
     cachingRequestFlagTableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-   })
+  })
 
   it('Generates cached route db entry properly with ttl based on chain id and blocks to live', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
