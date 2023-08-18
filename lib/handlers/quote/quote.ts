@@ -213,7 +213,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     let parsedDebugRoutingConfig = {}
-    if (debugRoutingConfig && unicornSecret === process.env.UNICORN_SECRET) {
+    if (debugRoutingConfig && unicornSecret && unicornSecret === process.env.UNICORN_SECRET) {
       parsedDebugRoutingConfig = JSON.parse(debugRoutingConfig)
     }
 
