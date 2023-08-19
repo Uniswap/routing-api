@@ -10,9 +10,9 @@ interface ProtocolsBucketBlockNumberArgs {
  * Class used to model the sort key of the CachedRoutes cache database.
  */
 export class ProtocolsBucketBlockNumber {
-  public readonly protocols: Protocol[]
-  public readonly bucket: number
-  public readonly blockNumber?: number
+  private protocols: Protocol[]
+  private bucket: number
+  private blockNumber?: number
 
   constructor({ protocols, bucket, blockNumber }: ProtocolsBucketBlockNumberArgs) {
     this.protocols = protocols.sort()

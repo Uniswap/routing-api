@@ -6,7 +6,7 @@ import {
   log,
   routeToString,
 } from '@uniswap/smart-order-router'
-import { DynamoDB, Lambda } from 'aws-sdk'
+import { DynamoDB } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
@@ -23,14 +23,6 @@ interface ConstructorParams {
    * The TableName for the DynamoDB Table. This is wired in from the CDK definition.
    */
   cachedRoutesTableName: string
-  /**
-   * The Lambda Function Name for the Lambda that will be invoked to fill the cache
-   */
-  cachingQuoteLambdaName: string
-  /**
-   * The TableName for the DynamoDB Table that stores wether or not a request has been sent for caching
-   */
-  cachingRequestFlagTableName: string
   /**
    * The amount of minutes that a CachedRoute should live in the database.
    * This is used to limit the database growth, Dynamo will automatically delete expired entries.
@@ -50,18 +42,10 @@ interface CachedRouteDbEntry {
 const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
-  private readonly lambdaClient: Lambda
   private readonly tableName: string
-  private readonly cachingQuoteLambdaName: string
-  private readonly cachingRequestFlagTableName: string
   private readonly ttlMinutes: number
 
-  constructor({
-    cachedRoutesTableName,
-    cachingQuoteLambdaName,
-    cachingRequestFlagTableName,
-    ttlMinutes = DEFAULT_TTL_MINUTES,
-  }: ConstructorParams) {
+  constructor({ cachedRoutesTableName, ttlMinutes = DEFAULT_TTL_MINUTES }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -73,10 +57,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         timeout: 100,
       },
     })
-    this.lambdaClient = new Lambda()
     this.tableName = cachedRoutesTableName
-    this.cachingQuoteLambdaName = cachingQuoteLambdaName
-    this.cachingRequestFlagTableName = cachingRequestFlagTableName
     this.ttlMinutes = ttlMinutes
   }
 
@@ -116,9 +97,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType,
-    protocols: Protocol[],
-    currentBlockNumber: number,
-    optimistic: boolean
+    protocols: Protocol[]
   ): Promise<CachedRoutes | undefined> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
@@ -131,16 +110,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         tradeType,
         chainId,
       })
-      const sortKey = new ProtocolsBucketBlockNumber({
+      const partialSortKey = new ProtocolsBucketBlockNumber({
         protocols,
         bucket: cachingBucket.bucket,
-        blockNumber: currentBlockNumber,
       })
-
-      if (optimistic) {
-        // Do not await on this function, it's a fire and forget
-        this.maybeSendCachingQuote(partitionKey, sortKey, amount)
-      }
 
       const queryParams = {
         TableName: this.tableName,
@@ -152,7 +125,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         },
         ExpressionAttributeValues: {
           ':pk': partitionKey.toString(),
-          ':sk': sortKey.protocolsBucketPartialKey(),
+          ':sk': partialSortKey.protocolsBucketPartialKey(),
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: Math.max(cachingBucket.withLastNCachedRoutes, 1),
@@ -226,74 +199,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // We only get here if we didn't find a cachedRoutes
     return undefined
-  }
-
-  private async maybeSendCachingQuote(
-    partitionKey: PairTradeTypeChainId,
-    sortKey: ProtocolsBucketBlockNumber,
-    amount: CurrencyAmount<Currency>
-  ): Promise<void> {
-    const getParams = {
-      TableName: this.cachingRequestFlagTableName,
-      Key: {
-        pairTradeTypeChainId: partitionKey.toString(),
-        protocolsBucketBlockNumber: sortKey.fullKey(),
-      },
-    }
-
-    try {
-      const result = await this.ddbClient.get(getParams).promise()
-      // if no Item is found it means we need to send a caching request
-      if (!result.Item) {
-        this.sendAsyncCachingRequest(partitionKey, sortKey, amount)
-        this.setCachingRequestFlag(partitionKey, sortKey)
-      }
-    } catch (e) {
-      log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
-    }
-  }
-
-  private sendAsyncCachingRequest(
-    partitionKey: PairTradeTypeChainId,
-    sortKey: ProtocolsBucketBlockNumber,
-    amount: CurrencyAmount<Currency>
-  ): void {
-    const payload = {
-      queryStringParameters: {
-        tokenInAddress: partitionKey.tokenIn,
-        tokenInChainId: partitionKey.chainId.toString(),
-        tokenOutAddress: partitionKey.tokenOut,
-        tokenOutChainId: partitionKey.chainId.toString(),
-        amount: amount.quotient.toString(),
-        type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
-        protocols: sortKey.protocols.map((protocol) => protocol.toLowerCase()).join(','),
-        intent: 'caching',
-      },
-    }
-
-    const params = {
-      FunctionName: this.cachingQuoteLambdaName,
-      InvocationType: 'Event',
-      Payload: JSON.stringify(payload),
-    }
-
-    log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
-
-    this.lambdaClient.invoke(params).promise()
-  }
-
-  private setCachingRequestFlag(partitionKey: PairTradeTypeChainId, sortKey: ProtocolsBucketBlockNumber): void {
-    const putParams = {
-      TableName: this.cachingRequestFlagTableName,
-      Item: {
-        pairTradeTypeChainId: partitionKey.toString(),
-        protocolsBucketBlockNumber: sortKey.fullKey(),
-        ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
-        caching: true,
-      },
-    }
-
-    this.ddbClient.put(putParams).promise()
   }
 
   /**

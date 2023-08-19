@@ -14,7 +14,6 @@ import { CachedRoutesMarshaller } from '../../../../../../lib/handlers/router-en
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../../../../../lib/handlers/shared'
-import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
 
 chai.use(chaiAsPromised)
 
@@ -120,11 +119,7 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
 
 describe('DynamoRouteCachingProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
-  const dynamoRouteCache = new DynamoRouteCachingProvider({
-    cachedRoutesTableName: TEST_ROUTE_TABLE.TableName,
-    cachingQuoteLambdaName: 'test',
-    cachingRequestFlagTableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-  })
+  const dynamoRouteCache = new DynamoRouteCachingProvider({ cachedRoutesTableName: TEST_ROUTE_TABLE.TableName })
 
   it('Generates cached route db entry properly with ttl based on chain id and blocks to live', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
