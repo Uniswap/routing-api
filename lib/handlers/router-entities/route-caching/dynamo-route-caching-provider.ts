@@ -221,11 +221,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             MetricLoggerUnit.Count
           )
 
-          // If this route is notExpired, we need to make sure there's a caching request in the queue for this block
-          // If the route is expired or not found, the synchronous request will be in charge of populating the cache
-          //   so we don't need to send the caching quote.
-          if (optimistic && cachedRoutes.notExpired(currentBlockNumber, optimistic)) {
-            // Do not await on this function, it's a fire and forget
+          if (
+            optimistic && // If we are in optimistic mode
+            cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
+            cachedRoutes.notExpired(currentBlockNumber, optimistic) // and the cachedRoutes are not expired
+          ) {
+            // We send an async caching quote
+            // we do not await on this function, it's a fire and forget
             this.maybeSendCachingQuote(partitionKey, sortKey, amount)
           }
 
