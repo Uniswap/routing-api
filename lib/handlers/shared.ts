@@ -141,18 +141,18 @@ export type IntentSpecificConfig = {
 export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   caching: {
     // When the intent is to create a cache entry, we should not use the cache
-    useCachedRoutes: false,
-    optimisticCachedRoutes: false,
+    // useCachedRoutes: false,
+    // optimisticCachedRoutes: false,
   },
   quote: {
     // When the intent is to get a quote, we should use the cache and optimistic cached routes
-    useCachedRoutes: true,
-    optimisticCachedRoutes: true,
+    // useCachedRoutes: true,
+    // optimisticCachedRoutes: true,
   },
   swap: {
     // When the intent is to prepare the swap, we can use cache, but it should not be optimistic
-    useCachedRoutes: true,
-    optimisticCachedRoutes: false,
+    // useCachedRoutes: true,
+    // optimisticCachedRoutes: false,
   },
 }
 

@@ -38,12 +38,12 @@ export class CachedRoutesBucket {
     blocksToLive = 1,
     cacheMode,
     maxSplits = 0,
-    withLastNCachedRoutes = 4,
+    withLastNCachedRoutes = 1,
   }: CachedRoutesBucketsArgs) {
     this.bucket = bucket
-    this.blocksToLive = blocksToLive // by default this value is 1, which means we only allow up to the previous block.
+    this.blocksToLive = blocksToLive // by default this value is 1, which means it's only cached in the current block.
     this.cacheMode = cacheMode
     this.maxSplits = maxSplits // by default this value is 0, which means that any number of splits are allowed
-    this.withLastNCachedRoutes = withLastNCachedRoutes // Fetching the last 4 cached routes by default
+    this.withLastNCachedRoutes = withLastNCachedRoutes
   }
 }

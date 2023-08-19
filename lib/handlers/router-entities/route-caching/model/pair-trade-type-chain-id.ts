@@ -12,10 +12,10 @@ interface PairTradeTypeChainIdArgs {
  * Class used to model the partition key of the CachedRoutes cache database and configuration.
  */
 export class PairTradeTypeChainId {
-  public readonly tokenIn: string
-  public readonly tokenOut: string
-  public readonly tradeType: TradeType
-  public readonly chainId: ChainId
+  private tokenIn: string
+  private tokenOut: string
+  private tradeType: TradeType
+  private chainId: ChainId
 
   constructor({ tokenIn, tokenOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
     this.tokenIn = tokenIn.toLowerCase() // All token addresses should be lower case for normalization.
