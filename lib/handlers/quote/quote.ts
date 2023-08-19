@@ -26,7 +26,8 @@ import {
   parseDeadline,
   parseSlippageTolerance,
   tokenStringToCurrency,
-  QUOTE_SPEED_MAP,
+  QUOTE_SPEED_CONFIG,
+  INTENT_SPECIFIC_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -117,6 +118,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         permitSigDeadline,
         enableUniversalRouter,
         quoteSpeed,
+        intent,
       },
       requestInjected: {
         router,
@@ -216,8 +218,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
-      ...(quoteSpeed ? QUOTE_SPEED_MAP[quoteSpeed] : {}),
+      ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
+      ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
+
+    metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     let swapParams: SwapOptions | undefined = undefined
 
@@ -324,6 +329,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             type,
             routingConfig: routingConfig,
             swapParams,
+            intent,
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
             currencyOut.symbol
