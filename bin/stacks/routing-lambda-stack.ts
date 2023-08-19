@@ -27,6 +27,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyAccessKey: string
   chatbotSNSArn?: string
   cachedRoutesDynamoDb?: aws_dynamodb.Table
+  cachingRequestFlagDynamoDb?: aws_dynamodb.Table
   cachedV3PoolsDynamoDb?: aws_dynamodb.Table
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -48,6 +49,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyProject,
       tenderlyAccessKey,
       cachedRoutesDynamoDb,
+      cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
     } = props
 
@@ -55,6 +57,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaRole'),
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLambdaInsightsExecutionRolePolicy'),
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
       ],
@@ -63,6 +66,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
     cachedRoutesDynamoDb?.grantReadWriteData(lambdaRole)
+    cachingRequestFlagDynamoDb?.grantReadWriteData(lambdaRole)
     cachedV3PoolsDynamoDb?.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
@@ -91,6 +95,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+        CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         ...jsonRpcProviders,
       },
