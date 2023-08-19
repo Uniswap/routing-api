@@ -140,11 +140,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         blockNumber: currentBlockNumber,
       })
 
-      if (optimistic) {
-        // Do not await on this function, it's a fire and forget
-        this.maybeSendCachingQuote(partitionKey, sortKey, amount)
-      }
-
       const queryParams = {
         TableName: this.tableName,
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
@@ -225,6 +220,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             blocksDifference,
             MetricLoggerUnit.Count
           )
+
+          // If this route is notExpired, we need to make sure there's a caching request in the queue for this block
+          // If the route is expired or not found, the synchronous request will be in charge of populating the cache
+          //   so we don't need to send the caching quote.
+          if (optimistic && cachedRoutes.notExpired(currentBlockNumber, optimistic)) {
+            // Do not await on this function, it's a fire and forget
+            this.maybeSendCachingQuote(partitionKey, sortKey, amount)
+          }
 
           return cachedRoutes
         } else {
