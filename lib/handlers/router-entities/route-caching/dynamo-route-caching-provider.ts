@@ -2,11 +2,12 @@ import {
   CachedRoute,
   CachedRoutes,
   CacheMode,
+  ID_TO_NETWORK_NAME,
   IRouteCachingProvider,
   log,
   metric,
   MetricLoggerUnit,
-  routeToString
+  routeToString,
 } from '@uniswap/smart-order-router'
 import { DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -219,6 +220,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           const blocksDifference = currentBlockNumber - blockNumber
           metric.putMetric('CachedRoutesBlockDifference', blocksDifference, MetricLoggerUnit.Count)
+          metric.putMetric(
+            `CachedRoutesBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
+            blocksDifference,
+            MetricLoggerUnit.Count
+          )
 
           return cachedRoutes
         } else {
