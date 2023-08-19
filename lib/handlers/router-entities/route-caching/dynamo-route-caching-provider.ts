@@ -97,7 +97,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType,
-    protocols: Protocol[]
+    protocols: Protocol[],
+    _currentBlockNumber: number,
+    _optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
