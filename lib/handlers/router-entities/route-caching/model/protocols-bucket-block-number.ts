@@ -41,6 +41,6 @@ export class ProtocolsBucketBlockNumber {
   }
 
   public protocolsPartialKey(): string {
-    return `${this.protocols}/`;
+    return `${this.protocols}/`
   }
 }

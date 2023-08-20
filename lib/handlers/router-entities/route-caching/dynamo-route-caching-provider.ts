@@ -234,9 +234,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             }
           } catch (error) {
             metric.putMetric('CachedRouteFetchSecondaryError', 1, MetricLoggerUnit.Count)
-            log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from secondary index`)
+            log.error(
+              { queryParams, error },
+              `[DynamoRouteCachingProvider] Error while fetching route from secondary index`
+            )
           }
-
         } else {
           metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
           log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
@@ -251,7 +253,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return undefined
   }
 
-  private parseCachedRoutes(result: PromiseResult<DynamoDB.DocumentClient.QueryOutput, AWSError>, chainId: ChainId, currentBlockNumber: number): CachedRoutes {
+  private parseCachedRoutes(
+    result: PromiseResult<DynamoDB.DocumentClient.QueryOutput, AWSError>,
+    chainId: ChainId,
+    currentBlockNumber: number
+  ): CachedRoutes {
     metric.putMetric('CachedRouteEntriesFound', result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
       // If we got a response with more than 1 item, we extract the binary field from the response
