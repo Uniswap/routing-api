@@ -7,7 +7,7 @@ import {
   log,
   metric,
   MetricLoggerUnit,
-  routeToString
+  routeToString,
 } from '@uniswap/smart-order-router'
 import { DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
