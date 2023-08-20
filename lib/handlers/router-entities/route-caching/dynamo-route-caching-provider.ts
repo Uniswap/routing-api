@@ -10,7 +10,7 @@ import {
   routeToString,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
@@ -21,7 +21,6 @@ import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
-import { ItemList } from 'aws-sdk/clients/dynamodb'
 import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 
 interface ConstructorParams {
