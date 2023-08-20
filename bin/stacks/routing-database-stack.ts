@@ -43,8 +43,9 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
-    this.cachedRoutesDynamoDb.addLocalSecondaryIndex({
+    this.cachedRoutesDynamoDb.addGlobalSecondaryIndex({
       indexName: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondaryIndexName,
+      partitionKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
       sortKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondarySortKeyName, type: AttributeType.STRING },
     })
 

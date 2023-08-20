@@ -10,7 +10,7 @@ import {
   routeToString,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
@@ -144,46 +144,27 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         blockNumber: currentBlockNumber,
       })
 
-      const queryParams = {
-        TableName: this.tableName,
-        // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
-        KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-        ExpressionAttributeNames: {
-          '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
-          '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName,
-        },
-        ExpressionAttributeValues: {
-          ':pk': partitionKey.toString(),
-          ':sk': sortKey.protocolsBucketPartialKey(),
-        },
-        ScanIndexForward: false, // Reverse order to retrieve most recent item first
-        Limit: Math.max(cachingBucket.withLastNCachedRoutes, 1),
-      }
-
       try {
+        const queryParams = {
+          TableName: this.tableName,
+          // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
+          KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
+          ExpressionAttributeNames: {
+            '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
+            '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName,
+          },
+          ExpressionAttributeValues: {
+            ':pk': partitionKey.toString(),
+            ':sk': sortKey.protocolsBucketPartialKey(),
+          },
+          ScanIndexForward: false, // Reverse order to retrieve most recent item first
+          Limit: Math.max(cachingBucket.withLastNCachedRoutes, 1),
+        }
+
         const result = await this.ddbClient.query(queryParams).promise()
 
         if (result.Items && result.Items.length > 0) {
-          const cachedRoutes = this.parseCachedRoutes(result, chainId, currentBlockNumber)
-
-          const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
-          if (notExpiredCachedRoute) {
-            metric.putMetric('CachedRoutesNotExpired', 1, MetricLoggerUnit.Count)
-          } else {
-            metric.putMetric('CachedRoutesExpired', 1, MetricLoggerUnit.Count)
-          }
-
-          if (
-            optimistic && // If we are in optimistic mode
-            cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
-            notExpiredCachedRoute // and the cachedRoutes are not expired
-          ) {
-            // We send an async caching quote
-            // we do not await on this function, it's a fire and forget
-            this.maybeSendCachingQuote(partitionKey, sortKey, amount)
-          }
-
-          return cachedRoutes
+          return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, sortKey, amount)
         } else if (optimistic) {
           log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
 
@@ -208,44 +189,51 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             const result = await this.ddbClient.query(secondaryQueryParams).promise()
 
             if (result.Items && result.Items.length > 0) {
-              const cachedRoutes = this.parseCachedRoutes(result, chainId, currentBlockNumber)
+              const cachedRoutes: CachedRoutes = this.parseCachedRoutes(
+                result,
+                chainId,
+                currentBlockNumber,
+                optimistic,
+                partitionKey,
+                sortKey,
+                amount,
+                'SecondaryCachedRoutes'
+              )
+              const greaterAmounts = cachedRoutes.originalAmount.split(', ').map((item) => {
+                const parts: string[] = item.split(' | ')
+                return amount.lessThan(parts[0])
+              })
 
-              const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
-              if (notExpiredCachedRoute) {
-                metric.putMetric('CachedRoutesNotExpired', 1, MetricLoggerUnit.Count)
+              if (greaterAmounts.includes(true)) {
+                metric.putMetric('SecondaryCachedRoutesGreaterAmount', 1, MetricLoggerUnit.Count)
               } else {
-                metric.putMetric('CachedRoutesExpired', 1, MetricLoggerUnit.Count)
+                metric.putMetric('SecondaryCachedRoutesLowerAmount', 1, MetricLoggerUnit.Count)
               }
 
-              if (
-                optimistic && // If we are in optimistic mode
-                cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
-                notExpiredCachedRoute // and the cachedRoutes are not expired
-              ) {
-                // We send an async caching quote
-                // we do not await on this function, it's a fire and forget
-                this.maybeSendCachingQuote(partitionKey, sortKey, amount)
-              }
-
-              return cachedRoutes
+              // TODO(mikeki): Enable returning cachedRoutes once we confirm with metrics the impact of it
+              // return cachedRoutes
+              return undefined
             } else {
-              metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
+              metric.putMetric('SecondaryCachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
               log.info(`[DynamoRouteCachingProvider] No items found in the secondary query.`)
             }
           } catch (error) {
-            metric.putMetric('CachedRouteFetchSecondaryError', 1, MetricLoggerUnit.Count)
+            metric.putMetric('SecondaryCachedRoutesFetchError', 1, MetricLoggerUnit.Count)
             log.error(
               { queryParams, error },
               `[DynamoRouteCachingProvider] Error while fetching route from secondary index`
             )
           }
         } else {
-          metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
+          metric.putMetric('CachedRoutesEntriesNotFound', 1, MetricLoggerUnit.Count)
           log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
         }
       } catch (error) {
-        metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
-        log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from cache`)
+        metric.putMetric('CachedRoutesFetchError', 1, MetricLoggerUnit.Count)
+        log.error(
+          { partitionKey, sortKey, error },
+          `[DynamoRouteCachingProvider] Error while fetching route from cache`
+        )
       }
     }
 
@@ -256,9 +244,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private parseCachedRoutes(
     result: PromiseResult<DynamoDB.DocumentClient.QueryOutput, AWSError>,
     chainId: ChainId,
-    currentBlockNumber: number
+    currentBlockNumber: number,
+    optimistic: boolean,
+    partitionKey: PairTradeTypeChainId,
+    sortKey: ProtocolsBucketBlockNumber,
+    amount: CurrencyAmount<Currency>,
+    cachedRoutesMetricName: string = 'CachedRoutes'
   ): CachedRoutes {
-    metric.putMetric('CachedRouteEntriesFound', result.Items!.length, MetricLoggerUnit.Count)
+    metric.putMetric(`${cachedRoutesMetricName}EntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
       // If we got a response with more than 1 item, we extract the binary field from the response
       const itemBinary = record.item
@@ -275,7 +268,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     let originalAmount: string = ''
 
     cachedRoutesArr.forEach((cachedRoutes) => {
-      metric.putMetric('CachedRoutesPerBlockFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
+      metric.putMetric(`${cachedRoutesMetricName}PerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
       cachedRoutes.routes.forEach((cachedRoute) => {
         // we use the stringified route as identifier
         const routeId = routeToString(cachedRoute.route)
@@ -307,17 +300,34 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       blocksToLive: first.blocksToLive,
     })
 
-    metric.putMetric('UniqueCachedRoutesFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
+    metric.putMetric(`Unique${cachedRoutesMetricName}Found`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
 
     log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
     const blocksDifference = currentBlockNumber - blockNumber
-    metric.putMetric('CachedRoutesBlockDifference', blocksDifference, MetricLoggerUnit.Count)
+    metric.putMetric(`${cachedRoutesMetricName}BlockDifference`, blocksDifference, MetricLoggerUnit.Count)
     metric.putMetric(
-      `CachedRoutesBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
+      `${cachedRoutesMetricName}BlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
       blocksDifference,
       MetricLoggerUnit.Count
     )
+
+    const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
+    if (notExpiredCachedRoute) {
+      metric.putMetric(`${cachedRoutesMetricName}NotExpired`, 1, MetricLoggerUnit.Count)
+    } else {
+      metric.putMetric(`${cachedRoutesMetricName}Expired`, 1, MetricLoggerUnit.Count)
+    }
+
+    if (
+      optimistic && // If we are in optimistic mode
+      cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
+      notExpiredCachedRoute // and the cachedRoutes are not expired
+    ) {
+      // We send an async caching quote
+      // we do not await on this function, it's a fire and forget
+      this.maybeSendCachingQuote(partitionKey, sortKey, amount)
+    }
 
     return cachedRoutes
   }
