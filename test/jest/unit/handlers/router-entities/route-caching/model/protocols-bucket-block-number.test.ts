@@ -33,7 +33,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/1234')
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/123')
     })
 
     it('protocols are sorted, even if the original array is not, without the last digit of the blockNumber', () => {
@@ -43,7 +43,7 @@ describe('ProtocolsBucketBlockNumber', () => {
         blockNumber: 12345,
       })
 
-      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/1234')
+      expect(protocolsBucketBlockNumber.protocolsBucketPartialKey()).toBe('MIXED,V2,V3/5/123')
     })
   })
 })

@@ -25,8 +25,8 @@ export class ProtocolsBucketBlockNumber {
   }
 
   public protocolsBucketPartialKey(): string {
-    // allowing up to 10 blocks in the query
-    const partialBlockNumber = this.blockNumber.toString().slice(0, -1)
+    // allowing up to 100 blocks in the query
+    const partialBlockNumber = this.blockNumber.toString().slice(0, -2)
     return `${this.protocols}/${this.bucket}/${partialBlockNumber}`
   }
 }
