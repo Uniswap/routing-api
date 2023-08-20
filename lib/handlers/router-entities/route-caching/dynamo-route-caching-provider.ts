@@ -50,7 +50,7 @@ interface CachedRouteDbEntry {
   }
 }
 
-const DEFAULT_TTL_MINUTES = 2
+const DEFAULT_TTL_MINUTES = 10
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
@@ -245,7 +245,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           return cachedRoutes
         } else {
           metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
-          log.info(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
+          log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
         }
       } catch (error) {
         metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
