@@ -3,7 +3,7 @@ import { Protocol } from '@uniswap/router-sdk'
 interface ProtocolsBucketBlockNumberArgs {
   protocols: Protocol[]
   bucket: number
-  blockNumber?: number
+  blockNumber: number
 }
 
 /**
@@ -12,7 +12,7 @@ interface ProtocolsBucketBlockNumberArgs {
 export class ProtocolsBucketBlockNumber {
   public readonly protocols: Protocol[]
   public readonly bucket: number
-  public readonly blockNumber?: number
+  public readonly blockNumber: number
 
   constructor({ protocols, bucket, blockNumber }: ProtocolsBucketBlockNumberArgs) {
     this.protocols = protocols.sort()
@@ -21,14 +21,12 @@ export class ProtocolsBucketBlockNumber {
   }
 
   public fullKey(): string {
-    if (this.blockNumber === undefined) {
-      throw Error('BlockNumber is necessary to create a fullKey')
-    }
-
     return `${this.protocols}/${this.bucket}/${this.blockNumber}`
   }
 
   public protocolsBucketPartialKey(): string {
-    return `${this.protocols}/${this.bucket}/`
+    // allowing up to 10 blocks in the query
+    const partialBlockNumber = this.blockNumber.toString().slice(0, -1)
+    return `${this.protocols}/${this.bucket}/${partialBlockNumber}`
   }
 }
