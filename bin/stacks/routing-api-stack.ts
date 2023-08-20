@@ -60,6 +60,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      unicornSecret,
     } = props
 
     const {
@@ -99,6 +100,7 @@ export class RoutingAPIStack extends cdk.Stack {
       cachedRoutesDynamoDb,
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
+      unicornSecret,
     })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')

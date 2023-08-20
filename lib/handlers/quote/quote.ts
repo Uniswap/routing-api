@@ -119,7 +119,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         enableUniversalRouter,
         quoteSpeed,
         debugRoutingConfig,
-        unicornSecret
+        unicornSecret,
         intent,
       },
       requestInjected: {
@@ -225,8 +225,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
-      ...(quoteSpeed ? QUOTE_SPEED_MAP[quoteSpeed] : {}),
-      ...parsedDebugRoutingConfig
+      ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
+      ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
 

@@ -126,8 +126,9 @@ export class RoutingAPIPipeline extends Stack {
       //secretCompleteArn: arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-rpc-urls-json-backup-D2sWoe
     })
 
-    const unicornSecrets = sm.Secret.fromSecretAttributes(this, 'Unicorn', {
-      secretCompleteArn: '',
+    // Secret that controls the access to the debugging query string params
+    const unicornSecrets = sm.Secret.fromSecretAttributes(this, 'DebugConfigUnicornSecrets', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:debug-config-unicornsecrets-jvmCsq',
     })
 
     const tenderlyCreds = sm.Secret.fromSecretAttributes(this, 'TenderlyCreds', {
@@ -180,7 +181,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
-      unicornSecret: unicornSecrets.secretValue.toString(),
+      unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -203,7 +204,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
-      unicornSecret: unicornSecrets.secretValue.toString(),
+      unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicornsecrets').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
