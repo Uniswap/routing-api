@@ -60,6 +60,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   quoteSpeed: Joi.string().valid('fast', 'standard').optional().default('standard'),
   debugRoutingConfig: Joi.string().optional(),
   unicornSecret: Joi.string().optional(),
+  intent: Joi.string().valid('quote', 'swap', 'caching').optional().default('quote'),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -88,4 +89,5 @@ export type QuoteQueryParams = {
   quoteSpeed?: string
   debugRoutingConfig?: string
   unicornSecret?: string
+  intent?: string
 }

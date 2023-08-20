@@ -112,7 +112,14 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     })
     setGlobalLogger(log)
 
-    const { POOL_CACHE_BUCKET_2, POOL_CACHE_KEY, TOKEN_LIST_CACHE_BUCKET, CACHED_ROUTES_TABLE_NAME } = process.env
+    const {
+      POOL_CACHE_BUCKET_2,
+      POOL_CACHE_KEY,
+      TOKEN_LIST_CACHE_BUCKET,
+      CACHED_ROUTES_TABLE_NAME,
+      AWS_LAMBDA_FUNCTION_NAME,
+      CACHING_REQUEST_FLAG_TABLE_NAME,
+    } = process.env
 
     const dependenciesByChain: {
       [chainId in ChainId]?: ContainerDependencies
@@ -310,7 +317,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         let routeCachingProvider: IRouteCachingProvider | undefined = undefined
         if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
-          routeCachingProvider = new DynamoRouteCachingProvider({ cachedRoutesTableName: CACHED_ROUTES_TABLE_NAME })
+          routeCachingProvider = new DynamoRouteCachingProvider({
+            cachedRoutesTableName: CACHED_ROUTES_TABLE_NAME,
+            cachingQuoteLambdaName: AWS_LAMBDA_FUNCTION_NAME!,
+            cachingRequestFlagTableName: CACHING_REQUEST_FLAG_TABLE_NAME!,
+          })
         }
 
         return {
