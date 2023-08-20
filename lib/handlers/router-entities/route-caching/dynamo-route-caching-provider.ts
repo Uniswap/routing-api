@@ -244,8 +244,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           return cachedRoutes
         } else {
-          metric.putMetric('CachedRouteEntriesFound', 0, MetricLoggerUnit.Count)
-          log.info(`[DynamoRouteCachingProvider] No items found in the query response.`)
+          metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
+          log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
         }
       } catch (error) {
         metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
