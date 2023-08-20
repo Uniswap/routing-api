@@ -50,7 +50,7 @@ interface CachedRouteDbEntry {
   }
 }
 
-const DEFAULT_TTL_MINUTES = 10
+const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
