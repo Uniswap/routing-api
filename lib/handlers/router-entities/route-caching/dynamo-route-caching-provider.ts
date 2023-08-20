@@ -9,7 +9,7 @@ import {
   MetricLoggerUnit,
   routeToString,
 } from '@uniswap/smart-order-router'
-import { DynamoDB, Lambda } from 'aws-sdk'
+import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
@@ -20,6 +20,9 @@ import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-numbe
 import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
+import { PromiseResult } from 'aws-sdk/lib/request'
+import { ItemList } from 'aws-sdk/clients/dynamodb'
+import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 
 interface ConstructorParams {
   /**
@@ -45,6 +48,7 @@ interface CachedRouteDbEntry {
   Item: {
     pairTradeTypeChainId: string
     protocolsBucketBlockNumber: string
+    protocolsBlockNumberBucket: string
     item: Buffer
     ttl: number
   }
@@ -157,73 +161,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       }
 
       try {
-        log.info({ queryParams }, `[DynamoRouteCachingProvider] Attempting to get route from cache.`)
-
         const result = await this.ddbClient.query(queryParams).promise()
 
-        log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
-
         if (result.Items && result.Items.length > 0) {
-          metric.putMetric('CachedRouteEntriesFound', result.Items.length, MetricLoggerUnit.Count)
-          const cachedRoutesArr: CachedRoutes[] = result.Items.map((record) => {
-            // If we got a response with more than 1 item, we extract the binary field from the response
-            const itemBinary = record.item
-            // Then we convert it into a Buffer
-            const cachedRoutesBuffer = Buffer.from(itemBinary)
-            // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
-            const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
-            // Finally we unmarshal that JSON into a `CachedRoutes` object
-            return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
-          })
-
-          const routesMap: Map<string, CachedRoute<V3Route | V2Route | MixedRoute>> = new Map()
-          var blockNumber: number = 0
-          var originalAmount: string = ''
-
-          cachedRoutesArr.forEach((cachedRoutes) => {
-            metric.putMetric('CachedRoutesPerBlockFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
-            cachedRoutes.routes.forEach((cachedRoute) => {
-              // we use the stringified route as identifier
-              const routeId = routeToString(cachedRoute.route)
-              // Using a map to remove duplicates, we will the different percents of different routes.
-              if (!routesMap.has(routeId)) routesMap.set(routeId, cachedRoute)
-            })
-            // Find the latest blockNumber
-            blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
-            // Keep track of all the originalAmounts
-            if (originalAmount === '') {
-              originalAmount = `${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
-            } else {
-              originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
-            }
-          })
-
-          const first = cachedRoutesArr[0]
-
-          // Build a new CachedRoutes object with the values calculated earlier
-          const cachedRoutes = new CachedRoutes({
-            routes: Array.from(routesMap.values()),
-            chainId: first.chainId,
-            tokenIn: first.tokenIn,
-            tokenOut: first.tokenOut,
-            protocolsCovered: first.protocolsCovered,
-            blockNumber,
-            tradeType: first.tradeType,
-            originalAmount,
-            blocksToLive: first.blocksToLive,
-          })
-
-          metric.putMetric('UniqueCachedRoutesFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
-
-          log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
-
-          const blocksDifference = currentBlockNumber - blockNumber
-          metric.putMetric('CachedRoutesBlockDifference', blocksDifference, MetricLoggerUnit.Count)
-          metric.putMetric(
-            `CachedRoutesBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
-            blocksDifference,
-            MetricLoggerUnit.Count
-          )
+          const cachedRoutes = this.parseCachedRoutes(result, chainId, currentBlockNumber)
 
           const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
           if (notExpiredCachedRoute) {
@@ -244,8 +185,58 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           return cachedRoutes
         } else {
-          metric.putMetric('CachedRouteEntriesFound', 0, MetricLoggerUnit.Count)
-          log.info(`[DynamoRouteCachingProvider] No items found in the query response.`)
+          log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
+
+          try {
+            const secondaryQueryParams = {
+              TableName: this.tableName,
+              IndexName: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondaryIndexName,
+              // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
+              KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
+              ExpressionAttributeNames: {
+                '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
+                '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SecondarySortKeyName,
+              },
+              ExpressionAttributeValues: {
+                ':pk': partitionKey.toString(),
+                ':sk': sortKey.protocolsPartialKey(),
+              },
+              ScanIndexForward: false, // Reverse order to retrieve most recent item first
+              Limit: 10,
+            }
+
+            const result = await this.ddbClient.query(secondaryQueryParams).promise()
+
+            if (result.Items && result.Items.length > 0) {
+              const cachedRoutes = this.parseCachedRoutes(result, chainId, currentBlockNumber)
+
+              const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
+              if (notExpiredCachedRoute) {
+                metric.putMetric('CachedRoutesNotExpired', 1, MetricLoggerUnit.Count)
+              } else {
+                metric.putMetric('CachedRoutesExpired', 1, MetricLoggerUnit.Count)
+              }
+
+              if (
+                optimistic && // If we are in optimistic mode
+                cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
+                notExpiredCachedRoute // and the cachedRoutes are not expired
+              ) {
+                // We send an async caching quote
+                // we do not await on this function, it's a fire and forget
+                this.maybeSendCachingQuote(partitionKey, sortKey, amount)
+              }
+
+              return cachedRoutes
+            } else {
+              metric.putMetric('CachedRouteEntriesFound', 0, MetricLoggerUnit.Count)
+              log.info(`[DynamoRouteCachingProvider] No items found in the secondary query.`)
+            }
+          } catch (error) {
+            metric.putMetric('CachedRouteFetchSecondaryError', 1, MetricLoggerUnit.Count)
+            log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from secondary index`)
+          }
+
         }
       } catch (error) {
         metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
@@ -255,6 +246,71 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // We only get here if we didn't find a cachedRoutes
     return undefined
+  }
+
+  private parseCachedRoutes(result: PromiseResult<DynamoDB.DocumentClient.QueryOutput, AWSError>, chainId: ChainId, currentBlockNumber: number): CachedRoutes {
+    metric.putMetric('CachedRouteEntriesFound', result.Items!.length, MetricLoggerUnit.Count)
+    const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
+      // If we got a response with more than 1 item, we extract the binary field from the response
+      const itemBinary = record.item
+      // Then we convert it into a Buffer
+      const cachedRoutesBuffer = Buffer.from(itemBinary)
+      // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
+      const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
+      // Finally we unmarshal that JSON into a `CachedRoutes` object
+      return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+    })
+
+    const routesMap: Map<string, CachedRoute<V3Route | V2Route | MixedRoute>> = new Map()
+    let blockNumber: number = 0
+    let originalAmount: string = ''
+
+    cachedRoutesArr.forEach((cachedRoutes) => {
+      metric.putMetric('CachedRoutesPerBlockFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
+      cachedRoutes.routes.forEach((cachedRoute) => {
+        // we use the stringified route as identifier
+        const routeId = routeToString(cachedRoute.route)
+        // Using a map to remove duplicates, we will the different percents of different routes.
+        if (!routesMap.has(routeId)) routesMap.set(routeId, cachedRoute)
+      })
+      // Find the latest blockNumber
+      blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
+      // Keep track of all the originalAmounts
+      if (originalAmount === '') {
+        originalAmount = `${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
+      } else {
+        originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
+      }
+    })
+
+    const first = cachedRoutesArr[0]
+
+    // Build a new CachedRoutes object with the values calculated earlier
+    const cachedRoutes = new CachedRoutes({
+      routes: Array.from(routesMap.values()),
+      chainId: first.chainId,
+      tokenIn: first.tokenIn,
+      tokenOut: first.tokenOut,
+      protocolsCovered: first.protocolsCovered,
+      blockNumber,
+      tradeType: first.tradeType,
+      originalAmount,
+      blocksToLive: first.blocksToLive,
+    })
+
+    metric.putMetric('UniqueCachedRoutesFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
+
+    log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
+
+    const blocksDifference = currentBlockNumber - blockNumber
+    metric.putMetric('CachedRoutesBlockDifference', blocksDifference, MetricLoggerUnit.Count)
+    metric.putMetric(
+      `CachedRoutesBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
+      blocksDifference,
+      MetricLoggerUnit.Count
+    )
+
+    return cachedRoutes
   }
 
   private async maybeSendCachingQuote(
@@ -370,6 +426,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
           protocolsBucketBlockNumber: sortKey.fullKey(),
+          protocolsBlockNumberBucket: sortKey.fullSecondaryKey(),
           item: binaryCachedRoutes,
           ttl: ttl,
         },
