@@ -29,7 +29,6 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachedRoutesDynamoDb?: aws_dynamodb.Table
   cachingRequestFlagDynamoDb?: aws_dynamodb.Table
   cachedV3PoolsDynamoDb?: aws_dynamodb.Table
-  unicornSecret: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -52,7 +51,6 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachedRoutesDynamoDb,
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
-      unicornSecret,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -99,7 +97,6 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
         CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
-        UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
       },
       layers: [
