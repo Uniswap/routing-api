@@ -149,8 +149,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
         ExpressionAttributeNames: {
-          '#pk': 'pairTradeTypeChainId',
-          '#sk': 'protocolsBucketBlockNumber',
+          '#pk': DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName,
+          '#sk': DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName,
         },
         ExpressionAttributeValues: {
           ':pk': partitionKey.toString(),
@@ -184,7 +184,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           }
 
           return cachedRoutes
-        } else {
+        } else if (optimistic) {
           log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
 
           try {
@@ -229,7 +229,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
               return cachedRoutes
             } else {
-              metric.putMetric('CachedRouteEntriesFound', 0, MetricLoggerUnit.Count)
+              metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
               log.info(`[DynamoRouteCachingProvider] No items found in the secondary query.`)
             }
           } catch (error) {
@@ -237,6 +237,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from secondary index`)
           }
 
+        } else {
+          metric.putMetric('CachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
+          log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
         }
       } catch (error) {
         metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
