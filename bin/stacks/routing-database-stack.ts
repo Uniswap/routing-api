@@ -10,6 +10,8 @@ export const DynamoDBTableProps = {
     Name: 'RouteCachingDB',
     PartitionKeyName: 'pairTradeTypeChainId',
     SortKeyName: 'protocolsBucketBlockNumber',
+    SecondaryIndexName: 'protocolsBlockNumberBucket',
+    SecondarySortKeyName: 'protocolsBlockNumberBucket',
   },
   CachingRequestFlagDynamoDbTable: {
     Name: 'CacheReqFlagDB',
@@ -39,6 +41,12 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       sortKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.SortKeyName, type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+    })
+
+    this.cachedRoutesDynamoDb.addGlobalSecondaryIndex({
+      indexName: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondaryIndexName,
+      partitionKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
+      sortKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondarySortKeyName, type: AttributeType.STRING },
     })
 
     // Creates a DynamoDB Table for storing the caching request flags
