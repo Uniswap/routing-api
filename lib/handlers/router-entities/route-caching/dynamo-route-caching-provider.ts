@@ -164,6 +164,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         log.info({ result }, `[DynamoRouteCachingProvider] Got the following response from querying cache`)
 
         if (result.Items && result.Items.length > 0) {
+          metric.putMetric('CachedRouteEntriesFound', result.Items.length, MetricLoggerUnit.Count)
           const cachedRoutesArr: CachedRoutes[] = result.Items.map((record) => {
             // If we got a response with more than 1 item, we extract the binary field from the response
             const itemBinary = record.item
@@ -180,6 +181,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           var originalAmount: string = ''
 
           cachedRoutesArr.forEach((cachedRoutes) => {
+            metric.putMetric('CachedRoutesPerBlockFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
             cachedRoutes.routes.forEach((cachedRoute) => {
               // we use the stringified route as identifier
               const routeId = routeToString(cachedRoute.route)
@@ -211,6 +213,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             blocksToLive: first.blocksToLive,
           })
 
+          metric.putMetric('UniqueCachedRoutesFound', cachedRoutes.routes.length, MetricLoggerUnit.Count)
+
           log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
           const blocksDifference = currentBlockNumber - blockNumber
@@ -221,10 +225,17 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             MetricLoggerUnit.Count
           )
 
+          const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
+          if (notExpiredCachedRoute) {
+            metric.putMetric('CachedRoutesNotExpired', 1, MetricLoggerUnit.Count)
+          } else {
+            metric.putMetric('CachedRoutesExpired', 1, MetricLoggerUnit.Count)
+          }
+
           if (
             optimistic && // If we are in optimistic mode
             cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
-            cachedRoutes.notExpired(currentBlockNumber, optimistic) // and the cachedRoutes are not expired
+            notExpiredCachedRoute // and the cachedRoutes are not expired
           ) {
             // We send an async caching quote
             // we do not await on this function, it's a fire and forget
@@ -233,9 +244,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           return cachedRoutes
         } else {
+          metric.putMetric('CachedRouteEntriesFound', 0, MetricLoggerUnit.Count)
           log.info(`[DynamoRouteCachingProvider] No items found in the query response.`)
         }
       } catch (error) {
+        metric.putMetric('CachedRouteFetchError', 1, MetricLoggerUnit.Count)
         log.error({ queryParams, error }, `[DynamoRouteCachingProvider] Error while fetching route from cache`)
       }
     }
@@ -257,10 +270,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       },
     }
 
+    metric.putMetric('OptimisticCachedRoute', 1, MetricLoggerUnit.Count)
+
     try {
       const result = await this.ddbClient.get(getParams).promise()
       // if no Item is found it means we need to send a caching request
       if (!result.Item) {
+        metric.putMetric('UniqueOptimisticCachedRoute', 1, MetricLoggerUnit.Count)
         this.sendAsyncCachingRequest(partitionKey, sortKey, amount)
         this.setCachingRequestFlag(partitionKey, sortKey)
       }
