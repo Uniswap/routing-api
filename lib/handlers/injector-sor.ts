@@ -29,7 +29,8 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
-  IRouteCachingProvider, CachingV2PoolProvider
+  IRouteCachingProvider,
+  CachingV2PoolProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -272,12 +273,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
         const nonCachingv2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
         const cachingV2PoolProvider = new CachingV2PoolProvider(
-            chainId,
-            nonCachingv2PoolProvider,
-            // make TTL lower than average of L2 chain block confirmation time,
-            // so that we know the latency improvement is the bottom line not top line
-            new NodeJSCache(new NodeCache({ stdTTL: 1, useClones: false }))
-          );
+          chainId,
+          nonCachingv2PoolProvider,
+          // make TTL lower than average of L2 chain block confirmation time,
+          // so that we know the latency improvement is the bottom line not top line
+          new NodeJSCache(new NodeCache({ stdTTL: 1, useClones: false }))
+        )
         const v2PoolProvider = new V2DebugCachingPoolProvider(cachingV2PoolProvider, nonCachingv2PoolProvider)
 
         const tenderlySimulator = new TenderlySimulator(

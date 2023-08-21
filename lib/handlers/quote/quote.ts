@@ -229,7 +229,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
-    
+
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     let swapParams: SwapOptions | undefined = undefined
