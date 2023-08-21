@@ -215,10 +215,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     let parsedDebugRoutingConfig = {}
-    let debugRouting: boolean | undefined = undefined
     if (debugRoutingConfig && unicornSecret && unicornSecret === process.env.UNICORN_SECRET) {
       parsedDebugRoutingConfig = JSON.parse(debugRoutingConfig)
-      debugRouting = true
     }
 
     const routingConfig: AlphaRouterConfig = {
@@ -231,8 +229,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
     }
-    // hack to ensure debugRouting is set to true if debugRoutingConfig is set
-    routingConfig.debugRouting = debugRouting
     
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
