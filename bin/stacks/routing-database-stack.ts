@@ -6,6 +6,11 @@ import { Construct } from 'constructs'
 export interface RoutingDatabaseStackProps extends cdk.NestedStackProps {}
 
 export const DynamoDBTableProps = {
+  RoutesDbTable: {
+    Name: 'RoutesDB',
+    PartitionKeyName: 'pairTradeTypeChainId',
+    SortKeyName: 'routeId',
+  },
   CacheRouteDynamoDbTable: {
     Name: 'RouteCachingDB',
     PartitionKeyName: 'pairTradeTypeChainId',
@@ -27,12 +32,22 @@ export const DynamoDBTableProps = {
 }
 
 export class RoutingDatabaseStack extends cdk.NestedStack {
+  public readonly routesDynamoDb: aws_dynamodb.Table
   public readonly cachedRoutesDynamoDb: aws_dynamodb.Table
   public readonly cachingRequestFlagDynamoDb: aws_dynamodb.Table
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
     super(scope, name, props)
+
+    // Creates a DynamoDB Table for storing the routes
+    this.routesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CacheRouteDynamoDbTable.Name, {
+      tableName: DynamoDBTableProps.RoutesDbTable.Name,
+      partitionKey: { name: DynamoDBTableProps.RoutesDbTable.PartitionKeyName, type: AttributeType.STRING },
+      sortKey: { name: DynamoDBTableProps.RoutesDbTable.SortKeyName, type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+    })
 
     // Creates a DynamoDB Table for storing the cached routes
     this.cachedRoutesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CacheRouteDynamoDbTable.Name, {

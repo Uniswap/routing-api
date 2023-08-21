@@ -26,9 +26,10 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyProject: string
   tenderlyAccessKey: string
   chatbotSNSArn?: string
-  cachedRoutesDynamoDb?: aws_dynamodb.Table
-  cachingRequestFlagDynamoDb?: aws_dynamodb.Table
-  cachedV3PoolsDynamoDb?: aws_dynamodb.Table
+  routesDynamoDb: aws_dynamodb.Table
+  cachedRoutesDynamoDb: aws_dynamodb.Table
+  cachingRequestFlagDynamoDb: aws_dynamodb.Table
+  cachedV3PoolsDynamoDb: aws_dynamodb.Table
   unicornSecret: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -49,6 +50,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      routesDynamoDb,
       cachedRoutesDynamoDb,
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
@@ -67,9 +69,10 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
-    cachedRoutesDynamoDb?.grantReadWriteData(lambdaRole)
-    cachingRequestFlagDynamoDb?.grantReadWriteData(lambdaRole)
-    cachedV3PoolsDynamoDb?.grantReadWriteData(lambdaRole)
+    routesDynamoDb.grantReadWriteData(lambdaRole)
+    cachedRoutesDynamoDb.grantReadWriteData(lambdaRole)
+    cachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
+    cachedV3PoolsDynamoDb.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -96,6 +99,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
+        ROUTES_TABLE_NAME: DynamoDBTableProps.RoutesDbTable.Name,
         CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
         CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
