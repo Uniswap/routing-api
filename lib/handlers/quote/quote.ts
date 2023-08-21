@@ -230,9 +230,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
-      ...(debugRouting ? { debugRouting } : {}),
     }
-
+    // hack to ensure debugRouting is set to true if debugRoutingConfig is set
+    routingConfig.debugRouting = debugRouting
+    
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     let swapParams: SwapOptions | undefined = undefined
