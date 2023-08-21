@@ -461,6 +461,51 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
+   * Helper function to generate the [RouteDbEntry] object to be stored in the Cached Routes DynamoDB.
+   *
+   * @param cachedRoutes
+   * @param amount
+   * @public
+   */
+  public generateRouteDbEntry(
+    cachedRoutes: CachedRoutes
+  ): CachedRouteDbEntry | null {
+    const cachedRoutesTtl = 24 * 60 * 60 // 24 hours
+
+    if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
+      // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
+      const ttl = Math.floor(Date.now() / 1000) + Math.max(cachedRoutesTtl, this.ttlMinutes * 60)
+      // Marshal the CachedRoutes object in preparation for storing in DynamoDB
+      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
+      // Convert the marshalledCachedRoutes to JSON string
+      const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
+      // Encode the jsonCachedRoutes into Binary
+      const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
+
+      // Primary Key object
+      const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
+      const sortKey = new ProtocolsBucketBlockNumber({
+        protocols: cachedRoutes.protocolsCovered,
+        bucket: cachingBucket.bucket,
+        blockNumber: cachedRoutes.blockNumber,
+      })
+
+      return {
+        TableName: this.cachingRoutesTableName,
+        Item: {
+          pairTradeTypeChainId: partitionKey.toString(),
+          protocolsBucketBlockNumber: sortKey.fullKey(),
+          protocolsBlockNumberBucket: sortKey.fullSecondaryKey(),
+          item: binaryCachedRoutes,
+          ttl: ttl,
+        },
+      }
+    } else {
+      return null
+    }
+  }
+
+  /**
    * Implementation of the abstract method defined in `IRouteCachingProvider`
    * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
    *
