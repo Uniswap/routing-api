@@ -24,7 +24,11 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 
 interface ConstructorParams {
   /**
-   * The TableName for the DynamoDB Table. This is wired in from the CDK definition.
+   * The TableName for the DynamoDB Table that stores routes
+   */
+  routesTableName: string
+  /**
+   * The TableName for the DynamoDB Table that stores cached routes.
    */
   cachedRoutesTableName: string
   /**
@@ -32,7 +36,7 @@ interface ConstructorParams {
    */
   cachingQuoteLambdaName: string
   /**
-   * The TableName for the DynamoDB Table that stores wether or not a request has been sent for caching
+   * The TableName for the DynamoDB Table that stores whether a request has been sent for caching
    */
   cachingRequestFlagTableName: string
   /**
@@ -56,12 +60,14 @@ const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
-  private readonly tableName: string
+  private readonly routesTableName: string
+  private readonly cachingRoutesTableName: string
   private readonly cachingQuoteLambdaName: string
   private readonly cachingRequestFlagTableName: string
   private readonly ttlMinutes: number
 
   constructor({
+    routesTableName,
     cachedRoutesTableName,
     cachingQuoteLambdaName,
     cachingRequestFlagTableName,
@@ -79,7 +85,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       },
     })
     this.lambdaClient = new Lambda()
-    this.tableName = cachedRoutesTableName
+    this.routesTableName = routesTableName
+    this.cachingRoutesTableName = cachedRoutesTableName
     this.cachingQuoteLambdaName = cachingQuoteLambdaName
     this.cachingRequestFlagTableName = cachingRequestFlagTableName
     this.ttlMinutes = ttlMinutes
@@ -144,7 +151,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
       try {
         const queryParams = {
-          TableName: this.tableName,
+          TableName: this.cachingRoutesTableName,
           // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
           KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
           ExpressionAttributeNames: {
@@ -168,7 +175,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
           try {
             const secondaryQueryParams = {
-              TableName: this.tableName,
+              TableName: this.cachingRoutesTableName,
               IndexName: 'protocolsBlockNumberBucket',
               // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
               KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
@@ -439,7 +446,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       })
 
       return {
-        TableName: this.tableName,
+        TableName: this.cachingRoutesTableName,
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
           protocolsBucketBlockNumber: sortKey.fullKey(),
