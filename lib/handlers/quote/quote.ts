@@ -215,8 +215,10 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     let parsedDebugRoutingConfig = {}
+    let debugRouting: boolean | undefined = undefined
     if (debugRoutingConfig && unicornSecret && unicornSecret === process.env.UNICORN_SECRET) {
       parsedDebugRoutingConfig = JSON.parse(debugRoutingConfig)
+      debugRouting = true
     }
 
     const routingConfig: AlphaRouterConfig = {
@@ -228,6 +230,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
+      ...(debugRouting ? { debugRouting } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
