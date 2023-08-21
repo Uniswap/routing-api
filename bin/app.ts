@@ -204,7 +204,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
-      unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicornsecrets').toString(),
+      unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
