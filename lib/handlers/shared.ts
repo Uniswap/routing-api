@@ -1,4 +1,4 @@
-import { ChainId, Currency, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ITokenListProvider,
@@ -9,12 +9,53 @@ import {
   ProtocolPoolSelection,
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
+import JSBI from 'jsbi'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 30,
 }
 
-export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
+export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId, currencyIn: Currency, currencyOut: Currency, type: string, amountRaw: string): AlphaRouterConfig => {
+  let distributionPercent = 5;
+  let amount: CurrencyAmount<Currency>
+
+  switch (type) {
+    case 'exactIn':
+      amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
+      if (currencyIn.symbol == 'ETH' && currencyOut.symbol == 'USDC' && amount.lessThan(JSBI.BigInt(0.5))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'WETH' && currencyOut.symbol == 'USDC' && amount.lessThan(JSBI.BigInt(0.5))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'ETH' && amount.lessThan(JSBI.BigInt(1000))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'WETH' && amount.lessThan(JSBI.BigInt(1000))) {
+        distributionPercent = 10;
+      }
+
+      break
+    case 'exactOut':
+      amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
+      if (currencyIn.symbol == 'ETH' && currencyOut.symbol == 'USDC' && amount.lessThan(JSBI.BigInt(1000))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'WETH' && currencyOut.symbol == 'USDC' && amount.lessThan(JSBI.BigInt(1000))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'ETH' && amount.lessThan(JSBI.BigInt(0.5))) {
+        distributionPercent = 10;
+      }
+      if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'WETH' && amount.lessThan(JSBI.BigInt(0.5))) {
+        distributionPercent = 10;
+      }
+
+      break
+    default:
+      throw new Error('Invalid swap type')
+  }
+
   switch (chainId) {
     case ChainId.BASE:
     case ChainId.OPTIMISM:
@@ -92,7 +133,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
         maxSwapsPerPath: 3,
         minSplits: 1,
         maxSplits: 7,
-        distributionPercent: 10,
+        distributionPercent: distributionPercent,
         forceCrossProtocol: false,
       }
   }
