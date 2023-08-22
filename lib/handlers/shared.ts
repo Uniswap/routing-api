@@ -175,29 +175,15 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
 
       if (chainId == ChainId.MAINNET) {
         if (
-          currencyIn.symbol == WETH9[chainId].symbol &&
-          currencyOut.symbol == USDC_MAINNET.symbol &&
+          currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
+          currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
           amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
         ) {
           distributionPercent = 10
         }
         if (
-          currencyIn.symbol == WETH9[chainId].symbol &&
-          currencyOut.symbol == USDC_MAINNET.symbol &&
-          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
-        ) {
-          distributionPercent = 10
-        }
-        if (
-          currencyIn.symbol == USDC_MAINNET.symbol &&
-          currencyOut.symbol == 'ETH' &&
-          amount.lessThan(USDC_MAINNET.decimals * 1000)
-        ) {
-          distributionPercent = 10
-        }
-        if (
-          currencyIn.symbol == USDC_MAINNET.symbol &&
-          currencyOut.symbol == 'WETH' &&
+          currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
+          currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
           amount.lessThan(USDC_MAINNET.decimals * 1000)
         ) {
           distributionPercent = 10
@@ -210,29 +196,15 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
 
       if (chainId == ChainId.MAINNET) {
         if (
-          currencyIn.symbol == 'ETH' &&
-          currencyOut.symbol == 'USDC' &&
+          currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
+          currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
           amount.lessThan(USDC_MAINNET.decimals * 1000)
         ) {
           distributionPercent = 10
         }
         if (
-          currencyIn.symbol == 'WETH' &&
-          currencyOut.symbol == 'USDC' &&
-          amount.lessThan(USDC_MAINNET.decimals * 1000)
-        ) {
-          distributionPercent = 10
-        }
-        if (
-          currencyIn.symbol == 'USDC' &&
-          currencyOut.symbol == 'ETH' &&
-          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
-        ) {
-          distributionPercent = 10
-        }
-        if (
-          currencyIn.symbol == 'USDC' &&
-          currencyOut.symbol == 'WETH' &&
+          currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
+          currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
           amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
         ) {
           distributionPercent = 10
