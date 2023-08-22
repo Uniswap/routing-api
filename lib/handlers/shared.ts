@@ -1,4 +1,4 @@
-import { ChainId, Currency, CurrencyAmount, Fraction, Percent, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent, WETH9 } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ITokenListProvider,
@@ -6,62 +6,17 @@ import {
   MapWithLowerCaseKey,
   NATIVE_NAMES_BY_ID,
   nativeOnChain,
-  ProtocolPoolSelection, USDC_MAINNET
+  ProtocolPoolSelection,
+  USDC_MAINNET,
 } from '@uniswap/smart-order-router'
-import Logger from 'bunyan'
 import JSBI from 'jsbi'
+import Logger from 'bunyan'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 30,
 }
 
-export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId, currencyIn: Currency, currencyOut: Currency, type: string, amountRaw: string, log: Logger): AlphaRouterConfig => {
-  let distributionPercent = 5;
-  let amount: CurrencyAmount<Currency>
-
-  switch (type) {
-    case 'exactIn':
-      amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
-      
-      if (chainId == ChainId.MAINNET) {
-        if (currencyIn.symbol == WETH9[chainId].symbol && currencyOut.symbol == USDC_MAINNET.symbol && amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == WETH9[chainId].symbol && currencyOut.symbol == USDC_MAINNET.symbol && amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == USDC_MAINNET.symbol && currencyOut.symbol == 'ETH' && amount.lessThan(USDC_MAINNET.decimals * 1000)) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == USDC_MAINNET.symbol && currencyOut.symbol == 'WETH' && amount.lessThan(USDC_MAINNET.decimals * 1000)) {
-          distributionPercent = 10;
-        }
-      }
-
-      break
-    case 'exactOut':
-      amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
-
-      if (chainId == ChainId.MAINNET) {
-        if (currencyIn.symbol == 'ETH' && currencyOut.symbol == 'USDC' && amount.lessThan(USDC_MAINNET.decimals * 1000)) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == 'WETH' && currencyOut.symbol == 'USDC' && amount.lessThan(USDC_MAINNET.decimals * 1000)) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'ETH' && amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))) {
-          distributionPercent = 10;
-        }
-        if (currencyIn.symbol == 'USDC' && currencyOut.symbol == 'WETH' && amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))) {
-          distributionPercent = 10;
-        }
-      }
-
-      break
-    default:
-      throw new Error('Invalid swap type')
-  }
-
+export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
     case ChainId.BASE:
     case ChainId.OPTIMISM:
@@ -139,7 +94,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId, currencyIn: Cu
         maxSwapsPerPath: 3,
         minSplits: 1,
         maxSplits: 7,
-        distributionPercent: distributionPercent,
+        distributionPercent: 5,
         forceCrossProtocol: false,
       }
   }
@@ -201,6 +156,94 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
     useCachedRoutes: true,
     optimisticCachedRoutes: false,
   },
+}
+
+export const DISTRIBUTION_PERCENT_CONFIG = (
+  chainId: ChainId,
+  currencyIn: Currency,
+  currencyOut: Currency,
+  type: string,
+  amountRaw: string
+) => {
+  let distributionPercent = 5
+  let amount: CurrencyAmount<Currency>
+
+  switch (type) {
+    case 'exactIn':
+      amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
+
+      if (chainId == ChainId.MAINNET) {
+        if (
+          currencyIn.symbol == WETH9[chainId].symbol &&
+          currencyOut.symbol == USDC_MAINNET.symbol &&
+          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == WETH9[chainId].symbol &&
+          currencyOut.symbol == USDC_MAINNET.symbol &&
+          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == USDC_MAINNET.symbol &&
+          currencyOut.symbol == 'ETH' &&
+          amount.lessThan(USDC_MAINNET.decimals * 1000)
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == USDC_MAINNET.symbol &&
+          currencyOut.symbol == 'WETH' &&
+          amount.lessThan(USDC_MAINNET.decimals * 1000)
+        ) {
+          distributionPercent = 10
+        }
+      }
+
+      break
+    case 'exactOut':
+      amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
+
+      if (chainId == ChainId.MAINNET) {
+        if (
+          currencyIn.symbol == 'ETH' &&
+          currencyOut.symbol == 'USDC' &&
+          amount.lessThan(USDC_MAINNET.decimals * 1000)
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == 'WETH' &&
+          currencyOut.symbol == 'USDC' &&
+          amount.lessThan(USDC_MAINNET.decimals * 1000)
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == 'USDC' &&
+          currencyOut.symbol == 'ETH' &&
+          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+        ) {
+          distributionPercent = 10
+        }
+        if (
+          currencyIn.symbol == 'USDC' &&
+          currencyOut.symbol == 'WETH' &&
+          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+        ) {
+          distributionPercent = 10
+        }
+      }
+
+      break
+    default:
+      throw new Error('Invalid swap type')
+  }
+
+  return distributionPercent
 }
 
 export async function tokenStringToCurrency(

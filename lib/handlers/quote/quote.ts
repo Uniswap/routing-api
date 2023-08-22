@@ -28,6 +28,7 @@ import {
   tokenStringToCurrency,
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
+  DISTRIBUTION_PERCENT_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -221,7 +222,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const routingConfig: AlphaRouterConfig = {
-      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId, currencyIn, currencyOut, type, amountRaw, log),
+      ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
+      ...{ distributionPercent: DISTRIBUTION_PERCENT_CONFIG(chainId, currencyIn, currencyOut, type, amountRaw) },
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
