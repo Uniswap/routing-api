@@ -22,9 +22,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId, currencyIn: Cu
   switch (type) {
     case 'exactIn':
       amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
-
-      log.error(`debug amount ${amount.toExact()}`)
-
+      
       if (chainId == ChainId.MAINNET) {
         if (currencyIn.symbol == WETH9[chainId].symbol && currencyOut.symbol == USDC_MAINNET.symbol && amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))) {
           distributionPercent = 10;
