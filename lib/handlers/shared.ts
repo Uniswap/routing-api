@@ -177,14 +177,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.divide(WETH9[chainId].decimals).lessThan(new Fraction(1, 2))
+          amount.divide(amount.decimalScale).lessThan(new Fraction(1, 2))
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.divide(USDC_MAINNET.decimals).lessThan(1000)
+          amount.divide(amount.decimalScale).lessThan(1000)
         ) {
           distributionPercent = 10
         }
@@ -198,14 +198,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.divide(USDC_MAINNET.decimals).lessThan(100)
+          amount.divide(amount.decimalScale).lessThan(1000)
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.divide(WETH9[chainId].decimals).lessThan(new Fraction(1, 2))
+          amount.divide(amount.decimalScale).lessThan(new Fraction(1, 2))
         ) {
           distributionPercent = 10
         }
@@ -215,13 +215,6 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
     default:
       throw new Error('Invalid swap type')
   }
-
-  log.info(`Distribution percent has changed to ${distributionPercent} for 
-      currency ${currencyIn.wrapped.symbol}
-      amount ${amount.toExact()}
-      quote currency ${currencyOut.wrapped.symbol}
-      trade type ${type}
-      chain id ${chainId}`)
 
   return distributionPercent
 }
