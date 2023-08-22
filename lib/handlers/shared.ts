@@ -1,4 +1,4 @@
-import { ChainId, Currency, CurrencyAmount, Percent, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Fraction, Percent, WETH9 } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ITokenListProvider,
@@ -177,14 +177,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+          amount.divide(WETH9[chainId].decimals).lessThan(new Fraction(1, 2))
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.lessThan(USDC_MAINNET.decimals * 1000)
+          amount.divide(USDC_MAINNET.decimals).lessThan(1000)
         ) {
           distributionPercent = 10
         }
@@ -198,14 +198,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.lessThan(USDC_MAINNET.decimals * 1000)
+          amount.divide(USDC_MAINNET.decimals).lessThan(100)
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.lessThan(JSBI.BigInt(WETH9[chainId].decimals * 0.5))
+          amount.divide(WETH9[chainId].decimals).lessThan(new Fraction(1, 2))
         ) {
           distributionPercent = 10
         }
