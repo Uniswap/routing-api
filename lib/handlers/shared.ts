@@ -163,7 +163,8 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
   currencyIn: Currency,
   currencyOut: Currency,
   type: string,
-  amountRaw: string
+  amountRaw: string,
+  log: Logger
 ) => {
   let distributionPercent = 5
   let amount: CurrencyAmount<Currency>
@@ -242,6 +243,13 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
     default:
       throw new Error('Invalid swap type')
   }
+
+  log.info(`Distribution percent has changed to ${distributionPercent} for 
+      currency ${currencyIn.wrapped.symbol}
+      amount ${amount.toExact()}
+      quote currency ${currencyOut.wrapped.symbol}
+      trade type ${type}
+      chain id ${chainId}`)
 
   return distributionPercent
 }
