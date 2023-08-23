@@ -163,8 +163,7 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
   currencyIn: Currency,
   currencyOut: Currency,
   type: string,
-  amountRaw: string,
-  log: Logger
+  amountRaw: string
 ) => {
   let distributionPercent = 5
   let amount: CurrencyAmount<Currency>
@@ -177,14 +176,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.divide(amount.decimalScale).lessThan(new Fraction(1, 2))
+          amount.lessThan(new Fraction(1, 2).multiply(amount.decimalScale))
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.divide(amount.decimalScale).lessThan(1000)
+          amount.lessThan(new Fraction(1000, 1).multiply(amount.decimalScale))
         ) {
           distributionPercent = 10
         }
@@ -198,14 +197,14 @@ export const DISTRIBUTION_PERCENT_CONFIG = (
         if (
           currencyIn.wrapped.symbol == WETH9[chainId].symbol &&
           currencyOut.wrapped.symbol == USDC_MAINNET.symbol &&
-          amount.divide(amount.decimalScale).lessThan(1000)
+          amount.lessThan(new Fraction(1000, 1).multiply(amount.decimalScale))
         ) {
           distributionPercent = 10
         }
         if (
           currencyIn.wrapped.symbol == USDC_MAINNET.symbol &&
           currencyOut.wrapped.symbol == WETH9[chainId].symbol &&
-          amount.divide(amount.decimalScale).lessThan(new Fraction(1, 2))
+          amount.lessThan(new Fraction(1, 2).multiply(amount.decimalScale))
         ) {
           distributionPercent = 10
         }

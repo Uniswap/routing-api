@@ -223,7 +223,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const routingConfig: AlphaRouterConfig = {
       ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(chainId),
-      ...{ distributionPercent: DISTRIBUTION_PERCENT_CONFIG(chainId, currencyIn, currencyOut, type, amountRaw, log) },
+      ...{ distributionPercent: DISTRIBUTION_PERCENT_CONFIG(chainId, currencyIn, currencyOut, type, amountRaw) },
       ...(minSplits ? { minSplits } : {}),
       ...(forceCrossProtocol ? { forceCrossProtocol } : {}),
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
