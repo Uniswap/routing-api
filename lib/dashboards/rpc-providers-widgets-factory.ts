@@ -48,7 +48,7 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
   }
 
   private generateWidgetsForMethod(rpcMethod: string): Widget[] {
-    return this.generateRequestsWidgetForMethod(rpcMethod).concat(this.generateSuccessRateForMethod(rpcMethod));
+    return this.generateRequestsWidgetForMethod(rpcMethod).concat(this.generateSuccessRateForMethod(rpcMethod))
   }
 
   private generateSuccessRateForMethod(rpcMethod: string): Widget[] {
@@ -122,18 +122,8 @@ export class RpcProvidersWidgetsFactory implements WidgetsFactory {
       const providerName = ID_TO_PROVIDER(chainId)
 
       return [
-        [
-          this.namespace,
-          `RPC_${providerName}_${chainId}_${rpcMethod}_SUCCESS`,
-          'Service',
-          'RoutingAPI',
-        ],
-        [
-          this.namespace,
-          `RPC_${providerName}_${chainId}_${rpcMethod}_FAILURE`,
-          'Service',
-          'RoutingAPI',
-        ],
+        [this.namespace, `RPC_${providerName}_${chainId}_${rpcMethod}_SUCCESS`, 'Service', 'RoutingAPI'],
+        [this.namespace, `RPC_${providerName}_${chainId}_${rpcMethod}_FAILURE`, 'Service', 'RoutingAPI'],
       ]
     })
 
