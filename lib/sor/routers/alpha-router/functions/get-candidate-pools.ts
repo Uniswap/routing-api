@@ -361,7 +361,7 @@ export async function getV3CandidatePools({
 
   addToAddressSet(top2DirectSwapPool);
 
-  const wrappedNativeAddress = WRAPPED_NATIVE_CURRENCY[chainId]?.address;
+  const wrappedNativeAddress = WRAPPED_NATIVE_CURRENCY[chainId]?.address.toLowerCase();
 
   // Main reason we need this is for gas estimates, only needed if token out is not native.
   // We don't check the seen address set because if we've already added pools for getting native quotes
@@ -637,15 +637,10 @@ export async function getV2CandidatePools({
   const beforeSubgraphPools = Date.now();
 
   const getV2CandidatePoolsStart = Date.now()
-  const subgraphProviderGetPoolsStart = Date.now()
 
   const allPoolsRaw = await subgraphProvider.getPools(tokenIn, tokenOut, {
     blockNumber,
   });
-
-  const subgraphProviderGetPoolsEnd = Date.now()
-
-  const allPoolsMapStart = Date.now()
 
   // With tens of thousands of V2 pools, operations that copy pools become costly.
   // Mutate the pool directly rather than creating a new pool / token to optimmize for speed.
@@ -653,8 +648,6 @@ export async function getV2CandidatePools({
     pool.token0.id = pool.token0.id.toLowerCase();
     pool.token1.id = pool.token1.id.toLowerCase();
   }
-
-  const allPoolsMapEnd = Date.now()
 
   metric.putMetric(
     'V2SubgraphPoolsLoad',
@@ -664,15 +657,10 @@ export async function getV2CandidatePools({
 
   const beforePoolsFiltered = Date.now();
 
-  const subgraphPoolsSortStart = Date.now()
   // Sort by pool reserve in descending order.
   const subgraphPoolsSorted = allPoolsRaw.sort((a, b) => b.reserve - a.reserve);
 
-  const subgraphPoolsSortEnd = Date.now()
-
   const poolAddressesSoFar = new Set<string>();
-
-  const topNDirectSwapsStart = Date.now()
 
   // Always add the direct swap pool into the mix regardless of if it exists in the subgraph pool list.
   // Ensures that new pools can be swapped on immediately, and that if a pool was filtered out of the
@@ -702,9 +690,7 @@ export async function getV2CandidatePools({
     ];
   }
 
-  const topNDirectSwapsEnd = Date.now()
-
-  const wethAddress = WRAPPED_NATIVE_CURRENCY[chainId]!.address;
+  const wethAddress = WRAPPED_NATIVE_CURRENCY[chainId]!.address.toLowerCase();
 
   const topByBaseWithTokenInMap: Map<string, SubcategorySelectionPools<V2SubgraphPool>> = new Map();
   const topByBaseWithTokenOutMap: Map<string, SubcategorySelectionPools<V2SubgraphPool>> = new Map();
@@ -732,7 +718,9 @@ export async function getV2CandidatePools({
   // Main reason we need this is for gas estimates
   let topNEthQuoteToken = 1;
   // but, we only need it if token out is not ETH.
-  if (tokenOut.symbol == 'WETH' || tokenOut.symbol == 'WETH9' || tokenOut.symbol == 'ETH') {
+  if (
+    routeType == TradeType.EXACT_INPUT && (tokenOut.symbol == 'WETH' || tokenOut.symbol == 'WETH9' || tokenOut.symbol == 'ETH')
+  ){
     // if it's eth we change the topN to 0, so we can break early from the loop.
     topNEthQuoteToken = 0;
   }
@@ -932,7 +920,6 @@ export async function getV2CandidatePools({
 
   metric.putMetric('V2SubgraphLoopsInFirstIteration', loopsInFirstIteration, MetricLoggerUnit.Count);
 
-  const topByBaseTokenInOutStart = Date.now()
   const topByBaseWithTokenIn: V2SubgraphPool[] = [];
   for (const topByBaseWithTokenInSelection of topByBaseWithTokenInMap.values()) {
     topByBaseWithTokenIn.push(...topByBaseWithTokenInSelection.pools);
@@ -942,9 +929,6 @@ export async function getV2CandidatePools({
   for (const topByBaseWithTokenOutSelection of topByBaseWithTokenOutMap.values()) {
     topByBaseWithTokenOut.push(...topByBaseWithTokenOutSelection.pools);
   }
-  const topByBaseTokenInOutEnd = Date.now()
-
-  const secondHopTotalStart = Date.now()
 
   // Filtering step for second hops
   const topByTVLUsingTokenInSecondHopsMap: Map<string, SubcategorySelectionPools<V2SubgraphPool>> = new Map();
@@ -1060,11 +1044,6 @@ export async function getV2CandidatePools({
     topByTVLUsingTokenOutSecondHops.push(...secondHopPools.pools);
   }
 
-  const secondHopTotalEnd = Date.now()
-
-  const metadataBuildTime = Date.now()
-  const buildSubgraphPoolsStart = Date.now()
-
   const subgraphPools = _([
     ...topByBaseWithTokenIn,
     ...topByBaseWithTokenOut,
@@ -1079,9 +1058,6 @@ export async function getV2CandidatePools({
     .uniqBy((pool) => pool.id)
     .value();
 
-  const buildSubgraphPoolsEnd = Date.now()
-
-  const buildTokenAddressesStart = Date.now()
 
   const tokenAddressesSet: Set<string> = new Set();
   for (const pool of subgraphPools) {
@@ -1090,23 +1066,22 @@ export async function getV2CandidatePools({
   }
   const tokenAddresses = Array.from(tokenAddressesSet);
 
-  const buildTokenAddressesEnd = Date.now()
-  const metadataBuildTimeEnd = Date.now()
 
   log.info(
     `Getting the ${tokenAddresses.length} tokens within the ${subgraphPools.length} V2 pools we are considering`
   );
 
-  const tokenAccessorTimeStart = Date.now()
   const tokenAccessor = await tokenProvider.getTokens(tokenAddresses, {
     blockNumber,
   });
-  const tokenAccessorEnd = Date.now()
 
   const printV2SubgraphPool = (s: V2SubgraphPool) =>
     `${tokenAccessor.getTokenByAddress(s.token0.id)?.symbol ?? s.token0.id}/${
       tokenAccessor.getTokenByAddress(s.token1.id)?.symbol ?? s.token1.id
     }`;
+
+  const printV2SubgraphPoolAddress = (s: V2SubgraphPool) =>
+    `${s.token0.id}/${s.token1.id}`;
 
   log.info(
     {
@@ -1180,30 +1155,17 @@ export async function getV2CandidatePools({
   };
 
   const getV2CandidatePoolsEnd = Date.now()
-  
+
   CONTEXT['V2 GetCandidatePools'] = {
     duration: {
       blockedTokensTotalFetchTime: totalTimeFetchingBlockedTokens,
-      subgraphProviderGetPoolsDuration: subgraphProviderGetPoolsEnd - subgraphProviderGetPoolsStart,
-
-      topNDirectSwapsFetchDuration: topNDirectSwapsEnd - topNDirectSwapsStart,
-      allPoolsMapDuration: allPoolsMapEnd - allPoolsMapStart,
-      subgraphPoolsSortDuration: subgraphPoolsSortEnd - subgraphPoolsSortStart,
-      topByBaseTokenInOutDuration: topByBaseTokenInOutEnd - topByBaseTokenInOutStart,
-      secondHopTotalDuration: secondHopTotalEnd - secondHopTotalStart,
-
-      topByBaseETHTVLStartDuration: topByBaseEThTVLEnd - topByBaseETHTVLStart,
       totalDurationFetchingBlockedInTVL: totalDurationFetchingBlockedInTVL,
 
+      topByBaseETHTVLStartDuration: topByBaseEThTVLEnd - topByBaseETHTVLStart,
       tvlLoopTotalPoolsSeen: totalPoolsSeen,
       tvlLoopPotentialPoolsToLookAt: subgraphPoolsSorted.length,
 
-      tokenAccessorDuration: tokenAccessorEnd - tokenAccessorTimeStart,
       getPoolsDuration: getPoolsEnd - getPoolsStart,
-
-      metadataBuildTimeDuration: metadataBuildTimeEnd - metadataBuildTime,
-      buildSubgraphPoolsDuration: buildSubgraphPoolsEnd - buildSubgraphPoolsStart,
-      buildTokenAddressesDuration: buildTokenAddressesEnd - buildTokenAddressesStart,
 
       totalDuration: getV2CandidatePoolsEnd - getV2CandidatePoolsStart,
     },
@@ -1211,6 +1173,42 @@ export async function getV2CandidatePools({
       tokenAddresses: tokenAddresses.length,
       allPoolsRaw: allPoolsRaw.length,
       tokenPairs: tokenPairs.length,
+    },
+
+    whatDidINeed: {
+      topNEthQuoteToken,
+      wethAddress,
+      tokenIn: tokenIn.symbol,
+      tokenOut: tokenOut.symbol,
+      tradeType: routeType == TradeType.EXACT_INPUT ? 'EXACT_INPUT' : 'EXACT_OUTPUT',
+    },
+
+    poolsFound: {
+      topByBaseWithTokenIn: topByBaseWithTokenIn.map(printV2SubgraphPool),
+      topByBaseWithTokenOut: topByBaseWithTokenOut.map(printV2SubgraphPool),
+      topByTVL: topByTVL.map(printV2SubgraphPool),
+      topByTVLUsingTokenIn: topByTVLUsingTokenIn.map(printV2SubgraphPool),
+      topByTVLUsingTokenOut: topByTVLUsingTokenOut.map(printV2SubgraphPool),
+      topByTVLUsingTokenInSecondHops:
+        topByTVLUsingTokenInSecondHops.map(printV2SubgraphPool),
+      topByTVLUsingTokenOutSecondHops:
+        topByTVLUsingTokenOutSecondHops.map(printV2SubgraphPool),
+      topByDirectSwap: topByDirectSwapPool.map(printV2SubgraphPool),
+      topByEthQuotePool: topByEthQuoteTokenPool.map(printV2SubgraphPool),
+    },
+
+    poolsFoundByAddress: {
+      topByBaseWithTokenIn: topByBaseWithTokenIn.map(printV2SubgraphPoolAddress),
+      topByBaseWithTokenOut: topByBaseWithTokenOut.map(printV2SubgraphPoolAddress),
+      topByTVL: topByTVL.map(printV2SubgraphPoolAddress),
+      topByTVLUsingTokenIn: topByTVLUsingTokenIn.map(printV2SubgraphPoolAddress),
+      topByTVLUsingTokenOut: topByTVLUsingTokenOut.map(printV2SubgraphPoolAddress),
+      topByTVLUsingTokenInSecondHops:
+        topByTVLUsingTokenInSecondHops.map(printV2SubgraphPoolAddress),
+      topByTVLUsingTokenOutSecondHops:
+        topByTVLUsingTokenOutSecondHops.map(printV2SubgraphPoolAddress),
+      topByDirectSwap: topByDirectSwapPool.map(printV2SubgraphPoolAddress),
+      topByEthQuotePool: topByEthQuoteTokenPool.map(printV2SubgraphPoolAddress),
     },
 
     whatDidIFind: {
@@ -1221,7 +1219,7 @@ export async function getV2CandidatePools({
       foundTopByTVLUsingTokenIn,
       foundTopByTVLUsingTokenOut,
     },
-    whatDidIFindNumbers: {
+    howManyDidIFind: {
       topByBaseWithTokenInPoolsFound,
       topByBaseWithTokenOutPoolsFound,
       topByTVLFound: topByTVL.length,
