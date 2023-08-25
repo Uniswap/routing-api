@@ -47,7 +47,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    const { chainId, metric, log } = params.requestInjected
+    const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
@@ -89,6 +89,17 @@ export class QuoteHandler extends APIGLambdaHandler<
       // This metric is logged after calling the internal handler to correlate with the status metrics
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
     }
 
     return result
@@ -547,8 +558,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       amount,
       routeString,
       swapRoute,
-      quoteSpeed,
-      intent
     )
 
     return {
@@ -570,8 +579,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     amount: CurrencyAmount<Currency>,
     routeString: string,
     swapRoute: SwapRoute,
-    quoteSpeed?: string,
-    intent?: string
   ): void {
     const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
     const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
@@ -600,17 +607,6 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       metric.putMetric(
         `GET_QUOTE_LATENCY_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
-        Date.now() - startTime,
-        MetricLoggerUnit.Milliseconds
-      )
-
-      metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
-        Date.now() - startTime,
-        MetricLoggerUnit.Milliseconds
-      )
-      metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
         Date.now() - startTime,
         MetricLoggerUnit.Milliseconds
       )
