@@ -98,5 +98,4 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
       }
     }
   }
-
 }
