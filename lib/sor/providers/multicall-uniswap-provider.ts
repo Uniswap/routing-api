@@ -8,6 +8,7 @@ import { UniswapInterfaceMulticall } from '../types/v3/UniswapInterfaceMulticall
 import { UniswapInterfaceMulticall__factory } from '../types/v3/factories/UniswapInterfaceMulticall__factory';
 import { UNISWAP_MULTICALL_ADDRESSES } from '../util/addresses';
 import { log } from '../util/log';
+import { CONTEXT } from '../../handlers/context'
 
 import {
   CallMultipleFunctionsOnSameContractParams,
@@ -158,6 +159,7 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
       additionalConfig?.gasLimitPerCallOverride ?? this.gasLimitPerCall;
     const blockNumberOverride = providerConfig?.blockNumber ?? undefined;
 
+    const beforeBuildCalls = Date.now();
     const calls = _.map(functionParams, (functionParam) => {
       const callData = contractInterface.encodeFunctionData(
         fragment,
@@ -170,19 +172,23 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
         gasLimit: gasLimitPerCall,
       };
     });
+    const afterBuildCalls = Date.now();
 
     log.debug(
       { calls },
       `About to multicall for ${functionName} at address ${address} with ${functionParams.length} different sets of params`
     );
 
+    const beforeMulticall = Date.now();
     const { blockNumber, returnData: aggregateResults } =
       await this.multicallContract.callStatic.multicall(calls, {
         blockTag: blockNumberOverride,
       });
+    const afterMulticall = Date.now();
 
     const results: Result<TReturn>[] = [];
 
+    const beforeGasUsed = Date.now();
     const gasUsedForSuccess: number[] = [];
     for (let i = 0; i < aggregateResults.length; i++) {
       const { success, returnData, gasUsed } = aggregateResults[i]!;
@@ -210,11 +216,19 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
         ) as unknown as TReturn,
       });
     }
+    const afterGasUsed = Date.now();
 
     log.debug(
       { results, functionName, address },
       `Results for multicall for ${functionName} at address ${address} with ${functionParams.length} different sets of params. Results as of block ${blockNumber}`
     );
+
+    CONTEXT['MulticallContract'] = {
+      buildCalls: afterBuildCalls - beforeBuildCalls,
+      multicall: afterMulticall - beforeMulticall,
+      gasUsed: afterGasUsed - beforeGasUsed,
+    }
+
     return {
       blockNumber,
       results,

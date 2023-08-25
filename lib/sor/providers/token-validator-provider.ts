@@ -7,6 +7,7 @@ import { log, WRAPPED_NATIVE_CURRENCY } from '../util';
 import { ICache } from './cache';
 import { IMulticallProvider } from './multicall-provider';
 import { ProviderConfig } from './provider';
+import { CONTEXT } from '../../handlers/context'
 
 const DEFAULT_ALLOWLIST = new Set<string>([
   // RYOSHI. Does not allow transfers between contracts so fails validation.
@@ -70,15 +71,18 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
     providerConfig?: ProviderConfig
   ): Promise<TokenValidationResults> {
     const tokenAddressToToken = _.keyBy(tokens, 'address');
+    const beforeMap = Date.now();
     const addressesRaw = _(tokens)
       .map((token) => token.address)
       .uniq()
       .value();
+    const afterMap = Date.now();
 
     const addresses: string[] = [];
     const tokenToResult: { [tokenAddress: string]: TokenValidationResult } = {};
 
     // Check if we have cached token validation results for any tokens.
+    const beforeValidationCache = Date.now();
     for (const address of addressesRaw) {
       if (
         await this.tokenValidationCache.has(
@@ -93,6 +97,7 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
         addresses.push(address);
       }
     }
+    const afterValidationCache = Date.now();
 
     log.info(
       `Got token validation results for ${
@@ -100,10 +105,13 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
       } tokens from cache. Getting ${addresses.length} on-chain.`
     );
 
+    const beforeFunctionParams = Date.now();
     const functionParams = _(addresses)
       .map((address) => [address, this.BASES, this.amountToFlashBorrow])
       .value() as [string, string[], string][];
+    const afterFunctionParams = Date.now();
 
+    const beforeMulticall = Date.now();
     // We use the validate function instead of batchValidate to avoid poison pill problem.
     // One token that consumes too much gas could cause the entire batch to fail.
     const multicallResult =
@@ -120,7 +128,9 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
           gasLimitPerCallOverride: this.gasLimitPerCall,
         },
       });
+    const afterMulticall = Date.now();
 
+    const beforeIterate = Date.now();
     for (let i = 0; i < multicallResult.results.length; i++) {
       const resultWrapper = multicallResult.results[i]!;
       const tokenAddress = addresses[i]!;
@@ -157,6 +167,15 @@ export class TokenValidatorProvider implements ITokenValidatorProvider {
         this.CACHE_KEY(this.chainId, token.address.toLowerCase()),
         tokenToResult[token.address.toLowerCase()]!
       );
+    }
+    const afterIterate = Date.now();
+
+    CONTEXT['TokenValidatorProvider.validateTokens'] = {
+      mapLatency: afterMap - beforeMap,
+      validationCacheLatency: afterValidationCache - beforeValidationCache,
+      functionParamsLatency: afterFunctionParams - beforeFunctionParams,
+      multicallLatency: afterMulticall - beforeMulticall,
+      iterateLatency: afterIterate - beforeIterate,
     }
 
     return {

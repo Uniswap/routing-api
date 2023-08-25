@@ -152,10 +152,15 @@ export abstract class BaseQuoter<
 
     log.info(`Running token validator on ${pools.length} pools`)
 
+    const beforeFlatMapTokens = Date.now()
     const tokens = _.flatMap(pools, (pool) => [pool.token0, pool.token1])
+    const afterFlatMapTokens = Date.now()
 
+    const beforeValidation = Date.now()
     const tokenValidationResults = await this.tokenValidatorProvider.validateTokens(tokens)
+    const afterValidation = Date.now()
 
+    const beforeFilterPools = Date.now()
     const poolsFiltered = _.filter(pools, (pool: T) => {
       const token0Validation = tokenValidationResults.getValidationByToken(pool.token0)
       const token1Validation = tokenValidationResults.getValidationByToken(pool.token1)
@@ -173,6 +178,13 @@ export abstract class BaseQuoter<
 
       return !token0Invalid && !token1Invalid
     })
+    const afterFilterPools = Date.now()
+
+    CONTEXT['BaseQuoter.ApplyTokenValidation'] = {
+      flatMapTokens: afterFlatMapTokens - beforeFlatMapTokens,
+      validation: afterValidation - beforeValidation,
+      filterPools: afterFilterPools - beforeFilterPools,
+    }
 
     return poolsFiltered
   }
