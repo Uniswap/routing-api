@@ -1,9 +1,9 @@
-import { IV3PoolProvider, V3PoolAccessor } from '@uniswap/smart-order-router'
+import { IV3PoolProvider, V3PoolAccessor } from '../../../../sor'
 import { ChainId, Token } from '@uniswap/sdk-core'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { IDynamoCache } from '../cache-dynamo'
 import { DynamoCachingV3Pool } from './cache-dynamo-pool'
+import { ProviderConfig } from '../../../../sor/providers/provider'
 
 export class DynamoDBCachingV3PoolProvider implements IV3PoolProvider {
   private readonly dynamoCache: IDynamoCache<string, number, Pool>

@@ -7,7 +7,7 @@ import {
   NATIVE_NAMES_BY_ID,
   nativeOnChain,
   ProtocolPoolSelection,
-} from '@uniswap/smart-order-router'
+} from '../sor'
 import Logger from 'bunyan'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
@@ -76,7 +76,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNTokenInOut: 5,
           topNSecondHop: 2,
           topNWithEachBaseToken: 2,
-          topNWithBaseToken: 6,
+          topNWithBaseToken: 6
         },
         v3PoolSelection: {
           topN: 2,
@@ -87,7 +87,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
             ['0x5f98805a4e8be255a32880fdec7f6728c6568ba0', 2], // LUSD
           ]),
           topNWithEachBaseToken: 3,
-          topNWithBaseToken: 5,
+          topNWithBaseToken: 5
         },
         maxSwapsPerPath: 3,
         minSplits: 1,

@@ -1,6 +1,6 @@
-import { IV2PoolProvider, V2PoolAccessor } from '@uniswap/smart-order-router'
 import { Token } from '@uniswap/sdk-core'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { ProviderConfig } from '../../../../sor/providers/provider'
+import { IV2PoolProvider, V2PoolAccessor } from '../../../../sor'
 
 export class V2DebugCachingPoolProvider implements IV2PoolProvider {
   cachingPoolProvider: IV2PoolProvider

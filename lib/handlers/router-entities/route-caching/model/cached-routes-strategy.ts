@@ -1,6 +1,6 @@
 import { ChainId, Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { CachedRoutesBucket } from './cached-routes-bucket'
-import { CacheMode } from '@uniswap/smart-order-router'
+import { CacheMode } from '../../../../sor'
 
 interface CachedRoutesStrategyArgs {
   pair: string

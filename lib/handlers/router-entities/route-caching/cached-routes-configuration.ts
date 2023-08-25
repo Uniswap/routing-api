@@ -1,5 +1,5 @@
 import { ChainId, TradeType } from '@uniswap/sdk-core'
-import { CacheMode } from '@uniswap/smart-order-router'
+import { CacheMode } from '../../../sor'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesBucket } from './model/cached-routes-bucket'

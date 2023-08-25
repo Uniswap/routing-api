@@ -1,5 +1,5 @@
-import { IMetric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { MetricsLogger as AWSEmbeddedMetricsLogger } from 'aws-embedded-metrics'
+import { IMetric, MetricLoggerUnit } from '../../sor'
 
 export class AWSMetricsLogger implements IMetric {
   constructor(private awsMetricLogger: AWSEmbeddedMetricsLogger) {}

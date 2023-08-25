@@ -1,10 +1,4 @@
-import {
-  CachingTokenListProvider,
-  ITokenListProvider,
-  ITokenProvider,
-  log,
-  NodeJSCache,
-} from '@uniswap/smart-order-router'
+import { CachingTokenListProvider, ITokenListProvider, ITokenProvider, log, NodeJSCache } from '../../sor'
 import { ChainId } from '@uniswap/sdk-core'
 import { TokenList } from '@uniswap/token-lists'
 import S3 from 'aws-sdk/clients/s3'

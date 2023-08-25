@@ -31,7 +31,7 @@ import {
   V3PoolProvider,
   IRouteCachingProvider,
   CachingV2PoolProvider,
-} from '@uniswap/smart-order-router'
+} from '../sor'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { ethers } from 'ethers'

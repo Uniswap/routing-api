@@ -1,5 +1,5 @@
-import { SimulationStatus } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
+import { SimulationStatus } from '../../../sor'
 
 export const simulationStatusToString = (simulationStatus: SimulationStatus | undefined, log: Logger) => {
   switch (simulationStatus) {

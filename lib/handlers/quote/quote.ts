@@ -14,7 +14,7 @@ import {
   SimulationStatus,
   IMetric,
   ID_TO_NETWORK_NAME,
-} from '@uniswap/smart-order-router'
+} from '../../sor'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
@@ -36,6 +36,10 @@ import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 
+import { Logger as PowertoolsLogger } from '@aws-lambda-powertools/logger'
+import { CONTEXT } from '../context'
+
+const powertoolsLogger = new PowertoolsLogger({ serviceName: 'QuoteHandler' })
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
   RequestInjected<IRouter<AlphaRouterConfig>>,
@@ -53,6 +57,10 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     try {
       result = await this.handleRequestInternal(params)
+
+      powertoolsLogger.info('$$CONTEXT$$', {
+        context: CONTEXT,
+      })
 
       switch (result.statusCode) {
         case 200:
@@ -122,6 +130,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         debugRoutingConfig,
         unicornSecret,
         intent,
+        cannedRoutingConfig,
       },
       requestInjected: {
         router,
@@ -320,6 +329,15 @@ export class QuoteHandler extends APIGLambdaHandler<
       ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
       : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
 
+    let overrideRoutingConfig = {}
+    if (cannedRoutingConfig) {
+      overrideRoutingConfig = JSON.parse(cannedRoutingConfig)
+      powertoolsLogger.info('Using canned routing config', {
+        overrideRoutingConfig,
+      })
+    } else {
+      powertoolsLogger.info('No canned routing config found; using whatever the default is')
+    }
     switch (type) {
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
@@ -345,7 +363,14 @@ export class QuoteHandler extends APIGLambdaHandler<
           }. Chain: ${chainId}`
         )
 
-        swapRoute = await router.route(amount, currencyOut, TradeType.EXACT_INPUT, swapParams, routingConfig)
+        swapRoute = await router.route(
+          amount,
+          currencyOut,
+          TradeType.EXACT_INPUT,
+          swapParams,
+          routingConfig,
+          overrideRoutingConfig
+        )
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))

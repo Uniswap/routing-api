@@ -1,11 +1,11 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { setGlobalLogger } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
 import { chainProtocols } from './cache-config'
+import { setGlobalLogger } from '../sor'
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
   const chainId: ChainId = parseInt(process.env.chainId!)

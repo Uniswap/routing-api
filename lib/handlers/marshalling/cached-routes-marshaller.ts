@@ -1,8 +1,8 @@
-import { CachedRoutes } from '@uniswap/smart-order-router'
 import { ChainId, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { MarshalledToken, TokenMarshaller } from './token-marshaller'
 import { CachedRouteMarshaller, MarshalledCachedRoute } from './cached-route-marshaller'
+import { CachedRoutes } from '../../sor'
 
 export interface MarshalledCachedRoutes {
   routes: MarshalledCachedRoute[]

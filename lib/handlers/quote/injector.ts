@@ -7,7 +7,7 @@ import {
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
-} from '@uniswap/smart-order-router'
+} from '../../sor'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -16,6 +16,8 @@ import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
 import { QuoteQueryParams } from './schema/quote-schema'
+import { clearContext } from '../context'
+
 export class QuoteHandlerInjector extends InjectorSOR<
   IRouter<AlphaRouterConfig | LegacyRoutingConfig>,
   QuoteQueryParams
@@ -29,6 +31,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
     log: Logger,
     metricsLogger: MetricsLogger
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
+    clearContext()
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
     // Sample 10% of all requests at the INFO log level for debugging purposes.

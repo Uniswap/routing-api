@@ -1,5 +1,4 @@
 import pinataSDK from '@pinata/sdk'
-import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { Route53, STS } from 'aws-sdk'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -7,6 +6,7 @@ import fs from 'fs'
 import _ from 'lodash'
 import path from 'path'
 import { chainProtocols } from './cache-config'
+import { ID_TO_NETWORK_NAME } from '../sor'
 
 const PARENT = '/tmp/temp/'
 

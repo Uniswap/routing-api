@@ -1,6 +1,6 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
+import { V3SubgraphProvider, V2SubgraphProvider } from '../sor'
 
 export const chainProtocols = [
   // V3.
