@@ -14,6 +14,7 @@ import {
   usdGasTokensByChain,
 } from '../gas-model';
 import { ProviderConfig } from '../../../../providers/provider';
+import { CONTEXT } from '../../../../../handlers/context'
 
 // Constant cost for doing any swap regardless of pools.
 export const BASE_SWAP_COST = BigNumber.from(135000); // 115000, bumped up by 20_000 @eric 7/8/2022
@@ -51,11 +52,17 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
     providerConfig
   }: BuildV2GasModelFactoryType): Promise<IGasModel<V2RouteWithValidQuote>> {
     if (token.equals(WRAPPED_NATIVE_CURRENCY[chainId]!)) {
+      const beforeGetUsdPool = Date.now();
       const usdPool: Pair = await this.getHighestLiquidityUSDPool(
         chainId,
         poolProvider,
         providerConfig
       );
+      const afterGetUsdPool = Date.now();
+
+      CONTEXT['V2GasModel.wrappedNativeCurrency'] = {
+        getUsdPool: afterGetUsdPool - beforeGetUsdPool,
+      }
 
       return {
         estimateGasCost: (routeWithValidQuote: V2RouteWithValidQuote) => {
@@ -87,23 +94,42 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
 
     // If the quote token is not WETH, we convert the gas cost to be in terms of the quote token.
     // We do this by getting the highest liquidity <token>/ETH pool.
-    const ethPool: Pair | null = await this.getEthPool(
+    const beforeGetEthPool = Date.now()
+    let afterGetEthPool = 0
+    const ethPoolPromise = this.getEthPool(
       chainId,
       token,
       poolProvider,
       providerConfig
-    );
+    ).then((res) => {
+      afterGetEthPool = Date.now();
+      return res;
+    });
+
+    const beforeGetUsdPool = Date.now()
+    let afterGetUsdPool = 0
+    const usdPoolPromise = this.getHighestLiquidityUSDPool(
+      chainId,
+      poolProvider,
+      providerConfig
+    ).then((res) => {
+      afterGetUsdPool = Date.now();
+      return res;
+    });
+
+    const [ethPool, usdPool] = await Promise.all([ethPoolPromise, usdPoolPromise]);
+
     if (!ethPool) {
       log.info(
         'Unable to find ETH pool with the quote token to produce gas adjusted costs. Route will not account for gas.'
       );
     }
 
-    const usdPool: Pair = await this.getHighestLiquidityUSDPool(
-      chainId,
-      poolProvider,
-      providerConfig
-    );
+    CONTEXT['V2GasModel.notWrapped'] = {
+      getEthPool: afterGetEthPool - beforeGetEthPool,
+      getUsdPool: afterGetUsdPool - beforeGetUsdPool,
+      foundEthPool: !!ethPool,
+    }
 
     return {
       estimateGasCost: (routeWithValidQuote: V2RouteWithValidQuote) => {
