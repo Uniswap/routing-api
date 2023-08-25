@@ -35,6 +35,8 @@ import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
+import { MetricsLogger } from 'aws-embedded-metrics'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -646,5 +648,39 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
     return QuoteResponseSchemaJoi
+  }
+
+  protected override async processRequestInEntirety(
+    metric: MetricsLogger,
+    event: APIGatewayProxyEvent,
+    context: Context
+  ): Promise<[APIGatewayProxyResult, QuoteResponse | null]> {
+    const topLevelRequestStartTime = Date.now()
+
+    const aggregateResult = await super.processRequestInEntirety(metric, event, context)
+    const [_, quoteResponseOrNull] = aggregateResult
+
+    // fwiw, we are only interested in a completed request, not a failed one
+    // there are many reasons the top-level request processing can fail,
+    // including input validations, etc.
+    // Our focus on is the investigation of the top-level quote latencies,
+    // so we should focus on the successful ones
+    if (quoteResponseOrNull) {
+      // once the metric is here,
+      // it already got instantiated in the base handler,
+      // with the same namespace as in the quote handler
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_TOP_LEVEL_${quoteResponseOrNull.hitsCache ? 'CACHED_ROUTES_HIT' : 'CACHED_ROUTES_MISS'}`,
+        Date.now() - topLevelRequestStartTime,
+        MetricLoggerUnit.Milliseconds
+      )
+      metric.putMetric(
+        `GET_QUOTE_REQUESTED_TOP_LEVEL_${quoteResponseOrNull.hitsCache ? 'CACHED_ROUTES_HIT' : 'CACHED_ROUTES_MISS'}`,
+        1,
+        MetricLoggerUnit.Count
+      )
+    }
+
+    return aggregateResult
   }
 }
