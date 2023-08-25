@@ -545,7 +545,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       chainId,
       amount,
       routeString,
-      swapRoute
+      swapRoute,
+      quoteSpeed,
+      intent
     )
 
     return {
@@ -566,7 +568,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string,
-    swapRoute: SwapRoute
+    swapRoute: SwapRoute,
+    quoteSpeed?: string,
+    intent?: string
   ): void {
     const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
     const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
@@ -598,6 +602,18 @@ export class QuoteHandler extends APIGLambdaHandler<
         Date.now() - startTime,
         MetricLoggerUnit.Milliseconds
       )
+
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
+
       // Create a hashcode from the routeString, this will indicate that a different route is being used
       // hashcode function copied from: https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=4261728#gistcomment-4261728
       const routeStringHash = Math.abs(
