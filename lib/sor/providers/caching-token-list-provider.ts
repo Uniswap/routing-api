@@ -37,10 +37,6 @@ export class CachingTokenListProvider
       tokenInfo.decimals
     }/${tokenInfo.symbol}/${tokenInfo.name}`;
 
-  private CHAIN_ID_TO_CHAIN_NAME: { [chainId: ChainId]: string } = {
-    [ChainId.MAINNET]: 'MAINNET',
-  }
-
   private chainId: ChainId;
   private chainToTokenInfos: ChainToTokenInfoList;
   private chainSymbolToTokenInfo: TokenInfoMapping;
@@ -202,7 +198,7 @@ export class CachingTokenListProvider
   }
 
   public async getTokenByAddress(address: string): Promise<Token | undefined> {
-    if (!this.chainAddressToTokenInfo[]) {
+    if (!this.chainAddressToTokenInfo[this.chainId.toString()]) {
       return undefined;
     }
 
