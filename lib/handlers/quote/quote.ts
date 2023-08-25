@@ -417,6 +417,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       methodParameters,
       blockNumber,
       simulationStatus,
+      hitsCachedRoute,
     } = swapRoute
 
     if (simulationStatus == SimulationStatus.Failed) {
@@ -543,6 +544,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       route: routeResponse,
       routeString,
       quoteId,
+      hitsCachedRoutes: hitsCachedRoute,
     }
 
     this.logRouteMetrics(
