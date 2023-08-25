@@ -35,6 +35,7 @@ import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
+import { MetricsLogger } from 'aws-embedded-metrics'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -46,7 +47,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    const { chainId, metric, log } = params.requestInjected
+    const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
@@ -88,6 +89,17 @@ export class QuoteHandler extends APIGLambdaHandler<
       // This metric is logged after calling the internal handler to correlate with the status metrics
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
+      metric.putMetric(
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
+        Date.now() - startTime,
+        MetricLoggerUnit.Milliseconds
+      )
     }
 
     return result
@@ -545,9 +557,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       chainId,
       amount,
       routeString,
-      swapRoute,
-      quoteSpeed,
-      intent
+      swapRoute
     )
 
     return {
@@ -568,9 +578,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string,
-    swapRoute: SwapRoute,
-    quoteSpeed?: string,
-    intent?: string
+    swapRoute: SwapRoute
   ): void {
     const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
     const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
@@ -599,17 +607,6 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       metric.putMetric(
         `GET_QUOTE_LATENCY_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
-        Date.now() - startTime,
-        MetricLoggerUnit.Milliseconds
-      )
-
-      metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
-        Date.now() - startTime,
-        MetricLoggerUnit.Milliseconds
-      )
-      metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
         Date.now() - startTime,
         MetricLoggerUnit.Milliseconds
       )
@@ -646,5 +643,13 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
     return QuoteResponseSchemaJoi
+  }
+
+  protected afterHandler(metric: MetricsLogger, response: QuoteResponse, requestStart: number): void {
+    metric.putMetric(
+      `GET_QUOTE_LATENCY_TOP_LEVEL_${response.hitsCachedRoutes ? 'CACHED_ROUTES_HIT' : 'CACHED_ROUTES_MISS'}`,
+      Date.now() - requestStart,
+      MetricLoggerUnit.Milliseconds
+    )
   }
 }

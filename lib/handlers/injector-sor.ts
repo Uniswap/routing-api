@@ -74,6 +74,8 @@ export interface RequestInjected<Router> extends BaseRInj {
   tokenProvider: ITokenProvider
   tokenListProvider: ITokenListProvider
   router: Router
+  quoteSpeed?: string
+  intent?: string
 }
 
 export type ContainerDependencies = {
