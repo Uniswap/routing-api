@@ -270,16 +270,27 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
       );
     }
 
+    const beforeMapPools = Date.now();
     const usdPools = _.map<Token, [Token, Token]>(usdTokens, (usdToken) => [
       usdToken,
       WRAPPED_NATIVE_CURRENCY[chainId]!,
     ]);
+    const afterMapPools = Date.now();
+
+    const beforeGetPool = Date.now();
     const poolAccessor = await poolProvider.getPools(usdPools, providerConfig);
+    const afterGetPools = Date.now();
+
+    const beforeGetAllPools = Date.now();
     const poolsRaw = poolAccessor.getAllPools();
+    const afterGetAllPools = Date.now();
+
+    const beforeFilterPools = Date.now();
     const pools = _.filter(
       poolsRaw,
       (pool) => pool.reserve0.greaterThan(0) && pool.reserve1.greaterThan(0)
     );
+    const afterFilterPools = Date.now();
 
     if (pools.length == 0) {
       log.error(
@@ -289,6 +300,7 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
       throw new Error(`Can't find USD/WETH pool for computing gas costs.`);
     }
 
+    const beforeMaxPools = Date.now();
     const maxPool = _.maxBy(pools, (pool) => {
       if (pool.token0.equals(WRAPPED_NATIVE_CURRENCY[chainId]!)) {
         return parseFloat(pool.reserve0.toSignificant(2));
@@ -296,6 +308,15 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
         return parseFloat(pool.reserve1.toSignificant(2));
       }
     }) as Pair;
+    const afterMaxPools = Date.now();
+
+    CONTEXT['V2GasModel.HighestUSD'] = {
+      mapPools: afterMapPools - beforeMapPools,
+      getPools: afterGetPools - beforeGetPool,
+      getAllPools: afterGetAllPools - beforeGetAllPools,
+      filterPools: afterFilterPools - beforeFilterPools,
+      maxPools: afterMaxPools - beforeMaxPools,
+    }
 
     return maxPool;
   }
