@@ -47,7 +47,6 @@ import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traff
 import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { deriveProviderName } from './evm/provider/ProviderName'
-import { V2DebugCachingPoolProvider } from './pools/pool-caching/v2/v2-debug-caching-pool-provider'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
