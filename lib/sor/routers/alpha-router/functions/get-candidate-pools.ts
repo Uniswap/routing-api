@@ -695,6 +695,22 @@ export async function getV2CandidatePools({
       continue
     }
 
+    // Only consider pools where neither tokens are in the blocked token list.
+    if (blockedTokenListProvider) {
+       const beforeBlockedTokens = Date.now()
+         const [token0InBlocklist, token1InBlocklist] = await Promise.all([
+          blockedTokenListProvider.getTokenByAddress(subgraphPool.token0.id),
+           blockedTokenListProvider.getTokenByAddress(subgraphPool.token1.id),
+         ])
+       const afterBlockedTokens = Date.now()
+      totalDurationFetchingBlockedInTVL += afterBlockedTokens - beforeBlockedTokens
+      totalTimeFetchingBlockedTokens += afterBlockedTokens - beforeBlockedTokens
+
+         if (token0InBlocklist || token1InBlocklist) {
+          continue
+         }
+    }
+
     const tokenInToken0TopByBase = topByBaseWithTokenInMap.get(subgraphPool.token0.id)
     if (
       topByBaseWithTokenInPoolsFound < topNWithBaseToken &&
@@ -868,6 +884,20 @@ export async function getV2CandidatePools({
     if (poolAddressesSoFar.has(subgraphPool.id)) {
       continue
     }
+
+    // Only consider pools where neither tokens are in the blocked token list.
+       if (blockedTokenListProvider) {
+            const beforeBlockedTokens = Date.now()
+              const [token0InBlocklist, token1InBlocklist] = await Promise.all([
+                blockedTokenListProvider.getTokenByAddress(subgraphPool.token0.id),
+                blockedTokenListProvider.getTokenByAddress(subgraphPool.token1.id),
+              ])
+           const afterBlockedTokens = Date.now()
+           totalTimeFetchingBlockedTokens += afterBlockedTokens - beforeBlockedTokens
+         if (token0InBlocklist || token1InBlocklist) {
+           continue
+            }
+         }
 
     const tokenInToken0SecondHop = topByTVLUsingTokenInSecondHopsMap.get(subgraphPool.token0.id)
 
