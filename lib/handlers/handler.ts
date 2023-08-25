@@ -224,7 +224,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
     )
   }
 
-  protected abstract afterHandler(metric: MetricsLogger, response: Res, requestStart: number): void
+  protected afterHandler(_: MetricsLogger, __: Res, ___: number): void {}
 
   public abstract handleRequest(
     params: HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams>
