@@ -79,11 +79,8 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     })
 
-    const { cachedRoutesDynamoDb, cachingRequestFlagDynamoDb, cachedV3PoolsDynamoDb } = new RoutingDatabaseStack(
-      this,
-      'RoutingDatabaseStack',
-      {}
-    )
+    const { cachedRoutesDynamoDb, cachingRequestFlagDynamoDb, cachedV3PoolsDynamoDb, cachedV2PairsDynamoDb } =
+      new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
       poolCacheBucket,
@@ -100,6 +97,7 @@ export class RoutingAPIStack extends cdk.Stack {
       cachedRoutesDynamoDb,
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
+      cachedV2PairsDynamoDb,
       unicornSecret,
     })
 

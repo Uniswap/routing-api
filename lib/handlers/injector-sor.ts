@@ -47,7 +47,7 @@ import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traff
 import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { deriveProviderName } from './evm/provider/ProviderName'
-import { V2DebugCachingPoolProvider } from './pools/pool-caching/v2/v2-debug-caching-pool-provider'
+import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -123,6 +123,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       CACHED_ROUTES_TABLE_NAME,
       AWS_LAMBDA_FUNCTION_NAME,
       CACHING_REQUEST_FLAG_TABLE_NAME,
+      V2_PAIRS_CACHE_TABLE_NAME,
     } = process.env
 
     const dependenciesByChain: {
@@ -187,15 +188,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           sourceOfTruthPoolProvider: noCacheV3PoolProvider,
         })
 
-        const nonCachingv2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
-        const cachingV2PoolProvider = new CachingV2PoolProvider(
+        const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
+        const v2PoolProvider = new CachingV2PoolProvider(
           chainId,
-          nonCachingv2PoolProvider,
-          // make TTL lower than average of L2 chain block confirmation time,
-          // so that we know the latency improvement is the bottom line not top line
-          new NodeJSCache(new NodeCache({ stdTTL: 1, useClones: false }))
+          underlyingV2PoolProvider,
+          new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
         )
-        const v2PoolProvider = new V2DebugCachingPoolProvider(cachingV2PoolProvider, nonCachingv2PoolProvider)
 
         const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] = await Promise.all(
           [
