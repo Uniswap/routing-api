@@ -224,9 +224,7 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
     )
   }
 
-  protected abstract afterHandler(metric: MetricsLogger,
-                                  response: Res,
-                                  requestStart: number): void
+  protected abstract afterHandler(metric: MetricsLogger, response: Res, requestStart: number): void
 
   public abstract handleRequest(
     params: HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams>
@@ -245,10 +243,10 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
     log: Logger
   ): Promise<
     | {
-    state: 'valid'
-    requestBody: ReqBody
-    requestQueryParams: ReqQueryParams
-  }
+        state: 'valid'
+        requestBody: ReqBody
+        requestQueryParams: ReqQueryParams
+      }
     | { state: 'invalid'; errorResponse: APIGatewayProxyResult }
   > {
     let bodyRaw: any

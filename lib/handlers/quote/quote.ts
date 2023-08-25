@@ -557,7 +557,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       chainId,
       amount,
       routeString,
-      swapRoute,
+      swapRoute
     )
 
     return {
@@ -578,7 +578,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string,
-    swapRoute: SwapRoute,
+    swapRoute: SwapRoute
   ): void {
     const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
     const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
