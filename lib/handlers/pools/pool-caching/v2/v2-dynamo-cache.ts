@@ -81,7 +81,7 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
           cacheKey: key,
           block: value.block,
           item: binaryPair,
-          ttl: this.DEFAULT_TTL,
+          ttl: Math.floor(Date.now() / 1000) + this.DEFAULT_TTL,
         },
       }
 
