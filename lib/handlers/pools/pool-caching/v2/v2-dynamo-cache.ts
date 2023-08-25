@@ -25,10 +25,10 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
         // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk',
         ExpressionAttributeNames: {
-          '#pk': 'cacheKey'
+          '#pk': 'cacheKey',
         },
         ExpressionAttributeValues: {
-          ':pk': key
+          ':pk': key,
         },
         ScanIndexForward: false, // Reverse order to retrieve most recent item first
         Limit: Math.max(1),
@@ -47,27 +47,26 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
         // Finally we unmarshal that JSON into a `Pair` object
         return {
           pair: PairMarshaller.unmarshal(pairJson),
-          block: record.block
-        };
+          block: record.block,
+        }
       } else {
-        log.info('[V2DynamoCache] No V2Pair found in cache');
+        log.info('[V2DynamoCache] No V2Pair found in cache')
         return
       }
-
     } catch (e) {
-      log.error({e}, '[V2DynamoCache] Error calling dynamoDB')
+      log.error({ e }, '[V2DynamoCache] Error calling dynamoDB')
     }
     return Promise.resolve(undefined)
   }
 
   has(key: string): Promise<boolean> {
-    return this.get(key).then((value) => value != undefined);
+    return this.get(key).then((value) => value != undefined)
   }
 
   async set(key: string, value: { pair: Pair; block?: number }): Promise<boolean> {
     if (value.block == undefined) {
-      log.error('[V2DynamoCache] We can only cache values with a block number');
-      return false;
+      log.error('[V2DynamoCache] We can only cache values with a block number')
+      return false
     } else {
       // Marshal the Pair object in preparation for storing in DynamoDB
       const marshalledPair = PairMarshaller.marshal(value.pair)

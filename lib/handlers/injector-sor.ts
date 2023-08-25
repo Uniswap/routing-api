@@ -123,7 +123,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       CACHED_ROUTES_TABLE_NAME,
       AWS_LAMBDA_FUNCTION_NAME,
       CACHING_REQUEST_FLAG_TABLE_NAME,
-      V2_PAIRS_CACHE_TABLE_NAME
+      V2_PAIRS_CACHE_TABLE_NAME,
     } = process.env
 
     const dependenciesByChain: {

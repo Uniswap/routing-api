@@ -88,6 +88,5 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
-
   }
 }
