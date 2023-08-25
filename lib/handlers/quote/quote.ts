@@ -647,7 +647,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   protected afterHandler(metric: MetricsLogger, response: QuoteResponse, requestStart: number): void {
     metric.putMetric(
-      `GET_QUOTE_LATENCY_TOP_LEVEL_${response.hitsCache ? 'CACHED_ROUTES_HIT' : 'CACHED_ROUTES_MISS'}`,
+      `GET_QUOTE_LATENCY_TOP_LEVEL_${response.hitsCachedRoutes ? 'CACHED_ROUTES_HIT' : 'CACHED_ROUTES_MISS'}`,
       Date.now() - requestStart,
       MetricLoggerUnit.Milliseconds
     )

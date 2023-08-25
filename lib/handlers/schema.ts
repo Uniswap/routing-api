@@ -81,5 +81,5 @@ export type QuoteResponse = {
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
   routeString: string
   methodParameters?: MethodParameters
-  hitsCache?: boolean
+  hitsCachedRoutes?: boolean
 }
