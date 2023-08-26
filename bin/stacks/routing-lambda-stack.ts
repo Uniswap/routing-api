@@ -87,6 +87,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         minify: true,
         sourceMap: true,
       },
+
+      awsSdkConnectionReuse: true,
+
       description: 'Routing Lambda',
       environment: {
         VERSION: '5',
