@@ -370,7 +370,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       TableName: this.routesCachingRequestFlagTableName,
       // We use a ratio to get a range of amounts that are close to the amount we are thinking about inserting
       // If there's an item in the table which range covers our amount, we don't need to send a caching request
-      KeyConditionExpression: '#pk = :pk AND #amount >= :amount AND #amount < :amount_ratio)',
+      KeyConditionExpression: '#pk = :pk AND #amount >= :amount AND #amount < :amount_ratio',
       ExpressionAttributeNames: {
         '#pk': 'pairTradeTypeChainId',
         '#amount': 'amount',
