@@ -59,6 +59,11 @@ interface CachedRouteDbEntry {
   }
 }
 
+enum CachedRoutesSource {
+  CachedRoutes = 'CachedRoutes',
+  RoutesDb = 'RoutesDb',
+}
+
 const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
@@ -180,7 +185,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         const result = await this.ddbClient.query(queryParams).promise()
 
         if (result.Items && result.Items.length > 0) {
-          return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, sortKey)
+          return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, CachedRoutesSource.CachedRoutes, sortKey)
         } else {
           metric.putMetric('CachedRoutesEntriesNotFound', 1, MetricLoggerUnit.Count)
           log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -215,7 +220,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       if (result.Items && result.Items.length > 0) {
         const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(0, 5)
         result.Items = filteredItems
-        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount)
+        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, CachedRoutesSource.RoutesDb)
       } else {
         metric.putMetric('RouteDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -239,7 +244,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     optimistic: boolean,
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
-    cachedRoutesSource: string = 'CachedRoutes',
+    cachedRoutesSource: CachedRoutesSource,
     sortKey?: ProtocolsBucketBlockNumber,
   ): CachedRoutes {
     metric.putMetric(`${cachedRoutesSource}EntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
@@ -315,11 +320,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
       notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
     ) {
-      if (cachedRoutesSource === 'CachedRoutes') {
+      if (cachedRoutesSource === CachedRoutesSource.CachedRoutes) {
         // We send an async caching quote
         // we do not await on this function, it's a fire and forget
-        this.maybeSendCachingQuoteForCachedRoutes(partitionKey, sortKey, amount)
-      } else if (cachedRoutesSource === 'RoutesDb') {
+        this.maybeSendCachingQuoteForCachedRoutes(partitionKey, sortKey!, amount)
+      } else if (cachedRoutesSource === CachedRoutesSource.RoutesDb) {
         // We send an async caching quote
         // we do not await on this function, it's a fire and forget
         this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
