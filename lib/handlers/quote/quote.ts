@@ -91,12 +91,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
       metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${quoteSpeed ?? 'standard'}`,
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_QUOTE_SPEED_${quoteSpeed ?? 'standard'}`,
         Date.now() - startTime,
         MetricLoggerUnit.Milliseconds
       )
       metric.putMetric(
-        `GET_QUOTE_LATENCY_CHAIN_${chainId}_${intent ?? 'quote'}`,
+        `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_${intent ?? 'quote'}`,
         Date.now() - startTime,
         MetricLoggerUnit.Milliseconds
       )
