@@ -28,6 +28,10 @@ interface ConstructorParams {
    */
   routesTableName: string
   /**
+   * The TableName for the DynamoDB Table that stores whether a request has been sent for caching related to routesDb
+   */
+  routesCachingRequestFlagTableName: string
+  /**
    * The TableName for the DynamoDB Table that stores cached routes.
    */
   cachedRoutesTableName: string
@@ -36,7 +40,7 @@ interface ConstructorParams {
    */
   cachingQuoteLambdaName: string
   /**
-   * The TableName for the DynamoDB Table that stores whether a request has been sent for caching
+   * The TableName for the DynamoDB Table that stores whether a request has been sent for caching related to cachedRoutes
    */
   cachingRequestFlagTableName: string
   /**
@@ -55,11 +59,23 @@ interface CachedRouteDbEntry {
   }
 }
 
+interface RouteDbEntry {
+  TableName: string
+  Item: {
+    pairTradeTypeChainId: string
+    routeId: number
+    item: Buffer
+    blockNumber: number
+    ttl: number
+  }
+}
+
 const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
   private readonly routesTableName: string
+  private readonly routesCachingRequestFlagTableName: string
   private readonly cachingRoutesTableName: string
   private readonly cachingQuoteLambdaName: string
   private readonly cachingRequestFlagTableName: string
@@ -68,6 +84,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   constructor({
     routesTableName,
+    routesCachingRequestFlagTableName,
     cachedRoutesTableName,
     cachingQuoteLambdaName,
     cachingRequestFlagTableName,
@@ -86,6 +103,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     })
     this.lambdaClient = new Lambda()
     this.routesTableName = routesTableName
+    this.routesCachingRequestFlagTableName = routesCachingRequestFlagTableName
     this.cachingRoutesTableName = cachedRoutesTableName
     this.cachingQuoteLambdaName = cachingQuoteLambdaName
     this.cachingRequestFlagTableName = cachingRequestFlagTableName
@@ -299,7 +317,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       if (!result.Item) {
         metric.putMetric('UniqueOptimisticCachedRoute', 1, MetricLoggerUnit.Count)
         this.sendAsyncCachingRequest(partitionKey, sortKey, amount)
-        this.setCachingRequestFlag(partitionKey, sortKey)
+        this.setCachedRoutesCachingIntentFlag(partitionKey, sortKey)
       }
     } catch (e) {
       log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
@@ -335,7 +353,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     this.lambdaClient.invoke(params).promise()
   }
 
-  private setCachingRequestFlag(partitionKey: PairTradeTypeChainId, sortKey: ProtocolsBucketBlockNumber): void {
+  private setCachedRoutesCachingIntentFlag(partitionKey: PairTradeTypeChainId, sortKey: ProtocolsBucketBlockNumber): void {
     const putParams = {
       TableName: this.cachingRequestFlagTableName,
       Item: {
@@ -409,8 +427,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    */
   public generateRouteDbEntries(
     cachedRoutes: CachedRoutes
-  ): CachedRouteDbEntry[] {
-    cachedRoutes.routes.map((route) => {
+  ): RouteDbEntry[] {
+    return cachedRoutes.routes.map((route) => {
       const individualCachedRoutes = new CachedRoutes({
         routes: [route],
         chainId: cachedRoutes.chainId,
@@ -431,28 +449,18 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
       const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
-      const sortKey = route.route
 
+      return {
+        TableName: this.routesTableName,
+        Item: {
+          pairTradeTypeChainId: partitionKey.toString(),
+          routeId: route.routeId,
+          blockNumber: cachedRoutes.blockNumber,
+          item: binaryCachedRoutes,
+          ttl: ttl,
+        },
+      }
     })
-
-
-    // Primary Key object
-
-    const sortKey = new ProtocolsBucketBlockNumber({
-      protocols: cachedRoutes.protocolsCovered,
-      bucket: cachingBucket.bucket,
-      blockNumber: cachedRoutes.blockNumber,
-    })
-
-    return {
-      TableName: this.cachingRoutesTableName,
-      Item: {
-        pairTradeTypeChainId: partitionKey.toString(),
-        protocolsBucketBlockNumber: sortKey.fullKey(),
-        item: binaryCachedRoutes,
-        ttl: ttl,
-      },
-    }
   }
 
   /**
