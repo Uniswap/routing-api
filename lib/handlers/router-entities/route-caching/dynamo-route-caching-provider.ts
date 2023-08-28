@@ -46,7 +46,6 @@ interface CachedRouteDbEntry {
   Item: {
     pairTradeTypeChainId: string
     protocolsBucketBlockNumber: string
-    protocolsBlockNumberBucket: string
     item: Buffer
     ttl: number
   }
@@ -163,65 +162,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
         if (result.Items && result.Items.length > 0) {
           return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, sortKey, amount)
-        } else if (optimistic) {
-          log.info(`[DynamoRouteCachingProvider] No items found in the primary query.`)
-
-          try {
-            const secondaryQueryParams = {
-              TableName: this.tableName,
-              IndexName: 'protocolsBlockNumberBucket',
-              // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
-              KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-              ExpressionAttributeNames: {
-                '#pk': 'pairTradeTypeChainId',
-                '#sk': 'protocolsBlockNumberBucket',
-              },
-              ExpressionAttributeValues: {
-                ':pk': partitionKey.toString(),
-                ':sk': sortKey.protocolsPartialKey(),
-              },
-              ScanIndexForward: false, // Reverse order to retrieve most recent item first
-              Limit: 10,
-            }
-
-            const result = await this.ddbClient.query(secondaryQueryParams).promise()
-
-            if (result.Items && result.Items.length > 0) {
-              const cachedRoutes: CachedRoutes = this.parseCachedRoutes(
-                result,
-                chainId,
-                currentBlockNumber,
-                optimistic,
-                partitionKey,
-                sortKey,
-                amount,
-                'SecondaryCachedRoutes'
-              )
-              const greaterAmounts = cachedRoutes.originalAmount.split(', ').map((item) => {
-                const parts: string[] = item.split(' | ')
-                return amount.lessThan(parts[0])
-              })
-
-              if (greaterAmounts.includes(true)) {
-                metric.putMetric('SecondaryCachedRoutesGreaterAmount', 1, MetricLoggerUnit.Count)
-              } else {
-                metric.putMetric('SecondaryCachedRoutesLowerAmount', 1, MetricLoggerUnit.Count)
-              }
-
-              // TODO(mikeki): Enable returning cachedRoutes once we confirm with metrics the impact of it
-              // return cachedRoutes
-              return undefined
-            } else {
-              metric.putMetric('SecondaryCachedRouteEntriesNotFound', 1, MetricLoggerUnit.Count)
-              log.info(`[DynamoRouteCachingProvider] No items found in the secondary query.`)
-            }
-          } catch (error) {
-            metric.putMetric('SecondaryCachedRoutesFetchError', 1, MetricLoggerUnit.Count)
-            log.error(
-              { queryParams, error },
-              `[DynamoRouteCachingProvider] Error while fetching route from secondary index`
-            )
-          }
         } else {
           metric.putMetric('CachedRoutesEntriesNotFound', 1, MetricLoggerUnit.Count)
           log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -443,7 +383,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
           protocolsBucketBlockNumber: sortKey.fullKey(),
-          protocolsBlockNumberBucket: sortKey.fullSecondaryKey(),
           item: binaryCachedRoutes,
           ttl: ttl,
         },

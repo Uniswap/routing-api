@@ -28,19 +28,7 @@ export class ProtocolsBucketBlockNumber {
     return `${this.protocols}/${this.bucket}/${this.blockNumber}`
   }
 
-  public fullSecondaryKey(): string {
-    if (this.blockNumber === undefined) {
-      throw Error('BlockNumber is necessary to create a fullSecondaryKey')
-    }
-
-    return `${this.protocols}/${this.blockNumber}/${this.bucket.toString().padStart(10, '0')}`
-  }
-
   public protocolsBucketPartialKey(): string {
     return `${this.protocols}/${this.bucket}/`
-  }
-
-  public protocolsPartialKey(): string {
-    return `${this.protocols}/`
   }
 }
