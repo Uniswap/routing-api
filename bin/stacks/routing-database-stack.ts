@@ -49,12 +49,6 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
-    this.cachedRoutesDynamoDb.addGlobalSecondaryIndex({
-      indexName: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondaryIndexName,
-      partitionKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.PartitionKeyName, type: AttributeType.STRING },
-      sortKey: { name: DynamoDBTableProps.CacheRouteDynamoDbTable.SecondarySortKeyName, type: AttributeType.STRING },
-    })
-
     // Creates a DynamoDB Table for storing the caching request flags
     this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(
       this,
