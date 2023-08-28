@@ -20,8 +20,6 @@ export const DynamoDBTableProps = {
     Name: 'RouteCachingDB',
     PartitionKeyName: 'pairTradeTypeChainId',
     SortKeyName: 'protocolsBucketBlockNumber',
-    SecondaryIndexName: 'protocolsBlockNumberBucket',
-    SecondarySortKeyName: 'protocolsBlockNumberBucket',
   },
   CachingRequestFlagDynamoDbTable: {
     Name: 'CacheReqFlagDB',
