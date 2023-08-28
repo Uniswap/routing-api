@@ -200,7 +200,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     }
 
     // If no cachedRoutes were found, we try to fetch from the RoutesDb
-
     metric.putMetric('RoutesDbQuery', 1, MetricLoggerUnit.Count)
 
     try {
@@ -220,13 +219,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       if (result.Items && result.Items.length > 0) {
         const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(0, 5)
         result.Items = filteredItems
+
         return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, CachedRoutesSource.RoutesDb)
       } else {
-        metric.putMetric('RouteDbEntriesNotFound', 1, MetricLoggerUnit.Count)
+        metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
       }
     } catch (error) {
-      metric.putMetric('RouteDbFetchError', 1, MetricLoggerUnit.Count)
+      metric.putMetric('RoutesDbFetchError', 1, MetricLoggerUnit.Count)
       log.error(
         { partitionKey, error },
         `[DynamoRouteCachingProvider] Error while fetching route from RouteDb`
@@ -390,18 +390,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       if (result.Items && result.Items.length == 0) {
         metric.putMetric('UniqueCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
         this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.MIXED], amount)
-
-        const putParams = {
-          TableName: this.routesCachingRequestFlagTableName,
-          Item: {
-            pairTradeTypeChainId: partitionKey.toString(),
-            amount: parseFloat(amount.toExact()),
-            ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
-            caching: true,
-          },
-        }
-
-        this.ddbClient.put(putParams).promise()
+        this.setRoutesDbCachingIntentFlag(partitionKey, amount)
       }
     } catch (e) {
       log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
@@ -443,6 +432,20 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       Item: {
         pairTradeTypeChainId: partitionKey.toString(),
         protocolsBucketBlockNumber: sortKey.fullKey(),
+        ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
+        caching: true,
+      },
+    }
+
+    this.ddbClient.put(putParams).promise()
+  }
+
+  private setRoutesDbCachingIntentFlag(partitionKey: PairTradeTypeChainId, amount: CurrencyAmount<Currency>): void {
+    const putParams = {
+      TableName: this.routesCachingRequestFlagTableName,
+      Item: {
+        pairTradeTypeChainId: partitionKey.toString(),
+        amount: parseFloat(amount.toExact()),
         ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
         caching: true,
       },
