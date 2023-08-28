@@ -64,6 +64,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly cachingQuoteLambdaName: string
   private readonly cachingRequestFlagTableName: string
   private readonly ttlMinutes: number
+  private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
 
   constructor({
     routesTableName,
@@ -406,40 +407,51 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @param amount
    * @public
    */
-  public generateRouteDbEntry(
+  public generateRouteDbEntries(
     cachedRoutes: CachedRoutes
-  ): CachedRouteDbEntry | null {
-    const cachedRoutesTtl = 24 * 60 * 60 // 24 hours
-
-    if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
+  ): CachedRouteDbEntry[] {
+    cachedRoutes.routes.map((route) => {
+      const individualCachedRoutes = new CachedRoutes({
+        routes: [route],
+        chainId: cachedRoutes.chainId,
+        tokenIn: cachedRoutes.tokenIn,
+        tokenOut: cachedRoutes.tokenOut,
+        protocolsCovered: cachedRoutes.protocolsCovered,
+        blockNumber: cachedRoutes.blockNumber,
+        tradeType: cachedRoutes.tradeType,
+        originalAmount: cachedRoutes.originalAmount,
+      })
       // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + Math.max(cachedRoutesTtl, this.ttlMinutes * 60)
+      const ttl = Math.floor(Date.now() / 1000) + this.ROUTES_DB_TTL
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
-      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
+      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(individualCachedRoutes)
       // Convert the marshalledCachedRoutes to JSON string
       const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
       // Encode the jsonCachedRoutes into Binary
       const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
-      // Primary Key object
       const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
-      const sortKey = new ProtocolsBucketBlockNumber({
-        protocols: cachedRoutes.protocolsCovered,
-        bucket: cachingBucket.bucket,
-        blockNumber: cachedRoutes.blockNumber,
-      })
+      const sortKey = route.route
 
-      return {
-        TableName: this.cachingRoutesTableName,
-        Item: {
-          pairTradeTypeChainId: partitionKey.toString(),
-          protocolsBucketBlockNumber: sortKey.fullKey(),
-          item: binaryCachedRoutes,
-          ttl: ttl,
-        },
-      }
-    } else {
-      return null
+    })
+
+
+    // Primary Key object
+
+    const sortKey = new ProtocolsBucketBlockNumber({
+      protocols: cachedRoutes.protocolsCovered,
+      bucket: cachingBucket.bucket,
+      blockNumber: cachedRoutes.blockNumber,
+    })
+
+    return {
+      TableName: this.cachingRoutesTableName,
+      Item: {
+        pairTradeTypeChainId: partitionKey.toString(),
+        protocolsBucketBlockNumber: sortKey.fullKey(),
+        item: binaryCachedRoutes,
+        ttl: ttl,
+      },
     }
   }
 
