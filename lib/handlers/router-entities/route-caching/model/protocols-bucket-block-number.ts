@@ -33,7 +33,7 @@ export class ProtocolsBucketBlockNumber {
       throw Error('BlockNumber is necessary to create a fullSecondaryKey')
     }
 
-    return `${this.protocols}/${this.blockNumber}/${this.bucket}`
+    return `${this.protocols}/${this.blockNumber}/${this.bucket.toString().padStart(10, '0')}`
   }
 
   public protocolsBucketPartialKey(): string {

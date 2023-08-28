@@ -37,7 +37,17 @@ export class QuoteHandlerInjector extends InjectorSOR<
     // to capture Tapcompare logs in the smart-order-router.
     const logLevel = Math.random() < 0.1 ? bunyan.INFO : bunyan.WARN
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
+    const {
+      tokenInAddress,
+      tokenInChainId,
+      tokenOutAddress,
+      amount,
+      type,
+      algorithm,
+      gasPriceWei,
+      quoteSpeed,
+      intent,
+    } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -126,6 +136,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
+      quoteSpeed,
+      intent,
     }
   }
 }
