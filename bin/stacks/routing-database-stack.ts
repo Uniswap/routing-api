@@ -51,7 +51,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     super(scope, name, props)
 
     // Creates a DynamoDB Table for storing the routes
-    this.routesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CacheRouteDynamoDbTable.Name, {
+    this.routesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RoutesDbTable.Name, {
       tableName: DynamoDBTableProps.RoutesDbTable.Name,
       partitionKey: { name: DynamoDBTableProps.RoutesDbTable.PartitionKeyName, type: AttributeType.STRING },
       sortKey: { name: DynamoDBTableProps.RoutesDbTable.SortKeyName, type: AttributeType.NUMBER },
