@@ -7,7 +7,7 @@ import {
   log,
   metric,
   MetricLoggerUnit,
-  routeToString,
+  routeToString
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -59,17 +59,6 @@ interface CachedRouteDbEntry {
   }
 }
 
-interface RouteDbEntry {
-  TableName: string
-  Item: {
-    pairTradeTypeChainId: string
-    routeId: number
-    item: Buffer
-    blockNumber: number
-    ttl: number
-  }
-}
-
 const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
@@ -80,7 +69,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly cachingQuoteLambdaName: string
   private readonly cachingRequestFlagTableName: string
   private readonly ttlMinutes: number
+
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
+  private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = 2
+  private readonly ROUTES_DB_BUCKET_RATIO: number = 1.61803398875;
 
   constructor({
     routesTableName,
@@ -126,7 +118,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (cachingParameters) {
       return cachingParameters.blocksToLive
     } else {
-      return 0
+      return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB
     }
   }
 
@@ -154,13 +146,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
     const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
 
+    const partitionKey = new PairTradeTypeChainId({
+      tokenIn: tokenIn.address,
+      tokenOut: tokenOut.address,
+      tradeType,
+      chainId,
+    })
+
     if (cachingBucket) {
-      const partitionKey = new PairTradeTypeChainId({
-        tokenIn: tokenIn.address,
-        tokenOut: tokenOut.address,
-        tradeType,
-        chainId,
-      })
       const sortKey = new ProtocolsBucketBlockNumber({
         protocols,
         bucket: cachingBucket.bucket,
@@ -187,7 +180,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         const result = await this.ddbClient.query(queryParams).promise()
 
         if (result.Items && result.Items.length > 0) {
-          return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, sortKey, amount)
+          return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, sortKey)
         } else {
           metric.putMetric('CachedRoutesEntriesNotFound', 1, MetricLoggerUnit.Count)
           log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -201,6 +194,40 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       }
     }
 
+    // If no cachedRoutes were found, we try to fetch from the RoutesDb
+
+    metric.putMetric('RoutesDbQuery', 1, MetricLoggerUnit.Count)
+
+    try {
+      const queryParams = {
+        TableName: this.routesTableName,
+        // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
+        KeyConditionExpression: '#pk = :pk',
+        ExpressionAttributeNames: {
+          '#pk': 'pairTradeTypeChainId',
+        },
+        ExpressionAttributeValues: {
+          ':pk': partitionKey.toString(),
+        },
+      }
+
+      const result = await this.ddbClient.query(queryParams).promise()
+      if (result.Items && result.Items.length > 0) {
+        const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(0, 5)
+        result.Items = filteredItems
+        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount)
+      } else {
+        metric.putMetric('RouteDbEntriesNotFound', 1, MetricLoggerUnit.Count)
+        log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
+      }
+    } catch (error) {
+      metric.putMetric('RouteDbFetchError', 1, MetricLoggerUnit.Count)
+      log.error(
+        { partitionKey, error },
+        `[DynamoRouteCachingProvider] Error while fetching route from RouteDb`
+      )
+    }
+
     // We only get here if we didn't find a cachedRoutes
     return undefined
   }
@@ -211,11 +238,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     currentBlockNumber: number,
     optimistic: boolean,
     partitionKey: PairTradeTypeChainId,
-    sortKey: ProtocolsBucketBlockNumber,
     amount: CurrencyAmount<Currency>,
-    cachedRoutesMetricName: string = 'CachedRoutes'
+    cachedRoutesSource: string = 'CachedRoutes',
+    sortKey?: ProtocolsBucketBlockNumber,
   ): CachedRoutes {
-    metric.putMetric(`${cachedRoutesMetricName}EntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
+    metric.putMetric(`${cachedRoutesSource}EntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
       // If we got a response with more than 1 item, we extract the binary field from the response
       const itemBinary = record.item
@@ -232,7 +259,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     let originalAmount: string = ''
 
     cachedRoutesArr.forEach((cachedRoutes) => {
-      metric.putMetric(`${cachedRoutesMetricName}PerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
+      metric.putMetric(`${cachedRoutesSource}PerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
       cachedRoutes.routes.forEach((cachedRoute) => {
         // we use the stringified route as identifier
         const routeId = routeToString(cachedRoute.route)
@@ -264,39 +291,45 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       blocksToLive: first.blocksToLive,
     })
 
-    metric.putMetric(`Unique${cachedRoutesMetricName}Found`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
+    metric.putMetric(`Unique${cachedRoutesSource}Found`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
 
     log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
     const blocksDifference = currentBlockNumber - blockNumber
-    metric.putMetric(`${cachedRoutesMetricName}BlockDifference`, blocksDifference, MetricLoggerUnit.Count)
+    metric.putMetric(`${cachedRoutesSource}BlockDifference`, blocksDifference, MetricLoggerUnit.Count)
     metric.putMetric(
-      `${cachedRoutesMetricName}BlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
+      `${cachedRoutesSource}BlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
       blocksDifference,
       MetricLoggerUnit.Count
     )
 
     const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
     if (notExpiredCachedRoute) {
-      metric.putMetric(`${cachedRoutesMetricName}NotExpired`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`${cachedRoutesSource}NotExpired`, 1, MetricLoggerUnit.Count)
     } else {
-      metric.putMetric(`${cachedRoutesMetricName}Expired`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`${cachedRoutesSource}Expired`, 1, MetricLoggerUnit.Count)
     }
 
     if (
       optimistic && // If we are in optimistic mode
       cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
-      notExpiredCachedRoute // and the cachedRoutes are not expired
+      notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
     ) {
-      // We send an async caching quote
-      // we do not await on this function, it's a fire and forget
-      this.maybeSendCachingQuote(partitionKey, sortKey, amount)
+      if (cachedRoutesSource === 'CachedRoutes') {
+        // We send an async caching quote
+        // we do not await on this function, it's a fire and forget
+        this.maybeSendCachingQuoteForCachedRoutes(partitionKey, sortKey, amount)
+      } else if (cachedRoutesSource === 'RoutesDb') {
+        // We send an async caching quote
+        // we do not await on this function, it's a fire and forget
+        this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
+      }
     }
 
     return cachedRoutes
   }
 
-  private async maybeSendCachingQuote(
+  private async maybeSendCachingQuoteForCachedRoutes(
     partitionKey: PairTradeTypeChainId,
     sortKey: ProtocolsBucketBlockNumber,
     amount: CurrencyAmount<Currency>
@@ -316,8 +349,54 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       // if no Item is found it means we need to send a caching request
       if (!result.Item) {
         metric.putMetric('UniqueOptimisticCachedRoute', 1, MetricLoggerUnit.Count)
-        this.sendAsyncCachingRequest(partitionKey, sortKey, amount)
+        this.sendAsyncCachingRequest(partitionKey, sortKey.protocols, amount)
         this.setCachedRoutesCachingIntentFlag(partitionKey, sortKey)
+      }
+    } catch (e) {
+      log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
+    }
+  }
+
+  private async maybeSendCachingQuoteForRoutesDb(
+    partitionKey: PairTradeTypeChainId,
+    amount: CurrencyAmount<Currency>
+  ): Promise<void> {
+    const queryParams = {
+      TableName: this.routesCachingRequestFlagTableName,
+      // We use a ratio to get a range of amounts that are close to the amount we are thinking about inserting
+      // If there's an item in the table which range covers our amount, we don't need to send a caching request
+      KeyConditionExpression: '#pk = :pk AND #amount >= :amount AND #amount < :amount_ratio)',
+      ExpressionAttributeNames: {
+        '#pk': 'pairTradeTypeChainId',
+        '#amount': 'amount',
+      },
+      ExpressionAttributeValues: {
+        ':pk': partitionKey.toString(),
+        ':amount': parseFloat(amount.toExact()),
+        ':amount_phi': parseFloat(amount.multiply(this.ROUTES_DB_BUCKET_RATIO).toExact()),
+      },
+    }
+
+    metric.putMetric('CheckCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
+
+    try {
+      const result = await this.ddbClient.query(queryParams).promise()
+      // if no Item is found it means we need to send a caching request
+      if (result.Items && result.Items.length == 0) {
+        metric.putMetric('UniqueCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
+        this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.MIXED], amount)
+
+        const putParams = {
+          TableName: this.routesCachingRequestFlagTableName,
+          Item: {
+            pairTradeTypeChainId: partitionKey.toString(),
+            amount: parseFloat(amount.toExact()),
+            ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
+            caching: true,
+          },
+        }
+
+        this.ddbClient.put(putParams).promise()
       }
     } catch (e) {
       log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
@@ -326,7 +405,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   private sendAsyncCachingRequest(
     partitionKey: PairTradeTypeChainId,
-    sortKey: ProtocolsBucketBlockNumber,
+    protocols: Protocol[],
     amount: CurrencyAmount<Currency>
   ): void {
     const payload = {
@@ -337,7 +416,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         tokenOutChainId: partitionKey.chainId.toString(),
         amount: amount.quotient.toString(),
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
-        protocols: sortKey.protocols.map((protocol) => protocol.toLowerCase()).join(','),
+        protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
         intent: 'caching',
       },
     }
@@ -419,16 +498,49 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
-   * Helper function to generate the [RouteDbEntry] object to be stored in the Cached Routes DynamoDB.
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
    *
    * @param cachedRoutes
    * @param amount
-   * @public
+   * @protected
    */
-  public generateRouteDbEntries(
-    cachedRoutes: CachedRoutes
-  ): RouteDbEntry[] {
-    return cachedRoutes.routes.map((route) => {
+  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+    const [cachedRoutesInsert, routesDbInsert] = await Promise.all([
+      this.insertCachedRouteDBEntry(cachedRoutes, amount),
+      this.insertRoutesDbEntry(cachedRoutes)
+    ])
+
+    return cachedRoutesInsert && routesDbInsert
+  }
+
+  private async insertCachedRouteDBEntry(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
+    const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
+
+    if (cachedRouteDbEntry) {
+      const putParams = cachedRouteDbEntry
+
+      log.info({ putParams, cachedRoutes }, `[DynamoRouteCachingProvider] Attempting to insert route to cache`)
+
+      try {
+        await this.ddbClient.put(putParams).promise()
+        log.info(`[DynamoRouteCachingProvider] Cached route inserted to cache`)
+
+        return true
+      } catch (error) {
+        log.error({ error, putParams }, `[DynamoRouteCachingProvider] Cached route failed to insert`)
+
+        return false
+      }
+    } else {
+      // No CachingParameters found, return false to indicate the route was not cached.
+
+      return false
+    }
+  }
+
+  private async insertRoutesDbEntry(cachedRoutes: CachedRoutes): Promise<boolean> {
+    const routesDbEntries = cachedRoutes.routes.map((route) => {
       const individualCachedRoutes = new CachedRoutes({
         routes: [route],
         chainId: cachedRoutes.chainId,
@@ -451,47 +563,36 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
 
       return {
-        TableName: this.routesTableName,
-        Item: {
-          pairTradeTypeChainId: partitionKey.toString(),
-          routeId: route.routeId,
-          blockNumber: cachedRoutes.blockNumber,
-          item: binaryCachedRoutes,
-          ttl: ttl,
+        PutRequest: {
+          Item: {
+            pairTradeTypeChainId: partitionKey.toString(),
+            routeId: route.routeId,
+            blockNumber: cachedRoutes.blockNumber,
+            item: binaryCachedRoutes,
+            ttl: ttl,
+          },
         },
       }
     })
-  }
 
-  /**
-   * Implementation of the abstract method defined in `IRouteCachingProvider`
-   * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
-   *
-   * @param cachedRoutes
-   * @param amount
-   * @protected
-   */
-  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
-    const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
-
-    if (cachedRouteDbEntry) {
-      const putParams = cachedRouteDbEntry
-
-      log.info({ putParams, cachedRoutes }, `[DynamoRouteCachingProvider] Attempting to insert route to cache`)
-
+    if (routesDbEntries.length > 0) {
       try {
-        await this.ddbClient.put(putParams).promise()
-        log.info(`[DynamoRouteCachingProvider] Cached route inserted to cache`)
+        const batchWriteParams = {
+          RequestItems: {
+            [this.routesTableName]: routesDbEntries
+          }
+        }
+        await this.ddbClient.batchWrite(batchWriteParams).promise()
+        log.info(`[DynamoRouteCachingProvider] Route Entries inserted to database`)
 
         return true
       } catch (error) {
-        log.error({ error, putParams }, `[DynamoRouteCachingProvider] Cached route failed to insert`)
+        log.error({ error, routesDbEntries }, `[DynamoRouteCachingProvider] Route Entries failed to insert`)
 
         return false
       }
     } else {
-      // No CachingParameters found, return false to indicate the route was not cached.
-
+      log.warn(`[DynamoRouteCachingProvider] No Route Entries to insert`)
       return false
     }
   }
@@ -549,7 +650,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         }/${tradeType}/${chainId}`
       )
 
-      return CacheMode.Darkmode
+      return CacheMode.Tapcompare
     }
   }
 
