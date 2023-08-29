@@ -253,7 +253,7 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(cacheMode).to.equal(CacheMode.Livemode)
 
     const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_UNCACHED_ROUTES, currencyAmount)
-    expect(insertedIntoCache).to.be.false
+    expect(insertedIntoCache).to.be.true
 
     const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(
       TEST_UNCACHED_ROUTES,
