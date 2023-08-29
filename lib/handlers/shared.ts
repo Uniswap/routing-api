@@ -154,6 +154,11 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
     useCachedRoutes: true,
     optimisticCachedRoutes: false,
   },
+  pricing: {
+    // When the intent is to get pricing, we should use the cache and optimistic cached routes
+    useCachedRoutes: true,
+    optimisticCachedRoutes: true,
+  },
 }
 
 export async function tokenStringToCurrency(
