@@ -315,9 +315,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`${cachedRoutesSource}Expired`, 1, MetricLoggerUnit.Count)
     }
 
+    log.error({optimistic, cacheBlock: cachedRoutes.blockNumber, currentBlockNumber, notExpiredCachedRoute},"about to send caching quote")
+
     if (
       optimistic && // If we are in optimistic mode
-      cachedRoutes.blockNumber < currentBlockNumber && // and the cachedRoutes are from a block lower than current
       notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
     ) {
       if (cachedRoutesSource === CachedRoutesSource.CachedRoutes) {
@@ -339,6 +340,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     sortKey: ProtocolsBucketBlockNumber,
     amount: CurrencyAmount<Currency>
   ): Promise<void> {
+    log.error("caching quote for old")
     const getParams = {
       TableName: this.cachingRequestFlagTableName,
       Key: {
@@ -366,6 +368,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>
   ): Promise<void> {
+    log.error("caching quote for new")
     const queryParams = {
       TableName: this.routesCachingRequestFlagTableName,
       // We use a ratio to get a range of amounts that are close to the amount we are thinking about inserting
@@ -382,17 +385,22 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       },
     }
 
+    log.error({queryParams}, "caching quote query params")
+
     metric.putMetric('CheckCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
 
     try {
       const result = await this.ddbClient.query(queryParams).promise()
+      log.error("caching quote result")
       // if no Item is found it means we need to send a caching request
       if (result.Items && result.Items.length == 0) {
+        log.error("caching quote result yes")
         metric.putMetric('UniqueCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
         this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.MIXED], amount)
         this.setRoutesDbCachingIntentFlag(partitionKey, amount)
       }
     } catch (e) {
+      log.error("caching quote for old failed")
       log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
     }
   }
