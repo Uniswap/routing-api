@@ -61,7 +61,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly lambdaClient: Lambda
   private readonly routesTableName: string
   private readonly routesCachingRequestFlagTableName: string
-  private readonly cachingRoutesTableName: string
   private readonly cachingQuoteLambdaName: string
   private readonly ttlMinutes: number
 
@@ -451,7 +450,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       })
 
       return {
-        TableName: this.cachingRoutesTableName,
+        TableName: this.routesTableName,
         Item: {
           pairTradeTypeChainId: partitionKey.toString(),
           protocolsBucketBlockNumber: sortKey.fullKey(),
