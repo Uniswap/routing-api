@@ -252,7 +252,7 @@ describe('DynamoRouteCachingProvider', async () => {
       TradeType.EXACT_INPUT,
       [Protocol.V3]
     )
-    expect(cacheMode).to.equal(CacheMode.Tapcompare)
+    expect(cacheMode).to.equal(CacheMode.Livemode)
 
     const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_UNCACHED_ROUTES, currencyAmount)
     expect(insertedIntoCache).to.be.false
@@ -261,7 +261,7 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_UNCACHED_ROUTES,
       currencyAmount
     )
-    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Tapcompare)
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Livemode)
 
     // Fetches nothing from the cache since cache is in Darkmode.
     const route = await dynamoRouteCache.getCachedRoute(
