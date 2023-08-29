@@ -107,7 +107,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Livemode
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
-  private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 5
+  private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
 
   constructor({
     routesTableName,
