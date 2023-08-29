@@ -21,7 +21,6 @@ import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
-import { QueryInput } from 'aws-sdk/clients/dynamodb'
 
 interface ConstructorParams {
   /**
@@ -78,9 +77,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = 2
-
+  private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Tapcompare
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
+  private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 5
 
   constructor({
     routesTableName,
@@ -151,8 +151,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
-    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
-    const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
 
     const partitionKey = new PairTradeTypeChainId({
       tokenIn: tokenIn.address,
@@ -160,6 +158,48 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       tradeType,
       chainId,
     })
+
+    const cachedRoutesPromise = this.getCachedRoutesFromCachedRoutesDb(
+      tokenIn,
+      tokenOut,
+      chainId,
+      amount,
+      tradeType,
+      protocols,
+      currentBlockNumber,
+      optimistic,
+      partitionKey
+    )
+
+    const routesDbPromise = this.getRoutesFromRoutesDb(
+      partitionKey,
+      chainId,
+      amount,
+      currentBlockNumber,
+      optimistic
+    )
+
+    const [cachedRoutes, routesDb] = await Promise.all([
+      cachedRoutesPromise,
+      routesDbPromise,
+    ])
+
+    return cachedRoutes || routesDb
+  }
+
+  private async getCachedRoutesFromCachedRoutesDb(
+    tokenIn: Token,
+    tokenOut: Token,
+    chainId: ChainId,
+    amount: CurrencyAmount<Currency>,
+    tradeType: TradeType,
+    protocols: Protocol[],
+    currentBlockNumber: number,
+    optimistic: boolean,
+    partitionKey: PairTradeTypeChainId
+  ): Promise<CachedRoutes | undefined> {
+    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
+    const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
 
     if (cachingBucket) {
       const sortKey = new ProtocolsBucketBlockNumber({
@@ -211,13 +251,22 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       }
     }
 
+    return undefined
+  }
+
+  private async getRoutesFromRoutesDb(
+    partitionKey: PairTradeTypeChainId,
+    chainId: ChainId,
+    amount: CurrencyAmount<Currency>,
+    currentBlockNumber: number,
+    optimistic: boolean
+  ): Promise<CachedRoutes | undefined> {
     // If no cachedRoutes were found, we try to fetch from the RoutesDb
     metric.putMetric('RoutesDbQuery', 1, MetricLoggerUnit.Count)
 
     try {
       const queryParams = {
         TableName: this.routesTableName,
-        // Since we don't know what's the latest block that we have in cache, we make a query with a partial sort key
         KeyConditionExpression: '#pk = :pk',
         ExpressionAttributeNames: {
           '#pk': 'pairTradeTypeChainId',
@@ -229,7 +278,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
       const result = await this.ddbClient.query(queryParams).promise()
       if (result.Items && result.Items.length > 0) {
-        const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(0, 5)
+        // At this point we might have gotten all the routes we have discovered in the last 24 hours for this pair
+        // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
+        const filteredItems = result.Items
+          .sort((a, b) => b.blockNumber - a.blockNumber)
+          .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
+
         result.Items = filteredItems
 
         return this.parseCachedRoutes(
@@ -250,7 +304,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       log.error({ partitionKey, error }, `[DynamoRouteCachingProvider] Error while fetching route from RouteDb`)
     }
 
-    // We only get here if we didn't find a cachedRoutes
     return undefined
   }
 
@@ -683,7 +736,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         }/${tradeType}/${chainId}`
       )
 
-      return CacheMode.Tapcompare
+      return this.DEFAULT_CACHEMODE_ROUTES_DB
     }
   }
 
