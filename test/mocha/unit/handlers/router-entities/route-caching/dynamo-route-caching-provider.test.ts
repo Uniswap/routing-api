@@ -18,7 +18,7 @@ import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-databas
 
 chai.use(chaiAsPromised)
 
-const TEST_ROUTE_TABLE = {
+const TEST_ROUTE_CACHING_TABLE = {
   TableName: 'RouteCachingDB',
   KeySchema: [
     {
@@ -38,6 +38,34 @@ const TEST_ROUTE_TABLE = {
     {
       AttributeName: 'protocolsBucketBlockNumber',
       AttributeType: 'S',
+    },
+  ],
+  ProvisionedThroughput: {
+    ReadCapacityUnits: 1,
+    WriteCapacityUnits: 1,
+  },
+}
+
+const TEST_ROUTE_DB_TABLE = {
+  TableName: DynamoDBTableProps.RoutesDbTable.Name,
+  KeySchema: [
+    {
+      AttributeName: 'pairTradeTypeChainId',
+      KeyType: 'HASH',
+    },
+    {
+      AttributeName: 'routeId',
+      KeyType: 'RANGE',
+    },
+  ],
+  AttributeDefinitions: [
+    {
+      AttributeName: 'pairTradeTypeChainId',
+      AttributeType: 'S',
+    },
+    {
+      AttributeName: 'routeId',
+      AttributeType: 'N',
     },
   ],
   ProvisionedThroughput: {
@@ -119,9 +147,11 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
 })
 
 describe('DynamoRouteCachingProvider', async () => {
-  setupTables(TEST_ROUTE_TABLE)
+  setupTables(TEST_ROUTE_CACHING_TABLE, TEST_ROUTE_DB_TABLE)
   const dynamoRouteCache = new DynamoRouteCachingProvider({
-    cachedRoutesTableName: TEST_ROUTE_TABLE.TableName,
+    routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
+    routesCachingRequestFlagTableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+    cachedRoutesTableName: TEST_ROUTE_CACHING_TABLE.TableName,
     cachingQuoteLambdaName: 'test',
     cachingRequestFlagTableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
   })
@@ -213,7 +243,7 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(route).to.not.be.undefined
   })
 
-  it('Does not cache routes for a token pair that has its cache configured in the default Darkmode', async () => {
+  it('Still uses RoutesDB Table for the default configuration', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(UNI_MAINNET, JSBI.BigInt(1 * 10 ** UNI_MAINNET.decimals))
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
@@ -222,7 +252,7 @@ describe('DynamoRouteCachingProvider', async () => {
       TradeType.EXACT_INPUT,
       [Protocol.V3]
     )
-    expect(cacheMode).to.equal(CacheMode.Darkmode)
+    expect(cacheMode).to.equal(CacheMode.Tapcompare)
 
     const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_UNCACHED_ROUTES, currencyAmount)
     expect(insertedIntoCache).to.be.false
@@ -231,7 +261,7 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_UNCACHED_ROUTES,
       currencyAmount
     )
-    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Darkmode)
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Tapcompare)
 
     // Fetches nothing from the cache since cache is in Darkmode.
     const route = await dynamoRouteCache.getCachedRoute(
@@ -242,7 +272,7 @@ describe('DynamoRouteCachingProvider', async () => {
       [Protocol.V3],
       TEST_CACHED_ROUTES.blockNumber
     )
-    expect(route).to.be.undefined
+    expect(route).to.not.be.undefined
   })
 
   it('Finds the CacheMode from a wildcard exact output configuration', async () => {
