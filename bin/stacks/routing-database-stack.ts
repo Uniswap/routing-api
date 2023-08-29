@@ -59,7 +59,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
-    // Creates a DynamoDB Table for storing the caching request flags related to routes db
+    // Creates a DynamoDB Table for storing the buckets that are flagging as already cached in the RoutesDb
     this.routesDbCachingRequestFlagDynamoDb = new aws_dynamodb.Table(
       this,
       DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
@@ -84,7 +84,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
-    // Creates a DynamoDB Table for storing the caching request flags related to cached routes
+    // Creates a DynamoDB Table for storing the buckets that are flagging as already cached in the CachedRoutesDb
     this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(
       this,
       DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,

@@ -85,7 +85,7 @@ export class RoutingAPIStack extends cdk.Stack {
       cachedRoutesDynamoDb,
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
-      cachedV2PairsDynamoDb
+      cachedV2PairsDynamoDb,
     } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
