@@ -154,7 +154,6 @@ describe('DynamoRouteCachingProvider', async () => {
     cachedRoutesTableName: TEST_ROUTE_CACHING_TABLE.TableName,
     cachingQuoteLambdaName: 'test',
     cachingRequestFlagTableName: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-
   })
 
   it('Generates cached route db entry properly with ttl based on chain id and blocks to live', async () => {
