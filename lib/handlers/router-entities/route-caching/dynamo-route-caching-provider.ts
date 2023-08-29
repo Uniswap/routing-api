@@ -469,44 +469,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
    *
    * @param cachedRoutes
-   * @param amount
    * @protected
    */
-  protected async _setCachedRoute(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<boolean> {
-    const [cachedRoutesInsert, routesDbInsert] = await Promise.all([
-      this.insertCachedRouteDBEntry(cachedRoutes, amount),
-      this.insertRoutesDbEntry(cachedRoutes),
-    ])
-
-    return cachedRoutesInsert && routesDbInsert
-  }
-
-  private async insertCachedRouteDBEntry(
-    cachedRoutes: CachedRoutes,
-    amount: CurrencyAmount<Currency>
-  ): Promise<boolean> {
-    const cachedRouteDbEntry = this.generateCachedRouteDbEntry(cachedRoutes, amount)
-
-    if (cachedRouteDbEntry) {
-      const putParams = cachedRouteDbEntry
-
-      log.info({ putParams, cachedRoutes }, `[DynamoRouteCachingProvider] Attempting to insert route to cache`)
-
-      try {
-        await this.ddbClient.put(putParams).promise()
-        log.info(`[DynamoRouteCachingProvider] Cached route inserted to cache`)
-
-        return true
-      } catch (error) {
-        log.error({ error, putParams }, `[DynamoRouteCachingProvider] Cached route failed to insert`)
-
-        return false
-      }
-    } else {
-      // No CachingParameters found, return false to indicate the route was not cached.
-
-      return false
-    }
+  protected async _setCachedRoute(cachedRoutes: CachedRoutes): Promise<boolean> {
+    return await this.insertRoutesDbEntry(cachedRoutes)
   }
 
   private async insertRoutesDbEntry(cachedRoutes: CachedRoutes): Promise<boolean> {

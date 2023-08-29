@@ -168,7 +168,7 @@ describe('DynamoRouteCachingProvider', async () => {
       const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
       expect(cachedRouteDbEntry.Item.ttl).to.equal(ttlSeconds)
-      expect(cachedRouteDbEntry.TableName).to.equal('RouteCachingDB')
+      expect(cachedRouteDbEntry.TableName).to.equal('RoutesDB')
       expect(cachedRouteDbEntry.Item.pairTradeTypeChainId).to.equal(
         PairTradeTypeChainId.fromCachedRoutes(TEST_CACHED_ROUTES).toString()
       )
