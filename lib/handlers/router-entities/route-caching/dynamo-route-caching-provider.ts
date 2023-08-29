@@ -172,18 +172,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       partitionKey
     )
 
-    const routesDbPromise = this.getRoutesFromRoutesDb(
-      partitionKey,
-      chainId,
-      amount,
-      currentBlockNumber,
-      optimistic
-    )
+    const routesDbPromise = this.getRoutesFromRoutesDb(partitionKey, chainId, amount, currentBlockNumber, optimistic)
 
-    const [cachedRoutes, routesDb] = await Promise.all([
-      cachedRoutesPromise,
-      routesDbPromise,
-    ])
+    const [cachedRoutes, routesDb] = await Promise.all([cachedRoutesPromise, routesDbPromise])
 
     return cachedRoutes || routesDb
   }
@@ -281,9 +272,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       if (result.Items && result.Items.length > 0) {
         // At this point we might have gotten all the routes we have discovered in the last 24 hours for this pair
         // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
-        const filteredItems = result.Items
-          .sort((a, b) => b.blockNumber - a.blockNumber)
-          .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
+        const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(
+          0,
+          this.ROUTES_TO_TAKE_FROM_ROUTES_DB
+        )
 
         result.Items = filteredItems
 
