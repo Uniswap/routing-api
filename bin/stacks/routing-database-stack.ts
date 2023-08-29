@@ -6,12 +6,20 @@ import { Construct } from 'constructs'
 export interface RoutingDatabaseStackProps extends cdk.NestedStackProps {}
 
 export const DynamoDBTableProps = {
+  RoutesDbTable: {
+    Name: 'RoutesDB',
+    PartitionKeyName: 'pairTradeTypeChainId',
+    SortKeyName: 'routeId',
+  },
+  RoutesDbCachingRequestFlagTable: {
+    Name: 'RoutesDbCacheReqFlagDB',
+    PartitionKeyName: 'pairTradeTypeChainId',
+    SortKeyName: 'amount',
+  },
   CacheRouteDynamoDbTable: {
     Name: 'RouteCachingDB',
     PartitionKeyName: 'pairTradeTypeChainId',
     SortKeyName: 'protocolsBucketBlockNumber',
-    SecondaryIndexName: 'protocolsBlockNumberBucket',
-    SecondarySortKeyName: 'protocolsBlockNumberBucket',
   },
   CachingRequestFlagDynamoDbTable: {
     Name: 'CacheReqFlagDB',
@@ -32,6 +40,8 @@ export const DynamoDBTableProps = {
 }
 
 export class RoutingDatabaseStack extends cdk.NestedStack {
+  public readonly routesDynamoDb: aws_dynamodb.Table
+  public readonly routesDbCachingRequestFlagDynamoDb: aws_dynamodb.Table
   public readonly cachedRoutesDynamoDb: aws_dynamodb.Table
   public readonly cachingRequestFlagDynamoDb: aws_dynamodb.Table
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
@@ -39,6 +49,31 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
     super(scope, name, props)
+
+    // Creates a DynamoDB Table for storing the routes
+    this.routesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RoutesDbTable.Name, {
+      tableName: DynamoDBTableProps.RoutesDbTable.Name,
+      partitionKey: { name: DynamoDBTableProps.RoutesDbTable.PartitionKeyName, type: AttributeType.STRING },
+      sortKey: { name: DynamoDBTableProps.RoutesDbTable.SortKeyName, type: AttributeType.NUMBER },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+    })
+
+    // Creates a DynamoDB Table for storing the buckets that are flagging as already cached in the RoutesDb
+    this.routesDbCachingRequestFlagDynamoDb = new aws_dynamodb.Table(
+      this,
+      DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+      {
+        tableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+        partitionKey: {
+          name: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.PartitionKeyName,
+          type: AttributeType.STRING,
+        },
+        sortKey: { name: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.SortKeyName, type: AttributeType.NUMBER },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+      }
+    )
 
     // Creates a DynamoDB Table for storing the cached routes
     this.cachedRoutesDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.CacheRouteDynamoDbTable.Name, {
@@ -49,7 +84,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
 
-    // Creates a DynamoDB Table for storing the caching request flags
+    // Creates a DynamoDB Table for storing the buckets that are flagging as already cached in the CachedRoutesDb
     this.cachingRequestFlagDynamoDb = new aws_dynamodb.Table(
       this,
       DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
