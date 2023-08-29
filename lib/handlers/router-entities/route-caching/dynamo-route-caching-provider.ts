@@ -10,7 +10,7 @@ import {
   routeToString
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
@@ -21,6 +21,7 @@ import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
+import { QueryInput } from 'aws-sdk/clients/dynamodb'
 
 interface ConstructorParams {
   /**
@@ -77,7 +78,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = 2
-  private readonly ROUTES_DB_BUCKET_RATIO: number = 1.61803398875;
+
+  // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
+  private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811);
 
   constructor({
     routesTableName,
@@ -315,13 +318,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`${cachedRoutesSource}Expired`, 1, MetricLoggerUnit.Count)
     }
 
-    log.error({optimistic, cacheBlock: cachedRoutes.blockNumber, currentBlockNumber, notExpiredCachedRoute},"about to send caching quote")
+    log.error(`about to send ${cachedRoutesSource} caching quote ${optimistic && notExpiredCachedRoute ? 'true': 'false'}`)
 
     if (
       optimistic && // If we are in optimistic mode
       notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
     ) {
+      log.error({cachedRoutesSource}, "sending caching quote")
       if (cachedRoutesSource === CachedRoutesSource.CachedRoutes) {
+
         // We send an async caching quote
         // we do not await on this function, it's a fire and forget
         this.maybeSendCachingQuoteForCachedRoutes(partitionKey, sortKey!, amount)
@@ -368,30 +373,31 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>
   ): Promise<void> {
-    log.error("caching quote for new")
-    const queryParams = {
-      TableName: this.routesCachingRequestFlagTableName,
-      // We use a ratio to get a range of amounts that are close to the amount we are thinking about inserting
-      // If there's an item in the table which range covers our amount, we don't need to send a caching request
-      KeyConditionExpression: '#pk = :pk AND #amount >= :amount AND #amount < :amount_ratio',
-      ExpressionAttributeNames: {
-        '#pk': 'pairTradeTypeChainId',
-        '#amount': 'amount',
-      },
-      ExpressionAttributeValues: {
-        ':pk': partitionKey.toString(),
-        ':amount': parseFloat(amount.toExact()),
-        ':amount_phi': parseFloat(amount.multiply(this.ROUTES_DB_BUCKET_RATIO).toExact()),
-      },
-    }
-
-    log.error({queryParams}, "caching quote query params")
-
-    metric.putMetric('CheckCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
-
     try {
-      const result = await this.ddbClient.query(queryParams).promise()
-      log.error("caching quote result")
+      const queryParams = {
+        TableName: this.routesCachingRequestFlagTableName,
+        // We use a ratio to get a range of amounts that are close to the amount we are thinking about inserting
+        // If there's an item in the table which range covers our amount, we don't need to send a caching request
+        KeyConditionExpression: '#pk = :pk AND #amount BETWEEN :amount AND :amount_ratio',
+        ExpressionAttributeNames: {
+          '#pk': 'pairTradeTypeChainId',
+          '#amount': 'amount',
+        },
+        ExpressionAttributeValues: {
+          ':pk': partitionKey.toString(),
+          ':amount': parseFloat(amount.toExact()),
+          ':amount_ratio': parseFloat(amount.multiply(this.ROUTES_DB_BUCKET_RATIO).toExact()),
+        },
+      }
+
+      log.error(`caching quote amount: ${amount.toExact()} | ${amount.multiply(this.ROUTES_DB_BUCKET_RATIO).toExact()}`)
+
+      metric.putMetric('CheckCachingQuoteForRoutesDb', 1, MetricLoggerUnit.Count)
+
+      const result = await this.ddbClient.query(queryParams as QueryInput).promise()
+
+      log.error(`caching quote result: ${JSON.stringify(result)}`)
+
       // if no Item is found it means we need to send a caching request
       if (result.Items && result.Items.length == 0) {
         log.error("caching quote result yes")
@@ -400,7 +406,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         this.setRoutesDbCachingIntentFlag(partitionKey, amount)
       }
     } catch (e) {
-      log.error("caching quote for old failed")
+      log.error(`caching quote for new failed ${e}`)
       log.error(`[DynamoRouteCachingProvider] Error checking if caching request was sent.`)
     }
   }
