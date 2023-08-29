@@ -7,7 +7,7 @@ import {
   log,
   metric,
   MetricLoggerUnit,
-  routeToString,
+  routeToString
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
@@ -21,6 +21,7 @@ import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
+import { SUPPORTED_CHAINS } from '../../injector-sor'
 
 interface ConstructorParams {
   /**
@@ -77,7 +78,44 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
-  private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = 2
+
+  // heuristic is within 30 seconds we find a route.
+  // we know each chain block time
+  // divide those two
+  private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = (chainId: ChainId) => {
+    SUPPORTED_CHAINS
+    switch (chainId) {
+      // https://dune.com/queries/2138021
+      case ChainId.ARBITRUM_ONE:
+        return 100
+
+      // https://dune.com/queries/2009572
+      case ChainId.BASE:
+      case ChainId.OPTIMISM:
+        return 60
+
+      // https://snowtrace.io/chart/blocktime
+      case ChainId.AVALANCHE:
+        return 15
+
+      // https://dune.com/KARTOD/blockchains-analysis
+      case ChainId.BNB:
+        return 10
+
+      // https://dune.com/KARTOD/blockchains-analysis
+      case ChainId.POLYGON:
+        return 15
+
+      //  https://explorer.celo.org/mainnet/
+      case ChainId.CELO:
+        return 6
+
+      // https://dune.com/KARTOD/blockchains-analysis
+      case ChainId.MAINNET:
+      default:
+        return 2
+    }
+  }
   private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Tapcompare
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
@@ -127,7 +165,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (cachingParameters) {
       return cachingParameters.blocksToLive
     } else {
-      return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB
+      return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB(cachedRoutes.chainId)
     }
   }
 
