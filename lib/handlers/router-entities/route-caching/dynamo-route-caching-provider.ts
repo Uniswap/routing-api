@@ -76,6 +76,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ttlMinutes: number
 
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
+  private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
   private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = 2
   private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Tapcompare
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
@@ -521,7 +522,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       Item: {
         pairTradeTypeChainId: partitionKey.toString(),
         amount: parseFloat(amount.toExact()),
-        ttl: Math.floor(Date.now() / 1000) + this.ttlMinutes * 60,
+        ttl: Math.floor(Date.now() / 1000) + this.ROUTES_DB_FLAG_TTL,
         caching: true,
       },
     }
@@ -637,7 +638,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         tradeType: cachedRoutes.tradeType,
         originalAmount: cachedRoutes.originalAmount,
       })
-      // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
       const ttl = Math.floor(Date.now() / 1000) + this.ROUTES_DB_TTL
       // Marshal the CachedRoutes object in preparation for storing in DynamoDB
       const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(individualCachedRoutes)
