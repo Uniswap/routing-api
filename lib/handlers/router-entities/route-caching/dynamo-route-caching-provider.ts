@@ -364,7 +364,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
-    const blocksDifference = currentBlockNumber - blockNumber
+    // Normalize blocks difference, if the route is from a new block (which could happen in L2s), consider it same block
+    const blocksDifference = Math.max(0, currentBlockNumber - blockNumber)
     metric.putMetric(`${cachedRoutesSource}BlockDifference`, blocksDifference, MetricLoggerUnit.Count)
     metric.putMetric(
       `${cachedRoutesSource}BlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
