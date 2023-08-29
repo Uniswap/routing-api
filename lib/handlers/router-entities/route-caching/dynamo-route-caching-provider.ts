@@ -21,7 +21,6 @@ import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
-import { SUPPORTED_CHAINS } from '../../injector-sor'
 
 interface ConstructorParams {
   /**
@@ -83,7 +82,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   // we know each chain block time
   // divide those two
   private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = (chainId: ChainId) => {
-    SUPPORTED_CHAINS
     switch (chainId) {
       // https://dune.com/queries/2138021
       case ChainId.ARBITRUM_ONE:
