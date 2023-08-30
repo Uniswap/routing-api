@@ -295,8 +295,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const result = await this.ddbClient.query(queryParams).promise()
       const shouldSendCachingRequest = result.Items && (
         result.Items.length == 0 || // no caching request has been sent recently
-        // or there are less than 3 routes from the current block number
-        result.Items.filter(record => (record.blockNumber ?? 0) >= currentBlockNumber).length < 3
+        // or there are less than 2 samples for the given block in the range of the amount
+        result.Items.filter(record => (record.blockNumber ?? 0) >= currentBlockNumber).length < 2
       )
 
       // if no Item is found it means we need to send a caching request
