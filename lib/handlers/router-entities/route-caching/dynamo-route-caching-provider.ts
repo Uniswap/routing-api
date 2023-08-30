@@ -16,10 +16,7 @@ import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
-import { ProtocolsBucketBlockNumber } from './model/protocols-bucket-block-number'
-import { CachedRoutesBucket } from './model'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
-import { SECONDS_PER_BLOCK_BY_CHAIN_ID } from '../../shared'
 import { PromiseResult } from 'aws-sdk/lib/request'
 
 interface ConstructorParams {
@@ -35,34 +32,18 @@ interface ConstructorParams {
    * The Lambda Function Name for the Lambda that will be invoked to fill the cache
    */
   cachingQuoteLambdaName: string
-  /**
-   * The amount of minutes that a CachedRoute should live in the database.
-   * This is used to limit the database growth, Dynamo will automatically delete expired entries.
-   */
-  ttlMinutes?: number
-}
-interface CachedRouteDbEntry {
-  TableName: string
-  Item: {
-    pairTradeTypeChainId: string
-    protocolsBucketBlockNumber: string
-    item: Buffer
-    ttl: number
-  }
 }
 
 enum CachedRoutesSource {
   RoutesDb = 'RoutesDb',
 }
 
-const DEFAULT_TTL_MINUTES = 2
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
   private readonly routesTableName: string
   private readonly routesCachingRequestFlagTableName: string
   private readonly cachingQuoteLambdaName: string
-  private readonly ttlMinutes: number
 
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
@@ -112,7 +93,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     routesTableName,
     routesCachingRequestFlagTableName,
     cachingQuoteLambdaName,
-    ttlMinutes = DEFAULT_TTL_MINUTES,
   }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
@@ -129,7 +109,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     this.routesTableName = routesTableName
     this.routesCachingRequestFlagTableName = routesCachingRequestFlagTableName
     this.cachingQuoteLambdaName = cachingQuoteLambdaName
-    this.ttlMinutes = ttlMinutes
   }
 
   /**
@@ -413,57 +392,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
-   * Helper function to generate the [CachedRouteDbEntry] object to be stored in the Cached Routes DynamoDB.
-   *
-   * @param cachedRoutes
-   * @param amount
-   * @public
-   */
-  public generateCachedRouteDbEntry(
-    cachedRoutes: CachedRoutes,
-    amount: CurrencyAmount<Currency>
-  ): CachedRouteDbEntry | null {
-    const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
-    const cachingBucket = cachedRoutesStrategy?.getCachingBucket(amount)
-    const chainId = cachedRoutes.chainId
-    const blocksToLive = cachedRoutes.blocksToLive
-    const secondsToLivePerBlock = SECONDS_PER_BLOCK_BY_CHAIN_ID[chainId]
-    const cachedRoutesTtl =
-      blocksToLive > 0 && typeof secondsToLivePerBlock === 'number' ? secondsToLivePerBlock * blocksToLive : 0
-
-    if (cachingBucket && this.isAllowedInCache(cachingBucket, cachedRoutes)) {
-      // TTL is minutes from now. multiply ttlMinutes times 60 to convert to seconds, since ttl is in seconds.
-      const ttl = Math.floor(Date.now() / 1000) + Math.max(cachedRoutesTtl, this.ttlMinutes * 60)
-      // Marshal the CachedRoutes object in preparation for storing in DynamoDB
-      const marshalledCachedRoutes = CachedRoutesMarshaller.marshal(cachedRoutes)
-      // Convert the marshalledCachedRoutes to JSON string
-      const jsonCachedRoutes = JSON.stringify(marshalledCachedRoutes)
-      // Encode the jsonCachedRoutes into Binary
-      const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
-
-      // Primary Key object
-      const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
-      const sortKey = new ProtocolsBucketBlockNumber({
-        protocols: cachedRoutes.protocolsCovered,
-        bucket: cachingBucket.bucket,
-        blockNumber: cachedRoutes.blockNumber,
-      })
-
-      return {
-        TableName: this.routesTableName,
-        Item: {
-          pairTradeTypeChainId: partitionKey.toString(),
-          protocolsBucketBlockNumber: sortKey.fullKey(),
-          item: binaryCachedRoutes,
-          ttl: ttl,
-        },
-      }
-    } else {
-      return null
-    }
-  }
-
-  /**
    * Implementation of the abstract method defined in `IRouteCachingProvider`
    * Attempts to insert the `CachedRoutes` object into cache, if the CachingStrategy returns the CachingParameters
    *
@@ -672,19 +600,5 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     } else {
       return { tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
     }
-  }
-
-  /**
-   * Helper function that based on the CachingBucket can determine if the route is allowed in cache.
-   * There are 2 conditions, currently:
-   * 1. `cachingBucket.maxSplits <= 0` indicate that any number of maxSplits is allowed
-   * 2. `cachedRoutes.routes.length <= maxSplits` to test that there are fewer splits than allowed
-   *
-   * @param cachingBucket
-   * @param cachedRoutes
-   * @private
-   */
-  private isAllowedInCache(cachingBucket: CachedRoutesBucket, cachedRoutes: CachedRoutes): boolean {
-    return cachingBucket.maxSplits <= 0 || cachedRoutes.routes.length <= cachingBucket.maxSplits
   }
 }
