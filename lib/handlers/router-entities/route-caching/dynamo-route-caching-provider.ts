@@ -34,10 +34,6 @@ interface ConstructorParams {
   cachingQuoteLambdaName: string
 }
 
-enum CachedRoutesSource {
-  RoutesDb = 'RoutesDb',
-}
-
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ddbClient: DynamoDB.DocumentClient
   private readonly lambdaClient: Lambda
@@ -203,8 +199,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           currentBlockNumber,
           optimistic,
           partitionKey,
-          amount,
-          CachedRoutesSource.RoutesDb
+          amount
         )
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
@@ -224,10 +219,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     currentBlockNumber: number,
     optimistic: boolean,
     partitionKey: PairTradeTypeChainId,
-    amount: CurrencyAmount<Currency>,
-    cachedRoutesSource: CachedRoutesSource
+    amount: CurrencyAmount<Currency>
   ): CachedRoutes {
-    metric.putMetric(`${cachedRoutesSource}EntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
+    metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
       // If we got a response with more than 1 item, we extract the binary field from the response
       const itemBinary = record.item
@@ -244,7 +238,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     let originalAmount: string = ''
 
     cachedRoutesArr.forEach((cachedRoutes) => {
-      metric.putMetric(`${cachedRoutesSource}PerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbPerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
       cachedRoutes.routes.forEach((cachedRoute) => {
         // we use the stringified route as identifier
         const routeId = routeToString(cachedRoute.route)
@@ -276,35 +270,33 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       blocksToLive: first.blocksToLive,
     })
 
-    metric.putMetric(`Unique${cachedRoutesSource}Found`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
+    metric.putMetric(`UniqueRoutesDbFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
 
     log.info({ cachedRoutes }, `[DynamoRouteCachingProvider] Returning the cached and unmarshalled route.`)
 
     // Normalize blocks difference, if the route is from a new block (which could happen in L2s), consider it same block
     const blocksDifference = Math.max(0, currentBlockNumber - blockNumber)
-    metric.putMetric(`${cachedRoutesSource}BlockDifference`, blocksDifference, MetricLoggerUnit.Count)
+    metric.putMetric(`RoutesDbBlockDifference`, blocksDifference, MetricLoggerUnit.Count)
     metric.putMetric(
-      `${cachedRoutesSource}BlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
+      `RoutesDbBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
       blocksDifference,
       MetricLoggerUnit.Count
     )
 
     const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
     if (notExpiredCachedRoute) {
-      metric.putMetric(`${cachedRoutesSource}NotExpired`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbNotExpired`, 1, MetricLoggerUnit.Count)
     } else {
-      metric.putMetric(`${cachedRoutesSource}Expired`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbExpired`, 1, MetricLoggerUnit.Count)
     }
 
     if (
       optimistic && // If we are in optimistic mode
       notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
     ) {
-      if (cachedRoutesSource === CachedRoutesSource.RoutesDb) {
-        // We send an async caching quote
-        // we do not await on this function, it's a fire and forget
-        this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
-      }
+      // We send an async caching quote
+      // we do not await on this function, it's a fire and forget
+      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
     }
 
     return cachedRoutes
