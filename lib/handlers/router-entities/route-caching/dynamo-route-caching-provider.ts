@@ -12,10 +12,8 @@ import {
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
-import { CACHED_ROUTES_CONFIGURATION } from './cached-routes-configuration'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
-import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { PromiseResult } from 'aws-sdk/lib/request'
 
@@ -41,6 +39,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly routesCachingRequestFlagTableName: string
   private readonly cachingQuoteLambdaName: string
 
+  private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Livemode
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
 
@@ -80,16 +79,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         return 2
     }
   }
-  private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Livemode
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
 
-  constructor({
-    routesTableName,
-    routesCachingRequestFlagTableName,
-    cachingQuoteLambdaName,
-  }: ConstructorParams) {
+  constructor({ routesTableName, routesCachingRequestFlagTableName, cachingQuoteLambdaName }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -113,18 +107,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * we will find the BlocksToLive associated to the bucket.
    *
    * @param cachedRoutes
-   * @param amount
+   * @param _
    * @protected
    */
-  protected async _getBlocksToLive(cachedRoutes: CachedRoutes, amount: CurrencyAmount<Currency>): Promise<number> {
-    const cachedRoutesStrategy = this.getCachedRoutesStrategyFromCachedRoutes(cachedRoutes)
-    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
-
-    if (cachingParameters) {
-      return cachingParameters.blocksToLive
-    } else {
-      return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB(cachedRoutes.chainId)
-    }
+  protected async _getBlocksToLive(cachedRoutes: CachedRoutes, _: CurrencyAmount<Currency>): Promise<number> {
+    return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB(cachedRoutes.chainId)
   }
 
   /**
@@ -183,14 +170,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
         result.Items = filteredItems
 
-        return this.parseCachedRoutes(
-          result,
-          chainId,
-          currentBlockNumber,
-          optimistic,
-          partitionKey,
-          amount
-        )
+        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount)
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -267,11 +247,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     // Normalize blocks difference, if the route is from a new block (which could happen in L2s), consider it same block
     const blocksDifference = Math.max(0, currentBlockNumber - blockNumber)
     metric.putMetric(`RoutesDbBlockDifference`, blocksDifference, MetricLoggerUnit.Count)
-    metric.putMetric(
-      `RoutesDbBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`,
-      blocksDifference,
-      MetricLoggerUnit.Count
-    )
+    metric.putMetric(`RoutesDbBlockDifference_${ID_TO_NETWORK_NAME(chainId)}`, blocksDifference, MetricLoggerUnit.Count)
 
     const notExpiredCachedRoute = cachedRoutes.notExpired(currentBlockNumber, optimistic)
     if (notExpiredCachedRoute) {
@@ -445,123 +421,20 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * Implementation of the abstract method defined in `IRouteCachingProvider`
    * Obtains the CacheMode from the CachingStrategy, if not found, then return Darkmode.
    *
-   * @param chainId
-   * @param amount
-   * @param quoteToken
-   * @param tradeType
+   * @param _chainId
+   * @param _amount
+   * @param _quoteToken
+   * @param _tradeType
    * @param _protocols
    */
   public async getCacheMode(
-    chainId: ChainId,
-    amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
-    tradeType: TradeType,
+    _chainId: ChainId,
+    _amount: CurrencyAmount<Currency>,
+    _quoteToken: Token,
+    _tradeType: TradeType,
     _protocols: Protocol[]
   ): Promise<CacheMode> {
-    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
-    const cachedRoutesStrategy = this.getCachedRoutesStrategy(tokenIn, tokenOut, tradeType, chainId)
-    const cachingParameters = cachedRoutesStrategy?.getCachingBucket(amount)
-
-    if (cachingParameters) {
-      log.info(
-        {
-          cachingParameters: cachingParameters,
-          tokenIn: tokenIn.address,
-          tokenOut: tokenOut.address,
-          pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
-          chainId,
-          tradeType,
-          amount: amount.toExact(),
-        },
-        `[DynamoRouteCachingProvider] Got CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
-          tokenOut.symbol
-        }/${tradeType}/${chainId}`
-      )
-
-      return cachingParameters.cacheMode
-    } else {
-      log.info(
-        {
-          tokenIn: tokenIn.address,
-          tokenOut: tokenOut.address,
-          pair: `${tokenIn.symbol}/${tokenOut.symbol}`,
-          chainId,
-          tradeType,
-          amount: amount.toExact(),
-        },
-        `[DynamoRouteCachingProvider] Didn't find CachingParameters for ${amount.toExact()} in ${tokenIn.symbol}/${
-          tokenOut.symbol
-        }/${tradeType}/${chainId}`
-      )
-
-      return this.DEFAULT_CACHEMODE_ROUTES_DB
-    }
-  }
-
-  /**
-   * Helper function to fetch the CachingStrategy using CachedRoutes as input
-   *
-   * @param cachedRoutes
-   * @private
-   */
-  private getCachedRoutesStrategyFromCachedRoutes(cachedRoutes: CachedRoutes): CachedRoutesStrategy | undefined {
-    return this.getCachedRoutesStrategy(
-      cachedRoutes.tokenIn,
-      cachedRoutes.tokenOut,
-      cachedRoutes.tradeType,
-      cachedRoutes.chainId
-    )
-  }
-
-  /**
-   * Helper function to obtain the Caching strategy from the CACHED_ROUTES_CONFIGURATION
-   *
-   * @param tokenIn
-   * @param tokenOut
-   * @param tradeType
-   * @param chainId
-   * @private
-   */
-  private getCachedRoutesStrategy(
-    tokenIn: Token,
-    tokenOut: Token,
-    tradeType: TradeType,
-    chainId: ChainId
-  ): CachedRoutesStrategy | undefined {
-    const pairTradeTypeChainId = new PairTradeTypeChainId({
-      tokenIn: tokenIn.address,
-      tokenOut: tokenOut.address,
-      tradeType: tradeType,
-      chainId: chainId,
-    })
-
-    let withWildcard: PairTradeTypeChainId
-    if (tradeType === TradeType.EXACT_INPUT) {
-      withWildcard = new PairTradeTypeChainId({
-        tokenIn: tokenIn.address,
-        tokenOut: '*',
-        tradeType: TradeType.EXACT_INPUT,
-        chainId: chainId,
-      })
-    } else {
-      withWildcard = new PairTradeTypeChainId({
-        tokenIn: '*',
-        tokenOut: tokenOut.address,
-        tradeType: TradeType.EXACT_OUTPUT,
-        chainId: chainId,
-      })
-    }
-
-    log.info(
-      { pairTradeTypeChainId },
-      `[DynamoRouteCachingProvider] Looking for cache configuration of ${pairTradeTypeChainId.toString()}
-      or ${withWildcard.toString()}`
-    )
-
-    return (
-      CACHED_ROUTES_CONFIGURATION.get(pairTradeTypeChainId.toString()) ??
-      CACHED_ROUTES_CONFIGURATION.get(withWildcard.toString())
-    )
+    return this.DEFAULT_CACHEMODE_ROUTES_DB
   }
 
   /**
