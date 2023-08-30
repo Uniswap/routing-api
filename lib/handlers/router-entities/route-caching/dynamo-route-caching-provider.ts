@@ -261,14 +261,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`RoutesDbExpired`, 1, MetricLoggerUnit.Count)
     }
 
-    if (
-      optimistic && // If we are in optimistic mode
-      notExpiredCachedRoute // and the cachedRoutes are not expired (if they are expired, the regular request will insert cache)
-    ) {
-      // We send an async caching quote
-      // we do not await on this function, it's a fire and forget
-      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
-    }
+    // We send an async caching quote
+    // we do not await on this function, it's a fire and forget
+    this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
 
     return cachedRoutes
   }
@@ -362,10 +357,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @protected
    */
   protected async _setCachedRoute(cachedRoutes: CachedRoutes): Promise<boolean> {
-    return await this.insertRoutesDbEntry(cachedRoutes)
-  }
-
-  private async insertRoutesDbEntry(cachedRoutes: CachedRoutes): Promise<boolean> {
     const routesDbEntries = cachedRoutes.routes.map((route) => {
       const individualCachedRoutes = new CachedRoutes({
         routes: [route],
@@ -441,6 +432,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     _protocols: Protocol[]
   ): Promise<CacheMode> {
     return this.DEFAULT_CACHEMODE_ROUTES_DB
+  }
+
+  protected override filterExpiredCachedRoutes(
+    cachedRoutes: CachedRoutes | undefined,
+    _blockNumber: number,
+    _optimistic: boolean
+  ): CachedRoutes | undefined {
+    return cachedRoutes
   }
 
   /**
