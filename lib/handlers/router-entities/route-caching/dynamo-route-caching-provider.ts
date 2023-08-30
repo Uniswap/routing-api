@@ -130,7 +130,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType,
-    _protocols: Protocol[],
+    protocols: Protocol[],
     currentBlockNumber: number,
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
@@ -163,14 +163,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         metric.putMetric('RoutesDbPreFilterEntriesFound', result.Items.length, MetricLoggerUnit.Count)
         // At this point we might have gotten all the routes we have discovered in the last 24 hours for this pair
         // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
-        const filteredItems = result.Items.sort((a, b) => b.blockNumber - a.blockNumber).slice(
-          0,
-          this.ROUTES_TO_TAKE_FROM_ROUTES_DB
-        )
+        const filteredItems = result.Items
+          // Older routes might not have the protocol field, so we keep them if they don't have it
+          .filter((record) => !record.protocol || protocols.includes(record.protocol))
+          .sort((a, b) => b.blockNumber - a.blockNumber)
+          .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
         result.Items = filteredItems
 
-        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount)
+        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, protocols)
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -189,7 +190,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     currentBlockNumber: number,
     optimistic: boolean,
     partitionKey: PairTradeTypeChainId,
-    amount: CurrencyAmount<Currency>
+    amount: CurrencyAmount<Currency>,
+    protocols: Protocol[]
   ): CachedRoutes {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
@@ -213,7 +215,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // we use the stringified route as identifier
         const routeId = routeToString(cachedRoute.route)
         // Using a map to remove duplicates, we will the different percents of different routes.
-        if (!routesMap.has(routeId)) routesMap.set(routeId, cachedRoute)
+        // We also filter by protocol, in case we are loading a route from a protocol that wasn't requested
+        if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol)) {
+          routesMap.set(routeId, cachedRoute)
+        }
       })
       // Find the latest blockNumber
       blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
@@ -388,6 +393,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             pairTradeTypeChainId: partitionKey.toString(),
             routeId: route.routeId,
             blockNumber: cachedRoutes.blockNumber,
+            protocol: route.protocol.toString(),
             item: binaryCachedRoutes,
             ttl: ttl,
           },
