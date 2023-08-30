@@ -263,14 +263,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // We send an async caching quote
     // we do not await on this function, it's a fire and forget
-    this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount)
+    this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
 
     return cachedRoutes
   }
 
   private async maybeSendCachingQuoteForRoutesDb(
     partitionKey: PairTradeTypeChainId,
-    amount: CurrencyAmount<Currency>
+    amount: CurrencyAmount<Currency>,
+    currentBlockNumber: number
   ): Promise<void> {
     try {
       const queryParams = {
@@ -292,12 +293,17 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric('CachingQuoteForRoutesDbCheck', 1, MetricLoggerUnit.Count)
 
       const result = await this.ddbClient.query(queryParams).promise()
+      const shouldSendCachingRequest =
+        result.Items &&
+        (result.Items.length == 0 || // no caching request has been sent recently
+          // or there is not a single sample for the current block
+          result.Items.every((record) => (record.blockNumber ?? 0) < currentBlockNumber))
 
       // if no Item is found it means we need to send a caching request
-      if (result.Items && result.Items.length == 0) {
+      if (shouldSendCachingRequest) {
         metric.putMetric('CachingQuoteForRoutesDbRequestSent', 1, MetricLoggerUnit.Count)
         this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.MIXED], amount)
-        this.setRoutesDbCachingIntentFlag(partitionKey, amount)
+        this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
         metric.putMetric('CachingQuoteForRoutesDbRequestNotNeeded', 1, MetricLoggerUnit.Count)
       }
@@ -335,14 +341,18 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     this.lambdaClient.invoke(params).promise()
   }
 
-  private setRoutesDbCachingIntentFlag(partitionKey: PairTradeTypeChainId, amount: CurrencyAmount<Currency>): void {
+  private setRoutesDbCachingIntentFlag(
+    partitionKey: PairTradeTypeChainId,
+    amount: CurrencyAmount<Currency>,
+    currentBlockNumber: number
+  ): void {
     const putParams = {
       TableName: this.routesCachingRequestFlagTableName,
       Item: {
         pairTradeTypeChainId: partitionKey.toString(),
         amount: parseFloat(amount.toExact()),
         ttl: Math.floor(Date.now() / 1000) + this.ROUTES_DB_FLAG_TTL,
-        caching: true,
+        blockNumber: currentBlockNumber,
       },
     }
 
