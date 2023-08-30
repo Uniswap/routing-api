@@ -293,11 +293,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric('CachingQuoteForRoutesDbCheck', 1, MetricLoggerUnit.Count)
 
       const result = await this.ddbClient.query(queryParams).promise()
-      const shouldSendCachingRequest = result.Items && (
-        result.Items.length == 0 || // no caching request has been sent recently
-        // or there are less than 2 samples for the given block in the range of the amount
-        result.Items.filter(record => (record.blockNumber ?? 0) >= currentBlockNumber).length < 2
-      )
+      const shouldSendCachingRequest =
+        result.Items &&
+        (result.Items.length == 0 || // no caching request has been sent recently
+          // or there are less than 2 samples for the given block in the range of the amount
+          result.Items.filter((record) => (record.blockNumber ?? 0) >= currentBlockNumber).length < 2)
 
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
@@ -352,7 +352,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         pairTradeTypeChainId: partitionKey.toString(),
         amount: parseFloat(amount.toExact()),
         ttl: Math.floor(Date.now() / 1000) + this.ROUTES_DB_FLAG_TTL,
-        blockNumber: currentBlockNumber
+        blockNumber: currentBlockNumber,
       },
     }
 
