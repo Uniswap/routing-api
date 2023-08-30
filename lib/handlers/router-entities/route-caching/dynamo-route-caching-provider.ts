@@ -296,8 +296,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const shouldSendCachingRequest =
         result.Items &&
         (result.Items.length == 0 || // no caching request has been sent recently
-          // or there are less than 2 samples for the given block in the range of the amount
-          result.Items.filter((record) => (record.blockNumber ?? 0) >= currentBlockNumber).length < 2)
+          // or there is not a single sample for the current block
+          result.Items.every((record) => (record.blockNumber ?? 0) < currentBlockNumber))
 
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
