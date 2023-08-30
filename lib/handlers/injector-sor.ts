@@ -124,7 +124,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME,
       CACHED_ROUTES_TABLE_NAME,
       AWS_LAMBDA_FUNCTION_NAME,
-      CACHING_REQUEST_FLAG_TABLE_NAME,
       V2_PAIRS_CACHE_TABLE_NAME,
     } = process.env
 
@@ -330,9 +329,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           routeCachingProvider = new DynamoRouteCachingProvider({
             routesTableName: ROUTES_TABLE_NAME!,
             routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
-            cachedRoutesTableName: CACHED_ROUTES_TABLE_NAME,
             cachingQuoteLambdaName: AWS_LAMBDA_FUNCTION_NAME!,
-            cachingRequestFlagTableName: CACHING_REQUEST_FLAG_TABLE_NAME!,
           })
         }
 
