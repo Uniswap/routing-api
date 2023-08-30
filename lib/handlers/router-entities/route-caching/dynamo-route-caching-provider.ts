@@ -156,16 +156,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       chainId,
     })
 
-    return await this.getRoutesFromRoutesDb(partitionKey, chainId, amount, currentBlockNumber, optimistic)
-  }
-
-  private async getRoutesFromRoutesDb(
-    partitionKey: PairTradeTypeChainId,
-    chainId: ChainId,
-    amount: CurrencyAmount<Currency>,
-    currentBlockNumber: number,
-    optimistic: boolean
-  ): Promise<CachedRoutes | undefined> {
     // If no cachedRoutes were found, we try to fetch from the RoutesDb
     metric.putMetric('RoutesDbQuery', 1, MetricLoggerUnit.Count)
 
