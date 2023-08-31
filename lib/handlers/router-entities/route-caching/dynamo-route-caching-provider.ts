@@ -261,9 +261,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`RoutesDbExpired`, 1, MetricLoggerUnit.Count)
     }
 
-    // We send an async caching quote
-    // we do not await on this function, it's a fire and forget
-    this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
+    if (optimistic) {
+      // We send an async caching quote
+      // we do not await on this function, it's a fire and forget
+      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
+    }
 
     return cachedRoutes
   }
@@ -442,14 +444,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     _protocols: Protocol[]
   ): Promise<CacheMode> {
     return this.DEFAULT_CACHEMODE_ROUTES_DB
-  }
-
-  protected override filterExpiredCachedRoutes(
-    cachedRoutes: CachedRoutes | undefined,
-    _blockNumber: number,
-    _optimistic: boolean
-  ): CachedRoutes | undefined {
-    return cachedRoutes
   }
 
   /**
