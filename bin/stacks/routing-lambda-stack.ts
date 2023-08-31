@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
-import { Duration } from 'aws-cdk-lib'
+import { Duration, Size } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -87,8 +87,10 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       runtime: aws_lambda.Runtime.NODEJS_14_X,
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
-      timeout: cdk.Duration.seconds(29),
-      memorySize: 1024,
+      timeout: cdk.Duration.seconds(15),
+      memorySize: 1536,
+      ephemeralStorageSize: Size.gibibytes(1),
+      deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
         sourceMap: true,
