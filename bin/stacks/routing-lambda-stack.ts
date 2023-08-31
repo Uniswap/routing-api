@@ -32,6 +32,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachingRequestFlagDynamoDb: aws_dynamodb.Table
   cachedV3PoolsDynamoDb: aws_dynamodb.Table
   cachedV2PairsDynamoDb: aws_dynamodb.Table
+  tokenValidationResultDynamoDb: aws_dynamodb.Table
   unicornSecret: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -58,6 +59,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
+      tokenValidationResultDynamoDb,
       unicornSecret,
     } = props
 
@@ -79,6 +81,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     cachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
     cachedV3PoolsDynamoDb.grantReadWriteData(lambdaRole)
     cachedV2PairsDynamoDb.grantReadWriteData(lambdaRole)
+    tokenValidationResultDynamoDb.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -116,6 +119,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
+        TOKEN_VALIDATION_RESULT_TABLE_NAME: DynamoDBTableProps.TokenValidationResultDbTable.Name,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
       },
