@@ -447,6 +447,23 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
+   * RoutesDB self-correcting mechanism allows us to look at routes that would have been considered expired
+   * We override this method to increase our cache coverage.
+   *
+   * @param cachedRoutes
+   * @param _blockNumber
+   * @param _optimistic
+   * @protected
+   */
+  protected override filterExpiredCachedRoutes(
+    cachedRoutes: CachedRoutes | undefined,
+    _blockNumber: number,
+    _optimistic: boolean
+  ): CachedRoutes | undefined {
+    return cachedRoutes
+  }
+
+  /**
    * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
    *
    * @param amount
