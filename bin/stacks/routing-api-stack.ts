@@ -82,8 +82,6 @@ export class RoutingAPIStack extends cdk.Stack {
     const {
       routesDynamoDb,
       routesDbCachingRequestFlagDynamoDb,
-      cachedRoutesDynamoDb,
-      cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
     } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
@@ -102,8 +100,6 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyAccessKey,
       routesDynamoDb,
       routesDbCachingRequestFlagDynamoDb,
-      cachedRoutesDynamoDb,
-      cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
       unicornSecret,
