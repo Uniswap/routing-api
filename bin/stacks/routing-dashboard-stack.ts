@@ -144,7 +144,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               NAMESPACE,
-              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
               'Service',
               'RoutingAPI',
               { stat: 'p99.99', label: `${ID_TO_NETWORK_NAME(chainId)} P99.99` },
@@ -176,7 +176,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               NAMESPACE,
-              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
               'Service',
               'RoutingAPI',
               { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95` },
@@ -207,7 +207,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               NAMESPACE,
-              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
               'Service',
               'RoutingAPI',
               { stat: 'p50', label: `${ID_TO_NETWORK_NAME(chainId)} Median` },
@@ -238,7 +238,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               NAMESPACE,
-              `GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
               'Service',
               'RoutingAPI',
               { stat: 'Minimum', label: `${ID_TO_NETWORK_NAME(chainId)} Minimum` },
@@ -323,7 +323,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               'RoutingAPI',
               { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95 Caching` },
             ],
-            ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Caching` }],
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_caching`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Caching` },
+            ],
             [
               NAMESPACE,
               `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
@@ -331,7 +337,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               'RoutingAPI',
               { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95 Quote` },
             ],
-            ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Quote` }],
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_quote`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Quote` },
+            ],
             [
               NAMESPACE,
               `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_swap`,
@@ -339,7 +351,13 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               'RoutingAPI',
               { stat: 'p95', label: `${ID_TO_NETWORK_NAME(chainId)} P95 Swap` },
             ],
-            ['...', { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Swa[` }],
+            [
+              NAMESPACE,
+              `GET_QUOTE_LATENCY_CHAIN_${chainId}_INTENT_swap`,
+              'Service',
+              'RoutingAPI',
+              { stat: 'p90', label: `${ID_TO_NETWORK_NAME(chainId)} P90 Swap` },
+            ],
           ]),
           region,
           title: `P95 & P90 Latency by Chain and Intent`,
