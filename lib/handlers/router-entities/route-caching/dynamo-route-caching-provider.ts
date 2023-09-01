@@ -261,6 +261,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`RoutesDbExpired`, 1, MetricLoggerUnit.Count)
     }
 
+    // Caching requests are not `optimistic`, we need to be careful of not removing this flag
+    // This condition is protecting us against firing another caching request from inside a caching request
     if (optimistic) {
       // We send an async caching quote
       // we do not await on this function, it's a fire and forget
