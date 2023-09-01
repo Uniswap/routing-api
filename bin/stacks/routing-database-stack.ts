@@ -42,8 +42,13 @@ export const DynamoDBTableProps = {
 export class RoutingDatabaseStack extends cdk.NestedStack {
   public readonly routesDynamoDb: aws_dynamodb.Table
   public readonly routesDbCachingRequestFlagDynamoDb: aws_dynamodb.Table
+
+  // WARNING: even though cachedRoutesDynamoDb and cachingRequestFlagDynamoDb are not used in prod
+  //          we still have to keep there here. Removing them will cause routes DB to stop receiving
+  //          cached routes. We don't know why, but let's not delete cachedRoutesDynamoDb or cachingRequestFlagDynamoDb
   public readonly cachedRoutesDynamoDb: aws_dynamodb.Table
   public readonly cachingRequestFlagDynamoDb: aws_dynamodb.Table
+
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
   public readonly cachedV2PairsDynamoDb: aws_dynamodb.Table
 
