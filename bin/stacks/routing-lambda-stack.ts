@@ -11,7 +11,6 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
