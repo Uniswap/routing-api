@@ -261,9 +261,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       metric.putMetric(`RoutesDbExpired`, 1, MetricLoggerUnit.Count)
     }
 
-    // We send an async caching quote
-    // we do not await on this function, it's a fire and forget
-    this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
+    if (optimistic) {
+      // We send an async caching quote
+      // we do not await on this function, it's a fire and forget
+      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
+    }
 
     return cachedRoutes
   }
@@ -444,6 +446,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     return this.DEFAULT_CACHEMODE_ROUTES_DB
   }
 
+  /**
+   * RoutesDB self-correcting mechanism allows us to look at routes that would have been considered expired
+   * We override this method to increase our cache coverage.
+   *
+   * @param cachedRoutes
+   * @param _blockNumber
+   * @param _optimistic
+   * @protected
+   */
   protected override filterExpiredCachedRoutes(
     cachedRoutes: CachedRoutes | undefined,
     _blockNumber: number,
