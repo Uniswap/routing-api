@@ -28,6 +28,8 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   chatbotSNSArn?: string
   routesDynamoDb: aws_dynamodb.Table
   routesDbCachingRequestFlagDynamoDb: aws_dynamodb.Table
+  cachedRoutesDynamoDb: aws_dynamodb.Table
+  cachingRequestFlagDynamoDb: aws_dynamodb.Table
   cachedV3PoolsDynamoDb: aws_dynamodb.Table
   cachedV2PairsDynamoDb: aws_dynamodb.Table
   unicornSecret: string
@@ -52,6 +54,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyAccessKey,
       routesDynamoDb,
       routesDbCachingRequestFlagDynamoDb,
+      cachedRoutesDynamoDb,
+      cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
       unicornSecret,
@@ -71,6 +75,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     tokenListCacheBucket.grantRead(lambdaRole)
     routesDynamoDb.grantReadWriteData(lambdaRole)
     routesDbCachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
+    cachedRoutesDynamoDb.grantReadWriteData(lambdaRole)
+    cachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
     cachedV3PoolsDynamoDb.grantReadWriteData(lambdaRole)
     cachedV2PairsDynamoDb.grantReadWriteData(lambdaRole)
 
@@ -106,6 +112,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         ROUTES_TABLE_NAME: DynamoDBTableProps.RoutesDbTable.Name,
         ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+        CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
+        CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
         UNICORN_SECRET: unicornSecret,
