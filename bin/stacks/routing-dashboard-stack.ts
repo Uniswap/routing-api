@@ -145,7 +145,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -177,7 +177,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -208,7 +208,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -239,7 +239,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -277,7 +277,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -309,7 +309,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -340,7 +340,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
@@ -371,7 +371,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
       {
         type: 'metric',
         width: 12,
-        height: 8,
+        height: 10,
         properties: {
           view: 'timeSeries',
           stacked: false,
