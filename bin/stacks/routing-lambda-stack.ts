@@ -11,7 +11,6 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
@@ -104,10 +103,10 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
-        ROUTES_TABLE_NAME: DynamoDBTableProps.RoutesDbTable.Name,
-        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
-        CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
-        V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
+        ROUTES_TABLE_NAME: routesDynamoDb.tableName,
+        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: routesDbCachingRequestFlagDynamoDb.tableName,
+        CACHED_V3_POOLS_TABLE_NAME: cachedV3PoolsDynamoDb.tableName,
+        V2_PAIRS_CACHE_TABLE_NAME: cachedV2PairsDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
       },
