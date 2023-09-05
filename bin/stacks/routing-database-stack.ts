@@ -39,7 +39,6 @@ export const DynamoDBTableProps = {
   TokenPropertiesCachingDbTable: {
     Name: 'TokenPropertiesCachingDb',
     PartitionKeyName: 'chainIdTokenAddress',
-    SortKeyName: 'blockNumber',
   },
   TTLAttributeName: 'ttl',
 }
@@ -139,7 +138,6 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
           name: DynamoDBTableProps.TokenPropertiesCachingDbTable.PartitionKeyName,
           type: AttributeType.STRING,
         },
-        sortKey: { name: DynamoDBTableProps.TokenPropertiesCachingDbTable.SortKeyName, type: AttributeType.NUMBER },
         billingMode: BillingMode.PAY_PER_REQUEST,
         timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
       }
