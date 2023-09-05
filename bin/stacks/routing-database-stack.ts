@@ -36,10 +36,10 @@ export const DynamoDBTableProps = {
     PartitionKeyName: 'cacheKey',
     SortKeyName: 'block',
   },
-  TokenValidationResultDbTable: {
-    Name: 'TokenValidationResultDB',
-    PartitionKeyName: 'tokenAddress',
-    SortKeyName: 'chainId',
+  TokenPropertiesCachingDbTable: {
+    Name: 'TokenPropertiesCachingDb',
+    PartitionKeyName: 'chainIdTokenAddress',
+    SortKeyName: 'blockNumber',
   },
   TTLAttributeName: 'ttl',
 }
@@ -56,7 +56,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
 
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
   public readonly cachedV2PairsDynamoDb: aws_dynamodb.Table
-  public readonly tokenValidationResultDynamoDb: aws_dynamodb.Table
+  public readonly tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
     super(scope, name, props)
@@ -130,16 +130,16 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     })
 
     // Creates a TokenValidationResult Table for storing the FOT/SFT tokens
-    this.tokenValidationResultDynamoDb = new aws_dynamodb.Table(
+    this.tokenPropertiesCachingDynamoDb = new aws_dynamodb.Table(
       this,
-      DynamoDBTableProps.TokenValidationResultDbTable.Name,
+      DynamoDBTableProps.TokenPropertiesCachingDbTable.Name,
       {
-        tableName: DynamoDBTableProps.TokenValidationResultDbTable.Name,
+        tableName: DynamoDBTableProps.TokenPropertiesCachingDbTable.Name,
         partitionKey: {
-          name: DynamoDBTableProps.TokenValidationResultDbTable.PartitionKeyName,
+          name: DynamoDBTableProps.TokenPropertiesCachingDbTable.PartitionKeyName,
           type: AttributeType.STRING,
         },
-        sortKey: { name: DynamoDBTableProps.TokenValidationResultDbTable.SortKeyName, type: AttributeType.STRING },
+        sortKey: { name: DynamoDBTableProps.TokenPropertiesCachingDbTable.SortKeyName, type: AttributeType.NUMBER },
         billingMode: BillingMode.PAY_PER_REQUEST,
         timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
       }
