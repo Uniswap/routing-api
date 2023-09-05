@@ -36,6 +36,10 @@ export const DynamoDBTableProps = {
     PartitionKeyName: 'cacheKey',
     SortKeyName: 'block',
   },
+  TokenPropertiesCachingDbTable: {
+    Name: 'TokenPropertiesCachingDb',
+    PartitionKeyName: 'chainIdTokenAddress',
+  },
   TTLAttributeName: 'ttl',
 }
 
@@ -51,6 +55,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
 
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
   public readonly cachedV2PairsDynamoDb: aws_dynamodb.Table
+  public readonly tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
     super(scope, name, props)
@@ -122,5 +127,20 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
     })
+
+    // Creates a TokenValidationResult Table for storing the FOT/SFT tokens
+    this.tokenPropertiesCachingDynamoDb = new aws_dynamodb.Table(
+      this,
+      DynamoDBTableProps.TokenPropertiesCachingDbTable.Name,
+      {
+        tableName: DynamoDBTableProps.TokenPropertiesCachingDbTable.Name,
+        partitionKey: {
+          name: DynamoDBTableProps.TokenPropertiesCachingDbTable.PartitionKeyName,
+          type: AttributeType.STRING,
+        },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+      }
+    )
   }
 }
