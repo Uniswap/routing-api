@@ -32,6 +32,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachingRequestFlagDynamoDb: aws_dynamodb.Table
   cachedV3PoolsDynamoDb: aws_dynamodb.Table
   cachedV2PairsDynamoDb: aws_dynamodb.Table
+  tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
   unicornSecret: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
@@ -58,6 +59,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachingRequestFlagDynamoDb,
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
+      tokenPropertiesCachingDynamoDb,
       unicornSecret,
     } = props
 
@@ -79,6 +81,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     cachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
     cachedV3PoolsDynamoDb.grantReadWriteData(lambdaRole)
     cachedV2PairsDynamoDb.grantReadWriteData(lambdaRole)
+    tokenPropertiesCachingDynamoDb.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -123,6 +126,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
 
+        // tokenPropertiesCachingDynamoDb.tableName is the correct format.
+        // we will start using the correct ones going forward
+        TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
       },
