@@ -142,6 +142,7 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   caching: {
     // When the intent is to create a cache entry, we should not use the cache
     useCachedRoutes: false,
+    // This is *super* important to avoid an infinite loop of caching quotes calling themselves
     optimisticCachedRoutes: false,
   },
   quote: {
