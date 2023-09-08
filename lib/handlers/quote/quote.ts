@@ -242,7 +242,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
-      ... (enableFeeOnTransferFeeFetching ? { enableFeeOnTransferFeeFetching } : {}),
+      ...(enableFeeOnTransferFeeFetching ? { enableFeeOnTransferFeeFetching } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
