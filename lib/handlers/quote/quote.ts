@@ -134,6 +134,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         debugRoutingConfig,
         unicornSecret,
         intent,
+        enableFeeOnTransferFeeFetching,
       },
       requestInjected: {
         router,
@@ -241,6 +242,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
+      ...(enableFeeOnTransferFeeFetching ? { enableFeeOnTransferFeeFetching } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)

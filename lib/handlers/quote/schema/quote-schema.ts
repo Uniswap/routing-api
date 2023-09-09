@@ -61,6 +61,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   debugRoutingConfig: Joi.string().optional(),
   unicornSecret: Joi.string().optional(),
   intent: Joi.string().valid('quote', 'swap', 'caching', 'pricing').optional().default('quote'),
+  enableFeeOnTransferFeeFetching: Joi.boolean().optional().default(false),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -90,4 +91,5 @@ export type QuoteQueryParams = {
   debugRoutingConfig?: string
   unicornSecret?: string
   intent?: string
+  enableFeeOnTransferFeeFetching?: boolean
 }
