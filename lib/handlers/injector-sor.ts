@@ -97,9 +97,9 @@ export type ContainerDependencies = {
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
-  routeCachingProvider?: IRouteCachingProvider,
-  tokenValidatorProvider: TokenValidatorProvider,
-  tokenPropertiesProvider: ITokenPropertiesProvider,
+  routeCachingProvider?: IRouteCachingProvider
+  tokenValidatorProvider: TokenValidatorProvider
+  tokenPropertiesProvider: ITokenPropertiesProvider
 }
 
 export interface ContainerInjected {
