@@ -1,11 +1,14 @@
 import { Token } from '@uniswap/sdk-core'
+import { BigNumber } from 'ethers'
 
 export interface MarshalledToken {
   chainId: number
   address: string
   decimals: number
   symbol?: string
-  name?: string
+  name?: string,
+  buyFeeBps?: BigNumber,
+  sellFeeBps?: BigNumber,
 }
 
 export class TokenMarshaller {
@@ -16,6 +19,8 @@ export class TokenMarshaller {
       decimals: token.decimals,
       symbol: token.symbol,
       name: token.name,
+      buyFeeBps: token.buyFeeBps,
+      sellFeeBps: token.sellFeeBps,
     }
   }
 
@@ -25,7 +30,10 @@ export class TokenMarshaller {
       marshalledToken.address,
       marshalledToken.decimals,
       marshalledToken.symbol,
-      marshalledToken.name
+      marshalledToken.name,
+      true, // at this point we know it's valid token address
+      marshalledToken.buyFeeBps,
+      marshalledToken.sellFeeBps,
     )
   }
 }

@@ -25,12 +25,13 @@ import {
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
   TokenProvider,
+  TokenPropertiesProvider,
   UniswapMulticallProvider,
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
   IRouteCachingProvider,
-  CachingV2PoolProvider,
+  CachingV2PoolProvider, TokenValidatorProvider, ITokenPropertiesProvider
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -48,6 +49,7 @@ import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
+import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -93,7 +95,9 @@ export type ContainerDependencies = {
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
-  routeCachingProvider?: IRouteCachingProvider
+  routeCachingProvider?: IRouteCachingProvider,
+  tokenValidatorProvider: TokenValidatorProvider,
+  tokenPropertiesProvider: ITokenPropertiesProvider,
 }
 
 export interface ContainerInjected {
@@ -189,7 +193,22 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           sourceOfTruthPoolProvider: noCacheV3PoolProvider,
         })
 
-        const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider)
+        const tokenFeeFetcher = new OnChainTokenFeeFetcher(
+          chainId,
+          provider
+        )
+        const tokenValidatorProvider = new TokenValidatorProvider(
+          chainId,
+          multicall2Provider,
+          new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
+        )
+        const tokenPropertiesProvider = new TokenPropertiesProvider(
+          chainId,
+          tokenValidatorProvider,
+          new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
+          tokenFeeFetcher
+        )
+        const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
         const v2PoolProvider = new CachingV2PoolProvider(
           chainId,
           underlyingV2PoolProvider,
@@ -359,6 +378,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2SubgraphProvider,
             simulator,
             routeCachingProvider,
+            tokenValidatorProvider,
+            tokenPropertiesProvider,
           },
         }
       })
