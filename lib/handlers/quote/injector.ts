@@ -88,6 +88,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v3SubgraphProvider,
       blockedTokenListProvider,
       v2PoolProvider,
+      tokenValidatorProvider,
+      tokenPropertiesProvider,
       v2QuoteProvider,
       v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
@@ -122,6 +124,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v2SubgraphProvider,
           simulator,
           routeCachingProvider,
+          tokenValidatorProvider,
+          tokenPropertiesProvider,
         })
         break
     }

@@ -491,12 +491,17 @@ export class QuoteHandler extends APIGLambdaHandler<
               decimals: tokenIn.decimals.toString(),
               address: tokenIn.address,
               symbol: tokenIn.symbol!,
+              buyFeeBps: reserve0.currency.equals(tokenIn) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
+              sellFeeBps: reserve0.currency.equals(tokenIn) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
             },
             tokenOut: {
               chainId: tokenOut.chainId,
               decimals: tokenOut.decimals.toString(),
               address: tokenOut.address,
               symbol: tokenOut.symbol!,
+              buyFeeBps: reserve0.currency.equals(tokenOut) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
+              sellFeeBps: reserve0.currency.equals(tokenOut) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
+
             },
             reserve0: {
               token: {
@@ -504,6 +509,8 @@ export class QuoteHandler extends APIGLambdaHandler<
                 decimals: reserve0.currency.wrapped.decimals.toString(),
                 address: reserve0.currency.wrapped.address,
                 symbol: reserve0.currency.wrapped.symbol!,
+                buyFeeBps: reserve0.currency.buyFeeBps,
+                sellFeeBps: reserve0.currency.sellFeeBps,
               },
               quotient: reserve0.quotient.toString(),
             },
@@ -513,6 +520,8 @@ export class QuoteHandler extends APIGLambdaHandler<
                 decimals: reserve1.currency.wrapped.decimals.toString(),
                 address: reserve1.currency.wrapped.address,
                 symbol: reserve1.currency.wrapped.symbol!,
+                buyFeeBps: reserve1.currency.buyFeeBps,
+                sellFeeBps: reserve1.currency.sellFeeBps,
               },
               quotient: reserve1.quotient.toString(),
             },
