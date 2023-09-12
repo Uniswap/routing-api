@@ -6,9 +6,9 @@ export interface MarshalledToken {
   address: string
   decimals: number
   symbol?: string
-  name?: string,
-  buyFeeBps?: BigNumber,
-  sellFeeBps?: BigNumber,
+  name?: string
+  buyFeeBps?: BigNumber
+  sellFeeBps?: BigNumber
 }
 
 export class TokenMarshaller {
@@ -33,7 +33,7 @@ export class TokenMarshaller {
       marshalledToken.name,
       true, // at this point we know it's valid token address
       marshalledToken.buyFeeBps,
-      marshalledToken.sellFeeBps,
+      marshalledToken.sellFeeBps
     )
   }
 }

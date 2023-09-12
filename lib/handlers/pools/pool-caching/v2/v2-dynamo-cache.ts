@@ -20,14 +20,11 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
   }
 
   async batchGet(keys: Set<string>): Promise<Record<string, { pair: Pair; block?: number | undefined } | undefined>> {
-    const valuesPromise = Array.from(keys).map((key) => this.get(key).then(
-      (value) => (
-        { key, value }
-      )))
+    const valuesPromise = Array.from(keys).map((key) => this.get(key).then((value) => ({ key, value })))
     const keyValuePairs = await Promise.all(valuesPromise)
     const records: Record<string, { pair: Pair; block?: number | undefined } | undefined> = {}
 
-    keyValuePairs.forEach(( {key, value }) => {
+    keyValuePairs.forEach(({ key, value }) => {
       records[key] = value
     })
 

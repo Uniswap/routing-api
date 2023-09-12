@@ -31,7 +31,9 @@ import {
   V2QuoteProvider,
   V3PoolProvider,
   IRouteCachingProvider,
-  CachingV2PoolProvider, TokenValidatorProvider, ITokenPropertiesProvider
+  CachingV2PoolProvider,
+  TokenValidatorProvider,
+  ITokenPropertiesProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -95,9 +97,9 @@ export type ContainerDependencies = {
   onChainQuoteProvider?: OnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
-  routeCachingProvider?: IRouteCachingProvider,
-  tokenValidatorProvider: TokenValidatorProvider,
-  tokenPropertiesProvider: ITokenPropertiesProvider,
+  routeCachingProvider?: IRouteCachingProvider
+  tokenValidatorProvider: TokenValidatorProvider
+  tokenPropertiesProvider: ITokenPropertiesProvider
 }
 
 export interface ContainerInjected {
@@ -193,10 +195,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           sourceOfTruthPoolProvider: noCacheV3PoolProvider,
         })
 
-        const tokenFeeFetcher = new OnChainTokenFeeFetcher(
-          chainId,
-          provider
-        )
+        const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider)
         const tokenValidatorProvider = new TokenValidatorProvider(
           chainId,
           multicall2Provider,

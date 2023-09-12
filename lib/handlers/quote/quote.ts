@@ -500,8 +500,9 @@ export class QuoteHandler extends APIGLambdaHandler<
               address: tokenOut.address,
               symbol: tokenOut.symbol!,
               buyFeeBps: reserve0.currency.equals(tokenOut) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
-              sellFeeBps: reserve0.currency.equals(tokenOut) ? reserve0.currency.buyFeeBps : reserve1.currency.buyFeeBps,
-
+              sellFeeBps: reserve0.currency.equals(tokenOut)
+                ? reserve0.currency.buyFeeBps
+                : reserve1.currency.buyFeeBps,
             },
             reserve0: {
               token: {
