@@ -197,8 +197,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
 
-          const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] = await Promise.all(
-            [
+          const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] =
+            await Promise.all([
               AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
               CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
               (async () => {
@@ -226,8 +226,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                   return new StaticV2SubgraphProvider(chainId)
                 }
               })(),
-            ]
-          )
+            ])
 
           const tokenProvider = new CachingTokenProviderWithFallback(
             chainId,
@@ -374,7 +373,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       }
     } catch (err) {
       log.fatal({ err }, `Fatal: Failed to build container`)
-      throw err;
+      throw err
     }
   }
 }
