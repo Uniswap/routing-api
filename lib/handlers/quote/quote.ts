@@ -245,6 +245,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(enableFeeOnTransferFeeFetching ? { enableFeeOnTransferFeeFetching } : {}),
     }
 
+    if (enableFeeOnTransferFeeFetching) {
+      routingConfig.writeToCachedRoutes = true
+      routingConfig.useCachedRoutes = INTENT_SPECIFIC_CONFIG[`caching`].useCachedRoutes
+      routingConfig.optimisticCachedRoutes = INTENT_SPECIFIC_CONFIG[`caching`].optimisticCachedRoutes
+    }
+
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     let swapParams: SwapOptions | undefined = undefined
