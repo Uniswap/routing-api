@@ -994,6 +994,24 @@ describe('quote', function () {
                 expect(routeString.includes('[V2 + V3]'))
               })
             }
+
+            it(`fee-on-transfer -> fee-on-transfer enableFeeOnTransferFeeFetching true`, async () => {
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'BOND',
+                tokenInChainId: 1,
+                tokenOutAddress: 'APE',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm: 'alpha',
+                forceMixedRoutes: true,
+                protocols: 'v2,v3,mixed',
+                enableUniversalRouter: true,
+              }
+            })
           }
         })
 
