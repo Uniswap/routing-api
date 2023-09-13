@@ -8,6 +8,7 @@ const TOKEN_LISTS = [
   'https://tokens.coingecko.com/uniswap/all.json',
   'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
   'https://cloudflare-ipfs.com/ipns/tokens.uniswap.org',
+  'https://ipfs.io/ipfs/QmXd7oP5j6dv25YtCjQs17GsSoJxnG2BmHSUiSoQGA7kPN',
 ]
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
