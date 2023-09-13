@@ -45,7 +45,7 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
 
       TOKEN_LIST_CACHE.set<TokenList>(tokenListURI, tokenList)
 
-      throw new Error('you must failll')
+      return new CachingTokenListProvider(chainId, tokenList, new NodeJSCache(tokenCache))
     } catch (err) {
       log.error({ err }, `Failed to get tokenLists from s3.`)
       return super.fromTokenListURI(chainId, tokenListURI, new NodeJSCache(tokenCache))
