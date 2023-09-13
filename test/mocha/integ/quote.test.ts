@@ -1003,14 +1003,13 @@ describe('quote', function () {
                 tokenOutChainId: 1,
                 amount: await getAmount(1, type, 'BULLET', 'BLAST', '1000000000000000000'),
                 type,
+                enableFeeOnTransferFeeFetching: true,
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-              const {
-                status,
-              } = response
+              const { status } = response
 
               expect(status).to.equal(200)
             })

@@ -27,7 +27,8 @@ import {
   parseSlippageTolerance,
   tokenStringToCurrency,
   QUOTE_SPEED_CONFIG,
-  INTENT_SPECIFIC_CONFIG, FEE_ON_TRANSFER_SPECIFIC_CONFIG
+  INTENT_SPECIFIC_CONFIG,
+  FEE_ON_TRANSFER_SPECIFIC_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
