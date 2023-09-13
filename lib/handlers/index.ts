@@ -13,7 +13,7 @@ try {
   const quoteInjectorPromise = new QuoteHandlerInjector('quoteInjector').build()
   quoteHandler = new QuoteHandler('quote', quoteInjectorPromise)
 } catch (error) {
-  log.fatal({error}, 'Fatal error')
+  log.fatal({ error }, 'Fatal error')
   throw error
 }
 
