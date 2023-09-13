@@ -1,14 +1,13 @@
 import Joi from '@hapi/joi'
 import { MethodParameters } from '@uniswap/smart-order-router'
-import { BigNumber } from 'ethers'
 
 export type TokenInRoute = {
   address: string
   chainId: number
   symbol: string
   decimals: string
-  buyFeeBps?: BigNumber
-  sellFeeBps?: BigNumber
+  buyFeeBps?: string
+  sellFeeBps?: string
 }
 
 export type V3PoolInRoute = {
