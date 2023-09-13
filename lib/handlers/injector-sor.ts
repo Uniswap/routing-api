@@ -212,6 +212,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     { err },
                     `AWS Token List Provider failed with ${DEFAULT_TOKEN_LIST}, trying ${FALLBACK_DEFAULT_TOKEN_LIST}`
                   )
+
+                  // we intentionally don't catch here, because the token-list provider
+                  // either fetch the default token list,
+                  // or the entire routing lambda lifecycle fails
                   return await AWSTokenListProvider.fromTokenListS3Bucket(
                     chainId,
                     TOKEN_LIST_CACHE_BUCKET!,
