@@ -64,7 +64,8 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.AVALANCHE,
   ChainId.BASE,
 ]
-const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+const DEFAULT_TOKEN_LIST = 'https://cloudflare-ipfs.com/ipns/tokens.uniswap.org'
+const FALLBACK_DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
@@ -199,7 +200,25 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] =
             await Promise.all([
-              AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
+              (async () => {
+                try {
+                  return await AWSTokenListProvider.fromTokenListS3Bucket(
+                    chainId,
+                    TOKEN_LIST_CACHE_BUCKET!,
+                    DEFAULT_TOKEN_LIST
+                  )
+                } catch (err) {
+                  log.error(
+                    { err },
+                    `AWS Token List Provider failed with ${DEFAULT_TOKEN_LIST}, trying ${FALLBACK_DEFAULT_TOKEN_LIST}`
+                  )
+                  return await AWSTokenListProvider.fromTokenListS3Bucket(
+                    chainId,
+                    TOKEN_LIST_CACHE_BUCKET!,
+                    FALLBACK_DEFAULT_TOKEN_LIST
+                  )
+                }
+              })(),
               CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
               (async () => {
                 try {

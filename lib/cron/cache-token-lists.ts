@@ -7,6 +7,7 @@ const TOKEN_LISTS = [
   'https://raw.githubusercontent.com/The-Blockchain-Association/sec-notice-list/master/ba-sec-list.json',
   'https://tokens.coingecko.com/uniswap/all.json',
   'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
+  'https://cloudflare-ipfs.com/ipns/tokens.uniswap.org',
 ]
 
 const handler: ScheduledHandler = async (event: EventBridgeEvent<string, void>) => {
