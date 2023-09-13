@@ -33,7 +33,7 @@ export class TokenMarshaller {
       marshalledToken.name,
       true, // at this point we know it's valid token address
       marshalledToken.buyFeeBps ? BigNumber.from(marshalledToken.buyFeeBps) : undefined,
-      marshalledToken.sellFeeBps ? BigNumber.from(marshalledToken.sellFeeBps) : undefined,
+      marshalledToken.sellFeeBps ? BigNumber.from(marshalledToken.sellFeeBps) : undefined
     )
   }
 }

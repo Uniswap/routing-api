@@ -163,7 +163,7 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
 }
 
 export type FeeOnTransferSpecificConfig = {
-  enableFeeOnTransferFeeFetching?: boolean,
+  enableFeeOnTransferFeeFetching?: boolean
   useCachedRoutes?: boolean
 }
 
