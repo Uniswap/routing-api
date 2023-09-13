@@ -162,6 +162,20 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   },
 }
 
+export type FeeOnTransferSpecificConfig = {
+  enableFeeOnTransferFeeFetching?: boolean,
+  useCachedRoutes?: boolean
+}
+
+export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (enableFeeOnTransferFeeFetching?: boolean) => {
+  return {
+    // if enableFeeOnTransferFeeFetching is true, then we do not use cached routes for read path
+    // if enableFeeOnTransferFeeFetching is false or undefined, then we use cached routes for read path
+    useCachedRoutes: !enableFeeOnTransferFeeFetching,
+    enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+  }
+}
+
 export async function tokenStringToCurrency(
   tokenListProvider: ITokenListProvider,
   tokenProvider: ITokenProvider,

@@ -27,7 +27,7 @@ import {
   parseSlippageTolerance,
   tokenStringToCurrency,
   QUOTE_SPEED_CONFIG,
-  INTENT_SPECIFIC_CONFIG,
+  INTENT_SPECIFIC_CONFIG, FEE_ON_TRANSFER_SPECIFIC_CONFIG
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -241,14 +241,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols,
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
+      // enable fee-on-transfer needs to be before intent specific config,
+      // in case someone wants to override useCachedRoutes with intent other than caching
+      // we allow reading from the cached routes
+      ...FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching),
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
-      ...(enableFeeOnTransferFeeFetching ? { enableFeeOnTransferFeeFetching } : {}),
-    }
-
-    if (enableFeeOnTransferFeeFetching) {
-      routingConfig.writeToCachedRoutes = true
-      routingConfig.useCachedRoutes = INTENT_SPECIFIC_CONFIG[`caching`].useCachedRoutes
-      routingConfig.optimisticCachedRoutes = INTENT_SPECIFIC_CONFIG[`caching`].optimisticCachedRoutes
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
