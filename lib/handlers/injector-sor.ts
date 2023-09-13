@@ -65,7 +65,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE,
 ]
 const DEFAULT_TOKEN_LIST = 'https://cloudflare-ipfs.com/ipns/tokens.uniswap.org'
-const FALLBACK_DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+const FALLBACK_DEFAULT_TOKEN_LIST_URLS = ['https://ipfs.io/ipfs/QmXd7oP5j6dv25YtCjQs17GsSoJxnG2BmHSUiSoQGA7kPN', 'https://gateway.ipfs.io/ipns/tokens.uniswap.org']
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
@@ -210,17 +210,37 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 } catch (err) {
                   log.error(
                     { err },
-                    `AWS Token List Provider failed with ${DEFAULT_TOKEN_LIST}, trying ${FALLBACK_DEFAULT_TOKEN_LIST}`
+                    `AWS Token List Provider failed with ${DEFAULT_TOKEN_LIST}, trying ${FALLBACK_DEFAULT_TOKEN_LIST_URLS}`
                   )
 
-                  // we intentionally don't catch here, because the token-list provider
-                  // either fetch the default token list,
-                  // or the entire routing lambda lifecycle fails
-                  return await AWSTokenListProvider.fromTokenListS3Bucket(
-                    chainId,
-                    TOKEN_LIST_CACHE_BUCKET!,
-                    FALLBACK_DEFAULT_TOKEN_LIST
-                  )
+                  let tokenListProvider: ITokenListProvider & ITokenProvider | undefined = undefined
+                  let errors = []
+                  for (const fallbackUrl of FALLBACK_DEFAULT_TOKEN_LIST_URLS) {
+                    if (tokenListProvider) {
+                      break;
+                    }
+
+                    try {
+                      tokenListProvider = await AWSTokenListProvider.fromTokenListS3Bucket(
+                          chainId,
+                          TOKEN_LIST_CACHE_BUCKET!,
+                          fallbackUrl
+                      )
+                    } catch (err) {
+                      errors.push(err)
+                    }
+                  }
+
+                  if (!tokenListProvider) {
+                    // we intentionally don't catch here, because the token-list provider
+                    // either fetch the default token list,
+                    // or the entire routing lambda lifecycle fails
+                    log.error(`AWS Token List Provider failed with ${FALLBACK_DEFAULT_TOKEN_LIST_URLS} with errors ${errors}`)
+
+                    throw new Error('Failed to build token list provider')
+                  } else {
+                    return tokenListProvider
+                  }
                 }
               })(),
               CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
