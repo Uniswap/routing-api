@@ -995,22 +995,24 @@ describe('quote', function () {
               })
             }
 
-            it(`fee-on-transfer -> fee-on-transfer enableFeeOnTransferFeeFetching true`, async () => {
+            it(`fee-on-transfer BULLET -> fee-on-transfer BLAST enableFeeOnTransferFeeFetching true`, async () => {
               const quoteReq: QuoteQueryParams = {
-                tokenInAddress: 'BOND',
+                tokenInAddress: '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
                 tokenInChainId: 1,
-                tokenOutAddress: 'APE',
+                tokenOutAddress: '0xab98093C7232E98A47D7270CE0c1c2106f61C73b',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                amount: await getAmount(1, type, 'BULLET', 'BLAST', '1000000000000000000'),
                 type,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm: 'alpha',
-                forceMixedRoutes: true,
-                protocols: 'v2,v3,mixed',
-                enableUniversalRouter: true,
               }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const {
+                status,
+              } = response
+
+              expect(status).to.equal(200)
             })
           }
         })
