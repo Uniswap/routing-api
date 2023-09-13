@@ -37,7 +37,6 @@ export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3Subgra
       `Subgraph pools local cache miss for protocol ${this.protocol}. Getting subgraph pools from S3`
     )
 
-
     const pools = await cachePoolsFromS3<TSubgraphPool>(s3, this.bucket, this.baseKey, this.chain, this.protocol)
 
     return pools
