@@ -54,6 +54,8 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '10'
 
+const BULLET = new Token(ChainId.MAINNET, '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6', 8, 'BULLET', 'Bullet Game Betting Token')
+
 const axios = axiosStatic.create()
 axiosRetry(axios, {
   retries: 10,
@@ -195,6 +197,7 @@ describe('quote', function () {
       parseAmount('1000', UNI_MAINNET),
       parseAmount('4000', WETH9[1]),
       parseAmount('5000000', DAI_MAINNET),
+      parseAmount('735871', BULLET),
     ])
   })
 
@@ -995,23 +998,83 @@ describe('quote', function () {
               })
             }
 
-            it(`fee-on-transfer BULLET -> fee-on-transfer BLAST enableFeeOnTransferFeeFetching true`, async () => {
+            it(`fee-on-transfer BULLET -> WETH enableFeeOnTransferFeeFetching true`, async () => {
+              // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+              const tokenIn = WETH9[ChainId.MAINNET]!
+              const tokenOut = BULLET
+              const originalAmount = type === 'exactIn' ? '10' : '893517'
+              const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+
               const quoteReq: QuoteQueryParams = {
-                tokenInAddress: '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
-                tokenInChainId: 1,
-                tokenOutAddress: '0xab98093C7232E98A47D7270CE0c1c2106f61C73b',
-                tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'BULLET', 'BLAST', '1000000000000000000'),
-                type,
+                tokenInAddress: tokenIn.address,
+                tokenInChainId: tokenIn.chainId,
+                tokenOutAddress: tokenOut.address,
+                tokenOutChainId: tokenOut.chainId,
+                amount: amount,
+                type: type,
+                protocols: 'v2,v3,mixed',
+                // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
                 enableFeeOnTransferFeeFetching: true,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                enableUniversalRouter: true,
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-              const { status } = response
+              const {
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                status,
+              } = response
 
               expect(status).to.equal(200)
+
+              if (type == 'exactIn') {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+              } else {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+              }
+
+              expect(methodParameters).to.not.be.undefined
+
+              let hasV3Pool = false
+              let hasV2Pool = false
+              for (const r of route) {
+                for (const pool of r) {
+                  if (pool.type == 'v3-pool') {
+                    hasV3Pool = true
+                  }
+                  if (pool.type == 'v2-pool') {
+                    hasV2Pool = true
+                    expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
+                    expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                  }
+                }
+              }
+
+              expect(!hasV3Pool && hasV2Pool).to.be.true
+
+              // For V2_SWAP_EXACT_OUT (universal router command 0x09), somehow the swap can fail
+              // with unpredictable gas limit.
+              // For V2_SWAP_EXACT_IN (universal router command 0x08), the swap always succeeds.
+              // We are only executing exact in swap for now.
+              // TODO: wait until interface and mobile integration, and see if this is legit issue, or just a test issue.
+              if (type === 'exactIn') {
+                // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                // so the best way is to execute the swap on hardhat mainnet fork,
+                // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    response.data.methodParameters!,
+                    tokenIn,
+                    tokenOut
+                )
+
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+              }
             })
           }
         })
