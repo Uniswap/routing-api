@@ -54,7 +54,13 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '10'
 
-const BULLET = new Token(ChainId.MAINNET, '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6', 8, 'BULLET', 'Bullet Game Betting Token')
+const BULLET = new Token(
+  ChainId.MAINNET,
+  '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
+  8,
+  'BULLET',
+  'Bullet Game Betting Token'
+)
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
@@ -1067,9 +1073,9 @@ describe('quote', function () {
                 // so the best way is to execute the swap on hardhat mainnet fork,
                 // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
                 const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                    response.data.methodParameters!,
-                    tokenIn,
-                    tokenOut
+                  response.data.methodParameters!,
+                  tokenIn,
+                  tokenOut
                 )
 
                 expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
