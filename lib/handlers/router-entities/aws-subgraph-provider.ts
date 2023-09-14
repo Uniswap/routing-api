@@ -13,6 +13,7 @@ import { S3_POOL_CACHE_KEY } from '../../util/pool-cache-key'
 
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false })
 const LOCAL_POOL_CACHE_KEY = (chainId: ChainId, protocol: Protocol) => `pools${chainId}#${protocol}`
+const s3 = new S3({ correctClockSkew: true, maxRetries: 1 })
 
 export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3SubgraphPool> {
   constructor(private chain: ChainId, private protocol: Protocol, private bucket: string, private baseKey: string) {}
@@ -35,8 +36,6 @@ export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3Subgra
       { bucket: this.bucket, key: this.baseKey },
       `Subgraph pools local cache miss for protocol ${this.protocol}. Getting subgraph pools from S3`
     )
-
-    const s3 = new S3()
 
     const pools = await cachePoolsFromS3<TSubgraphPool>(s3, this.bucket, this.baseKey, this.chain, this.protocol)
 
@@ -82,7 +81,6 @@ export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> i
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
-    const s3 = new S3()
     await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
 
     return new V3AWSSubgraphProvider(chainId, bucket, baseKey)
@@ -95,7 +93,6 @@ export class V2AWSSubgraphProvider extends AWSSubgraphProvider<V2SubgraphPool> i
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V2AWSSubgraphProvider> {
-    const s3 = new S3()
     await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
 
     return new V2AWSSubgraphProvider(chainId, bucket, baseKey)
