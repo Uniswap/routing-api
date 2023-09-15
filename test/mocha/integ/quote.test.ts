@@ -1044,11 +1044,14 @@ describe('quote', function () {
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
                 const {
-                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
                   status,
                 } = response
 
                 expect(status).to.equal(200)
+                // not hitting cached routes when we send enableFeeOnTransferFeeFetching = true is important
+                // during QA internal testing
+                expect(hitsCachedRoutes).to.equal(!enableFeeOnTransferFeeFetching)
 
                 if (type == 'exactIn') {
                   expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))

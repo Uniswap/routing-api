@@ -242,11 +242,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       protocols,
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
       ...parsedDebugRoutingConfig,
-      // enable fee-on-transfer needs to be before intent specific config,
-      // in case someone wants to override useCachedRoutes with intent other than caching
-      // we allow reading from the cached routes
-      ...FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching),
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
+      // Only when enableFeeOnTransferFeeFetching is explicitly set to true, then we
+      // override usedCachedRoutes to false. This is to ensure that we don't use
+      // accidentally override usedCachedRoutes in the normal path.
+      ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)

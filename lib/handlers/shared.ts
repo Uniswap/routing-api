@@ -172,13 +172,13 @@ export type FeeOnTransferSpecificConfig = {
 // because RoutesDB has 24hrs TTL, and routing-api no longer filters unexpired routers.
 // So during interface & mobile e2e testing, it won't work if the fot quote hits the cached routes read path.
 // We allow writing into RoutesDB but not reading from it, if enableFeeOnTransferFeeFetching is true.
-export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (enableFeeOnTransferFeeFetching?: boolean) => {
+export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (enableFeeOnTransferFeeFetching?: boolean): FeeOnTransferSpecificConfig => {
   return {
     // if enableFeeOnTransferFeeFetching is true, then we do not use cached routes for read path
     // if enableFeeOnTransferFeeFetching is false or undefined, then we use cached routes for read path
     useCachedRoutes: !enableFeeOnTransferFeeFetching,
     enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
-  }
+  } as FeeOnTransferSpecificConfig
 }
 
 export async function tokenStringToCurrency(
