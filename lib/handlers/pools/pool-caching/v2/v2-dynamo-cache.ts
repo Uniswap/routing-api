@@ -50,23 +50,23 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
     }
 
     return (
-        result.Responses?.[this.tableName]
-            ?.map((item) => {
-              const key = item.cacheKey.S!
-              const block = parseInt(item.block.N!)
-              const itemBinary = item.item.B!
-              const pairBuffer = Buffer.from(itemBinary)
-              const pairJson: MarshalledPair = JSON.parse(pairBuffer.toString())
+      result.Responses?.[this.tableName]
+        ?.map((item) => {
+          const key = item.cacheKey.S!
+          const block = parseInt(item.block.N!)
+          const itemBinary = item.item.B!
+          const pairBuffer = Buffer.from(itemBinary)
+          const pairJson: MarshalledPair = JSON.parse(pairBuffer.toString())
 
-              return {
-                [key]: {
-                  pair: PairMarshaller.unmarshal(pairJson),
-                  block,
-                },
-              }
-            })
-            ?.reduce((accumulatedRecords, currentRecord) => ({ ...accumulatedRecords, ...currentRecord }), records) ??
-        records
+          return {
+            [key]: {
+              pair: PairMarshaller.unmarshal(pairJson),
+              block,
+            },
+          }
+        })
+        ?.reduce((accumulatedRecords, currentRecord) => ({ ...accumulatedRecords, ...currentRecord }), records) ??
+      records
     )
   }
   async get(key: string): Promise<{ pair: Pair; block?: number } | undefined> {

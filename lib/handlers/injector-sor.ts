@@ -195,15 +195,15 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider)
           const tokenValidatorProvider = new TokenValidatorProvider(
-              chainId,
-              multicall2Provider,
-              new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
+            chainId,
+            multicall2Provider,
+            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
           )
           const tokenPropertiesProvider = new TokenPropertiesProvider(
-              chainId,
-              tokenValidatorProvider,
-              new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-              tokenFeeFetcher
+            chainId,
+            tokenValidatorProvider,
+            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
+            tokenFeeFetcher
           )
           const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
           const v2PoolProvider = new CachingV2PoolProvider(
