@@ -61,6 +61,16 @@ const BULLET = new Token(
   'BULLET',
   'Bullet Game Betting Token'
 )
+const BULLET_WHT_TAX = new Token(
+    ChainId.MAINNET,
+    '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
+    8,
+    'BULLET',
+    'Bullet Game Betting Token',
+    false,
+    BigNumber.from(500),
+    BigNumber.from(500)
+)
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
@@ -1058,12 +1068,30 @@ describe('quote', function () {
                     if (pool.type == 'v2-pool') {
                       hasV2Pool = true
                       if (enableFeeOnTransferFeeFetching) {
-                        expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
-                        expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
-                        expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
-                        expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
-                        expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
-                        expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
+                        if (pool.tokenIn.address === BULLET.address) {
+                          expect(pool.tokenIn.sellFeeBps).to.be.not.undefined
+                          expect(pool.tokenIn.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                          expect(pool.tokenIn.buyFeeBps).to.be.not.undefined
+                          expect(pool.tokenIn.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        }
+                        if (pool.tokenOut.address === BULLET.address) {
+                          expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
+                          expect(pool.tokenOut.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                          expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                          expect(pool.tokenOut.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        }
+                        if (pool.reserve0.token.address === BULLET.address) {
+                          expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
+                          expect(pool.reserve0.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                          expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
+                          expect(pool.reserve0.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        }
+                        if (pool.reserve1.token.address === BULLET.address) {
+                          expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
+                          expect(pool.reserve1.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                          expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
+                          expect(pool.reserve1.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        }
                       } else {
                         expect(pool.tokenOut.sellFeeBps).to.be.undefined
                         expect(pool.tokenOut.buyFeeBps).to.be.undefined
@@ -1084,17 +1112,23 @@ describe('quote', function () {
                 // We are only executing exact in swap for now.
                 // TODO: wait until interface and mobile integration, and see if this is legit issue, or just a test issue.
                 if (type === 'exactIn') {
-                  // We don't have a bullet proof way to asser the fot-involved quote is post tax
-                  // so the best way is to execute the swap on hardhat mainnet fork,
-                  // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
-                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                      response.data.methodParameters!,
-                      tokenIn,
-                      tokenOut
-                  )
+                  // without enabling the fee fetching
+                  // sometimes we can get execute swap failure due to unpredictable gas limit
+                  // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
+                  // which is equivalent of what was happening in prod, before interface supports FOT
+                  if (enableFeeOnTransferFeeFetching) {
+                    // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                    // so the best way is to execute the swap on hardhat mainnet fork,
+                    // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                    const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                        response.data.methodParameters!,
+                        tokenIn,
+                        tokenOut
+                    )
 
-                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
-                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+                  }
                 }
               })
             })

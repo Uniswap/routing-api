@@ -499,8 +499,8 @@ export class QuoteHandler extends APIGLambdaHandler<
                 ? reserve0.currency.buyFeeBps?.toString()
                 : reserve1.currency.buyFeeBps?.toString()) : undefined,
               sellFeeBps: enableFeeOnTransferFeeFetching ? (reserve0.currency.equals(tokenIn)
-                ? reserve0.currency.buyFeeBps?.toString()
-                : reserve1.currency.buyFeeBps?.toString()) : undefined,
+                ? reserve0.currency.sellFeeBps?.toString()
+                : reserve1.currency.sellFeeBps?.toString()) : undefined,
             },
             tokenOut: {
               chainId: tokenOut.chainId,
@@ -511,8 +511,8 @@ export class QuoteHandler extends APIGLambdaHandler<
                 ? reserve0.currency.buyFeeBps?.toString()
                 : reserve1.currency.buyFeeBps?.toString() : undefined,
               sellFeeBps: enableFeeOnTransferFeeFetching ? reserve0.currency.equals(tokenOut)
-                ? reserve0.currency.buyFeeBps?.toString()
-                : reserve1.currency.buyFeeBps?.toString() : undefined,
+                ? reserve0.currency.sellFeeBps?.toString()
+                : reserve1.currency.sellFeeBps?.toString() : undefined,
             },
             reserve0: {
               token: {
