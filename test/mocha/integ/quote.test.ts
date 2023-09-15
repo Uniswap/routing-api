@@ -1004,83 +1004,99 @@ describe('quote', function () {
               })
             }
 
-            it(`fee-on-transfer BULLET -> WETH enableFeeOnTransferFeeFetching true`, async () => {
-              // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-              const tokenIn = WETH9[ChainId.MAINNET]!
-              const tokenOut = BULLET
-              const originalAmount = type === 'exactIn' ? '10' : '893517'
-              const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+            const enableFeeOnTransferFeeFetching = [true, false, undefined]
+            enableFeeOnTransferFeeFetching.forEach((enableFeeOnTransferFeeFetching) => {
+              it(`fee-on-transfer BULLET -> WETH enableFeeOnTransferFeeFetching = ${enableFeeOnTransferFeeFetching}`, async () => {
+                // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+                const tokenIn = WETH9[ChainId.MAINNET]!
+                const tokenOut = BULLET
+                const originalAmount = type === 'exactIn' ? '10' : '893517'
+                const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
-              const quoteReq: QuoteQueryParams = {
-                tokenInAddress: tokenIn.address,
-                tokenInChainId: tokenIn.chainId,
-                tokenOutAddress: tokenOut.address,
-                tokenOutChainId: tokenOut.chainId,
-                amount: amount,
-                type: type,
-                protocols: 'v2,v3,mixed',
-                // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
-                enableFeeOnTransferFeeFetching: true,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm,
-                enableUniversalRouter: true,
-              }
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: tokenIn.address,
+                  tokenInChainId: tokenIn.chainId,
+                  tokenOutAddress: tokenOut.address,
+                  tokenOutChainId: tokenOut.chainId,
+                  amount: amount,
+                  type: type,
+                  protocols: 'v2,v3,mixed',
+                  // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
+                  enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                }
 
-              const queryParams = qs.stringify(quoteReq)
+                const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-              const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
-                status,
-              } = response
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const {
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                  status,
+                } = response
 
-              expect(status).to.equal(200)
+                expect(status).to.equal(200)
 
-              if (type == 'exactIn') {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-              } else {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-              }
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
 
-              expect(methodParameters).to.not.be.undefined
+                expect(methodParameters).to.not.be.undefined
 
-              let hasV3Pool = false
-              let hasV2Pool = false
-              for (const r of route) {
-                for (const pool of r) {
-                  if (pool.type == 'v3-pool') {
-                    hasV3Pool = true
-                  }
-                  if (pool.type == 'v2-pool') {
-                    hasV2Pool = true
-                    expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
-                    expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                let hasV3Pool = false
+                let hasV2Pool = false
+                for (const r of route) {
+                  for (const pool of r) {
+                    if (pool.type == 'v3-pool') {
+                      hasV3Pool = true
+                    }
+                    if (pool.type == 'v2-pool') {
+                      hasV2Pool = true
+                      if (enableFeeOnTransferFeeFetching) {
+                        expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
+                        expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                        expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
+                        expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
+                        expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
+                        expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
+                      } else {
+                        expect(pool.tokenOut.sellFeeBps).to.be.undefined
+                        expect(pool.tokenOut.buyFeeBps).to.be.undefined
+                        expect(pool.reserve0.token.sellFeeBps).to.be.undefined
+                        expect(pool.reserve0.token.buyFeeBps).to.be.undefined
+                        expect(pool.reserve1.token.sellFeeBps).to.be.undefined
+                        expect(pool.reserve1.token.buyFeeBps).to.be.undefined
+                      }
+                    }
                   }
                 }
-              }
 
-              expect(!hasV3Pool && hasV2Pool).to.be.true
+                expect(!hasV3Pool && hasV2Pool).to.be.true
 
-              // For V2_SWAP_EXACT_OUT (universal router command 0x09), somehow the swap can fail
-              // with unpredictable gas limit.
-              // For V2_SWAP_EXACT_IN (universal router command 0x08), the swap always succeeds.
-              // We are only executing exact in swap for now.
-              // TODO: wait until interface and mobile integration, and see if this is legit issue, or just a test issue.
-              if (type === 'exactIn') {
-                // We don't have a bullet proof way to asser the fot-involved quote is post tax
-                // so the best way is to execute the swap on hardhat mainnet fork,
-                // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
-                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                  response.data.methodParameters!,
-                  tokenIn,
-                  tokenOut
-                )
+                // For V2_SWAP_EXACT_OUT (universal router command 0x09), somehow the swap can fail
+                // with unpredictable gas limit.
+                // For V2_SWAP_EXACT_IN (universal router command 0x08), the swap always succeeds.
+                // We are only executing exact in swap for now.
+                // TODO: wait until interface and mobile integration, and see if this is legit issue, or just a test issue.
+                if (type === 'exactIn') {
+                  // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                  // so the best way is to execute the swap on hardhat mainnet fork,
+                  // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                      response.data.methodParameters!,
+                      tokenIn,
+                      tokenOut
+                  )
 
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
-                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
-              }
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+                }
+              })
             })
           }
         })
