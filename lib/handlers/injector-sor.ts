@@ -33,7 +33,7 @@ import {
   IRouteCachingProvider,
   CachingV2PoolProvider,
   TokenValidatorProvider,
-  ITokenPropertiesProvider
+  ITokenPropertiesProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
