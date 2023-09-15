@@ -69,7 +69,6 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
       records
     )
   }
-
   async get(key: string): Promise<{ pair: Pair; block?: number } | undefined> {
     try {
       const queryParams = {
