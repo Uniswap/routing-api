@@ -504,7 +504,7 @@ export class QuoteHandler extends APIGLambdaHandler<
               address: tokenOut.address,
               symbol: tokenOut.symbol!,
               buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching)
+              sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
             },
             reserve0: {
               token: {
@@ -512,8 +512,18 @@ export class QuoteHandler extends APIGLambdaHandler<
                 decimals: reserve0.currency.wrapped.decimals.toString(),
                 address: reserve0.currency.wrapped.address,
                 symbol: reserve0.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(reserve0.currency.wrapped, reserve0, undefined, enableFeeOnTransferFeeFetching),
-                sellFeeBps: this.deriveSellFeeBps(reserve0.currency.wrapped, reserve0, undefined, enableFeeOnTransferFeeFetching),
+                buyFeeBps: this.deriveBuyFeeBps(
+                  reserve0.currency.wrapped,
+                  reserve0,
+                  undefined,
+                  enableFeeOnTransferFeeFetching
+                ),
+                sellFeeBps: this.deriveSellFeeBps(
+                  reserve0.currency.wrapped,
+                  reserve0,
+                  undefined,
+                  enableFeeOnTransferFeeFetching
+                ),
               },
               quotient: reserve0.quotient.toString(),
             },
@@ -523,8 +533,18 @@ export class QuoteHandler extends APIGLambdaHandler<
                 decimals: reserve1.currency.wrapped.decimals.toString(),
                 address: reserve1.currency.wrapped.address,
                 symbol: reserve1.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(reserve1.currency.wrapped, undefined, reserve1, enableFeeOnTransferFeeFetching),
-                sellFeeBps: this.deriveSellFeeBps(reserve1.currency.wrapped, undefined, reserve1, enableFeeOnTransferFeeFetching),
+                buyFeeBps: this.deriveBuyFeeBps(
+                  reserve1.currency.wrapped,
+                  undefined,
+                  reserve1,
+                  enableFeeOnTransferFeeFetching
+                ),
+                sellFeeBps: this.deriveSellFeeBps(
+                  reserve1.currency.wrapped,
+                  undefined,
+                  reserve1,
+                  enableFeeOnTransferFeeFetching
+                ),
               },
               quotient: reserve1.quotient.toString(),
             },
@@ -582,7 +602,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
   }
 
-  private deriveBuyFeeBps(token: Currency, reserve0?: CurrencyAmount<Token>, reserve1?: CurrencyAmount<Token>, enableFeeOnTransferFeeFetching?: boolean): string | undefined {
+  private deriveBuyFeeBps(
+    token: Currency,
+    reserve0?: CurrencyAmount<Token>,
+    reserve1?: CurrencyAmount<Token>,
+    enableFeeOnTransferFeeFetching?: boolean
+  ): string | undefined {
     if (!enableFeeOnTransferFeeFetching) {
       return undefined
     }
@@ -598,7 +623,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     return undefined
   }
 
-  private deriveSellFeeBps(token: Currency, reserve0?: CurrencyAmount<Token>, reserve1?: CurrencyAmount<Token>, enableFeeOnTransferFeeFetching?: boolean): string | undefined {
+  private deriveSellFeeBps(
+    token: Currency,
+    reserve0?: CurrencyAmount<Token>,
+    reserve1?: CurrencyAmount<Token>,
+    enableFeeOnTransferFeeFetching?: boolean
+  ): string | undefined {
     if (!enableFeeOnTransferFeeFetching) {
       return undefined
     }
