@@ -1,8 +1,8 @@
 import { ICache } from '@uniswap/smart-order-router/build/main/providers/cache'
 import { Pair } from '@uniswap/v2-sdk'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-import { log } from '@uniswap/smart-order-router'
-import { PairMarshaller } from '../../../marshalling'
+import { BatchGetItemInput, DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { log, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { MarshalledPair, PairMarshaller } from '../../../marshalling'
 
 export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
   private readonly ddbClient: DocumentClient
@@ -17,6 +17,57 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
         timeout: 100,
       },
     })
+  }
+
+  // TODO: ROUTE-81 & ROUTE-84 - once smart-order-router updates the ICache.batchGet API to take in
+  // composite key as part of ROUTE-83, then we can leverage the batchGet Dynamo call
+  // for both caching-pool-provider and token-properties-provider
+  // Prior to completion of ROUTE-81 & ROUTE-84, this function is not being called anywhere.
+  async batchGet(keys: Set<string>): Promise<Record<string, { pair: Pair; block?: number | undefined } | undefined>> {
+    const records: Record<string, { pair: Pair; block?: number | undefined } | undefined> = {}
+    const batchGetParams: BatchGetItemInput = {
+      RequestItems: {
+        [this.tableName]: {
+          Keys: Array.from(keys).map((key) => {
+            // TODO: ROUTE-83 fix the ICache.batchGet to allow passing in composite key type
+            // instead of a simple string type
+            // then fix the key destructuring here
+            const [cacheKey, block] = key.split(':', 2)
+            return {
+              cacheKey: { S: cacheKey },
+              block: { N: block },
+            }
+          }),
+        },
+      },
+    }
+
+    const result = await this.ddbClient.batchGet(batchGetParams).promise()
+    const unprocessedKeys = result?.UnprocessedKeys?.[this.tableName]?.Keys
+
+    if (unprocessedKeys && unprocessedKeys.length > 0) {
+      metric.putMetric('V2_PAIRS_DYNAMO_CACHING_UNPROCESSED_KEYS', unprocessedKeys.length, MetricLoggerUnit.None)
+    }
+
+    return (
+      result.Responses?.[this.tableName]
+        ?.map((item) => {
+          const key = item.cacheKey.S!
+          const block = parseInt(item.block.N!)
+          const itemBinary = item.item.B!
+          const pairBuffer = Buffer.from(itemBinary)
+          const pairJson: MarshalledPair = JSON.parse(pairBuffer.toString())
+
+          return {
+            [key]: {
+              pair: PairMarshaller.unmarshal(pairJson),
+              block,
+            },
+          }
+        })
+        ?.reduce((accumulatedRecords, currentRecord) => ({ ...accumulatedRecords, ...currentRecord }), records) ??
+      records
+    )
   }
   async get(key: string): Promise<{ pair: Pair; block?: number } | undefined> {
     try {
