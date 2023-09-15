@@ -162,6 +162,27 @@ export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   },
 }
 
+export type FeeOnTransferSpecificConfig = {
+  enableFeeOnTransferFeeFetching?: boolean
+  useCachedRoutes?: boolean
+}
+
+// TODO: ROUTE-86 - remove useCachedRoutes: !enableFeeOnTransferFeeFetching once we are ready to consume from RoutesDB
+// We cannot consume from RoutesDB for getting the FOT tax from v2 cached routes yet,
+// because RoutesDB has 24hrs TTL, and routing-api no longer filters unexpired routers.
+// So during interface & mobile e2e testing, it won't work if the fot quote hits the cached routes read path.
+// We allow writing into RoutesDB but not reading from it, if enableFeeOnTransferFeeFetching is true.
+export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (
+  enableFeeOnTransferFeeFetching?: boolean
+): FeeOnTransferSpecificConfig => {
+  return {
+    // if enableFeeOnTransferFeeFetching is true, then we do not use cached routes for read path
+    // if enableFeeOnTransferFeeFetching is false or undefined, then we use cached routes for read path
+    useCachedRoutes: !enableFeeOnTransferFeeFetching,
+    enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+  } as FeeOnTransferSpecificConfig
+}
+
 export async function tokenStringToCurrency(
   tokenListProvider: ITokenListProvider,
   tokenProvider: ITokenProvider,

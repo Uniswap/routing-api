@@ -20,6 +20,7 @@ const WHALES = [
   '0x28c6c06298d514db089934071355e5743bf21d60',
   '0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503',
   '0x06601571aa9d3e8f5f7cdd5b993192618964bab5',
+  '0x171d311eAcd2206d21Cb462d661C33F0eddadC03',
 ]
 
 const { ethers } = hre

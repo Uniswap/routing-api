@@ -25,6 +25,7 @@ import {
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
   TokenProvider,
+  TokenPropertiesProvider,
   UniswapMulticallProvider,
   V2PoolProvider,
   V2QuoteProvider,
@@ -32,7 +33,7 @@ import {
   IRouteCachingProvider,
   CachingV2PoolProvider,
   TokenValidatorProvider,
-  TokenPropertiesProvider,
+  ITokenPropertiesProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -97,6 +98,8 @@ export type ContainerDependencies = {
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
   routeCachingProvider?: IRouteCachingProvider
+  tokenValidatorProvider: TokenValidatorProvider
+  tokenPropertiesProvider: ITokenPropertiesProvider
 }
 
 export interface ContainerInjected {
@@ -374,6 +377,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v2SubgraphProvider,
               simulator,
               routeCachingProvider,
+              tokenValidatorProvider,
+              tokenPropertiesProvider,
             },
           }
         })
