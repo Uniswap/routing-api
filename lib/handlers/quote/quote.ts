@@ -495,24 +495,32 @@ export class QuoteHandler extends APIGLambdaHandler<
               decimals: tokenIn.decimals.toString(),
               address: tokenIn.address,
               symbol: tokenIn.symbol!,
-              buyFeeBps: enableFeeOnTransferFeeFetching ? (reserve0.currency.equals(tokenIn)
-                ? reserve0.currency.buyFeeBps?.toString()
-                : reserve1.currency.buyFeeBps?.toString()) : undefined,
-              sellFeeBps: enableFeeOnTransferFeeFetching ? (reserve0.currency.equals(tokenIn)
-                ? reserve0.currency.sellFeeBps?.toString()
-                : reserve1.currency.sellFeeBps?.toString()) : undefined,
+              buyFeeBps: enableFeeOnTransferFeeFetching
+                ? reserve0.currency.equals(tokenIn)
+                  ? reserve0.currency.buyFeeBps?.toString()
+                  : reserve1.currency.buyFeeBps?.toString()
+                : undefined,
+              sellFeeBps: enableFeeOnTransferFeeFetching
+                ? reserve0.currency.equals(tokenIn)
+                  ? reserve0.currency.sellFeeBps?.toString()
+                  : reserve1.currency.sellFeeBps?.toString()
+                : undefined,
             },
             tokenOut: {
               chainId: tokenOut.chainId,
               decimals: tokenOut.decimals.toString(),
               address: tokenOut.address,
               symbol: tokenOut.symbol!,
-              buyFeeBps: enableFeeOnTransferFeeFetching ?  reserve0.currency.equals(tokenOut)
-                ? reserve0.currency.buyFeeBps?.toString()
-                : reserve1.currency.buyFeeBps?.toString() : undefined,
-              sellFeeBps: enableFeeOnTransferFeeFetching ? reserve0.currency.equals(tokenOut)
-                ? reserve0.currency.sellFeeBps?.toString()
-                : reserve1.currency.sellFeeBps?.toString() : undefined,
+              buyFeeBps: enableFeeOnTransferFeeFetching
+                ? reserve0.currency.equals(tokenOut)
+                  ? reserve0.currency.buyFeeBps?.toString()
+                  : reserve1.currency.buyFeeBps?.toString()
+                : undefined,
+              sellFeeBps: enableFeeOnTransferFeeFetching
+                ? reserve0.currency.equals(tokenOut)
+                  ? reserve0.currency.sellFeeBps?.toString()
+                  : reserve1.currency.sellFeeBps?.toString()
+                : undefined,
             },
             reserve0: {
               token: {

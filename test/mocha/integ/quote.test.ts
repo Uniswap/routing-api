@@ -62,14 +62,14 @@ const BULLET = new Token(
   'Bullet Game Betting Token'
 )
 const BULLET_WHT_TAX = new Token(
-    ChainId.MAINNET,
-    '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
-    8,
-    'BULLET',
-    'Bullet Game Betting Token',
-    false,
-    BigNumber.from(500),
-    BigNumber.from(500)
+  ChainId.MAINNET,
+  '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
+  8,
+  'BULLET',
+  'Bullet Game Betting Token',
+  false,
+  BigNumber.from(500),
+  BigNumber.from(500)
 )
 
 const axios = axiosStatic.create()
@@ -1121,9 +1121,9 @@ describe('quote', function () {
                     // so the best way is to execute the swap on hardhat mainnet fork,
                     // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
                     const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                        response.data.methodParameters!,
-                        tokenIn,
-                        tokenOut
+                      response.data.methodParameters!,
+                      tokenIn,
+                      tokenOut
                     )
 
                     expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
