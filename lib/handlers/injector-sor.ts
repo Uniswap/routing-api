@@ -204,7 +204,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           )
           const tokenPropertiesProvider = new TokenPropertiesProvider(
             chainId,
-            tokenValidatorProvider,
             new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
             tokenFeeFetcher
           )
