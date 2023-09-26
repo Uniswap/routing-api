@@ -29,6 +29,7 @@ import {
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
+  parsePortion,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -136,6 +137,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         unicornSecret,
         intent,
         enableFeeOnTransferFeeFetching,
+        portionBips,
+        portionAmount,
+        portionRecipient,
       },
       requestInjected: {
         router,
@@ -264,6 +268,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           deadlineOrPreviousBlockhash: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
+          fee: parsePortion(portionBips, portionRecipient),
         }
       } else {
         swapParams = {

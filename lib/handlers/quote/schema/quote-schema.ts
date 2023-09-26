@@ -62,6 +62,16 @@ export const QuoteQueryParamsJoi = Joi.object({
   unicornSecret: Joi.string().optional(),
   intent: Joi.string().valid('quote', 'swap', 'caching', 'pricing').optional().default('quote'),
   enableFeeOnTransferFeeFetching: Joi.boolean().optional().default(false),
+  portionBips: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(5) // 0% < portionBips < 100%
+    .optional(),
+  portionAmount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .optional(),
+  portionRecipient: Joi.string()
+    .pattern(/^0x[a-fA-F0-9]{40}$/)
+    .optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -92,4 +102,7 @@ export type QuoteQueryParams = {
   unicornSecret?: string
   intent?: string
   enableFeeOnTransferFeeFetching?: boolean
+  portionBips?: string
+  portionAmount?: string
+  portionRecipient?: string
 }
