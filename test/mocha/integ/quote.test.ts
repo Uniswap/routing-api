@@ -1016,6 +1016,7 @@ describe('quote', function () {
 
             // If this test fails sporadically, dev needs to investigate further
             // There could be genuine regressions in the form of race condition, due to complex layers of caching
+            // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
             it(`fee-on-transfer BULLET -> WETH`, async () => {
               const enableFeeOnTransferFeeFetching = [true, false, undefined]
               // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
