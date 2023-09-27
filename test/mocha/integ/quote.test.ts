@@ -1014,6 +1014,8 @@ describe('quote', function () {
               })
             }
 
+            // If this test fails sporadically, dev needs to investigate further
+            // There could be genuine regressions in the form of race condition, due to complex layers of caching
             it(`fee-on-transfer BULLET -> WETH`, async () => {
               const enableFeeOnTransferFeeFetching = [true, false, undefined]
               // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
@@ -1022,6 +1024,7 @@ describe('quote', function () {
               const originalAmount = type === 'exactIn' ? '10' : '893517'
               const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
+              // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
               const responses = await Promise.all(enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: tokenIn.address,
@@ -1043,11 +1046,12 @@ describe('quote', function () {
                 const queryParams = qs.stringify(quoteReq)
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                return response
+                return { enableFeeOnTransferFeeFetching, ...response }
               }));
 
               for (const response of responses) {
                 const {
+                  enableFeeOnTransferFeeFetching,
                   data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
                   status,
                 } = response
