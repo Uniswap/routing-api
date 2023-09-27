@@ -1031,7 +1031,7 @@ describe('quote', function () {
                   if (enableFeeOnTransferFeeFetching) {
                     // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
                     // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
-                    await new Promise(f => setTimeout(f, 1000));
+                    await new Promise((f) => setTimeout(f, 1000))
                   }
 
                   const quoteReq: QuoteQueryParams = {
