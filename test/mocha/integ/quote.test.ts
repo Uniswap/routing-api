@@ -1014,15 +1014,15 @@ describe('quote', function () {
               })
             }
 
-            const enableFeeOnTransferFeeFetching = [true, false, undefined]
-            enableFeeOnTransferFeeFetching.forEach((enableFeeOnTransferFeeFetching) => {
-              it(`fee-on-transfer BULLET -> WETH enableFeeOnTransferFeeFetching = ${enableFeeOnTransferFeeFetching}`, async () => {
-                // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-                const tokenIn = WETH9[ChainId.MAINNET]!
-                const tokenOut = BULLET
-                const originalAmount = type === 'exactIn' ? '10' : '893517'
-                const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+            it(`fee-on-transfer BULLET -> WETH`, async () => {
+              const enableFeeOnTransferFeeFetching = [true, false, undefined]
+              // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+              const tokenIn = WETH9[ChainId.MAINNET]!
+              const tokenOut = BULLET
+              const originalAmount = type === 'exactIn' ? '10' : '893517'
+              const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
+              const responses = await Promise.all(enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: tokenIn.address,
                   tokenInChainId: tokenIn.chainId,
@@ -1043,6 +1043,10 @@ describe('quote', function () {
                 const queryParams = qs.stringify(quoteReq)
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                return response
+              }));
+
+              for (const response of responses) {
                 const {
                   data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
                   status,
@@ -1133,7 +1137,7 @@ describe('quote', function () {
                     checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
                   }
                 }
-              })
+              }
             })
           }
         })
