@@ -1026,29 +1026,31 @@ describe('quote', function () {
               const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
               // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
-              const responses = await Promise.all(enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: tokenIn.address,
-                  tokenInChainId: tokenIn.chainId,
-                  tokenOutAddress: tokenOut.address,
-                  tokenOutChainId: tokenOut.chainId,
-                  amount: amount,
-                  type: type,
-                  protocols: 'v2,v3,mixed',
-                  // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
-                  enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm,
-                  enableUniversalRouter: true,
-                }
+              const responses = await Promise.all(
+                enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: tokenIn.address,
+                    tokenInChainId: tokenIn.chainId,
+                    tokenOutAddress: tokenOut.address,
+                    tokenOutChainId: tokenOut.chainId,
+                    amount: amount,
+                    type: type,
+                    protocols: 'v2,v3,mixed',
+                    // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
+                    enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm,
+                    enableUniversalRouter: true,
+                  }
 
-                const queryParams = qs.stringify(quoteReq)
+                  const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                return { enableFeeOnTransferFeeFetching, ...response }
-              }));
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                  return { enableFeeOnTransferFeeFetching, ...response }
+                })
+              )
 
               for (const response of responses) {
                 const {
