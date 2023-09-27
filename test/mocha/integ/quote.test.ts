@@ -1014,36 +1014,53 @@ describe('quote', function () {
               })
             }
 
-            const enableFeeOnTransferFeeFetching = [true, false, undefined]
-            enableFeeOnTransferFeeFetching.forEach((enableFeeOnTransferFeeFetching) => {
-              it(`fee-on-transfer BULLET -> WETH enableFeeOnTransferFeeFetching = ${enableFeeOnTransferFeeFetching}`, async () => {
-                // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-                const tokenIn = WETH9[ChainId.MAINNET]!
-                const tokenOut = BULLET
-                const originalAmount = type === 'exactIn' ? '10' : '893517'
-                const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+            // If this test fails sporadically, dev needs to investigate further
+            // There could be genuine regressions in the form of race condition, due to complex layers of caching
+            // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
+            it(`fee-on-transfer BULLET -> WETH`, async () => {
+              const enableFeeOnTransferFeeFetching = [true, false, undefined]
+              // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+              const tokenIn = WETH9[ChainId.MAINNET]!
+              const tokenOut = BULLET
+              const originalAmount = type === 'exactIn' ? '10' : '893517'
+              const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: tokenIn.address,
-                  tokenInChainId: tokenIn.chainId,
-                  tokenOutAddress: tokenOut.address,
-                  tokenOutChainId: tokenOut.chainId,
-                  amount: amount,
-                  type: type,
-                  protocols: 'v2,v3,mixed',
-                  // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
-                  enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm,
-                  enableUniversalRouter: true,
-                }
+              // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
+              const responses = await Promise.all(
+                enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
+                  if (enableFeeOnTransferFeeFetching) {
+                    // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
+                    // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
+                    await new Promise((f) => setTimeout(f, 1000))
+                  }
 
-                const queryParams = qs.stringify(quoteReq)
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: tokenIn.address,
+                    tokenInChainId: tokenIn.chainId,
+                    tokenOutAddress: tokenOut.address,
+                    tokenOutChainId: tokenOut.chainId,
+                    amount: amount,
+                    type: type,
+                    protocols: 'v2,v3,mixed',
+                    // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
+                    enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm,
+                    enableUniversalRouter: true,
+                  }
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                  return { enableFeeOnTransferFeeFetching, ...response }
+                })
+              )
+
+              for (const response of responses) {
                 const {
+                  enableFeeOnTransferFeeFetching,
                   data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
                   status,
                 } = response
@@ -1133,7 +1150,7 @@ describe('quote', function () {
                     checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
                   }
                 }
-              })
+              }
             })
           }
         })
