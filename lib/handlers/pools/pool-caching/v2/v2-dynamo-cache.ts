@@ -99,13 +99,16 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
         // Finally we unmarshal that JSON into a `Pair` object
         const pair = PairMarshaller.unmarshal(pairJson)
 
-        if (record.cacheKey === "pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0") {
-            const fakeError = new Error();
-            log.error({ fakeError }, `[V2DynamoCache] We are retrieving WETH/BITBOY pool. We are debugging to see the pair object values.
+        if (record.cacheKey === 'pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0') {
+          const fakeError = new Error()
+          log.error(
+            { fakeError },
+            `[V2DynamoCache] We are retrieving WETH/BITBOY pool. We are debugging to see the pair object values.
             key: ${key}
             value: ${JSON.stringify(pair)}
             block: ${record.block}
-            stackTrace: ${fakeError.stack}`)
+            stackTrace: ${fakeError.stack}`
+          )
         }
 
         return {
@@ -131,13 +134,16 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
       log.error('[V2DynamoCache] We can only cache values with a block number')
       return false
     } else {
-      if (key === "pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0") {
-        const fakeError = new Error();
-        log.error({ fakeError }, `[V2DynamoCache] We are caching WETH/BITBOY pool. We are debugging to see the pair object values.
+      if (key === 'pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0') {
+        const fakeError = new Error()
+        log.error(
+          { fakeError },
+          `[V2DynamoCache] We are caching WETH/BITBOY pool. We are debugging to see the pair object values.
             key: ${key}
             value: ${JSON.stringify(value.pair)}
             block: ${value.block}
-            stackTrace: ${fakeError.stack}`)
+            stackTrace: ${fakeError.stack}`
+        )
       }
 
       // Marshal the Pair object in preparation for storing in DynamoDB
