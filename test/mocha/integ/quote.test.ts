@@ -1028,6 +1028,12 @@ describe('quote', function () {
               // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
               const responses = await Promise.all(
                 enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
+                  if (enableFeeOnTransferFeeFetching) {
+                    // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
+                    // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
+                    await new Promise(f => setTimeout(f, 1000));
+                  }
+
                   const quoteReq: QuoteQueryParams = {
                     tokenInAddress: tokenIn.address,
                     tokenInChainId: tokenIn.chainId,
