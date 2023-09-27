@@ -89,6 +89,7 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
 
       if (result.Items && result.Items.length > 0) {
         const record = result.Items[0]
+
         // If we got a response with more than 1 item, we extract the binary field from the response
         const itemBinary = record.item
         // Then we convert it into a Buffer
@@ -96,8 +97,22 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
         // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
         const pairJson = JSON.parse(pairBuffer.toString())
         // Finally we unmarshal that JSON into a `Pair` object
+        const pair = PairMarshaller.unmarshal(pairJson)
+
+        if (record.cacheKey === 'pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0') {
+          const fakeError = new Error()
+          log.error(
+            { fakeError },
+            `[V2DynamoCache] We are retrieving WETH/BITBOY pool. We are debugging to see the pair object values.
+            key: ${key}
+            value: ${JSON.stringify(pair)}
+            block: ${record.block}
+            stackTrace: ${fakeError.stack}`
+          )
+        }
+
         return {
-          pair: PairMarshaller.unmarshal(pairJson),
+          pair: pair,
           block: record.block,
         }
       } else {
@@ -119,6 +134,18 @@ export class V2DynamoCache implements ICache<{ pair: Pair; block?: number }> {
       log.error('[V2DynamoCache] We can only cache values with a block number')
       return false
     } else {
+      if (key === 'pool-1-0xA802E152244c6eC47F9a0337F4E62E47B6d6A2d0') {
+        const fakeError = new Error()
+        log.error(
+          { fakeError },
+          `[V2DynamoCache] We are caching WETH/BITBOY pool. We are debugging to see the pair object values.
+            key: ${key}
+            value: ${JSON.stringify(value.pair)}
+            block: ${value.block}
+            stackTrace: ${fakeError.stack}`
+        )
+      }
+
       // Marshal the Pair object in preparation for storing in DynamoDB
       const marshalledPair = PairMarshaller.marshal(value.pair)
       // Convert the marshalledPair to JSON string
