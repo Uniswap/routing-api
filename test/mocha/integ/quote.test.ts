@@ -1061,7 +1061,7 @@ describe('quote', function () {
               for (const response of responses) {
                 const {
                   enableFeeOnTransferFeeFetching,
-                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                   status,
                 } = response
 
