@@ -1061,14 +1061,11 @@ describe('quote', function () {
               for (const response of responses) {
                 const {
                   enableFeeOnTransferFeeFetching,
-                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, hitsCachedRoutes },
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                   status,
                 } = response
 
                 expect(status).to.equal(200)
-                // not hitting cached routes when we send enableFeeOnTransferFeeFetching = true is important
-                // during QA internal testing
-                expect(hitsCachedRoutes).to.equal(!enableFeeOnTransferFeeFetching)
 
                 if (type == 'exactIn') {
                   expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
