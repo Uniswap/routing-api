@@ -224,9 +224,8 @@ export function parseDeadline(deadline: string): number {
   return Math.floor(Date.now() / 1000) + parseInt(deadline)
 }
 
-export function parsePortionPercent(portionPercent: string): Percent {
-  const portionPer10k = Math.round(parseFloat(portionPercent) * 100)
-  return new Percent(portionPer10k, 10_000)
+export function parsePortionPercent(portionBips: string): Percent {
+  return new Percent(portionBips, 100)
 }
 
 export function parsePortion(portionBips?: string, portionRecipient?: string): FeeOptions | undefined {

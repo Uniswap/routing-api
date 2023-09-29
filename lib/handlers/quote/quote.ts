@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
+import { FlatFeeOptions, UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { PermitSingle } from '@uniswap/permit2-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
@@ -268,7 +268,8 @@ export class QuoteHandler extends APIGLambdaHandler<
           deadlineOrPreviousBlockhash: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
-          fee: parsePortion(portionBips, portionRecipient),
+          fee: type === 'exactIn' ? parsePortion(portionBips, portionRecipient) : undefined,
+          flatFee: type === 'exactOut' ? { amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions : undefined,
         }
       } else {
         swapParams = {
