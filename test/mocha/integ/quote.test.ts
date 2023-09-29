@@ -1014,141 +1014,166 @@ describe('quote', function () {
               })
             }
 
-            // If this test fails sporadically, dev needs to investigate further
-            // There could be genuine regressions in the form of race condition, due to complex layers of caching
-            // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
-            it(`fee-on-transfer BULLET -> WETH`, async () => {
-              const enableFeeOnTransferFeeFetching = [true, false, undefined]
-              // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-              const tokenIn = WETH9[ChainId.MAINNET]!
-              const tokenOut = BULLET
-              const originalAmount = type === 'exactIn' ? '10' : '893517'
-              const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+            // FOT swap only works for exact in
+            if (type === 'exactIn') {
+              const tokenInAndTokenOut = [
+                [BULLET, WETH9[ChainId.MAINNET]!],
+                [WETH9[ChainId.MAINNET]!, BULLET],
+              ]
 
-              // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
-              const responses = await Promise.all(
-                enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
-                  if (enableFeeOnTransferFeeFetching) {
-                    // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
-                    // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
-                    await new Promise((f) => setTimeout(f, 1000))
-                  }
+              tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
+                // If this test fails sporadically, dev needs to investigate further
+                // There could be genuine regressions in the form of race condition, due to complex layers of caching
+                // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
+                it(`fee-on-transfer BULLET -> WETH`, async () => {
+                  const enableFeeOnTransferFeeFetching = [true, false, undefined]
+                  // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '893517'
+                  const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
-                  const quoteReq: QuoteQueryParams = {
-                    tokenInAddress: tokenIn.address,
-                    tokenInChainId: tokenIn.chainId,
-                    tokenOutAddress: tokenOut.address,
-                    tokenOutChainId: tokenOut.chainId,
-                    amount: amount,
-                    type: type,
-                    protocols: 'v2,v3,mixed',
-                    // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
-                    enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
-                    recipient: alice.address,
-                    slippageTolerance: SLIPPAGE,
-                    deadline: '360',
-                    algorithm,
-                    enableUniversalRouter: true,
-                  }
-
-                  const queryParams = qs.stringify(quoteReq)
-
-                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                  return { enableFeeOnTransferFeeFetching, ...response }
-                })
-              )
-
-              for (const response of responses) {
-                const {
-                  enableFeeOnTransferFeeFetching,
-                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
-                  status,
-                } = response
-
-                expect(status).to.equal(200)
-
-                if (type == 'exactIn') {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-                } else {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-                }
-
-                expect(methodParameters).to.not.be.undefined
-
-                let hasV3Pool = false
-                let hasV2Pool = false
-                for (const r of route) {
-                  for (const pool of r) {
-                    if (pool.type == 'v3-pool') {
-                      hasV3Pool = true
-                    }
-                    if (pool.type == 'v2-pool') {
-                      hasV2Pool = true
+                  // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
+                  const responses = await Promise.all(
+                    enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
                       if (enableFeeOnTransferFeeFetching) {
-                        if (pool.tokenIn.address === BULLET.address) {
-                          expect(pool.tokenIn.sellFeeBps).to.be.not.undefined
-                          expect(pool.tokenIn.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                          expect(pool.tokenIn.buyFeeBps).to.be.not.undefined
-                          expect(pool.tokenIn.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
+                        // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
+                        await new Promise((f) => setTimeout(f, 1000))
+                      }
+
+                      const quoteReq: QuoteQueryParams = {
+                        tokenInAddress: tokenIn.address,
+                        tokenInChainId: tokenIn.chainId,
+                        tokenOutAddress: tokenOut.address,
+                        tokenOutChainId: tokenOut.chainId,
+                        amount: amount,
+                        type: type,
+                        protocols: 'v2,v3,mixed',
+                        // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
+                        enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+                        recipient: alice.address,
+                        slippageTolerance: SLIPPAGE,
+                        deadline: '360',
+                        algorithm,
+                        enableUniversalRouter: true,
+                      }
+
+                      const queryParams = qs.stringify(quoteReq)
+
+                      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                        `${API}?${queryParams}`
+                      )
+                      return { enableFeeOnTransferFeeFetching, ...response }
+                    })
+                  )
+
+                  const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
+                  expect(quoteWithFlagOn).not.to.be.undefined
+                  responses
+                    .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
+                    .forEach((r) => {
+                      console.log(`no flag response ${r.enableFeeOnTransferFeeFetching} ${JSON.stringify(r.data)}`)
+                      console.log(
+                        `flag response ${quoteWithFlagOn!.enableFeeOnTransferFeeFetching}  ${JSON.stringify(
+                          quoteWithFlagOn?.data
+                        )}`
+                      )
+
+                      // there's an accidental regression from https://github.com/Uniswap/smart-order-router/pull/421/files#diff-604dffede13d2dd8277f5a7512a5ba0ff6fac291f2d0fb102c2af5f1711dedafL116-L150,
+                      // that by removing the outputAmountWithSellTax as the route tokenIn, the quote doesn't deduct the tokenIn sell tax.
+                      // this is not double FOT taxation, but rather need to fix before mobile rolls out to 100%.
+                      if (!tokenIn.equals(BULLET)) {
+                        // quote without fot flag must be greater than the quote with fot flag
+                        // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
+                        expect(parseFloat(r.data.quote)).to.be.greaterThan(parseFloat(quoteWithFlagOn!.data.quote))
+                      }
+                    })
+
+                  for (const response of responses) {
+                    const {
+                      enableFeeOnTransferFeeFetching,
+                      data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                      status,
+                    } = response
+
+                    expect(status).to.equal(200)
+
+                    if (type == 'exactIn') {
+                      expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                    } else {
+                      expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                    }
+
+                    expect(methodParameters).to.not.be.undefined
+
+                    let hasV3Pool = false
+                    let hasV2Pool = false
+                    for (const r of route) {
+                      for (const pool of r) {
+                        if (pool.type == 'v3-pool') {
+                          hasV3Pool = true
                         }
-                        if (pool.tokenOut.address === BULLET.address) {
-                          expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
-                          expect(pool.tokenOut.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                          expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
-                          expect(pool.tokenOut.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                        if (pool.type == 'v2-pool') {
+                          hasV2Pool = true
+                          if (enableFeeOnTransferFeeFetching) {
+                            if (pool.tokenIn.address === BULLET.address) {
+                              expect(pool.tokenIn.sellFeeBps).to.be.not.undefined
+                              expect(pool.tokenIn.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                              expect(pool.tokenIn.buyFeeBps).to.be.not.undefined
+                              expect(pool.tokenIn.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                            }
+                            if (pool.tokenOut.address === BULLET.address) {
+                              expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
+                              expect(pool.tokenOut.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                              expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                              expect(pool.tokenOut.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                            }
+                            if (pool.reserve0.token.address === BULLET.address) {
+                              expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
+                              expect(pool.reserve0.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                              expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
+                              expect(pool.reserve0.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                            }
+                            if (pool.reserve1.token.address === BULLET.address) {
+                              expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
+                              expect(pool.reserve1.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                              expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
+                              expect(pool.reserve1.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                            }
+                          } else {
+                            expect(pool.tokenOut.sellFeeBps).to.be.undefined
+                            expect(pool.tokenOut.buyFeeBps).to.be.undefined
+                            expect(pool.reserve0.token.sellFeeBps).to.be.undefined
+                            expect(pool.reserve0.token.buyFeeBps).to.be.undefined
+                            expect(pool.reserve1.token.sellFeeBps).to.be.undefined
+                            expect(pool.reserve1.token.buyFeeBps).to.be.undefined
+                          }
                         }
-                        if (pool.reserve0.token.address === BULLET.address) {
-                          expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
-                          expect(pool.reserve0.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                          expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
-                          expect(pool.reserve0.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                        }
-                        if (pool.reserve1.token.address === BULLET.address) {
-                          expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
-                          expect(pool.reserve1.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                          expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
-                          expect(pool.reserve1.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                        }
-                      } else {
-                        expect(pool.tokenOut.sellFeeBps).to.be.undefined
-                        expect(pool.tokenOut.buyFeeBps).to.be.undefined
-                        expect(pool.reserve0.token.sellFeeBps).to.be.undefined
-                        expect(pool.reserve0.token.buyFeeBps).to.be.undefined
-                        expect(pool.reserve1.token.sellFeeBps).to.be.undefined
-                        expect(pool.reserve1.token.buyFeeBps).to.be.undefined
                       }
                     }
+
+                    expect(!hasV3Pool && hasV2Pool).to.be.true
+
+                    // without enabling the fee fetching
+                    // sometimes we can get execute swap failure due to unpredictable gas limit
+                    // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
+                    // which is equivalent of what was happening in prod, before interface supports FOT
+                    if (enableFeeOnTransferFeeFetching && tokenIn.equals(WETH9[ChainId.MAINNET]!)) {
+                      // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                      // so the best way is to execute the swap on hardhat mainnet fork,
+                      // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                      const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                        response.data.methodParameters!,
+                        tokenIn,
+                        tokenOut
+                      )
+
+                      expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                      checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+                    }
                   }
-                }
-
-                expect(!hasV3Pool && hasV2Pool).to.be.true
-
-                // For V2_SWAP_EXACT_OUT (universal router command 0x09), somehow the swap can fail
-                // with unpredictable gas limit.
-                // For V2_SWAP_EXACT_IN (universal router command 0x08), the swap always succeeds.
-                // We are only executing exact in swap for now.
-                // TODO: wait until interface and mobile integration, and see if this is legit issue, or just a test issue.
-                if (type === 'exactIn') {
-                  // without enabling the fee fetching
-                  // sometimes we can get execute swap failure due to unpredictable gas limit
-                  // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
-                  // which is equivalent of what was happening in prod, before interface supports FOT
-                  if (enableFeeOnTransferFeeFetching) {
-                    // We don't have a bullet proof way to asser the fot-involved quote is post tax
-                    // so the best way is to execute the swap on hardhat mainnet fork,
-                    // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
-                    const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                      response.data.methodParameters!,
-                      tokenIn,
-                      tokenOut
-                    )
-
-                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
-                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
-                  }
-                }
-              }
-            })
+                })
+              })
+            }
           }
         })
 
