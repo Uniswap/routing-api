@@ -1016,7 +1016,10 @@ describe('quote', function () {
 
             // FOT swap only works for exact in
             if (type === 'exactIn') {
-              const tokenInAndTokenOut = [[BULLET, WETH9[ChainId.MAINNET]!], [WETH9[ChainId.MAINNET]!, BULLET]]
+              const tokenInAndTokenOut = [
+                [BULLET, WETH9[ChainId.MAINNET]!],
+                [WETH9[ChainId.MAINNET]!, BULLET],
+              ]
 
               tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
                 // If this test fails sporadically, dev needs to investigate further
@@ -1056,27 +1059,34 @@ describe('quote', function () {
 
                       const queryParams = qs.stringify(quoteReq)
 
-                      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                        `${API}?${queryParams}`
+                      )
                       return { enableFeeOnTransferFeeFetching, ...response }
                     })
                   )
 
-
                   const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
                   expect(quoteWithFlagOn).not.to.be.undefined
-                  responses.filter((r) => r.enableFeeOnTransferFeeFetching !== true).forEach((r) => {
-                    console.log(`no flag response ${r.enableFeeOnTransferFeeFetching} ${JSON.stringify(r.data)}`)
-                    console.log(`flag response ${quoteWithFlagOn!.enableFeeOnTransferFeeFetching}  ${JSON.stringify(quoteWithFlagOn?.data)}`)
+                  responses
+                    .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
+                    .forEach((r) => {
+                      console.log(`no flag response ${r.enableFeeOnTransferFeeFetching} ${JSON.stringify(r.data)}`)
+                      console.log(
+                        `flag response ${quoteWithFlagOn!.enableFeeOnTransferFeeFetching}  ${JSON.stringify(
+                          quoteWithFlagOn?.data
+                        )}`
+                      )
 
-                    // there's an accidental regression from https://github.com/Uniswap/smart-order-router/pull/421/files#diff-604dffede13d2dd8277f5a7512a5ba0ff6fac291f2d0fb102c2af5f1711dedafL116-L150,
-                    // that by removing the outputAmountWithSellTax as the route tokenIn, the quote doesn't deduct the tokenIn sell tax.
-                    // this is not double FOT taxation, but rather need to fix before mobile rolls out to 100%.
-                    if (!tokenIn.equals(BULLET)) {
-                      // quote without fot flag must be greater than the quote with fot flag
-                      // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
-                      expect(parseFloat(r.data.quote)).to.be.greaterThan(parseFloat(quoteWithFlagOn!.data.quote))
-                    }
-                  });
+                      // there's an accidental regression from https://github.com/Uniswap/smart-order-router/pull/421/files#diff-604dffede13d2dd8277f5a7512a5ba0ff6fac291f2d0fb102c2af5f1711dedafL116-L150,
+                      // that by removing the outputAmountWithSellTax as the route tokenIn, the quote doesn't deduct the tokenIn sell tax.
+                      // this is not double FOT taxation, but rather need to fix before mobile rolls out to 100%.
+                      if (!tokenIn.equals(BULLET)) {
+                        // quote without fot flag must be greater than the quote with fot flag
+                        // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
+                        expect(parseFloat(r.data.quote)).to.be.greaterThan(parseFloat(quoteWithFlagOn!.data.quote))
+                      }
+                    })
 
                   for (const response of responses) {
                     const {
@@ -1143,26 +1153,25 @@ describe('quote', function () {
 
                     expect(!hasV3Pool && hasV2Pool).to.be.true
 
-                      // without enabling the fee fetching
-                      // sometimes we can get execute swap failure due to unpredictable gas limit
-                      // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
-                      // which is equivalent of what was happening in prod, before interface supports FOT
-                      if (enableFeeOnTransferFeeFetching && tokenIn.equals(WETH9[ChainId.MAINNET]!)) {
-                        // We don't have a bullet proof way to asser the fot-involved quote is post tax
-                        // so the best way is to execute the swap on hardhat mainnet fork,
-                        // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
-                        const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                          response.data.methodParameters!,
-                          tokenIn,
-                          tokenOut
-                        )
+                    // without enabling the fee fetching
+                    // sometimes we can get execute swap failure due to unpredictable gas limit
+                    // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
+                    // which is equivalent of what was happening in prod, before interface supports FOT
+                    if (enableFeeOnTransferFeeFetching && tokenIn.equals(WETH9[ChainId.MAINNET]!)) {
+                      // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                      // so the best way is to execute the swap on hardhat mainnet fork,
+                      // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                      const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                        response.data.methodParameters!,
+                        tokenIn,
+                        tokenOut
+                      )
 
-                        expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
-                        checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
-                      }
+                      expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                      checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
                     }
                   }
-                )
+                })
               })
             }
           }
