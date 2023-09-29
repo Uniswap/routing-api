@@ -269,7 +269,10 @@ export class QuoteHandler extends APIGLambdaHandler<
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           fee: type === 'exactIn' ? parsePortion(portionBips, portionRecipient) : undefined,
-          flatFee: type === 'exactOut' ? { amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions : undefined,
+          flatFee:
+            type === 'exactOut'
+              ? ({ amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions)
+              : undefined,
         }
       } else {
         swapParams = {

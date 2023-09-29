@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect } from 'chai'
 import { parsePortion, parsePortionPercent } from '../../../../lib/handlers/shared'
 
 describe('shared', async () => {
@@ -16,4 +16,4 @@ describe('shared', async () => {
       expect(percent.recipient).to.equal('0x123')
     }
   })
-});
+})
