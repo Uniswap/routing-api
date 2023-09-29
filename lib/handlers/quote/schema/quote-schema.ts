@@ -64,7 +64,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   enableFeeOnTransferFeeFetching: Joi.boolean().optional().default(false),
   portionBips: Joi.string()
     .pattern(/^[0-9]+$/)
-    .max(5) // 0% < portionBips < 100%
+    .max(5) // portionBips is a string type with the expectation of being parsable to integer between 0 and 10000
     .optional(),
   portionAmount: Joi.string()
     .pattern(/^[0-9]+$/)
