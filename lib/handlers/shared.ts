@@ -9,6 +9,7 @@ import {
   ProtocolPoolSelection,
 } from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
+import { FeeOptions } from '@uniswap/v3-sdk'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 30,
@@ -221,4 +222,16 @@ export function parseSlippageTolerance(slippageTolerance: string): Percent {
 
 export function parseDeadline(deadline: string): number {
   return Math.floor(Date.now() / 1000) + parseInt(deadline)
+}
+
+export function parsePortionPercent(portionBips: string): Percent {
+  return new Percent(portionBips, 100)
+}
+
+export function parsePortion(portionBips?: string, portionRecipient?: string): FeeOptions | undefined {
+  if (!portionBips || !portionRecipient) {
+    return undefined
+  }
+
+  return { fee: parsePortionPercent(portionBips), recipient: portionRecipient } as FeeOptions
 }
