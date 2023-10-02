@@ -1063,7 +1063,7 @@ describe('quote', function () {
                       const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
                         `${API}?${queryParams}`
                       )
-                      
+
                       return { enableFeeOnTransferFeeFetching, ...response }
                     })
                   )
