@@ -1026,16 +1026,6 @@ describe('quote', function () {
                 // There could be genuine regressions in the form of race condition, due to complex layers of caching
                 // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
                 it(`fee-on-transfer BULLET -> WETH`, async () => {
-                  alice = await resetAndFundAtBlock(alice, 18203687, [
-                    parseAmount('8000000', USDC_MAINNET),
-                    parseAmount('5000000', USDT_MAINNET),
-                    parseAmount('10', WBTC_MAINNET),
-                    parseAmount('1000', UNI_MAINNET),
-                    parseAmount('4000', WETH9[1]),
-                    parseAmount('5000000', DAI_MAINNET),
-                    parseAmount('735871', BULLET),
-                  ])
-
                   const enableFeeOnTransferFeeFetching = [true, false, undefined]
                   // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
                   const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '893517'
@@ -1073,6 +1063,7 @@ describe('quote', function () {
                       const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
                         `${API}?${queryParams}`
                       )
+                      
                       return { enableFeeOnTransferFeeFetching, ...response }
                     })
                   )
