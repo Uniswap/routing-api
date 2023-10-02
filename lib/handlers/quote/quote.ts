@@ -29,6 +29,8 @@ import {
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
+  parseFeeOptions,
+  parseFlatFeeOptions,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -136,6 +138,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         unicornSecret,
         intent,
         enableFeeOnTransferFeeFetching,
+        portionBips,
+        portionAmount,
+        portionRecipient,
       },
       requestInjected: {
         router,
@@ -264,6 +269,8 @@ export class QuoteHandler extends APIGLambdaHandler<
           deadlineOrPreviousBlockhash: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
+          fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
+          flatFee: type === 'exactOut' ? parseFlatFeeOptions(portionAmount, portionRecipient) : undefined,
         }
       } else {
         swapParams = {
