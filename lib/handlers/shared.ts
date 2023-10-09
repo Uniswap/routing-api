@@ -1,4 +1,4 @@
-import { ChainId, Currency, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ITokenListProvider,
@@ -243,4 +243,12 @@ export function parseFlatFeeOptions(portionAmount?: string, portionRecipient?: s
   }
 
   return { amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions
+}
+
+export function computePortionAmount(currencyOut: CurrencyAmount<Currency>, portionBips?: string): string  | undefined {
+  if (!portionBips) {
+    return undefined
+  }
+
+  return currencyOut.multiply(parsePortionPercent(portionBips)).quotient.toString()
 }

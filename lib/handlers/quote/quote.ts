@@ -30,7 +30,7 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   parseFeeOptions,
-  parseFlatFeeOptions,
+  parseFlatFeeOptions, computePortionAmount
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -139,7 +139,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
-        portionAmount,
         portionRecipient,
       },
       requestInjected: {
@@ -270,7 +269,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
-          flatFee: type === 'exactOut' ? parseFlatFeeOptions(portionAmount, portionRecipient) : undefined,
+          flatFee: type === 'exactOut' ? parseFlatFeeOptions(computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips), portionRecipient) : undefined,
         }
       } else {
         swapParams = {
