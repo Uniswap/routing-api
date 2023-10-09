@@ -85,4 +85,10 @@ export type QuoteResponse = {
   routeString: string
   methodParameters?: MethodParameters
   hitsCachedRoutes?: boolean
+  portionBips?: number
+  portionRecipient?: string
+  portionAmount?: string
+  portionAmountDecimals?: string
+  quoteGasAndPortionAdjusted?: string
+  quoteGasAndPortionAdjustedDecimals?: string
 }

@@ -30,7 +30,8 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   parseFeeOptions,
-  parseFlatFeeOptions, computePortionAmount
+  parseFlatFeeOptions,
+  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -269,7 +270,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
-          flatFee: type === 'exactOut' ? parseFlatFeeOptions(computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips), portionRecipient) : undefined,
+          flatFee:
+            type === 'exactOut'
+              ? parseFlatFeeOptions(
+                  computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
+                  portionRecipient
+                )
+              : undefined,
         }
       } else {
         swapParams = {
@@ -585,6 +592,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
       hitsCachedRoutes: hitsCachedRoute,
+      portionBips: portionBips,
+      portionRecipient: portionRecipient,
     }
 
     this.logRouteMetrics(
