@@ -31,6 +31,7 @@ import {
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   parseFeeOptions,
   parseFlatFeeOptions,
+  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -139,7 +140,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
-        portionAmount,
         portionRecipient,
       },
       requestInjected: {
@@ -270,7 +270,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
-          flatFee: type === 'exactOut' ? parseFlatFeeOptions(portionAmount, portionRecipient) : undefined,
+          flatFee:
+            type === 'exactOut'
+              ? parseFlatFeeOptions(
+                  computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
+                  portionRecipient
+                )
+              : undefined,
         }
       } else {
         swapParams = {
@@ -422,6 +428,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const {
       quote,
       quoteGasAdjusted,
+      quoteGasAndPortionAdjusted,
       route,
       estimatedGasUsed,
       estimatedGasUsedQuoteToken,
@@ -431,6 +438,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
+      portionAmount,
     } = swapRoute
 
     if (simulationStatus == SimulationStatus.Failed) {
@@ -575,6 +583,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteDecimals: quote.toExact(),
       quoteGasAdjusted: quoteGasAdjusted.quotient.toString(),
       quoteGasAdjustedDecimals: quoteGasAdjusted.toExact(),
+      quoteGasAndPortionAdjusted: quoteGasAndPortionAdjusted?.quotient.toString(),
+      quoteGasAndPortionAdjustedDecimals: quoteGasAndPortionAdjusted?.toExact(),
       gasUseEstimateQuote: estimatedGasUsedQuoteToken.quotient.toString(),
       gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
@@ -586,6 +596,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
       hitsCachedRoutes: hitsCachedRoute,
+      portionBips: portionBips ?? 0, // business decision is we always return back the portionBips from routing BE
+      portionRecipient: portionRecipient,
+      portionAmount: portionAmount?.quotient.toString() ?? '0', // business decision is we always return back the portionAmount from routing BE
+      portionAmountDecimals: portionAmount?.toExact() ?? '0', // business decision is we always return back the portionAmount from routing BE
     }
 
     this.logRouteMetrics(

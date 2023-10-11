@@ -1,4 +1,4 @@
-import { ChainId, Currency, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   ITokenListProvider,
@@ -225,11 +225,11 @@ export function parseDeadline(deadline: string): number {
   return Math.floor(Date.now() / 1000) + parseInt(deadline)
 }
 
-export function parsePortionPercent(portionBips: string): Percent {
+export function parsePortionPercent(portionBips: number): Percent {
   return new Percent(portionBips, 10_000)
 }
 
-export function parseFeeOptions(portionBips?: string, portionRecipient?: string): FeeOptions | undefined {
+export function parseFeeOptions(portionBips?: number, portionRecipient?: string): FeeOptions | undefined {
   if (!portionBips || !portionRecipient) {
     return undefined
   }
@@ -243,4 +243,12 @@ export function parseFlatFeeOptions(portionAmount?: string, portionRecipient?: s
   }
 
   return { amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions
+}
+
+export function computePortionAmount(currencyOut: CurrencyAmount<Currency>, portionBips?: number): string | undefined {
+  if (!portionBips) {
+    return undefined
+  }
+
+  return currencyOut.multiply(parsePortionPercent(portionBips)).quotient.toString()
 }

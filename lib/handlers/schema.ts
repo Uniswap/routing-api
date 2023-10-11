@@ -49,6 +49,8 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   quoteGasAdjustedDecimals: Joi.string().required(),
   gasUseEstimateQuote: Joi.string().required(),
   gasUseEstimateQuoteDecimals: Joi.string().required(),
+  quoteGasAndPortionAdjusted: Joi.string().optional(),
+  quoteGasAndPortionAdjustedDecimals: Joi.string().optional(),
   gasUseEstimate: Joi.string().required(),
   gasUseEstimateUSD: Joi.string().required(),
   simulationError: Joi.boolean().optional(),
@@ -63,6 +65,10 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
     to: Joi.string().required(),
   }).optional(),
   hitsCachedRoutes: Joi.boolean().optional(),
+  portionBips: Joi.number().optional(),
+  portionRecipient: Joi.string().optional(),
+  portionAmount: Joi.string().optional(),
+  portionAmountDecimals: Joi.string().optional(),
 })
 
 export type QuoteResponse = {
@@ -73,6 +79,8 @@ export type QuoteResponse = {
   quoteDecimals: string
   quoteGasAdjusted: string
   quoteGasAdjustedDecimals: string
+  quoteGasAndPortionAdjusted?: string
+  quoteGasAndPortionAdjustedDecimals?: string
   gasUseEstimate: string
   gasUseEstimateQuote: string
   gasUseEstimateQuoteDecimals: string
@@ -85,4 +93,8 @@ export type QuoteResponse = {
   routeString: string
   methodParameters?: MethodParameters
   hitsCachedRoutes?: boolean
+  portionBips?: number
+  portionRecipient?: string
+  portionAmount?: string
+  portionAmountDecimals?: string
 }
