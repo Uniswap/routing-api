@@ -52,6 +52,7 @@ import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -325,6 +326,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               break
           }
 
+          const portionProvider = new PortionProvider()
           const tenderlySimulator = new TenderlySimulator(
             chainId,
             'https://api.tenderly.co',
@@ -334,12 +336,25 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2PoolProvider,
             v3PoolProvider,
             provider,
+            portionProvider,
             { [ChainId.ARBITRUM_ONE]: 2.5 }
           )
 
-          const ethEstimateGasSimulator = new EthEstimateGasSimulator(chainId, provider, v2PoolProvider, v3PoolProvider)
+          const ethEstimateGasSimulator = new EthEstimateGasSimulator(
+            chainId,
+            provider,
+            v2PoolProvider,
+            v3PoolProvider,
+            portionProvider
+          )
 
-          const simulator = new FallbackTenderlySimulator(chainId, provider, tenderlySimulator, ethEstimateGasSimulator)
+          const simulator = new FallbackTenderlySimulator(
+            chainId,
+            provider,
+            portionProvider,
+            tenderlySimulator,
+            ethEstimateGasSimulator
+          )
 
           let routeCachingProvider: IRouteCachingProvider | undefined = undefined
           if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
