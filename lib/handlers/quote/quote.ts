@@ -596,10 +596,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
       hitsCachedRoutes: hitsCachedRoute,
-      portionBips: portionBips ?? 0, // business decision is we always return back the portionBips from routing BE
+      portionBips: portionBips,
       portionRecipient: portionRecipient,
-      portionAmount: portionAmount?.quotient.toString() ?? '0', // business decision is we always return back the portionAmount from routing BE
-      portionAmountDecimals: portionAmount?.toExact() ?? '0', // business decision is we always return back the portionAmount from routing BE
+      portionAmount: portionAmount?.quotient.toString(),
+      portionAmountDecimals: portionAmount?.toExact(),
     }
 
     this.logRouteMetrics(
