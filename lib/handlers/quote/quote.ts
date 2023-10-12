@@ -273,18 +273,17 @@ export class QuoteHandler extends APIGLambdaHandler<
           fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
           flatFee:
             type === 'exactOut'
-              // TODO: remove this hack once https://github.com/Uniswap/unified-routing-api/pull/282 gets merged
-              // right now URA passes down portionAmount for exactOut swaps,
-              // but in the ideal case, URA just passes down portionBips and portionRecipient
-              // routing-api computes portionAmount for exact out swaps.
-              // Current fix is to check if portionAmount is passed down, if so, use that, otherwise compute portionAmount
-              ? (portionAmount ? parseFlatFeeOptions(
-                  portionAmount,
-                  portionRecipient
-                ) : parseFlatFeeOptions(
-                  computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
-                  portionRecipient
-                ))
+              ? // TODO: remove this hack once https://github.com/Uniswap/unified-routing-api/pull/282 gets merged
+                // right now URA passes down portionAmount for exactOut swaps,
+                // but in the ideal case, URA just passes down portionBips and portionRecipient
+                // routing-api computes portionAmount for exact out swaps.
+                // Current fix is to check if portionAmount is passed down, if so, use that, otherwise compute portionAmount
+                portionAmount
+                ? parseFlatFeeOptions(portionAmount, portionRecipient)
+                : parseFlatFeeOptions(
+                    computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
+                    portionRecipient
+                  )
               : undefined,
         }
       } else {
