@@ -140,6 +140,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
+        portionAmount,
         portionRecipient,
       },
       requestInjected: {
@@ -272,10 +273,18 @@ export class QuoteHandler extends APIGLambdaHandler<
           fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
           flatFee:
             type === 'exactOut'
-              ? parseFlatFeeOptions(
+              // TODO: remove this hack once https://github.com/Uniswap/unified-routing-api/pull/282 gets merged
+              // right now URA passes down portionAmount for exactOut swaps,
+              // but in the ideal case, URA just passes down portionBips and portionRecipient
+              // routing-api computes portionAmount for exact out swaps.
+              // Current fix is to check if portionAmount is passed down, if so, use that, otherwise compute portionAmount
+              ? (portionAmount ? parseFlatFeeOptions(
+                  portionAmount,
+                  portionRecipient
+                ) : parseFlatFeeOptions(
                   computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
                   portionRecipient
-                )
+                ))
               : undefined,
         }
       } else {
@@ -438,7 +447,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
-      portionAmount,
+      portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
     if (simulationStatus == SimulationStatus.Failed) {
@@ -598,8 +607,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       hitsCachedRoutes: hitsCachedRoute,
       portionBips: portionBips,
       portionRecipient: portionRecipient,
-      portionAmount: portionAmount?.quotient.toString(),
-      portionAmountDecimals: portionAmount?.toExact(),
+      portionAmount: outputPortionAmount?.quotient.toString(),
+      portionAmountDecimals: outputPortionAmount?.toExact(),
     }
 
     this.logRouteMetrics(

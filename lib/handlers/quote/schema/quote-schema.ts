@@ -66,6 +66,9 @@ export const QuoteQueryParamsJoi = Joi.object({
     .pattern(/^[0-9]+$/)
     .max(5) // portionBips is a string type with the expectation of being parsable to integer between 0 and 10000
     .optional(),
+  portionAmount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .optional(),
   portionRecipient: Joi.string().alphanum().max(42).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
@@ -98,5 +101,6 @@ export type QuoteQueryParams = {
   intent?: string
   enableFeeOnTransferFeeFetching?: boolean
   portionBips?: number
+  portionAmount?: string
   portionRecipient?: string
 }
