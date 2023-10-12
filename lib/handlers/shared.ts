@@ -245,6 +245,29 @@ export function parseFlatFeeOptions(portionAmount?: string, portionRecipient?: s
   return { amount: portionAmount, recipient: portionRecipient } as FlatFeeOptions
 }
 
+export type AllFeeOptions = {
+  fee?: FeeOptions
+  flatFee?: FlatFeeOptions
+}
+
+export function populateFeeOptions(
+  type: string,
+  portionBips?: number,
+  portionRecipient?: string,
+  portionAmount?: string
+): AllFeeOptions | undefined {
+  switch (type) {
+    case 'exactIn':
+      const feeOptions = parseFeeOptions(portionBips, portionRecipient)
+      return { fee: feeOptions }
+    case 'exactOut':
+      const flatFeeOptions = parseFlatFeeOptions(portionAmount, portionRecipient)
+      return { flatFee: flatFeeOptions }
+    default:
+      return undefined
+  }
+}
+
 export function computePortionAmount(currencyOut: CurrencyAmount<Currency>, portionBips?: number): string | undefined {
   if (!portionBips) {
     return undefined

@@ -29,9 +29,7 @@ import {
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
-  parseFeeOptions,
-  parseFlatFeeOptions,
-  computePortionAmount,
+  populateFeeOptions,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -265,26 +263,14 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
+        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, portionAmount)
+
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
           deadlineOrPreviousBlockhash: parseDeadline(deadline),
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
-          fee: type === 'exactIn' ? parseFeeOptions(portionBips, portionRecipient) : undefined,
-          flatFee:
-            type === 'exactOut'
-              ? // TODO: remove this hack once https://github.com/Uniswap/unified-routing-api/pull/282 gets merged
-                // right now URA passes down portionAmount for exactOut swaps,
-                // but in the ideal case, URA just passes down portionBips and portionRecipient
-                // routing-api computes portionAmount for exact out swaps.
-                // Current fix is to check if portionAmount is passed down, if so, use that, otherwise compute portionAmount
-                portionAmount
-                ? parseFlatFeeOptions(portionAmount, portionRecipient)
-                : parseFlatFeeOptions(
-                    computePortionAmount(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw)), portionBips),
-                    portionRecipient
-                  )
-              : undefined,
+          ...allFeeOptions,
         }
       } else {
         swapParams = {

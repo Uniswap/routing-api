@@ -1,13 +1,15 @@
 import { expect } from 'chai'
 import {
   computePortionAmount,
+  parseDeadline,
   parseFeeOptions,
   parseFlatFeeOptions,
   parsePortionPercent,
+  populateFeeOptions,
 } from '../../../../lib/handlers/shared'
 import { getAmount } from '../../../utils/tokens'
-import { CurrencyAmount } from '@uniswap/sdk-core'
-import { DAI_MAINNET } from '@uniswap/smart-order-router'
+import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
+import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
 
 describe('shared', async () => {
   it('parsePortionPercent', () => {
@@ -44,5 +46,41 @@ describe('shared', async () => {
     if (portionAmount) {
       expect(portionAmount).to.equal(daiAmount.multiply(parsePortionPercent(15)).quotient.toString())
     }
+  })
+
+  it('populateFeeOptions exact in', () => {
+    const allFeeOptions = populateFeeOptions('exactIn', 15, '0x123')
+
+    const swapParams: SwapOptions = {
+      type: SwapType.UNIVERSAL_ROUTER,
+      deadlineOrPreviousBlockhash: parseDeadline('1800'),
+      recipient: '0x123',
+      slippageTolerance: new Percent(5),
+      ...allFeeOptions,
+    }
+
+    expect(swapParams.fee).not.to.be.undefined
+    expect(swapParams.fee!.fee.equalTo(parsePortionPercent(15))).to.be.true
+    expect(swapParams.fee!.recipient).to.equal('0x123')
+
+    expect(swapParams.flatFee).to.be.undefined
+  })
+
+  it('populateFeeOptions exact out', () => {
+    const allFeeOptions = populateFeeOptions('exactOut', undefined, '0x123', '35')
+
+    const swapParams: SwapOptions = {
+      type: SwapType.UNIVERSAL_ROUTER,
+      deadlineOrPreviousBlockhash: parseDeadline('1800'),
+      recipient: '0x123',
+      slippageTolerance: new Percent(5),
+      ...allFeeOptions,
+    }
+
+    expect(swapParams.flatFee).not.to.be.undefined
+    expect(swapParams.flatFee!.amount.toString()).to.equal('35')
+    expect(swapParams.flatFee!.recipient).to.equal('0x123')
+
+    expect(swapParams.fee).to.be.undefined
   })
 })
