@@ -1829,7 +1829,7 @@ describe('quote', function () {
           expect(methodParameters).to.be.undefined
         })
 
-        it.only(`one of recipient/deadline/slippage is missing`, async () => {
+        it(`one of recipient/deadline/slippage is missing`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
             tokenInChainId: 1,
