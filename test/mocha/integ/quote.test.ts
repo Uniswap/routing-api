@@ -1675,9 +1675,6 @@ describe('quote', function () {
                   enableUniversalRouter: true,
                   simulateFromAddress: alice.address,
                   portionBips: FLAT_PORTION.bips,
-                  portionAmount: CurrencyAmount.fromRawAmount(tokenOut, amount)
-                    .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
-                    .quotient.toString(),
                   portionRecipient: FLAT_PORTION.recipient,
                 }
 
