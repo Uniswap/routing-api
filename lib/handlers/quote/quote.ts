@@ -29,7 +29,9 @@ import {
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
-  populateFeeOptions, DEFAULT_DEADLINE, UNISWAP_DOT_ETH_ADDRESS
+  populateFeeOptions,
+  DEFAULT_DEADLINE,
+  UNISWAP_DOT_ETH_ADDRESS,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
