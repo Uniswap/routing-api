@@ -30,8 +30,6 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
-  DEFAULT_DEADLINE,
-  UNISWAP_DOT_ETH_ADDRESS,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -275,11 +273,13 @@ export class QuoteHandler extends APIGLambdaHandler<
           ...allFeeOptions,
         }
       } else {
-        swapParams = {
-          type: SwapType.SWAP_ROUTER_02,
-          deadline: deadline ? parseDeadline(deadline) : DEFAULT_DEADLINE,
-          recipient: recipient ?? UNISWAP_DOT_ETH_ADDRESS,
-          slippageTolerance: slippageTolerancePercent,
+        if (deadline && recipient) {
+          swapParams = {
+            type: SwapType.SWAP_ROUTER_02,
+            deadline: parseDeadline(deadline),
+            recipient: recipient,
+            slippageTolerance: slippageTolerancePercent,
+          }
         }
       }
 
@@ -302,9 +302,11 @@ export class QuoteHandler extends APIGLambdaHandler<
           sigDeadline: permitSigDeadline,
         }
 
-        swapParams.inputTokenPermit = {
-          ...permit,
-          signature: permitSignature,
+        if (swapParams) {
+          swapParams.inputTokenPermit = {
+            ...permit,
+            signature: permitSignature,
+          }
         }
       } else if (
         !enableUniversalRouter &&
@@ -313,19 +315,24 @@ export class QuoteHandler extends APIGLambdaHandler<
       ) {
         const { v, r, s } = utils.splitSignature(permitSignature)
 
-        swapParams.inputTokenPermit = {
-          v: v as 0 | 1 | 27 | 28,
-          r,
-          s,
-          ...(permitNonce && permitExpiration
-            ? { nonce: permitNonce!, expiry: permitExpiration! }
-            : { amount: permitAmount!, deadline: permitSigDeadline! }),
+        if (swapParams) {
+          swapParams.inputTokenPermit = {
+            v: v as 0 | 1 | 27 | 28,
+            r,
+            s,
+            ...(permitNonce && permitExpiration
+              ? { nonce: permitNonce!, expiry: permitExpiration! }
+              : { amount: permitAmount!, deadline: permitSigDeadline! }),
+          }
         }
       }
 
       if (simulateFromAddress) {
         metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-        swapParams.simulate = { fromAddress: simulateFromAddress }
+
+        if (swapParams) {
+          swapParams.simulate = { fromAddress: simulateFromAddress }
+        }
       }
     }
 

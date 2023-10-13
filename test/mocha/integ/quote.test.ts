@@ -1829,6 +1829,42 @@ describe('quote', function () {
           expect(methodParameters).to.be.undefined
         })
 
+        it(`one of recipient/deadline/slippage is missing`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'USDC',
+            tokenInChainId: 1,
+            tokenOutAddress: 'USDT',
+            tokenOutChainId: 1,
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+            type,
+            slippageTolerance: SLIPPAGE,
+            deadline: '360',
+            algorithm,
+            enableUniversalRouter: true,
+          }
+          const queryParams = qs.stringify(quoteReq)
+
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const {
+            data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+            status,
+          } = response
+
+          expect(status).to.equal(200)
+          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+          if (type == 'exactIn') {
+            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+          } else {
+            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+          }
+
+          // Since ur-sdk hardcodes recipient in case of no recipient https://github.com/Uniswap/universal-router-sdk/blob/main/src/entities/protocols/uniswap.ts#L68
+          // the calldata will still get generated even if URA doesn't pass in recipient
+          expect(methodParameters).not.to.be.undefined
+        })
+
         it(`erc20 -> erc20 gas price specified`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
@@ -2155,28 +2191,6 @@ describe('quote', function () {
             data: {
               detail: 'tokenIn and tokenOut must be different',
               errorCode: 'TOKEN_IN_OUT_SAME',
-            },
-          })
-        })
-
-        it(`one of recipient/deadline/slippage is missing`, async () => {
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: 'USDC',
-            tokenInChainId: 1,
-            tokenOutAddress: 'USDT',
-            tokenOutChainId: 1,
-            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-            type,
-            slippageTolerance: SLIPPAGE,
-            deadline: '360',
-            algorithm,
-            enableUniversalRouter: true,
-          }
-          await callAndExpectFail(quoteReq, {
-            status: 400,
-            data: {
-              detail: '"value" contains [slippageTolerance, deadline] without its required peers [recipient]',
-              errorCode: 'VALIDATION_ERROR',
             },
           })
         })
