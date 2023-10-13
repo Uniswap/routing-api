@@ -263,7 +263,12 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips))
+        const allFeeOptions = populateFeeOptions(
+          type,
+          portionBips,
+          portionRecipient,
+          computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
+        )
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
