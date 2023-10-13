@@ -1700,15 +1700,48 @@ describe('quote', function () {
                 expect(data.portionRecipient).to.equal(FLAT_PORTION.recipient)
 
                 if (type == 'exactIn') {
-                  const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, data.quote).multiply(
-                    new Fraction(FLAT_PORTION.bips, 10000)
-                  )
+                  const allQuotesAcrossRoutes = data.route
+                    .map((routes) =>
+                      routes
+                        .map((route) => route.amountOut)
+                        .map((amountOut) => CurrencyAmount.fromRawAmount(tokenOut, amountOut ?? '0'))
+                        .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
+                    )
+                    .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
+
+                  const quote = CurrencyAmount.fromRawAmount(tokenOut, data.quote)
+                  const expectedPortionAmount = quote.multiply(new Fraction(FLAT_PORTION.bips, 10000))
                   expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
+
+                  // The most strict way to ensure the output amount from route path is correct with respect to portion
+                  // is to make sure the output amount from route path is exactly portion bps different from the quote
+                  const tokensDiff = quote.subtract(allQuotesAcrossRoutes)
+                  const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                  expect(percentDiff.quotient.toString()).equal(
+                    new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
+                  )
                 } else {
+                  const allQuotesAcrossRoutes = data.route
+                    .map((routes) =>
+                      routes
+                        .map((route) => route.amountOut)
+                        .map((amountOut) => CurrencyAmount.fromRawAmount(tokenIn, amountOut ?? '0'))
+                        .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
+                    )
+                    .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
+                  const quote = CurrencyAmount.fromRawAmount(tokenIn, data.quote)
                   const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, amount).multiply(
                     new Fraction(FLAT_PORTION.bips, 10000)
                   )
                   expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
+
+                  // The most strict way to ensure the output amount from route path is correct with respect to portion
+                  // is to make sure the output amount from route path is exactly portion bps different from the quote
+                  const tokensDiff = allQuotesAcrossRoutes.subtract(quote)
+                  const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                  expect(percentDiff.quotient.toString()).equal(
+                    new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
+                  )
                 }
 
                 const {
