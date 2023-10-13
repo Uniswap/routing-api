@@ -139,6 +139,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
+        portionAmount,
         portionRecipient,
       },
       requestInjected: {
@@ -267,7 +268,8 @@ export class QuoteHandler extends APIGLambdaHandler<
           type,
           portionBips,
           portionRecipient,
-          computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
+          // TODO: remove portionAmount ?? once URA merges https://github.com/Uniswap/unified-routing-api/pull/282/files
+          portionAmount ?? computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
         )
 
         swapParams = {
