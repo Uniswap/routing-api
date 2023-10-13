@@ -448,7 +448,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
-      portionAmount,
+      portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
     if (simulationStatus == SimulationStatus.Failed) {
@@ -608,8 +608,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       hitsCachedRoutes: hitsCachedRoute,
       portionBips: portionBips,
       portionRecipient: portionRecipient,
-      portionAmount: portionAmount?.quotient.toString(),
-      portionAmountDecimals: portionAmount?.toExact(),
+      portionAmount: outputPortionAmount?.quotient.toString(),
+      portionAmountDecimals: outputPortionAmount?.toExact(),
     }
 
     this.logRouteMetrics(
