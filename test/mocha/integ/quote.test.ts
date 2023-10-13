@@ -1652,7 +1652,7 @@ describe('quote', function () {
             })
 
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
-              it.only(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion`, async () => {
+              it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion`, async () => {
                 const originalAmount = '10'
                 const tokenInSymbol = tokenIn.symbol!
                 const tokenOutSymbol = tokenOut.symbol!
