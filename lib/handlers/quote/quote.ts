@@ -139,7 +139,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
-        portionAmount,
         portionRecipient,
       },
       requestInjected: {
