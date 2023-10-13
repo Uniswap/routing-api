@@ -30,6 +30,7 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
+  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -138,7 +139,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         intent,
         enableFeeOnTransferFeeFetching,
         portionBips,
-        portionAmount,
         portionRecipient,
       },
       requestInjected: {
@@ -263,7 +263,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, portionAmount)
+        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips))
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
@@ -441,7 +441,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
-      portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
+      portionAmount,
     } = swapRoute
 
     if (simulationStatus == SimulationStatus.Failed) {
@@ -601,8 +601,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       hitsCachedRoutes: hitsCachedRoute,
       portionBips: portionBips,
       portionRecipient: portionRecipient,
-      portionAmount: outputPortionAmount?.quotient.toString(),
-      portionAmountDecimals: outputPortionAmount?.toExact(),
+      portionAmount: portionAmount?.quotient.toString(),
+      portionAmountDecimals: portionAmount?.toExact(),
     }
 
     this.logRouteMetrics(
