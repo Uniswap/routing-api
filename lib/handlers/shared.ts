@@ -275,3 +275,6 @@ export function computePortionAmount(currencyOut: CurrencyAmount<Currency>, port
 
   return currencyOut.multiply(parsePortionPercent(portionBips)).quotient.toString()
 }
+
+export const DEFAULT_DEADLINE = 600 // 10 minutes
+export const UNISWAP_DOT_ETH_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'

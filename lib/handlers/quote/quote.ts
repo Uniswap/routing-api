@@ -30,6 +30,8 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
+  DEFAULT_DEADLINE,
+  UNISWAP_DOT_ETH_ADDRESS,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -258,7 +260,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     let swapParams: SwapOptions | undefined = undefined
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    if (slippageTolerance && deadline && recipient) {
+    if (slippageTolerance) {
       const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
 
       // TODO: Remove once universal router is no longer behind a feature flag.
@@ -267,7 +269,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
-          deadlineOrPreviousBlockhash: parseDeadline(deadline),
+          deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           ...allFeeOptions,
@@ -275,8 +277,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       } else {
         swapParams = {
           type: SwapType.SWAP_ROUTER_02,
-          deadline: parseDeadline(deadline),
-          recipient: recipient,
+          deadline: deadline ? parseDeadline(deadline) : DEFAULT_DEADLINE,
+          recipient: recipient ?? UNISWAP_DOT_ETH_ADDRESS,
           slippageTolerance: slippageTolerancePercent,
         }
       }
