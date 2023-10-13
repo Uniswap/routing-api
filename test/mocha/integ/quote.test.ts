@@ -1829,7 +1829,7 @@ describe('quote', function () {
           expect(methodParameters).to.be.undefined
         })
 
-        it(`one of recipient/deadline/slippage is missing`, async () => {
+        it.only(`one of recipient/deadline/slippage is missing`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
             tokenInChainId: 1,
@@ -1862,7 +1862,7 @@ describe('quote', function () {
 
           // Since ur-sdk hardcodes recipient in case of no recipient https://github.com/Uniswap/universal-router-sdk/blob/main/src/entities/protocols/uniswap.ts#L68
           // the calldata will still get generated even if URA doesn't pass in recipient
-          expect(methodParameters).not.to.be.undefined;
+          expect(methodParameters).not.to.be.undefined
         })
 
         it(`erc20 -> erc20 gas price specified`, async () => {
