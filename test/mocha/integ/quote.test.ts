@@ -1674,10 +1674,15 @@ describe('quote', function () {
                   algorithm,
                   enableUniversalRouter: true,
                   simulateFromAddress: alice.address,
-                  portionBips: FLAT_PORTION.bips,
-                  portionAmount: CurrencyAmount.fromRawAmount(tokenOut, amount)
-                    .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
-                    .quotient.toString(),
+                  portionBips: type === 'exactIn' ? FLAT_PORTION.bips : undefined,
+                  // TODO: remove portionAmount once URA merge https://github.com/Uniswap/unified-routing-api/pull/282
+                  // This interim state test setup is needed to ensure it simulates URA's data transfer pattern
+                  portionAmount:
+                    type === 'exactOut'
+                      ? CurrencyAmount.fromRawAmount(tokenOut, amount)
+                          .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
+                          .quotient.toString()
+                      : undefined,
                   portionRecipient: FLAT_PORTION.recipient,
                 }
 
