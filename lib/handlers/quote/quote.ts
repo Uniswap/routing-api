@@ -262,15 +262,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     if (slippageTolerance) {
       const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
 
-      if (type === 'exactOut') {
-        log.error(
-          portionAmount +
-            ' why failed ' +
-            (portionAmount ??
-              computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips))
-        )
-      }
-
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
         const allFeeOptions = populateFeeOptions(
@@ -280,10 +271,6 @@ export class QuoteHandler extends APIGLambdaHandler<
           portionAmount ??
             computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
         )
-
-        if (type === 'exactOut') {
-          log.error(' allFeeOptions ' + JSON.stringify(allFeeOptions))
-        }
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
