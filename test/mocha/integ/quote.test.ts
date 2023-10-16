@@ -1654,7 +1654,7 @@ describe('quote', function () {
             const uraRefactorInterimState = ['before', 'after'];
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
               uraRefactorInterimState.forEach((state) => {
-                it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion`, async () => {
+                it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
                   const originalAmount = '10'
                   const tokenInSymbol = tokenIn.symbol!
                   const tokenOutSymbol = tokenOut.symbol!
@@ -1709,13 +1709,18 @@ describe('quote', function () {
                   expect(data.methodParameters).to.not.be.undefined
 
                   expect(data.portionRecipient).to.not.be.undefined
-                  expect(data.portionBips).to.not.be.undefined
+
+                  if (!(state === 'before' && type === 'exactOut')) {
+                    // before URA interim state it doesnt send portionBips to routing-api,
+                    // so routing-api has no way to know the portionBips
+                    expect(data.portionBips).to.not.be.undefined
+                    expect(data.portionBips).to.equal(FLAT_PORTION.bips)
+                  }
                   expect(data.portionAmount).to.not.be.undefined
                   expect(data.portionAmountDecimals).to.not.be.undefined
                   expect(data.quoteGasAndPortionAdjusted).to.not.be.undefined
                   expect(data.quoteGasAndPortionAdjustedDecimals).to.not.be.undefined
 
-                  expect(data.portionBips).to.equal(FLAT_PORTION.bips)
                   expect(data.portionRecipient).to.equal(FLAT_PORTION.recipient)
 
                   if (type == 'exactIn') {
