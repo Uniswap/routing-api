@@ -66,7 +66,6 @@ export const QuoteQueryParamsJoi = Joi.object({
     .pattern(/^[0-9]+$/)
     .max(5) // portionBips is a string type with the expectation of being parsable to integer between 0 and 10000
     .optional(),
-  // TODO: remove this once URA merges https://github.com/Uniswap/unified-routing-api/pull/282
   portionAmount: Joi.string()
     .pattern(/^[0-9]+$/)
     .optional(),
