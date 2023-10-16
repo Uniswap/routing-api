@@ -1651,147 +1651,179 @@ describe('quote', function () {
               }
             })
 
+            const uraRefactorInterimState = ['before', 'after']
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
-              it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion`, async () => {
-                const originalAmount = '10'
-                const tokenInSymbol = tokenIn.symbol!
-                const tokenOutSymbol = tokenOut.symbol!
-                const tokenInAddress = tokenIn.isNative ? tokenInSymbol : tokenIn.address
-                const tokenOutAddress = tokenOut.isNative ? tokenOutSymbol : tokenOut.address
-                const amount = await getAmountFromToken(type, tokenIn.wrapped, tokenOut.wrapped, originalAmount)
+              uraRefactorInterimState.forEach((state) => {
+                it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
+                  const originalAmount = '10'
+                  const tokenInSymbol = tokenIn.symbol!
+                  const tokenOutSymbol = tokenOut.symbol!
+                  const tokenInAddress = tokenIn.isNative ? tokenInSymbol : tokenIn.address
+                  const tokenOutAddress = tokenOut.isNative ? tokenOutSymbol : tokenOut.address
+                  const amount = await getAmountFromToken(type, tokenIn.wrapped, tokenOut.wrapped, originalAmount)
 
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: tokenInAddress,
-                  tokenInChainId: tokenIn.chainId,
-                  tokenOutAddress: tokenOutAddress,
-                  tokenOutChainId: tokenOut.chainId,
-                  amount: amount,
-                  type: type,
-                  protocols: 'v2,v3,mixed',
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm,
-                  enableUniversalRouter: true,
-                  simulateFromAddress: alice.address,
-                  portionBips: FLAT_PORTION.bips,
-                  portionAmount: CurrencyAmount.fromRawAmount(tokenOut, amount)
-                    .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
-                    .quotient.toString(),
-                  portionRecipient: FLAT_PORTION.recipient,
-                }
+                  // we need to simulate URA before and after merging https://github.com/Uniswap/unified-routing-api/pull/282 interim states
+                  // to ensure routing-api is backward compatible with URA
+                  let portionBips = undefined
+                  if (state === 'before' && type === 'exactIn') {
+                    portionBips = FLAT_PORTION.bips
+                  } else if (state === 'after') {
+                    portionBips = FLAT_PORTION.bips
+                  }
+                  let portionAmount = undefined
+                  if (state === 'before' && type === 'exactOut') {
+                    portionAmount = CurrencyAmount.fromRawAmount(tokenOut, amount)
+                      .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
+                      .quotient.toString()
+                  } else if (state === 'after') {
+                    // after URA merges https://github.com/Uniswap/unified-routing-api/pull/282,
+                    // it no longer sends portionAmount
+                    portionAmount = undefined
+                  }
 
-                const queryParams = qs.stringify(quoteReq)
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: tokenInAddress,
+                    tokenInChainId: tokenIn.chainId,
+                    tokenOutAddress: tokenOutAddress,
+                    tokenOutChainId: tokenOut.chainId,
+                    amount: amount,
+                    type: type,
+                    protocols: 'v2,v3,mixed',
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm,
+                    enableUniversalRouter: true,
+                    simulateFromAddress: alice.address,
+                    portionBips: portionBips,
+                    portionAmount: portionAmount,
+                    portionRecipient: FLAT_PORTION.recipient,
+                  }
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-                const { data, status } = response
-                expect(status).to.equal(200)
-                expect(data.simulationError).to.equal(false)
-                expect(data.methodParameters).to.not.be.undefined
+                  const queryParams = qs.stringify(quoteReq)
 
-                expect(data.portionRecipient).to.not.be.undefined
-                expect(data.portionBips).to.not.be.undefined
-                expect(data.portionAmount).to.not.be.undefined
-                expect(data.portionAmountDecimals).to.not.be.undefined
-                expect(data.quoteGasAndPortionAdjusted).to.not.be.undefined
-                expect(data.quoteGasAndPortionAdjustedDecimals).to.not.be.undefined
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                  const { data, status } = response
+                  expect(status).to.equal(200)
+                  expect(data.simulationError).to.equal(false)
+                  expect(data.methodParameters).to.not.be.undefined
 
-                expect(data.portionBips).to.equal(FLAT_PORTION.bips)
-                expect(data.portionRecipient).to.equal(FLAT_PORTION.recipient)
+                  expect(data.portionRecipient).to.not.be.undefined
 
-                if (type == 'exactIn') {
-                  const allQuotesAcrossRoutes = data.route
-                    .map((routes) =>
-                      routes
-                        .map((route) => route.amountOut)
-                        .map((amountOut) => CurrencyAmount.fromRawAmount(tokenOut, amountOut ?? '0'))
-                        .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
+                  if (!(state === 'before' && type === 'exactOut')) {
+                    // before URA interim state it doesnt send portionBips to routing-api,
+                    // so routing-api has no way to know the portionBips
+                    expect(data.portionBips).to.not.be.undefined
+                    expect(data.portionBips).to.equal(FLAT_PORTION.bips)
+                  }
+                  expect(data.portionAmount).to.not.be.undefined
+                  expect(data.portionAmountDecimals).to.not.be.undefined
+                  expect(data.quoteGasAndPortionAdjusted).to.not.be.undefined
+                  expect(data.quoteGasAndPortionAdjustedDecimals).to.not.be.undefined
+
+                  expect(data.portionRecipient).to.equal(FLAT_PORTION.recipient)
+
+                  if (type == 'exactIn') {
+                    const allQuotesAcrossRoutes = data.route
+                      .map((routes) =>
+                        routes
+                          .map((route) => route.amountOut)
+                          .map((amountOut) => CurrencyAmount.fromRawAmount(tokenOut, amountOut ?? '0'))
+                          .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
+                      )
+                      .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
+
+                    const quote = CurrencyAmount.fromRawAmount(tokenOut, data.quote)
+                    const expectedPortionAmount = quote.multiply(new Fraction(FLAT_PORTION.bips, 10000))
+                    expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
+
+                    // The most strict way to ensure the output amount from route path is correct with respect to portion
+                    // is to make sure the output amount from route path is exactly portion bps different from the quote
+                    const tokensDiff = quote.subtract(allQuotesAcrossRoutes)
+                    const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                    expect(percentDiff.quotient.toString()).equal(
+                      new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
                     )
-                    .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenOut, '0'))
-
-                  const quote = CurrencyAmount.fromRawAmount(tokenOut, data.quote)
-                  const expectedPortionAmount = quote.multiply(new Fraction(FLAT_PORTION.bips, 10000))
-                  expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
-
-                  // The most strict way to ensure the output amount from route path is correct with respect to portion
-                  // is to make sure the output amount from route path is exactly portion bps different from the quote
-                  const tokensDiff = quote.subtract(allQuotesAcrossRoutes)
-                  const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
-                  expect(percentDiff.quotient.toString()).equal(
-                    new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
-                  )
-                } else {
-                  const allQuotesAcrossRoutes = data.route
-                    .map((routes) =>
-                      routes
-                        .map((route) => route.amountOut)
-                        .map((amountOut) => CurrencyAmount.fromRawAmount(tokenIn, amountOut ?? '0'))
-                        .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
+                  } else {
+                    const allQuotesAcrossRoutes = data.route
+                      .map((routes) =>
+                        routes
+                          .map((route) => route.amountOut)
+                          .map((amountOut) => CurrencyAmount.fromRawAmount(tokenIn, amountOut ?? '0'))
+                          .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
+                      )
+                      .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
+                    const quote = CurrencyAmount.fromRawAmount(tokenIn, data.quote)
+                    const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, amount).multiply(
+                      new Fraction(FLAT_PORTION.bips, 10000)
                     )
-                    .reduce((cur, total) => total.add(cur), CurrencyAmount.fromRawAmount(tokenIn, '0'))
-                  const quote = CurrencyAmount.fromRawAmount(tokenIn, data.quote)
-                  const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, amount).multiply(
-                    new Fraction(FLAT_PORTION.bips, 10000)
-                  )
-                  expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
+                    expect(data.portionAmount).to.equal(expectedPortionAmount.quotient.toString())
 
-                  // The most strict way to ensure the output amount from route path is correct with respect to portion
-                  // is to make sure the output amount from route path is exactly portion bps different from the quote
-                  const tokensDiff = allQuotesAcrossRoutes.subtract(quote)
-                  const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
-                  expect(percentDiff.quotient.toString()).equal(
-                    new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
-                  )
-                }
-
-                const {
-                  tokenInBefore,
-                  tokenInAfter,
-                  tokenOutBefore,
-                  tokenOutAfter,
-                  tokenOutPortionRecipientBefore,
-                  tokenOutPortionRecipientAfter,
-                } = await executeSwap(data.methodParameters!, tokenIn, tokenOut!, false, tokenIn.chainId, FLAT_PORTION)
-
-                if (type == 'exactIn') {
-                  // if the token in is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
-                  if (!tokenIn.isNative) {
-                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                    // The most strict way to ensure the output amount from route path is correct with respect to portion
+                    // is to make sure the output amount from route path is exactly portion bps different from the quote
+                    const tokensDiff = allQuotesAcrossRoutes.subtract(quote)
+                    const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                    expect(percentDiff.quotient.toString()).equal(
+                      new Fraction(FLAT_PORTION.bips, 10_000).quotient.toString()
+                    )
                   }
 
-                  // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
-                  if (!tokenOut.isNative) {
-                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, data.quote))
-                  }
-
-                  expect(data.portionAmount).not.to.be.undefined
-
-                  const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, data.portionAmount!)
-                  checkPortionRecipientToken(
-                    tokenOutPortionRecipientBefore!,
-                    tokenOutPortionRecipientAfter!,
-                    expectedPortionAmount
+                  const {
+                    tokenInBefore,
+                    tokenInAfter,
+                    tokenOutBefore,
+                    tokenOutAfter,
+                    tokenOutPortionRecipientBefore,
+                    tokenOutPortionRecipientAfter,
+                  } = await executeSwap(
+                    data.methodParameters!,
+                    tokenIn,
+                    tokenOut!,
+                    false,
+                    tokenIn.chainId,
+                    FLAT_PORTION
                   )
-                } else {
-                  // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
-                  if (!tokenOut.isNative) {
-                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal(originalAmount)
+
+                  if (type == 'exactIn') {
+                    // if the token in is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
+                    if (!tokenIn.isNative) {
+                      expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                    }
+
+                    // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
+                    if (!tokenOut.isNative) {
+                      checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, data.quote))
+                    }
+
+                    expect(data.portionAmount).not.to.be.undefined
+
+                    const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, data.portionAmount!)
+                    checkPortionRecipientToken(
+                      tokenOutPortionRecipientBefore!,
+                      tokenOutPortionRecipientAfter!,
+                      expectedPortionAmount
+                    )
+                  } else {
+                    // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
+                    if (!tokenOut.isNative) {
+                      expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal(originalAmount)
+                    }
+
+                    // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
+                    if (!tokenIn.isNative) {
+                      checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(tokenIn, data.quote))
+                    }
+
+                    expect(data.portionAmount).not.to.be.undefined
+
+                    const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, data.portionAmount!)
+                    checkPortionRecipientToken(
+                      tokenOutPortionRecipientBefore!,
+                      tokenOutPortionRecipientAfter!,
+                      expectedPortionAmount
+                    )
                   }
-
-                  // if the token out is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
-                  if (!tokenIn.isNative) {
-                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(tokenIn, data.quote))
-                  }
-
-                  expect(data.portionAmount).not.to.be.undefined
-
-                  const expectedPortionAmount = CurrencyAmount.fromRawAmount(tokenOut, data.portionAmount!)
-                  checkPortionRecipientToken(
-                    tokenOutPortionRecipientBefore!,
-                    tokenOutPortionRecipientAfter!,
-                    expectedPortionAmount
-                  )
-                }
+                })
               })
             })
           })

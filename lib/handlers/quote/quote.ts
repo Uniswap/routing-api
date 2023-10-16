@@ -30,6 +30,7 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
+  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -263,7 +264,13 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, portionAmount)
+        const allFeeOptions = populateFeeOptions(
+          type,
+          portionBips,
+          portionRecipient,
+          portionAmount ??
+            computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
+        )
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
