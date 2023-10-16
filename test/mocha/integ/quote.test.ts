@@ -1651,7 +1651,7 @@ describe('quote', function () {
               }
             })
 
-            const uraRefactorInterimState = ['before', 'after'];
+            const uraRefactorInterimState = ['before', 'after']
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
               uraRefactorInterimState.forEach((state) => {
                 it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
@@ -1664,13 +1664,13 @@ describe('quote', function () {
 
                   // we need to simulate URA before and after merging https://github.com/Uniswap/unified-routing-api/pull/282 interim states
                   // to ensure routing-api is backward compatible with URA
-                  let portionBips = undefined;
+                  let portionBips = undefined
                   if (state === 'before' && type === 'exactIn') {
                     portionBips = FLAT_PORTION.bips
                   } else if (state === 'after') {
                     portionBips = FLAT_PORTION.bips
                   }
-                  let portionAmount = undefined;
+                  let portionAmount = undefined
                   if (state === 'before' && type === 'exactOut') {
                     portionAmount = CurrencyAmount.fromRawAmount(tokenOut, amount)
                       .multiply(new Fraction(FLAT_PORTION.bips, 10_000))
@@ -1775,7 +1775,14 @@ describe('quote', function () {
                     tokenOutAfter,
                     tokenOutPortionRecipientBefore,
                     tokenOutPortionRecipientAfter,
-                  } = await executeSwap(data.methodParameters!, tokenIn, tokenOut!, false, tokenIn.chainId, FLAT_PORTION)
+                  } = await executeSwap(
+                    data.methodParameters!,
+                    tokenIn,
+                    tokenOut!,
+                    false,
+                    tokenIn.chainId,
+                    FLAT_PORTION
+                  )
 
                   if (type == 'exactIn') {
                     // if the token in is native token, the difference will be slightly larger due to gas. We have no way to know precise gas costs in terms of GWEI * gas units.
@@ -1816,8 +1823,8 @@ describe('quote', function () {
                       expectedPortionAmount
                     )
                   }
-                });
-              });
+                })
+              })
             })
           })
         }
