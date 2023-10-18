@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { AllowanceTransfer, PermitSingle } from '@uniswap/permit2-sdk'
-import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Rounding, Token, WETH9 } from '@uniswap/sdk-core'
 import {
   CEUR_CELO,
   CEUR_CELO_ALFAJORES,
@@ -9,11 +9,11 @@ import {
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
-  parseAmount,
+  parseAmount, SimulationStatus,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
   USDT_MAINNET,
-  WBTC_MAINNET,
+  WBTC_MAINNET
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
@@ -1101,20 +1101,29 @@ describe('quote', function () {
                   responses
                     .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
                     .forEach((r) => {
-                      // there's an accidental regression from https://github.com/Uniswap/smart-order-router/pull/421/files#diff-604dffede13d2dd8277f5a7512a5ba0ff6fac291f2d0fb102c2af5f1711dedafL116-L150,
-                      // that by removing the outputAmountWithSellTax as the route tokenIn, the quote doesn't deduct the tokenIn sell tax.
-                      // this is not double FOT taxation, but rather need to fix before mobile rolls out to 100%.
-                      if (!tokenIn.equals(BULLET)) {
+                      if (type === 'exactIn') {
+                        const quote = CurrencyAmount.fromRawAmount(tokenOut, r.data.quote)
+                        const quoteWithFlagon = CurrencyAmount.fromRawAmount(tokenOut, quoteWithFlagOn!.data.quote)
+
                         // quote without fot flag must be greater than the quote with fot flag
                         // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
-                        expect(parseFloat(r.data.quote)).to.be.greaterThan(parseFloat(quoteWithFlagOn!.data.quote))
+                        expect(quote.greaterThan(quoteWithFlagon)).to.be.true;
+
+                        // below is additional assertion to ensure the quote without fot tax vs quote with tax should be very roughly equal to the fot sell/buy tax rate
+                        const tokensDiff = quote.subtract(quoteWithFlagon);
+                        const percentDiff = tokensDiff.asFraction.divide(quote.asFraction);
+                        if (tokenIn?.equals(BULLET)) {
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal((new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000)).toFixed(3));
+                        } else if (tokenOut?.equals(BULLET)) {
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal((new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000)).toFixed(3));
+                        }
                       }
                     })
 
                   for (const response of responses) {
                     const {
                       enableFeeOnTransferFeeFetching,
-                      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                      data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, simulationStatus, simulationError },
                       status,
                     } = response
 
@@ -1126,6 +1135,8 @@ describe('quote', function () {
                       expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
                     }
 
+                    expect(simulationStatus).to.equal(SimulationStatus.Succeeded)
+                    expect(simulationError).to.equal(false)
                     expect(methodParameters).to.not.be.undefined
 
                     let hasV3Pool = false
@@ -1176,13 +1187,7 @@ describe('quote', function () {
 
                     expect(!hasV3Pool && hasV2Pool).to.be.true
 
-                    /*
-                    // TODO: ROUTE-90 investigate why we can't have successful hardhat fork simulation for BULLET => WETH exact in swap
-                    // without enabling the fee fetching
-                    // sometimes we can get execute swap failure due to unpredictable gas limit
-                    // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
-                    // which is equivalent of what was happening in prod, before interface supports FOT
-                    if (enableFeeOnTransferFeeFetching && tokenIn.equals(WETH9[ChainId.MAINNET]!)) {
+                    if (enableFeeOnTransferFeeFetching) {
                       // We don't have a bullet proof way to asser the fot-involved quote is post tax
                       // so the best way is to execute the swap on hardhat mainnet fork,
                       // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
@@ -1195,7 +1200,6 @@ describe('quote', function () {
                       expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
                       checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
                     }
-                     */
                   }
                 })
               })
