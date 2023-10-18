@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { AllowanceTransfer, PermitSingle } from '@uniswap/permit2-sdk'
-import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Rounding, Token, WETH9 } from '@uniswap/sdk-core'
 import {
   CEUR_CELO,
   CEUR_CELO_ALFAJORES,
@@ -243,6 +243,25 @@ describe('quote', function () {
       parseAmount('5000000', DAI_MAINNET),
       parseAmount('735871', BULLET),
     ])
+
+    // alice should always have 10000 ETH
+    const aliceEthBalance = await getBalance(alice, Ether.onChain(1))
+    /// Since alice is deploying the QuoterV3 contract, expect to have slightly less than 10_000 ETH but not too little
+    expect(!aliceEthBalance.lessThan(CurrencyAmount.fromRawAmount(Ether.onChain(1), '9995'))).to.be.true
+    const aliceUSDCBalance = await getBalance(alice, USDC_MAINNET)
+    expect(aliceUSDCBalance.quotient.toString()).equal(parseAmount('8000000', USDC_MAINNET).quotient.toString())
+    const aliceUSDTBalance = await getBalance(alice, USDT_MAINNET)
+    expect(aliceUSDTBalance.quotient.toString()).equal(parseAmount('5000000', USDT_MAINNET).quotient.toString())
+    const aliceWETH9Balance = await getBalance(alice, WETH9[1])
+    expect(aliceWETH9Balance.quotient.toString()).equal(parseAmount('4000', WETH9[1]).quotient.toString())
+    const aliceWBTCBalance = await getBalance(alice, WBTC_MAINNET)
+    expect(aliceWBTCBalance.quotient.toString()).equal(parseAmount('10', WBTC_MAINNET).quotient.toString())
+    const aliceDAIBalance = await getBalance(alice, DAI_MAINNET)
+    expect(aliceDAIBalance.quotient.toString()).equal(parseAmount('5000000', DAI_MAINNET).quotient.toString())
+    const aliceUNIBalance = await getBalance(alice, UNI_MAINNET)
+    expect(aliceUNIBalance.quotient.toString()).equal(parseAmount('1000', UNI_MAINNET).quotient.toString())
+    const aliceBULLETBalance = await getBalance(alice, BULLET)
+    expect(aliceBULLETBalance.quotient.toString()).equal(parseAmount('735871', BULLET).quotient.toString())
   })
 
   for (const algorithm of ['alpha']) {
@@ -1053,10 +1072,10 @@ describe('quote', function () {
                 // If this test fails sporadically, dev needs to investigate further
                 // There could be genuine regressions in the form of race condition, due to complex layers of caching
                 // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
-                it(`fee-on-transfer BULLET -> WETH`, async () => {
+                it(`fee-on-transfer ${tokenIn.symbol} -> ${tokenOut.symbol}`, async () => {
                   const enableFeeOnTransferFeeFetching = [true, false, undefined]
                   // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '893517'
+                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '2924'
                   const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
                   // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
@@ -1067,7 +1086,9 @@ describe('quote', function () {
                         // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
                         await new Promise((f) => setTimeout(f, 1000))
                       }
-
+                      const simulateFromAddress = tokenIn.equals(WETH9[ChainId.MAINNET]!)
+                        ? '0x2fEb1512183545f48f6b9C5b4EbfCaF49CfCa6F3'
+                        : '0x171d311eAcd2206d21Cb462d661C33F0eddadC03'
                       const quoteReq: QuoteQueryParams = {
                         tokenInAddress: tokenIn.address,
                         tokenInChainId: tokenIn.chainId,
@@ -1079,11 +1100,14 @@ describe('quote', function () {
                         // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
                         enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
                         recipient: alice.address,
-                        slippageTolerance: SLIPPAGE,
+                        // we have to use large slippage for FOT swap, because routing-api always forks at the latest block,
+                        // and the FOT swap can have large slippage, despite SOR already subtracted FOT tax
+                        slippageTolerance: LARGE_SLIPPAGE,
                         deadline: '360',
                         algorithm,
                         enableUniversalRouter: true,
-                        simulateFromAddress: alice.address,
+                        // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
+                        simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
                       }
 
                       const queryParams = qs.stringify(quoteReq)
@@ -1101,20 +1125,41 @@ describe('quote', function () {
                   responses
                     .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
                     .forEach((r) => {
-                      // there's an accidental regression from https://github.com/Uniswap/smart-order-router/pull/421/files#diff-604dffede13d2dd8277f5a7512a5ba0ff6fac291f2d0fb102c2af5f1711dedafL116-L150,
-                      // that by removing the outputAmountWithSellTax as the route tokenIn, the quote doesn't deduct the tokenIn sell tax.
-                      // this is not double FOT taxation, but rather need to fix before mobile rolls out to 100%.
-                      if (!tokenIn.equals(BULLET)) {
+                      if (type === 'exactIn') {
+                        const quote = CurrencyAmount.fromRawAmount(tokenOut, r.data.quote)
+                        const quoteWithFlagon = CurrencyAmount.fromRawAmount(tokenOut, quoteWithFlagOn!.data.quote)
+
                         // quote without fot flag must be greater than the quote with fot flag
                         // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
-                        expect(parseFloat(r.data.quote)).to.be.greaterThan(parseFloat(quoteWithFlagOn!.data.quote))
+                        expect(quote.greaterThan(quoteWithFlagon)).to.be.true
+
+                        // below is additional assertion to ensure the quote without fot tax vs quote with tax should be very roughly equal to the fot sell/buy tax rate
+                        const tokensDiff = quote.subtract(quoteWithFlagon)
+                        const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                        if (tokenIn?.equals(BULLET)) {
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                            new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000).toFixed(3)
+                          )
+                        } else if (tokenOut?.equals(BULLET)) {
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                            new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(3)
+                          )
+                        }
                       }
                     })
 
                   for (const response of responses) {
                     const {
                       enableFeeOnTransferFeeFetching,
-                      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                      data: {
+                        quote,
+                        quoteDecimals,
+                        quoteGasAdjustedDecimals,
+                        methodParameters,
+                        route,
+                        simulationStatus,
+                        simulationError,
+                      },
                       status,
                     } = response
 
@@ -1125,8 +1170,6 @@ describe('quote', function () {
                     } else {
                       expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
                     }
-
-                    expect(methodParameters).to.not.be.undefined
 
                     let hasV3Pool = false
                     let hasV2Pool = false
@@ -1176,14 +1219,12 @@ describe('quote', function () {
 
                     expect(!hasV3Pool && hasV2Pool).to.be.true
 
-                    /*
-                    // TODO: ROUTE-90 investigate why we can't have successful hardhat fork simulation for BULLET => WETH exact in swap
-                    // without enabling the fee fetching
-                    // sometimes we can get execute swap failure due to unpredictable gas limit
-                    // underneath the hood, the returned universal router calldata can be bad enough to cause swap failures
-                    // which is equivalent of what was happening in prod, before interface supports FOT
-                    if (enableFeeOnTransferFeeFetching && tokenIn.equals(WETH9[ChainId.MAINNET]!)) {
-                      // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                    if (enableFeeOnTransferFeeFetching) {
+                      expect(simulationStatus).to.equal('SUCCESS')
+                      expect(simulationError).to.equal(false)
+                      expect(methodParameters).to.not.be.undefined
+
+                      // We don't have a bullet proof way to assert the fot-involved quote is post tax
                       // so the best way is to execute the swap on hardhat mainnet fork,
                       // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
                       const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1195,7 +1236,6 @@ describe('quote', function () {
                       expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
                       checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
                     }
-                     */
                   }
                 })
               })
