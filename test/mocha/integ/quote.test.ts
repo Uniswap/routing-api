@@ -10,7 +10,6 @@ import {
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
   parseAmount,
-  SimulationStatus,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
   USDT_MAINNET,
