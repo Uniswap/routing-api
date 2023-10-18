@@ -9,11 +9,12 @@ import {
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
-  parseAmount, SimulationStatus,
+  parseAmount,
+  SimulationStatus,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
   USDT_MAINNET,
-  WBTC_MAINNET
+  WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
@@ -243,6 +244,25 @@ describe('quote', function () {
       parseAmount('5000000', DAI_MAINNET),
       parseAmount('735871', BULLET),
     ])
+
+    // alice should always have 10000 ETH
+    const aliceEthBalance = await getBalance(alice, Ether.onChain(1))
+    /// Since alice is deploying the QuoterV3 contract, expect to have slightly less than 10_000 ETH but not too little
+    expect(!aliceEthBalance.lessThan(CurrencyAmount.fromRawAmount(Ether.onChain(1), '9995'))).to.be.true
+    const aliceUSDCBalance = await getBalance(alice, USDC_MAINNET)
+    expect(aliceUSDCBalance.quotient.toString()).equal(parseAmount('8000000', USDC_MAINNET).quotient.toString())
+    const aliceUSDTBalance = await getBalance(alice, USDT_MAINNET)
+    expect(aliceUSDTBalance.quotient.toString()).equal(parseAmount('5000000', USDT_MAINNET).quotient.toString())
+    const aliceWETH9Balance = await getBalance(alice, WETH9[1])
+    expect(aliceWETH9Balance.quotient.toString()).equal(parseAmount('4000', WETH9[1]).quotient.toString())
+    const aliceWBTCBalance = await getBalance(alice, WBTC_MAINNET)
+    expect(aliceWBTCBalance.quotient.toString()).equal(parseAmount('10', WBTC_MAINNET).quotient.toString())
+    const aliceDAIBalance = await getBalance(alice, DAI_MAINNET)
+    expect(aliceDAIBalance.quotient.toString()).equal(parseAmount('5000000', DAI_MAINNET).quotient.toString())
+    const aliceUNIBalance = await getBalance(alice, UNI_MAINNET)
+    expect(aliceUNIBalance.quotient.toString()).equal(parseAmount('1000', UNI_MAINNET).quotient.toString())
+    const aliceBULLETBalance = await getBalance(alice, BULLET)
+    expect(aliceBULLETBalance.quotient.toString()).equal(parseAmount('735871', BULLET).quotient.toString())
   })
 
   for (const algorithm of ['alpha']) {
@@ -1053,10 +1073,10 @@ describe('quote', function () {
                 // If this test fails sporadically, dev needs to investigate further
                 // There could be genuine regressions in the form of race condition, due to complex layers of caching
                 // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
-                it(`fee-on-transfer BULLET -> WETH`, async () => {
+                it(`fee-on-transfer ${tokenIn.symbol} -> ${tokenOut.symbol}`, async () => {
                   const enableFeeOnTransferFeeFetching = [true, false, undefined]
                   // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '893517'
+                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '2924'
                   const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
 
                   // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
@@ -1067,7 +1087,9 @@ describe('quote', function () {
                         // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
                         await new Promise((f) => setTimeout(f, 1000))
                       }
-
+                      const simulateFromAddress = tokenIn.equals(WETH9[ChainId.MAINNET]!)
+                        ? '0x2fEb1512183545f48f6b9C5b4EbfCaF49CfCa6F3'
+                        : '0x171d311eAcd2206d21Cb462d661C33F0eddadC03'
                       const quoteReq: QuoteQueryParams = {
                         tokenInAddress: tokenIn.address,
                         tokenInChainId: tokenIn.chainId,
@@ -1079,11 +1101,14 @@ describe('quote', function () {
                         // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
                         enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
                         recipient: alice.address,
-                        slippageTolerance: SLIPPAGE,
+                        // we have to use large slippage for FOT swap, because routing-api always forks at the latest block,
+                        // and the FOT swap can have large slippage, despite SOR already subtracted FOT tax
+                        slippageTolerance: LARGE_SLIPPAGE,
                         deadline: '360',
                         algorithm,
                         enableUniversalRouter: true,
-                        simulateFromAddress: alice.address,
+                        // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
+                        simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
                       }
 
                       const queryParams = qs.stringify(quoteReq)
@@ -1107,15 +1132,19 @@ describe('quote', function () {
 
                         // quote without fot flag must be greater than the quote with fot flag
                         // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
-                        expect(quote.greaterThan(quoteWithFlagon)).to.be.true;
+                        expect(quote.greaterThan(quoteWithFlagon)).to.be.true
 
                         // below is additional assertion to ensure the quote without fot tax vs quote with tax should be very roughly equal to the fot sell/buy tax rate
-                        const tokensDiff = quote.subtract(quoteWithFlagon);
-                        const percentDiff = tokensDiff.asFraction.divide(quote.asFraction);
+                        const tokensDiff = quote.subtract(quoteWithFlagon)
+                        const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
                         if (tokenIn?.equals(BULLET)) {
-                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal((new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000)).toFixed(3));
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                            new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000).toFixed(3)
+                          )
                         } else if (tokenOut?.equals(BULLET)) {
-                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal((new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000)).toFixed(3));
+                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                            new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(3)
+                          )
                         }
                       }
                     })
@@ -1123,7 +1152,15 @@ describe('quote', function () {
                   for (const response of responses) {
                     const {
                       enableFeeOnTransferFeeFetching,
-                      data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, simulationStatus, simulationError },
+                      data: {
+                        quote,
+                        quoteDecimals,
+                        quoteGasAdjustedDecimals,
+                        methodParameters,
+                        route,
+                        simulationStatus,
+                        simulationError,
+                      },
                       status,
                     } = response
 
@@ -1134,10 +1171,6 @@ describe('quote', function () {
                     } else {
                       expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
                     }
-
-                    expect(simulationStatus).to.equal(SimulationStatus.Succeeded)
-                    expect(simulationError).to.equal(false)
-                    expect(methodParameters).to.not.be.undefined
 
                     let hasV3Pool = false
                     let hasV2Pool = false
@@ -1188,7 +1221,11 @@ describe('quote', function () {
                     expect(!hasV3Pool && hasV2Pool).to.be.true
 
                     if (enableFeeOnTransferFeeFetching) {
-                      // We don't have a bullet proof way to asser the fot-involved quote is post tax
+                      expect(simulationStatus).to.equal('SUCCESS')
+                      expect(simulationError).to.equal(false)
+                      expect(methodParameters).to.not.be.undefined
+
+                      // We don't have a bullet proof way to assert the fot-involved quote is post tax
                       // so the best way is to execute the swap on hardhat mainnet fork,
                       // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
                       const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
