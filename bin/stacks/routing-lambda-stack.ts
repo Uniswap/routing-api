@@ -1,18 +1,18 @@
 import * as cdk from 'aws-cdk-lib'
 import { Duration, Size } from 'aws-cdk-lib'
-import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
+import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as aws_iam from 'aws-cdk-lib/aws-iam'
 import * as aws_lambda from 'aws-cdk-lib/aws-lambda'
 import * as aws_lambda_nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
+import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
 import { DynamoDBTableProps } from './routing-database-stack'
-import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket

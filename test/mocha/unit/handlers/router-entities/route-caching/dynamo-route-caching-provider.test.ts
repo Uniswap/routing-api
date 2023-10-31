@@ -1,15 +1,15 @@
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import 'reflect-metadata'
-import { setupTables } from '../../../../dbSetup'
-import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
-import JSBI from 'jsbi'
+import { CachedRoute, CachedRoutes, CacheMode, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
-import { WNATIVE_ON } from '../../../../../utils/tokens'
-import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import JSBI from 'jsbi'
+import 'reflect-metadata'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
+import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
+import { WNATIVE_ON } from '../../../../../utils/tokens'
+import { setupTables } from '../../../../dbSetup'
 
 chai.use(chaiAsPromised)
 

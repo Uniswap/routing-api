@@ -1,11 +1,16 @@
-import { TrafficSwitchV3PoolProvider } from '../../../../../../lib/handlers/pools/provider-migration/v3/traffic-switch-v3-pool-provider'
-import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
-import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
+import { ChainId, Token } from '@uniswap/sdk-core'
 import { CachingV3PoolProvider, MetricLoggerUnit, NodeJSCache } from '@uniswap/smart-order-router'
+import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import {
+  DAI_MAINNET as DAI,
+  USDC_MAINNET as USDC,
+} from '@uniswap/smart-order-router/build/main/providers/token-provider'
+import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
+import { encodeSqrtRatioX96, FeeAmount, Pool } from '@uniswap/v3-sdk'
 import NodeCache from 'node-cache'
 import sinon from 'sinon'
-import { ChainId, Token } from '@uniswap/sdk-core'
-import { encodeSqrtRatioX96, FeeAmount, Pool } from '@uniswap/v3-sdk'
+import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/pools/pool-caching/v3/dynamo-caching-pool-provider'
+import { TrafficSwitchV3PoolProvider } from '../../../../../../lib/handlers/pools/provider-migration/v3/traffic-switch-v3-pool-provider'
 import {
   DAI_USDT_LOW,
   SUPPORTED_POOLS,
@@ -13,13 +18,8 @@ import {
   USDC_WETH_LOW,
   WETH9_USDT_LOW,
 } from '../../../../../test-utils/mocked-data'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
-import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
+import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
 import { setupTables } from '../../../../dbSetup'
-import {
-  DAI_MAINNET as DAI,
-  USDC_MAINNET as USDC,
-} from '@uniswap/smart-order-router/build/main/providers/token-provider'
 
 describe('TrafficSwitchV3PoolProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)

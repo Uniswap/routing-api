@@ -1,9 +1,9 @@
-import { WidgetsFactory } from './core/widgets-factory'
-import { Widget } from './core/model/widget'
 import { ChainId } from '@uniswap/sdk-core'
-import _ from 'lodash'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
+import _ from 'lodash'
 import { ProviderName } from '../handlers/evm/provider/ProviderName'
+import { Widget } from './core/model/widget'
+import { WidgetsFactory } from './core/widgets-factory'
 
 const ID_TO_PROVIDER = (id: ChainId): string => {
   switch (id) {

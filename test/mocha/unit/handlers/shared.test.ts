@@ -1,3 +1,5 @@
+import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
+import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
 import { expect } from 'chai'
 import {
   computePortionAmount,
@@ -8,8 +10,6 @@ import {
   populateFeeOptions,
 } from '../../../../lib/handlers/shared'
 import { getAmount } from '../../../utils/tokens'
-import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
-import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
 
 describe('shared', async () => {
   it('parsePortionPercent', () => {
