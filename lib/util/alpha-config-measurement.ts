@@ -1,5 +1,5 @@
-import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
+import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { log, metric, MetricLoggerUnit, SwapRoute } from '@uniswap/smart-order-router'
 
 export const getDistribution = (distributionPercent: number) => {

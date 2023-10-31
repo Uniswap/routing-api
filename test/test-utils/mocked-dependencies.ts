@@ -1,5 +1,6 @@
 import { V3PoolProvider } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
+import sinon from 'sinon'
 import {
   buildMockV3PoolAccessor,
   DAI_USDT_LOW,
@@ -8,7 +9,6 @@ import {
   USDC_WETH_LOW,
   WETH9_USDT_LOW,
 } from './mocked-data'
-import sinon from 'sinon'
 
 export function getMockedV3PoolProvider(
   pools: Pool[] = [USDC_DAI_LOW, USDC_DAI_MEDIUM, USDC_WETH_LOW, WETH9_USDT_LOW, DAI_USDT_LOW]

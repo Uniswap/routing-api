@@ -1,9 +1,9 @@
-import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { Protocol } from '@uniswap/router-sdk'
-import { MarshalledToken, TokenMarshaller } from './token-marshaller'
+import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { Pool } from '@uniswap/v3-sdk'
 import { MarshalledPair, PairMarshaller } from './pair-marshaller'
 import { MarshalledPool, PoolMarshaller } from './pool-marshaller'
-import { Pool } from '@uniswap/v3-sdk'
+import { MarshalledToken, TokenMarshaller } from './token-marshaller'
 
 export interface MarshalledV2Route {
   protocol: Protocol

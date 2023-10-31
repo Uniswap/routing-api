@@ -1,3 +1,5 @@
+import { Protocol } from '@uniswap/router-sdk'
+import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import {
   CachedRoute,
   CachedRoutes,
@@ -9,13 +11,11 @@ import {
   MetricLoggerUnit,
   routeToString,
 } from '@uniswap/smart-order-router'
-import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
-import { Protocol } from '@uniswap/router-sdk'
-import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
-import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { PromiseResult } from 'aws-sdk/lib/request'
+import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
+import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 
 interface ConstructorParams {
   /**

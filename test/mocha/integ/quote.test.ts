@@ -8,6 +8,7 @@ import {
   CUSD_CELO_ALFAJORES,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
+  MethodParameters,
   NATIVE_CURRENCY,
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
@@ -19,7 +20,6 @@ import {
   PERMIT2_ADDRESS,
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
 } from '@uniswap/universal-router-sdk'
-import { MethodParameters } from '@uniswap/smart-order-router'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
 import axiosRetry from 'axios-retry'
@@ -34,10 +34,10 @@ import { SUPPORTED_CHAINS } from '../../../lib/handlers/injector-sor'
 import { QuoteQueryParams } from '../../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../../lib/handlers/schema'
 import { Permit2__factory } from '../../../lib/types/ext'
+import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { resetAndFundAtBlock } from '../../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndApprove'
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
-import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 
 const { ethers } = hre
 

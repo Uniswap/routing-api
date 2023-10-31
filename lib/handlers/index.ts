@@ -1,6 +1,6 @@
+import { default as bunyan, default as Logger } from 'bunyan'
 import { QuoteHandlerInjector } from './quote/injector'
 import { QuoteHandler } from './quote/quote'
-import { default as bunyan, default as Logger } from 'bunyan'
 
 const log: Logger = bunyan.createLogger({
   name: 'Root',

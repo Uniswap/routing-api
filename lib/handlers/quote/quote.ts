@@ -1,44 +1,44 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { PermitSingle } from '@uniswap/permit2-sdk'
+import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
+  ID_TO_NETWORK_NAME,
+  IMetric,
   IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapRoute,
-  SwapOptions,
-  SwapType,
   SimulationStatus,
-  IMetric,
-  ID_TO_NETWORK_NAME,
+  SwapOptions,
+  SwapRoute,
+  SwapType,
 } from '@uniswap/smart-order-router'
+import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { Pool } from '@uniswap/v3-sdk'
+import { MetricsLogger } from 'aws-embedded-metrics'
+import Logger from 'bunyan'
+import { utils } from 'ethers'
 import JSBI from 'jsbi'
 import _ from 'lodash'
+import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import {
+  computePortionAmount,
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
+  FEE_ON_TRANSFER_SPECIFIC_CONFIG,
+  INTENT_SPECIFIC_CONFIG,
   parseDeadline,
   parseSlippageTolerance,
-  tokenStringToCurrency,
-  QUOTE_SPEED_CONFIG,
-  INTENT_SPECIFIC_CONFIG,
-  FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
-  computePortionAmount,
+  QUOTE_SPEED_CONFIG,
+  tokenStringToCurrency,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
-import { utils } from 'ethers'
-import { simulationStatusToString } from './util/simulation'
-import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
-import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
-import { MetricsLogger } from 'aws-embedded-metrics'
+import { simulationStatusToString } from './util/simulation'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,

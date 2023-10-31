@@ -1,6 +1,6 @@
-import { ProtocolsBucketBlockNumber } from '../../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
+import { describe, expect, it } from '@jest/globals'
 import { Protocol } from '@uniswap/router-sdk'
-import { describe, it, expect } from '@jest/globals'
+import { ProtocolsBucketBlockNumber } from '../../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
 
 describe('ProtocolsBucketBlockNumber', () => {
   describe('#fullKey', () => {

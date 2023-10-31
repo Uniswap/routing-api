@@ -1,6 +1,3 @@
-import { ethers } from 'ethers'
-import { Deferrable } from '@ethersproject/properties'
-import { TransactionRequest } from '@ethersproject/providers'
 import {
   Block,
   BlockTag,
@@ -10,10 +7,13 @@ import {
   TransactionReceipt,
   TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Network, Networkish } from '@ethersproject/networks'
+import { Deferrable } from '@ethersproject/properties'
+import { TransactionRequest } from '@ethersproject/providers'
 import { ConnectionInfo } from '@ethersproject/web'
+import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { ethers } from 'ethers'
 import { ProviderName } from './ProviderName'
 
 export type InstrumentedEVMProviderProps = {
