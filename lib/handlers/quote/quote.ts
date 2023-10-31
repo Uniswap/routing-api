@@ -30,6 +30,7 @@ import {
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   populateFeeOptions,
+  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
 import { utils } from 'ethers'
@@ -258,26 +259,34 @@ export class QuoteHandler extends APIGLambdaHandler<
     let swapParams: SwapOptions | undefined = undefined
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    if (slippageTolerance && deadline && recipient) {
+    if (slippageTolerance) {
       const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
 
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(type, portionBips, portionRecipient, portionAmount)
+        const allFeeOptions = populateFeeOptions(
+          type,
+          portionBips,
+          portionRecipient,
+          portionAmount ??
+            computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
+        )
 
         swapParams = {
           type: SwapType.UNIVERSAL_ROUTER,
-          deadlineOrPreviousBlockhash: parseDeadline(deadline),
+          deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
           recipient: recipient,
           slippageTolerance: slippageTolerancePercent,
           ...allFeeOptions,
         }
       } else {
-        swapParams = {
-          type: SwapType.SWAP_ROUTER_02,
-          deadline: parseDeadline(deadline),
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
+        if (deadline && recipient) {
+          swapParams = {
+            type: SwapType.SWAP_ROUTER_02,
+            deadline: parseDeadline(deadline),
+            recipient: recipient,
+            slippageTolerance: slippageTolerancePercent,
+          }
         }
       }
 
@@ -300,9 +309,11 @@ export class QuoteHandler extends APIGLambdaHandler<
           sigDeadline: permitSigDeadline,
         }
 
-        swapParams.inputTokenPermit = {
-          ...permit,
-          signature: permitSignature,
+        if (swapParams) {
+          swapParams.inputTokenPermit = {
+            ...permit,
+            signature: permitSignature,
+          }
         }
       } else if (
         !enableUniversalRouter &&
@@ -311,19 +322,24 @@ export class QuoteHandler extends APIGLambdaHandler<
       ) {
         const { v, r, s } = utils.splitSignature(permitSignature)
 
-        swapParams.inputTokenPermit = {
-          v: v as 0 | 1 | 27 | 28,
-          r,
-          s,
-          ...(permitNonce && permitExpiration
-            ? { nonce: permitNonce!, expiry: permitExpiration! }
-            : { amount: permitAmount!, deadline: permitSigDeadline! }),
+        if (swapParams) {
+          swapParams.inputTokenPermit = {
+            v: v as 0 | 1 | 27 | 28,
+            r,
+            s,
+            ...(permitNonce && permitExpiration
+              ? { nonce: permitNonce!, expiry: permitExpiration! }
+              : { amount: permitAmount!, deadline: permitSigDeadline! }),
+          }
         }
       }
 
       if (simulateFromAddress) {
         metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-        swapParams.simulate = { fromAddress: simulateFromAddress }
+
+        if (swapParams) {
+          swapParams.simulate = { fromAddress: simulateFromAddress }
+        }
       }
     }
 
