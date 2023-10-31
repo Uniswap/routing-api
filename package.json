@@ -99,7 +99,7 @@
     "aws-embedded-metrics": "^2.0.4",
     "aws-sdk": "^2.927.0",
     "aws-xray-sdk": "^3.3.3",
-    "axios": "^0.21.1",
+    "axios": "^1.6.0",
     "bunyan": "^1.8.15",
     "esm": "^3.2.25",
     "got": "^11.8.2",
