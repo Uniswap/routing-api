@@ -11,4 +11,8 @@ export class AWSMetricsLogger implements IMetric {
   public putMetric(key: string, value: number, unit?: MetricLoggerUnit): void {
     this.awsMetricLogger.putMetric(key, value, unit)
   }
+
+  public setProperty(key: string, value: unknown): void {
+    this.awsMetricLogger.setProperty(key, value)
+  }
 }

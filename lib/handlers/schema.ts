@@ -1,11 +1,13 @@
 import Joi from '@hapi/joi'
-import { MethodParameters } from '@uniswap/v3-sdk'
+import { MethodParameters } from '@uniswap/smart-order-router'
 
 export type TokenInRoute = {
   address: string
   chainId: number
   symbol: string
   decimals: string
+  buyFeeBps?: string
+  sellFeeBps?: string
 }
 
 export type V3PoolInRoute = {
@@ -47,8 +49,12 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   quoteGasAdjustedDecimals: Joi.string().required(),
   gasUseEstimateQuote: Joi.string().required(),
   gasUseEstimateQuoteDecimals: Joi.string().required(),
+  quoteGasAndPortionAdjusted: Joi.string().optional(),
+  quoteGasAndPortionAdjustedDecimals: Joi.string().optional(),
   gasUseEstimate: Joi.string().required(),
   gasUseEstimateUSD: Joi.string().required(),
+  simulationError: Joi.boolean().optional(),
+  simulationStatus: Joi.string().required(),
   gasPriceWei: Joi.string().required(),
   blockNumber: Joi.string().required(),
   route: Joi.array().items(Joi.any()).required(),
@@ -56,7 +62,13 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   methodParameters: Joi.object({
     calldata: Joi.string().required(),
     value: Joi.string().required(),
+    to: Joi.string().required(),
   }).optional(),
+  hitsCachedRoutes: Joi.boolean().optional(),
+  portionBips: Joi.number().optional(),
+  portionRecipient: Joi.string().optional(),
+  portionAmount: Joi.string().optional(),
+  portionAmountDecimals: Joi.string().optional(),
 })
 
 export type QuoteResponse = {
@@ -67,13 +79,22 @@ export type QuoteResponse = {
   quoteDecimals: string
   quoteGasAdjusted: string
   quoteGasAdjustedDecimals: string
+  quoteGasAndPortionAdjusted?: string
+  quoteGasAndPortionAdjustedDecimals?: string
   gasUseEstimate: string
   gasUseEstimateQuote: string
   gasUseEstimateQuoteDecimals: string
   gasUseEstimateUSD: string
+  simulationError?: boolean
+  simulationStatus: string
   gasPriceWei: string
   blockNumber: string
-  route: Array<V3PoolInRoute[] | V2PoolInRoute[]>
+  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
   routeString: string
   methodParameters?: MethodParameters
+  hitsCachedRoutes?: boolean
+  portionBips?: number
+  portionRecipient?: string
+  portionAmount?: string
+  portionAmountDecimals?: string
 }

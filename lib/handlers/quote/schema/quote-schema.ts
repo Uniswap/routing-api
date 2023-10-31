@@ -45,7 +45,31 @@ export const QuoteQueryParamsJoi = Joi.object({
     .optional(),
   minSplits: Joi.number().max(7).optional(),
   forceCrossProtocol: Joi.boolean().optional(),
-  protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3')).optional(),
+  forceMixedRoutes: Joi.boolean().optional(),
+  protocols: Joi.stringArray().items(Joi.string().valid('v2', 'v3', 'mixed')).optional(),
+  simulateFromAddress: Joi.string().alphanum().max(42).optional(),
+  permitSignature: Joi.string().optional(),
+  permitNonce: Joi.string().optional(),
+  permitExpiration: Joi.number().optional(),
+  permitAmount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(77),
+  permitSigDeadline: Joi.number().optional(),
+  // TODO: Remove once universal router is no longer behind a feature flag.
+  enableUniversalRouter: Joi.boolean().optional().default(false),
+  quoteSpeed: Joi.string().valid('fast', 'standard').optional().default('standard'),
+  debugRoutingConfig: Joi.string().optional(),
+  unicornSecret: Joi.string().optional(),
+  intent: Joi.string().valid('quote', 'swap', 'caching', 'pricing').optional().default('quote'),
+  enableFeeOnTransferFeeFetching: Joi.boolean().optional().default(false),
+  portionBips: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(5) // portionBips is a string type with the expectation of being parsable to integer between 0 and 10000
+    .optional(),
+  portionAmount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .optional(),
+  portionRecipient: Joi.string().alphanum().max(42).optional(),
 }).and('recipient', 'slippageTolerance', 'deadline')
 
 export type QuoteQueryParams = {
@@ -62,5 +86,21 @@ export type QuoteQueryParams = {
   gasPriceWei?: string
   minSplits?: number
   forceCrossProtocol?: boolean
+  forceMixedRoutes?: boolean
   protocols?: string[] | string
+  simulateFromAddress?: string
+  permitSignature?: string
+  permitNonce?: string
+  permitExpiration?: string
+  permitAmount?: string
+  permitSigDeadline?: string
+  enableUniversalRouter?: boolean
+  quoteSpeed?: string
+  debugRoutingConfig?: string
+  unicornSecret?: string
+  intent?: string
+  enableFeeOnTransferFeeFetching?: boolean
+  portionBips?: number
+  portionAmount?: string
+  portionRecipient?: string
 }

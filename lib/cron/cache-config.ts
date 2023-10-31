@@ -1,44 +1,58 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { ChainId, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
+import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
+import { ChainId } from '@uniswap/sdk-core'
 
 export const chainProtocols = [
   // V3.
   {
     protocol: Protocol.V3,
     chainId: ChainId.MAINNET,
+    timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 90000),
   },
   {
     protocol: Protocol.V3,
-    chainId: ChainId.RINKEBY,
-    provider: new V3SubgraphProvider(ChainId.RINKEBY, 3, 90000),
-  },
-  {
-    protocol: Protocol.V3,
     chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.ARBITRUM_ONE, 3, 90000),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.POLYGON,
+    timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000),
   },
   {
     protocol: Protocol.V3,
-    chainId: ChainId.GÖRLI,
-    provider: new V3SubgraphProvider(ChainId.GÖRLI, 3, 90000),
+    chainId: ChainId.CELO,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.CELO, 3, 90000),
   },
   {
     protocol: Protocol.V3,
-    chainId: ChainId.CELO,
-    provider: new V3SubgraphProvider(ChainId.CELO, 3, 90000),
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000),
   },
-  // Currently there is no working V3 subgraph for Kovan, Optimism, Optimism Kovan, Arbitrum Rinkeby, so we use static providers.
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.AVALANCHE,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.BASE,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.BASE, 3, 90000),
+  },
+  // Currently there is no working V3 subgraph for Optimism so we use a static provider.
   // V2.
+
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 2, 480000), // Bump from 360_000 (6 min) to 480_000 (8 min)
+    timeout: 840000,
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000), // 1000 is the largest page size supported by thegraph
   },
-  // Currently there is no working V2 subgraph for Rinkeby, Ropsten, Gorli or Kovan, so we use static providers.
 ]

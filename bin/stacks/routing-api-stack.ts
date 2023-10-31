@@ -1,8 +1,11 @@
+import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
+import { ChainId } from '@uniswap/sdk-core'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
 import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
@@ -12,6 +15,9 @@ import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
+import { RoutingDatabaseStack } from './routing-database-stack'
+
+export const CHAINS_NOT_MONITORED: ChainId[] = [ChainId.GOERLI, ChainId.POLYGON_MUMBAI]
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -26,10 +32,15 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl: string
       chatbotSNSArn?: string
       stage: string
+      internalApiKey?: string
       route53Arn?: string
       pinata_key?: string
       pinata_secret?: string
       hosted_zone?: string
+      tenderlyUser: string
+      tenderlyProject: string
+      tenderlyAccessKey: string
+      unicornSecret: string
     }
   ) {
     super(parent, name, props)
@@ -41,18 +52,23 @@ export class RoutingAPIStack extends cdk.Stack {
       ethGasStationInfoUrl,
       chatbotSNSArn,
       stage,
+      internalApiKey,
       route53Arn,
       pinata_key,
       pinata_secret,
       hosted_zone,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
+      unicornSecret,
     } = props
 
     const {
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheKey,
+      poolCacheLambdaNameArray,
       tokenListCacheBucket,
-      poolCacheLambda,
       ipfsPoolCachingLambda,
     } = new RoutingCachingStack(this, 'RoutingCachingStack', {
       chatbotSNSArn,
@@ -63,20 +79,37 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
     })
 
-    const { routingLambda, routingLambdaAlias, routeToRatioLambda } = new RoutingLambdaStack(
-      this,
-      'RoutingLambdaStack',
-      {
-        poolCacheBucket,
-        poolCacheBucket2,
-        poolCacheKey,
-        jsonRpcProviders,
-        tokenListCacheBucket,
-        provisionedConcurrency,
-        ethGasStationInfoUrl,
-        chatbotSNSArn,
-      }
-    )
+    const {
+      routesDynamoDb,
+      routesDbCachingRequestFlagDynamoDb,
+      cachedRoutesDynamoDb,
+      cachingRequestFlagDynamoDb,
+      cachedV3PoolsDynamoDb,
+      cachedV2PairsDynamoDb,
+      tokenPropertiesCachingDynamoDb,
+    } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
+
+    const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
+      poolCacheBucket,
+      poolCacheBucket2,
+      poolCacheKey,
+      jsonRpcProviders,
+      tokenListCacheBucket,
+      provisionedConcurrency,
+      ethGasStationInfoUrl,
+      chatbotSNSArn,
+      tenderlyUser,
+      tenderlyProject,
+      tenderlyAccessKey,
+      routesDynamoDb,
+      routesDbCachingRequestFlagDynamoDb,
+      cachedRoutesDynamoDb,
+      cachingRequestFlagDynamoDb,
+      cachedV3PoolsDynamoDb,
+      cachedV2PairsDynamoDb,
+      tokenPropertiesCachingDynamoDb,
+      unicornSecret,
+    })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')
 
@@ -135,6 +168,27 @@ export class RoutingAPIStack extends cdk.Stack {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'MATCH',
               },
+              scopeDownStatement: {
+                notStatement: {
+                  statement: {
+                    byteMatchStatement: {
+                      fieldToMatch: {
+                        singleHeader: {
+                          name: 'x-api-key',
+                        },
+                      },
+                      positionalConstraint: 'EXACTLY',
+                      searchString: internalApiKey,
+                      textTransformations: [
+                        {
+                          type: 'NONE',
+                          priority: 0,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
             },
           },
           action: {
@@ -165,7 +219,7 @@ export class RoutingAPIStack extends cdk.Stack {
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
       routingLambdaName: routingLambda.functionName,
-      poolCacheLambdaName: poolCacheLambda.functionName,
+      poolCacheLambdaNameArray,
       ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
     })
 
@@ -179,16 +233,6 @@ export class RoutingAPIStack extends cdk.Stack {
     })
     quote.addMethod('GET', lambdaIntegration)
 
-    const routeToRatioLambdaIntegration = new aws_apigateway.LambdaIntegration(routeToRatioLambda)
-
-    const quoteToRatio = api.root.addResource('quoteToRatio', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: aws_apigateway.Cors.ALL_ORIGINS,
-        allowMethods: aws_apigateway.Cors.ALL_METHODS,
-      },
-    })
-    quoteToRatio.addMethod('GET', routeToRatioLambdaIntegration)
-
     // All alarms default to GreaterThanOrEqualToThreshold for when to be triggered.
     const apiAlarm5xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-5XXAlarm', {
       alarmName: 'RoutingAPI-SEV2-5XX',
@@ -197,7 +241,7 @@ export class RoutingAPIStack extends cdk.Stack {
         // For this metric 'avg' represents error rate.
         statistic: 'avg',
       }),
-      threshold: 0.25,
+      threshold: 0.05,
       // Beta has much less traffic so is more susceptible to transient errors.
       evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
     })
@@ -218,7 +262,7 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'p90',
       }),
-      threshold: 12000,
+      threshold: 8500,
       evaluationPeriods: 3,
     })
 
@@ -229,7 +273,7 @@ export class RoutingAPIStack extends cdk.Stack {
         // For this metric 'avg' represents error rate.
         statistic: 'avg',
       }),
-      threshold: 0.05,
+      threshold: 0.03,
       // Beta has much less traffic so is more susceptible to transient errors.
       evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
     })
@@ -250,8 +294,103 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'p90',
       }),
-      threshold: 7500,
+      threshold: 5500,
       evaluationPeriods: 3,
+    })
+
+    // Simulations can fail for valid reasons. For example, if the simulation reverts due
+    // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
+    // account for the fees taken during transfer when we show the user the quote).
+    //
+    // For this reason we only alert on SEV3 to avoid unnecessary pages.
+    const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
+      alarmName: 'RoutingAPI-SEV3-Simulation',
+      metric: new MathExpression({
+        expression: '100*(simulationFailed/simulationRequested)',
+        period: Duration.minutes(30),
+        usingMetrics: {
+          simulationRequested: new aws_cloudwatch.Metric({
+            namespace: 'Uniswap',
+            metricName: `Simulation Requested`,
+            dimensionsMap: { Service: 'RoutingAPI' },
+            unit: aws_cloudwatch.Unit.COUNT,
+            statistic: 'sum',
+          }),
+          simulationFailed: new aws_cloudwatch.Metric({
+            namespace: 'Uniswap',
+            metricName: `SimulationFailed`,
+            dimensionsMap: { Service: 'RoutingAPI' },
+            unit: aws_cloudwatch.Unit.COUNT,
+            statistic: 'sum',
+          }),
+        },
+      }),
+      threshold: 75,
+      evaluationPeriods: 3,
+      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
+    })
+
+    // Alarms for high 400 error rate for each chain
+    const percent4XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
+    SUPPORTED_CHAINS.forEach((chainId) => {
+      if (CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
+      const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
+      const metric = new MathExpression({
+        expression: '100*(response400/invocations)',
+        usingMetrics: {
+          invocations: api.metric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          response400: api.metric(`GET_QUOTE_400_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+        },
+      })
+      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        alarmName,
+        metric,
+        threshold: 80,
+        evaluationPeriods: 2,
+      })
+      percent4XXByChainAlarm.push(alarm)
+    })
+
+    // Alarms for high 500 error rate for each chain
+    const successRateByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
+    SUPPORTED_CHAINS.forEach((chainId) => {
+      if (CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
+      const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
+      const metric = new MathExpression({
+        expression: '100*(response200/(invocations-response400))',
+        usingMetrics: {
+          invocations: api.metric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          response400: api.metric(`GET_QUOTE_400_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+          response200: api.metric(`GET_QUOTE_200_CHAINID: ${chainId.toString()}`, {
+            period: Duration.minutes(5),
+            statistic: 'sum',
+          }),
+        },
+      })
+      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        alarmName,
+        metric,
+        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+        threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
+        evaluationPeriods: 2,
+      })
+      successRateByChainAlarm.push(alarm)
     })
 
     if (chatbotSNSArn) {
@@ -262,6 +401,14 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+
+      percent4XXByChainAlarm.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      successRateByChainAlarm.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
     }
 
     this.url = new CfnOutput(this, 'Url', {

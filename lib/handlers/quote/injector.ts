@@ -3,12 +3,10 @@ import {
   AlphaRouterConfig,
   ID_TO_CHAIN_ID,
   IRouter,
-  LegacyRouter,
   LegacyRoutingConfig,
   setGlobalLogger,
   setGlobalMetric,
   V3HeuristicGasModelFactory,
-  V3QuoteProvider,
 } from '@uniswap/smart-order-router'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
@@ -33,9 +31,23 @@ export class QuoteHandlerInjector extends InjectorSOR<
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
-    const logLevel = bunyan.INFO
+    // Sample 10% of all requests at the INFO log level for debugging purposes.
+    // All other requests will only log warnings and errors.
+    // Note that we use WARN as a default rather than ERROR
+    // to capture Tapcompare logs in the smart-order-router.
+    const logLevel = Math.random() < 0.1 ? bunyan.INFO : bunyan.WARN
 
-    const { tokenInAddress, tokenInChainId, tokenOutAddress, amount, type, algorithm, gasPriceWei } = requestQueryParams
+    const {
+      tokenInAddress,
+      tokenInChainId,
+      tokenOutAddress,
+      amount,
+      type,
+      algorithm,
+      gasPriceWei,
+      quoteSpeed,
+      intent,
+    } = requestQueryParams
 
     log = log.child({
       serializers: bunyan.stdSerializers,
@@ -76,12 +88,16 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v3SubgraphProvider,
       blockedTokenListProvider,
       v2PoolProvider,
+      tokenValidatorProvider,
+      tokenPropertiesProvider,
       v2QuoteProvider,
       v2SubgraphProvider,
       gasPriceProvider: gasPriceProviderOnChain,
+      simulator,
+      routeCachingProvider,
     } = dependencies[chainIdEnum]!
 
-    let v3QuoteProvider = dependencies[chainIdEnum]!.v3QuoteProvider
+    let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
@@ -90,36 +106,6 @@ export class QuoteHandlerInjector extends InjectorSOR<
 
     let router
     switch (algorithm) {
-      case 'legacy':
-        v3QuoteProvider =
-          v3QuoteProvider ??
-          new V3QuoteProvider(
-            chainId,
-            provider,
-            multicallProvider,
-            {
-              retries: 2,
-              minTimeout: 100,
-              maxTimeout: 1000,
-            },
-            {
-              multicallChunk: 210,
-              gasLimitPerCall: 705_000,
-              quoteMinSuccessRate: 0.15,
-            },
-            {
-              gasLimitOverride: 2_000_000,
-              multicallChunk: 70,
-            }
-          )
-        router = new LegacyRouter({
-          chainId,
-          multicall2Provider: multicallProvider,
-          poolProvider: v3PoolProvider,
-          quoteProvider: v3QuoteProvider,
-          tokenProvider,
-        })
-        break
       case 'alpha':
       default:
         router = new AlphaRouter({
@@ -128,7 +114,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v3SubgraphProvider,
           multicall2Provider: multicallProvider,
           v3PoolProvider,
-          v3QuoteProvider,
+          onChainQuoteProvider,
           gasPriceProvider,
           v3GasModelFactory: new V3HeuristicGasModelFactory(),
           blockedTokenListProvider,
@@ -136,6 +122,10 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v2PoolProvider,
           v2QuoteProvider,
           v2SubgraphProvider,
+          simulator,
+          routeCachingProvider,
+          tokenValidatorProvider,
+          tokenPropertiesProvider,
         })
         break
     }
@@ -150,6 +140,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2PoolProvider,
       tokenProvider,
       tokenListProvider,
+      quoteSpeed,
+      intent,
     }
   }
 }

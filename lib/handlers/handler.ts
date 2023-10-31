@@ -112,6 +112,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
     return metricScope(
       (metric: MetricsLogger) =>
         async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+          const requestStart = Date.now()
+
           let log: Logger = bunyan.createLogger({
             name: this.handlerName,
             serializers: bunyan.stdSerializers,
@@ -185,7 +187,10 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
                 body: response,
               }
             } else {
-              log.info({ requestBody, requestQueryParams }, 'Handler returned 200')
+              log.info(
+                { requestBody, requestQueryParams, requestDuration: Date.now() - requestStart },
+                'Handler returned 200'
+              )
               ;({ body, statusCode } = handleRequestResult)
             }
           } catch (err) {
@@ -208,6 +213,9 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
           }
 
           log.info({ statusCode, response }, `Request ended. ${statusCode}`)
+
+          this.afterHandler(metric, response, requestStart)
+
           return {
             statusCode,
             body: JSON.stringify(response),
@@ -215,6 +223,8 @@ export abstract class APIGLambdaHandler<CInj, RInj extends BaseRInj, ReqBody, Re
         }
     )
   }
+
+  protected afterHandler(_: MetricsLogger, __: Res, ___: number): void {}
 
   public abstract handleRequest(
     params: HandleRequestParams<CInj, RInj, ReqBody, ReqQueryParams>

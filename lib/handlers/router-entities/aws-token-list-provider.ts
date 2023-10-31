@@ -1,11 +1,11 @@
 import {
   CachingTokenListProvider,
-  ChainId,
   ITokenListProvider,
   ITokenProvider,
   log,
   NodeJSCache,
 } from '@uniswap/smart-order-router'
+import { ChainId } from '@uniswap/sdk-core'
 import { TokenList } from '@uniswap/token-lists'
 import S3 from 'aws-sdk/clients/s3'
 import NodeCache from 'node-cache'
@@ -18,7 +18,7 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
     bucket: string,
     tokenListURI: string
   ): Promise<ITokenListProvider & ITokenProvider> {
-    const s3 = new S3()
+    const s3 = new S3({ correctClockSkew: true, maxRetries: 3 })
 
     const cachedTokenList = TOKEN_LIST_CACHE.get<TokenList>(tokenListURI)
 
