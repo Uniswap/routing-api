@@ -252,19 +252,19 @@ describe('quote', function () {
     // for all other balance checks, we ensure they are at least X amount. There's a possibility for more than X token amount,
     // due to a single whale address being whale for more than one token.
     const aliceUSDCBalance = await getBalance(alice, USDC_MAINNET)
-    expect(!aliceUSDCBalance.lessThan(parseAmount('8000000', USDC_MAINNET))).to.be.true;
+    expect(!aliceUSDCBalance.lessThan(parseAmount('8000000', USDC_MAINNET))).to.be.true
     const aliceUSDTBalance = await getBalance(alice, USDT_MAINNET)
-    expect(!aliceUSDTBalance.lessThan(parseAmount('5000000', USDT_MAINNET))).to.be.true;
+    expect(!aliceUSDTBalance.lessThan(parseAmount('5000000', USDT_MAINNET))).to.be.true
     const aliceWETH9Balance = await getBalance(alice, WETH9[1])
-    expect(!aliceWETH9Balance.lessThan(parseAmount('4000', WETH9[1]))).to.be.true;
+    expect(!aliceWETH9Balance.lessThan(parseAmount('4000', WETH9[1]))).to.be.true
     const aliceWBTCBalance = await getBalance(alice, WBTC_MAINNET)
-    expect(!aliceWBTCBalance.lessThan(parseAmount('10', WBTC_MAINNET))).to.be.true;
+    expect(!aliceWBTCBalance.lessThan(parseAmount('10', WBTC_MAINNET))).to.be.true
     const aliceDAIBalance = await getBalance(alice, DAI_MAINNET)
-    expect(!aliceDAIBalance.lessThan(parseAmount('5000000', DAI_MAINNET))).to.be.true;
+    expect(!aliceDAIBalance.lessThan(parseAmount('5000000', DAI_MAINNET))).to.be.true
     const aliceUNIBalance = await getBalance(alice, UNI_MAINNET)
-    expect(!aliceUNIBalance.lessThan(parseAmount('1000', UNI_MAINNET))).to.be.true;
+    expect(!aliceUNIBalance.lessThan(parseAmount('1000', UNI_MAINNET))).to.be.true
     const aliceBULLETBalance = await getBalance(alice, BULLET)
-    expect(!aliceBULLETBalance.lessThan(parseAmount('735871', BULLET))).to.be.true;
+    expect(!aliceBULLETBalance.lessThan(parseAmount('735871', BULLET))).to.be.true
   })
 
   for (const algorithm of ['alpha']) {
