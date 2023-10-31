@@ -1,8 +1,8 @@
 import { TradeType } from '@uniswap/sdk-core'
 import { CacheMode, ChainId } from '@uniswap/smart-order-router'
+import { CachedRoutesBucket } from './model/cached-routes-bucket'
 import { CachedRoutesStrategy } from './model/cached-routes-strategy'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
-import { CachedRoutesBucket } from './model/cached-routes-bucket'
 
 /**
  * This is the main configuration for the caching strategies of routes.
