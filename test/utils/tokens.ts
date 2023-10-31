@@ -1,37 +1,42 @@
 import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
-import { ChainId, Token } from '@uniswap/sdk-core'
+import { Token } from '@uniswap/sdk-core'
 import {
   CachingTokenListProvider,
+  ChainId,
   DAI_ARBITRUM,
-  DAI_AVAX,
-  DAI_BNB,
-  DAI_GOERLI,
+  DAI_ARBITRUM_RINKEBY,
+  DAI_GÖRLI,
+  DAI_KOVAN,
   DAI_MAINNET,
   DAI_OPTIMISM,
-  DAI_OPTIMISM_GOERLI,
+  DAI_OPTIMISTIC_KOVAN,
   DAI_POLYGON,
   DAI_POLYGON_MUMBAI,
-  DAI_SEPOLIA,
+  DAI_RINKEBY_1,
+  DAI_ROPSTEN,
   log,
   NodeJSCache,
   USDC_ARBITRUM,
-  USDC_AVAX,
-  USDC_BNB,
-  USDC_GOERLI,
+  USDC_ARBITRUM_RINKEBY,
+  USDC_GÖRLI,
+  USDC_KOVAN,
   USDC_MAINNET,
   USDC_OPTIMISM,
-  USDC_OPTIMISM_GOERLI,
+  USDC_OPTIMISTIC_KOVAN,
   USDC_POLYGON,
   USDC_POLYGON_MUMBAI,
-  USDC_SEPOLIA,
+  USDC_RINKEBY,
+  USDC_ROPSTEN,
   USDT_ARBITRUM,
-  USDT_BNB,
-  USDT_GOERLI,
+  USDT_ARBITRUM_RINKEBY,
+  USDT_GÖRLI,
+  USDT_KOVAN,
   USDT_MAINNET,
   USDT_OPTIMISM,
+  USDT_OPTIMISTIC_KOVAN,
+  USDT_RINKEBY,
+  USDT_ROPSTEN,
   WRAPPED_NATIVE_CURRENCY,
-  USDC_BASE,
-  USDC_BASE_GOERLI,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -60,30 +65,38 @@ export const UNI_MAINNET = new Token(
   'Uniswap'
 )
 
-export const UNI_GORLI = new Token(ChainId.GOERLI, '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 18, 'UNI', 'Uni token')
+export const UNI_ARBITRUM_RINKEBY = new Token(
+  ChainId.ARBITRUM_RINKEBY,
+  '0x049251a7175071316e089d0616d8b6aacd2c93b8',
+  18,
+  'UNI',
+  'Uni token'
+)
 
 export const DAI_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return DAI_MAINNET
-    case ChainId.GOERLI:
-      return DAI_GOERLI
-    case ChainId.SEPOLIA:
-      return DAI_SEPOLIA
+    case ChainId.ROPSTEN:
+      return DAI_ROPSTEN
+    case ChainId.RINKEBY:
+      return DAI_RINKEBY_1
+    case ChainId.GÖRLI:
+      return DAI_GÖRLI
+    case ChainId.KOVAN:
+      return DAI_KOVAN
     case ChainId.OPTIMISM:
       return DAI_OPTIMISM
-    case ChainId.OPTIMISM_GOERLI:
-      return DAI_OPTIMISM_GOERLI
+    case ChainId.OPTIMISTIC_KOVAN:
+      return DAI_OPTIMISTIC_KOVAN
     case ChainId.ARBITRUM_ONE:
       return DAI_ARBITRUM
+    case ChainId.ARBITRUM_RINKEBY:
+      return DAI_ARBITRUM_RINKEBY
     case ChainId.POLYGON:
       return DAI_POLYGON
     case ChainId.POLYGON_MUMBAI:
       return DAI_POLYGON_MUMBAI
-    case ChainId.BNB:
-      return DAI_BNB
-    case ChainId.AVALANCHE:
-      return DAI_AVAX
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -93,14 +106,22 @@ export const USDT_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return USDT_MAINNET
-    case ChainId.GOERLI:
-      return USDT_GOERLI
+    case ChainId.ROPSTEN:
+      return USDT_ROPSTEN
+    case ChainId.RINKEBY:
+      return USDT_RINKEBY
+    case ChainId.GÖRLI:
+      return USDT_GÖRLI
+    case ChainId.KOVAN:
+      return USDT_KOVAN
     case ChainId.OPTIMISM:
       return USDT_OPTIMISM
+    case ChainId.OPTIMISTIC_KOVAN:
+      return USDT_OPTIMISTIC_KOVAN
     case ChainId.ARBITRUM_ONE:
       return USDT_ARBITRUM
-    case ChainId.BNB:
-      return USDT_BNB
+    case ChainId.ARBITRUM_RINKEBY:
+      return USDT_ARBITRUM_RINKEBY
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -110,28 +131,26 @@ export const USDC_ON = (chainId: ChainId): Token => {
   switch (chainId) {
     case ChainId.MAINNET:
       return USDC_MAINNET
-    case ChainId.GOERLI:
-      return USDC_GOERLI
-    case ChainId.SEPOLIA:
-      return USDC_SEPOLIA
+    case ChainId.ROPSTEN:
+      return USDC_ROPSTEN
+    case ChainId.RINKEBY:
+      return USDC_RINKEBY
+    case ChainId.GÖRLI:
+      return USDC_GÖRLI
+    case ChainId.KOVAN:
+      return USDC_KOVAN
     case ChainId.OPTIMISM:
       return USDC_OPTIMISM
-    case ChainId.OPTIMISM_GOERLI:
-      return USDC_OPTIMISM_GOERLI
+    case ChainId.OPTIMISTIC_KOVAN:
+      return USDC_OPTIMISTIC_KOVAN
     case ChainId.ARBITRUM_ONE:
       return USDC_ARBITRUM
+    case ChainId.ARBITRUM_RINKEBY:
+      return USDC_ARBITRUM_RINKEBY
     case ChainId.POLYGON:
       return USDC_POLYGON
     case ChainId.POLYGON_MUMBAI:
       return USDC_POLYGON_MUMBAI
-    case ChainId.BNB:
-      return USDC_BNB
-    case ChainId.AVALANCHE:
-      return USDC_AVAX
-    case ChainId.BASE:
-      return USDC_BASE
-    case ChainId.BASE_GOERLI:
-      return USDC_BASE_GOERLI
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
