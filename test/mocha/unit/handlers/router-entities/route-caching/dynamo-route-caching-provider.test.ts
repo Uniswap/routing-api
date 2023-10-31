@@ -1,22 +1,22 @@
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import 'reflect-metadata'
-import { setupTables } from '../../../../mocha/dbSetup'
-import { DynamoRouteCachingProvider } from '../../../../../lib/handlers/router-entities/route-caching'
 import { Protocol } from '@uniswap/router-sdk'
 import { CurrencyAmount, TradeType } from '@uniswap/sdk-core'
-import JSBI from 'jsbi'
-import { FeeAmount, Pool } from '@uniswap/v3-sdk'
-import { WNATIVE_ON } from '../../../../utils/tokens'
 import {
-  CacheMode,
   CachedRoute,
   CachedRoutes,
+  CacheMode,
   ChainId,
   UNI_MAINNET,
   USDC_MAINNET,
   V3Route,
 } from '@uniswap/smart-order-router'
+import { FeeAmount, Pool } from '@uniswap/v3-sdk'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import JSBI from 'jsbi'
+import 'reflect-metadata'
+import { DynamoRouteCachingProvider } from '../../../../../lib/handlers/router-entities/route-caching'
+import { setupTables } from '../../../../mocha/dbSetup'
+import { WNATIVE_ON } from '../../../../utils/tokens'
 
 chai.use(chaiAsPromised)
 
