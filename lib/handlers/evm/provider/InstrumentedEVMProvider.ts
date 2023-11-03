@@ -47,15 +47,19 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
     // Only cache eth_call's.
     if (method !== 'eth_call') return super.send(method, params)
 
-    const key = `call:${JSON.stringify(params)}`
-    const cached = this.blockCache.get(key)
-    if (cached) {
-      return cached
-    }
+    try {
+      const key = `call:${JSON.stringify(params)}`
+      const cached = this.blockCache.get(key)
+      if (cached) {
+        return cached
+      }
 
-    const result = super.send(method, params)
-    this.blockCache.set(key, result)
-    return result
+      const result = super.send(method, params)
+      this.blockCache.set(key, result)
+      return result
+    } catch (e) {
+      return super.send(method, params)
+    }
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
