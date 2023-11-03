@@ -248,20 +248,23 @@ describe('quote', function () {
     const aliceEthBalance = await getBalance(alice, Ether.onChain(1))
     /// Since alice is deploying the QuoterV3 contract, expect to have slightly less than 10_000 ETH but not too little
     expect(!aliceEthBalance.lessThan(CurrencyAmount.fromRawAmount(Ether.onChain(1), '9995'))).to.be.true
+
+    // for all other balance checks, we ensure they are at least X amount. There's a possibility for more than X token amount,
+    // due to a single whale address being whale for more than one token.
     const aliceUSDCBalance = await getBalance(alice, USDC_MAINNET)
-    expect(aliceUSDCBalance.quotient.toString()).equal(parseAmount('8000000', USDC_MAINNET).quotient.toString())
+    expect(!aliceUSDCBalance.lessThan(parseAmount('8000000', USDC_MAINNET))).to.be.true
     const aliceUSDTBalance = await getBalance(alice, USDT_MAINNET)
-    expect(aliceUSDTBalance.quotient.toString()).equal(parseAmount('5000000', USDT_MAINNET).quotient.toString())
+    expect(!aliceUSDTBalance.lessThan(parseAmount('5000000', USDT_MAINNET))).to.be.true
     const aliceWETH9Balance = await getBalance(alice, WETH9[1])
-    expect(aliceWETH9Balance.quotient.toString()).equal(parseAmount('4000', WETH9[1]).quotient.toString())
+    expect(!aliceWETH9Balance.lessThan(parseAmount('4000', WETH9[1]))).to.be.true
     const aliceWBTCBalance = await getBalance(alice, WBTC_MAINNET)
-    expect(aliceWBTCBalance.quotient.toString()).equal(parseAmount('10', WBTC_MAINNET).quotient.toString())
+    expect(!aliceWBTCBalance.lessThan(parseAmount('10', WBTC_MAINNET))).to.be.true
     const aliceDAIBalance = await getBalance(alice, DAI_MAINNET)
-    expect(aliceDAIBalance.quotient.toString()).equal(parseAmount('5000000', DAI_MAINNET).quotient.toString())
+    expect(!aliceDAIBalance.lessThan(parseAmount('5000000', DAI_MAINNET))).to.be.true
     const aliceUNIBalance = await getBalance(alice, UNI_MAINNET)
-    expect(aliceUNIBalance.quotient.toString()).equal(parseAmount('1000', UNI_MAINNET).quotient.toString())
+    expect(!aliceUNIBalance.lessThan(parseAmount('1000', UNI_MAINNET))).to.be.true
     const aliceBULLETBalance = await getBalance(alice, BULLET)
-    expect(aliceBULLETBalance.quotient.toString()).equal(parseAmount('735871', BULLET).quotient.toString())
+    expect(!aliceBULLETBalance.lessThan(parseAmount('735871', BULLET))).to.be.true
   })
 
   for (const algorithm of ['alpha']) {

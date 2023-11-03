@@ -91,7 +91,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
       timeout: cdk.Duration.seconds(15),
-      memorySize: 2048,
+      memorySize: 1792,
       ephemeralStorageSize: Size.gibibytes(1),
       deadLetterQueueEnabled: true,
       bundling: {
