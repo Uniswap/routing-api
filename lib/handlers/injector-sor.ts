@@ -84,7 +84,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 }
 
 export type ContainerDependencies = {
-  provider: ethers.providers.JsonRpcProvider
+  provider: ethers.providers.StaticJsonRpcProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
