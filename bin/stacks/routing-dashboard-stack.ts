@@ -878,7 +878,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 metrics: [
                   ['AWS/Lambda', 'ProvisionedConcurrentExecutions', 'FunctionName', routingLambdaName],
                   ['.', 'ConcurrentExecutions', '.', '.'],
-                  ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.'],
+                  ['.', 'ProvisionedConcurrencySpilloverInvocations', '.', '.', { stat: 'Sum' }],
                 ],
                 region: region,
                 title: 'Routing Lambda Provisioned Concurrency',
