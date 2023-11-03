@@ -27,7 +27,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   private readonly metricPrefix: string
   private _blockCache = new Map<string, Promise<any>>()
 
-  get blockCache() {
+  private get blockCache() {
     // If the blockCache has not yet been initialized this block, do so by
     // setting a listener to clear it on the next block.
     if (!this._blockCache.size) {
