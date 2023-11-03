@@ -337,7 +337,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v3PoolProvider,
             provider,
             portionProvider,
-            { [ChainId.ARBITRUM_ONE]: 2.5 }
+            { [ChainId.ARBITRUM_ONE]: 2.5 },
+            // The timeout for the underlying axios call to Tenderly, measured in milliseconds.
+            5 * 1000
           )
 
           const ethEstimateGasSimulator = new EthEstimateGasSimulator(
