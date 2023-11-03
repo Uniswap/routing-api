@@ -25,11 +25,41 @@ export type InstrumentedEVMProviderProps = {
 export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
+  private _blockCache = new Map<string, Promise<any>>()
+
+  private get blockCache() {
+    // If the blockCache has not yet been initialized this block, do so by
+    // setting a listener to clear it on the next block.
+    if (!this._blockCache.size) {
+      this.once('block', () => this._blockCache.clear())
+    }
+    return this._blockCache
+  }
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
     super(url, network)
     this.name = name
     this.metricPrefix = `RPC_${this.name}_${this.network.chainId}`
+  }
+
+  // Adds caching functionality to the RPC provider
+  override send(method: string, params: Array<any>): Promise<any> {
+    // Only cache eth_call's.
+    if (method !== 'eth_call') return super.send(method, params)
+
+    try {
+      const key = `call:${JSON.stringify(params)}`
+      const cached = this.blockCache.get(key)
+      if (cached) {
+        return cached
+      }
+
+      const result = super.send(method, params)
+      this.blockCache.set(key, result)
+      return result
+    } catch (e) {
+      return super.send(method, params)
+    }
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
