@@ -22,7 +22,7 @@ export type InstrumentedEVMProviderProps = {
   name: ProviderName
 }
 
-export class InstrumentedEVMProvider extends ethers.providers.JsonRpcProvider {
+export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
 
