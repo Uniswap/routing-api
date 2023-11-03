@@ -91,8 +91,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
       // 11/8/23: URA currently calls the Routing API with a timeout of 10 seconds.
-      // Set this lambda's timeout to be slightly higher to allow them to wait for a response.
-      timeout: cdk.Duration.millis(10.5 * 1000),
+      // Set this lambda's timeout to be slightly lower to give them time to
+      // log the response in the event of a failure on our end.
+      timeout: cdk.Duration.seconds(9),
       memorySize: 1792,
       ephemeralStorageSize: Size.gibibytes(1),
       deadLetterQueueEnabled: true,
