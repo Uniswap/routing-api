@@ -25,41 +25,50 @@ export type InstrumentedEVMProviderProps = {
 export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
-  private _blockCache = new Map<string, Promise<any>>()
-
-  private get blockCache() {
-    // If the blockCache has not yet been initialized this block, do so by
-    // setting a listener to clear it on the next block.
-    if (!this._blockCache.size) {
-      this.once('block', () => this._blockCache.clear())
-    }
-    return this._blockCache
-  }
+  private readonly blockCache: Map<string, Promise<any>>
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
     super(url, network)
     this.name = name
     this.metricPrefix = `RPC_${this.name}_${this.network.chainId}`
+    this.blockCache = new Map();
+    // Set an event listener to clear the cache on every new block.
+    this.on('block', () => {
+      metric.putMetric('RPCProviderCacheClear', 1, MetricLoggerUnit.Count)
+      this.blockCache.clear()
+    })
   }
 
   // Adds caching functionality to the RPC provider
   override send(method: string, params: Array<any>): Promise<any> {
     // Only cache eth_call's.
     if (method !== 'eth_call') return super.send(method, params)
+    let key: string | undefined = undefined;
 
     try {
-      const key = `call:${JSON.stringify(params)}`
+      key = `call:${JSON.stringify(params)}`
+    } catch (e) {
+      metric.putMetric('RPCProviderCacheKeyError', 1, MetricLoggerUnit.Count)
+    }
+
+    if (key) {
       const cached = this.blockCache.get(key)
       if (cached) {
+        metric.putMetric('RPCProviderCacheHit', 1, MetricLoggerUnit.Count)
         return cached
+      } else {
+        metric.putMetric('RPCProviderCacheMiss', 1, MetricLoggerUnit.Count)
       }
-
-      const result = super.send(method, params)
-      this.blockCache.set(key, result)
-      return result
-    } catch (e) {
-      return super.send(method, params)
     }
+
+    const result = super.send(method, params)
+
+    if (key) {
+      metric.putMetric('RPCProviderCacheInsert', 1, MetricLoggerUnit.Count)
+      this.blockCache.set(key, result)
+    }
+
+    return result
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
