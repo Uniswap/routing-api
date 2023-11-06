@@ -25,7 +25,7 @@ export type InstrumentedEVMProviderProps = {
 export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
-  private readonly blockCache: Map<string, Promise<any>>
+  private readonly blockCache: Map<string, any>
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
     super(url, network)
@@ -40,7 +40,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   }
 
   // Adds caching functionality to the RPC provider
-  override send(method: string, params: Array<any>): Promise<any> {
+  override async send(method: string, params: Array<any>): Promise<any> {
     // Only cache eth_call's.
     if (method !== 'eth_call') return super.send(method, params)
     let key: string | undefined = undefined
@@ -61,7 +61,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
       }
     }
 
-    const result = super.send(method, params)
+    const result = await super.send(method, params)
 
     if (key) {
       metric.putMetric('RPCProviderCacheInsert', 1, MetricLoggerUnit.Count)
