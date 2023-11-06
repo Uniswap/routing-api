@@ -31,7 +31,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
     super(url, network)
     this.name = name
     this.metricPrefix = `RPC_${this.name}_${this.network.chainId}`
-    this.blockCache = new Map();
+    this.blockCache = new Map()
     // Set an event listener to clear the cache on every new block.
     this.on('block', () => {
       metric.putMetric('RPCProviderCacheClear', 1, MetricLoggerUnit.Count)
@@ -43,7 +43,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   override send(method: string, params: Array<any>): Promise<any> {
     // Only cache eth_call's.
     if (method !== 'eth_call') return super.send(method, params)
-    let key: string | undefined = undefined;
+    let key: string | undefined = undefined
 
     try {
       key = `call:${JSON.stringify(params)}`
