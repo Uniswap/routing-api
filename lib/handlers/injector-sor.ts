@@ -142,7 +142,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       const dependenciesByChainArray = await Promise.all(
         _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
           const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
-
           if (!url) {
             log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
             return { chainId, dependencies: {} as ContainerDependencies }

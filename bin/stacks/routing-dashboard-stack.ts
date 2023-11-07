@@ -882,7 +882,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 ],
                 region: region,
                 title: 'Routing Lambda Provisioned Concurrency',
-                stat: 'p99',
+                stat: 'Maximum',
               },
             },
             {
