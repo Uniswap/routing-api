@@ -241,7 +241,19 @@ export class RoutingAPIStack extends cdk.Stack {
         // For this metric 'avg' represents error rate.
         statistic: 'avg',
       }),
-      threshold: 0.05,
+      threshold: 0.02,
+      // Beta has much less traffic so is more susceptible to transient errors.
+      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
+    })
+
+    const apiAlarm5xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-5XXAlarm', {
+      alarmName: 'RoutingAPI-SEV3-5XX',
+      metric: api.metricServerError({
+        period: Duration.minutes(5),
+        // For this metric 'avg' represents error rate.
+        statistic: 'avg',
+      }),
+      threshold: 0.01,
       // Beta has much less traffic so is more susceptible to transient errors.
       evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
     })
@@ -252,7 +264,17 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'avg',
       }),
-      threshold: 0.95,
+      threshold: 0.6,
+      evaluationPeriods: 3,
+    })
+
+    const apiAlarm4xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-4XXAlarm', {
+      alarmName: 'RoutingAPI-SEV3-4XX',
+      metric: api.metricClientError({
+        period: Duration.minutes(5),
+        statistic: 'avg',
+      }),
+      threshold: 0.4,
       evaluationPeriods: 3,
     })
 
@@ -262,29 +284,7 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'p90',
       }),
-      threshold: 8500,
-      evaluationPeriods: 3,
-    })
-
-    const apiAlarm5xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-5XXAlarm', {
-      alarmName: 'RoutingAPI-SEV3-5XX',
-      metric: api.metricServerError({
-        period: Duration.minutes(5),
-        // For this metric 'avg' represents error rate.
-        statistic: 'avg',
-      }),
-      threshold: 0.03,
-      // Beta has much less traffic so is more susceptible to transient errors.
-      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
-    })
-
-    const apiAlarm4xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-4XXAlarm', {
-      alarmName: 'RoutingAPI-SEV3-4XX',
-      metric: api.metricClientError({
-        period: Duration.minutes(5),
-        statistic: 'avg',
-      }),
-      threshold: 0.8,
+      threshold: 6500,
       evaluationPeriods: 3,
     })
 
@@ -294,7 +294,7 @@ export class RoutingAPIStack extends cdk.Stack {
         period: Duration.minutes(5),
         statistic: 'p90',
       }),
-      threshold: 5500,
+      threshold: 3500,
       evaluationPeriods: 3,
     })
 
