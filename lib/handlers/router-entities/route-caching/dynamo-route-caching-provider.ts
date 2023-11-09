@@ -82,6 +82,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
+  private readonly BLOCKS_DIFF_BETWEEN_CACHING_QUOTES: Map<ChainId, number> = new Map([[ChainId.MAINNET, 3]])
+
+  private readonly DEFAULT_BLOCKS_DIFF_CACHING = 15
 
   constructor({ routesTableName, routesCachingRequestFlagTableName, cachingQuoteLambdaName }: ConstructorParams) {
     super()
@@ -300,8 +303,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const shouldSendCachingRequest =
         result.Items &&
         (result.Items.length == 0 || // no caching request has been sent recently
-          // or there is not a single sample for the current block
-          result.Items.every((record) => (record.blockNumber ?? 0) < currentBlockNumber))
+          // or every sampled record is older than maximum blocks diff allowed for the chain
+          result.Items.every((record) => {
+            const blocksDiff = currentBlockNumber - (record.blockNumber ?? 0)
+            const maximumBlocksDiff =
+              this.BLOCKS_DIFF_BETWEEN_CACHING_QUOTES.get(partitionKey.chainId) || this.DEFAULT_BLOCKS_DIFF_CACHING
+            return blocksDiff > maximumBlocksDiff
+          }))
 
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
