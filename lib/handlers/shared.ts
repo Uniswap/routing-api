@@ -1,6 +1,7 @@
 import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
+  CacheMode,
   ITokenListProvider,
   ITokenProvider,
   MapWithLowerCaseKey,
@@ -137,14 +138,16 @@ export const QUOTE_SPEED_CONFIG: { [key: string]: QuoteSpeedConfig } = {
 
 export type IntentSpecificConfig = {
   useCachedRoutes?: boolean
+  overwriteCacheMode?: CacheMode
   optimisticCachedRoutes?: boolean
 }
 
 export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   caching: {
-    // When the intent is to create a cache entry, we should not use the cache
-    useCachedRoutes: false,
-    // This is *super* important to avoid an infinite loop of caching quotes calling themselves
+    // When the intent is to create a cache entry, we will use cachedRoutes with Tapcompare to track accuracy
+    useCachedRoutes: true,
+    overwriteCacheMode: CacheMode.Tapcompare,
+    // This optimistic=false is *super* important to avoid an infinite loop of caching quotes calling themselves
     optimisticCachedRoutes: false,
   },
   quote: {
