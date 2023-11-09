@@ -83,10 +83,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
   private readonly BLOCKS_DIFF_BETWEEN_CACHING_QUOTES: Map<ChainId, number> = new Map([
-    [ChainId.MAINNET, 10]
+    [ChainId.MAINNET, 3]
   ])
 
-  private readonly DEFAULT_BLOCKS_DIFF_CACHING = 100;
+  private readonly DEFAULT_BLOCKS_DIFF_CACHING = 15;
 
   constructor({ routesTableName, routesCachingRequestFlagTableName, cachingQuoteLambdaName }: ConstructorParams) {
     super()
