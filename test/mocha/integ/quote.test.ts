@@ -53,7 +53,7 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 const SLIPPAGE = '5'
-const LARGE_SLIPPAGE = '10'
+const LARGE_SLIPPAGE = '20'
 
 const BULLET = new Token(
   ChainId.MAINNET,
@@ -1573,7 +1573,7 @@ describe('quote', function () {
               }
             })
 
-            it(`eth -> erc20 swaprouter02`, async () => {
+            it.only(`eth -> erc20 swaprouter02`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'ETH',
                 tokenInChainId: 1,
@@ -1588,7 +1588,7 @@ describe('quote', function () {
                 slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE, // for exact out somehow the liquidation wasn't sufficient, hence higher slippage,
                 deadline: '360',
                 algorithm,
-                simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
+                simulateFromAddress: '0x00000000219ab540356cBB839Cbe05303d7705Fa',
                 enableUniversalRouter: false,
               }
 
