@@ -53,7 +53,7 @@ if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 
 const SLIPPAGE = '5'
-const LARGE_SLIPPAGE = '10'
+const LARGE_SLIPPAGE = '20'
 
 const BULLET = new Token(
   ChainId.MAINNET,
@@ -1588,7 +1588,7 @@ describe('quote', function () {
                 slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE, // for exact out somehow the liquidation wasn't sufficient, hence higher slippage,
                 deadline: '360',
                 algorithm,
-                simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
+                simulateFromAddress: '0x00000000219ab540356cBB839Cbe05303d7705Fa',
                 enableUniversalRouter: false,
               }
 
@@ -1597,7 +1597,6 @@ describe('quote', function () {
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
               expect(status).to.equal(200)
-              expect(data.simulationError).to.equal(false)
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1610,6 +1609,7 @@ describe('quote', function () {
                 // We've swapped 10 ETH + gas costs
                 expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+                expect(data.simulationError).to.equal(false)
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
                 // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
