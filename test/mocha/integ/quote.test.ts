@@ -1573,7 +1573,7 @@ describe('quote', function () {
               }
             })
 
-            it.only(`eth -> erc20 swaprouter02`, async () => {
+            it(`eth -> erc20 swaprouter02`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'ETH',
                 tokenInChainId: 1,
@@ -1597,7 +1597,6 @@ describe('quote', function () {
               const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
               const { data, status } = response
               expect(status).to.equal(200)
-              expect(data.simulationError).to.equal(false)
               expect(data.methodParameters).to.not.be.undefined
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
@@ -1610,6 +1609,7 @@ describe('quote', function () {
                 // We've swapped 10 ETH + gas costs
                 expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+                expect(data.simulationError).to.equal(false)
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
                 // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
