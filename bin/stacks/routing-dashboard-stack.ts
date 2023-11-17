@@ -906,6 +906,43 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 stat: 'Sum',
               },
             },
+            {
+              height: 8,
+              width: 12,
+              type: 'metric',
+              properties: {
+                metrics: [
+                  [
+                    {
+                      expression: `(m1 / m2) * 100`,
+                      label: `Tenderly Simulation API Success Rate by HTTP Status Code`,
+                      id: `tenderlySimulationHttpSuccessRate`,
+                    },
+                  ],
+                  [
+                    NAMESPACE,
+                    'TenderlySimulationUniversalRouterResponseStatus200',
+                    'Service',
+                    'RoutingAPI',
+                    { id: 'm1', visible: false },
+                  ],
+                  ['.', 'TenderlySimulationUniversalRouterRequests', '.', '.', { id: 'm2', visible: false }],
+                ],
+                view: 'timeSeries',
+                stacked: false,
+                region,
+                stat: 'Sum',
+                period: 300,
+                title: 'Tenderly Simulation API Success Rate by HTTP Status Code',
+                setPeriodToTimeRange: true,
+                yAxis: {
+                  left: {
+                    showUnits: false,
+                    label: '%',
+                  },
+                },
+              },
+            },
           ])
           .concat(rpcProvidersWidgetsForRoutingDashboard),
       }),
