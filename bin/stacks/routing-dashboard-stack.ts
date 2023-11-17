@@ -942,7 +942,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   },
                 },
               },
-            }
+            },
           ])
           .concat(rpcProvidersWidgetsForRoutingDashboard),
       }),
