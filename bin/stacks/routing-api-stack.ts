@@ -328,6 +328,7 @@ export class RoutingAPIStack extends cdk.Stack {
           },
         }),
         threshold: 99,
+        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
         evaluationPeriods: 3,
         treatMissingData: aws_cloudwatch.TreatMissingData.BREACHING, // Missing data points are bad, because it means a different http status code was returned
       }
