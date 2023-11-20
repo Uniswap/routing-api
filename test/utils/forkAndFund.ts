@@ -63,11 +63,10 @@ export const resetAndFundAtBlock = async (
       const whaleAccount = ethers.provider.getSigner(whale)
       try {
         // Send native ETH from hardhat alice test address, so that whale accounts have sufficient ETH to pay for gas
-        await alice.sendTransaction(
-          {
-            to: whale,
-            value: ethers.utils.parseEther("0.1"), // Sends exactly 0.1 ether
-          });
+        await alice.sendTransaction({
+          to: whale,
+          value: ethers.utils.parseEther('0.1'), // Sends exactly 0.1 ether
+        })
 
         const whaleToken: Erc20 = Erc20__factory.connect(currency.wrapped.address, whaleAccount)
 
@@ -76,7 +75,9 @@ export const resetAndFundAtBlock = async (
         break
       } catch (err) {
         if (i == WHALES.length - 1) {
-          throw new Error(`Could not fund ${amount} ${currency.symbol} from any whales. Original error ${JSON.stringify(err)}`)
+          throw new Error(
+            `Could not fund ${amount} ${currency.symbol} from any whales. Original error ${JSON.stringify(err)}`
+          )
         }
       }
     }
