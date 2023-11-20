@@ -338,7 +338,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             portionProvider,
             { [ChainId.ARBITRUM_ONE]: 2.5 },
             // The timeout for the underlying axios call to Tenderly, measured in milliseconds.
-            3 * 1000
+            2.5 * 1000
           )
 
           const ethEstimateGasSimulator = new EthEstimateGasSimulator(
