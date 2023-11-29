@@ -141,6 +141,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionBips,
         portionAmount,
         portionRecipient,
+        source,
       },
       requestInjected: {
         router,
@@ -158,6 +159,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     // Parse user provided token address/symbol to Currency object.
     let before = Date.now()
     const startTime = Date.now()
+
+    metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
 
     const currencyIn = await tokenStringToCurrency(
       tokenListProvider,
