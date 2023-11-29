@@ -45,13 +45,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
 
     const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
 
-    const REQUEST_SOURCES = [
-      'unknown',
-      'uniswap-ios',
-      'uniswap-android',
-      'uniswap-web',
-      'external-api',
-    ]
+    const REQUEST_SOURCES = ['unknown', 'uniswap-ios', 'uniswap-android', 'uniswap-web', 'external-api']
 
     // No CDK resource exists for contributor insights at the moment so use raw CloudFormation.
     const REQUESTED_QUOTES_RULE_NAME = 'RequestedQuotes'
@@ -623,7 +617,11 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               type: 'metric',
               properties: {
                 metrics: REQUEST_SOURCES.map((source) => [
-                    'Uniswap', `GET_QUOTE_REQUEST_SOURCE: ${source}`, 'Service', 'RoutingAPI', { label: `Source: ${source}` },
+                  'Uniswap',
+                  `GET_QUOTE_REQUEST_SOURCE: ${source}`,
+                  'Service',
+                  'RoutingAPI',
+                  { label: `Source: ${source}` },
                 ]),
                 view: 'timeSeries',
                 stacked: false,
