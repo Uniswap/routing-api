@@ -621,7 +621,7 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                   `GET_QUOTE_REQUEST_SOURCE: ${source}`,
                   'Service',
                   'RoutingAPI',
-                  { label: `Source: ${source}` },
+                  { label: `${source}` },
                 ]),
                 view: 'timeSeries',
                 stacked: false,
