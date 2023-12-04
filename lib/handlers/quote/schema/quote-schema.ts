@@ -70,7 +70,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .pattern(/^[0-9]+$/)
     .optional(),
   portionRecipient: Joi.string().alphanum().max(42).optional(),
-  source: Joi.string().max(20).required(),
+  source: Joi.string().max(20).optional(),
 })
 
 export type QuoteQueryParams = {
