@@ -33,7 +33,8 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    return super
+    const before = Date.now()
+    const result = super
       .call(transaction, blockTag)
       .then(
         (response) => {
@@ -45,7 +46,12 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
           throw error
         }
       )
-      .finally(() => metric.putMetric(`${this.metricPrefix}_CALL_REQUESTED`, 1, MetricLoggerUnit.Count))
+      .finally(() => {
+        metric.putMetric(`${this.metricPrefix}_CALL_REQUESTED`, 1, MetricLoggerUnit.Count)
+        metric.putMetric(`${this.metricPrefix}_CALL_LATENCY`, Date.now() - before, MetricLoggerUnit.Milliseconds)
+      })
+
+    return result
   }
 
   override estimateGas(transaction: Deferrable<TransactionRequest>): Promise<BigNumber> {
