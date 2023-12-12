@@ -8,7 +8,7 @@ import {
   Filter,
   Log,
   TransactionReceipt,
-  TransactionResponse
+  TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
@@ -33,7 +33,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    const before = Date.now();
+    const before = Date.now()
     const result = super
       .call(transaction, blockTag)
       .then(
@@ -51,7 +51,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
         metric.putMetric(`${this.metricPrefix}_CALL_LATENCY`, Date.now() - before, MetricLoggerUnit.Milliseconds)
       })
 
-    return result;
+    return result
   }
 
   override estimateGas(transaction: Deferrable<TransactionRequest>): Promise<BigNumber> {
