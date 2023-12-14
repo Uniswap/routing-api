@@ -81,6 +81,7 @@ export interface RequestInjected<Router> extends BaseRInj {
   router: Router
   quoteSpeed?: string
   intent?: string
+  gasToken?: string
 }
 
 export type ContainerDependencies = {

@@ -84,6 +84,8 @@ export type QuoteResponse = {
   gasUseEstimate: string
   gasUseEstimateQuote: string
   gasUseEstimateQuoteDecimals: string
+  gasUseEstimateGasToken?: string
+  gasUseEstimateGasTokenDecimals?: string
   gasUseEstimateUSD: string
   simulationError?: boolean
   simulationStatus: string
