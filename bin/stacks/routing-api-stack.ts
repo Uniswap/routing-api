@@ -298,42 +298,6 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
-    // Tenderly universal router simulation alarms focuses on the http status code returned
-    // It was to capture the situation like the HTTPS redirect issue in the past incident
-    // https://www.notion.so/uniswaplabs/New-tokens-swap-outages-on-Wallet-due-to-Tenderly-enforcing-HTTPS-aad4719087f0407d8a9b21f0137fd070?pvs=4#86b9072133b949a6b9e636dfcca1e76e
-    const tenderlyUniversalRouterSimulationHttpStatusAlarmSev2 = new aws_cloudwatch.Alarm(
-      this,
-      'RoutingAPI-SEV2-Tenderly-UniversalRouter-Simulation',
-      {
-        alarmName: 'RoutingAPI-SEV2-TenderlySimulation',
-        metric: new MathExpression({
-          expression:
-            '100*(tenderlySimulationUniversalRouterResponseStatus200/tenderlySimulationUniversalRouterRequested)',
-          period: Duration.minutes(5),
-          usingMetrics: {
-            tenderlySimulationUniversalRouterRequested: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `TenderlySimulationUniversalRouterRequests`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-            tenderlySimulationUniversalRouterResponseStatus200: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `TenderlySimulationUniversalRouterResponseStatus200`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-          },
-        }),
-        threshold: 60,
-        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-        evaluationPeriods: 3,
-        treatMissingData: aws_cloudwatch.TreatMissingData.BREACHING, // Missing data points are bad, because it means a different http status code was returned
-      }
-    )
-
     // Simulations can fail for valid reasons. For example, if the simulation reverts due
     // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
     // account for the fees taken during transfer when we show the user the quote).
@@ -361,7 +325,7 @@ export class RoutingAPIStack extends cdk.Stack {
           }),
         },
       }),
-      threshold: 75,
+      threshold: 20,
       evaluationPeriods: 3,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
     })
@@ -437,9 +401,6 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      tenderlyUniversalRouterSimulationHttpStatusAlarmSev2.addAlarmAction(
-        new aws_cloudwatch_actions.SnsAction(chatBotTopic)
-      )
       simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
       percent4XXByChainAlarm.forEach((alarm) => {
