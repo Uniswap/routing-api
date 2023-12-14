@@ -143,8 +143,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       tokenProvider,
       tokenListProvider,
       quoteSpeed,
-      intent,
-      gasToken
+      intent
     }
   }
 }

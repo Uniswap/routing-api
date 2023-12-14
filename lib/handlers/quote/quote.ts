@@ -50,7 +50,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   public async handleRequest(
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
-    const { chainId, metric, log, quoteSpeed, intent, gasToken } = params.requestInjected
+    const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
