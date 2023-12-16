@@ -13,6 +13,7 @@ import {
 import Logger from 'bunyan'
 import { FeeOptions } from '@uniswap/v3-sdk'
 import { FlatFeeOptions } from '@uniswap/universal-router-sdk'
+import { isAddress } from '../util/isAddress'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 30,
@@ -190,8 +191,6 @@ export async function tokenStringToCurrency(
   chainId: ChainId,
   log: Logger
 ): Promise<Currency | undefined> {
-  const isAddress = (s: string) => s.length == 42 && s.startsWith('0x')
-
   let token: Currency | undefined = undefined
 
   if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
