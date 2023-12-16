@@ -184,52 +184,6 @@ export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (
   } as FeeOnTransferSpecificConfig
 }
 
-export async function tokenStringToCurrency(
-  tokenListProvider: ITokenListProvider,
-  tokenProvider: ITokenProvider,
-  tokenRaw: string,
-  chainId: ChainId,
-  log: Logger
-): Promise<Currency | undefined> {
-  if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
-    const nativeToken = nativeOnChain(chainId)
-    log.info(
-      {
-        tokenAddress: nativeToken.wrapped.address,
-      },
-      `Found address of native token ${tokenRaw} for chain ${chainId}: ${nativeToken.wrapped.address}}`
-    )
-    return nativeToken
-  }
-
-  let token: Currency | undefined = undefined
-  if (isAddress(tokenRaw)) {
-    token = await tokenListProvider.getTokenByAddress(tokenRaw)
-  }
-
-  if (!token) {
-    token = await tokenListProvider.getTokenBySymbol(tokenRaw)
-  }
-
-  if (token) {
-    log.info(
-      {
-        tokenAddress: token.wrapped.address,
-      },
-      `Got input token from token list`
-    )
-    return token
-  }
-
-  log.info(`Getting input token ${tokenRaw} from chain`)
-  if (!token && isAddress(tokenRaw)) {
-    const tokenAccessor = await tokenProvider.getTokens([tokenRaw])
-    return tokenAccessor.getTokenByAddress(tokenRaw)
-  }
-
-  return undefined
-}
-
 export function parseSlippageTolerance(slippageTolerance: string): Percent {
   const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
   return new Percent(slippagePer10k, 10_000)
