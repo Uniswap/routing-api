@@ -193,7 +193,7 @@ export async function tokenStringToCurrency(
 ): Promise<Currency | undefined> {
   if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
     const nativeToken = nativeOnChain(chainId)
-    log.debug(
+    log.info(
       {
         tokenAddress: nativeToken.wrapped.address,
       },
