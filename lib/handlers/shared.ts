@@ -191,11 +191,19 @@ export async function tokenStringToCurrency(
   chainId: ChainId,
   log: Logger
 ): Promise<Currency | undefined> {
-  let token: Currency | undefined = undefined
-
   if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
-    token = nativeOnChain(chainId)
-  } else if (isAddress(tokenRaw)) {
+    const nativeToken = nativeOnChain(chainId)
+    log.debug(
+      {
+        tokenAddress: nativeToken.wrapped.address,
+      },
+      `Found address of native token ${tokenRaw} for chain ${chainId}: ${nativeToken.wrapped.address}}`
+    )
+    return nativeToken
+  }
+
+  let token: Currency | undefined = undefined
+  if (isAddress(tokenRaw)) {
     token = await tokenListProvider.getTokenByAddress(tokenRaw)
   }
 
