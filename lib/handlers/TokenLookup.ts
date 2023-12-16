@@ -13,7 +13,7 @@ export class TokenLookup {
   public async tokenStringToCurrency(tokenRaw: string, chainId: number): Promise<Currency | undefined> {
     if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
       const nativeToken = nativeOnChain(chainId)
-      this.log.info(
+      this.log.debug(
         {
           tokenAddress: nativeToken.wrapped.address,
         },
@@ -32,7 +32,7 @@ export class TokenLookup {
     }
 
     if (token) {
-      this.log.info(
+      this.log.debug(
         {
           tokenAddress: token.wrapped.address,
         },
@@ -41,7 +41,7 @@ export class TokenLookup {
       return token
     }
 
-    this.log.info(`Getting input token ${tokenRaw} from chain`)
+    this.log.debug(`Getting input token ${tokenRaw} from chain`)
     if (!token && isAddress(tokenRaw)) {
       const tokenAccessor = await this.tokenProvider.getTokens([tokenRaw])
       return tokenAccessor.getTokenByAddress(tokenRaw)

@@ -12,7 +12,7 @@ describe('TokenLookup', () => {
       {} as any, // tokenListProvider
       {} as any, // tokenProvider,
       {
-        info: jest.fn(),
+        debug: jest.fn(),
       } as any // log
     )
     const result = await tokenLookup.tokenStringToCurrency('ETH', 1)
@@ -28,7 +28,7 @@ describe('TokenLookup', () => {
       } as any, // tokenListProvider
       {} as any, // tokenProvider,
       {
-        info: jest.fn(),
+        debug: jest.fn(),
       } as any // log
     )
     const result = await tokenLookup.tokenStringToCurrency(address, 1)
@@ -44,7 +44,7 @@ describe('TokenLookup', () => {
       } as any, // tokenListProvider
       {} as any, // tokenProvider,
       {
-        info: jest.fn(),
+        debug: jest.fn(),
       } as any // log
     )
     const result = await tokenLookup.tokenStringToCurrency('FOO', 1)
@@ -68,7 +68,7 @@ describe('TokenLookup', () => {
         },
       } as any, // tokenProvider,
       {
-        info: jest.fn(),
+        debug: jest.fn(),
       } as any // log
     )
     const result = await tokenLookup.tokenStringToCurrency(address, 1)
@@ -92,7 +92,7 @@ describe('TokenLookup', () => {
         },
       } as any, // tokenProvider,
       {
-        info: jest.fn(),
+        debug: jest.fn(),
       } as any // log
     )
     const result = await tokenLookup.tokenStringToCurrency('FOO', 1)
