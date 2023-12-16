@@ -15,10 +15,10 @@ describe('CurrencyLookup', () => {
         debug: jest.fn(),
       } as any // log
     )
-    const result = await tokenLookup.searchForToken('ETH', 1)
+    const result = await tokenLookup.searchForToken('ETH', ChainId.MAINNET)
 
     expect(result).toBeDefined()
-    expect(result).toEqual(ExtendedEther.onChain(1))
+    expect(result).toEqual(ExtendedEther.onChain(ChainId.MAINNET))
   })
 
   it('Finds the token in the token list when the input is an address', async () => {
@@ -31,7 +31,7 @@ describe('CurrencyLookup', () => {
         debug: jest.fn(),
       } as any // log
     )
-    const result = await tokenLookup.searchForToken(address, 1)
+    const result = await tokenLookup.searchForToken(address, ChainId.MAINNET)
 
     expect(result).toBeDefined()
     expect(result).toEqual(token)
@@ -47,7 +47,7 @@ describe('CurrencyLookup', () => {
         debug: jest.fn(),
       } as any // log
     )
-    const result = await tokenLookup.searchForToken('FOO', 1)
+    const result = await tokenLookup.searchForToken('FOO', ChainId.MAINNET)
 
     expect(result).toBeDefined()
     expect(result).toEqual(token)
@@ -71,7 +71,7 @@ describe('CurrencyLookup', () => {
         debug: jest.fn(),
       } as any // log
     )
-    const result = await tokenLookup.searchForToken(address, 1)
+    const result = await tokenLookup.searchForToken(address, ChainId.MAINNET)
 
     // Because the input address was a symbol and not an address, expect the result to be undefined.
     expect(result).toBe(token)
@@ -95,7 +95,7 @@ describe('CurrencyLookup', () => {
         debug: jest.fn(),
       } as any // log
     )
-    const result = await tokenLookup.searchForToken('FOO', 1)
+    const result = await tokenLookup.searchForToken('FOO', ChainId.MAINNET)
 
     // Because the input address was a symbol and not an address, expect the result to be undefined.
     expect(result).toBeUndefined()
