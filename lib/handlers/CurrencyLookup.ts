@@ -3,14 +3,18 @@ import { ITokenListProvider, ITokenProvider, NATIVE_NAMES_BY_ID, nativeOnChain }
 import Logger from 'bunyan'
 import { isAddress } from '../util/isAddress'
 
-export class TokenLookup {
+/**
+ * CurrencyLookup searches native tokens, token lists, and on chain to determine
+ * the token details (called Currency by the sdk) for an inputted string.
+ */
+export class CurrencyLookup {
   constructor(
     private readonly tokenListProvider: ITokenListProvider,
     private readonly tokenProvider: ITokenProvider,
     private readonly log: Logger
   ) {}
 
-  public async tokenStringToCurrency(tokenRaw: string, chainId: number): Promise<Currency | undefined> {
+  public async searchForToken(tokenRaw: string, chainId: number): Promise<Currency | undefined> {
     if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
       const nativeToken = nativeOnChain(chainId)
       this.log.debug(
@@ -22,6 +26,7 @@ export class TokenLookup {
       return nativeToken
     }
 
+    // At this point, we know this is not a NativeCurrency based on the check above, so we can explicitly cast to Token.
     let token: Token | undefined = undefined
     if (isAddress(tokenRaw)) {
       token = await this.tokenListProvider.getTokenByAddress(tokenRaw)
