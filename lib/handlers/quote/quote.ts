@@ -164,45 +164,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-    // Parse user provided token address/symbol to Currency object.
-    const currencyLookupStartTime = Date.now()
-    const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
-    const [currencyIn, currencyOut] = await Promise.all([
-      currencyLookup.searchForToken(tokenInAddress, tokenInChainId),
-      currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId),
-    ])
-
-    metric.putMetric('TokenInOutStrToToken', Date.now() - currencyLookupStartTime, MetricLoggerUnit.Milliseconds)
-
-    if (!currencyIn) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_INVALID',
-        detail: `Could not find token with address "${tokenInAddress}"`,
-      }
-    }
-
-    if (!currencyOut) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_OUT_INVALID',
-        detail: `Could not find token with address "${tokenOutAddress}"`,
-      }
-    }
-
-    if (tokenInChainId != tokenOutChainId) {
+    if (tokenInChainId !== tokenOutChainId) {
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
         detail: `Cannot request quotes for tokens on different chains`,
-      }
-    }
-
-    if (currencyIn.equals(currencyOut)) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_OUT_SAME',
-        detail: `tokenIn and tokenOut must be different`,
       }
     }
 
@@ -229,6 +195,40 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     } else if (!forceCrossProtocol) {
       protocols = [Protocol.V3]
+    }
+
+    // Parse user provided token address/symbol to Currency object.
+    const currencyLookupStartTime = Date.now()
+    const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
+    const [currencyIn, currencyOut] = await Promise.all([
+      currencyLookup.searchForToken(tokenInAddress, tokenInChainId),
+      currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId),
+    ])
+
+    metric.putMetric('TokenInOutStrToToken', Date.now() - currencyLookupStartTime, MetricLoggerUnit.Milliseconds)
+
+    if (!currencyIn) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_INVALID',
+        detail: `Could not find token with address "${tokenInAddress}"`,
+      }
+    }
+
+    if (!currencyOut) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_OUT_INVALID',
+        detail: `Could not find token with address "${tokenOutAddress}"`,
+      }
+    }
+
+    if (currencyIn.equals(currencyOut)) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_OUT_SAME',
+        detail: `tokenIn and tokenOut must be different`,
+      }
     }
 
     let parsedDebugRoutingConfig = {}
