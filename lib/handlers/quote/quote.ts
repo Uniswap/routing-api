@@ -90,6 +90,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       throw err
     } finally {
       // This metric is logged after calling the internal handler to correlate with the status metrics
+      metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
@@ -141,7 +142,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionBips,
         portionAmount,
         portionRecipient,
-        source,
       },
       requestInjected: {
         router,
@@ -157,8 +157,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     } = params
 
     const startTime = Date.now()
-
-    metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
 
     // Parse user provided token address/symbol to Currency object.
     const currencyLookupStartTime = Date.now()
