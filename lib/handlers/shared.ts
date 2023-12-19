@@ -2,15 +2,10 @@ import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   CacheMode,
-  ITokenListProvider,
-  ITokenProvider,
   LowerCaseStringArray,
   MapWithLowerCaseKey,
-  NATIVE_NAMES_BY_ID,
-  nativeOnChain,
   ProtocolPoolSelection,
 } from '@uniswap/smart-order-router'
-import Logger from 'bunyan'
 import { FeeOptions } from '@uniswap/v3-sdk'
 import { FlatFeeOptions } from '@uniswap/universal-router-sdk'
 
@@ -181,46 +176,6 @@ export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (
   return {
     enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
   } as FeeOnTransferSpecificConfig
-}
-
-export async function tokenStringToCurrency(
-  tokenListProvider: ITokenListProvider,
-  tokenProvider: ITokenProvider,
-  tokenRaw: string,
-  chainId: ChainId,
-  log: Logger
-): Promise<Currency | undefined> {
-  const isAddress = (s: string) => s.length == 42 && s.startsWith('0x')
-
-  let token: Currency | undefined = undefined
-
-  if (NATIVE_NAMES_BY_ID[chainId]!.includes(tokenRaw)) {
-    token = nativeOnChain(chainId)
-  } else if (isAddress(tokenRaw)) {
-    token = await tokenListProvider.getTokenByAddress(tokenRaw)
-  }
-
-  if (!token) {
-    token = await tokenListProvider.getTokenBySymbol(tokenRaw)
-  }
-
-  if (token) {
-    log.info(
-      {
-        tokenAddress: token.wrapped.address,
-      },
-      `Got input token from token list`
-    )
-    return token
-  }
-
-  log.info(`Getting input token ${tokenRaw} from chain`)
-  if (!token && isAddress(tokenRaw)) {
-    const tokenAccessor = await tokenProvider.getTokens([tokenRaw])
-    return tokenAccessor.getTokenByAddress(tokenRaw)
-  }
-
-  return undefined
 }
 
 export function parseSlippageTolerance(slippageTolerance: string): Percent {

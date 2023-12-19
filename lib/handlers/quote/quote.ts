@@ -25,7 +25,6 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   parseDeadline,
   parseSlippageTolerance,
-  tokenStringToCurrency,
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
@@ -39,6 +38,7 @@ import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 import { MetricsLogger } from 'aws-embedded-metrics'
+import { CurrencyLookup } from '../CurrencyLookup'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -162,21 +162,10 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
 
-    const currencyIn = await tokenStringToCurrency(
-      tokenListProvider,
-      tokenProvider,
-      tokenInAddress,
-      tokenInChainId,
-      log
-    )
+    const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
 
-    const currencyOut = await tokenStringToCurrency(
-      tokenListProvider,
-      tokenProvider,
-      tokenOutAddress,
-      tokenOutChainId,
-      log
-    )
+    const currencyIn = await currencyLookup.searchForToken(tokenInAddress, tokenInChainId)
+    const currencyOut = await currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId)
 
     metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
 
