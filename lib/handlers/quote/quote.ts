@@ -51,6 +51,14 @@ export class QuoteHandler extends APIGLambdaHandler<
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
+
+    // Mark the start of core business logic for latency bookkeeping.
+    // Note that some time may have elapsed before handleRequest was called, so this
+    // time does not accurately indicate when our lambda started processing the request,
+    // resulting in slightly underreported metrics.
+    //
+    // To use the true requestStartTime, the route APIGLambdaHandler needs to be
+    // refactored to call handleRequest with the startTime.
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
