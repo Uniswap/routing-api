@@ -157,7 +157,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     } = params
 
     // Parse user provided token address/symbol to Currency object.
-    let before = Date.now()
+    const before = Date.now()
     const startTime = Date.now()
 
     metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
@@ -335,8 +335,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
       }
     }
-
-    before = Date.now()
 
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
