@@ -51,12 +51,20 @@ export class QuoteHandler extends APIGLambdaHandler<
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
+
+    // Mark the start of core business logic for latency bookkeeping.
+    // Note that some time may have elapsed before handleRequest was called, so this
+    // time does not accurately indicate when our lambda started processing the request,
+    // resulting in slightly underreported metrics.
+    //
+    // To use the true requestStartTime, the route APIGLambdaHandler needs to be
+    // refactored to call handleRequest with the startTime.
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
 
     try {
-      result = await this.handleRequestInternal(params)
+      result = await this.handleRequestInternal(params, startTime)
 
       switch (result.statusCode) {
         case 200:
@@ -90,6 +98,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       throw err
     } finally {
       // This metric is logged after calling the internal handler to correlate with the status metrics
+      metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
@@ -109,7 +118,8 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   private async handleRequestInternal(
-    params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
+    params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>,
+    handleRequestStartTime: number
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const {
       requestQueryParams: {
@@ -141,7 +151,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionBips,
         portionAmount,
         portionRecipient,
-        source,
       },
       requestInjected: {
         router,
@@ -155,50 +164,11 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-
-    // Parse user provided token address/symbol to Currency object.
-    let before = Date.now()
-    const startTime = Date.now()
-
-    metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
-
-    const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
-    const [currencyIn, currencyOut] = await Promise.all([
-      currencyLookup.searchForToken(tokenInAddress, tokenInChainId),
-      currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId),
-    ])
-
-    metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
-
-    if (!currencyIn) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_INVALID',
-        detail: `Could not find token with address "${tokenInAddress}"`,
-      }
-    }
-
-    if (!currencyOut) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_OUT_INVALID',
-        detail: `Could not find token with address "${tokenOutAddress}"`,
-      }
-    }
-
-    if (tokenInChainId != tokenOutChainId) {
+    if (tokenInChainId !== tokenOutChainId) {
       return {
         statusCode: 400,
         errorCode: 'TOKEN_CHAINS_DIFFERENT',
         detail: `Cannot request quotes for tokens on different chains`,
-      }
-    }
-
-    if (currencyIn.equals(currencyOut)) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_OUT_SAME',
-        detail: `tokenIn and tokenOut must be different`,
       }
     }
 
@@ -225,6 +195,40 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     } else if (!forceCrossProtocol) {
       protocols = [Protocol.V3]
+    }
+
+    // Parse user provided token address/symbol to Currency object.
+    const currencyLookupStartTime = Date.now()
+    const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
+    const [currencyIn, currencyOut] = await Promise.all([
+      currencyLookup.searchForToken(tokenInAddress, tokenInChainId),
+      currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId),
+    ])
+
+    metric.putMetric('TokenInOutStrToToken', Date.now() - currencyLookupStartTime, MetricLoggerUnit.Milliseconds)
+
+    if (!currencyIn) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_INVALID',
+        detail: `Could not find token with address "${tokenInAddress}"`,
+      }
+    }
+
+    if (!currencyOut) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_OUT_INVALID',
+        detail: `Could not find token with address "${tokenOutAddress}"`,
+      }
+    }
+
+    if (currencyIn.equals(currencyOut)) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_OUT_SAME',
+        detail: `tokenIn and tokenOut must be different`,
+      }
     }
 
     let parsedDebugRoutingConfig = {}
@@ -335,8 +339,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
       }
     }
-
-    before = Date.now()
 
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
@@ -608,7 +610,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     this.logRouteMetrics(
       log,
       metric,
-      startTime,
+      handleRequestStartTime,
       currencyIn,
       currencyOut,
       tokenInAddress,
@@ -671,7 +673,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   private logRouteMetrics(
     log: Logger,
     metric: IMetric,
-    startTime: number,
+    handleRequestStartTime: number,
     currencyIn: Currency,
     currencyOut: Currency,
     tokenInAddress: string,
@@ -709,7 +711,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       metric.putMetric(
         `GET_QUOTE_LATENCY_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
-        Date.now() - startTime,
+        Date.now() - handleRequestStartTime,
         MetricLoggerUnit.Milliseconds
       )
 
