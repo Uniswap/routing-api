@@ -156,19 +156,19 @@ export class QuoteHandler extends APIGLambdaHandler<
       },
     } = params
 
-    // Parse user provided token address/symbol to Currency object.
-    const before = Date.now()
     const startTime = Date.now()
 
     metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${source}`, 1, MetricLoggerUnit.Count)
 
+    // Parse user provided token address/symbol to Currency object.
+    const currencyLookupStartTime = Date.now()
     const currencyLookup = new CurrencyLookup(tokenListProvider, tokenProvider, log)
     const [currencyIn, currencyOut] = await Promise.all([
       currencyLookup.searchForToken(tokenInAddress, tokenInChainId),
       currencyLookup.searchForToken(tokenOutAddress, tokenOutChainId),
     ])
 
-    metric.putMetric('TokenInOutStrToToken', Date.now() - before, MetricLoggerUnit.Milliseconds)
+    metric.putMetric('TokenInOutStrToToken', Date.now() - currencyLookupStartTime, MetricLoggerUnit.Milliseconds)
 
     if (!currencyIn) {
       return {
