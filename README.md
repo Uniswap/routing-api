@@ -75,7 +75,17 @@ fields will be updated/calculated using tenderly gasLimit estimate. These fields
 
 fields will still be included, however they will be heuristics rather then Tenderly estimates. These heuristic values are not reliable for sending transactions on chain.
 
-### End-to-end Tests
+### Testing
+
+#### Unit Tests
+
+Unit tests are invoked by running `npm run test:unit` in the root directory. A 'watch' mode is also supported by running `npm run test:unit:watch`.
+
+#### Integration Tests
+
+Integration tests run against a local DynamoDB node deployed using [dynamodb-local](https://github.com/rynop/dynamodb-local). Note that JDK 8 is a dependency of this package. Invoke the integration tests by running `npm run test:integ` in the root directory.
+
+#### End-to-end Tests
 
 The end-to-end tests fetch quotes from your deployed API, then execute the swaps on a Hardhat mainnet fork.
 
