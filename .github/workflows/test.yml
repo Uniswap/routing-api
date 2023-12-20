@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-test:
-    name: Unit Test
+  test:
+    name: Run tests
     runs-on: ubuntu-latest
 
     steps:
@@ -23,5 +23,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Run Unit Tests
-        run: npm run test
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Run integration tests
+        run: npm run test:integ
