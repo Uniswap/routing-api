@@ -35,47 +35,83 @@ export class SwapOptionsFactory {
       return undefined
     }
 
-    let swapParams: SwapOptions | undefined = undefined
+    if (enableUniversalRouter) {
+      return SwapOptionsFactory.createUniversalRouterOptions(
+        chainId,
+        currencyIn,
+        currencyOut,
+        tradeType,
+        slippageTolerance,
+        portionBips,
+        portionRecipient,
+        portionAmount,
+        amountRaw,
+        deadline,
+        recipient,
+        permitSignature,
+        permitNonce,
+        permitExpiration,
+        permitAmount,
+        permitSigDeadline,
+        simulateFromAddress,
+        metric
+      )
+    } else {
+      return SwapOptionsFactory.createSwapRouter02Options(
+        slippageTolerance,
+        deadline,
+        recipient,
+        permitSignature,
+        permitNonce,
+        permitExpiration,
+        permitAmount,
+        permitSigDeadline,
+        simulateFromAddress,
+        metric
+      )
+    }
+  }
 
+  static createUniversalRouterOptions(
+    chainId: ChainId,
+    currencyIn: Currency,
+    currencyOut: Currency,
+    tradeType: TradeTypeParam,
+    slippageTolerance: string,
+    portionBips: number | undefined,
+    portionRecipient: string | undefined,
+    portionAmount: string | undefined,
+    amountRaw: string,
+    deadline: string | undefined,
+    recipient: string | undefined,
+    permitSignature: string | undefined,
+    permitNonce: string | undefined,
+    permitExpiration: string | undefined,
+    permitAmount: string | undefined,
+    permitSigDeadline: string | undefined,
+    simulateFromAddress: string | undefined,
+    metric: IMetric
+  ): SwapOptions | undefined {
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
 
-    // TODO: Remove once universal router is no longer behind a feature flag.
-    if (enableUniversalRouter) {
-      const allFeeOptions = populateFeeOptions(
-        tradeType,
-        portionBips,
-        portionRecipient,
-        portionAmount ??
-          computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
-      )
+    const allFeeOptions = populateFeeOptions(
+      tradeType,
+      portionBips,
+      portionRecipient,
+      portionAmount ??
+        computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
+    )
 
-      swapParams = {
-        type: SwapType.UNIVERSAL_ROUTER,
-        deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
-        recipient: recipient,
-        slippageTolerance: slippageTolerancePercent,
-        ...allFeeOptions,
-      }
-    } else {
-      if (deadline && recipient) {
-        swapParams = {
-          type: SwapType.SWAP_ROUTER_02,
-          deadline: parseDeadline(deadline),
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-        }
-      }
+    const swapParams: SwapOptions = {
+      type: SwapType.UNIVERSAL_ROUTER,
+      deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
+      recipient: recipient,
+      slippageTolerance: slippageTolerancePercent,
+      ...allFeeOptions,
     }
 
-    if (
-      enableUniversalRouter &&
-      permitSignature &&
-      permitNonce &&
-      permitExpiration &&
-      permitAmount &&
-      permitSigDeadline
-    ) {
+    if (permitSignature && permitNonce && permitExpiration && permitAmount && permitSigDeadline) {
       const permit: PermitSingle = {
         details: {
           token: currencyIn.wrapped.address,
@@ -87,17 +123,47 @@ export class SwapOptionsFactory {
         sigDeadline: permitSigDeadline,
       }
 
-      if (swapParams) {
-        swapParams.inputTokenPermit = {
-          ...permit,
-          signature: permitSignature,
-        }
+      swapParams.inputTokenPermit = {
+        ...permit,
+        signature: permitSignature,
       }
-    } else if (
-      !enableUniversalRouter &&
-      permitSignature &&
-      ((permitNonce && permitExpiration) || (permitAmount && permitSigDeadline))
-    ) {
+    }
+
+    if (simulateFromAddress) {
+      metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
+
+      swapParams.simulate = { fromAddress: simulateFromAddress }
+    }
+    return swapParams
+  }
+
+  static createSwapRouter02Options(
+    slippageTolerance: string,
+    deadline: string | undefined,
+    recipient: string | undefined,
+    permitSignature: string | undefined,
+    permitNonce: string | undefined,
+    permitExpiration: string | undefined,
+    permitAmount: string | undefined,
+    permitSigDeadline: string | undefined,
+    simulateFromAddress: string | undefined,
+    metric: IMetric
+  ): SwapOptions | undefined {
+    let swapParams: SwapOptions | undefined = undefined
+
+    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
+    const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
+
+    if (deadline && recipient) {
+      swapParams = {
+        type: SwapType.SWAP_ROUTER_02,
+        deadline: parseDeadline(deadline),
+        recipient: recipient,
+        slippageTolerance: slippageTolerancePercent,
+      }
+    }
+
+    if (permitSignature && ((permitNonce && permitExpiration) || (permitAmount && permitSigDeadline))) {
       const { v, r, s } = utils.splitSignature(permitSignature)
 
       if (swapParams) {
