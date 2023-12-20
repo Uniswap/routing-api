@@ -1,5 +1,5 @@
 import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import { IMetric, MetricLoggerUnit, SwapOptions, SwapType } from '@uniswap/smart-order-router'
+import { SwapOptions, SwapType } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi'
 import { TradeTypeParam } from './schema/quote-schema'
 import { computePortionAmount, parseDeadline, parseSlippageTolerance, populateFeeOptions } from '../shared'
@@ -43,8 +43,7 @@ export class SwapOptionsFactory {
     permitExpiration: string | undefined,
     permitAmount: string | undefined,
     permitSigDeadline: string | undefined,
-    simulateFromAddress: string | undefined,
-    metric: IMetric
+    simulateFromAddress: string | undefined
   ): SwapOptions | undefined {
     if (enableUniversalRouter) {
       return SwapOptionsFactory.createUniversalRouterOptions(
@@ -68,8 +67,7 @@ export class SwapOptionsFactory {
           permitAmount,
           permitSigDeadline,
         },
-        simulateFromAddress,
-        metric
+        simulateFromAddress
       )
     } else {
       return SwapOptionsFactory.createSwapRouter02Options(
@@ -83,8 +81,7 @@ export class SwapOptionsFactory {
           permitAmount,
           permitSigDeadline,
         },
-        simulateFromAddress,
-        metric
+        simulateFromAddress
       )
     }
   }
@@ -105,8 +102,7 @@ export class SwapOptionsFactory {
       permitAmount,
       permitSigDeadline,
     }: SwapOptionsPermitConfig,
-    simulateFromAddress: string | undefined,
-    metric: IMetric
+    simulateFromAddress: string | undefined
   ): SwapOptions | undefined {
     // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
     // If it's undefined, we'll exit early and not request any call data generation from SOR.
@@ -149,8 +145,6 @@ export class SwapOptionsFactory {
     }
 
     if (simulateFromAddress) {
-      metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-
       swapParams.simulate = { fromAddress: simulateFromAddress }
     }
     return swapParams
@@ -167,8 +161,7 @@ export class SwapOptionsFactory {
       permitAmount,
       permitSigDeadline,
     }: SwapOptionsPermitConfig,
-    simulateFromAddress: string | undefined,
-    metric: IMetric
+    simulateFromAddress: string | undefined
   ): SwapOptions | undefined {
     // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
     // If it's undefined, we'll exit early and not request any call data generation from SOR.
@@ -203,8 +196,6 @@ export class SwapOptionsFactory {
     }
 
     if (simulateFromAddress) {
-      metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-
       if (swapParams) {
         swapParams.simulate = { fromAddress: simulateFromAddress }
       }

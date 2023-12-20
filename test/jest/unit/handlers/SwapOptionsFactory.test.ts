@@ -43,10 +43,6 @@ describe('SwapOptionsFactory', () => {
     const permitSigDeadline = 'permitSigDeadline'
     const simulateFromAddress = 'simulateFromAddress'
 
-    const metric = {
-      putMetric: jest.fn(),
-    } as any
-
     expect(
       SwapOptionsFactory.assemble(
         chainId,
@@ -66,8 +62,7 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress,
-        metric
+        simulateFromAddress
       )
     ).toEqual({
       deadlineOrPreviousBlockhash: 1060,
@@ -123,10 +118,6 @@ describe('SwapOptionsFactory', () => {
     const permitSigDeadline = 'permitSigDeadline'
     const simulateFromAddress = 'simulateFromAddress'
 
-    const metric = {
-      putMetric: jest.fn(),
-    } as any
-
     jest.spyOn(utils, 'splitSignature').mockImplementation(
       () =>
         ({
@@ -154,8 +145,7 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress,
-        metric
+        simulateFromAddress
       )
     ).toEqual({
       deadline: 1060,
@@ -202,9 +192,6 @@ describe('SwapOptionsFactory', () => {
     const permitSigDeadline = 'permitSigDeadline'
     const simulateFromAddress = 'simulateFromAddress'
 
-    const metric = {
-      putMetric: jest.fn(),
-    } as any
     expect(
       SwapOptionsFactory.assemble(
         chainId,
@@ -224,8 +211,7 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress,
-        metric
+        simulateFromAddress
       )
     ).toBeUndefined()
   })

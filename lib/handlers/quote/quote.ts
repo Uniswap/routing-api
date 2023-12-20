@@ -280,9 +280,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       permitExpiration,
       permitAmount,
       permitSigDeadline,
-      simulateFromAddress,
-      metric
+      simulateFromAddress
     )
+
+    if (swapParams?.simulate?.fromAddress) {
+      metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
+    }
 
     switch (type) {
       case 'exactIn':
