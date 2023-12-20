@@ -1,7 +1,5 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
-import { PermitSingle } from '@uniswap/permit2-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -10,7 +8,6 @@ import {
   routeAmountsToString,
   SwapRoute,
   SwapOptions,
-  SwapType,
   SimulationStatus,
   IMetric,
   ID_TO_NETWORK_NAME,
@@ -23,22 +20,18 @@ import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
-  parseDeadline,
-  parseSlippageTolerance,
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
-  populateFeeOptions,
-  computePortionAmount,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
-import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
+import { SwapOptionsFactory } from './SwapOptionsFactory'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -253,7 +246,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
-    const swapParams: SwapOptions | undefined = QuoteHandler.determineSwapParams(
+    const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble(
       chainId,
       currencyIn,
       currencyOut,
@@ -561,116 +554,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       statusCode: 200,
       body: result,
     }
-  }
-
-  public static determineSwapParams(
-    chainId: ChainId,
-    currencyIn: Currency,
-    currencyOut: Currency,
-    tradeType: TradeTypeParam,
-    slippageTolerance: string | undefined,
-    enableUniversalRouter: boolean | undefined,
-    portionBips: number | undefined,
-    portionRecipient: string | undefined,
-    portionAmount: string | undefined,
-    amountRaw: string,
-    deadline: string | undefined,
-    recipient: string | undefined,
-    permitSignature: string | undefined,
-    permitNonce: string | undefined,
-    permitExpiration: string | undefined,
-    permitAmount: string | undefined,
-    permitSigDeadline: string | undefined,
-    simulateFromAddress: string | undefined,
-    metric: IMetric
-  ) {
-    let swapParams: SwapOptions | undefined = undefined
-
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    if (slippageTolerance) {
-      const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
-
-      // TODO: Remove once universal router is no longer behind a feature flag.
-      if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(
-          tradeType,
-          portionBips,
-          portionRecipient,
-          portionAmount ??
-            computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
-        )
-
-        swapParams = {
-          type: SwapType.UNIVERSAL_ROUTER,
-          deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-          ...allFeeOptions,
-        }
-      } else {
-        if (deadline && recipient) {
-          swapParams = {
-            type: SwapType.SWAP_ROUTER_02,
-            deadline: parseDeadline(deadline),
-            recipient: recipient,
-            slippageTolerance: slippageTolerancePercent,
-          }
-        }
-      }
-
-      if (
-        enableUniversalRouter &&
-        permitSignature &&
-        permitNonce &&
-        permitExpiration &&
-        permitAmount &&
-        permitSigDeadline
-      ) {
-        const permit: PermitSingle = {
-          details: {
-            token: currencyIn.wrapped.address,
-            amount: permitAmount,
-            expiration: permitExpiration,
-            nonce: permitNonce,
-          },
-          spender: UNIVERSAL_ROUTER_ADDRESS(chainId),
-          sigDeadline: permitSigDeadline,
-        }
-
-        if (swapParams) {
-          swapParams.inputTokenPermit = {
-            ...permit,
-            signature: permitSignature,
-          }
-        }
-      } else if (
-        !enableUniversalRouter &&
-        permitSignature &&
-        ((permitNonce && permitExpiration) || (permitAmount && permitSigDeadline))
-      ) {
-        const { v, r, s } = utils.splitSignature(permitSignature)
-
-        if (swapParams) {
-          swapParams.inputTokenPermit = {
-            v: v as 0 | 1 | 27 | 28,
-            r,
-            s,
-            ...(permitNonce && permitExpiration
-              ? { nonce: permitNonce!, expiry: permitExpiration! }
-              : { amount: permitAmount!, deadline: permitSigDeadline! }),
-          }
-        }
-      }
-
-      if (simulateFromAddress) {
-        metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-
-        if (swapParams) {
-          swapParams.simulate = { fromAddress: simulateFromAddress }
-        }
-      }
-    }
-    return swapParams
   }
 
   private deriveBuyFeeBps(
