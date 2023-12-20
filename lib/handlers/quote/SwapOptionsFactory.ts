@@ -114,9 +114,6 @@ export class SwapOptionsFactory {
       return undefined
     }
 
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
-
     const allFeeOptions = populateFeeOptions(
       tradeType,
       portionBips,
@@ -129,7 +126,7 @@ export class SwapOptionsFactory {
       type: SwapType.UNIVERSAL_ROUTER,
       deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
       recipient: recipient,
-      slippageTolerance: slippageTolerancePercent,
+      slippageTolerance: parseSlippageTolerance(slippageTolerance),
       ...allFeeOptions,
     }
 
@@ -181,15 +178,12 @@ export class SwapOptionsFactory {
 
     let swapParams: SwapOptions | undefined = undefined
 
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
-
     if (deadline && recipient) {
       swapParams = {
         type: SwapType.SWAP_ROUTER_02,
         deadline: parseDeadline(deadline),
         recipient: recipient,
-        slippageTolerance: slippageTolerancePercent,
+        slippageTolerance: parseSlippageTolerance(slippageTolerance),
       }
     }
 
