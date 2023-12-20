@@ -254,13 +254,15 @@ export class QuoteHandler extends APIGLambdaHandler<
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
     const swapParams: SwapOptions | undefined = QuoteHandler.determineSwapParams(
+      chainId,
+      currencyIn,
+      currencyOut,
       slippageTolerance,
       enableUniversalRouter,
       type,
       portionBips,
       portionRecipient,
       portionAmount,
-      currencyOut,
       amountRaw,
       deadline,
       recipient,
@@ -269,8 +271,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       permitExpiration,
       permitAmount,
       permitSigDeadline,
-      currencyIn,
-      chainId,
       simulateFromAddress,
       metric
     )
@@ -564,13 +564,15 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   public static determineSwapParams(
+    chainId: ChainId,
+    currencyIn: Currency,
+    currencyOut: Currency,
     slippageTolerance: string | undefined,
     enableUniversalRouter: boolean | undefined,
     type: string,
     portionBips: number | undefined,
     portionRecipient: string | undefined,
     portionAmount: string | undefined,
-    currencyOut: Currency,
     amountRaw: string,
     deadline: string | undefined,
     recipient: string | undefined,
@@ -579,8 +581,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     permitExpiration: string | undefined,
     permitAmount: string | undefined,
     permitSigDeadline: string | undefined,
-    currencyIn: Currency,
-    chainId: ChainId,
     simulateFromAddress: string | undefined,
     metric: IMetric
   ) {
