@@ -246,6 +246,22 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
+    let swapRoute: SwapRoute | null
+    let amount: CurrencyAmount<Currency>
+
+    let tokenPairSymbol = ''
+    let tokenPairSymbolChain = ''
+    if (currencyIn.symbol && currencyOut.symbol) {
+      tokenPairSymbol = _([currencyIn.symbol, currencyOut.symbol]).join('/')
+      tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
+    }
+
+    const [token0Symbol, token0Address, token1Symbol, token1Address] = currencyIn.wrapped.sortsBefore(
+      currencyOut.wrapped
+    )
+      ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
+      : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
+
     const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble(
       chainId,
       currencyIn,
@@ -267,22 +283,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       simulateFromAddress,
       metric
     )
-
-    let swapRoute: SwapRoute | null
-    let amount: CurrencyAmount<Currency>
-
-    let tokenPairSymbol = ''
-    let tokenPairSymbolChain = ''
-    if (currencyIn.symbol && currencyOut.symbol) {
-      tokenPairSymbol = _([currencyIn.symbol, currencyOut.symbol]).join('/')
-      tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
-    }
-
-    const [token0Symbol, token0Address, token1Symbol, token1Address] = currencyIn.wrapped.sortsBefore(
-      currencyOut.wrapped
-    )
-      ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
-      : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
 
     switch (type) {
       case 'exactIn':
