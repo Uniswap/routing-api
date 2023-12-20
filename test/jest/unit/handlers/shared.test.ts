@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect } from '@jest/globals'
 import {
   computePortionAmount,
   parseDeadline,
@@ -11,29 +11,29 @@ import { getAmount } from '../../../utils/tokens'
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
 
-describe('shared', async () => {
+describe('shared', () => {
   it('parsePortionPercent', () => {
     const percent = parsePortionPercent(10000)
-    expect(percent.quotient.toString()).to.equal('1')
+    expect(percent.quotient.toString()).toEqual('1')
   })
 
   it('parseFeePortions', () => {
     const feeOptions = parseFeeOptions(10000, '0x123')
-    expect(feeOptions).not.to.be.undefined
+    expect(feeOptions).toBeDefined()
 
     if (feeOptions) {
-      expect(feeOptions.fee.quotient.toString()).to.equal('1')
-      expect(feeOptions.recipient).to.equal('0x123')
+      expect(feeOptions.fee.quotient.toString()).toEqual('1')
+      expect(feeOptions.recipient).toEqual('0x123')
     }
   })
 
   it('parseFlatFeePortions', () => {
     const flatFeeOptionsent = parseFlatFeeOptions('35', '0x123')
-    expect(flatFeeOptionsent).not.to.be.undefined
+    expect(flatFeeOptionsent).toBeDefined()
 
     if (flatFeeOptionsent) {
-      expect(flatFeeOptionsent.amount.toString()).to.equal('35')
-      expect(flatFeeOptionsent.recipient).to.equal('0x123')
+      expect(flatFeeOptionsent.amount.toString()).toEqual('35')
+      expect(flatFeeOptionsent.recipient).toEqual('0x123')
     }
   })
 
@@ -41,10 +41,9 @@ describe('shared', async () => {
     const amount = await getAmount(1, 'EXACT_OUTPUT', 'ETH', 'DAI', '1')
     const daiAmount = CurrencyAmount.fromRawAmount(DAI_MAINNET, amount)
     const portionAmount = computePortionAmount(daiAmount, 15)
-    expect(portionAmount).not.to.be.undefined
 
     if (portionAmount) {
-      expect(portionAmount).to.equal(daiAmount.multiply(parsePortionPercent(15)).quotient.toString())
+      expect(portionAmount).toEqual(daiAmount.multiply(parsePortionPercent(15)).quotient.toString())
     }
   })
 
@@ -59,11 +58,11 @@ describe('shared', async () => {
       ...allFeeOptions,
     }
 
-    expect(swapParams.fee).not.to.be.undefined
-    expect(swapParams.fee!.fee.equalTo(parsePortionPercent(15))).to.be.true
-    expect(swapParams.fee!.recipient).to.equal('0x123')
+    expect(swapParams.fee).toBeDefined()
+    expect(swapParams.fee!.fee.equalTo(parsePortionPercent(15))).toBe(true)
+    expect(swapParams.fee!.recipient).toEqual('0x123')
 
-    expect(swapParams.flatFee).to.be.undefined
+    expect(swapParams.flatFee).toBeUndefined()
   })
 
   it('populateFeeOptions exact out', () => {
@@ -77,10 +76,10 @@ describe('shared', async () => {
       ...allFeeOptions,
     }
 
-    expect(swapParams.flatFee).not.to.be.undefined
-    expect(swapParams.flatFee!.amount.toString()).to.equal('35')
-    expect(swapParams.flatFee!.recipient).to.equal('0x123')
+    expect(swapParams.flatFee).toBeDefined()
+    expect(swapParams.flatFee!.amount.toString()).toEqual('35')
+    expect(swapParams.flatFee!.recipient).toEqual('0x123')
 
-    expect(swapParams.fee).to.be.undefined
+    expect(swapParams.fee).toBeUndefined()
   })
 })
