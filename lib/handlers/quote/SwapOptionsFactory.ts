@@ -7,6 +7,23 @@ import { PermitSingle } from '@uniswap/permit2-sdk'
 import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { utils } from 'ethers'
 
+export type SwapOptionsFeeConfig = {
+  portionBips?: number
+  portionRecipient?: string
+  portionAmount?: string
+  amountRaw: string
+}
+
+export type SwapOptionsPermitConfig = {
+  deadline?: string
+  recipient?: string
+  permitSignature?: string
+  permitNonce?: string
+  permitExpiration?: string
+  permitAmount?: string
+  permitSigDeadline?: string
+}
+
 export class SwapOptionsFactory {
   static assemble(
     chainId: ChainId,
@@ -29,12 +46,6 @@ export class SwapOptionsFactory {
     simulateFromAddress: string | undefined,
     metric: IMetric
   ): SwapOptions | undefined {
-    // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
-    // If it's undefined, we'll exit early and not request any call data generation from SOR.
-    if (!slippageTolerance) {
-      return undefined
-    }
-
     if (enableUniversalRouter) {
       return SwapOptionsFactory.createUniversalRouterOptions(
         chainId,
@@ -42,30 +53,36 @@ export class SwapOptionsFactory {
         currencyOut,
         tradeType,
         slippageTolerance,
-        portionBips,
-        portionRecipient,
-        portionAmount,
-        amountRaw,
-        deadline,
-        recipient,
-        permitSignature,
-        permitNonce,
-        permitExpiration,
-        permitAmount,
-        permitSigDeadline,
+        {
+          portionBips,
+          portionRecipient,
+          portionAmount,
+          amountRaw,
+        },
+        {
+          deadline,
+          recipient,
+          permitSignature,
+          permitNonce,
+          permitExpiration,
+          permitAmount,
+          permitSigDeadline,
+        },
         simulateFromAddress,
         metric
       )
     } else {
       return SwapOptionsFactory.createSwapRouter02Options(
         slippageTolerance,
-        deadline,
-        recipient,
-        permitSignature,
-        permitNonce,
-        permitExpiration,
-        permitAmount,
-        permitSigDeadline,
+        {
+          deadline,
+          recipient,
+          permitSignature,
+          permitNonce,
+          permitExpiration,
+          permitAmount,
+          permitSigDeadline,
+        },
         simulateFromAddress,
         metric
       )
@@ -77,21 +94,26 @@ export class SwapOptionsFactory {
     currencyIn: Currency,
     currencyOut: Currency,
     tradeType: TradeTypeParam,
-    slippageTolerance: string,
-    portionBips: number | undefined,
-    portionRecipient: string | undefined,
-    portionAmount: string | undefined,
-    amountRaw: string,
-    deadline: string | undefined,
-    recipient: string | undefined,
-    permitSignature: string | undefined,
-    permitNonce: string | undefined,
-    permitExpiration: string | undefined,
-    permitAmount: string | undefined,
-    permitSigDeadline: string | undefined,
+    slippageTolerance: string | undefined,
+    { portionBips, portionRecipient, portionAmount, amountRaw }: SwapOptionsFeeConfig,
+    {
+      deadline,
+      recipient,
+      permitSignature,
+      permitNonce,
+      permitExpiration,
+      permitAmount,
+      permitSigDeadline,
+    }: SwapOptionsPermitConfig,
     simulateFromAddress: string | undefined,
     metric: IMetric
   ): SwapOptions | undefined {
+    // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
+    // If it's undefined, we'll exit early and not request any call data generation from SOR.
+    if (!slippageTolerance) {
+      return undefined
+    }
+
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
     const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
 
@@ -138,17 +160,25 @@ export class SwapOptionsFactory {
   }
 
   static createSwapRouter02Options(
-    slippageTolerance: string,
-    deadline: string | undefined,
-    recipient: string | undefined,
-    permitSignature: string | undefined,
-    permitNonce: string | undefined,
-    permitExpiration: string | undefined,
-    permitAmount: string | undefined,
-    permitSigDeadline: string | undefined,
+    slippageTolerance: string | undefined,
+    {
+      deadline,
+      recipient,
+      permitSignature,
+      permitNonce,
+      permitExpiration,
+      permitAmount,
+      permitSigDeadline,
+    }: SwapOptionsPermitConfig,
     simulateFromAddress: string | undefined,
     metric: IMetric
   ): SwapOptions | undefined {
+    // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
+    // If it's undefined, we'll exit early and not request any call data generation from SOR.
+    if (!slippageTolerance) {
+      return undefined
+    }
+
     let swapParams: SwapOptions | undefined = undefined
 
     // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
