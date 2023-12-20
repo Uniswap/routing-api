@@ -24,27 +24,48 @@ export type SwapOptionsPermitConfig = {
   permitSigDeadline?: string
 }
 
+type SwapOptionsInput = {
+  chainId: ChainId
+  currencyIn: Currency
+  currencyOut: Currency
+  tradeType: TradeTypeParam
+  amountRaw: string
+  slippageTolerance?: string
+  enableUniversalRouter?: boolean
+  portionBips?: number
+  portionRecipient?: string
+  portionAmount?: string
+  deadline?: string
+  recipient?: string
+  permitSignature?: string
+  permitNonce?: string
+  permitExpiration?: string
+  permitAmount?: string
+  permitSigDeadline?: string
+  simulateFromAddress?: string
+}
+
 export class SwapOptionsFactory {
-  static assemble(
-    chainId: ChainId,
-    currencyIn: Currency,
-    currencyOut: Currency,
-    tradeType: TradeTypeParam,
-    slippageTolerance: string | undefined,
-    enableUniversalRouter: boolean | undefined,
-    portionBips: number | undefined,
-    portionRecipient: string | undefined,
-    portionAmount: string | undefined,
-    amountRaw: string,
-    deadline: string | undefined,
-    recipient: string | undefined,
-    permitSignature: string | undefined,
-    permitNonce: string | undefined,
-    permitExpiration: string | undefined,
-    permitAmount: string | undefined,
-    permitSigDeadline: string | undefined,
-    simulateFromAddress: string | undefined
-  ): SwapOptions | undefined {
+  static assemble({
+    chainId,
+    currencyIn,
+    currencyOut,
+    tradeType,
+    amountRaw,
+    slippageTolerance,
+    enableUniversalRouter,
+    portionBips,
+    portionRecipient,
+    portionAmount,
+    deadline,
+    recipient,
+    permitSignature,
+    permitNonce,
+    permitExpiration,
+    permitAmount,
+    permitSigDeadline,
+    simulateFromAddress,
+  }: SwapOptionsInput): SwapOptions | undefined {
     if (enableUniversalRouter) {
       return SwapOptionsFactory.createUniversalRouterOptions(
         chainId,

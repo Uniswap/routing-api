@@ -44,7 +44,7 @@ describe('SwapOptionsFactory', () => {
     const simulateFromAddress = 'simulateFromAddress'
 
     expect(
-      SwapOptionsFactory.assemble(
+      SwapOptionsFactory.assemble({
         chainId,
         currencyIn,
         currencyOut,
@@ -62,8 +62,8 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress
-      )
+        simulateFromAddress,
+      })
     ).toEqual({
       deadlineOrPreviousBlockhash: 1060,
       type: SwapType.UNIVERSAL_ROUTER,
@@ -127,7 +127,7 @@ describe('SwapOptionsFactory', () => {
         } as any)
     )
     expect(
-      SwapOptionsFactory.assemble(
+      SwapOptionsFactory.assemble({
         chainId,
         currencyIn,
         currencyOut,
@@ -145,8 +145,8 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress
-      )
+        simulateFromAddress,
+      })
     ).toEqual({
       deadline: 1060,
       type: SwapType.SWAP_ROUTER_02,
@@ -193,7 +193,7 @@ describe('SwapOptionsFactory', () => {
     const simulateFromAddress = 'simulateFromAddress'
 
     expect(
-      SwapOptionsFactory.assemble(
+      SwapOptionsFactory.assemble({
         chainId,
         currencyIn,
         currencyOut,
@@ -211,8 +211,8 @@ describe('SwapOptionsFactory', () => {
         permitExpiration,
         permitAmount,
         permitSigDeadline,
-        simulateFromAddress
-      )
+        simulateFromAddress,
+      })
     ).toBeUndefined()
   })
 })

@@ -262,11 +262,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
       : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
 
-    const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble(
+    const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble({
       chainId,
       currencyIn,
       currencyOut,
-      type,
+      tradeType: type,
       slippageTolerance,
       enableUniversalRouter,
       portionBips,
@@ -280,8 +280,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       permitExpiration,
       permitAmount,
       permitSigDeadline,
-      simulateFromAddress
-    )
+      simulateFromAddress,
+    })
 
     if (swapParams?.simulate?.fromAddress) {
       metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
