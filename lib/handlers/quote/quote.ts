@@ -253,7 +253,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
-    const swapParams: SwapOptions | undefined = this.determineSwapParams(
+    const swapParams: SwapOptions | undefined = QuoteHandler.determineSwapParams(
       slippageTolerance,
       enableUniversalRouter,
       type,
@@ -563,7 +563,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
   }
 
-  private determineSwapParams(
+  public static determineSwapParams(
     slippageTolerance: string | undefined,
     enableUniversalRouter: boolean | undefined,
     type: string,
