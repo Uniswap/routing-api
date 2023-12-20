@@ -252,7 +252,7 @@ export class RoutingAPIPipeline extends Stack {
         'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
         'npm install',
         'npm run build',
-        'npm run integ-test',
+        'npm run test:e2e',
       ],
     })
 

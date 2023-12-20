@@ -13,7 +13,7 @@
     "clean": "rm -rf dist cdk.out",
     "watch": "tsc -w",
     "test": "jest test/jest/. && ts-mocha -p tsconfig.cdk.json -r test/mocha/dynamoDBLocalFixture.ts test/mocha/unit --recursive --extension .test.ts",
-    "integ-test": "ts-mocha -p tsconfig.cdk.json -r dotenv/config test/mocha/integ/**/*.test.ts",
+    "test:e2e": "ts-mocha -p tsconfig.cdk.json -r dotenv/config test/mocha/e2e/**/*.test.ts",
     "cdk": "cdk",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"./**/*.ts\" --write",
