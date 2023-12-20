@@ -31,7 +31,7 @@ import {
   populateFeeOptions,
   computePortionAmount,
 } from '../shared'
-import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
+import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { utils } from 'ethers'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
@@ -257,9 +257,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       chainId,
       currencyIn,
       currencyOut,
+      type,
       slippageTolerance,
       enableUniversalRouter,
-      type,
       portionBips,
       portionRecipient,
       portionAmount,
@@ -567,9 +567,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     chainId: ChainId,
     currencyIn: Currency,
     currencyOut: Currency,
+    tradeType: TradeTypeParam,
     slippageTolerance: string | undefined,
     enableUniversalRouter: boolean | undefined,
-    type: string,
     portionBips: number | undefined,
     portionRecipient: string | undefined,
     portionAmount: string | undefined,
@@ -593,7 +593,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       // TODO: Remove once universal router is no longer behind a feature flag.
       if (enableUniversalRouter) {
         const allFeeOptions = populateFeeOptions(
-          type,
+          tradeType,
           portionBips,
           portionRecipient,
           portionAmount ??
@@ -723,7 +723,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     currencyOut: Currency,
     tokenInAddress: string,
     tokenOutAddress: string,
-    tradeType: 'exactIn' | 'exactOut',
+    tradeType: TradeTypeParam,
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string,

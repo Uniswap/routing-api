@@ -31,7 +31,7 @@ import hre from 'hardhat'
 import _ from 'lodash'
 import qs from 'qs'
 import { SUPPORTED_CHAINS } from '../../../lib/handlers/injector-sor'
-import { QuoteQueryParams } from '../../../lib/handlers/quote/schema/quote-schema'
+import { QuoteQueryParams, TradeTypeParam } from '../../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../../lib/handlers/schema'
 import { Permit2__factory } from '../../../lib/types/ext'
 import { resetAndFundAtBlock } from '../../utils/forkAndFund'
@@ -131,6 +131,8 @@ const isTesterPKEnvironmentSet = (): boolean => {
 }
 
 const MAX_UINT160 = '0xffffffffffffffffffffffffffffffffffffffff'
+
+const TRADE_TYPES: TradeTypeParam[] = ['exactIn', 'exactOut']
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
@@ -268,7 +270,7 @@ describe('quote', function () {
   })
 
   for (const algorithm of ['alpha']) {
-    for (const type of ['exactIn', 'exactOut']) {
+    for (const type of TRADE_TYPES) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ Execute Swap`, () => {
           it(`erc20 -> erc20`, async () => {
@@ -2375,7 +2377,7 @@ describe('quote', function () {
       c != ChainId.GOERLI &&
       c != ChainId.SEPOLIA
   )) {
-    for (const type of ['exactIn', 'exactOut']) {
+    for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
       const erc2 = TEST_ERC20_2[chain]()
 
