@@ -20,7 +20,7 @@ describe('QuoteHandler', () => {
       jest.resetAllMocks()
     })
 
-    it('Coverage test - enableUniversalRouter=true, permit provided, portions provided', () => {
+    it('Coverage test - slippageTolerance=defined, enableUniversalRouter=true, permit provided, portions provided', () => {
       const chainId = ChainId.MAINNET
       const currencyIn = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18, 'FOO', 'Foo')
       const tradeType: TradeTypeParam = 'exactIn'
@@ -37,7 +37,6 @@ describe('QuoteHandler', () => {
 
       const deadline = '60'
       const recipient = 'recipient'
-
       const permitSignature = 'permitSignature'
       const permitNonce = 'permitNonce'
       const permitExpiration = 'permitExpiration'
@@ -118,7 +117,6 @@ describe('QuoteHandler', () => {
 
       const deadline = '60'
       const recipient = 'recipient'
-
       const permitSignature = 'permitSignature'
       const permitNonce = 'permitNonce'
       const permitExpiration = 'permitExpiration'
@@ -179,6 +177,58 @@ describe('QuoteHandler', () => {
 
         slippageTolerance: new Percent(50, 10_000),
       })
+    })
+
+    it('Coverage test - returns undefined if slippageTolerance is undefined', () => {
+      const chainId = ChainId.MAINNET
+      const currencyIn = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18, 'FOO', 'Foo')
+      const tradeType: TradeTypeParam = 'exactIn'
+      const currencyOut = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000002', 18, 'BAR', 'Bar')
+
+      const slippageTolerance = undefined
+
+      const enableUniversalRouter = true
+
+      const portionBips = 1
+      const portionRecipient = 'portionRecipient'
+      const portionAmount = '1'
+      const amountRaw = '100000000000000000'
+
+      const deadline = '60'
+      const recipient = 'recipient'
+      const permitSignature = 'permitSignature'
+      const permitNonce = 'permitNonce'
+      const permitExpiration = 'permitExpiration'
+      const permitAmount = 'permitAmount'
+      const permitSigDeadline = 'permitSigDeadline'
+      const simulateFromAddress = 'simulateFromAddress'
+
+      const metric = {
+        putMetric: jest.fn(),
+      } as any
+      expect(
+        QuoteHandler.determineSwapParams(
+          chainId,
+          currencyIn,
+          currencyOut,
+          tradeType,
+          slippageTolerance,
+          enableUniversalRouter,
+          portionBips,
+          portionRecipient,
+          portionAmount,
+          amountRaw,
+          deadline,
+          recipient,
+          permitSignature,
+          permitNonce,
+          permitExpiration,
+          permitAmount,
+          permitSigDeadline,
+          simulateFromAddress,
+          metric
+        )
+      ).toBeUndefined()
     })
   })
 })
