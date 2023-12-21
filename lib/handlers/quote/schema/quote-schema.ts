@@ -73,13 +73,17 @@ export const QuoteQueryParamsJoi = Joi.object({
   source: Joi.string().max(20).optional(),
 })
 
+// Future work: this TradeTypeParam can be converted into an enum and used in the
+// schema above and in the route QuoteHandler.
+export type TradeTypeParam = 'exactIn' | 'exactOut'
+
 export type QuoteQueryParams = {
   tokenInAddress: string
   tokenInChainId: number
   tokenOutAddress: string
   tokenOutChainId: number
   amount: string
-  type: string
+  type: TradeTypeParam
   recipient?: string
   slippageTolerance?: string
   deadline?: string

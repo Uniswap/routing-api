@@ -1,7 +1,5 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
-import { PermitSingle } from '@uniswap/permit2-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -10,7 +8,6 @@ import {
   routeAmountsToString,
   SwapRoute,
   SwapOptions,
-  SwapType,
   SimulationStatus,
   IMetric,
   ID_TO_NETWORK_NAME,
@@ -23,22 +20,18 @@ import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
-  parseDeadline,
-  parseSlippageTolerance,
   QUOTE_SPEED_CONFIG,
   INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
-  populateFeeOptions,
-  computePortionAmount,
 } from '../shared'
-import { QuoteQueryParams, QuoteQueryParamsJoi } from './schema/quote-schema'
-import { utils } from 'ethers'
+import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusToString } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
+import { SwapOptionsFactory } from './SwapOptionsFactory'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -253,93 +246,6 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
 
-    let swapParams: SwapOptions | undefined = undefined
-
-    // e.g. Inputs of form "1.25%" with 2dp max. Convert to fractional representation => 1.25 => 125 / 10000
-    if (slippageTolerance) {
-      const slippageTolerancePercent = parseSlippageTolerance(slippageTolerance)
-
-      // TODO: Remove once universal router is no longer behind a feature flag.
-      if (enableUniversalRouter) {
-        const allFeeOptions = populateFeeOptions(
-          type,
-          portionBips,
-          portionRecipient,
-          portionAmount ??
-            computePortionAmount(CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw)), portionBips)
-        )
-
-        swapParams = {
-          type: SwapType.UNIVERSAL_ROUTER,
-          deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
-          recipient: recipient,
-          slippageTolerance: slippageTolerancePercent,
-          ...allFeeOptions,
-        }
-      } else {
-        if (deadline && recipient) {
-          swapParams = {
-            type: SwapType.SWAP_ROUTER_02,
-            deadline: parseDeadline(deadline),
-            recipient: recipient,
-            slippageTolerance: slippageTolerancePercent,
-          }
-        }
-      }
-
-      if (
-        enableUniversalRouter &&
-        permitSignature &&
-        permitNonce &&
-        permitExpiration &&
-        permitAmount &&
-        permitSigDeadline
-      ) {
-        const permit: PermitSingle = {
-          details: {
-            token: currencyIn.wrapped.address,
-            amount: permitAmount,
-            expiration: permitExpiration,
-            nonce: permitNonce,
-          },
-          spender: UNIVERSAL_ROUTER_ADDRESS(chainId),
-          sigDeadline: permitSigDeadline,
-        }
-
-        if (swapParams) {
-          swapParams.inputTokenPermit = {
-            ...permit,
-            signature: permitSignature,
-          }
-        }
-      } else if (
-        !enableUniversalRouter &&
-        permitSignature &&
-        ((permitNonce && permitExpiration) || (permitAmount && permitSigDeadline))
-      ) {
-        const { v, r, s } = utils.splitSignature(permitSignature)
-
-        if (swapParams) {
-          swapParams.inputTokenPermit = {
-            v: v as 0 | 1 | 27 | 28,
-            r,
-            s,
-            ...(permitNonce && permitExpiration
-              ? { nonce: permitNonce!, expiry: permitExpiration! }
-              : { amount: permitAmount!, deadline: permitSigDeadline! }),
-          }
-        }
-      }
-
-      if (simulateFromAddress) {
-        metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
-
-        if (swapParams) {
-          swapParams.simulate = { fromAddress: simulateFromAddress }
-        }
-      }
-    }
-
     let swapRoute: SwapRoute | null
     let amount: CurrencyAmount<Currency>
 
@@ -355,6 +261,31 @@ export class QuoteHandler extends APIGLambdaHandler<
     )
       ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
       : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
+
+    const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble({
+      chainId,
+      currencyIn,
+      currencyOut,
+      tradeType: type,
+      slippageTolerance,
+      enableUniversalRouter,
+      portionBips,
+      portionRecipient,
+      portionAmount,
+      amountRaw,
+      deadline,
+      recipient,
+      permitSignature,
+      permitNonce,
+      permitExpiration,
+      permitAmount,
+      permitSigDeadline,
+      simulateFromAddress,
+    })
+
+    if (swapParams?.simulate?.fromAddress) {
+      metric.putMetric('Simulation Requested', 1, MetricLoggerUnit.Count)
+    }
 
     switch (type) {
       case 'exactIn':
@@ -678,7 +609,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     currencyOut: Currency,
     tokenInAddress: string,
     tokenOutAddress: string,
-    tradeType: 'exactIn' | 'exactOut',
+    tradeType: TradeTypeParam,
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     routeString: string,
