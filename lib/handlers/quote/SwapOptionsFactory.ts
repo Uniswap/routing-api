@@ -1,5 +1,5 @@
 import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import { SwapOptions, SwapType } from '@uniswap/smart-order-router'
+import { SwapOptions, SwapOptionsSwapRouter02, SwapOptionsUniversalRouter, SwapType } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi'
 import { TradeTypeParam } from './schema/quote-schema'
 import { computePortionAmount, parseDeadline, parseSlippageTolerance, populateFeeOptions } from '../shared'
@@ -7,24 +7,7 @@ import { PermitSingle } from '@uniswap/permit2-sdk'
 import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { utils } from 'ethers'
 
-export type SwapOptionsFeeConfig = {
-  portionBips?: number
-  portionRecipient?: string
-  portionAmount?: string
-  amountRaw: string
-}
-
-export type SwapOptionsPermitConfig = {
-  deadline?: string
-  recipient?: string
-  permitSignature?: string
-  permitNonce?: string
-  permitExpiration?: string
-  permitAmount?: string
-  permitSigDeadline?: string
-}
-
-type SwapOptionsInput = {
+export type SwapOptionsUniversalRouterInput = {
   chainId: ChainId
   currencyIn: Currency
   currencyOut: Currency
@@ -44,6 +27,20 @@ type SwapOptionsInput = {
   permitSigDeadline?: string
   simulateFromAddress?: string
 }
+
+export type SwapOptionsSwapRouter02Input = {
+  slippageTolerance?: string
+  deadline?: string
+  recipient?: string
+  permitSignature?: string
+  permitNonce?: string
+  permitExpiration?: string
+  permitAmount?: string
+  permitSigDeadline?: string
+  simulateFromAddress?: string
+}
+
+export type SwapOptionsInput = SwapOptionsUniversalRouterInput & SwapOptionsSwapRouter02Input
 
 export class SwapOptionsFactory {
   static assemble({
@@ -67,66 +64,59 @@ export class SwapOptionsFactory {
     simulateFromAddress,
   }: SwapOptionsInput): SwapOptions | undefined {
     if (enableUniversalRouter) {
-      return SwapOptionsFactory.createUniversalRouterOptions(
+      return SwapOptionsFactory.createUniversalRouterOptions({
         chainId,
         currencyIn,
         currencyOut,
         tradeType,
         slippageTolerance,
-        {
-          portionBips,
-          portionRecipient,
-          portionAmount,
-          amountRaw,
-        },
-        {
-          deadline,
-          recipient,
-          permitSignature,
-          permitNonce,
-          permitExpiration,
-          permitAmount,
-          permitSigDeadline,
-        },
-        simulateFromAddress
-      )
+        portionBips,
+        portionRecipient,
+        portionAmount,
+        amountRaw,
+        deadline,
+        recipient,
+        permitSignature,
+        permitNonce,
+        permitExpiration,
+        permitAmount,
+        permitSigDeadline,
+        simulateFromAddress,
+      })
     } else {
-      return SwapOptionsFactory.createSwapRouter02Options(
+      return SwapOptionsFactory.createSwapRouter02Options({
         slippageTolerance,
-        {
-          deadline,
-          recipient,
-          permitSignature,
-          permitNonce,
-          permitExpiration,
-          permitAmount,
-          permitSigDeadline,
-        },
-        simulateFromAddress
-      )
+        deadline,
+        recipient,
+        permitSignature,
+        permitNonce,
+        permitExpiration,
+        permitAmount,
+        permitSigDeadline,
+        simulateFromAddress,
+      })
     }
   }
 
-  static createUniversalRouterOptions(
-    chainId: ChainId,
-    currencyIn: Currency,
-    currencyOut: Currency,
-    tradeType: TradeTypeParam,
-    slippageTolerance: string | undefined,
-    { portionBips, portionRecipient, portionAmount, amountRaw }: SwapOptionsFeeConfig,
-    {
-      deadline,
-      recipient,
-      permitSignature,
-      permitNonce,
-      permitExpiration,
-      permitAmount,
-      permitSigDeadline,
-    }: SwapOptionsPermitConfig,
-    simulateFromAddress: string | undefined
-  ): SwapOptions | undefined {
-    // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
-    // If it's undefined, we'll exit early and not request any call data generation from SOR.
+  static createUniversalRouterOptions({
+    chainId,
+    currencyIn,
+    currencyOut,
+    tradeType,
+    slippageTolerance,
+    portionBips,
+    portionRecipient,
+    portionAmount,
+    amountRaw,
+    deadline,
+    recipient,
+    permitSignature,
+    permitNonce,
+    permitExpiration,
+    permitAmount,
+    permitSigDeadline,
+    simulateFromAddress,
+  }: SwapOptionsUniversalRouterInput): SwapOptionsUniversalRouter | undefined {
     if (!slippageTolerance) {
       return undefined
     }
@@ -171,21 +161,17 @@ export class SwapOptionsFactory {
     return swapParams
   }
 
-  static createSwapRouter02Options(
-    slippageTolerance: string | undefined,
-    {
-      deadline,
-      recipient,
-      permitSignature,
-      permitNonce,
-      permitExpiration,
-      permitAmount,
-      permitSigDeadline,
-    }: SwapOptionsPermitConfig,
-    simulateFromAddress: string | undefined
-  ): SwapOptions | undefined {
-    // slippageTolerance looks like it's required for both the UniversalRouter and SwapRouter02.
-    // If it's undefined, we'll exit early and not request any call data generation from SOR.
+  static createSwapRouter02Options({
+    slippageTolerance,
+    deadline,
+    recipient,
+    permitSignature,
+    permitNonce,
+    permitExpiration,
+    permitAmount,
+    permitSigDeadline,
+    simulateFromAddress,
+  }: SwapOptionsSwapRouter02Input): SwapOptionsSwapRouter02 | undefined {
     if (!slippageTolerance) {
       return undefined
     }
