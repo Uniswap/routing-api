@@ -1,7 +1,8 @@
 import { LibSupportedChainsType } from './chains'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
+import { JsonRpcProvider } from '@ethersproject/providers'
 
-export default class UniJsonRpcProvider {
+export default class UniJsonRpcProvider extends JsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
   private unhealthyProviders: SingleJsonRpcProvider[] = []
 
@@ -9,11 +10,24 @@ export default class UniJsonRpcProvider {
   private urlPrecedence: Record<string, number> = {}
 
   constructor(chainId: LibSupportedChainsType, urls: string[]) {
+    super()
+
     let urlId = 0
     for (const url of urls) {
       this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url))
       this.urlPrecedence[url] = urlId
       urlId++
+    }
+  }
+
+  async perform(method: string, params: any): Promise<any> {
+    if (this.healthyProviders.length == 0) {
+      // TODO(jie): How to throw error?
+    } else {
+      const selectedProvider = this.healthyProviders[0]
+      const result = await selectedProvider.perform(method, params);
+      this.checkProviderHealthStatus()
+      return result
     }
   }
 
