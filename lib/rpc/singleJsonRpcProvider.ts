@@ -30,11 +30,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.url = url
   }
 
-  // TODO(jie): 我应该先去实现recordProviderError()等API
-  //   而不要先去把真的RPC call实现出来再说
-
-  // TODO(jie): 搞清楚send()和perform()的区别是什么，搞清楚之后再写！
-
   public isHealthy(): boolean {
     return this.healthScore >= HEALTH_SCORE_THRESHOLD
   }

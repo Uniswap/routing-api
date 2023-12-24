@@ -10,7 +10,8 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
   private urlPrecedence: Record<string, number> = {}
 
   constructor(chainId: LibSupportedChainsType, urls: string[]) {
-    super()
+    // Dummy super constructor call is needed.
+    super(urls[0], { chainId, name: 'dummy'})
 
     let urlId = 0
     for (const url of urls) {
@@ -25,6 +26,7 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
       // TODO(jie): How to throw error?
     } else {
       const selectedProvider = this.healthyProviders[0]
+      console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
       const result = await selectedProvider.perform(method, params);
       this.checkProviderHealthStatus()
       return result

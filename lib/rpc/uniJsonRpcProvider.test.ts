@@ -25,10 +25,19 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['healthyProviders'][2].url).to.be.equal('provider_2_url')
   })
 
-  it('test with real endpoint', async () => {
+  it('test with real endpoint, single', async () => {
     const provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e')
     const blockNumber = await provider.getBlockNumber()
     console.log(blockNumber)
     console.log(`${JSON.stringify(provider['perf'])}`)
+  })
+
+  it('test with real endpoint, uni', async () => {
+    const provider = new UniJsonRpcProvider(ChainId.MAINNET, [
+      'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e',
+      'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
+    ])
+    const blockNumber = await provider.getBlockNumber()
+    console.log(blockNumber)
   })
 })
