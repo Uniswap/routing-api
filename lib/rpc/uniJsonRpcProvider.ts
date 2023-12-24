@@ -36,11 +36,16 @@ export default class UniJsonRpcProvider {
       }
     }
 
-    // TODO(jie): Check unhealthy providers.
-    //   For unhealthy provider that's
-    //   - isHealthy() == true
-    //   - most recent call is success
-    //   We need to move it into healthy providers
+    for (const provider of this.unhealthyProviders) {
+      if (provider.isHealthy()) {
+        healthy.push(provider)
+      } else {
+        if (provider.hasEnoughRecovery()) {
+          provider.evaluateForRecovery()
+        }
+        unhealthy.push(provider)
+      }
+    }
 
     this.healthyProviders = healthy
     this.unhealthyProviders = unhealthy
