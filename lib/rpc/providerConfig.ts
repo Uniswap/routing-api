@@ -2,7 +2,7 @@
 // no actual RpcProvider object here
 
 import { ChainId } from '@uniswap/sdk-core'
-import UniJsonRpcProvider from './uni-json-rpc-provider'
+import UniJsonRpcProvider from './uniJsonRpcProvider'
 
 const INFURA_KEY = 'TODO(jie)'
 const QUICKNODE_MAINNET_RPC_URL = 'TODO(jie)'

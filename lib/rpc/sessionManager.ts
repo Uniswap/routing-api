@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache'
-import { SingleJsonRpcProvider } from './single-json-rpc-provider'
+import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 
 export class SessionManager {
   // TODO(jie): Implement
