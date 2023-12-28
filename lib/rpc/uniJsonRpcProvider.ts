@@ -56,6 +56,8 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
       if (provider.isHealthy()) {
         healthy.push(provider)
       } else {
+        // TODO(jie): 不光是has enough health score，这里还得上一次call距离现在时间得超过一定间隔才行
+        //   否则不就不停地evaluate for recovery了吗？
         if (provider.hasEnoughRecovery()) {
           provider.evaluateForRecovery()
         }

@@ -5,10 +5,9 @@ import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
 const ERROR_PENALTY = 50
 const HIGH_LATENCY_PENALTY = 50
 const HEALTH_SCORE_THRESHOLD =  70
-const MAX_LATENCY_ALLOWED = 400  // in ms
+const MAX_LATENCY_ALLOWED = 500  // in ms
 const RECOVER_SCORE_PER_SECOND = 1
 const RECOVER_EVALUATION_THRESHOLD = -20
-const EVALUATION_PASS_REWARD = 10
 
 class PerfStat {
   lastCallTimestampInMs: number = 0
@@ -52,10 +51,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  private recordEvaluatePass() {
-    this.healthScore -= EVALUATION_PASS_REWARD
-  }
-
   private checkCallPerformance() {
     if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
       this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
@@ -65,6 +60,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } else if (this.perf.lastCallLatencyInMs > MAX_LATENCY_ALLOWED) {
       this.recordHighLatency()
     }
+    // No reward for normal operation.
   }
 
   private async _perform(method: string, params: { [name: string]: any }): Promise<any> {
@@ -93,17 +89,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   async evaluateForRecovery() {
-    const startTime = Date.now()
     try {
       await this.getBlockNumber()
-      const latency = Date.now() - startTime
-      if (latency > MAX_LATENCY_ALLOWED) {
-        this.recordHighLatency()
-        return
-      }
-      this.recordEvaluatePass()
     } catch (error: any) {
-      this.recordError()
+      // TODO(jie): Log here?
+      //   反正这个error肯定是不需要处理的
     }
   }
 }

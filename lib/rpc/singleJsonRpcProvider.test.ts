@@ -1,18 +1,25 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
-import Sinon from 'sinon'
-import chai, { expect } from 'chai'
+import Sinon, { SinonSandbox } from 'sinon'
+import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 
+// TODO(jie): 可以考虑删掉chaiAsPromised
 chai.use(chaiAsPromised)
 
-// TODO(jie): 需要确保要使用line coverage！这样才能有足够的confidence!
+// TODO(jie): 怎么才能让 provider._perform() 花掉指定的时间？
 describe('SingleJsonRpcProvider', () => {
   let provider: SingleJsonRpcProvider
+  let sandbox: SinonSandbox
 
   beforeEach(() => {
     provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'provider_0_url')
+    sandbox = Sinon.createSandbox()
     // provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e')
+  })
+
+  afterEach(() => {
+    sandbox.restore()
   })
 
   // it('basic test', () => {
@@ -27,24 +34,40 @@ describe('SingleJsonRpcProvider', () => {
   // })
 
   it('provider call succeeded', async () => {
-    const performCall = Sinon.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
+    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
     performCall.resolves(123456)
 
     const blockNumber = await provider.getBlockNumber()
 
-    performCall.restore()
     expect(blockNumber).equals(123456)
     expect(provider['perf'].lastCallSucceed).to.be.true
   })
 
   it('provider call failed', async () => {
-    const performCall = Sinon.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
+    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
     performCall.throws('error')
+    const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordError' as any)
 
-    expect(provider.getBlockNumber()).to.eventually.be.rejected
+    try {
+      await provider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+      expect(provider['perf'].lastCallSucceed).to.be.false
+      expect(spy.calledOnce).to.be.true
+    }
+  })
 
-    performCall.restore()
-    expect(provider['perf'].lastCallSucceed).to.be.false
+  it('provider call too high latency', async () => {
+    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
+    performCall.resolves(new Promise(resolve => setTimeout(() => resolve(123456), 1000)))
+    const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordHighLatency' as any)
+
+    const blockNumber = await provider.getBlockNumber()
+
+    expect(blockNumber).equals(123456)
+    expect(provider['perf'].lastCallSucceed).to.be.true
+    expect(spy.calledOnce).to.be.true
   })
 
 })
