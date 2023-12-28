@@ -11,30 +11,29 @@ const RECOVER_EVALUATION_THRESHOLD = -20
 const EVALUATION_PASS_REWARD = 10
 
 class PerfStat {
-  public lastCallTimestampInMs: number = 0
-  public lastCallSucceed: boolean = false
-  public lastCallLatencyInMs: number = 0
-  public timeWaitedBeforeLastCallInMs: number = 0
+  lastCallTimestampInMs: number = 0
+  lastCallSucceed: boolean = false
+  lastCallLatencyInMs: number = 0
+  timeWaitedBeforeLastCallInMs: number = 0
 }
 
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): This class will implement block-aligned cache, as well as
   //   meta for provider selection and fallback
   private healthScore: number
-  public url: string
-
-  private perf: PerfStat = new PerfStat()
+  url: string
+  perf: PerfStat = new PerfStat()
 
   constructor(chainId: LibSupportedChainsType, url: string) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
     this.url = url
   }
 
-  public isHealthy(): boolean {
+  isHealthy(): boolean {
     return this.healthScore >= HEALTH_SCORE_THRESHOLD
   }
 
-  public hasEnoughRecovery(): boolean {
+  hasEnoughRecovery(): boolean {
     return this.healthScore >= RECOVER_EVALUATION_THRESHOLD
   }
 
@@ -68,6 +67,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
+  async _perform(method: string, params: { [name: string]: any }): Promise<any> {
+    return await super.perform(method, params)
+  }
+
   async perform(method: string, params: { [name: string]: any }): Promise<any> {
     const startTime = Date.now()
     if (this.perf.lastCallTimestampInMs > 0) {
@@ -75,7 +78,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
     let callSucceed = true
     try {
-      return super.perform(method, params)
+      return await this._perform(method, params)
     } catch (error: any) {
       callSucceed = false
     } finally {
@@ -88,7 +91,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  public async evaluateForRecovery() {
+  async evaluateForRecovery() {
     const startTime = Date.now()
     try {
       await this.getBlockNumber()
