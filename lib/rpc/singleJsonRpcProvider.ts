@@ -22,7 +22,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   //   meta for provider selection and fallback
   private healthScore: number
   url: string
-  perf: PerfStat = new PerfStat()
+  private perf: PerfStat = new PerfStat()
 
   constructor(chainId: LibSupportedChainsType, url: string) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
@@ -67,7 +67,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  async _perform(method: string, params: { [name: string]: any }): Promise<any> {
+  private async _perform(method: string, params: { [name: string]: any }): Promise<any> {
     return await super.perform(method, params)
   }
 
@@ -81,6 +81,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       return await this._perform(method, params)
     } catch (error: any) {
       callSucceed = false
+      throw error
     } finally {
       const endTime = Date.now()
       this.perf.lastCallTimestampInMs = endTime
