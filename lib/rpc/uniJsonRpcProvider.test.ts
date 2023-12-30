@@ -232,6 +232,17 @@ describe('UniJsonRpcProvider', () => {
     expect(unhealthyProvider['healthScore']).equals(-95)
   })
 
+  it('no healthy provider available', async () => {
+    uniProvider['healthyProviders'] = []
+
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.message).equals('No healthy providers available')
+    }
+  })
+
   // it('basic test', () => {
   //   const rpcProvider = new UniJsonRpcProvider(ChainId.MAINNET, ['url1', 'url2'])
   //   rpcProvider['checkProviderHealthStatus']()
