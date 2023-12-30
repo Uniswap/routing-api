@@ -300,6 +300,4 @@ describe('UniJsonRpcProvider', () => {
   //   const blockNumber = await provider.getBlockNumber()
   //   console.log(blockNumber)
   // })
-
-
 })
