@@ -3,6 +3,7 @@ import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
+import { isEmpty } from 'lodash'
 
 const debug = Debug('UniJsonRpcProvider')
 
@@ -20,18 +21,35 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   // Used to remember the user-specified precedence or provider URLs. 0 means highest
   private urlPrecedence: Record<string, number> = {}
 
+  // If provided, we will use this weight to decide the probability of choosing
+  // one of the healthy providers.
+  private urlWeight: Record<string, number> = {}
+  private urlWeightSum: number = 0
+
   private lastUsedProvider: SingleJsonRpcProvider | null = null
 
-  constructor(chainId: LibSupportedChainsType, urls: string[], config: Config = DEFAULT_CONFIG) {
+  constructor(chainId: LibSupportedChainsType, urls: string[], weights?: number[], config: Config = DEFAULT_CONFIG) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
 
-    let urlId = 0
-    for (const url of urls) {
-      this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url, config))
-      this.urlPrecedence[url] = urlId
-      urlId++
+    if (weights && weights.length != urls.length) {
+      throw new Error('urls and weights need to have the same length')
     }
+
+    let weightSum = 0
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i]
+      this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url, config))
+      this.urlPrecedence[url] = i
+      if (weights) {
+        if (weights[i] <= 0) {
+          throw new Error(`Invalid weight: ${weights[i]}. Weight needs to be a positive number`)
+        }
+        this.urlWeight[url] = weights[i]
+        weightSum += weights[i]
+      }
+    }
+    this.urlWeightSum = weightSum
   }
 
    get currentHealthyUrls() {
@@ -46,12 +64,28 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return this.lastUsedProvider?.url
   }
 
+  private selectPreferredProvider(): SingleJsonRpcProvider {
+    if (isEmpty(this.urlWeight)) {
+      return this.healthyProviders[0]
+    }
+    const rand = Math.random() * this.urlWeightSum
+    // No need to use binary search since the size of healthy providers is very small.
+    let accumulatedWeight: number = 0
+    for (const provider of  this.healthyProviders) {
+      accumulatedWeight += this.urlWeight[provider.url]
+      if (accumulatedWeight >= rand) {
+        return provider
+      }
+    }
+    throw new Error("Encounter error when selecting preferred provider")
+  }
+
   async perform(method: string, params: any): Promise<any> {
     if (this.healthyProviders.length == 0) {
       throw new Error('No healthy providers available')
     }
 
-    const selectedProvider = this.healthyProviders[0]
+    const selectedProvider = this.selectPreferredProvider()
     this.lastUsedProvider = selectedProvider
     console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
     try {
@@ -65,6 +99,16 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.healthyProviders.sort((a, b) => {
       return this.urlPrecedence[a.url] - this.urlPrecedence[b.url]
     })
+  }
+
+  private updateHealthyProviderUrlWeightSum() {
+    // Update url weight sum for healthy providers.
+    if (!isEmpty(this.urlWeight)) {
+      this.urlWeightSum = 0
+      for (const provider of this.healthyProviders) {
+        this.urlWeightSum += this.urlWeight[provider.url]
+      }
+    }
   }
 
   private checkProviderHealthStatus() {
@@ -96,6 +140,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.unhealthyProviders = unhealthy
     this.reorderHealthyProviders()
     debug(`reordered healthy providers, top provider ${this.healthyProviders[0].url}`)
+
+    this.updateHealthyProviderUrlWeightSum()
   }
 
   private debugPrintProviderHealthScores() {
@@ -108,5 +154,4 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
-
 }

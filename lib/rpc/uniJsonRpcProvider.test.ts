@@ -25,7 +25,7 @@ describe('UniJsonRpcProvider', () => {
 
   beforeEach(() => {
     uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
-      ['url_0', 'url_1', 'url_2'], TEST_CONFIG)
+      ['url_0', 'url_1', 'url_2'], undefined, TEST_CONFIG)
     sandbox = Sinon.createSandbox()
   })
 
@@ -198,7 +198,6 @@ describe('UniJsonRpcProvider', () => {
     // We advance some time. During this the failed provider starts recovering.
     const unhealthyProvider = uniProvider['unhealthyProviders'][0]
     const scoreBeforeRecovering = unhealthyProvider['healthScore']
-    console.log(unhealthyProvider['healthScore'])
     clock.tick(1000)  // Advance 1 seconds
     perform0.resolves(123)
 
@@ -241,6 +240,36 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.message).equals('No healthy providers available')
     }
+  })
+
+  it('test selectPreferredProvider: without weights', async () => {
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+  })
+
+  it('test selectPreferredProvider: with weights', async () => {
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
+      ['url_0', 'url_1', 'url_2'], [4, 1, 3], TEST_CONFIG)
+
+    expect(uniProvider['urlWeightSum']).equals(8)
+
+    uniProvider['updateHealthyProviderUrlWeightSum']()
+    expect(uniProvider['urlWeightSum']).equals(8)
+
+    const randStub = Sinon.stub(Math, 'random')
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.5)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.51)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    randStub.returns(0.62)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    randStub.returns(0.63)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
   })
 
   // it('basic test', () => {
