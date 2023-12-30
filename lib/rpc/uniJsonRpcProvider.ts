@@ -6,6 +6,13 @@ import Debug from 'debug'
 
 const debug = Debug('UniJsonRpcProvider')
 
+// TODO(jie): 加入weight的支持。使用随机数和weight来辅助选。也就是要忽略这里的ordering
+//   完全是按照weight的比例来选provider。以及相关的UT
+
+// TODO(jie): 照抄instrumented provider来加入auto metrics reporting
+
+// TODO(jie): 开始和routing API的code进行一定集成
+
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
   private unhealthyProviders: SingleJsonRpcProvider[] = []
