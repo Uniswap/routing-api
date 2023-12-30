@@ -3,9 +3,20 @@ import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import Sinon, { SinonSandbox } from 'sinon'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
+import { Config } from './config'
 
 // TODO(jie): 可以考虑删掉chaiAsPromised
 chai.use(chaiAsPromised)
+
+const config: Config = {
+  ERROR_PENALTY: -50,
+  HIGH_LATENCY_PENALTY: -50,
+  HEALTH_SCORE_THRESHOLD: -150,
+  MAX_LATENCY_ALLOWED_IN_MS: 500,
+  RECOVER_SCORE_PER_SECOND: 1,
+  RECOVER_EVALUATION_THRESHOLD: -20,
+  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+}
 
 // TODO(jie): 怎么才能让 provider._perform() 花掉指定的时间？
 describe('SingleJsonRpcProvider', () => {
@@ -13,7 +24,7 @@ describe('SingleJsonRpcProvider', () => {
   let sandbox: SinonSandbox
 
   beforeEach(() => {
-    provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'provider_0_url')
+    provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'provider_0_url', config)
     sandbox = Sinon.createSandbox()
     // provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e')
   })

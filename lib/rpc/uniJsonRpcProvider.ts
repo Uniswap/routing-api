@@ -1,24 +1,38 @@
 import { LibSupportedChainsType } from './chains'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
-export default class UniJsonRpcProvider extends JsonRpcProvider {
+export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
   private unhealthyProviders: SingleJsonRpcProvider[] = []
 
   // Used to remember the user-specified precedence or provider URLs. 0 means highest
   private urlPrecedence: Record<string, number> = {}
 
-  constructor(chainId: LibSupportedChainsType, urls: string[]) {
+  private lastUsedProvider: SingleJsonRpcProvider | null = null
+
+  constructor(chainId: LibSupportedChainsType, urls: string[], config: Config) {
     // Dummy super constructor call is needed.
-    super(urls[0], { chainId, name: 'dummy'})
+    super('dummy_url', { chainId, name: 'dummy_network'})
 
     let urlId = 0
     for (const url of urls) {
-      this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url))
+      this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url, config))
       this.urlPrecedence[url] = urlId
       urlId++
     }
+  }
+
+   get currentHealthyUrls() {
+    return this.healthyProviders.map((provider) => provider.url)
+  }
+
+  get currentUnhealthyUrls() {
+    return this.unhealthyProviders.map((provider) => provider.url)
+  }
+
+  get lastUsedUrl() {
+    return this.lastUsedProvider?.url
   }
 
   async perform(method: string, params: any): Promise<any> {
@@ -26,6 +40,7 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
       // TODO(jie): How to throw error?
     } else {
       const selectedProvider = this.healthyProviders[0]
+      this.lastUsedProvider = selectedProvider
       console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
       const result = await selectedProvider.perform(method, params);
       this.checkProviderHealthStatus()
@@ -56,8 +71,6 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
       if (provider.isHealthy()) {
         healthy.push(provider)
       } else {
-        // TODO(jie): 不光是has enough health score，这里还得上一次call距离现在时间得超过一定间隔才行
-        //   否则不就不停地evaluate for recovery了吗？
         if (provider.hasEnoughRecovery()) {
           provider.evaluateForRecovery()
         }
@@ -68,6 +81,17 @@ export default class UniJsonRpcProvider extends JsonRpcProvider {
     this.healthyProviders = healthy
     this.unhealthyProviders = unhealthy
     this.reorderHealthyProviders()
+  }
+
+  private debugPrintProviderHealthScores() {
+    console.log('=== Healthy Providers ===')
+    for (const provider of this.healthyProviders) {
+      console.log(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+    }
+    console.log('=== Unhealthy Providers ===')
+    for (const provider of this.unhealthyProviders) {
+      console.log(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+    }
   }
 
 }
