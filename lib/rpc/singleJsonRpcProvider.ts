@@ -1,7 +1,5 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
-import { Network } from '@ethersproject/networks'
-import { ChainId } from '@uniswap/sdk-core'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 
@@ -26,31 +24,33 @@ class PerfStat {
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): This class will implement block-aligned cache, as well as
   //   meta for provider selection and fallback
-  private healthScore
   url: string
+  private healthScore
+  private isRecovering: boolean
   private perf: PerfStat
   private config: Config
 
   constructor(chainId: LibSupportedChainsType, url: string, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
-    this.healthScore = 0
     this.url = url
+    this.healthScore = 0
+    this.isRecovering = false
     this.perf = new PerfStat()
     this.config = config
   }
 
   isHealthy(): boolean {
-    return this.healthScore >= this.config.HEALTH_SCORE_THRESHOLD
+    return !this.isRecovering
   }
 
-  hasEnoughRecovery(): boolean {
+  hasEnoughWaitSinceLastCall(): boolean {
+    debug(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
     return Date.now() - this.perf.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
-      && this.healthScore >= this.config.RECOVER_EVALUATION_THRESHOLD
   }
 
   private recordError() {
     this.healthScore += this.config.ERROR_PENALTY
-    debug(`${this.url}: error penalty ${this.config.ERROR_PENALTY} => ${this.healthScore}`)
+    debug(`${this.url}: error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
   }
 
   private recordHighLatency() {
@@ -62,28 +62,33 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} => ${this.healthScore}`)
+    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
   }
 
-  private checkCallPerformance() {
-    if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
-      this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
-    }
+  private checkLastCallPerformance() {
     if (!this.perf.lastCallSucceed) {
       this.recordError()
     } else if (this.perf.lastCallLatencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
       this.recordHighLatency()
+    } else {
+      // For a success call, we will increase health score.
+      if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
+        this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
+      }
+    }
+    if (!this.isRecovering && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
+      this.isRecovering = true
+      debug(`${this.url} drops to unhealthy`)
+    } else if (this.isRecovering && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
+      this.isRecovering = false
+      debug(`${this.url} resumes to healthy`)
     }
     // No reward for normal operation.
   }
 
-  async detectNetwork(): Promise<Network> {
-    // return await super.detectNetwork()
-    return Promise.resolve({name: 'mainnet', chainId: ChainId.MAINNET})
-  }
-
-  // async getNetwork(): Promise<Network> {
-  //   return await super.getNetwork()
+  // async detectNetwork(): Promise<Network> {
+  //   // return await super.detectNetwork()
+  //   return Promise.resolve({name: 'mainnet', chainId: ChainId.MAINNET})
   // }
 
   private async _perform(method: string, params: { [name: string]: any }): Promise<any> {
@@ -107,15 +112,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.perf.lastCallLatencyInMs = endTime - startTime
       this.perf.lastCallSucceed = callSucceed
 
-      this.checkCallPerformance()
+      this.checkLastCallPerformance()
     }
   }
 
   async evaluateForRecovery() {
+    debug(`${this.url}: evaluate for recovery...`)
     try {
+      console.log('evaluate call started')
       await this.getBlockNumber()
+      console.log('evaluate call ended')
     } catch (error: any) {
       console.log(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
+    } finally {
+      debug(`${this.url}: ...evaluate done, score => ${this.healthScore}`)
     }
   }
 }

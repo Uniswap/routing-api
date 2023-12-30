@@ -61,6 +61,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkProviderHealthStatus() {
+    debug('after a call, checkProviderHealthStatus')
     const healthy: SingleJsonRpcProvider[] = []
     const unhealthy: SingleJsonRpcProvider[] = []
 
@@ -77,16 +78,17 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       if (provider.isHealthy()) {
         healthy.push(provider)
       } else {
-        if (provider.hasEnoughRecovery()) {
-          provider.evaluateForRecovery()
-        }
         unhealthy.push(provider)
+        if (provider.hasEnoughWaitSinceLastCall()) {
+          provider.evaluateForRecovery()  // not blocking
+        }
       }
     }
 
     this.healthyProviders = healthy
     this.unhealthyProviders = unhealthy
     this.reorderHealthyProviders()
+    debug(`reordered healthy providers, top provider ${this.healthyProviders[0].url}`)
   }
 
   private debugPrintProviderHealthScores() {

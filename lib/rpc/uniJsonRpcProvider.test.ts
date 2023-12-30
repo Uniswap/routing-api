@@ -11,7 +11,8 @@ import { Config } from './config'
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
-  HEALTH_SCORE_THRESHOLD: -70,
+  HEALTH_SCORE_FALLBACK_THRESHOLD: -70,
+  HEALTH_SCORE_RECOVER_THRESHOLD: -10,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_EVALUATION_THRESHOLD: -20,
@@ -36,9 +37,9 @@ describe('UniJsonRpcProvider', () => {
     const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
     perform0.resolves(123)
     const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
-    perform1.resolves(456)
+    perform1.resolves(123)
     const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
-    perform2.resolves(789)
+    perform2.resolves(123)
 
     expect(uniProvider.lastUsedUrl).undefined
     const blockNumber = await uniProvider.getBlockNumber()
@@ -46,13 +47,13 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_0')
   })
 
-  it('first provider unhealthy', async () => {
+  it('fallback when first provider becomes unhealthy', async () => {
     const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
     perform0.throws('error')
     const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
-    perform1.resolves(456)
+    perform1.resolves(123)
     const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
-    perform2.resolves(789)
+    perform2.resolves(123)
 
     uniProvider['debugPrintProviderHealthScores']()
 
@@ -63,6 +64,7 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
+    uniProvider['debugPrintProviderHealthScores']()
     try {
       await uniProvider.getBlockNumber()
       assert(false)  // Should not reach.
@@ -76,10 +78,82 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
     // Now later requests will be served with provider1
+    // let result = await uniProvider.getBlockNumber()
+    // expect(uniProvider.lastUsedUrl).equals('url_1')
+    // result = await uniProvider.getBlockNumber()
+    // expect(uniProvider.lastUsedUrl).equals('url_1')
+  })
+
+  it('unhealthy provider trying to recover', async () => {
+    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    perform0.throws('error')
+    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    perform1.resolves(123)
+    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    perform2.resolves(123)
+
+    uniProvider['debugPrintProviderHealthScores']()
+
+    // Two failed calls makes provider0 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
+    uniProvider['debugPrintProviderHealthScores']()
+
+    // We advance some time. During this the failed provider starts recovering.
+    const clock = Sinon.useFakeTimers(Date.now())
+    clock.tick(10 * 1000)  // Advance 10 seconds
+    perform0.resolves(123)
+
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
+    uniProvider['debugPrintProviderHealthScores']()
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
+
+    clock.tick(10 * 1000)  // Advance 10 seconds
+
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
+    uniProvider['debugPrintProviderHealthScores']()
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
+    // but a shadow the failed provider has been evaluated and resumed to healthy score.
+
+    clock.tick(1000)
+
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_1')
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.be.empty
+    uniProvider['debugPrintProviderHealthScores']()
+
+    // From now on, we go back to use the original preferred provider (provider0)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.be.empty
+    uniProvider['debugPrintProviderHealthScores']()
+
+    // Now later requests will be served with provider0
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_0')
   })
 
   // it('basic test', () => {
