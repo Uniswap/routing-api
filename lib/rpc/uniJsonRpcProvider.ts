@@ -2,6 +2,9 @@ import { LibSupportedChainsType } from './chains'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { Config, DEFAULT_CONFIG } from './config'
+import Debug from 'debug'
+
+const debug = Debug('UniJsonRpcProvider')
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
@@ -87,13 +90,13 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private debugPrintProviderHealthScores() {
-    console.log('=== Healthy Providers ===')
+    debug('=== Healthy Providers ===')
     for (const provider of this.healthyProviders) {
-      console.log(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
-    console.log('=== Unhealthy Providers ===')
+    debug('=== Unhealthy Providers ===')
     for (const provider of this.unhealthyProviders) {
-      console.log(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
 

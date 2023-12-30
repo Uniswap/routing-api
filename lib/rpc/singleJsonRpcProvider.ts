@@ -3,6 +3,9 @@ import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
 import { Network } from '@ethersproject/networks'
 import { ChainId } from '@uniswap/sdk-core'
 import { Config, DEFAULT_CONFIG } from './config'
+import Debug from 'debug'
+
+const debug = Debug("SingleJsonRpcProvider")
 
 // TODO(jie): Tune them!
 // const ERROR_PENALTY = -50
@@ -47,6 +50,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordError() {
     this.healthScore += this.config.ERROR_PENALTY
+    debug(`${this.url}: error penalty ${this.config.ERROR_PENALTY} => ${this.healthScore}`)
   }
 
   private recordHighLatency() {
@@ -54,10 +58,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private recordProviderRecovery(timeInMs: number) {
-    this.healthScore += timeInMs * this.config.RECOVER_SCORE_PER_SECOND
+    this.healthScore += timeInMs * this.config.RECOVER_SCORE_PER_MS
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
+    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} => ${this.healthScore}`)
   }
 
   private checkCallPerformance() {

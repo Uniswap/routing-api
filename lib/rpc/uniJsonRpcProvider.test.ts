@@ -13,7 +13,7 @@ const TEST_CONFIG: Config = {
   HIGH_LATENCY_PENALTY: -50,
   HEALTH_SCORE_THRESHOLD: -70,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
-  RECOVER_SCORE_PER_SECOND: 1,
+  RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_EVALUATION_THRESHOLD: -20,
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
@@ -24,7 +24,7 @@ describe('UniJsonRpcProvider', () => {
 
   beforeEach(() => {
     uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
-      ['provider_0_url', 'provider_1_url', 'provider_2_url'], TEST_CONFIG)
+      ['url_0', 'url_1', 'url_2'], TEST_CONFIG)
     sandbox = Sinon.createSandbox()
   })
 
@@ -43,7 +43,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).undefined
     const blockNumber = await uniProvider.getBlockNumber()
     expect(blockNumber).equals(123)
-    expect(uniProvider.lastUsedUrl).equals('provider_0_url')
+    expect(uniProvider.lastUsedUrl).equals('url_0')
   })
 
   it('first provider unhealthy', async () => {
@@ -56,6 +56,13 @@ describe('UniJsonRpcProvider', () => {
 
     uniProvider['debugPrintProviderHealthScores']()
 
+    // Two failed calls makes provider0 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
     try {
       await uniProvider.getBlockNumber()
       assert(false)  // Should not reach.
@@ -63,18 +70,16 @@ describe('UniJsonRpcProvider', () => {
       expect(err.name).equals('error')
     }
 
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+    // uniProvider['debugPrintProviderHealthScores']()
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
-    expect(uniProvider.lastUsedUrl).equals('provider_0_url')
-    console.log(uniProvider.currentHealthyUrls)
-    console.log(uniProvider.currentUnhealthyUrls)
-
-    uniProvider['debugPrintProviderHealthScores']()
+    // Now later requests will be served with provider1
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_1')
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_1')
   })
 
   // it('basic test', () => {
@@ -85,9 +90,9 @@ describe('UniJsonRpcProvider', () => {
   // it('test reorderHealthyProviders()', () => {
   //   uniProvider['healthyProviders'].reverse()
   //   uniProvider['reorderHealthyProviders']()
-  //   expect(uniProvider['healthyProviders'][0].url).to.be.equal('provider_0_url')
-  //   expect(uniProvider['healthyProviders'][1].url).to.be.equal('provider_1_url')
-  //   expect(uniProvider['healthyProviders'][2].url).to.be.equal('provider_2_url')
+  //   expect(uniProvider['healthyProviders'][0].url).to.be.equal('url_0')
+  //   expect(uniProvider['healthyProviders'][1].url).to.be.equal('url_1')
+  //   expect(uniProvider['healthyProviders'][2].url).to.be.equal('url_2')
   // })
 
   // it('test with real endpoint, single', async () => {
