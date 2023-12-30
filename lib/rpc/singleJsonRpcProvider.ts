@@ -5,15 +5,6 @@ import Debug from 'debug'
 
 const debug = Debug("SingleJsonRpcProvider")
 
-// TODO(jie): Tune them!
-// const ERROR_PENALTY = -50
-// const HIGH_LATENCY_PENALTY = -50
-// const HEALTH_SCORE_THRESHOLD =  ERROR_PENALTY * 3
-// const MAX_LATENCY_ALLOWED_IN_MS = 500
-// const RECOVER_SCORE_PER_SECOND = 1
-// const RECOVER_EVALUATION_THRESHOLD = -20
-// const RECOVER_EVALUATION_WAIT_PERIOD_IN_MS = 5000 // in ms = -20
-
 class PerfStat {
   lastCallTimestampInMs: number = 0
   lastCallSucceed: boolean = false
@@ -62,7 +53,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
+    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${timeInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
   }
 
   private checkLastCallPerformance() {
