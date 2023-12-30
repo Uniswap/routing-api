@@ -2,7 +2,7 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
 import { Network } from '@ethersproject/networks'
 import { ChainId } from '@uniswap/sdk-core'
-import { Config } from './config'
+import { Config, DEFAULT_CONFIG } from './config'
 
 // TODO(jie): Tune them!
 // const ERROR_PENALTY = -50
@@ -28,7 +28,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private perf: PerfStat
   private config: Config
 
-  constructor(chainId: LibSupportedChainsType, url: string, config: Config) {
+  constructor(chainId: LibSupportedChainsType, url: string, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
     this.healthScore = 0
     this.url = url

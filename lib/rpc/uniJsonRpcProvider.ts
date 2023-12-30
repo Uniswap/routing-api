@@ -1,6 +1,7 @@
 import { LibSupportedChainsType } from './chains'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { Config, DEFAULT_CONFIG } from './config'
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
@@ -11,7 +12,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
 
-  constructor(chainId: LibSupportedChainsType, urls: string[], config: Config) {
+  constructor(chainId: LibSupportedChainsType, urls: string[], config: Config = DEFAULT_CONFIG) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
 
@@ -37,14 +38,16 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   async perform(method: string, params: any): Promise<any> {
     if (this.healthyProviders.length == 0) {
-      // TODO(jie): How to throw error?
-    } else {
-      const selectedProvider = this.healthyProviders[0]
-      this.lastUsedProvider = selectedProvider
-      console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
-      const result = await selectedProvider.perform(method, params);
+      throw new Error('No healthy providers available')
+    }
+
+    const selectedProvider = this.healthyProviders[0]
+    this.lastUsedProvider = selectedProvider
+    console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
+    try {
+      return await selectedProvider.perform(method, params);
+    } finally {
       this.checkProviderHealthStatus()
-      return result
     }
   }
 

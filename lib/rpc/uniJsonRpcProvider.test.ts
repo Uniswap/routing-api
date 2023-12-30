@@ -8,10 +8,10 @@ import { Config } from './config'
 // import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 // import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
-const config: Config = {
+const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
-  HEALTH_SCORE_THRESHOLD: -150,
+  HEALTH_SCORE_THRESHOLD: -70,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_SECOND: 1,
   RECOVER_EVALUATION_THRESHOLD: -20,
@@ -24,7 +24,7 @@ describe('UniJsonRpcProvider', () => {
 
   beforeEach(() => {
     uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
-      ['provider_0_url', 'provider_1_url', 'provider_2_url'], config)
+      ['provider_0_url', 'provider_1_url', 'provider_2_url'], TEST_CONFIG)
     sandbox = Sinon.createSandbox()
   })
 
@@ -61,12 +61,20 @@ describe('UniJsonRpcProvider', () => {
       assert(false)  // Should not reach.
     } catch (err: any) {
       expect(err.name).equals('error')
-      expect(uniProvider.lastUsedUrl).equals('provider_0_url')
-      console.log(uniProvider.currentHealthyUrls)
-      console.log(uniProvider.currentUnhealthyUrls)
-
-      uniProvider['debugPrintProviderHealthScores']()
     }
+
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider.lastUsedUrl).equals('provider_0_url')
+    console.log(uniProvider.currentHealthyUrls)
+    console.log(uniProvider.currentUnhealthyUrls)
+
+    uniProvider['debugPrintProviderHealthScores']()
   })
 
   // it('basic test', () => {
