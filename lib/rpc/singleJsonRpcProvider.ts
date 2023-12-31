@@ -2,8 +2,9 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
+import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 
-const debug = Debug("SingleJsonRpcProvider")
+const debug = Debug('SingleJsonRpcProvider')
 
 class PerfStat {
   lastCallTimestampInMs: number = 0
@@ -20,6 +21,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private isRecovering: boolean
   private perf: PerfStat
   private config: Config
+  private readonly metricPrefix: string
 
   constructor(chainId: LibSupportedChainsType, url: string, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
@@ -28,6 +30,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.isRecovering = false
     this.perf = new PerfStat()
     this.config = config
+    this.metricPrefix = `RPC_${this.network.chainId}_${this.url}`
   }
 
   isHealthy(): boolean {
@@ -56,12 +59,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${timeInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
   }
 
-  private checkLastCallPerformance() {
+  private checkLastCallPerformance(method: string) {
     if (!this.perf.lastCallSucceed) {
+      metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError()
     } else if (this.perf.lastCallLatencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
+      metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS_HIGH_LATENCY`, 1, MetricLoggerUnit.Count)
       this.recordHighLatency()
     } else {
+      metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
       // For a success call, we will increase health score.
       if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
         this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
@@ -76,11 +82,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
     // No reward for normal operation.
   }
-
-  // async detectNetwork(): Promise<Network> {
-  //   // return await super.detectNetwork()
-  //   return Promise.resolve({name: 'mainnet', chainId: ChainId.MAINNET})
-  // }
 
   private async _perform(method: string, params: { [name: string]: any }): Promise<any> {
     return await super.perform(method, params)
@@ -103,7 +104,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.perf.lastCallLatencyInMs = endTime - startTime
       this.perf.lastCallSucceed = callSucceed
 
-      this.checkLastCallPerformance()
+      this.checkLastCallPerformance(method)
     }
   }
 
