@@ -109,6 +109,7 @@
     "http-errors": "^1.7.3",
     "http-json-errors": "^1.2.10",
     "lodash": "^4.17.21",
+    "lru-cache": "^10.1.0",
     "node-cache": "^5.1.2",
     "punycode": "^2.1.1",
     "qs": "^6.10.1",
