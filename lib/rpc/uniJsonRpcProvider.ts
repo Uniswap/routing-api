@@ -25,6 +25,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
 
+  private allowProviderSwitch: boolean = true
+
   constructor(chainId: LibSupportedChainsType, urls: string[], weights?: number[], config: Config = DEFAULT_CONFIG) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
@@ -61,7 +63,23 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return this.lastUsedProvider?.url
   }
 
+  enableProviderAutoSwitch() {
+    this.allowProviderSwitch = true
+  }
+
+  disableProviderAutoSwitch() {
+    this.allowProviderSwitch = false
+  }
+
   private selectPreferredProvider(): SingleJsonRpcProvider {
+    if (!this.allowProviderSwitch && this.lastUsedProvider !== null) {
+      if (this.lastUsedProvider.isHealthy()) {
+        return this.lastUsedProvider
+      } else {
+        throw new Error('Forced to use last used provider which is unhealthy')
+      }
+    }
+
     if (isEmpty(this.urlWeight)) {
       return this.healthyProviders[0]
     }

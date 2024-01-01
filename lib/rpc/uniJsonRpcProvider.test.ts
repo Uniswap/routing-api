@@ -272,6 +272,34 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
   })
 
+  it('enable disable provider switch', async () => {
+    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    perform0.throws('error')
+
+    // Two failed calls makes provider0 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.disableProviderAutoSwitch()
+
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.message).equals('Forced to use last used provider which is unhealthy')
+    }
+  })
+
   // it('basic test', () => {
   //   const rpcProvider = new UniJsonRpcProvider(ChainId.MAINNET, ['url1', 'url2'])
   //   rpcProvider['checkProviderHealthStatus']()
