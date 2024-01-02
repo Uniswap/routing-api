@@ -9,8 +9,6 @@ const debug = Debug('UniJsonRpcProvider')
 
 // TODO(jie): 开始和routing API的code进行一定集成
 
-// TODO(jie): 认真调节prod参数
-
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private healthyProviders: SingleJsonRpcProvider[] = []
   private unhealthyProviders: SingleJsonRpcProvider[] = []
@@ -102,7 +100,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
     const selectedProvider = this.selectPreferredProvider()
     this.lastUsedProvider = selectedProvider
-    console.log(`jiejie: Use selected provider: ${selectedProvider.url}`)
+    debug(`Use selected provider: ${selectedProvider.url}`)
     try {
       return await selectedProvider.perform(method, params);
     } finally {
