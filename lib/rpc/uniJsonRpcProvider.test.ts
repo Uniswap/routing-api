@@ -231,6 +231,47 @@ describe('UniJsonRpcProvider', () => {
     expect(unhealthyProvider['healthScore']).equals(-95)
   })
 
+  it('healthy provider can also drop score and resume score', async () => {
+    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    perform0.throws('error')
+    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    perform1.resolves(123)
+    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    perform2.resolves(123)
+
+    const clock = Sinon.useFakeTimers(Date.now())
+
+    uniProvider['debugPrintProviderHealthScores']()
+
+    // One failed call reduce provider0's score, but it's still considered as healthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false)  // Should not reach.
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+    const healthyProvider = uniProvider['healthyProviders'][0]
+    expect(healthyProvider['healthScore']).equals(-50)
+
+    clock.tick(1000 * 2)  // Advance 2 seconds
+    perform0.resolves(123)
+
+    await uniProvider.getBlockNumber()
+    uniProvider['debugPrintProviderHealthScores']()
+    expect(healthyProvider['healthScore']).equals(-40)
+
+    clock.tick(1000 * 2)  // Advance 2 seconds
+
+    await uniProvider.getBlockNumber()
+    uniProvider['debugPrintProviderHealthScores']()
+    expect(healthyProvider['healthScore']).equals(-30)
+
+    // Score deduct and resume doesn't make it an less-preferred provider, as long as it's considered as healthy
+    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
+    expect(uniProvider.currentUnhealthyUrls).to.be.empty
+  })
+
   it('no healthy provider available', async () => {
     uniProvider['healthyProviders'] = []
 

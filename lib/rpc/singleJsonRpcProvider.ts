@@ -52,11 +52,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private recordProviderRecovery(timeInMs: number) {
+    if (this.healthScore === 0) {
+      return
+    }
     this.healthScore += timeInMs * this.config.RECOVER_SCORE_PER_MS
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    debug(`${this.url}: recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${timeInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
+    debug(`${this.url}: healthy: ${this.isHealthy()}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${timeInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
   }
 
   private checkLastCallPerformance(method: string) {
