@@ -5,7 +5,6 @@ import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { Config } from './config'
 
-// TODO(jie): 可以考虑删掉chaiAsPromised
 chai.use(chaiAsPromised)
 
 const config: Config = {
@@ -19,7 +18,6 @@ const config: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
-// TODO(jie): 怎么才能让 provider._perform() 花掉指定的时间？
 describe('SingleJsonRpcProvider', () => {
   let provider: SingleJsonRpcProvider
   let sandbox: SinonSandbox

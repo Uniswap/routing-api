@@ -341,11 +341,6 @@ describe('UniJsonRpcProvider', () => {
     }
   })
 
-  // it('basic test', () => {
-  //   const rpcProvider = new UniJsonRpcProvider(ChainId.MAINNET, ['url1', 'url2'])
-  //   rpcProvider['checkProviderHealthStatus']()
-  // })
-
   it('test reorderHealthyProviders()', () => {
     uniProvider['healthyProviders'].reverse()
     uniProvider['reorderHealthyProviders']()

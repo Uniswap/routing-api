@@ -14,8 +14,7 @@ class PerfStat {
 }
 
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
-  // TODO(jie): This class will implement block-aligned cache, as well as
-  //   meta for provider selection and fallback
+  // TODO(jie): Implement block-aligned cache
   url: string
   private healthScore
   private isRecovering: boolean

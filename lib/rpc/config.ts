@@ -9,7 +9,6 @@ export interface Config {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: number,
 }
 
-// TODO(jie): Tune them!
 export const DEFAULT_CONFIG: Config = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
