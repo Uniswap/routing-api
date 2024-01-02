@@ -118,7 +118,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       await this.getBlockNumber()
       debug('Evaluate call ended')
     } catch (error: any) {
-      console.log(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
+      debug(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
     } finally {
       debug(`${this.url}: ...evaluate done, score => ${this.healthScore}`)
     }

@@ -346,20 +346,13 @@ describe('UniJsonRpcProvider', () => {
   //   rpcProvider['checkProviderHealthStatus']()
   // })
 
-  // it('test reorderHealthyProviders()', () => {
-  //   uniProvider['healthyProviders'].reverse()
-  //   uniProvider['reorderHealthyProviders']()
-  //   expect(uniProvider['healthyProviders'][0].url).to.be.equal('url_0')
-  //   expect(uniProvider['healthyProviders'][1].url).to.be.equal('url_1')
-  //   expect(uniProvider['healthyProviders'][2].url).to.be.equal('url_2')
-  // })
-
-  // it('test with real endpoint, single', async () => {
-  //   const provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e')
-  //   const blockNumber = await provider.getBlockNumber()
-  //   console.log(blockNumber)
-  //   console.log(`${JSON.stringify(provider['perf'])}`)
-  // })
+  it('test reorderHealthyProviders()', () => {
+    uniProvider['healthyProviders'].reverse()
+    uniProvider['reorderHealthyProviders']()
+    expect(uniProvider['healthyProviders'][0].url).to.be.equal('url_0')
+    expect(uniProvider['healthyProviders'][1].url).to.be.equal('url_1')
+    expect(uniProvider['healthyProviders'][2].url).to.be.equal('url_2')
+  })
 
   // it('test with real endpoint, uni', async () => {
   //   const provider = new UniJsonRpcProvider(ChainId.MAINNET, [
