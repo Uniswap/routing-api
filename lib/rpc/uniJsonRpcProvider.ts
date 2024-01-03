@@ -1,9 +1,9 @@
-import { LibSupportedChainsType } from './chains'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
+import { ChainId } from '@uniswap/sdk-core'
 
 const debug = Debug('UniJsonRpcProvider')
 
@@ -25,7 +25,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private allowProviderSwitch: boolean = true
 
-  constructor(chainId: LibSupportedChainsType, urls: string[], weights?: number[], config: Config = DEFAULT_CONFIG) {
+  constructor(chainId: ChainId, urls: string[], weights?: number[], config: Config = DEFAULT_CONFIG) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
 

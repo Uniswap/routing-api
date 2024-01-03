@@ -1,23 +1,21 @@
-// chain id to provider ids
-// no actual RpcProvider object here
-
 import { ChainId } from '@uniswap/sdk-core'
-import UniJsonRpcProvider from './uniJsonRpcProvider'
 
-const INFURA_KEY = 'TODO(jie)'
-const QUICKNODE_MAINNET_RPC_URL = 'TODO(jie)'
+const INFURA_KEY = process.env.UNI_RPC_PROVIDER_INFURA_KEY
+if (INFURA_KEY === undefined) {
+  throw new Error(`UNI_RPC_PROVIDER_INFURA_KEY must be a defined environment variable`)
+}
+const QUICKNODE_MAINNET_RPC_URL = process.env.UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL
+if (typeof QUICKNODE_MAINNET_RPC_URL === 'undefined') {
+  throw new Error(`REACT_APP_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
+}
 
-const PROVIDER_RPC_URLS = {
+export const PROVIDER_RPC_URLS = {
   [ChainId.MAINNET]: [
     `https://mainnet.infura.io/v3/${INFURA_KEY}`,
     QUICKNODE_MAINNET_RPC_URL,
   ],
-  [ChainId.OPTIMISM]: [
-    `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`
-  ],
 }
 
-export const RPC_PROVIDERS = {
-  [ChainId.MAINNET]: new UniJsonRpcProvider(ChainId.MAINNET, PROVIDER_RPC_URLS[ChainId.MAINNET]),
-  [ChainId.OPTIMISM]: new UniJsonRpcProvider(ChainId.MAINNET, PROVIDER_RPC_URLS[ChainId.OPTIMISM]),
+export const PROVIDER_RPC_URL_WEIGHTS = {
+  [ChainId.MAINNET]: undefined,
 }

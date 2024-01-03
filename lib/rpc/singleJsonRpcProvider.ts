@@ -1,8 +1,9 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { CHAIN_IDS_TO_NAMES, LibSupportedChainsType } from './chains'
+import { CHAIN_IDS_TO_NAMES } from './chains'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { ChainId } from '@uniswap/sdk-core'
 
 const debug = Debug('SingleJsonRpcProvider')
 
@@ -22,7 +23,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private config: Config
   private readonly metricPrefix: string
 
-  constructor(chainId: LibSupportedChainsType, url: string, config: Config = DEFAULT_CONFIG) {
+  constructor(chainId: ChainId, url: string, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: CHAIN_IDS_TO_NAMES[chainId] })
     this.url = url
     this.healthScore = 0

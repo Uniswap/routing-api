@@ -349,12 +349,14 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['healthyProviders'][2].url).to.be.equal('url_2')
   })
 
-  // it('test with real endpoint, uni', async () => {
-  //   const provider = new UniJsonRpcProvider(ChainId.MAINNET, [
-  //     'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e',
-  //     'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
-  //   ])
-  //   const blockNumber = await provider.getBlockNumber()
-  //   console.log(blockNumber)
-  // })
+  it('test with real endpoint, uni', async () => {
+    const provider = new UniJsonRpcProvider(ChainId.MAINNET, [
+      // 'https://api.mycryptoapi.com/eth',
+      // 'https://cloudflare-eth.com',
+      // 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e',
+      'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
+    ])
+    const blockNumber = await provider.getBlockNumber()
+    console.log(blockNumber)
+  })
 })

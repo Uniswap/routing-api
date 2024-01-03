@@ -1,4 +1,4 @@
-import { ChainId, SupportedChainsType } from '@uniswap/sdk-core'
+import { ChainId } from '@uniswap/sdk-core'
 
 export const CHAIN_IDS_TO_NAMES = {
   [ChainId.MAINNET]: 'mainnet',
@@ -15,7 +15,7 @@ export const CHAIN_IDS_TO_NAMES = {
   [ChainId.BNB]: 'bnb',
   [ChainId.AVALANCHE]: 'avalanche',
   [ChainId.BASE]: 'base',
+  [ChainId.BASE_GOERLI]: 'base_goerli',
+  [ChainId.GNOSIS]: 'gnosis',
+  [ChainId.MOONBEAM]: 'moonbeam',
 } as const
-
-// TODO(jie): Exclude the chain type that we don't support using Exclude
-export type LibSupportedChainsType = Exclude<SupportedChainsType, ChainId.BASE_GOERLI>
