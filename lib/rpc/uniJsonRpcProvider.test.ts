@@ -2,12 +2,9 @@ import { assert, expect } from 'chai'
 
 import UniJsonRpcProvider from './uniJsonRpcProvider'
 import { ChainId } from '@uniswap/sdk-core'
-// import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from './config'
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
-// import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
-// import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
@@ -22,7 +19,6 @@ const TEST_CONFIG: Config = {
 
 const SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
-    // new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
@@ -516,10 +512,4 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
   })
-
-  // it('test with real endpoint, uni', async () => {
-  //   const provider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
-  //   const blockNumber = await provider.getBlockNumber()
-  //   console.log(blockNumber)
-  // })
 })

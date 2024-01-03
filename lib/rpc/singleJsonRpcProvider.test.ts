@@ -25,23 +25,11 @@ describe('SingleJsonRpcProvider', () => {
   beforeEach(() => {
     provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'provider_0_url', config)
     sandbox = Sinon.createSandbox()
-    // provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e')
   })
 
   afterEach(() => {
     sandbox.restore()
   })
-
-  // it('basic test', () => {
-  //   const rpcProvider = new UniJsonRpcProvider(ChainId.MAINNET, ['url1', 'url2'])
-  //   rpcProvider['checkProviderHealthStatus']()
-  // })
-
-  // it('test with real endpoint, single', async () => {
-  //   const blockNumber = await provider.getBlockNumber()
-  //   console.log(blockNumber)
-  //   console.log(`${JSON.stringify(provider['perf'])}`)
-  // })
 
   it('provider call succeeded', async () => {
     const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
