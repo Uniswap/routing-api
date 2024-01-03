@@ -278,7 +278,7 @@ describe('UniJsonRpcProvider', () => {
     uniProvider['debugPrintProviderHealthScores']()
     expect(healthyProvider['healthScore']).equals(-30)
 
-    // Score deduct and resume doesn't make it an less-preferred provider, as long as it's considered as healthy
+    // Score deduct and resume doesn't make it a less-preferred provider, as long as it's considered as healthy
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
   })

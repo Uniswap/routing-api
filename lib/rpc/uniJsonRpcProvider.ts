@@ -6,8 +6,6 @@ import { ChainId } from '@uniswap/sdk-core'
 
 const debug = Debug('UniJsonRpcProvider')
 
-// TODO(jie): 开始和routing API的code进行一定集成
-
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly chainId: ChainId = ChainId.MAINNET
 
@@ -24,9 +22,15 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private allowProviderSwitch: boolean = true
 
+  private totallyDisableFallback: boolean = false
+
   constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
+
+    if (isEmpty(singleRpcProviders)) {
+      throw new Error('Empty singlePrcProviders')
+    }
 
     if (ranking !== undefined && weights !== undefined && weights && ranking.length != weights.length) {
       throw new Error('urls and weights need to have the same length')
@@ -75,7 +79,17 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.allowProviderSwitch = false
   }
 
+  disableFallback() {
+    this.totallyDisableFallback = true
+  }
+
   private selectPreferredProvider(): SingleJsonRpcProvider {
+    if (this.totallyDisableFallback) {
+      const providers = [...this.providers]
+      this.reorderProviders(providers)
+      return providers[0]
+    }
+
     if (!this.allowProviderSwitch && this.lastUsedProvider !== null) {
       if (this.lastUsedProvider.isHealthy()) {
         return this.lastUsedProvider

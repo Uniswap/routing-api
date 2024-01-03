@@ -52,8 +52,9 @@ import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
-import { UNI_RPC_PROVIDERS } from '../rpc/rpcGateway'
+import { UNI_RPC_PROVIDERS } from '../rpc/providers'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import UniJsonRpcProvider from '../rpc/uniJsonRpcProvider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -165,6 +166,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           let provider: StaticJsonRpcProvider
           if (chainId in UNI_RPC_PROVIDERS) {
             provider = UNI_RPC_PROVIDERS[chainId]!
+            // Disable fallback for temporary testing purpose
+            const uniProvider = provider as UniJsonRpcProvider
+            uniProvider.disableFallback()
           } else {
             provider = new DefaultEVMClient({
               allProviders: [
