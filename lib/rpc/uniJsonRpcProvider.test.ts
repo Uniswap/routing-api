@@ -5,6 +5,7 @@ import { ChainId } from '@uniswap/sdk-core'
 // import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from './config'
+import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 // import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 // import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
@@ -19,26 +20,46 @@ const TEST_CONFIG: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
+const SINGLE_RPC_PROVIDERS = {
+  [ChainId.MAINNET]: [
+    // new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+  ]
+}
+
+const resetRpcProviders = () => {
+  SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+  ]
+}
+
 describe('UniJsonRpcProvider', () => {
   let uniProvider: UniJsonRpcProvider
   let sandbox: SinonSandbox
 
   beforeEach(() => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
-      ['url_0', 'url_1', 'url_2'], undefined, TEST_CONFIG)
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
     sandbox = Sinon.createSandbox()
   })
 
   afterEach(() => {
+    resetRpcProviders()
     sandbox.restore()
   })
 
   it('all provider healthy', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.resolves(123)
-    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
     perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
     expect(uniProvider.lastUsedUrl).undefined
@@ -48,11 +69,11 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('fallback when first provider becomes unhealthy', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
     perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
     uniProvider['debugPrintProviderHealthScores']()
@@ -60,17 +81,18 @@ describe('UniJsonRpcProvider', () => {
     // Two failed calls makes provider0 unhealthy
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
     uniProvider['debugPrintProviderHealthScores']()
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
+    uniProvider['debugPrintProviderHealthScores']()
 
     expect(uniProvider.lastUsedUrl).equals('url_0')
     // uniProvider['debugPrintProviderHealthScores']()
@@ -82,14 +104,15 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
+    uniProvider['debugPrintProviderHealthScores']()
   })
 
   it('unhealthy provider successfully recovered', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
     perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
@@ -99,14 +122,14 @@ describe('UniJsonRpcProvider', () => {
     // Two failed calls makes provider0 unhealthy
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
     uniProvider['debugPrintProviderHealthScores']()
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
@@ -132,24 +155,16 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     uniProvider['debugPrintProviderHealthScores']()
-    // Provider0 is considered fully recovered, but healthy provider list hasn't been updated yet (because only when
-    // serving a new request can we update the healthy provider list)
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    // but a shadow the failed provider has been evaluated and resumed to healthy score.
-
-    clock.tick(1000)
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    // Healthy provider list is updated.
+    // Provider0 is fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
-    uniProvider['debugPrintProviderHealthScores']()
+
+    clock.tick(1000)
 
     // From now on, we go back to use the original preferred provider (provider0)
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_0')
+    // Healthy provider list is updated.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
     uniProvider['debugPrintProviderHealthScores']()
@@ -164,11 +179,11 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('unhealthy provider has some challenge during recovering', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
     perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
@@ -178,14 +193,14 @@ describe('UniJsonRpcProvider', () => {
     // Two failed calls makes provider0 unhealthy
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
     uniProvider['debugPrintProviderHealthScores']()
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
@@ -196,7 +211,7 @@ describe('UniJsonRpcProvider', () => {
     uniProvider['debugPrintProviderHealthScores']()
 
     // We advance some time. During this the failed provider starts recovering.
-    const unhealthyProvider = uniProvider['unhealthyProviders'][0]
+    const unhealthyProvider = uniProvider['providers'][0]
     const scoreBeforeRecovering = unhealthyProvider['healthScore']
     clock.tick(1000)  // Advance 1 seconds
     perform0.resolves(123)
@@ -232,11 +247,11 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('healthy provider can also drop score and resume score', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['healthyProviders'][1], '_perform' as any)
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
     perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['healthyProviders'][2], '_perform' as any)
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
@@ -246,12 +261,12 @@ describe('UniJsonRpcProvider', () => {
     // One failed call reduce provider0's score, but it's still considered as healthy
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
     uniProvider['debugPrintProviderHealthScores']()
-    const healthyProvider = uniProvider['healthyProviders'][0]
+    const healthyProvider = uniProvider['providers'][0]
     expect(healthyProvider['healthScore']).equals(-50)
 
     clock.tick(1000 * 2)  // Advance 2 seconds
@@ -273,28 +288,76 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('no healthy provider available', async () => {
-    uniProvider['healthyProviders'] = []
+    uniProvider['providers'][0]['isRecovering'] = true
+    uniProvider['providers'][1]['isRecovering'] = true
+    uniProvider['providers'][2]['isRecovering'] = true
 
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
-      expect(err.message).equals('No healthy providers available')
+      expect(err.message).equals('No healthy provider available')
     }
   })
 
-  it('test selectPreferredProvider: without weights', async () => {
+  it('test selectPreferredProvider: without custom ranking nor weights', async () => {
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+  })
+
+  it('test selectPreferredProvider: with custom ranking', async () => {
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [2, 1, 0], undefined)
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // Two failed calls makes provider2 unhealthy
+    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
+    perform2.throws('error')
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+
+    // Two failed calls makes provider1 unhealthy
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
+    perform1.throws('error')
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider['debugPrintProviderHealthScores']()
+
     expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
   })
 
   it('test selectPreferredProvider: with weights', async () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET,
-      ['url_0', 'url_1', 'url_2'], [4, 1, 3], TEST_CONFIG)
-
-    expect(uniProvider['urlWeightSum']).equals(8)
-
-    uniProvider['updateHealthyProviderUrlWeightSum']()
-    expect(uniProvider['urlWeightSum']).equals(8)
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, [4, 1, 3])
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
 
     const randStub = Sinon.stub(Math, 'random')
     randStub.returns(0.0)
@@ -314,19 +377,19 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('enable disable provider switch', async () => {
-    const perform0 = sandbox.stub(uniProvider['healthyProviders'][0], '_perform' as any)
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
     perform0.throws('error')
 
     // Two failed calls makes provider0 unhealthy
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
@@ -335,28 +398,128 @@ describe('UniJsonRpcProvider', () => {
 
     try {
       await uniProvider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.message).equals('Forced to use last used provider which is unhealthy')
     }
   })
 
   it('test reorderHealthyProviders()', () => {
-    uniProvider['healthyProviders'].reverse()
-    uniProvider['reorderHealthyProviders']()
-    expect(uniProvider['healthyProviders'][0].url).to.be.equal('url_0')
-    expect(uniProvider['healthyProviders'][1].url).to.be.equal('url_1')
-    expect(uniProvider['healthyProviders'][2].url).to.be.equal('url_2')
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [2, 0, 1])
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+    const providers = uniProvider['providers']
+    uniProvider['reorderProviders'](providers)
+    expect(providers[0].url).to.be.equal('url_1')
+    expect(providers[1].url).to.be.equal('url_2')
+    expect(providers[2].url).to.be.equal('url_0')
   })
 
-  it('test with real endpoint, uni', async () => {
-    const provider = new UniJsonRpcProvider(ChainId.MAINNET, [
-      // 'https://api.mycryptoapi.com/eth',
-      // 'https://cloudflare-eth.com',
-      // 'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e',
-      'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
-    ])
-    const blockNumber = await provider.getBlockNumber()
-    console.log(blockNumber)
+  it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider', async () => {
+    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    for (const provider of uniProvider1['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+
+    const uniProvider2 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    for (const provider of uniProvider2['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
+    perform0.throws('error')
+
+    // Two failed calls makes provider0 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    expect(uniProvider1['selectPreferredProvider']().url).equals('url_1')
+    expect(uniProvider2['selectPreferredProvider']().url).equals('url_1')
+
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
+    perform1.throws('error')
+
+    // Two failed calls makes provider1 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
+    expect(uniProvider2['selectPreferredProvider']().url).equals('url_2')
   })
+
+  it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider, but with different rankings', async () => {
+    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [0, 2, 1])
+    for (const provider of uniProvider1['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+
+    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
+    perform0.throws('error')
+
+    // Two failed calls makes provider0 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
+
+    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
+    perform1.throws('error')
+
+    // Two failed calls makes provider1 unhealthy
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    try {
+      await uniProvider.getBlockNumber()
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
+  })
+
+  // it('test with real endpoint, uni', async () => {
+  //   const provider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+  //   const blockNumber = await provider.getBlockNumber()
+  //   console.log(blockNumber)
+  // })
 })

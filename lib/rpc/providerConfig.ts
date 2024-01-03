@@ -1,4 +1,5 @@
 import { ChainId } from '@uniswap/sdk-core'
+import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 
 const INFURA_KEY = process.env.UNI_RPC_PROVIDER_INFURA_KEY
 if (INFURA_KEY === undefined) {
@@ -18,4 +19,12 @@ export const PROVIDER_RPC_URLS = {
 
 export const PROVIDER_RPC_URL_WEIGHTS = {
   [ChainId.MAINNET]: undefined,
+}
+
+export const SINGLE_RPC_PROVIDERS: {[key in ChainId]? : SingleJsonRpcProvider[]} = {
+  [ChainId.MAINNET]: [
+    new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e`),
+    // new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`),
+    // new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL),
+  ]
 }

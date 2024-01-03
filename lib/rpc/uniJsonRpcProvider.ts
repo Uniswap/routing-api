@@ -1,6 +1,5 @@
 import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -10,51 +9,58 @@ const debug = Debug('UniJsonRpcProvider')
 // TODO(jie): 开始和routing API的code进行一定集成
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
-  private healthyProviders: SingleJsonRpcProvider[] = []
-  private unhealthyProviders: SingleJsonRpcProvider[] = []
+  private readonly chainId: ChainId = ChainId.MAINNET
+
+  private readonly providers: SingleJsonRpcProvider[] = []
 
   // Used to remember the user-specified precedence or provider URLs. 0 means highest
-  private urlPrecedence: Record<string, number> = {}
+  private readonly urlPrecedence: Record<string, number> = {}
 
   // If provided, we will use this weight to decide the probability of choosing
   // one of the healthy providers.
-  private urlWeight: Record<string, number> = {}
-  private urlWeightSum: number = 0
+  private readonly urlWeight: Record<string, number> = {}
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
 
   private allowProviderSwitch: boolean = true
 
-  constructor(chainId: ChainId, urls: string[], weights?: number[], config: Config = DEFAULT_CONFIG) {
+  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network'})
 
-    if (weights && weights.length != urls.length) {
+    if (ranking !== undefined && weights !== undefined && weights && ranking.length != weights.length) {
       throw new Error('urls and weights need to have the same length')
     }
 
-    let weightSum = 0
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i]
-      this.healthyProviders.push(new SingleJsonRpcProvider(chainId, url, config))
-      this.urlPrecedence[url] = i
-      if (weights) {
+    this.chainId = chainId
+    this.providers = singleRpcProviders
+    for (let i = 0; i < this.providers.length; i++) {
+      const url = this.providers[i].url
+      if (ranking !== undefined) {
+        if (ranking[i] < 0) {
+          throw new Error(`Invalid rank: ${ranking[i]}. Rank needs to be a positive number`)
+        }
+        this.urlPrecedence[url] = ranking[i]
+      } else {
+        this.urlPrecedence[url] = i
+      }
+      if (weights != undefined) {
         if (weights[i] <= 0) {
           throw new Error(`Invalid weight: ${weights[i]}. Weight needs to be a positive number`)
         }
         this.urlWeight[url] = weights[i]
-        weightSum += weights[i]
       }
     }
-    this.urlWeightSum = weightSum
   }
 
    get currentHealthyUrls() {
-    return this.healthyProviders.map((provider) => provider.url)
+     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
+     return healthyProviders.map((provider) => provider.url)
   }
 
   get currentUnhealthyUrls() {
-    return this.unhealthyProviders.map((provider) => provider.url)
+    const unhealthyProviders = this.providers.filter((provider) => !provider.isHealthy())
+    return unhealthyProviders.map((provider) => provider.url)
   }
 
   get lastUsedUrl() {
@@ -78,92 +84,77 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    if (isEmpty(this.urlWeight)) {
-      return this.healthyProviders[0]
+    const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
+    if (isEmpty(healthyProviders)) {
+      throw new Error('No healthy provider available')
     }
-    const rand = Math.random() * this.urlWeightSum
+
+    this.reorderProviders(healthyProviders)
+
+    if (isEmpty(this.urlWeight)) {
+      return healthyProviders[0]
+    }
+
+    const urlWeightSum = this.calculateHealthyProviderUrlWeightSum(healthyProviders)
+    const rand = Math.random() * urlWeightSum
     // No need to use binary search since the size of healthy providers is very small.
     let accumulatedWeight: number = 0
-    for (const provider of  this.healthyProviders) {
+    for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
         return provider
       }
     }
+
     throw new Error("Encounter error when selecting preferred provider")
   }
 
   async perform(method: string, params: any): Promise<any> {
-    if (this.healthyProviders.length == 0) {
-      throw new Error('No healthy providers available')
-    }
-
     const selectedProvider = this.selectPreferredProvider()
     this.lastUsedProvider = selectedProvider
-    debug(`Use selected provider: ${selectedProvider.url}`)
+    debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
     try {
       return await selectedProvider.perform(method, params);
     } finally {
-      this.checkProviderHealthStatus()
+      this.checkUnhealthyProvider()
     }
   }
 
-  private reorderHealthyProviders() {
-    this.healthyProviders.sort((a, b) => {
+  private reorderProviders(providers: SingleJsonRpcProvider[]) {
+    providers.sort((a, b) => {
       return this.urlPrecedence[a.url] - this.urlPrecedence[b.url]
     })
   }
 
-  private updateHealthyProviderUrlWeightSum() {
-    // Update url weight sum for healthy providers.
+  private calculateHealthyProviderUrlWeightSum(healthyProviders: SingleJsonRpcProvider[]): number {
     if (!isEmpty(this.urlWeight)) {
-      this.urlWeightSum = 0
-      for (const provider of this.healthyProviders) {
-        this.urlWeightSum += this.urlWeight[provider.url]
+      let urlWeightSum = 0
+      for (const provider of healthyProviders) {
+        urlWeightSum += this.urlWeight[provider.url]
       }
+      return urlWeightSum
+    } else {
+      throw new Error('Weights are not provided')
     }
   }
 
-  private checkProviderHealthStatus() {
-    debug('after a call, checkProviderHealthStatus')
-    const healthy: SingleJsonRpcProvider[] = []
-    const unhealthy: SingleJsonRpcProvider[] = []
+  private checkUnhealthyProvider() {
+    debug('after a call, checkUnhealthyProvider')
 
-    // Check health providers.
-    for (const provider of this.healthyProviders) {
-      if (provider.isHealthy()) {
-        healthy.push(provider)
-      } else {
-        unhealthy.push(provider)
+    for (const provider of this.providers) {
+      if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
+        provider.evaluateForRecovery()  // not blocking
       }
     }
-
-    for (const provider of this.unhealthyProviders) {
-      if (provider.isHealthy()) {
-        healthy.push(provider)
-      } else {
-        unhealthy.push(provider)
-        if (provider.hasEnoughWaitSinceLastCall()) {
-          provider.evaluateForRecovery()  // not blocking
-        }
-      }
-    }
-
-    this.healthyProviders = healthy
-    this.unhealthyProviders = unhealthy
-    this.reorderHealthyProviders()
-    debug(`reordered healthy providers, top provider ${this.healthyProviders[0].url}`)
-
-    this.updateHealthyProviderUrlWeightSum()
   }
 
   private debugPrintProviderHealthScores() {
     debug('=== Healthy Providers ===')
-    for (const provider of this.healthyProviders) {
+    for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
       debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
     debug('=== Unhealthy Providers ===')
-    for (const provider of this.unhealthyProviders) {
+    for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
       debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
