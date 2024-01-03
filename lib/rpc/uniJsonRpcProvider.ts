@@ -157,7 +157,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
-        provider.evaluateForRecovery()  // not blocking
+        provider.evaluateForRecovery() // not blocking
       }
     }
   }

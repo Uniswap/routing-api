@@ -59,7 +59,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    debug(`${this.url}: healthy: ${this.isHealthy()}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${timeInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`)
+    debug(
+      `${this.url}: healthy: ${this.isHealthy()}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${
+        timeInMs * this.config.RECOVER_SCORE_PER_MS
+      }, score => ${this.healthScore}`
+    )
   }
 
   private checkLastCallPerformance(method: string) {

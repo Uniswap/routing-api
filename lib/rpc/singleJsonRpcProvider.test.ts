@@ -14,7 +14,7 @@ const config: Config = {
   HEALTH_SCORE_RECOVER_THRESHOLD: -10,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000
+  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
 describe('SingleJsonRpcProvider', () => {
@@ -57,7 +57,7 @@ describe('SingleJsonRpcProvider', () => {
 
   it('provider call too high latency', async () => {
     const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
-    performCall.resolves(new Promise(resolve => setTimeout(() => resolve(123456), 1000)))
+    performCall.resolves(new Promise((resolve) => setTimeout(() => resolve(123456), 1000)))
     const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordHighLatency' as any)
 
     const blockNumber = await provider.getBlockNumber()
@@ -66,5 +66,4 @@ describe('SingleJsonRpcProvider', () => {
     expect(provider['perf'].lastCallSucceed).to.be.true
     expect(spy.calledOnce).to.be.true
   })
-
 })

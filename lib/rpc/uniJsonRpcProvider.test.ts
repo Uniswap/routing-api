@@ -13,22 +13,22 @@ const TEST_CONFIG: Config = {
   HEALTH_SCORE_RECOVER_THRESHOLD: -10,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000
+  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
 const SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`)
-  ]
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+  ],
 }
 
 const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`)
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
   ]
 }
 
@@ -135,7 +135,7 @@ describe('UniJsonRpcProvider', () => {
     uniProvider.debugPrintProviderHealthScores()
 
     // We advance some time. During this the failed provider starts recovering.
-    clock.tick(10 * 1000)  // Advance 10 seconds
+    clock.tick(10 * 1000) // Advance 10 seconds
     perform0.resolves(123)
 
     await uniProvider.getBlockNumber()
@@ -145,7 +145,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
-    clock.tick(10 * 1000)  // Advance 10 seconds
+    clock.tick(10 * 1000) // Advance 10 seconds
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -208,7 +208,7 @@ describe('UniJsonRpcProvider', () => {
     // We advance some time. During this the failed provider starts recovering.
     const unhealthyProvider = uniProvider['providers'][0]
     const scoreBeforeRecovering = unhealthyProvider['healthScore']
-    clock.tick(1000)  // Advance 1 seconds
+    clock.tick(1000) // Advance 1 seconds
     perform0.resolves(123)
 
     await uniProvider.getBlockNumber()
@@ -219,7 +219,7 @@ describe('UniJsonRpcProvider', () => {
     // 1 second isn't enough to start re-evaluate the failed provider.
     expect(unhealthyProvider['healthScore']).equals(scoreBeforeRecovering)
 
-    clock.tick(10 * 1000)  // Advance 10 seconds
+    clock.tick(10 * 1000) // Advance 10 seconds
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -229,7 +229,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
     expect(unhealthyProvider['healthScore']).equals(-45)
 
-    clock.tick(10 * 1000)  // Advance 10 seconds
+    clock.tick(10 * 1000) // Advance 10 seconds
     perform0.throws('error during recovery evaluation')
 
     await uniProvider.getBlockNumber()
@@ -264,14 +264,14 @@ describe('UniJsonRpcProvider', () => {
     const healthyProvider = uniProvider['providers'][0]
     expect(healthyProvider['healthScore']).equals(-50)
 
-    clock.tick(1000 * 2)  // Advance 2 seconds
+    clock.tick(1000 * 2) // Advance 2 seconds
     perform0.resolves(123)
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()
     expect(healthyProvider['healthScore']).equals(-40)
 
-    clock.tick(1000 * 2)  // Advance 2 seconds
+    clock.tick(1000 * 2) // Advance 2 seconds
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()

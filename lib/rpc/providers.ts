@@ -23,7 +23,7 @@ export const SINGLE_RPC_PROVIDERS: Partial<Record<ChainId, SingleJsonRpcProvider
   [ChainId.MAINNET]: [
     new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`),
     new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL),
-  ]
+  ],
 }
 
 export const UNI_RPC_PROVIDERS: Partial<Record<ChainId, UniJsonRpcProvider>> = {
@@ -31,5 +31,6 @@ export const UNI_RPC_PROVIDERS: Partial<Record<ChainId, UniJsonRpcProvider>> = {
     ChainId.MAINNET,
     SINGLE_RPC_PROVIDERS[ChainId.MAINNET]!,
     PROVIDER_RPC_URL_RANKING[ChainId.MAINNET],
-    PROVIDER_RPC_URL_WEIGHTS[ChainId.MAINNET])
+    PROVIDER_RPC_URL_WEIGHTS[ChainId.MAINNET]
+  ),
 }
