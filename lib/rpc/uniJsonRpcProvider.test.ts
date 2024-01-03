@@ -4,7 +4,7 @@ import UniJsonRpcProvider from './uniJsonRpcProvider'
 import { ChainId } from '@uniswap/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from './config'
-import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
+import SingleJsonRpcProvider from './singleJsonRpcProvider'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,

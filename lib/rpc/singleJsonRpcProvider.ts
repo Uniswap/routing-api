@@ -14,7 +14,7 @@ class PerfStat {
   timeWaitedBeforeLastCallInMs: number = 0
 }
 
-export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
+export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): Implement block-aligned cache
   url: string
   private healthScore

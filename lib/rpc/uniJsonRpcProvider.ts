@@ -1,4 +1,4 @@
-import { SingleJsonRpcProvider } from './singleJsonRpcProvider'
+import SingleJsonRpcProvider from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
@@ -7,6 +7,7 @@ import { ChainId } from '@uniswap/sdk-core'
 const debug = Debug('UniJsonRpcProvider')
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
+
   private readonly chainId: ChainId = ChainId.MAINNET
 
   private readonly providers: SingleJsonRpcProvider[] = []
@@ -123,12 +124,15 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     throw new Error('Encounter error when selecting preferred provider')
   }
 
-  async perform(method: string, params: any): Promise<any> {
+  override async perform(method: string, params: any): Promise<any> {
     const selectedProvider = this.selectPreferredProvider()
     this.lastUsedProvider = selectedProvider
     debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
+    console.log(`jiejie: Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
     try {
-      return await selectedProvider.perform(method, params)
+      const result = await selectedProvider.perform(method, params)
+      console.log(`jiejie: provider call method: ${method}, params: ${JSON.stringify(params)}, result: ${JSON.stringify(result)}`)
+      return result
     } finally {
       this.checkUnhealthyProvider()
     }

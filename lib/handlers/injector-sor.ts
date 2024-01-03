@@ -52,9 +52,9 @@ import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
-import { UNI_RPC_PROVIDERS } from '../rpc/providers'
+import GlobalRpcProviders  from '../rpc/globalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import UniJsonRpcProvider from '../rpc/uniJsonRpcProvider'
+// import UniJsonRpcProvider from '../rpc/uniJsonRpcProvider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -164,11 +164,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           }
 
           let provider: StaticJsonRpcProvider
-          if (chainId in UNI_RPC_PROVIDERS) {
-            provider = UNI_RPC_PROVIDERS[chainId]!
+          if (chainId in GlobalRpcProviders.getGlobalUniRpcProviders()) {
+            provider = GlobalRpcProviders.getGlobalUniRpcProviders()[chainId]!
             // Disable fallback for temporary testing purpose
-            const uniProvider = provider as UniJsonRpcProvider
-            uniProvider.disableFallback()
+            // const uniProvider = provider as UniJsonRpcProvider
+            // uniProvider.disableFallback()
           } else {
             provider = new DefaultEVMClient({
               allProviders: [
@@ -183,6 +183,18 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ],
             }).getProvider()
           }
+          // const provider = new DefaultEVMClient({
+          //   allProviders: [
+          //     new InstrumentedEVMProvider({
+          //       url: {
+          //         url: url,
+          //         timeout,
+          //       },
+          //       network: chainId,
+          //       name: deriveProviderName(url),
+          //     }),
+          //   ],
+          // }).getProvider()
 
           const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
           const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
