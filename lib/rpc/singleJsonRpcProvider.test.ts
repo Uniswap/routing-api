@@ -14,7 +14,6 @@ const config: Config = {
   HEALTH_SCORE_RECOVER_THRESHOLD: -10,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
-  RECOVER_EVALUATION_THRESHOLD: -20,
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000
 }
 
@@ -48,7 +47,7 @@ describe('SingleJsonRpcProvider', () => {
 
     try {
       await provider.getBlockNumber()
-      assert(false)  // Should not reach.
+      assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
       expect(provider['perf'].lastCallSucceed).to.be.false
