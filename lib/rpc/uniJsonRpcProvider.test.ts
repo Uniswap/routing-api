@@ -14,14 +14,14 @@ const TEST_CONFIG: Config = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_EVALUATION_THRESHOLD: -20,
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000
 }
 
 const SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`)
   ]
 }
 
@@ -29,7 +29,7 @@ const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`)
   ]
 }
 
@@ -72,7 +72,7 @@ describe('UniJsonRpcProvider', () => {
     const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
     perform2.resolves(123)
 
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -81,17 +81,17 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     expect(uniProvider.lastUsedUrl).equals('url_0')
-    // uniProvider['debugPrintProviderHealthScores']()
+    // uniProvider.debugPrintProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
@@ -100,7 +100,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
   })
 
   it('unhealthy provider successfully recovered', async () => {
@@ -113,7 +113,7 @@ describe('UniJsonRpcProvider', () => {
 
     const clock = Sinon.useFakeTimers(Date.now())
 
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -122,7 +122,7 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
@@ -133,7 +133,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_0')
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // We advance some time. During this the failed provider starts recovering.
     clock.tick(10 * 1000)  // Advance 10 seconds
@@ -141,7 +141,7 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     // Provider0 hasn't been considered fully recovered yet.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
@@ -150,7 +150,7 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     // Provider0 is fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
@@ -163,7 +163,7 @@ describe('UniJsonRpcProvider', () => {
     // Healthy provider list is updated.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // Now later requests will be served with provider0
     await uniProvider.getBlockNumber()
@@ -184,7 +184,7 @@ describe('UniJsonRpcProvider', () => {
 
     const clock = Sinon.useFakeTimers(Date.now())
 
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -193,7 +193,7 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
@@ -204,7 +204,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_0')
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // We advance some time. During this the failed provider starts recovering.
     const unhealthyProvider = uniProvider['providers'][0]
@@ -214,7 +214,7 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
     // 1 second isn't enough to start re-evaluate the failed provider.
@@ -224,7 +224,7 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     // Provider0 has recovered quite a bit. But still not enough to be considered as fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
@@ -235,7 +235,7 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
     // Provider0 failed again during recovery evaluation.
@@ -252,7 +252,7 @@ describe('UniJsonRpcProvider', () => {
 
     const clock = Sinon.useFakeTimers(Date.now())
 
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     // One failed call reduce provider0's score, but it's still considered as healthy
     try {
@@ -261,7 +261,7 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     const healthyProvider = uniProvider['providers'][0]
     expect(healthyProvider['healthScore']).equals(-50)
 
@@ -269,13 +269,13 @@ describe('UniJsonRpcProvider', () => {
     perform0.resolves(123)
 
     await uniProvider.getBlockNumber()
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     expect(healthyProvider['healthScore']).equals(-40)
 
     clock.tick(1000 * 2)  // Advance 2 seconds
 
     await uniProvider.getBlockNumber()
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     expect(healthyProvider['healthScore']).equals(-30)
 
     // Score deduct and resume doesn't make it a less-preferred provider, as long as it's considered as healthy
@@ -317,14 +317,14 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
 
@@ -337,14 +337,14 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
   })
@@ -389,7 +389,7 @@ describe('UniJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
     }
-    uniProvider['debugPrintProviderHealthScores']()
+    uniProvider.debugPrintProviderHealthScores()
     uniProvider.disableProviderAutoSwitch()
 
     try {

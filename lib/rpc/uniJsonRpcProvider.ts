@@ -26,7 +26,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
     // Dummy super constructor call is needed.
-    super('dummy_url', { chainId, name: 'dummy_network'})
+    super('dummy_url', { chainId, name: 'dummy_network' })
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')
@@ -57,9 +57,9 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-   get currentHealthyUrls() {
-     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
-     return healthyProviders.map((provider) => provider.url)
+  get currentHealthyUrls() {
+    const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
+    return healthyProviders.map((provider) => provider.url)
   }
 
   get currentUnhealthyUrls() {
@@ -120,7 +120,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    throw new Error("Encounter error when selecting preferred provider")
+    throw new Error('Encounter error when selecting preferred provider')
   }
 
   async perform(method: string, params: any): Promise<any> {
@@ -128,7 +128,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.lastUsedProvider = selectedProvider
     debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
     try {
-      return await selectedProvider.perform(method, params);
+      return await selectedProvider.perform(method, params)
     } finally {
       this.checkUnhealthyProvider()
     }
@@ -162,7 +162,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  private debugPrintProviderHealthScores() {
+  debugPrintProviderHealthScores() {
     debug('=== Healthy Providers ===')
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
       debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
