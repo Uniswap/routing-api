@@ -90,29 +90,47 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     // No reward for normal operation.
   }
 
-  private async _perform(method: string, params: { [name: string]: any }): Promise<any> {
-    return await super.perform(method, params)
+  private recordPerfBeforeCall(startTimeInMs: number) {
+    if (this.perf.lastCallTimestampInMs > 0) {
+      this.perf.timeWaitedBeforeLastCallInMs = startTimeInMs - this.perf.lastCallTimestampInMs
+    }
   }
 
-  async perform(method: string, params: { [name: string]: any }): Promise<any> {
-    const startTime = Date.now()
-    if (this.perf.lastCallTimestampInMs > 0) {
-      this.perf.timeWaitedBeforeLastCallInMs = startTime - this.perf.lastCallTimestampInMs
-    }
-    let callSucceed = true
-    try {
-      return await this._perform(method, params)
-    } catch (error: any) {
-      callSucceed = false
-      throw error
-    } finally {
-      const endTime = Date.now()
-      this.perf.lastCallTimestampInMs = endTime
-      this.perf.lastCallLatencyInMs = endTime - startTime
-      this.perf.lastCallSucceed = callSucceed
+  private recordPerfAfterCall(startTimeInMs: number, endTimeInMs: number, callSucceed: boolean) {
+    this.perf.lastCallTimestampInMs = endTimeInMs
+    this.perf.lastCallLatencyInMs = endTimeInMs - startTimeInMs
+    this.perf.lastCallSucceed = callSucceed
+  }
 
-      this.checkLastCallPerformance(method)
-    }
+  private _getBlockNumber(): Promise<number> {
+    return super.getBlockNumber()
+  }
+
+  override async getBlockNumber(): Promise<number> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    // return super.getBlockNumber()
+    return this._getBlockNumber()
+      .then(
+        (response) => {
+          console.log('in then')
+          return response
+        },
+      )
+      .catch(
+        error => {
+          console.log('in catch')
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally( () => {
+        console.log('in finally')
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getBlockNumber')
+      })
   }
 
   async evaluateForRecovery() {

@@ -58,41 +58,17 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  get currentHealthyUrls() {
-    const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
-    return healthyProviders.map((provider) => provider.url)
-  }
-
-  get currentUnhealthyUrls() {
-    const unhealthyProviders = this.providers.filter((provider) => !provider.isHealthy())
-    return unhealthyProviders.map((provider) => provider.url)
-  }
-
-  get lastUsedUrl() {
-    return this.lastUsedProvider?.url
-  }
-
-  enableProviderAutoSwitch() {
-    this.allowProviderSwitch = true
-  }
-
-  disableProviderAutoSwitch() {
-    this.allowProviderSwitch = false
-  }
-
-  disableFallback() {
-    this.totallyDisableFallback = true
-  }
-
   private selectPreferredProvider(): SingleJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
       this.reorderProviders(providers)
+      debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
     }
 
     if (!this.allowProviderSwitch && this.lastUsedProvider !== null) {
       if (this.lastUsedProvider.isHealthy()) {
+        debug(`Use provider ${this.lastUsedProvider.url} for chain ${this.chainId.toString()}`)
         return this.lastUsedProvider
       } else {
         throw new Error('Forced to use last used provider which is unhealthy')
@@ -107,6 +83,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.reorderProviders(healthyProviders)
 
     if (isEmpty(this.urlWeight)) {
+      debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
       return healthyProviders[0]
     }
 
@@ -117,25 +94,12 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
+        debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         return provider
       }
     }
 
     throw new Error('Encounter error when selecting preferred provider')
-  }
-
-  override async perform(method: string, params: any): Promise<any> {
-    const selectedProvider = this.selectPreferredProvider()
-    this.lastUsedProvider = selectedProvider
-    debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
-    console.log(`jiejie: Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
-    try {
-      const result = await selectedProvider.perform(method, params)
-      console.log(`jiejie: provider call method: ${method}, params: ${JSON.stringify(params)}, result: ${JSON.stringify(result)}`)
-      return result
-    } finally {
-      this.checkUnhealthyProvider()
-    }
   }
 
   private reorderProviders(providers: SingleJsonRpcProvider[]) {
@@ -174,6 +138,42 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     debug('=== Unhealthy Providers ===')
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
       debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+    }
+  }
+
+  get currentHealthyUrls() {
+    const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
+    return healthyProviders.map((provider) => provider.url)
+  }
+
+  get currentUnhealthyUrls() {
+    const unhealthyProviders = this.providers.filter((provider) => !provider.isHealthy())
+    return unhealthyProviders.map((provider) => provider.url)
+  }
+
+  get lastUsedUrl() {
+    return this.lastUsedProvider?.url
+  }
+
+  enableProviderAutoSwitch() {
+    this.allowProviderSwitch = true
+  }
+
+  disableProviderAutoSwitch() {
+    this.allowProviderSwitch = false
+  }
+
+  disableFallback() {
+    this.totallyDisableFallback = true
+  }
+
+  override async perform(method: string, params: any): Promise<any> {
+    const selectedProvider = this.selectPreferredProvider()
+    try {
+      return await selectedProvider.perform(method, params)
+    } finally {
+      this.lastUsedProvider = selectedProvider
+      this.checkUnhealthyProvider()
     }
   }
 }

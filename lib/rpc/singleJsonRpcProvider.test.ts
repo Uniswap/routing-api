@@ -31,8 +31,8 @@ describe('SingleJsonRpcProvider', () => {
   })
 
   it('provider call succeeded', async () => {
-    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
-    performCall.resolves(123456)
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
 
     const blockNumber = await provider.getBlockNumber()
 
@@ -41,8 +41,9 @@ describe('SingleJsonRpcProvider', () => {
   })
 
   it('provider call failed', async () => {
-    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
-    performCall.throws('error')
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves()
+    getBlockNumber.rejects('error')
     const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordError' as any)
 
     try {
@@ -51,13 +52,14 @@ describe('SingleJsonRpcProvider', () => {
     } catch (err: any) {
       expect(err.name).equals('error')
       expect(provider['perf'].lastCallSucceed).to.be.false
+      console.log(spy.callCount)
       expect(spy.calledOnce).to.be.true
     }
   })
 
   it('provider call too high latency', async () => {
-    const performCall = sandbox.stub(SingleJsonRpcProvider.prototype, '_perform' as any)
-    performCall.resolves(new Promise((resolve) => setTimeout(() => resolve(123456), 1000)))
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(new Promise((resolve) => setTimeout(() => resolve(123456), 1000)))
     const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordHighLatency' as any)
 
     const blockNumber = await provider.getBlockNumber()

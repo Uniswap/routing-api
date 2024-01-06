@@ -50,12 +50,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('all provider healthy', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.resolves(123)
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.resolves(123)
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
 
     expect(uniProvider.lastUsedUrl).undefined
     const blockNumber = await uniProvider.getBlockNumber()
@@ -64,12 +64,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('fallback when first provider becomes unhealthy', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.resolves(123)
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
 
     uniProvider.debugPrintProviderHealthScores()
 
@@ -103,12 +103,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('unhealthy provider successfully recovered', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.resolves(123)
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
 
@@ -136,7 +136,7 @@ describe('UniJsonRpcProvider', () => {
 
     // We advance some time. During this the failed provider starts recovering.
     clock.tick(10 * 1000) // Advance 10 seconds
-    perform0.resolves(123)
+    getBlockNumber0.resolves(123)
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -174,12 +174,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('unhealthy provider has some challenge during recovering', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.resolves(123)
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
 
@@ -209,7 +209,7 @@ describe('UniJsonRpcProvider', () => {
     const unhealthyProvider = uniProvider['providers'][0]
     const scoreBeforeRecovering = unhealthyProvider['healthScore']
     clock.tick(1000) // Advance 1 seconds
-    perform0.resolves(123)
+    getBlockNumber0.resolves(123)
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -230,7 +230,7 @@ describe('UniJsonRpcProvider', () => {
     expect(unhealthyProvider['healthScore']).equals(-45)
 
     clock.tick(10 * 1000) // Advance 10 seconds
-    perform0.throws('error during recovery evaluation')
+    getBlockNumber0.throws('error during recovery evaluation')
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -242,12 +242,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('healthy provider can also drop score and resume score', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.resolves(123)
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.resolves(123)
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
 
     const clock = Sinon.useFakeTimers(Date.now())
 
@@ -265,7 +265,7 @@ describe('UniJsonRpcProvider', () => {
     expect(healthyProvider['healthScore']).equals(-50)
 
     clock.tick(1000 * 2) // Advance 2 seconds
-    perform0.resolves(123)
+    getBlockNumber0.resolves(123)
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()
@@ -308,8 +308,8 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
 
     // Two failed calls makes provider2 unhealthy
-    const perform2 = sandbox.stub(uniProvider['providers'][2], '_perform' as any)
-    perform2.throws('error')
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.throws('error')
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
@@ -328,8 +328,8 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
 
     // Two failed calls makes provider1 unhealthy
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.throws('error')
     try {
       await uniProvider.getBlockNumber()
       assert(false, 'Should not reach')
@@ -372,8 +372,8 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('enable disable provider switch', async () => {
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -422,8 +422,8 @@ describe('UniJsonRpcProvider', () => {
       provider['config'] = TEST_CONFIG
     }
 
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -443,8 +443,8 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_1')
     expect(uniProvider2['selectPreferredProvider']().url).equals('url_1')
 
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.throws('error')
 
     // Two failed calls makes provider1 unhealthy
     try {
@@ -471,8 +471,8 @@ describe('UniJsonRpcProvider', () => {
       provider['config'] = TEST_CONFIG
     }
 
-    const perform0 = sandbox.stub(uniProvider['providers'][0], '_perform' as any)
-    perform0.throws('error')
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.throws('error')
 
     // Two failed calls makes provider0 unhealthy
     try {
@@ -491,8 +491,8 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
 
-    const perform1 = sandbox.stub(uniProvider['providers'][1], '_perform' as any)
-    perform1.throws('error')
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.throws('error')
 
     // Two failed calls makes provider1 unhealthy
     try {
