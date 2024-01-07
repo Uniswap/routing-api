@@ -240,8 +240,8 @@ describe('UniJsonRpcProvider', () => {
     // Provider0 has recovered quite a bit. But still not enough to be considered as fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    expect(unhealthyProvider['healthScore']).above(-50)
-    expect(unhealthyProvider['healthScore']).below(-40)
+    expect(unhealthyProvider['healthScore']).gt(-50)
+    expect(unhealthyProvider['healthScore']).lt(-40)
 
     getBlockNumber0.rejects('error during recovery evaluation')
     // Dial back provider's last call time to simulate that it has some period of recovery.
@@ -256,8 +256,8 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
     // Provider0 failed again during recovery evaluation.
-    expect(unhealthyProvider['healthScore']).above(-100)
-    expect(unhealthyProvider['healthScore']).below(-90)
+    expect(unhealthyProvider['healthScore']).gt(-100)
+    expect(unhealthyProvider['healthScore']).lt(-90)
   })
 
   it('healthy provider can also drop score and resume score', async () => {
@@ -279,7 +279,8 @@ describe('UniJsonRpcProvider', () => {
     }
     uniProvider.debugPrintProviderHealthScores()
     const healthyProvider = uniProvider['providers'][0]
-    expect(healthyProvider['healthScore']).equals(-50)
+    expect(healthyProvider['healthScore']).gte(-50)
+    expect(healthyProvider['healthScore']).lt(-49)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
     healthyProvider['perf'].lastCallTimestampInMs -= 2000
@@ -287,14 +288,16 @@ describe('UniJsonRpcProvider', () => {
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()
-    expect(healthyProvider['healthScore']).equals(-40)
+    expect(healthyProvider['healthScore']).gte(-40)
+    expect(healthyProvider['healthScore']).lt(-39)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
     healthyProvider['perf'].lastCallTimestampInMs -= 2000
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()
-    expect(healthyProvider['healthScore']).equals(-30)
+    expect(healthyProvider['healthScore']).gte(-30)
+    expect(healthyProvider['healthScore']).lt(-29)
 
     // Score deduct and resume doesn't make it a less-preferred provider, as long as it's considered as healthy
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])

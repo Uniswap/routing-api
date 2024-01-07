@@ -4,6 +4,7 @@ import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
+import { BlockTag, BlockWithTransactions } from '@ethersproject/abstract-provider'
 
 const debug = Debug('SingleJsonRpcProvider')
 
@@ -103,51 +104,63 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.perf.lastCallSucceed = callSucceed
   }
 
+  evaluateForRecovery() {
+    debug(`${this.url}: Evaluate for recovery...`)
+    this.getBlockNumber()
+  }
+
+  // Wrap another layer only for the sake of ease unit testing.
+  // We will test this API to represent the tests of other similar implemented APIs.
   private _getBlockNumber(): Promise<number> {
     return super.getBlockNumber()
   }
 
-  // override async getBlockNumber(): Promise<number> {
-  getBlockNumber(purpose: string = 'serve'): Promise<number> {
+  ///////////////////// Begin of override functions /////////////////////
+
+  override getBlockNumber(): Promise<number> {
     const startTime = Date.now()
-    console.log(`${purpose}: record start time: ${startTime}`)
     this.recordPerfBeforeCall(startTime)
     let callSucceed = true
-    // return super.getBlockNumber()
     return this._getBlockNumber()
       .then(
         (response) => {
-          console.log('in then')
           return response
         },
       )
       .catch(
         error => {
-          console.log('in catch')
           callSucceed = false
           throw error
         }
       )
       .finally(() => {
-        console.log('in finally')
         const endTime = Date.now()
-        console.log(`record end time: ${endTime} (start time we have ${startTime})`)
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('getBlockNumber')
       })
   }
 
-  evaluateForRecovery() {
-    debug(`${this.url}: Evaluate for recovery...`)
-    // try {
-    //   debug('Evaluate call started')
-    //   await this.getBlockNumber('evaluate')
-    //   debug('Evaluate call ended')
-    // } catch (error: any) {
-    //   debug(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
-    // } finally {
-    //   debug(`${this.url}: ...evaluate done, score => ${this.healthScore}`)
-    // }
-    this.getBlockNumber('evaluate')
+
+  override getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<BlockWithTransactions> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getBlockWithTransactions(blockHashOrBlockTag)
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getBlockWithTransactions')
+      })
   }
 }

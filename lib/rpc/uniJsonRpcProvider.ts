@@ -3,6 +3,7 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
+import { BlockTag, BlockWithTransactions } from '@ethersproject/abstract-provider'
 
 const debug = Debug('UniJsonRpcProvider')
 
@@ -122,7 +123,6 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private checkUnhealthyProvider() {
     debug('after a call, checkUnhealthyProvider')
-
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
         provider.evaluateForRecovery() // not blocking
@@ -167,6 +167,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.totallyDisableFallback = true
   }
 
+  ///////////////////// Begin of override functions /////////////////////
+
   override async getBlockNumber(): Promise<number> {
     const selectedProvider = this.selectPreferredProvider()
     try {
@@ -177,10 +179,10 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  override async perform(method: string, params: any): Promise<any> {
+  override async getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<BlockWithTransactions> {
     const selectedProvider = this.selectPreferredProvider()
     try {
-      return await selectedProvider.perform(method, params)
+      return await selectedProvider.getBlockWithTransactions(blockHashOrBlockTag);
     } finally {
       this.lastUsedProvider = selectedProvider
       this.checkUnhealthyProvider()
