@@ -4,6 +4,7 @@ import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
 import { BlockTag, BlockWithTransactions } from '@ethersproject/abstract-provider'
+import { LRUCache } from 'lru-cache'
 
 const debug = Debug('UniJsonRpcProvider')
 
@@ -25,6 +26,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private allowProviderSwitch: boolean = true
 
   private totallyDisableFallback: boolean = false
+
+  private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
 
   constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
     // Dummy super constructor call is needed.
@@ -59,7 +62,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  private selectPreferredProvider(): SingleJsonRpcProvider {
+  private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
       this.reorderProviders(providers)
@@ -76,6 +79,14 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
+    if (sessionId !== undefined && this.sessionCache.has(sessionId)) {
+      const provider = this.sessionCache.get(sessionId)!
+      if (!provider.isHealthy()) {
+        throw new Error('Forced to use the same provider during the session but the provider is unhealthy')
+      }
+      return provider
+    }
+
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
       throw new Error('No healthy provider available')
@@ -85,6 +96,9 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
     if (isEmpty(this.urlWeight)) {
       debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
+      if (sessionId !== undefined) {
+        this.sessionCache.set(sessionId, healthyProviders[0])
+      }
       return healthyProviders[0]
     }
 
@@ -96,6 +110,9 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
         debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
+        if (sessionId !== undefined) {
+          this.sessionCache.set(sessionId, provider)
+        }
         return provider
       }
     }
@@ -167,10 +184,16 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.totallyDisableFallback = true
   }
 
+  createNewSessionId(): string {
+    const sessionId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    debug(`New session id ${sessionId}`)
+    return sessionId
+  }
+
   ///////////////////// Begin of override functions /////////////////////
 
-  override async getBlockNumber(): Promise<number> {
-    const selectedProvider = this.selectPreferredProvider()
+  override async getBlockNumber(sessionId?: string): Promise<number> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
     try {
       return await selectedProvider.getBlockNumber()
     } finally {
@@ -179,8 +202,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  override async getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>): Promise<BlockWithTransactions> {
-    const selectedProvider = this.selectPreferredProvider()
+  override async getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>, sessionId?: string): Promise<BlockWithTransactions> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
     try {
       return await selectedProvider.getBlockWithTransactions(blockHashOrBlockTag);
     } finally {

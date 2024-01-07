@@ -376,7 +376,7 @@ describe('UniJsonRpcProvider', () => {
       provider['config'] = TEST_CONFIG
     }
 
-    const randStub = Sinon.stub(Math, 'random')
+    const randStub = sandbox.stub(Math, 'random')
     randStub.returns(0.0)
     expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
     randStub.returns(0.1)
@@ -532,5 +532,40 @@ describe('UniJsonRpcProvider', () => {
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
+  })
+
+  it('test session support: with provider weights', async () => {
+    const sessionId = uniProvider.createNewSessionId()
+    console.log(sessionId)
+
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, [4, 1, 3])
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    getBlockNumber1.resolves(123)
+    getBlockNumber2.resolves(123)
+
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.9)
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_2')
+
+    // Will always use url_2 for later requests if specified with the above session id.
+
+    randStub.returns(0.1)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_2')
+
+    randStub.returns(0.6)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals('url_1')
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_2')
   })
 })
