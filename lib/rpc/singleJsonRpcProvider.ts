@@ -49,6 +49,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordHighLatency() {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
+    debug(`${this.url}: high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
   }
 
   private recordProviderRecovery(timeInMs: number) {
@@ -106,8 +107,10 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  override async getBlockNumber(): Promise<number> {
+  // override async getBlockNumber(): Promise<number> {
+  getBlockNumber(purpose: string = 'serve'): Promise<number> {
     const startTime = Date.now()
+    console.log(`${purpose}: record start time: ${startTime}`)
     this.recordPerfBeforeCall(startTime)
     let callSucceed = true
     // return super.getBlockNumber()
@@ -125,24 +128,26 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
           throw error
         }
       )
-      .finally( () => {
+      .finally(() => {
         console.log('in finally')
         const endTime = Date.now()
+        console.log(`record end time: ${endTime} (start time we have ${startTime})`)
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('getBlockNumber')
       })
   }
 
-  async evaluateForRecovery() {
+  evaluateForRecovery() {
     debug(`${this.url}: Evaluate for recovery...`)
-    try {
-      debug('Evaluate call started')
-      await this.getBlockNumber()
-      debug('Evaluate call ended')
-    } catch (error: any) {
-      debug(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
-    } finally {
-      debug(`${this.url}: ...evaluate done, score => ${this.healthScore}`)
-    }
+    // try {
+    //   debug('Evaluate call started')
+    //   await this.getBlockNumber('evaluate')
+    //   debug('Evaluate call ended')
+    // } catch (error: any) {
+    //   debug(`Failed at evaluation for recovery: ${JSON.stringify(error)}`)
+    // } finally {
+    //   debug(`${this.url}: ...evaluate done, score => ${this.healthScore}`)
+    // }
+    this.getBlockNumber('evaluate')
   }
 }

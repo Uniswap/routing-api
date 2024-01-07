@@ -167,6 +167,16 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.totallyDisableFallback = true
   }
 
+  override async getBlockNumber(): Promise<number> {
+    const selectedProvider = this.selectPreferredProvider()
+    try {
+      return await selectedProvider.getBlockNumber()
+    } finally {
+      this.lastUsedProvider = selectedProvider
+      this.checkUnhealthyProvider()
+    }
+  }
+
   override async perform(method: string, params: any): Promise<any> {
     const selectedProvider = this.selectPreferredProvider()
     try {
