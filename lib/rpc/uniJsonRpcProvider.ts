@@ -3,7 +3,14 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
-import { BlockTag, BlockWithTransactions, Filter, Log } from '@ethersproject/abstract-provider'
+import {
+  BlockTag,
+  BlockWithTransactions,
+  Filter,
+  Log,
+  TransactionReceipt,
+  TransactionResponse,
+} from '@ethersproject/abstract-provider'
 import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Network } from '@ethersproject/networks'
@@ -11,7 +18,6 @@ import { Network } from '@ethersproject/networks'
 const debug = Debug('UniJsonRpcProvider')
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
-
   private readonly chainId: ChainId = ChainId.MAINNET
 
   private readonly providers: SingleJsonRpcProvider[] = []
@@ -196,19 +202,16 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   override getBlockNumber(sessionId?: string): Promise<number> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getBlockNumber()
-      .then(
-        response => {
-          console.log('********* ON UNI THEN *********')
-          return response
-        },
-      )
-      .catch(
-        error => {
-          console.log('********* ON UNI CATCH *********')
-          throw error
-        }
-      )
+    return selectedProvider
+      .getBlockNumber()
+      .then((response) => {
+        console.log('********* ON UNI THEN *********')
+        return response
+      })
+      .catch((error) => {
+        console.log('********* ON UNI CATCH *********')
+        throw error
+      })
       .finally(() => {
         console.log('********* ON UNI FINALLY *********')
         this.lastUsedProvider = selectedProvider
@@ -216,59 +219,55 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>, sessionId?: string): Promise<BlockWithTransactions> {
+  override getBlockWithTransactions(
+    blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>,
+    sessionId?: string
+  ): Promise<BlockWithTransactions> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getBlockWithTransactions(blockHashOrBlockTag)
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getBlockWithTransactions(blockHashOrBlockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
   }
 
-
-  override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+  override getCode(
+    addressOrName: string | Promise<string>,
+    blockTag?: BlockTag | Promise<BlockTag>,
+    sessionId?: string
+  ): Promise<string> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getCode(addressOrName, blockTag)
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getCode(addressOrName, blockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
   }
-
 
   override getGasPrice(sessionId?: string): Promise<BigNumber> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getGasPrice()
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getGasPrice()
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
@@ -277,17 +276,14 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   override getLogs(filter: Filter, sessionId?: string): Promise<Array<Log>> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getLogs(filter)
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getLogs(filter)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
@@ -296,41 +292,165 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   override getNetwork(sessionId?: string): Promise<Network> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getNetwork()
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getNetwork()
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
   }
 
-  override getStorageAt(addressOrName: string | Promise<string>, position: BigNumberish | Promise<BigNumberish>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+  override getStorageAt(
+    addressOrName: string | Promise<string>,
+    position: BigNumberish | Promise<BigNumberish>,
+    blockTag?: BlockTag | Promise<BlockTag>,
+    sessionId?: string
+  ): Promise<string> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider.getStorageAt(addressOrName, position, blockTag)
-      .then(
-        response => {
-          return response
-        },
-      )
-      .catch(
-        error => {
-          throw error
-        }
-      )
+    return selectedProvider
+      .getStorageAt(addressOrName, position, blockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override getTransaction(transactionHash: string | Promise<string>, sessionId?: string): Promise<TransactionResponse> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .getTransaction(transactionHash)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override getTransactionCount(
+    addressOrName: string | Promise<string>,
+    blockTag?: BlockTag | Promise<BlockTag>,
+    sessionId?: string
+  ): Promise<number> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .getTransactionCount(addressOrName, blockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override getTransactionReceipt(
+    transactionHash: string | Promise<string>,
+    sessionId?: string
+  ): Promise<TransactionReceipt> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .getTransactionReceipt(transactionHash)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override lookupAddress(address: string | Promise<string>, sessionId?: string): Promise<string | null> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .lookupAddress(address)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override resolveName(name: string | Promise<string>, sessionId?: string): Promise<string | null> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .resolveName(name)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override sendTransaction(
+    signedTransaction: string | Promise<string>,
+    sessionId?: string
+  ): Promise<TransactionResponse> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .sendTransaction(signedTransaction)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override waitForTransaction(
+    transactionHash: string,
+    confirmations?: number,
+    timeout?: number,
+    sessionId?: string
+  ): Promise<TransactionReceipt> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .waitForTransaction(transactionHash, confirmations, timeout)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
   }
 }
-
-

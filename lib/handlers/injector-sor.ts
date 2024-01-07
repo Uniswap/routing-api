@@ -52,7 +52,7 @@ import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
-import GlobalRpcProviders  from '../rpc/globalRpcProviders'
+import GlobalRpcProviders from '../rpc/globalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 // import UniJsonRpcProvider from '../rpc/uniJsonRpcProvider'
 

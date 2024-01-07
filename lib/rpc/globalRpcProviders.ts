@@ -3,9 +3,8 @@ import SingleJsonRpcProvider from './singleJsonRpcProvider'
 import UniJsonRpcProvider from './uniJsonRpcProvider'
 
 export default class GlobalRpcProviders {
-
   private static readonly PROVIDER_RPC_URL_RANKING: Partial<Record<ChainId, number[] | undefined>> = {
-    [ChainId.MAINNET]: undefined
+    [ChainId.MAINNET]: undefined,
   }
 
   private static readonly PROVIDER_RPC_URL_WEIGHTS: Partial<Record<ChainId, number[] | undefined>> = {
@@ -28,8 +27,8 @@ export default class GlobalRpcProviders {
     this.SINGLE_RPC_PROVIDERS = {
       [ChainId.MAINNET]: [
         new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`),
-        new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!)
-      ]
+        new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!),
+      ],
     }
   }
 
@@ -43,7 +42,7 @@ export default class GlobalRpcProviders {
         this.SINGLE_RPC_PROVIDERS![ChainId.MAINNET]!,
         GlobalRpcProviders.PROVIDER_RPC_URL_RANKING[ChainId.MAINNET],
         GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS[ChainId.MAINNET]
-      )
+      ),
     }
   }
 
@@ -54,11 +53,10 @@ export default class GlobalRpcProviders {
     return this.SINGLE_RPC_PROVIDERS!
   }
 
-  static getGlobalUniRpcProviders(): Partial<Record<ChainId, UniJsonRpcProvider>>  {
+  static getGlobalUniRpcProviders(): Partial<Record<ChainId, UniJsonRpcProvider>> {
     if (this.UNI_RPC_PROVIDERS === null) {
       this.initGlobalUniRpcProviders()
     }
     return this.UNI_RPC_PROVIDERS!
   }
 }
-
