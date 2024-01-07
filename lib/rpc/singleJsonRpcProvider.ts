@@ -4,8 +4,9 @@ import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
-import { BlockTag, BlockWithTransactions } from '@ethersproject/abstract-provider'
-
+import { BlockTag, BlockWithTransactions, Filter, Log } from '@ethersproject/abstract-provider'
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
+import { Network } from '@ethersproject/networks'
 const debug = Debug('SingleJsonRpcProvider')
 
 class PerfStat {
@@ -106,7 +107,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   evaluateForRecovery() {
     debug(`${this.url}: Evaluate for recovery...`)
-    this.getBlockNumber()
+    this.getBlockNumber()  // Ignore output in the promise
   }
 
   // Wrap another layer only for the sake of ease unit testing.
@@ -123,17 +124,20 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     let callSucceed = true
     return this._getBlockNumber()
       .then(
-        (response) => {
+        response => {
+          console.log('********* ON SINGLE THEN *********')
           return response
         },
       )
       .catch(
         error => {
+          console.log('********* ON SINGLE CATCH *********')
           callSucceed = false
           throw error
         }
       )
       .finally(() => {
+        console.log('********* ON SINGLE FINALLY *********')
         const endTime = Date.now()
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('getBlockNumber')
@@ -161,6 +165,123 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         const endTime = Date.now()
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('getBlockWithTransactions')
+      })
+  }
+
+
+  override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getCode(addressOrName, blockTag)
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getCode')
+      })
+  }
+
+  override getGasPrice(): Promise<BigNumber> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getGasPrice()
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getGasPrice')
+      })
+  }
+
+
+  override getLogs(filter: Filter): Promise<Array<Log>> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getLogs(filter)
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getLogs')
+      })
+  }
+
+  override getNetwork(): Promise<Network> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getNetwork()
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getNetwork')
+      })
+  }
+
+  getStorageAt(addressOrName: string | Promise<string>, position: BigNumberish | Promise<BigNumberish>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super.getStorageAt(addressOrName, position, blockTag)
+      .then(
+        (response) => {
+          return response
+        },
+      )
+      .catch(
+        error => {
+          callSucceed = false
+          throw error
+        }
+      )
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('getStorageAt')
       })
   }
 }
