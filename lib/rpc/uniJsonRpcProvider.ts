@@ -194,7 +194,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   ///////////////////// Begin of override functions /////////////////////
 
-  override async getBlockNumber(sessionId?: string): Promise<number> {
+  override getBlockNumber(sessionId?: string): Promise<number> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getBlockNumber()
       .then(
@@ -216,7 +216,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override async getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>, sessionId?: string): Promise<BlockWithTransactions> {
+  override getBlockWithTransactions(blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>, sessionId?: string): Promise<BlockWithTransactions> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getBlockWithTransactions(blockHashOrBlockTag)
       .then(
@@ -236,7 +236,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
 
-  override async getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+  override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getCode(addressOrName, blockTag)
       .then(
@@ -256,7 +256,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
 
-  override async getGasPrice(sessionId?: string): Promise<BigNumber> {
+  override getGasPrice(sessionId?: string): Promise<BigNumber> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getGasPrice()
       .then(
@@ -275,7 +275,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override async getLogs(filter: Filter, sessionId?: string): Promise<Array<Log>> {
+  override getLogs(filter: Filter, sessionId?: string): Promise<Array<Log>> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getLogs(filter)
       .then(
@@ -294,7 +294,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override async getNetwork(sessionId?: string): Promise<Network> {
+  override getNetwork(sessionId?: string): Promise<Network> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getNetwork()
       .then(
@@ -313,7 +313,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  getStorageAt(addressOrName: string | Promise<string>, position: BigNumberish | Promise<BigNumberish>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+  override getStorageAt(addressOrName: string | Promise<string>, position: BigNumberish | Promise<BigNumberish>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider.getStorageAt(addressOrName, position, blockTag)
       .then(
