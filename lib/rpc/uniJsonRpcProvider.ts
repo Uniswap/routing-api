@@ -9,7 +9,7 @@ import {
   Filter,
   Log,
   TransactionReceipt,
-  TransactionResponse
+  TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
@@ -458,7 +458,11 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+  override call(
+    transaction: Deferrable<TransactionRequest>,
+    blockTag?: BlockTag | Promise<BlockTag>,
+    sessionId?: string
+  ): Promise<string> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return selectedProvider
       .call(transaction, blockTag)
@@ -489,6 +493,4 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
         this.checkUnhealthyProvider()
       })
   }
-
-
 }

@@ -166,7 +166,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           let provider: StaticJsonRpcProvider
           if (chainId in GlobalRpcProviders.getGlobalUniRpcProviders()) {
             provider = GlobalRpcProviders.getGlobalUniRpcProviders()[chainId]!
-            // Disable fallback for temporary testing purpose
             // const uniProvider = provider as UniJsonRpcProvider
             // uniProvider.disableFallback()
           } else {
@@ -183,18 +182,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ],
             }).getProvider()
           }
-          // const provider = new DefaultEVMClient({
-          //   allProviders: [
-          //     new InstrumentedEVMProvider({
-          //       url: {
-          //         url: url,
-          //         timeout,
-          //       },
-          //       network: chainId,
-          //       name: deriveProviderName(url),
-          //     }),
-          //   ],
-          // }).getProvider()
 
           const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
           const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
