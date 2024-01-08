@@ -98,6 +98,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     this.debugPrintProviderHealthScores()
+
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
       throw new Error('No healthy provider available')
@@ -150,22 +151,23 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkUnhealthyProvider() {
-    debug('after a call, checkUnhealthyProvider')
+    debug('After serving a call, check unhealthy providers')
+    let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
         provider.evaluateForRecovery()
+        count++
       }
     }
+    debug(`Evaluated ${count} unhealthy providers`)
   }
 
   debugPrintProviderHealthScores() {
-    debug('=== Healthy Providers ===')
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
-    debug('=== Unhealthy Providers ===')
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      debug(`\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
 

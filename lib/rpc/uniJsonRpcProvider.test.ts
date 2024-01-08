@@ -94,7 +94,6 @@ describe('UniJsonRpcProvider', () => {
     uniProvider.debugPrintProviderHealthScores()
 
     expect(uniProvider.lastUsedUrl).equals('url_0')
-    // uniProvider.debugPrintProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
