@@ -1,4 +1,4 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { CHAIN_IDS_TO_NAMES } from './chains'
 import { Config, DEFAULT_CONFIG } from './config'
 import Debug from 'debug'
@@ -14,6 +14,7 @@ import {
 } from '@ethersproject/abstract-provider'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Network } from '@ethersproject/networks'
+import { Deferrable } from '@ethersproject/properties'
 const debug = Debug('SingleJsonRpcProvider')
 
 class PerfStat {
@@ -417,6 +418,46 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         const endTime = Date.now()
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('waitForTransaction')
+      })
+  }
+
+  override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super
+      .call(transaction, blockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        callSucceed = false
+        throw error
+      })
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('waitForTransaction')
+      })
+  }
+
+  override send(method: string, params: Array<any>): Promise<any> {
+    const startTime = Date.now()
+    this.recordPerfBeforeCall(startTime)
+    let callSucceed = true
+    return super
+      .send(method, params)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        callSucceed = false
+        throw error
+      })
+      .finally(() => {
+        const endTime = Date.now()
+        this.recordPerfAfterCall(startTime, endTime, callSucceed)
+        this.checkLastCallPerformance('send')
       })
   }
 }

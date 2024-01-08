@@ -1,5 +1,5 @@
 import SingleJsonRpcProvider from './singleJsonRpcProvider'
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -9,11 +9,12 @@ import {
   Filter,
   Log,
   TransactionReceipt,
-  TransactionResponse,
+  TransactionResponse
 } from '@ethersproject/abstract-provider'
 import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Network } from '@ethersproject/networks'
+import { Deferrable } from '@ethersproject/properties'
 
 const debug = Debug('UniJsonRpcProvider')
 
@@ -40,6 +41,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
+    this.connection.url
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')
@@ -199,6 +201,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   ///////////////////// Begin of override functions /////////////////////
+
+  // Notice: We should only intercept public methods that live at the top level and supposed to be called by user code
 
   override getBlockNumber(sessionId?: string): Promise<number> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
@@ -453,4 +457,38 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
         this.checkUnhealthyProvider()
       })
   }
+
+  override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>, sessionId?: string): Promise<string> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .call(transaction, blockTag)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+  override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
+    const selectedProvider = this.selectPreferredProvider(sessionId)
+    return selectedProvider
+      .send(method, params)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        throw error
+      })
+      .finally(() => {
+        this.lastUsedProvider = selectedProvider
+        this.checkUnhealthyProvider()
+      })
+  }
+
+
 }
