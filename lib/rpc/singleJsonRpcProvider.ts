@@ -132,16 +132,13 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     let callSucceed = true
     return this._getBlockNumber()
       .then((response) => {
-        console.log('********* ON SINGLE THEN *********')
         return response
       })
       .catch((error) => {
-        console.log('********* ON SINGLE CATCH *********')
         callSucceed = false
         throw error
       })
       .finally(() => {
-        console.log('********* ON SINGLE FINALLY *********')
         const endTime = Date.now()
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
         this.checkLastCallPerformance('getBlockNumber')

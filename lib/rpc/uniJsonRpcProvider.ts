@@ -97,6 +97,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       return provider
     }
 
+    this.debugPrintProviderHealthScores()
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
       throw new Error('No healthy provider available')
@@ -209,15 +210,12 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return selectedProvider
       .getBlockNumber()
       .then((response) => {
-        console.log('********* ON UNI THEN *********')
         return response
       })
       .catch((error) => {
-        console.log('********* ON UNI CATCH *********')
         throw error
       })
       .finally(() => {
-        console.log('********* ON UNI FINALLY *********')
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
