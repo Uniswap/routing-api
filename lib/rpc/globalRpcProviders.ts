@@ -21,8 +21,8 @@ export default class GlobalRpcProviders {
       throw new Error(`UNI_RPC_PROVIDER_INFURA_KEY must be a defined environment variable`)
     }
     const QUICKNODE_MAINNET_RPC_URL = process.env.UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL
-    if (QUICKNODE_MAINNET_RPC_URL === 'undefined') {
-      throw new Error(`REACT_APP_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
+    if (QUICKNODE_MAINNET_RPC_URL === undefined) {
+      throw new Error(`UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
     }
     this.SINGLE_RPC_PROVIDERS = new Map([
       [
@@ -33,6 +33,7 @@ export default class GlobalRpcProviders {
         ],
       ],
     ])
+    return this.SINGLE_RPC_PROVIDERS
   }
 
   private static initGlobalUniRpcProviders() {
@@ -50,19 +51,14 @@ export default class GlobalRpcProviders {
         ),
       ],
     ])
+    return this.UNI_RPC_PROVIDERS
   }
 
   static getGlobalSingleRpcProviders(): Map<ChainId, SingleJsonRpcProvider[]> {
-    if (this.SINGLE_RPC_PROVIDERS === null) {
-      this.initGlobalSingleRpcProviders()
-    }
-    return this.SINGLE_RPC_PROVIDERS!
+    return this.SINGLE_RPC_PROVIDERS ?? this.initGlobalSingleRpcProviders()
   }
 
   static getGlobalUniRpcProviders(): Map<ChainId, UniJsonRpcProvider> {
-    if (this.UNI_RPC_PROVIDERS === null) {
-      this.initGlobalUniRpcProviders()
-    }
-    return this.UNI_RPC_PROVIDERS!
+    return this.UNI_RPC_PROVIDERS ?? this.initGlobalUniRpcProviders()
   }
 }
