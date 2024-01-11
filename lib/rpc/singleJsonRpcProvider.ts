@@ -32,7 +32,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
 
   constructor(chainId: ChainId, url: string, config: Config = DEFAULT_CONFIG) {
-    super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId)})
+    super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
     this.healthScore = 0
     this.isRecovering = false
@@ -57,7 +57,9 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordHighLatency(method: string) {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    debug(`${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
+    debug(
+      `${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
+    )
   }
 
   private recordProviderRecovery(timeInMs: number) {
