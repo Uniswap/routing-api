@@ -1,10 +1,10 @@
 import { assert, expect } from 'chai'
 
-import UniJsonRpcProvider from './uniJsonRpcProvider'
+import UniJsonRpcProvider from '../../../../lib/rpc/uniJsonRpcProvider'
 import { ChainId } from '@uniswap/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
-import { Config } from './config'
-import SingleJsonRpcProvider from './singleJsonRpcProvider'
+import { Config } from '../../../../lib/rpc/config'
+import SingleJsonRpcProvider from '../../../../lib/rpc/singleJsonRpcProvider'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,

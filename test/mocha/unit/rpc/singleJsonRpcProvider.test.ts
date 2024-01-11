@@ -1,9 +1,9 @@
 import { ChainId } from '@uniswap/sdk-core'
-import SingleJsonRpcProvider from './singleJsonRpcProvider'
+import SingleJsonRpcProvider from '../../../../lib/rpc/singleJsonRpcProvider'
 import Sinon, { SinonSandbox } from 'sinon'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { Config } from './config'
+import { Config } from '../../../../lib/rpc/config'
 
 chai.use(chaiAsPromised)
 
