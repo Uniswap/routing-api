@@ -31,8 +31,6 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
 
-  private allowProviderSwitch: boolean = true
-
   private totallyDisableFallback: boolean = false
 
   private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
@@ -74,15 +72,6 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       this.reorderProviders(providers)
       debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
-    }
-
-    if (!this.allowProviderSwitch && this.lastUsedProvider !== null) {
-      if (this.lastUsedProvider.isHealthy()) {
-        debug(`Use provider ${this.lastUsedProvider.url} for chain ${this.chainId.toString()}`)
-        return this.lastUsedProvider
-      } else {
-        throw new Error('Forced to use last used provider which is unhealthy')
-      }
     }
 
     if (sessionId !== undefined && this.sessionCache.has(sessionId)) {
@@ -180,14 +169,6 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   get lastUsedUrl() {
     return this.lastUsedProvider?.url
-  }
-
-  enableProviderAutoSwitch() {
-    this.allowProviderSwitch = true
-  }
-
-  disableProviderAutoSwitch() {
-    this.allowProviderSwitch = false
   }
 
   disableFallback() {

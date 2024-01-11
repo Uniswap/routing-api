@@ -392,34 +392,6 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
   })
 
-  it('enable disable provider switch', async () => {
-    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
-    getBlockNumber0.rejects('error')
-
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.debugPrintProviderHealthScores()
-    uniProvider.disableProviderAutoSwitch()
-
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.message).equals('Forced to use last used provider which is unhealthy')
-    }
-  })
-
   it('test reorderHealthyProviders()', () => {
     uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [2, 0, 1])
     for (const provider of uniProvider['providers']) {
