@@ -5,6 +5,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from '../../../../lib/rpc/config'
 import SingleJsonRpcProvider from '../../../../lib/rpc/singleJsonRpcProvider'
+import { default as bunyan } from 'bunyan'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
@@ -16,19 +17,27 @@ const TEST_CONFIG: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
+const log = bunyan.createLogger(
+  {
+    name: 'SingleJsonRpcProviderTest',
+    serializers: bunyan.stdSerializers,
+    level: 'error',
+  }
+)
+
 const SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
   ],
 }
 
 const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
+    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
   ]
 }
 
@@ -41,7 +50,7 @@ describe('UniJsonRpcProvider', () => {
   let sandbox: SinonSandbox
 
   beforeEach(() => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log)
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -321,7 +330,7 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test selectPreferredProvider: with custom ranking', async () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [2, 1, 0], undefined)
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, [2, 1, 0], undefined)
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -370,7 +379,7 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test selectPreferredProvider: with weights', async () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, [4, 1, 3])
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, [4, 1, 3])
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -393,7 +402,7 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test reorderHealthyProviders()', () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [2, 0, 1])
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, [2, 0, 1])
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -405,12 +414,12 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider', async () => {
-    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log)
     for (const provider of uniProvider1['providers']) {
       provider['config'] = TEST_CONFIG
     }
 
-    const uniProvider2 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    const uniProvider2 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log)
     for (const provider of uniProvider2['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -459,7 +468,7 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider, but with different rankings', async () => {
-    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], [0, 2, 1])
+    const uniProvider1 = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, [0, 2, 1])
     for (const provider of uniProvider1['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -508,7 +517,7 @@ describe('UniJsonRpcProvider', () => {
   it('test session support: with provider weights', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, [4, 1, 3])
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, [4, 1, 3])
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -542,7 +551,7 @@ describe('UniJsonRpcProvider', () => {
   it('test session support: allow provider auto switch', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log)
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -585,7 +594,7 @@ describe('UniJsonRpcProvider', () => {
   it('test session support: forbit provider auto switch', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, undefined, false)
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, undefined, false)
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }

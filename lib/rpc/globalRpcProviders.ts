@@ -1,6 +1,7 @@
 import { ChainId } from '@uniswap/sdk-core'
 import SingleJsonRpcProvider from './singleJsonRpcProvider'
 import UniJsonRpcProvider from './uniJsonRpcProvider'
+import Logger from 'bunyan'
 
 export default class GlobalRpcProviders {
   private static readonly PROVIDER_RPC_URL_RANKING: Map<ChainId, number[] | undefined> = new Map([
@@ -15,7 +16,7 @@ export default class GlobalRpcProviders {
 
   private static UNI_RPC_PROVIDERS: Map<ChainId, UniJsonRpcProvider> | null = null
 
-  private static initGlobalSingleRpcProviders() {
+  private static initGlobalSingleRpcProviders(log: Logger) {
     const INFURA_KEY = process.env.UNI_RPC_PROVIDER_INFURA_KEY
     if (INFURA_KEY === undefined) {
       throw new Error(`UNI_RPC_PROVIDER_INFURA_KEY must be a defined environment variable`)
@@ -28,17 +29,17 @@ export default class GlobalRpcProviders {
       [
         ChainId.MAINNET,
         [
-          new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`),
-          new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!),
+          new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`, log),
+          new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!, log),
         ],
       ],
     ])
     return this.SINGLE_RPC_PROVIDERS
   }
 
-  private static initGlobalUniRpcProviders() {
+  private static initGlobalUniRpcProviders(log: Logger) {
     if (this.SINGLE_RPC_PROVIDERS === null) {
-      this.initGlobalSingleRpcProviders()
+      this.initGlobalSingleRpcProviders(log)
     }
     this.UNI_RPC_PROVIDERS = new Map([
       [
@@ -46,6 +47,7 @@ export default class GlobalRpcProviders {
         new UniJsonRpcProvider(
           ChainId.MAINNET,
           this.SINGLE_RPC_PROVIDERS!.get(ChainId.MAINNET)!,
+          log,
           GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(ChainId.MAINNET),
           GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(ChainId.MAINNET)
         ),
@@ -54,11 +56,11 @@ export default class GlobalRpcProviders {
     return this.UNI_RPC_PROVIDERS
   }
 
-  static getGlobalSingleRpcProviders(): Map<ChainId, SingleJsonRpcProvider[]> {
-    return this.SINGLE_RPC_PROVIDERS ?? this.initGlobalSingleRpcProviders()
+  static getGlobalSingleRpcProviders(log: Logger): Map<ChainId, SingleJsonRpcProvider[]> {
+    return this.SINGLE_RPC_PROVIDERS ?? this.initGlobalSingleRpcProviders(log)
   }
 
-  static getGlobalUniRpcProviders(): Map<ChainId, UniJsonRpcProvider> {
-    return this.UNI_RPC_PROVIDERS ?? this.initGlobalUniRpcProviders()
+  static getGlobalUniRpcProviders(log: Logger): Map<ChainId, UniJsonRpcProvider> {
+    return this.UNI_RPC_PROVIDERS ?? this.initGlobalUniRpcProviders(log)
   }
 }

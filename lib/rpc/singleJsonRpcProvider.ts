@@ -1,6 +1,5 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { Config, DEFAULT_CONFIG } from './config'
-import Debug from 'debug'
 import { ID_TO_NETWORK_NAME, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 import {
@@ -14,7 +13,7 @@ import {
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
-const debug = Debug('SingleJsonRpcProvider')
+import Logger from 'bunyan'
 
 class PerfStat {
   lastCallTimestampInMs: number = 0
@@ -33,10 +32,12 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private perf: PerfStat
   private config: Config
   private readonly metricPrefix: string
+  private readonly log: Logger
 
-  constructor(chainId: ChainId, url: string, config: Config = DEFAULT_CONFIG) {
+  constructor(chainId: ChainId, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
+    this.log = log
     this.providerName = deriveProviderName(url)
     this.healthScore = 0
     this.healthy = true
@@ -50,18 +51,18 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   hasEnoughWaitSinceLastCall(): boolean {
-    debug(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
+    this.log.debug(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
     return Date.now() - this.perf.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
   }
 
   private recordError(method: string) {
     this.healthScore += this.config.ERROR_PENALTY
-    debug(`${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
+    this.log.debug(`${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
   }
 
   private recordHighLatency(method: string) {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    debug(
+    this.log.debug(
       `${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
     )
   }
@@ -74,7 +75,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    debug(
+    this.log.debug(
       `${this.url}: healthy: ${this.healthy}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${
         timeInMs * this.config.RECOVER_SCORE_PER_MS
       }, score => ${this.healthScore}`
@@ -82,7 +83,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkLastCallPerformance(method: string) {
-    debug(`checkLastCallPerformance: method: ${method}`)
+    this.log.debug(`checkLastCallPerformance: method: ${method}`)
     if (!this.perf.lastCallSucceed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(method)
@@ -91,7 +92,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.recordHighLatency(method)
     } else {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
-      debug(`${this.url} method: ${method} succeeded`)
+      this.log.debug(`${this.url} method: ${method} succeeded`)
       // For a success call, we will increase health score.
       if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
         this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
@@ -99,10 +100,10 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
     if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
       this.healthy = false
-      debug(`${this.url} drops to unhealthy`)
+      this.log.debug(`${this.url} drops to unhealthy`)
     } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
       this.healthy = true
-      debug(`${this.url} resumes to healthy`)
+      this.log.debug(`${this.url} resumes to healthy`)
     }
     // No reward for normal operation.
   }
@@ -120,7 +121,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   evaluateForRecovery() {
-    debug(`${this.url}: Evaluate for recovery...`)
+    this.log.debug(`${this.url}: Evaluate for recovery...`)
     this.getBlockNumber() // Ignore output in the promise
   }
 

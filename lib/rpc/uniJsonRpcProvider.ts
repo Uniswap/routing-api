@@ -1,6 +1,5 @@
 import SingleJsonRpcProvider from './singleJsonRpcProvider'
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
-import Debug from 'debug'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
 import {
@@ -14,8 +13,7 @@ import {
 import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
-
-const debug = Debug('UniJsonRpcProvider')
+import Logger from 'bunyan'
 
 export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly chainId: ChainId = ChainId.MAINNET
@@ -38,10 +36,13 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
   private allowProviderAutoSwitch: boolean = true
 
-  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[], allowProviderAutoSwitch?: boolean) {
+  private readonly log: Logger
+
+  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], log: Logger, ranking?: number[], weights?: number[], allowProviderAutoSwitch?: boolean) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
+    this.log = log
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')
@@ -77,7 +78,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
       this.reorderProviders(providers)
-      debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
+      this.log.debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
     }
 
@@ -100,7 +101,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.reorderProviders(healthyProviders)
 
     if (isEmpty(this.urlWeight)) {
-      debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
+      this.log.debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
       if (sessionId !== undefined) {
         this.sessionCache.set(sessionId, healthyProviders[0])
       }
@@ -114,8 +115,8 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
-        debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
-        debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
+        this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
+        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         if (sessionId !== undefined) {
           this.sessionCache.set(sessionId, provider)
         }
@@ -145,7 +146,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkUnhealthyProvider() {
-    debug('After serving a call, check unhealthy providers')
+    this.log.debug('After serving a call, check unhealthy providers')
     let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
@@ -153,15 +154,15 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
         count++
       }
     }
-    debug(`Evaluated ${count} unhealthy providers`)
+    this.log.debug(`Evaluated ${count} unhealthy providers`)
   }
 
   debugPrintProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
 
@@ -185,7 +186,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   createNewSessionId(): string {
     const sessionId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    debug(`New session id ${sessionId}`)
+    this.log.debug(`New session id ${sessionId}`)
     return sessionId
   }
 
