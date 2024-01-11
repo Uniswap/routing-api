@@ -13,7 +13,6 @@ import {
 } from '@ethersproject/abstract-provider'
 import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
-import { Network } from '@ethersproject/networks'
 import { Deferrable } from '@ethersproject/properties'
 
 const debug = Debug('UniJsonRpcProvider')
@@ -121,6 +120,7 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
+        debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
         debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         if (sessionId !== undefined) {
           this.sessionCache.set(sessionId, provider)
@@ -294,21 +294,22 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override getNetwork(sessionId?: string): Promise<Network> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getNetwork()
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
-  }
+  // Probably no need to capture?
+  // override getNetwork(sessionId?: string): Promise<Network> {
+  //   const selectedProvider = this.selectPreferredProvider(sessionId)
+  //   return selectedProvider
+  //     .getNetwork()
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       this.lastUsedProvider = selectedProvider
+  //       this.checkUnhealthyProvider()
+  //     })
+  // }
 
   override getStorageAt(
     addressOrName: string | Promise<string>,

@@ -13,7 +13,6 @@ import {
   TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
-import { Network } from '@ethersproject/networks'
 import { Deferrable } from '@ethersproject/properties'
 const debug = Debug('SingleJsonRpcProvider')
 
@@ -52,14 +51,14 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return Date.now() - this.perf.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
   }
 
-  private recordError() {
+  private recordError(method: string) {
     this.healthScore += this.config.ERROR_PENALTY
-    debug(`${this.url}: error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
+    debug(`${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
   }
 
-  private recordHighLatency() {
+  private recordHighLatency(method: string) {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    debug(`${this.url}: high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
+    debug(`${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
   }
 
   private recordProviderRecovery(timeInMs: number) {
@@ -78,14 +77,16 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkLastCallPerformance(method: string) {
+    debug(`checkLastCallPerformance: method: ${method}`)
     if (!this.perf.lastCallSucceed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
-      this.recordError()
+      this.recordError(method)
     } else if (this.perf.lastCallLatencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS_HIGH_LATENCY`, 1, MetricLoggerUnit.Count)
-      this.recordHighLatency()
+      this.recordHighLatency(method)
     } else {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
+      debug(`${this.url} method: ${method} succeeded`)
       // For a success call, we will increase health score.
       if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
         this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
@@ -227,25 +228,26 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
-  override getNetwork(): Promise<Network> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getNetwork()
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getNetwork')
-      })
-  }
+  // Probably no need to capture?
+  // override getNetwork(): Promise<Network> {
+  //   const startTime = Date.now()
+  //   this.recordPerfBeforeCall(startTime)
+  //   let callSucceed = true
+  //   return super
+  //     .getNetwork()
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       callSucceed = false
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       const endTime = Date.now()
+  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
+  //       this.checkLastCallPerformance('getNetwork')
+  //     })
+  // }
 
   override getStorageAt(
     addressOrName: string | Promise<string>,
