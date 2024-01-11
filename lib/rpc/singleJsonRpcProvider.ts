@@ -13,6 +13,7 @@ import {
 } from '@ethersproject/abstract-provider'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
+import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 const debug = Debug('SingleJsonRpcProvider')
 
 class PerfStat {
@@ -25,6 +26,7 @@ class PerfStat {
 export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): Implement block-aligned cache
   readonly url: string
+  readonly providerName: string
 
   private healthScore
   private healthy: boolean
@@ -35,11 +37,12 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   constructor(chainId: ChainId, url: string, config: Config = DEFAULT_CONFIG) {
     super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
+    this.providerName = deriveProviderName(url)
     this.healthScore = 0
     this.healthy = true
     this.perf = new PerfStat()
     this.config = config
-    this.metricPrefix = `RPC_${this.network.chainId}_${this.url}`
+    this.metricPrefix = `RPC_${this.providerName}_${this.network.chainId}`
   }
 
   isHealthy() {
