@@ -304,9 +304,9 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('no healthy provider available', async () => {
-    uniProvider['providers'][0]['isRecovering'] = true
-    uniProvider['providers'][1]['isRecovering'] = true
-    uniProvider['providers'][2]['isRecovering'] = true
+    sandbox.stub(uniProvider['providers'][0], 'isHealthy' as any).returns(false)
+    sandbox.stub(uniProvider['providers'][1], 'isHealthy' as any).returns(false)
+    sandbox.stub(uniProvider['providers'][2], 'isHealthy' as any).returns(false)
 
     try {
       await uniProvider.getBlockNumber()

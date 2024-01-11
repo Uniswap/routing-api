@@ -24,9 +24,10 @@ class PerfStat {
 
 export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): Implement block-aligned cache
-  url: string
+  readonly url: string
+
   private healthScore
-  private isRecovering: boolean
+  private healthy: boolean
   private perf: PerfStat
   private config: Config
   private readonly metricPrefix: string
@@ -35,14 +36,14 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
     this.healthScore = 0
-    this.isRecovering = false
+    this.healthy = true
     this.perf = new PerfStat()
     this.config = config
     this.metricPrefix = `RPC_${this.network.chainId}_${this.url}`
   }
 
-  isHealthy(): boolean {
-    return !this.isRecovering
+  isHealthy() {
+    return this.healthy
   }
 
   hasEnoughWaitSinceLastCall(): boolean {
@@ -71,7 +72,7 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.healthScore = 0
     }
     debug(
-      `${this.url}: healthy: ${this.isHealthy()}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${
+      `${this.url}: healthy: ${this.healthy}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${
         timeInMs * this.config.RECOVER_SCORE_PER_MS
       }, score => ${this.healthScore}`
     )
@@ -93,11 +94,11 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
       }
     }
-    if (!this.isRecovering && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
-      this.isRecovering = true
+    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
+      this.healthy = false
       debug(`${this.url} drops to unhealthy`)
-    } else if (this.isRecovering && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
-      this.isRecovering = false
+    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
+      this.healthy = true
       debug(`${this.url} resumes to healthy`)
     }
     // No reward for normal operation.
