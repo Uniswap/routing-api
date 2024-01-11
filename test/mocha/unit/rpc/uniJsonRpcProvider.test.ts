@@ -1,10 +1,10 @@
 import { assert, expect } from 'chai'
 
-import UniJsonRpcProvider from '../../../../lib/rpc/uniJsonRpcProvider'
+import { UniJsonRpcProvider } from '../../../../lib/rpc/UniJsonRpcProvider'
 import { ChainId } from '@uniswap/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from '../../../../lib/rpc/config'
-import SingleJsonRpcProvider from '../../../../lib/rpc/singleJsonRpcProvider'
+import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
 
 const TEST_CONFIG: Config = {
@@ -17,13 +17,11 @@ const TEST_CONFIG: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
-const log = bunyan.createLogger(
-  {
-    name: 'SingleJsonRpcProviderTest',
-    serializers: bunyan.stdSerializers,
-    level: 'error',
-  }
-)
+const log = bunyan.createLogger({
+  name: 'SingleJsonRpcProviderTest',
+  serializers: bunyan.stdSerializers,
+  level: 'error',
+})
 
 const SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
@@ -330,7 +328,13 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test selectPreferredProvider: with custom ranking', async () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, [2, 1, 0], undefined)
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [2, 1, 0],
+      undefined
+    )
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -379,7 +383,13 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test selectPreferredProvider: with weights', async () => {
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, [4, 1, 3])
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      [4, 1, 3]
+    )
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -517,7 +527,13 @@ describe('UniJsonRpcProvider', () => {
   it('test session support: with provider weights', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, [4, 1, 3])
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      [4, 1, 3]
+    )
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -594,7 +610,14 @@ describe('UniJsonRpcProvider', () => {
   it('test session support: forbit provider auto switch', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
-    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], log, undefined, undefined, false)
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      false
+    )
     for (const provider of uniProvider['providers']) {
       provider['config'] = TEST_CONFIG
     }
@@ -632,7 +655,9 @@ describe('UniJsonRpcProvider', () => {
     try {
       await uniProvider.getBlockNumber(sessionId)
     } catch (err: any) {
-      expect(err.message).equals('Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy')
+      expect(err.message).equals(
+        'Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy'
+      )
     }
   })
 })

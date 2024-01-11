@@ -1,9 +1,9 @@
 import { ChainId } from '@uniswap/sdk-core'
-import SingleJsonRpcProvider from './singleJsonRpcProvider'
-import UniJsonRpcProvider from './uniJsonRpcProvider'
+import { SingleJsonRpcProvider } from './SingleJsonRpcProvider'
+import { UniJsonRpcProvider } from './UniJsonRpcProvider'
 import Logger from 'bunyan'
 
-export default class GlobalRpcProviders {
+export class GlobalRpcProviders {
   private static readonly PROVIDER_RPC_URL_RANKING: Map<ChainId, number[] | undefined> = new Map([
     [ChainId.MAINNET, undefined],
   ])

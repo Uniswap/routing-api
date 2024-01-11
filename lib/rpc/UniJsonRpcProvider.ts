@@ -1,4 +1,4 @@
-import SingleJsonRpcProvider from './singleJsonRpcProvider'
+import { SingleJsonRpcProvider } from './SingleJsonRpcProvider'
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -15,7 +15,7 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
 
-export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
+export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly chainId: ChainId = ChainId.MAINNET
 
   private readonly providers: SingleJsonRpcProvider[] = []
@@ -38,7 +38,14 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private readonly log: Logger
 
-  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], log: Logger, ranking?: number[], weights?: number[], allowProviderAutoSwitch?: boolean) {
+  constructor(
+    chainId: ChainId,
+    singleRpcProviders: SingleJsonRpcProvider[],
+    log: Logger,
+    ranking?: number[],
+    weights?: number[],
+    allowProviderAutoSwitch?: boolean
+  ) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
@@ -87,7 +94,9 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
       if (provider.isHealthy()) {
         return provider
       } else if (!this.allowProviderAutoSwitch) {
-        throw new Error(`Forced to use the same provider during the session but the provider (${provider.providerName}) is unhealthy`)
+        throw new Error(
+          `Forced to use the same provider during the session but the provider (${provider.providerName}) is unhealthy`
+        )
       }
     }
 

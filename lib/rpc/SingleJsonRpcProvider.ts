@@ -22,7 +22,7 @@ class PerfStat {
   timeWaitedBeforeLastCallInMs: number = 0
 }
 
-export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
+export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // TODO(jie): Implement block-aligned cache
   readonly url: string
   readonly providerName: string
@@ -57,7 +57,9 @@ export default class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordError(method: string) {
     this.healthScore += this.config.ERROR_PENALTY
-    this.log.debug(`${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`)
+    this.log.debug(
+      `${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
+    )
   }
 
   private recordHighLatency(method: string) {

@@ -1,5 +1,5 @@
 import { ChainId } from '@uniswap/sdk-core'
-import SingleJsonRpcProvider from '../../../../lib/rpc/singleJsonRpcProvider'
+import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import Sinon, { SinonSandbox } from 'sinon'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
@@ -18,13 +18,11 @@ const config: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
 }
 
-const log = bunyan.createLogger(
-  {
-    name: 'SingleJsonRpcProviderTest',
-    serializers: bunyan.stdSerializers,
-    level: 'error',
-  }
-)
+const log = bunyan.createLogger({
+  name: 'SingleJsonRpcProviderTest',
+  serializers: bunyan.stdSerializers,
+  level: 'error',
+})
 
 describe('SingleJsonRpcProvider', () => {
   let provider: SingleJsonRpcProvider
