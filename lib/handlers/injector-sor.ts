@@ -164,8 +164,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           }
 
           let provider: StaticJsonRpcProvider
-          if (chainId in GlobalRpcProviders.getGlobalUniRpcProviders()) {
-            provider = GlobalRpcProviders.getGlobalUniRpcProviders().get(chainId)!
+          if (chainId in GlobalRpcProviders.getGlobalUniRpcProviders(log)) {
+            provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
             // provider = new UniJsonRpcProvider(chainId, GlobalRpcProviders.getGlobalSingleRpcProviders()[chainId]!, undefined, [5, 5])
             // const uniProvider = provider as UniJsonRpcProvider
             // uniProvider.disableFallback()
