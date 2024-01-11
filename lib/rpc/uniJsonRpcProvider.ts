@@ -55,9 +55,6 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (let i = 0; i < this.providers.length; i++) {
       const url = this.providers[i].url
       if (ranking !== undefined) {
-        if (ranking[i] < 0) {
-          throw new Error(`Invalid rank: ${ranking[i]}. Rank needs to be a positive number`)
-        }
         this.urlPrecedence[url] = ranking[i]
       } else {
         this.urlPrecedence[url] = i
