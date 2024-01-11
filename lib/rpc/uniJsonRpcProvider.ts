@@ -35,7 +35,10 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
 
-  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[]) {
+  // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
+  private allowProviderAutoSwitch: boolean = true
+
+  constructor(chainId: ChainId, singleRpcProviders: SingleJsonRpcProvider[], ranking?: number[], weights?: number[], allowProviderAutoSwitch?: boolean) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
@@ -64,6 +67,10 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
         this.urlWeight[url] = weights[i]
       }
     }
+
+    if (allowProviderAutoSwitch !== undefined) {
+      this.allowProviderAutoSwitch = allowProviderAutoSwitch
+    }
   }
 
   private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
@@ -76,13 +83,14 @@ export default class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
     if (sessionId !== undefined && this.sessionCache.has(sessionId)) {
       const provider = this.sessionCache.get(sessionId)!
-      if (!provider.isHealthy()) {
-        throw new Error('Forced to use the same provider during the session but the provider is unhealthy')
+      if (provider.isHealthy()) {
+        return provider
+      } else if (!this.allowProviderAutoSwitch) {
+        throw new Error(`Forced to use the same provider during the session but the provider (${provider.providerName}) is unhealthy`)
       }
-      return provider
     }
 
-    this.debugPrintProviderHealthScores()
+    // this.debugPrintProviderHealthScores()
 
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {

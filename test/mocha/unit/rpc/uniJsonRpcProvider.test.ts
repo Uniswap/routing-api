@@ -507,7 +507,6 @@ describe('UniJsonRpcProvider', () => {
 
   it('test session support: with provider weights', async () => {
     const sessionId = uniProvider.createNewSessionId()
-    console.log(sessionId)
 
     uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, [4, 1, 3])
     for (const provider of uniProvider['providers']) {
@@ -538,5 +537,93 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     await uniProvider.getBlockNumber(sessionId)
     expect(uniProvider.lastUsedUrl).equals('url_2')
+  })
+
+  it('test session support: allow provider auto switch', async () => {
+    const sessionId = uniProvider.createNewSessionId()
+
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET])
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    getBlockNumber1.resolves(123)
+    getBlockNumber2.resolves(123)
+
+    // This session will use provider0.
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+
+    // However, now provider0 throws error.
+    getBlockNumber0.rejects('error')
+
+    // Two failed calls makes provider0 unhealthy.
+    try {
+      await uniProvider.getBlockNumber(sessionId)
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider.debugPrintProviderHealthScores()
+    try {
+      await uniProvider.getBlockNumber(sessionId)
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+
+    uniProvider.debugPrintProviderHealthScores()
+
+    // Although we pass in a session id, we accept fallback to another provider.
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_1')
+  })
+
+  it('test session support: forbit provider auto switch', async () => {
+    const sessionId = uniProvider.createNewSessionId()
+
+    uniProvider = new UniJsonRpcProvider(ChainId.MAINNET, SINGLE_RPC_PROVIDERS[ChainId.MAINNET], undefined, undefined, false)
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = TEST_CONFIG
+    }
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    getBlockNumber1.resolves(123)
+    getBlockNumber2.resolves(123)
+
+    // This session will use provider0.
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_0')
+
+    // However, now provider0 throws error.
+    getBlockNumber0.rejects('error')
+
+    // Two failed calls makes provider0 unhealthy.
+    try {
+      await uniProvider.getBlockNumber(sessionId)
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider.debugPrintProviderHealthScores()
+    try {
+      await uniProvider.getBlockNumber(sessionId)
+      assert(false, 'Should not reach')
+    } catch (err: any) {
+      expect(err.name).equals('error')
+    }
+    uniProvider.debugPrintProviderHealthScores()
+
+    // Although we pass in a session id, we accept fallback to another provider.
+    try {
+      await uniProvider.getBlockNumber(sessionId)
+    } catch (err: any) {
+      expect(err.message).equals('Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy')
+    }
   })
 })
