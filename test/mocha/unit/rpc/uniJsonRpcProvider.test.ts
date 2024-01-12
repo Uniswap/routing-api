@@ -31,6 +31,13 @@ const SINGLE_RPC_PROVIDERS = {
   ],
 }
 
+// TODO(jie): Delete
+const REAL_SINGLE_RPC_PROVIDERS = {
+  [ChainId.MAINNET]: [
+    new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e`, log),
+  ],
+}
+
 const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
@@ -659,5 +666,18 @@ describe('UniJsonRpcProvider', () => {
         'Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy'
       )
     }
+  })
+
+  it('real endpoint', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      false
+    )
+    const res = await uniProvider.getBlockNumber()
+    console.log(res)
   })
 })

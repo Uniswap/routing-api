@@ -133,25 +133,48 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  ///////////////////// Begin of override functions /////////////////////
-
-  override getBlockNumber(): Promise<number> {
+  private wrappedFunctionCall(fnName: string, fn: any, ...args: any[]): Promise<any> {
     const startTime = Date.now()
     this.recordPerfBeforeCall(startTime)
     let callSucceed = true
-    return this._getBlockNumber()
-      .then((response) => {
+    return fn(...args)
+      .then((response: any) => {
         return response
       })
-      .catch((error) => {
+      .catch((error: any) => {
         callSucceed = false
         throw error
       })
       .finally(() => {
         const endTime = Date.now()
         this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getBlockNumber')
+        this.checkLastCallPerformance(fnName)
       })
+  }
+
+  ///////////////////// Begin of override functions /////////////////////
+
+  // override getBlockNumber(): Promise<number> {
+  //   const startTime = Date.now()
+  //   this.recordPerfBeforeCall(startTime)
+  //   let callSucceed = true
+  //   return this._getBlockNumber()
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       callSucceed = false
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       const endTime = Date.now()
+  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
+  //       this.checkLastCallPerformance('getBlockNumber')
+  //     })
+  // }
+
+  override getBlockNumber(): Promise<number> {
+    return this.wrappedFunctionCall('getBlockNumber', this._getBlockNumber.bind(this))
   }
 
   override getBlockWithTransactions(
@@ -448,23 +471,27 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
+  // override send(method: string, params: Array<any>): Promise<any> {
+  //   const startTime = Date.now()
+  //   this.recordPerfBeforeCall(startTime)
+  //   let callSucceed = true
+  //   return super
+  //     .send(method, params)
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       callSucceed = false
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       const endTime = Date.now()
+  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
+  //       this.checkLastCallPerformance('send')
+  //     })
+  // }
+
   override send(method: string, params: Array<any>): Promise<any> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .send(method, params)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('send')
-      })
+    return this.wrappedFunctionCall('send', super.send.bind(this), method, params)
   }
 }

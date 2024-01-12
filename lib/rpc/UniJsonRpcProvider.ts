@@ -199,24 +199,43 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return sessionId
   }
 
-  ///////////////////// Begin of override functions /////////////////////
-
-  // Notice: We should only intercept public methods that live at the top level and supposed to be called by user code
-
-  override getBlockNumber(sessionId?: string): Promise<number> {
+  wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getBlockNumber()
-      .then((response) => {
+    return (selectedProvider as any)[`${fnName}`](args)
+      .then((response: any) => {
         return response
       })
-      .catch((error) => {
+      .catch((error: any) => {
         throw error
       })
       .finally(() => {
         this.lastUsedProvider = selectedProvider
         this.checkUnhealthyProvider()
       })
+  }
+
+  ///////////////////// Begin of override functions /////////////////////
+
+  // Notice: We should only intercept public methods that live at the top level and supposed to be called by user code
+
+  // override getBlockNumber(sessionId?: string): Promise<number> {
+  //   const selectedProvider = this.selectPreferredProvider(sessionId)
+  //   return selectedProvider
+  //     .getBlockNumber()
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       this.lastUsedProvider = selectedProvider
+  //       this.checkUnhealthyProvider()
+  //     })
+  // }
+
+  override getBlockNumber(sessionId?: string): Promise<number> {
+    return this.wrappedFunctionCall('getBlockNumber', sessionId)
   }
 
   override getBlockWithTransactions(
@@ -455,39 +474,50 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       })
   }
 
+  // override call(
+  //   transaction: Deferrable<TransactionRequest>,
+  //   blockTag?: BlockTag | Promise<BlockTag>,
+  //   sessionId?: string
+  // ): Promise<string> {
+  //   const selectedProvider = this.selectPreferredProvider(sessionId)
+  //   return selectedProvider
+  //     .call(transaction, blockTag)
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       this.lastUsedProvider = selectedProvider
+  //       this.checkUnhealthyProvider()
+  //     })
+  // }
+
   override call(
     transaction: Deferrable<TransactionRequest>,
     blockTag?: BlockTag | Promise<BlockTag>,
     sessionId?: string
   ): Promise<string> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .call(transaction, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('call', sessionId, transaction, blockTag)
   }
 
+  // override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
+  //   const selectedProvider = this.selectPreferredProvider(sessionId)
+  //   return selectedProvider
+  //     .send(method, params)
+  //     .then((response) => {
+  //       return response
+  //     })
+  //     .catch((error) => {
+  //       throw error
+  //     })
+  //     .finally(() => {
+  //       this.lastUsedProvider = selectedProvider
+  //       this.checkUnhealthyProvider()
+  //     })
+  // }
   override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .send(method, params)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('send', sessionId, method, params)
   }
 }
