@@ -199,7 +199,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return sessionId
   }
 
-  wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
+  private wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     return (selectedProvider as any)[`${fnName}`](args)
       .then((response: any) => {
