@@ -15,11 +15,10 @@ import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 
-class PerfStat {
-  lastCallTimestampInMs: number = 0
-  lastCallSucceed: boolean = false
-  lastCallLatencyInMs: number = 0
-  timeWaitedBeforeLastCallInMs: number = 0
+interface SingleCallPerf {
+  isSucceed: boolean
+  latencyInMs: number
+  startTimestampInMs: number
 }
 
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
@@ -29,7 +28,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private healthScore
   private healthy: boolean
-  private perf: PerfStat
+  private lastCallTimestampInMs: number
   private config: Config
   private readonly metricPrefix: string
   private readonly log: Logger
@@ -42,7 +41,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.providerName = deriveProviderName(url)
     this.healthScore = 0
     this.healthy = true
-    this.perf = new PerfStat()
+    this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_${this.providerName}_${this.network.chainId}`
   }
@@ -52,8 +51,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   hasEnoughWaitSinceLastCall(): boolean {
-    console.log(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
-    return Date.now() - this.perf.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
+    console.log(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.lastCallTimestampInMs} ms`)
+    return Date.now() - this.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
   }
 
   private recordError(method: string) {
@@ -86,20 +85,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  private checkLastCallPerformance(method: string) {
+  private checkLastCallPerformance(method: string, perf: SingleCallPerf) {
     console.log(`checkLastCallPerformance: method: ${method}`)
-    if (!this.perf.lastCallSucceed) {
+    if (!perf.isSucceed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(method)
-    } else if (this.perf.lastCallLatencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
+    } else if (perf.latencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS_HIGH_LATENCY`, 1, MetricLoggerUnit.Count)
       this.recordHighLatency(method)
     } else {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
       console.log(`${this.url} method: ${method} succeeded`)
       // For a success call, we will increase health score.
-      if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
-        this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
+      if (perf.startTimestampInMs - this.lastCallTimestampInMs > 0) {
+        this.recordProviderRecovery(perf.startTimestampInMs - this.lastCallTimestampInMs)
       }
     }
     if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
@@ -110,18 +109,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       console.log(`${this.url} resumes to healthy`)
     }
     // No reward for normal operation.
-  }
-
-  private recordPerfBeforeCall(startTimeInMs: number) {
-    if (this.perf.lastCallTimestampInMs > 0) {
-      this.perf.timeWaitedBeforeLastCallInMs = startTimeInMs - this.perf.lastCallTimestampInMs
-    }
-  }
-
-  private recordPerfAfterCall(startTimeInMs: number, endTimeInMs: number, callSucceed: boolean) {
-    this.perf.lastCallTimestampInMs = endTimeInMs
-    this.perf.lastCallLatencyInMs = endTimeInMs - startTimeInMs
-    this.perf.lastCallSucceed = callSucceed
   }
 
   evaluateForRecovery() {
@@ -137,22 +124,24 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private wrappedFunctionCall(fnName: string, fn: any, ...args: any[]): Promise<any> {
     console.log(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
+    const perf: SingleCallPerf = {
+      isSucceed: true,
+      latencyInMs: 0,
+      startTimestampInMs: Date.now()
+    }
     return fn(...args)
       .then((response: any) => {
         return response
       })
       .catch((error: any) => {
-        callSucceed = false
+        perf.isSucceed = false
         console.log(JSON.stringify(error))
         throw error
       })
       .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance(fnName)
+        perf.latencyInMs = Date.now() - perf.startTimestampInMs
+        this.checkLastCallPerformance(fnName, perf)
+        this.lastCallTimestampInMs = perf.startTimestampInMs
       })
   }
 

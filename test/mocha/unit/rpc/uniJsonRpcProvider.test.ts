@@ -16,6 +16,7 @@ const TEST_CONFIG: Config = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+  RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
 }
 
 const log = bunyan.createLogger({
@@ -154,7 +155,7 @@ describe('UniJsonRpcProvider', () => {
     getBlockNumber0.resolves(123)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    uniProvider['providers'][0]['perf'].lastCallTimestampInMs -= 10000
+    uniProvider['providers'][0]['lastCallTimestampInMs'] -= 10000
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -167,7 +168,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    uniProvider['providers'][0]['perf'].lastCallTimestampInMs -= 10000
+    uniProvider['providers'][0]['lastCallTimestampInMs'] -= 10000
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -229,7 +230,7 @@ describe('UniJsonRpcProvider', () => {
     const scoreBeforeRecovering = unhealthyProvider['healthScore']
     getBlockNumber0.resolves(123)
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['perf'].lastCallTimestampInMs -= 1000
+    unhealthyProvider['lastCallTimestampInMs'] -= 1000
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -243,7 +244,7 @@ describe('UniJsonRpcProvider', () => {
     expect(unhealthyProvider['healthScore']).equals(scoreBeforeRecovering)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['perf'].lastCallTimestampInMs -= 10000
+    unhealthyProvider['lastCallTimestampInMs'] -= 10000
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -259,7 +260,7 @@ describe('UniJsonRpcProvider', () => {
 
     getBlockNumber0.rejects('error during recovery evaluation')
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['perf'].lastCallTimestampInMs -= 10000
+    unhealthyProvider['lastCallTimestampInMs'] -= 10000
 
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
@@ -297,7 +298,7 @@ describe('UniJsonRpcProvider', () => {
     expect(healthyProvider['healthScore']).lt(-49)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    healthyProvider['perf'].lastCallTimestampInMs -= 2000
+    healthyProvider['lastCallTimestampInMs'] -= 2000
     getBlockNumber0.resolves(123)
 
     await uniProvider.getBlockNumber()
@@ -306,7 +307,7 @@ describe('UniJsonRpcProvider', () => {
     expect(healthyProvider['healthScore']).lt(-39)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
-    healthyProvider['perf'].lastCallTimestampInMs -= 2000
+    healthyProvider['lastCallTimestampInMs'] -= 2000
 
     await uniProvider.getBlockNumber()
     uniProvider.debugPrintProviderHealthScores()
