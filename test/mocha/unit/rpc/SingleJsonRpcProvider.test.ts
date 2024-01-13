@@ -72,19 +72,4 @@ describe('SingleJsonRpcProvider', () => {
     expect(blockNumber).equals(123456)
     expect(spy.calledOnce).to.be.true
   })
-
-  it('real endpoint', async () => {
-    provider = new SingleJsonRpcProvider(
-      ChainId.MAINNET,
-      'https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e',
-      log
-    )
-    // provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://magical-alien-tab.quiknode.pro/669e87e569a8277d3fbd9e202f9df93189f19f4c', config)
-    // provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'https://ultra-blue-flower.quiknode.pro/770b22d5f362c537bc8fe19b034c45b22958f880', config)
-    // const provider2 = new StaticJsonRpcProvider('https://ultra-blue-flower.quiknode.pro/770b22d5f362c537bc8fe19b034c45b22958f880', {chainId: ChainId.MAINNET, name: 'mainnet'})
-    // console.log(await provider2.getBlockNumber())
-    // const provider2 = new StaticJsonRpcProvider('https://magical-alien-tab.quiknode.pro/669e87e569a8277d3fbd9e202f9df93189f19f4c', {chainId: ChainId.MAINNET, name: 'mainnet'})
-    // console.log(await provider2.getBlockNumber())
-    console.log(await provider.getBlockNumber())
-  })
 })

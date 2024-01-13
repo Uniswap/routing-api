@@ -6,7 +6,6 @@ import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from '../../../../lib/rpc/config'
 import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
-import { GlobalRpcProviders } from '../../../../lib/rpc/GlobalRpcProviders'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
@@ -30,13 +29,6 @@ const SINGLE_RPC_PROVIDERS = {
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
-  ],
-}
-
-// TODO(jie): Delete
-const REAL_SINGLE_RPC_PROVIDERS = {
-  [ChainId.MAINNET]: [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e`, log),
   ],
 }
 
@@ -668,52 +660,5 @@ describe('UniJsonRpcProvider', () => {
         'Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy'
       )
     }
-  })
-
-  it('real endpoint for getBlockNumber', async () => {
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      undefined,
-      undefined,
-      false
-    )
-    const res = await uniProvider.getBlockNumber()
-    console.log(res)
-  })
-
-  it('real endpoint for send', async () => {
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      undefined,
-      undefined,
-      false
-    )
-    const res = await uniProvider.send('method_name', ['param1', 'param2'])
-    console.log(res)
-  })
-
-  it('real endpoint for resolveName', async () => {
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      undefined,
-      undefined,
-      false
-    )
-    const res = await uniProvider.resolveName('main')
-    console.log(res)
-  })
-
-  it('end user', async () => {
-    const providerMap = GlobalRpcProviders.getGlobalUniRpcProviders(log)
-    // console.log([...providerMap.entries()])
-    console.log(providerMap.has(ChainId.MAINNET))
-    console.log(providerMap.get(ChainId.MAINNET))
-    // console.log(`jiejie: ${JSON.stringify(GlobalRpcProviders.getGlobalUniRpcProviders(log))}`)
   })
 })

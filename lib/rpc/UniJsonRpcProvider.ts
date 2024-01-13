@@ -101,7 +101,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    // TODO(jie): Disable?
     this.debugPrintProviderHealthScores()
 
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
