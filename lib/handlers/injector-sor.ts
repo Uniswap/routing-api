@@ -54,7 +54,6 @@ import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/p
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-// import UniJsonRpcProvider from '../rpc/uniJsonRpcProvider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -164,16 +163,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           }
 
           let provider: StaticJsonRpcProvider
-          // console.log(`jiejie: ${JSON.stringify(GlobalRpcProviders.getGlobalUniRpcProviders(log))}`)
-          // console.log(`jiejie: ${chainId}`)
           if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
-            console.log('jiejie: using mine')
             provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
-            // provider = new UniJsonRpcProvider(chainId, GlobalRpcProviders.getGlobalSingleRpcProviders()[chainId]!, undefined, [5, 5])
-            // const uniProvider = provider as UniJsonRpcProvider
-            // uniProvider.disableFallback()
           } else {
-            console.log('jiejie: using old')
             provider = new DefaultEVMClient({
               allProviders: [
                 new InstrumentedEVMProvider({
