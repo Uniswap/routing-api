@@ -37,7 +37,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
     this.log = log
-    this.log.debug('shit')
     this.providerName = deriveProviderName(url)
     this.healthScore = 0
     this.healthy = true

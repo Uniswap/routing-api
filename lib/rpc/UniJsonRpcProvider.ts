@@ -50,7 +50,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
     this.log = log
-    this.log.debug('shit')
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')

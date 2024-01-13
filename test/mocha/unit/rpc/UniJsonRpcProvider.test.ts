@@ -21,7 +21,7 @@ const TEST_CONFIG: Config = {
 const log = bunyan.createLogger({
   name: 'SingleJsonRpcProviderTest',
   serializers: bunyan.stdSerializers,
-  level: bunyan.DEBUG,
+  level: bunyan.ERROR,
 })
 
 const SINGLE_RPC_PROVIDERS = {
