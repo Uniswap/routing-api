@@ -669,7 +669,7 @@ describe('UniJsonRpcProvider', () => {
     }
   })
 
-  it('real endpoint', async () => {
+  it('real endpoint for getBlockNumber', async () => {
     uniProvider = new UniJsonRpcProvider(
       ChainId.MAINNET,
       REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
@@ -692,6 +692,19 @@ describe('UniJsonRpcProvider', () => {
       false
     )
     const res = await uniProvider.send('method_name', ['param1', 'param2'])
+    console.log(res)
+  })
+
+  it('real endpoint for resolveName', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      false
+    )
+    const res = await uniProvider.resolveName('main')
     console.log(res)
   })
 

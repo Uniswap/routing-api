@@ -101,7 +101,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    // this.debugPrintProviderHealthScores()
+    // TODO(jie): Disable?
+    this.debugPrintProviderHealthScores()
 
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
@@ -201,9 +202,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
-    console.log(`UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`)
+    console.log(
+      `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
+    )
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return (selectedProvider as any)[`${fnName}`](...args)
+    return (selectedProvider as any)
+      [`${fnName}`](...args)
       .then((response: any) => {
         return response
       })
@@ -221,22 +225,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // Notice: We should only intercept public methods that live at the top level and supposed to be called by user code
 
-  // override getBlockNumber(sessionId?: string): Promise<number> {
-  //   const selectedProvider = this.selectPreferredProvider(sessionId)
-  //   return selectedProvider
-  //     .getBlockNumber()
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       this.lastUsedProvider = selectedProvider
-  //       this.checkUnhealthyProvider()
-  //     })
-  // }
-
   override getBlockNumber(sessionId?: string): Promise<number> {
     return this.wrappedFunctionCall('getBlockNumber', sessionId)
   }
@@ -245,19 +233,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>,
     sessionId?: string
   ): Promise<BlockWithTransactions> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getBlockWithTransactions(blockHashOrBlockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getBlockWithTransactions', sessionId, blockHashOrBlockTag)
   }
 
   override getCode(
@@ -265,69 +241,16 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     blockTag?: BlockTag | Promise<BlockTag>,
     sessionId?: string
   ): Promise<string> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getCode(addressOrName, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getCode', sessionId, addressOrName, blockTag)
   }
 
   override getGasPrice(sessionId?: string): Promise<BigNumber> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getGasPrice()
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getGasPrice', sessionId)
   }
 
   override getLogs(filter: Filter, sessionId?: string): Promise<Array<Log>> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getLogs(filter)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getLogs', sessionId, filter)
   }
-
-  // Probably no need to capture?
-  // override getNetwork(sessionId?: string): Promise<Network> {
-  //   const selectedProvider = this.selectPreferredProvider(sessionId)
-  //   return selectedProvider
-  //     .getNetwork()
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       this.lastUsedProvider = selectedProvider
-  //       this.checkUnhealthyProvider()
-  //     })
-  // }
 
   override getStorageAt(
     addressOrName: string | Promise<string>,
@@ -335,35 +258,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     blockTag?: BlockTag | Promise<BlockTag>,
     sessionId?: string
   ): Promise<string> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getStorageAt(addressOrName, position, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getStorageAt', sessionId, addressOrName, position, blockTag)
   }
 
   override getTransaction(transactionHash: string | Promise<string>, sessionId?: string): Promise<TransactionResponse> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getTransaction(transactionHash)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getTransaction', sessionId, transactionHash)
   }
 
   override getTransactionCount(
@@ -371,89 +270,29 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     blockTag?: BlockTag | Promise<BlockTag>,
     sessionId?: string
   ): Promise<number> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getTransactionCount(addressOrName, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getTransactionCount', sessionId, addressOrName, blockTag)
   }
 
   override getTransactionReceipt(
     transactionHash: string | Promise<string>,
     sessionId?: string
   ): Promise<TransactionReceipt> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .getTransactionReceipt(transactionHash)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('getTransactionReceipt', sessionId, transactionHash)
   }
 
   override lookupAddress(address: string | Promise<string>, sessionId?: string): Promise<string | null> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .lookupAddress(address)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('lookupAddress', sessionId, address)
   }
 
   override resolveName(name: string | Promise<string>, sessionId?: string): Promise<string | null> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .resolveName(name)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('resolveName', sessionId, name)
   }
 
   override sendTransaction(
     signedTransaction: string | Promise<string>,
     sessionId?: string
   ): Promise<TransactionResponse> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .sendTransaction(signedTransaction)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('sendTransaction', sessionId, signedTransaction)
   }
 
   override waitForTransaction(
@@ -462,40 +301,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     timeout?: number,
     sessionId?: string
   ): Promise<TransactionReceipt> {
-    const selectedProvider = this.selectPreferredProvider(sessionId)
-    return selectedProvider
-      .waitForTransaction(transactionHash, confirmations, timeout)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    return this.wrappedFunctionCall('waitForTransaction', sessionId, transactionHash, confirmations, timeout)
   }
-
-  // override call(
-  //   transaction: Deferrable<TransactionRequest>,
-  //   blockTag?: BlockTag | Promise<BlockTag>,
-  //   sessionId?: string
-  // ): Promise<string> {
-  //   const selectedProvider = this.selectPreferredProvider(sessionId)
-  //   return selectedProvider
-  //     .call(transaction, blockTag)
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       this.lastUsedProvider = selectedProvider
-  //       this.checkUnhealthyProvider()
-  //     })
-  // }
 
   override call(
     transaction: Deferrable<TransactionRequest>,
@@ -505,22 +312,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return this.wrappedFunctionCall('call', sessionId, transaction, blockTag)
   }
 
-  // override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
-  //   console.log(`UniJsonRpcProvider: send, sessionId: ${sessionId}, method: ${method}, params: ${JSON.stringify(params)}`)
-  //   const selectedProvider = this.selectPreferredProvider(sessionId)
-  //   return selectedProvider
-  //     .send(method, params)
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       this.lastUsedProvider = selectedProvider
-  //       this.checkUnhealthyProvider()
-  //     })
-  // }
   override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
     return this.wrappedFunctionCall('send', sessionId, method, params)
   }

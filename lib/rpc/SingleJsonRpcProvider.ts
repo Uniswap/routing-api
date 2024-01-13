@@ -157,25 +157,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   ///////////////////// Begin of override functions /////////////////////
 
-  // override getBlockNumber(): Promise<number> {
-  //   const startTime = Date.now()
-  //   this.recordPerfBeforeCall(startTime)
-  //   let callSucceed = true
-  //   return this._getBlockNumber()
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       callSucceed = false
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       const endTime = Date.now()
-  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
-  //       this.checkLastCallPerformance('getBlockNumber')
-  //     })
-  // }
-
   override getBlockNumber(): Promise<number> {
     return this.wrappedFunctionCall('getBlockNumber', this._getBlockNumber.bind(this))
   }
@@ -183,251 +164,63 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   override getBlockWithTransactions(
     blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
   ): Promise<BlockWithTransactions> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getBlockWithTransactions(blockHashOrBlockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getBlockWithTransactions')
-      })
+    return this.wrappedFunctionCall(
+      'getBlockWithTransactions',
+      super.getBlockWithTransactions.bind(this),
+      blockHashOrBlockTag
+    )
   }
 
   override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getCode(addressOrName, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getCode')
-      })
+    return this.wrappedFunctionCall('getCode', super.getCode.bind(this), addressOrName, blockTag)
   }
 
   override getGasPrice(): Promise<BigNumber> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getGasPrice()
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getGasPrice')
-      })
+    return this.wrappedFunctionCall('getGasPrice', super.getGasPrice.bind(this))
   }
 
   override getLogs(filter: Filter): Promise<Array<Log>> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getLogs(filter)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getLogs')
-      })
+    return this.wrappedFunctionCall('getLogs', super.getLogs.bind(this), filter)
   }
-
-  // Probably no need to capture?
-  // override getNetwork(): Promise<Network> {
-  //   const startTime = Date.now()
-  //   this.recordPerfBeforeCall(startTime)
-  //   let callSucceed = true
-  //   return super
-  //     .getNetwork()
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       callSucceed = false
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       const endTime = Date.now()
-  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
-  //       this.checkLastCallPerformance('getNetwork')
-  //     })
-  // }
 
   override getStorageAt(
     addressOrName: string | Promise<string>,
     position: BigNumberish | Promise<BigNumberish>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<string> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getStorageAt(addressOrName, position, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getStorageAt')
-      })
+    return this.wrappedFunctionCall('getStorageAt', super.getStorageAt.bind(this), addressOrName, position, blockTag)
   }
 
   override getTransaction(transactionHash: string | Promise<string>): Promise<TransactionResponse> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getTransaction(transactionHash)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getTransaction')
-      })
+    return this.wrappedFunctionCall('getTransaction', super.getTransaction.bind(this), transactionHash)
   }
 
   override getTransactionCount(
     addressOrName: string | Promise<string>,
     blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<number> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getTransactionCount(addressOrName, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getTransactionCount')
-      })
+    return this.wrappedFunctionCall(
+      'getTransactionCount',
+      super.getTransactionCount.bind(this),
+      addressOrName,
+      blockTag
+    )
   }
 
   override getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .getTransactionReceipt(transactionHash)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('getTransactionReceipt')
-      })
+    return this.wrappedFunctionCall('getTransactionReceipt', super.getTransactionReceipt.bind(this), transactionHash)
   }
 
   override lookupAddress(address: string | Promise<string>): Promise<string | null> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .lookupAddress(address)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('lookupAddress')
-      })
+    return this.wrappedFunctionCall('lookupAddress', super.lookupAddress.bind(this), address)
   }
 
   override resolveName(name: string | Promise<string>): Promise<string | null> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .resolveName(name)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('resolveName')
-      })
+    return this.wrappedFunctionCall('resolveName', super.resolveName.bind(this), name)
   }
 
   override sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .sendTransaction(signedTransaction)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('sendTransaction')
-      })
+    return this.wrappedFunctionCall('sendTransaction', super.sendTransaction.bind(this), signedTransaction)
   }
 
   override waitForTransaction(
@@ -435,67 +228,18 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     confirmations?: number,
     timeout?: number
   ): Promise<TransactionReceipt> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .waitForTransaction(transactionHash, confirmations, timeout)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('waitForTransaction')
-      })
+    return this.wrappedFunctionCall(
+      'waitForTransaction',
+      super.waitForTransaction.bind(this),
+      transactionHash,
+      confirmations,
+      timeout
+    )
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    const startTime = Date.now()
-    this.recordPerfBeforeCall(startTime)
-    let callSucceed = true
-    return super
-      .call(transaction, blockTag)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        callSucceed = false
-        throw error
-      })
-      .finally(() => {
-        const endTime = Date.now()
-        this.recordPerfAfterCall(startTime, endTime, callSucceed)
-        this.checkLastCallPerformance('waitForTransaction')
-      })
+    return this.wrappedFunctionCall('call', super.call.bind(this), transaction, blockTag)
   }
-
-  // override send(method: string, params: Array<any>): Promise<any> {
-  //   console.log(`SinglesonRpcProvider: send, method: ${method}, params: ${JSON.stringify(params)}`)
-  //   const startTime = Date.now()
-  //   this.recordPerfBeforeCall(startTime)
-  //   let callSucceed = true
-  //   return super
-  //     .send(method, params)
-  //     .then((response) => {
-  //       return response
-  //     })
-  //     .catch((error) => {
-  //       callSucceed = false
-  //       throw error
-  //     })
-  //     .finally(() => {
-  //       const endTime = Date.now()
-  //       this.recordPerfAfterCall(startTime, endTime, callSucceed)
-  //       this.checkLastCallPerformance('send')
-  //     })
-  // }
-
-  // TODO(jie): 看着，你不要deploy再去call。你就在本地调用send()去call，这会大大加快你的debug速度！
   override send(method: string, params: Array<any>): Promise<any> {
     return this.wrappedFunctionCall('send', super.send.bind(this), method, params)
   }
