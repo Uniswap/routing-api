@@ -6,6 +6,7 @@ export interface Config {
   MAX_LATENCY_ALLOWED_IN_MS: number
   RECOVER_SCORE_PER_MS: number
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: number
+  RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: number
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -23,4 +24,7 @@ export const DEFAULT_CONFIG: Config = {
   // test it out to check its recovery. This defines the time it needs to wait
   // before being tested again, in milliseconds.
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+  // This is added to prevent an unhealthy provider gain too much recovery score only by
+  // waiting a long time to be evaluated.
+  RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 60000,
 }

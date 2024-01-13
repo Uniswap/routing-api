@@ -74,6 +74,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore === 0) {
       return
     }
+    timeInMs = Math.min(timeInMs, this.config.RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS)
     this.healthScore += timeInMs * this.config.RECOVER_SCORE_PER_MS
     if (this.healthScore > 0) {
       this.healthScore = 0
