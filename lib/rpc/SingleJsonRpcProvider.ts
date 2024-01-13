@@ -126,7 +126,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     const perf: SingleCallPerf = {
       isSucceed: true,
       latencyInMs: 0,
-      startTimestampInMs: Date.now()
+      startTimestampInMs: Date.now(),
     }
     return fn(...args)
       .then((response: any) => {

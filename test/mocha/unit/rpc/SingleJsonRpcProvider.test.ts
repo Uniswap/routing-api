@@ -22,7 +22,7 @@ const config: Config = {
 const log = bunyan.createLogger({
   name: 'SingleJsonRpcProviderTest',
   serializers: bunyan.stdSerializers,
-  level: bunyan.ERROR
+  level: bunyan.ERROR,
 })
 
 describe('SingleJsonRpcProvider', () => {
