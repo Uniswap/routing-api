@@ -6,6 +6,7 @@ import Sinon, { SinonSandbox } from 'sinon'
 import { Config } from '../../../../lib/rpc/config'
 import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
+import { GlobalRpcProviders } from '../../../../lib/rpc/GlobalRpcProviders'
 
 const TEST_CONFIG: Config = {
   ERROR_PENALTY: -50,
@@ -20,7 +21,7 @@ const TEST_CONFIG: Config = {
 const log = bunyan.createLogger({
   name: 'SingleJsonRpcProviderTest',
   serializers: bunyan.stdSerializers,
-  level: 'error',
+  level: bunyan.DEBUG,
 })
 
 const SINGLE_RPC_PROVIDERS = {
@@ -679,5 +680,26 @@ describe('UniJsonRpcProvider', () => {
     )
     const res = await uniProvider.getBlockNumber()
     console.log(res)
+  })
+
+  it('real endpoint for send', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      false
+    )
+    const res = await uniProvider.send('method_name', ['param1', 'param2'])
+    console.log(res)
+  })
+
+  it('end user', async () => {
+    const providerMap = GlobalRpcProviders.getGlobalUniRpcProviders(log)
+    // console.log([...providerMap.entries()])
+    console.log(providerMap.has(ChainId.MAINNET))
+    console.log(providerMap.get(ChainId.MAINNET))
+    // console.log(`jiejie: ${JSON.stringify(GlobalRpcProviders.getGlobalUniRpcProviders(log))}`)
   })
 })

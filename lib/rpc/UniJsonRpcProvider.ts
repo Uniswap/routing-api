@@ -50,6 +50,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
     this.log = log
+    this.log.debug('shit')
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')
@@ -85,7 +86,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
       this.reorderProviders(providers)
-      this.log.debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
+      console.log(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
     }
 
@@ -110,7 +111,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.reorderProviders(healthyProviders)
 
     if (isEmpty(this.urlWeight)) {
-      this.log.debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
+      console.log(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
       if (sessionId !== undefined) {
         this.sessionCache.set(sessionId, healthyProviders[0])
       }
@@ -124,8 +125,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
-        this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
-        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
+        console.log(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
+        console.log(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         if (sessionId !== undefined) {
           this.sessionCache.set(sessionId, provider)
         }
@@ -155,7 +156,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkUnhealthyProvider() {
-    this.log.debug('After serving a call, check unhealthy providers')
+    console.log('After serving a call, check unhealthy providers')
     let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
@@ -163,15 +164,15 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         count++
       }
     }
-    this.log.debug(`Evaluated ${count} unhealthy providers`)
+    console.log(`Evaluated ${count} unhealthy providers`)
   }
 
   debugPrintProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      console.log(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      this.log.debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      console.log(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
 
@@ -195,17 +196,19 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   createNewSessionId(): string {
     const sessionId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    this.log.debug(`New session id ${sessionId}`)
+    console.log(`New session id ${sessionId}`)
     return sessionId
   }
 
   private wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
+    console.log(`UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`)
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return (selectedProvider as any)[`${fnName}`](args)
+    return (selectedProvider as any)[`${fnName}`](...args)
       .then((response: any) => {
         return response
       })
       .catch((error: any) => {
+        console.log(JSON.stringify(error))
         throw error
       })
       .finally(() => {
@@ -503,6 +506,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   // override send(method: string, params: Array<any>, sessionId?: string): Promise<any> {
+  //   console.log(`UniJsonRpcProvider: send, sessionId: ${sessionId}, method: ${method}, params: ${JSON.stringify(params)}`)
   //   const selectedProvider = this.selectPreferredProvider(sessionId)
   //   return selectedProvider
   //     .send(method, params)

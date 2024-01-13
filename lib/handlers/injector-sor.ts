@@ -164,12 +164,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           }
 
           let provider: StaticJsonRpcProvider
-          if (chainId in GlobalRpcProviders.getGlobalUniRpcProviders(log)) {
+          // console.log(`jiejie: ${JSON.stringify(GlobalRpcProviders.getGlobalUniRpcProviders(log))}`)
+          // console.log(`jiejie: ${chainId}`)
+          if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+            console.log('jiejie: using mine')
             provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
             // provider = new UniJsonRpcProvider(chainId, GlobalRpcProviders.getGlobalSingleRpcProviders()[chainId]!, undefined, [5, 5])
             // const uniProvider = provider as UniJsonRpcProvider
             // uniProvider.disableFallback()
           } else {
+            console.log('jiejie: using old')
             provider = new DefaultEVMClient({
               allProviders: [
                 new InstrumentedEVMProvider({

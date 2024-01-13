@@ -38,6 +38,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     this.url = url
     this.log = log
+    this.log.debug('shit')
     this.providerName = deriveProviderName(url)
     this.healthScore = 0
     this.healthy = true
@@ -51,20 +52,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   hasEnoughWaitSinceLastCall(): boolean {
-    this.log.debug(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
+    console.log(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.perf.lastCallTimestampInMs} ms`)
     return Date.now() - this.perf.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
   }
 
   private recordError(method: string) {
     this.healthScore += this.config.ERROR_PENALTY
-    this.log.debug(
+    console.log(
       `${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
     )
   }
 
   private recordHighLatency(method: string) {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    this.log.debug(
+    console.log(
       `${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
     )
   }
@@ -77,7 +78,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.healthScore > 0) {
       this.healthScore = 0
     }
-    this.log.debug(
+    console.log(
       `${this.url}: healthy: ${this.healthy}, recovery ${timeInMs} * ${this.config.RECOVER_SCORE_PER_MS} = ${
         timeInMs * this.config.RECOVER_SCORE_PER_MS
       }, score => ${this.healthScore}`
@@ -85,7 +86,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkLastCallPerformance(method: string) {
-    this.log.debug(`checkLastCallPerformance: method: ${method}`)
+    console.log(`checkLastCallPerformance: method: ${method}`)
     if (!this.perf.lastCallSucceed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(method)
@@ -94,7 +95,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.recordHighLatency(method)
     } else {
       metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
-      this.log.debug(`${this.url} method: ${method} succeeded`)
+      console.log(`${this.url} method: ${method} succeeded`)
       // For a success call, we will increase health score.
       if (this.perf.timeWaitedBeforeLastCallInMs > 0) {
         this.recordProviderRecovery(this.perf.timeWaitedBeforeLastCallInMs)
@@ -102,10 +103,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
     if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
       this.healthy = false
-      this.log.debug(`${this.url} drops to unhealthy`)
+      console.log(`${this.url} drops to unhealthy`)
     } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
       this.healthy = true
-      this.log.debug(`${this.url} resumes to healthy`)
+      console.log(`${this.url} resumes to healthy`)
     }
     // No reward for normal operation.
   }
@@ -123,7 +124,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   evaluateForRecovery() {
-    this.log.debug(`${this.url}: Evaluate for recovery...`)
+    console.log(`${this.url}: Evaluate for recovery...`)
     this.getBlockNumber() // Ignore output in the promise
   }
 
@@ -134,6 +135,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private wrappedFunctionCall(fnName: string, fn: any, ...args: any[]): Promise<any> {
+    console.log(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const startTime = Date.now()
     this.recordPerfBeforeCall(startTime)
     let callSucceed = true
@@ -143,6 +145,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       })
       .catch((error: any) => {
         callSucceed = false
+        console.log(JSON.stringify(error))
         throw error
       })
       .finally(() => {
@@ -472,6 +475,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   // override send(method: string, params: Array<any>): Promise<any> {
+  //   console.log(`SinglesonRpcProvider: send, method: ${method}, params: ${JSON.stringify(params)}`)
   //   const startTime = Date.now()
   //   this.recordPerfBeforeCall(startTime)
   //   let callSucceed = true
@@ -491,6 +495,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   //     })
   // }
 
+  // TODO(jie): 看着，你不要deploy再去call。你就在本地调用send()去call，这会大大加快你的debug速度！
   override send(method: string, params: Array<any>): Promise<any> {
     return this.wrappedFunctionCall('send', super.send.bind(this), method, params)
   }
