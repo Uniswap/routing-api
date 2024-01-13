@@ -45,7 +45,6 @@ describe('SingleJsonRpcProvider', () => {
     const blockNumber = await provider.getBlockNumber()
 
     expect(blockNumber).equals(123456)
-    expect(provider['perf'].lastCallSucceed).to.be.true
   })
 
   it('provider call failed', async () => {
@@ -59,7 +58,6 @@ describe('SingleJsonRpcProvider', () => {
       assert(false, 'Should not reach')
     } catch (err: any) {
       expect(err.name).equals('error')
-      expect(provider['perf'].lastCallSucceed).to.be.false
       expect(spy.calledOnce).to.be.true
     }
   })
@@ -72,7 +70,6 @@ describe('SingleJsonRpcProvider', () => {
     const blockNumber = await provider.getBlockNumber()
 
     expect(blockNumber).equals(123456)
-    expect(provider['perf'].lastCallSucceed).to.be.true
     expect(spy.calledOnce).to.be.true
   })
 

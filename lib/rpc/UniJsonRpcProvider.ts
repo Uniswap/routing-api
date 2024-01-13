@@ -86,7 +86,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
       this.reorderProviders(providers)
-      console.log(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
+      this.log.debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
     }
 
@@ -112,7 +112,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.reorderProviders(healthyProviders)
 
     if (isEmpty(this.urlWeight)) {
-      console.log(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
+      this.log.debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
       if (sessionId !== undefined) {
         this.sessionCache.set(sessionId, healthyProviders[0])
       }
@@ -126,8 +126,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (const provider of healthyProviders) {
       accumulatedWeight += this.urlWeight[provider.url]
       if (accumulatedWeight >= rand) {
-        console.log(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
-        console.log(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
+        this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
+        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         if (sessionId !== undefined) {
           this.sessionCache.set(sessionId, provider)
         }
@@ -157,7 +157,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private checkUnhealthyProvider() {
-    console.log('After serving a call, check unhealthy providers')
+    this.log.debug('After serving a call, check unhealthy providers')
     let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
@@ -165,15 +165,15 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         count++
       }
     }
-    console.log(`Evaluated ${count} unhealthy providers`)
+    this.log.debug(`Evaluated ${count} unhealthy providers`)
   }
 
   debugPrintProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      console.log(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      console.log(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
     }
   }
 
@@ -197,12 +197,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   createNewSessionId(): string {
     const sessionId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    console.log(`New session id ${sessionId}`)
+    this.log.debug(`New session id ${sessionId}`)
     return sessionId
   }
 
   private wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
-    console.log(
+    this.log.debug(
       `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
@@ -212,7 +212,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         return response
       })
       .catch((error: any) => {
-        console.log(JSON.stringify(error))
+        this.log.debug(JSON.stringify(error))
         throw error
       })
       .finally(() => {
