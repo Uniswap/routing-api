@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
-import { Duration, Size } from 'aws-cdk-lib'
+import { Duration } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
