@@ -41,6 +41,9 @@ export class GlobalRpcProviders {
     if (this.SINGLE_RPC_PROVIDERS === null) {
       this.initGlobalSingleRpcProviders(log)
     }
+    if (!this.SINGLE_RPC_PROVIDERS!.has(ChainId.MAINNET)) {
+      throw new Error(`No RPC providers configured for chain ${ChainId.MAINNET}`)
+    }
     this.UNI_RPC_PROVIDERS = new Map([
       [
         ChainId.MAINNET,

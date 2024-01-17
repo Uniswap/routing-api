@@ -16,13 +16,13 @@ import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 
 interface SingleCallPerf {
-  isSucceed: boolean
+  succeed: boolean
   latencyInMs: number
   startTimestampInMs: number
 }
 
+// TODO(jie): Implement block-aligned cache
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
-  // TODO(jie): Implement block-aligned cache
   readonly url: string
   readonly providerName: string
 
@@ -86,7 +86,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private checkLastCallPerformance(method: string, perf: SingleCallPerf) {
     this.log.debug(`checkLastCallPerformance: method: ${method}`)
-    if (!perf.isSucceed) {
+    if (!perf.succeed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(method)
     } else if (perf.latencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
@@ -124,7 +124,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private wrappedFunctionCall(fnName: string, fn: any, ...args: any[]): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
-      isSucceed: true,
+      succeed: true,
       latencyInMs: 0,
       startTimestampInMs: Date.now(),
     }
@@ -133,7 +133,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         return response
       })
       .catch((error: any) => {
-        perf.isSucceed = false
+        perf.succeed = false
         this.log.debug(JSON.stringify(error))
         throw error
       })

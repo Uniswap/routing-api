@@ -32,6 +32,12 @@ const SINGLE_RPC_PROVIDERS = {
   ],
 }
 
+const REAL_SINGLE_RPC_PROVIDERS = {
+  [ChainId.MAINNET]: [
+    new SingleJsonRpcProvider(ChainId.MAINNET, `https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g`, log),
+  ],
+}
+
 const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
     new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
@@ -660,5 +666,18 @@ describe('UniJsonRpcProvider', () => {
         'Forced to use the same provider during the session but the provider (UNKNOWN) is unhealthy'
       )
     }
+  })
+
+  it('real endpoint for getBlockNumber', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      REAL_SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      false
+    )
+    const res = await uniProvider.getBlockNumber()
+    console.log(res)
   })
 })
