@@ -34,7 +34,11 @@ const SINGLE_RPC_PROVIDERS = {
 
 const REAL_SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g`, log),
+    new SingleJsonRpcProvider(
+      ChainId.MAINNET,
+      `https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g`,
+      log
+    ),
   ],
 }
 
