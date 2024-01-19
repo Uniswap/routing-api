@@ -34,7 +34,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly log: Logger
 
   constructor(network: Networkish, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
-    // super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
     super(url, network)
     this.url = url
     this.log = log
