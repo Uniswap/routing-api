@@ -1,7 +1,6 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { Config, DEFAULT_CONFIG } from './config'
-import { ID_TO_NETWORK_NAME, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
-import { ChainId } from '@uniswap/sdk-core'
+import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import {
   BlockTag,
   BlockWithTransactions,
@@ -14,6 +13,7 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
+import { Networkish } from '@ethersproject/networks'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -33,8 +33,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
-  constructor(chainId: ChainId, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
-    super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
+  constructor(network: Networkish, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
+    // super(url, { chainId, name: ID_TO_NETWORK_NAME(chainId) })
+    super(url, network)
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)
