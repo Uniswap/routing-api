@@ -112,7 +112,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
-    this.getBlockNumber() // Ignore output in the promise
+    this.getBlockNumber()
+      .catch((error: any) => {
+        // Swallow the error
+        this.log.debug(`Swallow error: ${JSON.stringify(error)}`)
+      })
+  }
+
+  logHealthMetrics() {
+    metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
   }
 
   // Wrap another layer only for the sake of ease unit testing.
