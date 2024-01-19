@@ -25,13 +25,16 @@ export class GlobalRpcProviders {
     if (QUICKNODE_MAINNET_RPC_URL === undefined) {
       throw new Error(`UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
     }
-    console.log(`jiejie: in initGlobalSingleRpcProviders()`)
     GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
       [
         ChainId.MAINNET,
         [
           new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`, log),
-          new SingleJsonRpcProvider(ChainId.MAINNET, 'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g', log),
+          new SingleJsonRpcProvider(
+            ChainId.MAINNET,
+            'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
+            log
+          ),
           // new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!, log),
         ],
       ],
@@ -63,7 +66,6 @@ export class GlobalRpcProviders {
 
   static getGlobalSingleRpcProviders(log: Logger): Map<ChainId, SingleJsonRpcProvider[]> {
     if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
-      console.log("jiejie: will now create new single instance")
       GlobalRpcProviders.initGlobalSingleRpcProviders(log)
     }
     return GlobalRpcProviders.SINGLE_RPC_PROVIDERS!
@@ -71,7 +73,6 @@ export class GlobalRpcProviders {
 
   static getGlobalUniRpcProviders(log: Logger): Map<ChainId, UniJsonRpcProvider> {
     if (GlobalRpcProviders.UNI_RPC_PROVIDERS === null) {
-      console.log("jiejie: will now create new uni instance")
       GlobalRpcProviders.initGlobalUniRpcProviders(log)
     }
     return GlobalRpcProviders.UNI_RPC_PROVIDERS!

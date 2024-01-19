@@ -112,11 +112,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
-    this.getBlockNumber()
-      .catch((error: any) => {
-        // Swallow the error
-        this.log.debug(`Swallow error: ${JSON.stringify(error)}`)
-      })
+    this.getBlockNumber().catch((error: any) => {
+      // Swallow the error
+      this.log.debug(`Swallow error: ${JSON.stringify(error)}`)
+    })
   }
 
   logHealthMetrics() {
