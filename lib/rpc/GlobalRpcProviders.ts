@@ -59,18 +59,6 @@ export class GlobalRpcProviders {
         )
       }
     }
-    // GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map([
-    //   [
-    //     ChainId.AVALANCHE,
-    //     new UniJsonRpcProvider(
-    //       ChainId.AVALANCHE,
-    //       GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(ChainId.AVALANCHE)!,
-    //       log,
-    //       GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(ChainId.AVALANCHE),
-    //       GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(ChainId.AVALANCHE)
-    //     ),
-    //   ],
-    // ])
     return GlobalRpcProviders.UNI_RPC_PROVIDERS
   }
 
