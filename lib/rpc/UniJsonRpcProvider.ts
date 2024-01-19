@@ -55,7 +55,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw new Error('Empty singlePrcProviders')
     }
 
-    if (ranking !== undefined && weights !== undefined && weights && ranking.length != weights.length) {
+    if (ranking !== undefined && weights !== undefined && ranking.length != weights.length) {
       throw new Error('urls and weights need to have the same length')
     }
 

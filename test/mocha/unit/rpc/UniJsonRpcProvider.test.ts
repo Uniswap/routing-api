@@ -24,13 +24,13 @@ const log = bunyan.createLogger({
   level: bunyan.ERROR,
 })
 
-const SINGLE_RPC_PROVIDERS = {
-  [ChainId.MAINNET]: [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
-  ],
-}
+const createNewSingleJsonRpcProviders = () => [
+  new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
+  new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
+  new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log)
+]
+
+const SINGLE_RPC_PROVIDERS = { [ChainId.MAINNET]: createNewSingleJsonRpcProviders() }
 
 const REAL_SINGLE_RPC_PROVIDERS = {
   [ChainId.MAINNET]: [
@@ -43,11 +43,7 @@ const REAL_SINGLE_RPC_PROVIDERS = {
 }
 
 const resetRpcProviders = () => {
-  SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = [
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
-    new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
-  ]
+  SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = createNewSingleJsonRpcProviders()
 }
 
 const delay = (ms: number) => {

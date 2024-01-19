@@ -129,7 +129,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  private wrappedFunctionCall(fnName: string, fn: any, ...args: any[]): Promise<any> {
+  private wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>,  ...args: any[]): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
       succeed: true,
