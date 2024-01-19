@@ -25,45 +25,55 @@ export class GlobalRpcProviders {
     if (QUICKNODE_MAINNET_RPC_URL === undefined) {
       throw new Error(`UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
     }
-    this.SINGLE_RPC_PROVIDERS = new Map([
+    console.log(`jiejie: in initGlobalSingleRpcProviders()`)
+    GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
       [
         ChainId.MAINNET,
         [
           new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`, log),
-          new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!, log),
+          new SingleJsonRpcProvider(ChainId.MAINNET, 'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g', log),
+          // new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!, log),
         ],
       ],
     ])
-    return this.SINGLE_RPC_PROVIDERS
+    return GlobalRpcProviders.SINGLE_RPC_PROVIDERS
   }
 
   private static initGlobalUniRpcProviders(log: Logger) {
-    if (this.SINGLE_RPC_PROVIDERS === null) {
-      this.initGlobalSingleRpcProviders(log)
+    if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
+      GlobalRpcProviders.initGlobalSingleRpcProviders(log)
     }
-    if (!this.SINGLE_RPC_PROVIDERS!.has(ChainId.MAINNET)) {
+    if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(ChainId.MAINNET)) {
       throw new Error(`No RPC providers configured for chain ${ChainId.MAINNET}`)
     }
-    this.UNI_RPC_PROVIDERS = new Map([
+    GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map([
       [
         ChainId.MAINNET,
         new UniJsonRpcProvider(
           ChainId.MAINNET,
-          this.SINGLE_RPC_PROVIDERS!.get(ChainId.MAINNET)!,
+          GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(ChainId.MAINNET)!,
           log,
           GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(ChainId.MAINNET),
           GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(ChainId.MAINNET)
         ),
       ],
     ])
-    return this.UNI_RPC_PROVIDERS
+    return GlobalRpcProviders.UNI_RPC_PROVIDERS
   }
 
   static getGlobalSingleRpcProviders(log: Logger): Map<ChainId, SingleJsonRpcProvider[]> {
-    return this.SINGLE_RPC_PROVIDERS ?? this.initGlobalSingleRpcProviders(log)
+    if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
+      console.log("jiejie: will now create new single instance")
+      GlobalRpcProviders.initGlobalSingleRpcProviders(log)
+    }
+    return GlobalRpcProviders.SINGLE_RPC_PROVIDERS!
   }
 
   static getGlobalUniRpcProviders(log: Logger): Map<ChainId, UniJsonRpcProvider> {
-    return this.UNI_RPC_PROVIDERS ?? this.initGlobalUniRpcProviders(log)
+    if (GlobalRpcProviders.UNI_RPC_PROVIDERS === null) {
+      console.log("jiejie: will now create new uni instance")
+      GlobalRpcProviders.initGlobalUniRpcProviders(log)
+    }
+    return GlobalRpcProviders.UNI_RPC_PROVIDERS!
   }
 }
