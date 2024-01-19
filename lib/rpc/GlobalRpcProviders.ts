@@ -2,14 +2,15 @@ import { ChainId } from '@uniswap/sdk-core'
 import { SingleJsonRpcProvider } from './SingleJsonRpcProvider'
 import { UniJsonRpcProvider } from './UniJsonRpcProvider'
 import Logger from 'bunyan'
+import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 
 export class GlobalRpcProviders {
   private static readonly PROVIDER_RPC_URL_RANKING: Map<ChainId, number[] | undefined> = new Map([
-    [ChainId.MAINNET, undefined],
+    [ChainId.AVALANCHE, undefined],
   ])
 
   private static readonly PROVIDER_RPC_URL_WEIGHTS: Map<ChainId, number[] | undefined> = new Map([
-    [ChainId.MAINNET, undefined],
+    [ChainId.AVALANCHE, undefined],
   ])
 
   private static SINGLE_RPC_PROVIDERS: Map<ChainId, SingleJsonRpcProvider[]> | null = null
@@ -17,27 +18,15 @@ export class GlobalRpcProviders {
   private static UNI_RPC_PROVIDERS: Map<ChainId, UniJsonRpcProvider> | null = null
 
   private static initGlobalSingleRpcProviders(log: Logger) {
-    const INFURA_KEY = process.env.UNI_RPC_PROVIDER_INFURA_KEY
-    if (INFURA_KEY === undefined) {
-      throw new Error(`UNI_RPC_PROVIDER_INFURA_KEY must be a defined environment variable`)
-    }
-    const QUICKNODE_MAINNET_RPC_URL = process.env.UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL
-    if (QUICKNODE_MAINNET_RPC_URL === undefined) {
-      throw new Error(`UNI_RPC_PROVIDER_QUICKNODE_MAINNET_RPC_URL must be a defined environment variable`)
+    // Only Avalanche is supported for now.
+    const infuraAvalancheUrl = process.env[`WEB3_RPC_${ChainId.AVALANCHE.toString()}`]!
+    if (infuraAvalancheUrl === undefined) {
+      throw new Error(
+        `Infura Avalanche URL isn't provided by environment variable WEB3_RPC_${ChainId.AVALANCHE.toString()}`
+      )
     }
     GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
-      [
-        ChainId.MAINNET,
-        [
-          new SingleJsonRpcProvider(ChainId.MAINNET, `https://mainnet.infura.io/v3/${INFURA_KEY}`, log),
-          new SingleJsonRpcProvider(
-            ChainId.MAINNET,
-            'https://eth-mainnet.g.alchemy.com/v2/PC1uzrHueA8AdsD8jdQPcXFt4IUKSm-g',
-            log
-          ),
-          // new SingleJsonRpcProvider(ChainId.MAINNET, QUICKNODE_MAINNET_RPC_URL!, log),
-        ],
-      ],
+      [ChainId.AVALANCHE, [new SingleJsonRpcProvider(ChainId.AVALANCHE, infuraAvalancheUrl, log)]],
     ])
     return GlobalRpcProviders.SINGLE_RPC_PROVIDERS
   }
@@ -46,21 +35,42 @@ export class GlobalRpcProviders {
     if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
       GlobalRpcProviders.initGlobalSingleRpcProviders(log)
     }
-    if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(ChainId.MAINNET)) {
-      throw new Error(`No RPC providers configured for chain ${ChainId.MAINNET}`)
+    const rpcConfigStr = process.env['UNI_RPC_PROVIDER_CONFIG']!
+    if (rpcConfigStr === undefined) {
+      throw new Error('Environment variable UNI_RPC_PROVIDER_CONFIG is missing!')
     }
-    GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map([
-      [
-        ChainId.MAINNET,
-        new UniJsonRpcProvider(
-          ChainId.MAINNET,
-          GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(ChainId.MAINNET)!,
-          log,
-          GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(ChainId.MAINNET),
-          GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(ChainId.MAINNET)
-        ),
-      ],
-    ])
+    const rpcConfig = JSON.parse(rpcConfigStr)
+
+    GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map()
+    for (let chainId of SUPPORTED_CHAINS) {
+      if (rpcConfig[chainId.toString()] === 'true') {
+        if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(chainId)) {
+          throw new Error(`No RPC providers configured for chain ${chainId.toString()}`)
+        }
+        GlobalRpcProviders.UNI_RPC_PROVIDERS.set(
+          chainId,
+          new UniJsonRpcProvider(
+            chainId,
+            GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(chainId)!,
+            log,
+            GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(chainId),
+            GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(chainId)
+          )
+        )
+      }
+    }
+    // GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map([
+    //   [
+    //     ChainId.AVALANCHE,
+    //     new UniJsonRpcProvider(
+    //       ChainId.AVALANCHE,
+    //       GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(ChainId.AVALANCHE)!,
+    //       log,
+    //       GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(ChainId.AVALANCHE),
+    //       GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(ChainId.AVALANCHE)
+    //     ),
+    //   ],
+    // ])
     return GlobalRpcProviders.UNI_RPC_PROVIDERS
   }
 

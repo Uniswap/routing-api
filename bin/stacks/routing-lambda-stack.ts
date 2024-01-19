@@ -34,6 +34,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachedV2PairsDynamoDb: aws_dynamodb.Table
   tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
   unicornSecret: string
+  uniRpcProviderConfig: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -61,6 +62,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachedV2PairsDynamoDb,
       tokenPropertiesCachingDynamoDb,
       unicornSecret,
+      uniRpcProviderConfig,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -133,6 +135,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
+        UNI_RPC_PROVIDER_CONFIG: uniRpcProviderConfig,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(

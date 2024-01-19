@@ -16,7 +16,7 @@ import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
-  private readonly chainId: ChainId = ChainId.MAINNET
+  readonly chainId: ChainId = ChainId.MAINNET
 
   private readonly providers: SingleJsonRpcProvider[] = []
 
@@ -100,7 +100,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    this.debugPrintProviderHealthScores()
+    this.logProviderHealthScores()
 
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
@@ -166,7 +166,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.log.debug(`Evaluated ${count} unhealthy providers`)
   }
 
-  debugPrintProviderHealthScores() {
+  logProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
       this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
       provider.logHealthMetrics()

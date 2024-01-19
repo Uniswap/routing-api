@@ -43,7 +43,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.healthy = true
     this.lastCallTimestampInMs = 0
     this.config = config
-    this.metricPrefix = `RPC_${this.providerName}_${this.network.chainId}`
+    this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
   }
 
   isHealthy() {
@@ -129,7 +129,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  private wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>,  ...args: any[]): Promise<any> {
+  private wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>, ...args: any[]): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
       succeed: true,

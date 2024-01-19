@@ -27,7 +27,7 @@ const log = bunyan.createLogger({
 const createNewSingleJsonRpcProviders = () => [
   new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
   new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log)
+  new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
 ]
 
 const SINGLE_RPC_PROVIDERS = { [ChainId.MAINNET]: createNewSingleJsonRpcProviders() }
