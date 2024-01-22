@@ -212,7 +212,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         return response
       })
       .catch((error: any) => {
-        this.log.debug(JSON.stringify(error))
+        this.log.error(JSON.stringify(error))
         throw error
       })
       .finally(() => {

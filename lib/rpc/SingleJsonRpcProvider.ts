@@ -56,14 +56,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordError(method: string) {
     this.healthScore += this.config.ERROR_PENALTY
-    this.log.debug(
+    this.log.error(
       `${this.url}: method: ${method} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
     )
   }
 
   private recordHighLatency(method: string) {
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    this.log.debug(
+    this.log.error(
       `${this.url}: method: ${method}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
     )
   }
@@ -114,7 +114,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
     this.getBlockNumber().catch((error: any) => {
       // Swallow the error
-      this.log.debug(`Swallow error: ${JSON.stringify(error)}`)
+      this.log.error(`Swallow error for shadow evaluate call: ${JSON.stringify(error)}`)
     })
   }
 
@@ -141,7 +141,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       })
       .catch((error: any) => {
         perf.succeed = false
-        this.log.debug(JSON.stringify(error))
+        this.log.error(JSON.stringify(error))
         throw error
       })
       .finally(() => {
