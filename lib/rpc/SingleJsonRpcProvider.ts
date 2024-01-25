@@ -14,6 +14,7 @@ import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 import { Networkish } from '@ethersproject/networks'
+import { times } from 'lodash'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -33,6 +34,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
+  private healthScoreAtLastSync: number
+  private lastSyncTimestampInMs: number
+
   constructor(network: Networkish, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
     super(url, network)
     this.url = url
@@ -43,6 +47,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
+
+    // TODO(jie): Sync health store
+    // this.lastSyncedHealthScore = GetHealthScoreFromDB()
+    // this.healthScore = this.lastSyncedHealthScore
   }
 
   isHealthy() {
@@ -147,8 +155,33 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       .finally(() => {
         perf.latencyInMs = Date.now() - perf.startTimestampInMs
         this.checkLastCallPerformance(fnName, perf)
+        this.maybeSyncHealthScoreWithDB()
         this.lastCallTimestampInMs = perf.startTimestampInMs
       })
+  }
+
+  private maybeSyncHealthScoreWithDB(): boolean {
+    const timestampInMs = Date.now()
+    if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.config.DB_SYNC_INTERVAL_IN_S) {
+      return false
+    }
+    const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
+    const dbHealthScore = this.readHealthScoreFromDB()
+    const newHealthScore = dbHealthScore + locallyAccumulatedHealthScoreDiff
+    this.writeHealthScoreToDB(newHealthScore)
+    this.healthScoreAtLastSync = newHealthScore
+    this.healthScore = newHealthScore
+    this.lastSyncTimestampInMs = timestampInMs
+    return true
+  }
+
+  private readHealthScoreFromDB(): number {
+    this.log.debug(`Read health score from DB: 123`)
+    return 123;
+  }
+
+  private writeHealthScoreToDB(healthScore: number) {
+    this.log.debug(`Write health score to DB: ${healthScore}`)
   }
 
   ///////////////////// Begin of override functions /////////////////////
