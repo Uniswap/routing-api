@@ -125,7 +125,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
     this.getBlockNumber().catch((error: any) => {
-      // Swallow the error
       this.log.error(`Swallow error for shadow evaluate call: ${JSON.stringify(error)}`)
     })
   }
@@ -140,30 +139,44 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  private wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>, ...args: any[]): Promise<any> {
+  private async wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>, ...args: any[]): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
       succeed: true,
       latencyInMs: 0,
       startTimestampInMs: Date.now(),
     }
-    return fn(...args)
-      .then((response: any) => {
-        return response
-      })
-      .catch((error: any) => {
-        perf.succeed = false
-        this.log.error(JSON.stringify(error))
-        throw error
-      })
-      .finally(() => {
-        perf.latencyInMs = Date.now() - perf.startTimestampInMs
-        this.checkLastCallPerformance(fnName, perf)
-        if (this.enableDbSync) {
-          this.maybeSyncHealthScore()
-        }
-        this.lastCallTimestampInMs = perf.startTimestampInMs
-      })
+    // return fn(...args)
+    //   .then((response: any) => {
+    //     return response
+    //   })
+    //   .catch((error: any) => {
+    //     perf.succeed = false
+    //     this.log.error(JSON.stringify(error))
+    //     throw error
+    //   })
+    //   .finally(() => {
+    //     perf.latencyInMs = Date.now() - perf.startTimestampInMs
+    //     this.checkLastCallPerformance(fnName, perf)
+    //     if (this.enableDbSync) {
+    //       this.maybeSyncHealthScore()
+    //     }
+    //     this.lastCallTimestampInMs = perf.startTimestampInMs
+    //   })
+    try {
+      return await fn(...args)
+    } catch (error: any) {
+      perf.succeed = false
+      this.log.error(JSON.stringify(error))
+      throw error
+    } finally {
+      perf.latencyInMs = Date.now() - perf.startTimestampInMs
+      this.checkLastCallPerformance(fnName, perf)
+      if (this.enableDbSync) {
+        this.maybeSyncHealthScore()
+      }
+      this.lastCallTimestampInMs = perf.startTimestampInMs
+    }
   }
 
   private maybeSyncHealthScore() {
