@@ -15,26 +15,6 @@ const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// const DB_TABLE = {
-//   TableName: 'RpcProviderHealth',
-//   KeySchema: [
-//     {
-//       AttributeName: 'chainIdProviderName',
-//       KeyType: 'HASH'
-//     }
-//   ],
-//   AttributeDefinitions: [
-//     {
-//       AttributeName: 'healthScore',
-//       AttributeType: 'N',
-//     }
-//   ],
-//   ProvisionedThroughput: {
-//     ReadCapacityUnits: 1,
-//     WriteCapacityUnits: 1,
-//   },
-// }
-
 const config: Config = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,

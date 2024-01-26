@@ -29,31 +29,55 @@ export class HealthStateSyncer {
     this.log = log
   }
 
-  maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
+  // maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
+  //   const timestampInMs = Date.now()
+  //   if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
+  //     return Promise.resolve({synced: false, healthScore: 0})
+  //   }
+  //   const dbHealthScore = this.readHealthScoreFromDb()
+  //   const newHealthScore = dbHealthScore + localHealthScoreDiff
+  //   return this.writeHealthScoreToDb(newHealthScore, timestampInMs)
+  //     .then(() => {
+  //       this.lastSyncTimestampInMs = timestampInMs
+  //       return Promise.resolve({synced: true, healthScore: newHealthScore})
+  //     })
+  //     .catch((err: any) => {
+  //       this.log.error(`Failed to write to DB ${JSON.stringify(err)}`)
+  //       // Error is swallowed.
+  //       return Promise.resolve({ synced: false, healthScore: 0 })
+  //     })
+  // }
+  async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
-      return Promise.resolve({synced: false, healthScore: 0})
+      return {synced: false, healthScore: 0}
     }
-    const dbHealthScore = this.readHealthScoreFromDB()
+
+    let dbHealthScore: number
+    try {
+      dbHealthScore = await this.readHealthScoreFromDb()
+    } catch (err: any) {
+      this.log.error(`Failed to read from DB: ${JSON.stringify(err)}. Sync failed.`)
+      return {synced: false, healthScore: 0}
+    }
+
     const newHealthScore = dbHealthScore + localHealthScoreDiff
-    return this.writeHealthScoreToDB(newHealthScore, timestampInMs)
-      .then(() => {
-        this.lastSyncTimestampInMs = timestampInMs
-        return Promise.resolve({synced: true, healthScore: newHealthScore})
-      })
-      .catch((err: any) => {
-        this.log.error(`Failed to write to DB ${JSON.stringify(err)}`)
-        // Error is swallowed.
-        return Promise.resolve({ synced: false, healthScore: 0 })
-      })
+    try {
+      await this.writeHealthScoreToDb(newHealthScore, timestampInMs)
+      this.lastSyncTimestampInMs = timestampInMs
+      return { synced: true, healthScore: newHealthScore }
+    } catch (err: any) {
+      this.log.error(`Failed to write to DB: ${JSON.stringify(err)}. Sync failed.`)
+      return { synced: false, healthScore: 0 }
+    }
   }
 
-  private readHealthScoreFromDB(): number {
+  private async readHealthScoreFromDb(): Promise<number> {
     this.log.debug(`Read health score from DB: 123`)
     return 123;
   }
 
-  private writeHealthScoreToDB(healthScore: number, updateAt: number) {
+  private writeHealthScoreToDb(healthScore: number, updateAt: number) {
     this.log.debug(`Write health score to DB: ${healthScore}`)
     const putParams = {
       TableName: this.dbTableName,
