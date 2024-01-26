@@ -1,8 +1,8 @@
 import { setupTables } from '../../dbSetup'
-import Sinon from 'sinon'
 import { HealthStateSyncer } from '../../../../lib/rpc/HealthStateSyncer'
 import { default as bunyan } from 'bunyan'
 import { expect, assert } from 'chai'
+import Sinon from 'sinon'
 
 const DB_TABLE = {
   TableName: 'RpcProviderHealth',
@@ -47,13 +47,14 @@ describe('HealthStateSyncer', () => {
       assert(false, `Should not throw error ${err}`)
     }
 
+    let readResult
     try {
-      const readResult = await syncer['readHealthScoreFromDb']()
-      expect(readResult!.healthScore).equals(healthScore)
-      expect(readResult!.updatedAtInMs).equals(timestamp)
+      readResult = await syncer['readHealthScoreFromDb']()
     } catch (err: any) {
       assert(false, `Should not throw error ${err}`)
     }
+    expect(readResult!.healthScore).equals(healthScore)
+    expect(readResult!.updatedAtInMs).equals(timestamp)
   })
 
   it('write to health score to DB then write it again: Timestamp match', async () => {
@@ -92,13 +93,19 @@ describe('HealthStateSyncer', () => {
   it('sync health score succeeds: no previous DB result', async () => {
     const localHealthScoreDiff = -100
     const localHealthScore = -1100
+    const timestamp = Date.now()
+    const clock = Sinon.useFakeTimers(timestamp)
+    let syncResult
     try {
-      const syncResult = await syncer.maybeSyncHealthScoreWithDb(localHealthScoreDiff, localHealthScore)
-      expect(syncResult.synced).equals(true)
-      expect(syncResult.healthScore).equals(localHealthScore)
+      syncResult = await syncer.maybeSyncHealthScoreWithDb(localHealthScoreDiff, localHealthScore)
     } catch (err: any) {
       assert(false, `Should not throw error ${err}`)
+    } finally {
+      clock.restore()
     }
+    expect(syncResult.synced).equals(true)
+    expect(syncResult.healthScore).equals(localHealthScore)
+    expect(syncer['lastSyncTimestampInMs']).equals(timestamp)
   })
 
   it('sync health score succeeds: optimistic write succeeds', async () => {
@@ -111,18 +118,22 @@ describe('HealthStateSyncer', () => {
       assert(false, `Should not throw error ${err}`)
     }
 
-    clock.tick(1000)
+    // Tick time forward to exceed DB sync interval.
+    clock.tick(6000)
 
     const localHealthScoreDiff = -100
     const localHealthScore = -1100
+    let syncResult
     try {
-      const syncResult = await syncer.maybeSyncHealthScoreWithDb(localHealthScoreDiff, localHealthScore)
-      expect(syncResult.synced).equals(true)
-      expect(syncResult.healthScore).equals(-1100)
+      syncResult = await syncer.maybeSyncHealthScoreWithDb(localHealthScoreDiff, localHealthScore)
     } catch (err: any) {
+      console.log(JSON.stringify(err))
       assert(false, `Should not throw error ${err}`)
     } finally {
       clock.restore()
     }
+    expect(syncResult.synced).equals(true)
+    expect(syncResult.healthScore).equals(-1100)
+    expect(syncer['lastSyncTimestampInMs']).equals(timestamp + 6000)
   })
 })

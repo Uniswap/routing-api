@@ -118,7 +118,6 @@ export class HealthStateSyncer {
         },
         ConditionExpression: '#updatedAt = :oldUpdatedAtInMs',
       }
-      console.log(JSON.stringify(updateParams))
       return this.ddbClient.update(updateParams).promise()
     }
   }

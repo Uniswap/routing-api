@@ -167,9 +167,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private maybeSyncHealthScore() {
-    const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
     this.healthStateSyncer
-      .maybeSyncHealthScoreWithDb(locallyAccumulatedHealthScoreDiff)
+      .maybeSyncHealthScoreWithDb(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
           this.healthScoreAtLastSync = syncResult.healthScore
