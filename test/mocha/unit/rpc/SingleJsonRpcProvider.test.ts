@@ -5,8 +5,30 @@ import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { Config } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
+import { dbConnectionSetup } from '../../dynamoDBLocalFixture'
+import { deleteAllTables, setupTables } from '../../dbSetup'
 
 chai.use(chaiAsPromised)
+
+const DB_TABLE = {
+  TableName: 'RpcProviderHealth',
+  KeySchema: [
+    {
+      AttributeName: 'chainIdProviderName',
+      KeyType: 'HASH'
+    }
+  ],
+  AttributeDefinitions: [
+    {
+      AttributeName: 'healthScore',
+      AttributeType: 'N',
+    }
+  ],
+  ProvisionedThroughput: {
+    ReadCapacityUnits: 1,
+    WriteCapacityUnits: 1,
+  },
+}
 
 const config: Config = {
   ERROR_PENALTY: -50,
@@ -31,12 +53,18 @@ describe('SingleJsonRpcProvider', () => {
   let sandbox: SinonSandbox
 
   beforeEach(() => {
-    provider = new SingleJsonRpcProvider(ChainId.MAINNET, 'provider_0_url', log, config)
+    provider = new SingleJsonRpcProvider({
+      chainId: ChainId.MAINNET,
+      name: 'mainnet'
+    }, 'provider_0_url', log, 'RpcProviderHealth', config)
     sandbox = Sinon.createSandbox()
+    dbConnectionSetup()
+    setupTables(DB_TABLE)
   })
 
   afterEach(() => {
     sandbox.restore()
+    deleteAllTables()
   })
 
   it('provider call succeeded', async () => {

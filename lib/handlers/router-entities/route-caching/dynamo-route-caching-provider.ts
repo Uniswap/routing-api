@@ -348,6 +348,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       Payload: JSON.stringify(payload),
     }
 
+
     log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
 
     this.lambdaClient.invoke(params).promise()

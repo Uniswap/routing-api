@@ -13,8 +13,8 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
-import { Network, Networkish } from '@ethersproject/networks'
-import { DynamoDB } from 'aws-sdk'
+import { Network } from '@ethersproject/networks'
+import { HealthStateSyncer, SyncResult } from './HealthStateSyncer'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -35,26 +35,21 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
+  private healthStateSyncer: HealthStateSyncer
   private healthScoreAtLastSync: number
-  private lastSyncTimestampInMs: number
 
-  private readonly dbTableName: string
-  private readonly ddbClient: DynamoDB.DocumentClient
-  private readonly DB_TTL_IN_S = 30
-
-  constructor(network: Networkish, url: string, log: Logger, dbTableName: string, config: Config = DEFAULT_CONFIG) {
+  constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
     super(url, network)
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)
-    this.providerId = `${(network as Network).chainId.toString()}_${this.providerName}`
+    this.providerId = `${network.chainId.toString()}_${this.providerName}`
     this.healthScore = 0
     this.healthy = true
     this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
-    this.dbTableName = dbTableName
-    this.ddbClient = new DynamoDB.DocumentClient()
+    this.healthStateSyncer = new HealthStateSyncer(this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
 
     // TODO(jie): Sync health store
     // this.lastSyncedHealthScore = GetHealthScoreFromDB()
@@ -163,43 +158,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       .finally(() => {
         perf.latencyInMs = Date.now() - perf.startTimestampInMs
         this.checkLastCallPerformance(fnName, perf)
-        this.maybeSyncHealthScoreWithDB()
+        this.maybeSyncHealthScore()
         this.lastCallTimestampInMs = perf.startTimestampInMs
       })
   }
 
-  private maybeSyncHealthScoreWithDB(): boolean {
-    const timestampInMs = Date.now()
-    if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.config.DB_SYNC_INTERVAL_IN_S) {
-      return false
-    }
+  private maybeSyncHealthScore() {
     const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
-    const dbHealthScore = this.readHealthScoreFromDB()
-    const newHealthScore = dbHealthScore + locallyAccumulatedHealthScoreDiff
-    this.writeHealthScoreToDB(newHealthScore, timestampInMs)
-    this.healthScoreAtLastSync = newHealthScore
-    this.healthScore = newHealthScore
-    this.lastSyncTimestampInMs = timestampInMs
-    return true
-  }
-
-  private readHealthScoreFromDB(): number {
-    this.log.debug(`Read health score from DB: 123`)
-    return 123;
-  }
-
-  private writeHealthScoreToDB(healthScore: number, updateAt: number) {
-    this.log.debug(`Write health score to DB: ${healthScore}`)
-    const putParams = {
-      TableName: this.dbTableName,
-      Item: {
-        chainIdProviderName: this.providerId,
-        healthScore: healthScore,
-        updateAt: updateAt,
-        ttl: Math.floor(Date.now() / 1000) + this.DB_TTL_IN_S,
-      }
-    }
-    return this.ddbClient.put(putParams).promise()
+    this.healthStateSyncer.maybeSyncHealthScoreWithDB(locallyAccumulatedHealthScoreDiff)
+      .then((syncResult: SyncResult) => {
+        if (syncResult.synced) {
+          this.healthScoreAtLastSync = syncResult.healthScore
+          this.healthScore = this.healthScoreAtLastSync
+        }
+      })
   }
 
   ///////////////////// Begin of override functions /////////////////////

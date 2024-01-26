@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk'
 import { dbConnectionSetup } from './dynamoDBLocalFixture'
 
-const createTable = async (table: DynamoDB.Types.CreateTableInput) => {
+export const createTable = async (table: DynamoDB.Types.CreateTableInput) => {
   const ddb = getDdbOrDie()
 
   await ddb.createTable(table).promise()
