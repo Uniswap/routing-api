@@ -149,19 +149,15 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     )
 
     // Creates a Table for storing health state of RPC providers
-    this.rpcProviderHealthDynamoDb = new aws_dynamodb.Table(
-      this,
-      DynamoDBTableProps.RpcProviderHealthDbTable.Name,
-      {
-        tableName: DynamoDBTableProps.RpcProviderHealthDbTable.Name,
-        partitionKey: {
-          name: DynamoDBTableProps.RpcProviderHealthDbTable.PartitionKeyName,
-          type: AttributeType.STRING,
-        },
-        billingMode: BillingMode.PAY_PER_REQUEST,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
-      }
-    )
+    this.rpcProviderHealthDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderHealthDbTable.Name, {
+      tableName: DynamoDBTableProps.RpcProviderHealthDbTable.Name,
+      partitionKey: {
+        name: DynamoDBTableProps.RpcProviderHealthDbTable.PartitionKeyName,
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      timeToLiveAttribute: DynamoDBTableProps.TTLAttributeName,
+    })
   }
 }

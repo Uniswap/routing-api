@@ -207,7 +207,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
     try {
-      return await (selectedProvider as any) [`${fnName}`](...args)
+      return await (selectedProvider as any)[`${fnName}`](...args)
     } catch (error: any) {
       this.log.error(JSON.stringify(error))
       throw error

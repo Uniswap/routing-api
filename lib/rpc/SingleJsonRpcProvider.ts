@@ -139,7 +139,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  private async wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>, ...args: any[]): Promise<any> {
+  private async wrappedFunctionCall(
+    fnName: string,
+    fn: (...args: any[]) => Promise<any>,
+    ...args: any[]
+  ): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
       succeed: true,
@@ -164,7 +168,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private maybeSyncHealthScore() {
     const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
-    this.healthStateSyncer.maybeSyncHealthScoreWithDb(locallyAccumulatedHealthScoreDiff)
+    this.healthStateSyncer
+      .maybeSyncHealthScoreWithDb(locallyAccumulatedHealthScoreDiff)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
           this.healthScoreAtLastSync = syncResult.healthScore

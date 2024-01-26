@@ -32,5 +32,5 @@ export const DEFAULT_CONFIG: Config = {
   // Flag to enable health state sync with DB.
   ENABLE_DB_SYNC: true,
   // Time interval to sync with health states from DB
-  DB_SYNC_INTERVAL_IN_S: 5
+  DB_SYNC_INTERVAL_IN_S: 5,
 }

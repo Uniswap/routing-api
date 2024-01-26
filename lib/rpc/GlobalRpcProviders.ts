@@ -27,7 +27,10 @@ export class GlobalRpcProviders {
       )
     }
     GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
-      [ChainId.AVALANCHE, [new SingleJsonRpcProvider({name: 'avalanche', chainId: ChainId.AVALANCHE}, infuraAvalancheUrl, log, config)]],
+      [
+        ChainId.AVALANCHE,
+        [new SingleJsonRpcProvider({ name: 'avalanche', chainId: ChainId.AVALANCHE }, infuraAvalancheUrl, log, config)],
+      ],
     ])
     return GlobalRpcProviders.SINGLE_RPC_PROVIDERS
   }

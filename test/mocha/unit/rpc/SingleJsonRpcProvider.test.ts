@@ -39,10 +39,15 @@ describe('SingleJsonRpcProvider', () => {
   let sandbox: SinonSandbox
 
   beforeEach(() => {
-    provider = new SingleJsonRpcProvider({
-      chainId: ChainId.MAINNET,
-      name: 'mainnet'
-    }, 'provider_0_url', log, config)
+    provider = new SingleJsonRpcProvider(
+      {
+        chainId: ChainId.MAINNET,
+        name: 'mainnet',
+      },
+      'provider_0_url',
+      log,
+      config
+    )
     sandbox = Sinon.createSandbox()
   })
 
@@ -89,7 +94,7 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(HealthStateSyncer)
-    stubSyncer.maybeSyncHealthScoreWithDb.returns(Promise.resolve({synced: true, healthScore: DB_HEALTH_SCORE}))
+    stubSyncer.maybeSyncHealthScoreWithDb.returns(Promise.resolve({ synced: true, healthScore: DB_HEALTH_SCORE }))
     provider['healthStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)

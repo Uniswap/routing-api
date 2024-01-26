@@ -9,7 +9,7 @@ const DB_TABLE = {
   KeySchema: [
     {
       AttributeName: 'chainIdProviderName',
-      KeyType: 'HASH'
+      KeyType: 'HASH',
     },
   ],
   AttributeDefinitions: [
@@ -29,7 +29,6 @@ const log = bunyan.createLogger({
   serializers: bunyan.stdSerializers,
   level: bunyan.ERROR,
 })
-
 
 // TODO(jie): Add TTL related test case
 describe('HealthStateSyncer', () => {
@@ -105,7 +104,7 @@ describe('HealthStateSyncer', () => {
   it('sync health score succeeds: optimistic write succeeds', async () => {
     const prevHealthScore = -1000
     const timestamp = Date.now()
-    const clock = Sinon.useFakeTimers(timestamp);
+    const clock = Sinon.useFakeTimers(timestamp)
     try {
       await syncer['writeHealthScoreToDb'](prevHealthScore, 0, timestamp)
     } catch (err: any) {
@@ -127,4 +126,3 @@ describe('HealthStateSyncer', () => {
     }
   })
 })
-

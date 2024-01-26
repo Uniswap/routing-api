@@ -3,13 +3,13 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import Logger from 'bunyan'
 
 export interface SyncResult {
-  synced: boolean,
-  healthScore: number,
+  synced: boolean
+  healthScore: number
 }
 
 interface ReadResult {
-  healthScore: number,
-  updatedAtInMs: number,
+  healthScore: number
+  updatedAtInMs: number
 }
 
 export class HealthStateSyncer {
@@ -37,7 +37,7 @@ export class HealthStateSyncer {
   async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
-      return {synced: false, healthScore: 0}
+      return { synced: false, healthScore: 0 }
     }
 
     let readResult: ReadResult | null = null
@@ -62,7 +62,7 @@ export class HealthStateSyncer {
   private async readHealthScoreFromDb(): Promise<ReadResult | null> {
     const getParams = {
       TableName: this.dbTableName,
-      Key: { chainIdProviderName: this.providerId }
+      Key: { chainIdProviderName: this.providerId },
     }
     try {
       const result = await this.ddbClient.get(getParams).promise()
@@ -73,7 +73,7 @@ export class HealthStateSyncer {
       }
       if (item.ttl < Math.floor(Date.now() / 1000)) {
         this.log.info(`Health score has expired: TTL at ${item.ttl} for ${this.providerId}`)
-        return null;
+        return null
       }
       return { healthScore: item.healthScore, updatedAtInMs: item.updatedAt }
     } catch (error: any) {
@@ -94,7 +94,7 @@ export class HealthStateSyncer {
           healthScore: healthScore,
           updatedAt: newUpdatedAtInMs,
           ttl: ttl,
-        }
+        },
       }
       return this.ddbClient.put(putParams).promise()
     } else {
@@ -108,15 +108,15 @@ export class HealthStateSyncer {
         ExpressionAttributeNames: {
           '#updatedAt': 'updatedAt',
           '#healthScore': 'healthScore',
-          '#ttl':'ttl',
+          '#ttl': 'ttl',
         },
         ExpressionAttributeValues: {
           ':healthScore': healthScore,
           ':newUpdatedAtInMs': newUpdatedAtInMs,
-          ":oldUpdatedAtInMs": oldUpdatedAtInMs,
+          ':oldUpdatedAtInMs': oldUpdatedAtInMs,
           ':ttl': ttl,
         },
-        ConditionExpression: "#updatedAt = :oldUpdatedAtInMs",
+        ConditionExpression: '#updatedAt = :oldUpdatedAtInMs',
       }
       console.log(JSON.stringify(updateParams))
       return this.ddbClient.update(updateParams).promise()
