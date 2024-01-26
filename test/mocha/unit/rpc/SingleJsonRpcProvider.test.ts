@@ -5,30 +5,35 @@ import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { Config } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
-import { dbConnectionSetup } from '../../dynamoDBLocalFixture'
-import { deleteAllTables, setupTables } from '../../dbSetup'
+import { HealthStateSyncer } from '../../../../lib/rpc/HealthStateSyncer'
+// import { dbConnectionSetup } from '../../dynamoDBLocalFixture'
+// import { deleteAllTables, setupTables } from '../../dbSetup'
 
 chai.use(chaiAsPromised)
 
-const DB_TABLE = {
-  TableName: 'RpcProviderHealth',
-  KeySchema: [
-    {
-      AttributeName: 'chainIdProviderName',
-      KeyType: 'HASH'
-    }
-  ],
-  AttributeDefinitions: [
-    {
-      AttributeName: 'healthScore',
-      AttributeType: 'N',
-    }
-  ],
-  ProvisionedThroughput: {
-    ReadCapacityUnits: 1,
-    WriteCapacityUnits: 1,
-  },
+const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+// const DB_TABLE = {
+//   TableName: 'RpcProviderHealth',
+//   KeySchema: [
+//     {
+//       AttributeName: 'chainIdProviderName',
+//       KeyType: 'HASH'
+//     }
+//   ],
+//   AttributeDefinitions: [
+//     {
+//       AttributeName: 'healthScore',
+//       AttributeType: 'N',
+//     }
+//   ],
+//   ProvisionedThroughput: {
+//     ReadCapacityUnits: 1,
+//     WriteCapacityUnits: 1,
+//   },
+// }
 
 const config: Config = {
   ERROR_PENALTY: -50,
@@ -39,6 +44,7 @@ const config: Config = {
   RECOVER_SCORE_PER_MS: 0.01,
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
+  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
 }
 
@@ -56,15 +62,15 @@ describe('SingleJsonRpcProvider', () => {
     provider = new SingleJsonRpcProvider({
       chainId: ChainId.MAINNET,
       name: 'mainnet'
-    }, 'provider_0_url', log, 'RpcProviderHealth', config)
+    }, 'provider_0_url', log, config)
     sandbox = Sinon.createSandbox()
-    dbConnectionSetup()
-    setupTables(DB_TABLE)
+    // dbConnectionSetup()
+    // setupTables(DB_TABLE)
   })
 
   afterEach(() => {
     sandbox.restore()
-    deleteAllTables()
+    // deleteAllTables()
   })
 
   it('provider call succeeded', async () => {
@@ -100,5 +106,25 @@ describe('SingleJsonRpcProvider', () => {
 
     expect(blockNumber).equals(123456)
     expect(spy.calledOnce).to.be.true
+  })
+
+  it('maybeSyncHealthScore', async () => {
+    provider['enableDbSync'] = true
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(HealthStateSyncer)
+    stubSyncer.maybeSyncHealthScoreWithDb.returns(Promise.resolve({synced: true, healthScore: DB_HEALTH_SCORE}))
+    provider['healthStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const blockNumber = await provider.getBlockNumber()
+    expect(blockNumber).equals(123456)
+
+    // Wait to make sure all callbacks are executed.
+    await delay(100)
+
+    expect(provider['healthScore']).equals(DB_HEALTH_SCORE)
+    expect(provider['healthScoreAtLastSync']).equals(DB_HEALTH_SCORE)
   })
 })

@@ -11,7 +11,7 @@ export class HealthStateSyncer {
   private readonly providerId: string
   private readonly dbTableName: string
   private ddbClient: DocumentClient
-  private lastSyncTimestampInMs: number
+  private lastSyncTimestampInMs: number = 0
   private sync_interval_in_s: number
   private readonly DB_TTL_IN_S = 30
   private log: Logger
@@ -29,7 +29,7 @@ export class HealthStateSyncer {
     this.log = log
   }
 
-  public maybeSyncHealthScoreWithDB(localHealthScoreDiff: number): Promise<SyncResult> {
+  maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
       return Promise.resolve({synced: false, healthScore: 0})

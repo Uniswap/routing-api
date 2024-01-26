@@ -35,6 +35,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
+  private enableDbSync: boolean
   private healthStateSyncer: HealthStateSyncer
   private healthScoreAtLastSync: number
 
@@ -49,11 +50,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
-    this.healthStateSyncer = new HealthStateSyncer(this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
-
-    // TODO(jie): Sync health store
-    // this.lastSyncedHealthScore = GetHealthScoreFromDB()
-    // this.healthScore = this.lastSyncedHealthScore
+    this.enableDbSync = this.config.ENABLE_DB_SYNC
+    if (this.enableDbSync) {
+      this.healthStateSyncer = new HealthStateSyncer(this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
+      this.maybeSyncHealthScore()
+    }
   }
 
   isHealthy() {
@@ -158,14 +159,16 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       .finally(() => {
         perf.latencyInMs = Date.now() - perf.startTimestampInMs
         this.checkLastCallPerformance(fnName, perf)
-        this.maybeSyncHealthScore()
+        if (this.enableDbSync) {
+          this.maybeSyncHealthScore()
+        }
         this.lastCallTimestampInMs = perf.startTimestampInMs
       })
   }
 
   private maybeSyncHealthScore() {
     const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
-    this.healthStateSyncer.maybeSyncHealthScoreWithDB(locallyAccumulatedHealthScoreDiff)
+    this.healthStateSyncer.maybeSyncHealthScoreWithDb(locallyAccumulatedHealthScoreDiff)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
           this.healthScoreAtLastSync = syncResult.healthScore

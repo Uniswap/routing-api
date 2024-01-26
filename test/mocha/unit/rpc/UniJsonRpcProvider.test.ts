@@ -17,6 +17,7 @@ const TEST_CONFIG: Config = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
   DB_SYNC_INTERVAL_IN_S: 5,
+  ENABLE_DB_SYNC: false,
 }
 
 const log = bunyan.createLogger({
@@ -26,9 +27,9 @@ const log = bunyan.createLogger({
 })
 
 const createNewSingleJsonRpcProviders = () => [
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
+  new SingleJsonRpcProvider({name: 'mainnet', chainId: ChainId.MAINNET}, `url_0`, log, TEST_CONFIG),
+  new SingleJsonRpcProvider({name: 'mainnet', chainId: ChainId.MAINNET}, `url_1`, log, TEST_CONFIG),
+  new SingleJsonRpcProvider({name: 'mainnet', chainId: ChainId.MAINNET}, `url_2`, log, TEST_CONFIG),
 ]
 
 const SINGLE_RPC_PROVIDERS = { [ChainId.MAINNET]: createNewSingleJsonRpcProviders() }
