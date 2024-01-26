@@ -44,13 +44,10 @@ describe('SingleJsonRpcProvider', () => {
       name: 'mainnet'
     }, 'provider_0_url', log, config)
     sandbox = Sinon.createSandbox()
-    // dbConnectionSetup()
-    // setupTables(DB_TABLE)
   })
 
   afterEach(() => {
     sandbox.restore()
-    // deleteAllTables()
   })
 
   it('provider call succeeded', async () => {

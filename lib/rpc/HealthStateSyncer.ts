@@ -7,6 +7,11 @@ export interface SyncResult {
   healthScore: number,
 }
 
+interface ReadResult {
+  healthScore: number,
+  updatedAtInMs: number,
+}
+
 export class HealthStateSyncer {
   private readonly providerId: string
   private readonly dbTableName: string
@@ -29,23 +34,23 @@ export class HealthStateSyncer {
     this.log = log
   }
 
-  async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
+  async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
       return {synced: false, healthScore: 0}
     }
 
-    let dbHealthScore: number
+    let readResult: ReadResult | null = null
     try {
-      dbHealthScore = await this.readHealthScoreFromDb()
+      readResult = await this.readHealthScoreFromDb()
     } catch (err: any) {
       this.log.error(`Failed to read from DB: ${JSON.stringify(err)}. Sync failed.`)
-      return {synced: false, healthScore: 0}
     }
 
-    const newHealthScore = dbHealthScore + localHealthScoreDiff
+    const newHealthScore = readResult === null ? localHealthScore : readResult.healthScore + localHealthScoreDiff
+    const oldUpdatedAtInMs = readResult == null ? 0 : readResult.updatedAtInMs
     try {
-      await this.writeHealthScoreToDb(newHealthScore, timestampInMs)
+      await this.writeHealthScoreToDb(newHealthScore, oldUpdatedAtInMs, timestampInMs)
       this.lastSyncTimestampInMs = timestampInMs
       return { synced: true, healthScore: newHealthScore }
     } catch (err: any) {
@@ -54,37 +59,67 @@ export class HealthStateSyncer {
     }
   }
 
-  private async readHealthScoreFromDb(): Promise<number> {
+  private async readHealthScoreFromDb(): Promise<ReadResult | null> {
     const getParams = {
       TableName: this.dbTableName,
       Key: { chainIdProviderName: this.providerId }
     }
-    const result = await this.ddbClient.get(getParams).promise()
-    const item = result.Item
-    if (item === undefined) {
-      throw new Error('Get empty result.')
+    try {
+      const result = await this.ddbClient.get(getParams).promise()
+      const item = result.Item
+      if (item === undefined) {
+        this.log.info(`No health score found for ${this.providerId}`)
+        return null
+      }
+      if (item.ttl < Math.floor(Date.now() / 1000)) {
+        this.log.info(`Health score has expired: TTL at ${item.ttl} for ${this.providerId}`)
+        return null;
+      }
+      return { healthScore: item.healthScore, updatedAtInMs: item.updatedAt }
+    } catch (error: any) {
+      this.log.error(`Failed to read health score from DB: ${JSON.stringify(error)}`)
+      throw error
     }
-    if (item.ttl < Math.floor(Date.now() / 1000)) {
-      throw new Error(`Health score has expired: TTL at ${item.ttl}`)
-    }
-    // TODO: remove
-    console.log(JSON.stringify(item))
-    return item.healthScore
   }
 
-  private writeHealthScoreToDb(healthScore: number, updatedAtInMs: number) {
+  private writeHealthScoreToDb(healthScore: number, oldUpdatedAtInMs: number, newUpdatedAtInMs: number) {
     this.log.debug(`Write health score to DB: ${healthScore}`)
-    const item = {
-      chainIdProviderName: this.providerId,
-      healthScore: healthScore,
-      updatedAt: updatedAtInMs,
-      ttl: Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S,
+    const ttl = Math.floor(newUpdatedAtInMs / 1000) + this.DB_TTL_IN_S
+    let updateParams: DocumentClient.UpdateItemInput
+    if (oldUpdatedAtInMs === 0) {
+      const putParams = {
+        TableName: this.dbTableName,
+        Item: {
+          chainIdProviderName: this.providerId,
+          healthScore: healthScore,
+          updatedAt: newUpdatedAtInMs,
+          ttl: ttl,
+        }
+      }
+      return this.ddbClient.put(putParams).promise()
+    } else {
+      updateParams = {
+        TableName: this.dbTableName,
+        Key: { chainIdProviderName: this.providerId },
+        UpdateExpression: `SET 
+          #healthScore = :healthScore,
+          #updatedAt = :newUpdatedAtInMs,
+          #ttl = :ttl`,
+        ExpressionAttributeNames: {
+          '#updatedAt': 'updatedAt',
+          '#healthScore': 'healthScore',
+          '#ttl':'ttl',
+        },
+        ExpressionAttributeValues: {
+          ':healthScore': healthScore,
+          ':newUpdatedAtInMs': newUpdatedAtInMs,
+          ":oldUpdatedAtInMs": oldUpdatedAtInMs,
+          ':ttl': ttl,
+        },
+        ConditionExpression: "#updatedAt = :oldUpdatedAtInMs",
+      }
+      console.log(JSON.stringify(updateParams))
+      return this.ddbClient.update(updateParams).promise()
     }
-    const putParams = {
-      TableName: this.dbTableName,
-      Item: item,
-    }
-    return this.ddbClient.put(putParams).promise()
   }
-
 }
