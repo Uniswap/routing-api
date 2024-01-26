@@ -146,23 +146,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       latencyInMs: 0,
       startTimestampInMs: Date.now(),
     }
-    // return fn(...args)
-    //   .then((response: any) => {
-    //     return response
-    //   })
-    //   .catch((error: any) => {
-    //     perf.succeed = false
-    //     this.log.error(JSON.stringify(error))
-    //     throw error
-    //   })
-    //   .finally(() => {
-    //     perf.latencyInMs = Date.now() - perf.startTimestampInMs
-    //     this.checkLastCallPerformance(fnName, perf)
-    //     if (this.enableDbSync) {
-    //       this.maybeSyncHealthScore()
-    //     }
-    //     this.lastCallTimestampInMs = perf.startTimestampInMs
-    //   })
     try {
       return await fn(...args)
     } catch (error: any) {

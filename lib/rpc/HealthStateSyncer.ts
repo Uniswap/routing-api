@@ -29,24 +29,6 @@ export class HealthStateSyncer {
     this.log = log
   }
 
-  // maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
-  //   const timestampInMs = Date.now()
-  //   if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
-  //     return Promise.resolve({synced: false, healthScore: 0})
-  //   }
-  //   const dbHealthScore = this.readHealthScoreFromDb()
-  //   const newHealthScore = dbHealthScore + localHealthScoreDiff
-  //   return this.writeHealthScoreToDb(newHealthScore, timestampInMs)
-  //     .then(() => {
-  //       this.lastSyncTimestampInMs = timestampInMs
-  //       return Promise.resolve({synced: true, healthScore: newHealthScore})
-  //     })
-  //     .catch((err: any) => {
-  //       this.log.error(`Failed to write to DB ${JSON.stringify(err)}`)
-  //       // Error is swallowed.
-  //       return Promise.resolve({ synced: false, healthScore: 0 })
-  //     })
-  // }
   async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
@@ -73,20 +55,34 @@ export class HealthStateSyncer {
   }
 
   private async readHealthScoreFromDb(): Promise<number> {
-    this.log.debug(`Read health score from DB: 123`)
-    return 123;
+    const getParams = {
+      TableName: this.dbTableName,
+      Key: { chainIdProviderName: this.providerId }
+    }
+    const result = await this.ddbClient.get(getParams).promise()
+    const item = result.Item
+    if (item === undefined) {
+      throw new Error('Get empty result.')
+    }
+    if (item.ttl < Math.floor(Date.now() / 1000)) {
+      throw new Error(`Health score has expired: TTL at ${item.ttl}`)
+    }
+    // TODO: remove
+    console.log(JSON.stringify(item))
+    return item.healthScore
   }
 
-  private writeHealthScoreToDb(healthScore: number, updateAt: number) {
+  private writeHealthScoreToDb(healthScore: number, updatedAtInMs: number) {
     this.log.debug(`Write health score to DB: ${healthScore}`)
+    const item = {
+      chainIdProviderName: this.providerId,
+      healthScore: healthScore,
+      updatedAt: updatedAtInMs,
+      ttl: Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S,
+    }
     const putParams = {
       TableName: this.dbTableName,
-      Item: {
-        chainIdProviderName: this.providerId,
-        healthScore: healthScore,
-        updateAt: updateAt,
-        ttl: Math.floor(Date.now() / 1000) + this.DB_TTL_IN_S,
-      }
+      Item: item,
     }
     return this.ddbClient.put(putParams).promise()
   }

@@ -9,13 +9,13 @@ const DB_TABLE = {
     {
       AttributeName: 'chainIdProviderName',
       KeyType: 'HASH'
-    }
+    },
   ],
   AttributeDefinitions: [
     {
-      AttributeName: 'healthScore',
-      AttributeType: 'N',
-    }
+      AttributeName: 'chainIdProviderName',
+      AttributeType: 'S',
+    },
   ],
   ProvisionedThroughput: {
     ReadCapacityUnits: 1,
@@ -30,6 +30,9 @@ const log = bunyan.createLogger({
 })
 
 describe('HealthStateSyncer', () => {
+  process.env = {
+    RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
+  }
   setupTables(DB_TABLE)
   const syncer = new HealthStateSyncer('providerId', 5, log)
 
@@ -42,6 +45,11 @@ describe('HealthStateSyncer', () => {
       assert(false, `Should not throw error ${err}`)
     }
 
-
+    try {
+      const syncedHealthScore = await syncer['readHealthScoreFromDb']()
+      console.log(syncedHealthScore)
+    } catch (err: any) {
+      assert(false, `Should not throw error ${err}`)
+    }
   })
 })

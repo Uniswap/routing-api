@@ -206,19 +206,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    // return (selectedProvider as any)
-    //   [`${fnName}`](...args)
-    //   .then((response: any) => {
-    //     return response
-    //   })
-    //   .catch((error: any) => {
-    //     this.log.error(JSON.stringify(error))
-    //     throw error
-    //   })
-    //   .finally(() => {
-    //     this.lastUsedProvider = selectedProvider
-    //     this.checkUnhealthyProvider()
-    //   })
     try {
       return await (selectedProvider as any) [`${fnName}`](...args)
     } catch (error: any) {
