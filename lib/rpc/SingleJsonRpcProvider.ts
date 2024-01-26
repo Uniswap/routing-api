@@ -13,8 +13,8 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
-import { Networkish } from '@ethersproject/networks'
-import { times } from 'lodash'
+import { Network, Networkish } from '@ethersproject/networks'
+import { DynamoDB } from 'aws-sdk'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -26,6 +26,7 @@ interface SingleCallPerf {
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   readonly url: string
   readonly providerName: string
+  readonly providerId: string
 
   private healthScore
   private healthy: boolean
@@ -37,16 +38,23 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private healthScoreAtLastSync: number
   private lastSyncTimestampInMs: number
 
-  constructor(network: Networkish, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
+  private readonly dbTableName: string
+  private readonly ddbClient: DynamoDB.DocumentClient
+  private readonly DB_TTL_IN_S = 30
+
+  constructor(network: Networkish, url: string, log: Logger, dbTableName: string, config: Config = DEFAULT_CONFIG) {
     super(url, network)
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)
+    this.providerId = `${(network as Network).chainId.toString()}_${this.providerName}`
     this.healthScore = 0
     this.healthy = true
     this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
+    this.dbTableName = dbTableName
+    this.ddbClient = new DynamoDB.DocumentClient()
 
     // TODO(jie): Sync health store
     // this.lastSyncedHealthScore = GetHealthScoreFromDB()
@@ -168,7 +176,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     const locallyAccumulatedHealthScoreDiff = this.healthScore - this.healthScoreAtLastSync
     const dbHealthScore = this.readHealthScoreFromDB()
     const newHealthScore = dbHealthScore + locallyAccumulatedHealthScoreDiff
-    this.writeHealthScoreToDB(newHealthScore)
+    this.writeHealthScoreToDB(newHealthScore, timestampInMs)
     this.healthScoreAtLastSync = newHealthScore
     this.healthScore = newHealthScore
     this.lastSyncTimestampInMs = timestampInMs
@@ -180,8 +188,18 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return 123;
   }
 
-  private writeHealthScoreToDB(healthScore: number) {
+  private writeHealthScoreToDB(healthScore: number, updateAt: number) {
     this.log.debug(`Write health score to DB: ${healthScore}`)
+    const putParams = {
+      TableName: this.dbTableName,
+      Item: {
+        chainIdProviderName: this.providerId,
+        healthScore: healthScore,
+        updateAt: updateAt,
+        ttl: Math.floor(Date.now() / 1000) + this.DB_TTL_IN_S,
+      }
+    }
+    return this.ddbClient.put(putParams).promise()
   }
 
   ///////////////////// Begin of override functions /////////////////////
