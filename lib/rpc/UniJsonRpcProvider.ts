@@ -168,11 +168,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   logProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`Healthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
       provider.logHealthMetrics()
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      this.log.debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`Unhealthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
       provider.logHealthMetrics()
     }
   }

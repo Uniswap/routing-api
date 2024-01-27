@@ -28,16 +28,16 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   readonly providerName: string
   readonly providerId: string
 
-  private healthScore
-  private healthy: boolean
-  private lastCallTimestampInMs: number
+  private healthScore: number = 0
+  private healthy: boolean = true
+  private lastCallTimestampInMs: number = 0
   private config: Config
   private readonly metricPrefix: string
   private readonly log: Logger
 
   private enableDbSync: boolean
   private healthStateSyncer: HealthStateSyncer
-  private healthScoreAtLastSync: number
+  private healthScoreAtLastSync: number = 0
 
   constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
     super(url, network)
@@ -45,15 +45,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.log = log
     this.providerName = deriveProviderName(url)
     this.providerId = `${network.chainId.toString()}_${this.providerName}`
-    this.healthScore = 0
-    this.healthy = true
-    this.lastCallTimestampInMs = 0
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
-    this.enableDbSync = this.config.ENABLE_DB_SYNC
+    this.enableDbSync = config.ENABLE_DB_SYNC
     if (this.enableDbSync) {
       this.healthStateSyncer = new HealthStateSyncer(this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
-      this.maybeSyncHealthScore()
+      this.maybeSyncHealthScoreAndUpdateHealthyStatus()
     }
   }
 
@@ -112,13 +109,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.recordProviderRecovery(perf.startTimestampInMs - this.lastCallTimestampInMs)
       }
     }
-    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
-      this.healthy = false
-      this.log.debug(`${this.url} drops to unhealthy`)
-    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
-      this.healthy = true
-      this.log.debug(`${this.url} resumes to healthy`)
-    }
     // No reward for normal operation.
   }
 
@@ -159,22 +149,36 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } finally {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(fnName, perf)
-      if (this.enableDbSync) {
-        this.maybeSyncHealthScore()
-      }
+      this.updateHealthyStatus()
       this.lastCallTimestampInMs = perf.startTimestampInMs
+
+      if (this.enableDbSync) {
+        this.maybeSyncHealthScoreAndUpdateHealthyStatus()
+      }
     }
   }
 
-  private maybeSyncHealthScore() {
+  private maybeSyncHealthScoreAndUpdateHealthyStatus() {
     this.healthStateSyncer
       .maybeSyncHealthScoreWithDb(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
           this.healthScoreAtLastSync = syncResult.healthScore
           this.healthScore = this.healthScoreAtLastSync
+          this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
+          this.updateHealthyStatus()
         }
       })
+  }
+
+  private updateHealthyStatus() {
+    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
+      this.healthy = false
+      this.log.debug(`${this.url} drops to unhealthy`)
+    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
+      this.healthy = true
+      this.log.debug(`${this.url} resumes to healthy`)
+    }
   }
 
   ///////////////////// Begin of override functions /////////////////////
