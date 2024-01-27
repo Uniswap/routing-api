@@ -6,8 +6,6 @@ import chaiAsPromised from 'chai-as-promised'
 import { Config } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
 import { HealthStateSyncer } from '../../../../lib/rpc/HealthStateSyncer'
-// import { dbConnectionSetup } from '../../dynamoDBLocalFixture'
-// import { deleteAllTables, setupTables } from '../../dbSetup'
 
 chai.use(chaiAsPromised)
 
