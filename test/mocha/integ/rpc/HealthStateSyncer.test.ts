@@ -30,7 +30,6 @@ const log = bunyan.createLogger({
   level: bunyan.ERROR,
 })
 
-// TODO(jie): Add TTL related test case
 describe('HealthStateSyncer', () => {
   process.env = {
     RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
@@ -55,6 +54,27 @@ describe('HealthStateSyncer', () => {
     }
     expect(readResult!.healthScore).equals(healthScore)
     expect(readResult!.updatedAtInMs).equals(timestamp)
+  })
+
+  it('write to health score to DB then read from it later, but it already expired', async () => {
+    const healthScore = -1000
+    const timestamp = Date.now()
+    const clock = Sinon.useFakeTimers(timestamp)
+    try {
+      await syncer['writeHealthScoreToDb'](healthScore, 0, timestamp)
+    } catch (err: any) {
+      assert(false, `Should not throw error ${err}`)
+    }
+
+    clock.tick(60000) // Exceed TTL which is 30 seconds
+
+    let readResult
+    try {
+      readResult = await syncer['readHealthScoreFromDb']()
+    } catch (err: any) {
+      assert(false, `Should not throw error ${err}`)
+    }
+    expect(readResult === null)
   })
 
   it('write to health score to DB then write it again: Timestamp match', async () => {

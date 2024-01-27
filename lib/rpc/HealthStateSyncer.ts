@@ -36,13 +36,16 @@ export class HealthStateSyncer {
 
   async maybeSyncHealthScoreWithDb(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
     // TODO(jie): Reduce the amount of debug logging?
-    this.log.debug({
-      localHealthScore,
-      localHealthScoreDiff,
-    }, 'maybeSyncHealthScoreWithDB')
+    this.log.debug(
+      {
+        localHealthScore,
+        localHealthScoreDiff,
+      },
+      'maybeSyncHealthScoreWithDB'
+    )
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
-      return { synced: false, healthScore: 0 }
+      return { synced: false, healthScore: localHealthScore }
     }
 
     let readResult: ReadResult | null = null
@@ -51,7 +54,7 @@ export class HealthStateSyncer {
     } catch (err: any) {
       this.log.error(`Failed to read from DB: ${JSON.stringify(err)}. Sync failed.`)
     }
-    this.log.debug({readResult})
+    this.log.debug({ readResult })
 
     const newHealthScore = readResult === null ? localHealthScore : readResult.healthScore + localHealthScoreDiff
     const oldUpdatedAtInMs = readResult == null ? 0 : readResult.updatedAtInMs
@@ -61,7 +64,7 @@ export class HealthStateSyncer {
       return { synced: true, healthScore: newHealthScore }
     } catch (err: any) {
       this.log.error(`Failed to write to DB: ${JSON.stringify(err)}. Sync failed.`)
-      return { synced: false, healthScore: 0 }
+      return { synced: false, healthScore: localHealthScore }
     }
   }
 
