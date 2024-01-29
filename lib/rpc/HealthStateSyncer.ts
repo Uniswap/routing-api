@@ -17,7 +17,7 @@ export class HealthStateSyncer {
   private readonly dbTableName: string
   private ddbClient: DocumentClient
   private lastSyncTimestampInMs: number = 0
-  private sync_interval_in_s: number
+  private syncIntervalInS: number
   private readonly DB_TTL_IN_S = 30
   private log: Logger
 
@@ -30,7 +30,7 @@ export class HealthStateSyncer {
     this.dbTableName = dbTableNameStr
     this.ddbClient = new DynamoDB.DocumentClient()
     this.providerId = providerId
-    this.sync_interval_in_s = sync_interval_in_s
+    this.syncIntervalInS = sync_interval_in_s
     this.log = log
   }
 
@@ -44,7 +44,7 @@ export class HealthStateSyncer {
       'maybeSyncHealthScoreWithDB'
     )
     const timestampInMs = Date.now()
-    if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.sync_interval_in_s) {
+    if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.syncIntervalInS) {
       return { synced: false, healthScore: localHealthScore }
     }
 
