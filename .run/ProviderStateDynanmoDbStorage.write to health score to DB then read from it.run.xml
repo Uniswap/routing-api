@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ProviderStateDynanmoDbStorage.write to health score to DB then read from it" type="mocha-javascript-test-runner" nameIsGenerated="true">
+    <node-interpreter>project</node-interpreter>
+    <node-options />
+    <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
+    <working-directory>$PROJECT_DIR$</working-directory>
+    <pass-parent-env>true</pass-parent-env>
+    <envs>
+      <env name="TS_NODE_PROJECT" value="tsconfig.cdk.json" />
+    </envs>
+    <ui>bdd</ui>
+    <extra-mocha-options>--require ts-node/register  --require test/mocha/dynamoDBLocalFixture.ts</extra-mocha-options>
+    <test-kind>TEST</test-kind>
+    <test-file>$PROJECT_DIR$/test/mocha/integ/rpc/ProviderStateDynamoDbStorage.test.ts</test-file>
+    <test-names>
+      <name value="ProviderStateDynanmoDbStorage" />
+      <name value="write to health score to DB then read from it" />
+    </test-names>
+    <method v="2" />
+  </configuration>
+</component>

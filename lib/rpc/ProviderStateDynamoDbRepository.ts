@@ -1,7 +1,8 @@
-import { ProviderStateRepository, ProviderState, ProviderStateWithTimestamp } from './ProviderStateRepository'
+import { ProviderStateRepository, ProviderStateWithTimestamp } from './ProviderStateRepository'
 import Logger from 'bunyan'
 import { DynamoDB } from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { ProviderState } from './ProviderState'
 
 const UPDATE_EXPRESSION = `SET 
   #state = :state,
@@ -41,7 +42,7 @@ export class ProviderStateDynamoDbRepository implements ProviderStateRepository 
         return null
       }
       return {
-        state: JSON.parse(item.state),
+        state: item.state,
         updatedAtInMs: item.updatedAt,
       }
     } catch (error: any) {
@@ -69,7 +70,7 @@ export class ProviderStateDynamoDbRepository implements ProviderStateRepository 
           chainIdProviderName: providerId,
           updatedAt: updatedAtInMs,
           ttl: ttlInS,
-          state: JSON.stringify(state),
+          state: state,
         },
       }
       await this.ddbClient.put(putParams).promise()

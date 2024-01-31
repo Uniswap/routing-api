@@ -1,11 +1,7 @@
 import Logger from 'bunyan'
-import { ProviderState, ProviderStateRepository, ProviderStateWithTimestamp } from './ProviderStateRepository'
+import { ProviderStateRepository, ProviderStateWithTimestamp } from './ProviderStateRepository'
 import { ProviderStateDynamoDbRepository } from './ProviderStateDynamoDbRepository'
-
-export interface SyncResult {
-  synced: boolean
-  state: ProviderState
-}
+import { LatencyEvaluation, ProviderState, ProviderStateDiff } from './ProviderState'
 
 // Periodically sync provider state (health, performance, etc.) to a storage backend.
 // The frequency of sync is controlled by syncInterval.
@@ -18,6 +14,7 @@ export class ProviderStateSyncer {
     dbTableName: string,
     private readonly providerId: string,
     private readonly syncIntervalInS: number,
+    private readonly latencyStatHistoryWindowLengthInS: number,
     private readonly log: Logger
   ) {
     this.stateRepository = new ProviderStateDynamoDbRepository(dbTableName, log)
@@ -28,33 +25,79 @@ export class ProviderStateSyncer {
   // 2. Add local accumulated health score diff to the DB stored health score to get new health score
   // 3. Write back new health score to DB
   // 4. Update local health score with the new health score and refresh healthy state accordingly
-  async maybeSyncWithRepository(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
+  async maybeSyncWithRepository(
+    localHealthScoreDiff: number,
+    localHealthScore: number,
+    lastEvaluatedLatencyInMs: number,
+    lastLatencyEvaluationTimestampInMs: number
+  ): Promise<ProviderState | null> {
     const timestampInMs = Date.now()
-    if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.syncIntervalInS) {
-      // Limit sync frequency to at most every syncIntervalInS seconds
-      return { synced: false, state: {} }
+
+    if (!this.shouldSync(timestampInMs)) {
+      return null
     }
 
     let storedState: ProviderStateWithTimestamp | null = null
     try {
       storedState = await this.stateRepository.read(this.providerId)
     } catch (err: any) {
-      this.log.error(`Failed to read from DB: ${JSON.stringify(err)}. Sync failed.`)
+      this.log.error(`Failed to read from sync storage: ${JSON.stringify(err)}. Sync failed.`)
     }
     this.log.debug({ storedState })
 
-    const newHealthScore =
-      storedState === null ? localHealthScore : storedState.state.healthScore + localHealthScoreDiff
-    const prevUpdatedAtInMs = storedState === null ? undefined : storedState.updatedAtInMs
-    const newState = { healthScore: newHealthScore }
+    const stateDiff: ProviderStateDiff = {
+      healthScore: localHealthScore,
+      healthScoreDiff: localHealthScoreDiff,
+      latency: {
+        timestampInMs: lastLatencyEvaluationTimestampInMs,
+        latencyInMs: lastEvaluatedLatencyInMs,
+      },
+    }
+
+    let newState: ProviderState
+    let prevUpdatedAtInMs: number | undefined
+    if (storedState === null) {
+      newState = this.calculateNewState(null, stateDiff)
+      prevUpdatedAtInMs = undefined
+    } else {
+      newState = this.calculateNewState(storedState.state, stateDiff)
+      prevUpdatedAtInMs = storedState.updatedAtInMs
+    }
 
     try {
       await this.stateRepository.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
       this.lastSyncTimestampInMs = timestampInMs
-      return { synced: true, state: newState }
+      return newState
     } catch (err: any) {
-      this.log.error(`Failed to write to DB: ${JSON.stringify(err)}. Sync failed.`)
-      return { synced: false, state: {} }
+      this.log.error(`Failed to write to sync storage: ${JSON.stringify(err)}. Sync failed.`)
+      return null
     }
+  }
+
+  private calculateNewState(oldState: ProviderState | null, stateDiff: ProviderStateDiff): ProviderState {
+    const newHealthScore = oldState === null ? stateDiff.healthScore : oldState.healthScore + stateDiff.healthScoreDiff
+
+    const timestampInMs = Date.now()
+    const latencies: LatencyEvaluation[] = []
+    if (oldState !== null && oldState) {
+      for (const latency of oldState.latencies) {
+        if (latency.timestampInMs > timestampInMs - 1000 * this.latencyStatHistoryWindowLengthInS) {
+          latencies.push(latency)
+        }
+      }
+    }
+    if (stateDiff.latency.timestampInMs > timestampInMs - 1000 * this.latencyStatHistoryWindowLengthInS) {
+      latencies.push(stateDiff.latency)
+    }
+
+    return {
+      healthScore: newHealthScore,
+      latencies: latencies,
+    }
+  }
+
+  private shouldSync(timestampInMs: number): boolean {
+    // Limit sync frequency to at most every syncIntervalInS seconds
+    return timestampInMs - this.lastSyncTimestampInMs >= 1000 * this.syncIntervalInS
   }
 }

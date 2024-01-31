@@ -6,6 +6,7 @@ import chaiAsPromised from 'chai-as-promised'
 import { Config } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
 import { ProviderStateSyncer } from '../../../../lib/rpc/ProviderStateSyncer'
+import { ProviderState } from '../../../../lib/rpc/ProviderState'
 
 chai.use(chaiAsPromised)
 
@@ -24,6 +25,8 @@ const config: Config = {
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
   ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
+  HEALTHY_PROVIDER_SHADOW_EVALUATION_WAIT_PERIOD_IN_S: 15000,
+  LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
 }
 
 const log = bunyan.createLogger({
@@ -91,12 +94,7 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.maybeSyncWithRepository.returns(
-      Promise.resolve({
-        synced: true,
-        state: { healthScore: DB_HEALTH_SCORE },
-      })
-    )
+    stubSyncer.maybeSyncWithRepository.returns(Promise.resolve({ healthScore: DB_HEALTH_SCORE } as ProviderState))
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
@@ -110,5 +108,28 @@ describe('SingleJsonRpcProvider', () => {
 
     expect(provider['healthScore']).equals(DB_HEALTH_SCORE)
     expect(provider['healthScoreAtLastSync']).equals(DB_HEALTH_SCORE)
+  })
+
+  it('test updateLatencyStat', async () => {
+    const timestampInMs = Date.now()
+    const state: ProviderState = {
+      healthScore: 0,
+      latencies: [
+        {
+          timestampInMs: timestampInMs,
+          latencyInMs: 222,
+        },
+        {
+          timestampInMs: timestampInMs - 1000,
+          latencyInMs: 444,
+        },
+        {
+          timestampInMs: timestampInMs - 350000,
+          latencyInMs: 789,
+        },
+      ],
+    }
+    provider['updateLatencyStat'](state)
+    expect(provider.recentAverageLatency()).equals(333)
   })
 })

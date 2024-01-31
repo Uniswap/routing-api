@@ -4,12 +4,9 @@ import { default as bunyan } from 'bunyan'
 import chai, { expect } from 'chai'
 import Sinon from 'sinon'
 import chaiAsPromised from 'chai-as-promised'
-import {
-  ProviderState,
-  ProviderStateRepository,
-  ProviderStateWithTimestamp,
-} from '../../../../lib/rpc/ProviderStateRepository'
+import { ProviderStateRepository, ProviderStateWithTimestamp } from '../../../../lib/rpc/ProviderStateRepository'
 import { ProviderStateDynamoDbRepository } from '../../../../lib/rpc/ProviderStateDynamoDbRepository'
+import { ProviderState } from '../../../../lib/rpc/ProviderState'
 
 chai.use(chaiAsPromised)
 
@@ -49,28 +46,45 @@ describe('ProviderStateDynamoDbRepository', () => {
   )
 
   it('write state to DB then read from it', async () => {
-    const state: ProviderState = {
-      key1: 'val',
-      key2: 123,
-    }
     const timestamp = Date.now()
+    const state: ProviderState = {
+      healthScore: -10,
+      latencies: [
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 200,
+        },
+        {
+          timestampInMs: timestamp - 1000,
+          latencyInMs: 400,
+        },
+      ],
+    }
     await storage.write(PROVIDER_ID, state, timestamp)
 
     const readState: ProviderStateWithTimestamp | null = await storage.read(PROVIDER_ID)
 
     expect(readState !== null)
-    expect(readState!.state.key1).equal('val')
-    expect(readState!.state.key2).equal(123)
-    expect(readState!.updatedAtInMs).equal(timestamp)
+    expect(readState!.state.healthScore).equal(-10)
+    expect(readState!.state.latencies[0].timestampInMs).equal(timestamp)
+    expect(readState!.state.latencies[0].latencyInMs).equal(200)
+    expect(readState!.state.latencies[1].timestampInMs).equal(timestamp - 1000)
+    expect(readState!.state.latencies[1].latencyInMs).equal(400)
   })
 
   it('write state to DB then read from it later, but it already expired', async () => {
-    const state: ProviderState = {
-      key1: 'val',
-      key2: 123,
-    }
     const timestamp = Date.now()
     const clock = Sinon.useFakeTimers(timestamp)
+
+    const state: ProviderState = {
+      healthScore: -10,
+      latencies: [
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 200,
+        },
+      ],
+    }
     await storage.write(PROVIDER_ID, state, timestamp)
 
     clock.tick(60000) // Exceed TTL which is 30 seconds
@@ -80,22 +94,32 @@ describe('ProviderStateDynamoDbRepository', () => {
   })
 
   it('write state to DB then write it again: Timestamp match', async () => {
-    const state: ProviderState = {
-      key1: 'val',
-      key2: 123,
-    }
     const timestamp = Date.now()
+    const state: ProviderState = {
+      healthScore: -10,
+      latencies: [
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 200,
+        },
+      ],
+    }
     await storage.write(PROVIDER_ID, state, timestamp)
 
     await storage.write(PROVIDER_ID, state, timestamp + 1000, timestamp)
   })
 
   it('write state to DB then write it again:: Timestamp mismatch', async () => {
-    const state: ProviderState = {
-      key1: 'val',
-      key2: 123,
-    }
     const timestamp = Date.now()
+    const state: ProviderState = {
+      healthScore: -10,
+      latencies: [
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 200,
+        },
+      ],
+    }
     await storage.write(PROVIDER_ID, state, timestamp)
 
     await expect(storage.write(PROVIDER_ID, state, timestamp + 1000, timestamp + 100)).to.be.rejectedWith(Error)
