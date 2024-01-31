@@ -53,7 +53,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       if (dbTableName === undefined) {
         throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
       }
-      this.healthStateSyncer = new HealthStateSyncer(dbTableName, this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
+      this.healthStateSyncer = new HealthStateSyncer(
+        dbTableName,
+        this.providerId,
+        this.config.DB_SYNC_INTERVAL_IN_S,
+        log
+      )
       this.maybeSyncHealthScoreAndUpdateHealthyStatus()
     }
   }

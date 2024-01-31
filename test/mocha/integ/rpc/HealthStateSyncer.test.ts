@@ -31,10 +31,7 @@ const log = bunyan.createLogger({
   level: bunyan.ERROR,
 })
 
-describe.skip('HealthStateSyncer', () => {
-  // process.env = {
-  //   RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
-  // }
+describe('HealthStateSyncer', () => {
   setupTables(DB_TABLE)
   const syncer = new HealthStateSyncer(DynamoDBTableProps.RpcProviderHealthDbTable.Name, 'providerId', 5, log)
 

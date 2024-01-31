@@ -22,10 +22,6 @@ export class HealthStateSyncer {
   private log: Logger
 
   constructor(dbTableName: string, providerId: string, sync_interval_in_s: number, log: Logger) {
-    // const dbTableNameStr = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
-    // if (dbTableNameStr === undefined) {
-    //   throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
-    // }
     this.dbTableName = dbTableName
     this.ddbClient = new DynamoDB.DocumentClient()
     this.providerId = providerId
