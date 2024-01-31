@@ -14,7 +14,7 @@ let dbInstance: ChildProcess | undefined
 export const mochaGlobalSetup = async () => {
   try {
     console.log('Starting DynamoDB')
-    dbInstance = await DDBLocal.launch(dbPort, null)
+    dbInstance = await DDBLocal.launch(dbPort, null, undefined, true)
     console.log('Started DynamoDB')
 
     const ddb = new DynamoDB({
