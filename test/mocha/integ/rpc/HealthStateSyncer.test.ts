@@ -1,11 +1,12 @@
 import { setupTables } from '../../dbSetup'
 import { HealthStateSyncer } from '../../../../lib/rpc/HealthStateSyncer'
+import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 import { default as bunyan } from 'bunyan'
 import { expect, assert } from 'chai'
 import Sinon from 'sinon'
 
 const DB_TABLE = {
-  TableName: 'RpcProviderHealth',
+  TableName: DynamoDBTableProps.RpcProviderHealthDbTable.Name,
   KeySchema: [
     {
       AttributeName: 'chainIdProviderName',
@@ -31,11 +32,11 @@ const log = bunyan.createLogger({
 })
 
 describe.skip('HealthStateSyncer', () => {
-  process.env = {
-    RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
-  }
+  // process.env = {
+  //   RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
+  // }
   setupTables(DB_TABLE)
-  const syncer = new HealthStateSyncer('providerId', 5, log)
+  const syncer = new HealthStateSyncer(DynamoDBTableProps.RpcProviderHealthDbTable.Name, 'providerId', 5, log)
 
   it('write to health score to DB then read from it', async () => {
     const healthScore = -1000

@@ -49,7 +49,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
     this.enableDbSync = config.ENABLE_DB_SYNC
     if (this.enableDbSync) {
-      this.healthStateSyncer = new HealthStateSyncer(this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
+      const dbTableName = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
+      if (dbTableName === undefined) {
+        throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
+      }
+      this.healthStateSyncer = new HealthStateSyncer(dbTableName, this.providerId, this.config.DB_SYNC_INTERVAL_IN_S, log)
       this.maybeSyncHealthScoreAndUpdateHealthyStatus()
     }
   }

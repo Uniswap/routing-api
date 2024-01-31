@@ -21,13 +21,12 @@ export class HealthStateSyncer {
   private readonly DB_TTL_IN_S = 30
   private log: Logger
 
-  constructor(providerId: string, sync_interval_in_s: number, log: Logger) {
-    const dbTableNameStr = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
-    if (dbTableNameStr === undefined) {
-      throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
-    }
-
-    this.dbTableName = dbTableNameStr
+  constructor(dbTableName: string, providerId: string, sync_interval_in_s: number, log: Logger) {
+    // const dbTableNameStr = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
+    // if (dbTableNameStr === undefined) {
+    //   throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
+    // }
+    this.dbTableName = dbTableName
     this.ddbClient = new DynamoDB.DocumentClient()
     this.providerId = providerId
     this.syncIntervalInS = sync_interval_in_s
