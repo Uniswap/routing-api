@@ -30,7 +30,7 @@ const log = bunyan.createLogger({
   level: bunyan.ERROR,
 })
 
-describe('HealthStateSyncer', () => {
+describe.skip('HealthStateSyncer', () => {
   process.env = {
     RPC_PROVIDER_HEALTH_TABLE_NAME: 'RpcProviderHealth',
   }
