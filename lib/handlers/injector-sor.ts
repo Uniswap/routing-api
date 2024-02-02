@@ -37,7 +37,6 @@ import {
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
-import { ethers } from 'ethers'
 import _ from 'lodash'
 import NodeCache from 'node-cache'
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
@@ -53,6 +52,8 @@ import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
+import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -84,7 +85,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 }
 
 export type ContainerDependencies = {
-  provider: ethers.providers.StaticJsonRpcProvider
+  provider: StaticJsonRpcProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
@@ -161,18 +162,23 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               break
           }
 
-          const provider = new DefaultEVMClient({
-            allProviders: [
-              new InstrumentedEVMProvider({
-                url: {
-                  url: url,
-                  timeout,
-                },
-                network: chainId,
-                name: deriveProviderName(url),
-              }),
-            ],
-          }).getProvider()
+          let provider: StaticJsonRpcProvider
+          if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+            provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+          } else {
+            provider = new DefaultEVMClient({
+              allProviders: [
+                new InstrumentedEVMProvider({
+                  url: {
+                    url: url,
+                    timeout,
+                  },
+                  network: chainId,
+                  name: deriveProviderName(url),
+                }),
+              ],
+            }).getProvider()
+          }
 
           const tokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
           const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))

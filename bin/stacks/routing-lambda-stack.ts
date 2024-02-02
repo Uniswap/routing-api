@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
-import { Duration, Size } from 'aws-cdk-lib'
+import { Duration } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -34,6 +34,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachedV2PairsDynamoDb: aws_dynamodb.Table
   tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
   unicornSecret: string
+  uniRpcProviderConfig: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -61,6 +62,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachedV2PairsDynamoDb,
       tokenPropertiesCachingDynamoDb,
       unicornSecret,
+      uniRpcProviderConfig,
     } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
@@ -94,8 +96,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
       timeout: cdk.Duration.seconds(9),
-      memorySize: 1792,
-      ephemeralStorageSize: Size.gibibytes(1),
+      memorySize: 2560,
       deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
@@ -106,7 +107,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
       description: 'Routing Lambda',
       environment: {
-        VERSION: '6',
+        VERSION: '7',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
@@ -134,6 +135,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
+        UNI_RPC_PROVIDER_CONFIG: uniRpcProviderConfig,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
