@@ -144,7 +144,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionBips,
         portionAmount,
         portionRecipient,
-        gasToken
+        gasToken,
       },
       requestInjected: {
         router,
@@ -308,7 +308,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
             intent,
-            gasToken
+            gasToken,
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
             currencyOut.symbol
@@ -334,7 +334,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             type,
             routingConfig: routingConfig,
             swapParams,
-            gasToken
+            gasToken,
           },
           `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
             currencyIn.symbol

@@ -47,7 +47,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       gasPriceWei,
       quoteSpeed,
       intent,
-      gasToken
+      gasToken,
     } = requestQueryParams
 
     log = log.child({
@@ -61,7 +61,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       amount,
       type,
       algorithm,
-      gasToken
+      gasToken,
     })
     setGlobalLogger(log)
 
@@ -143,7 +143,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       tokenProvider,
       tokenListProvider,
       quoteSpeed,
-      intent
+      intent,
     }
   }
 }

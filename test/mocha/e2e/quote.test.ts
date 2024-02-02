@@ -1981,6 +1981,56 @@ describe('quote', function () {
           expect(methodParameters).to.be.undefined
         })
 
+        it(`erc20 -> erc20 gas token specified`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'USDC',
+            tokenInChainId: 1,
+            tokenOutAddress: 'USDT',
+            tokenOutChainId: 1,
+            amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+            type,
+            algorithm,
+            gasPriceWei: '60000000000',
+            enableUniversalRouter: true,
+            gasToken: USDC_MAINNET.address,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const {
+            data: {
+              quoteDecimals,
+              quoteGasAdjustedDecimals,
+              gasUseEstimateGasToken,
+              gasUseEstimateGasTokenDecimals,
+              methodParameters,
+              gasPriceWei,
+            },
+            status,
+          } = response
+
+          expect(status).to.equal(200)
+          expect(gasUseEstimateGasToken).to.not.be.undefined
+          expect(gasUseEstimateGasTokenDecimals).to.not.be.undefined
+
+          if (algorithm == 'alpha') {
+            expect(gasPriceWei).to.equal('60000000000')
+          }
+
+          expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+          expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+          expect(parseFloat(gasUseEstimateGasTokenDecimals!)).to.be.greaterThan(0)
+
+          if (type == 'exactIn') {
+            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+          } else {
+            expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+          }
+
+          expect(methodParameters).to.be.undefined
+        })
+
         it(`erc20 -> erc20 by address`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',

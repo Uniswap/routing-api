@@ -71,7 +71,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .optional(),
   portionRecipient: Joi.string().alphanum().max(42).optional(),
   source: Joi.string().max(20).optional(),
-  gasToken: Joi.string().alphanum().max(42).optional()
+  gasToken: Joi.string().alphanum().max(42).optional(),
 })
 
 // Future work: this TradeTypeParam can be converted into an enum and used in the
