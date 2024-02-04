@@ -21,11 +21,11 @@ export class HealthStateSyncer {
   private readonly DB_TTL_IN_S = 30
   private log: Logger
 
-  constructor(dbTableName: string, providerId: string, sync_interval_in_s: number, log: Logger) {
+  constructor(dbTableName: string, providerId: string, syncIntervalInS: number, log: Logger) {
     this.dbTableName = dbTableName
     this.ddbClient = new DynamoDB.DocumentClient()
     this.providerId = providerId
-    this.syncIntervalInS = sync_interval_in_s
+    this.syncIntervalInS = syncIntervalInS
     this.log = log
   }
 

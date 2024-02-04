@@ -1,0 +1,88 @@
+import { ProviderStateStorage, ProviderState, ProviderStateWithTimestamp } from './ProviderStateStorage'
+import Logger from 'bunyan'
+import { DynamoDB } from 'aws-sdk'
+import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+
+const UPDATE_EXPRESSION = `SET 
+  #state = :state,
+  #updatedAt = :updatedAtInMs,
+  #ttl = :ttl`
+
+const EXPRESSION_ATTRIBUTE_NAMES = {
+  '#state': 'state',
+  '#updatedAt': 'updatedAt',
+  '#ttl': 'ttl',
+}
+
+const CONDITION_EXPRESSION = '#updatedAt = :prevUpdatedAtInMs'
+
+export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
+  private ddbClient: DynamoDB.DocumentClient
+  private DB_TTL_IN_S: number = 30
+
+  constructor(private dbTableName: string, private log: Logger) {
+    this.ddbClient = new DynamoDB.DocumentClient()
+  }
+
+  async read(providerId: string): Promise<ProviderStateWithTimestamp | null> {
+    const getParams = {
+      TableName: this.dbTableName,
+      Key: { chainIdProviderName: providerId },
+    }
+    try {
+      const result = await this.ddbClient.get(getParams).promise()
+      const item = result.Item
+      if (item === undefined) {
+        this.log.debug(`No health score found for ${providerId}`)
+        return null
+      }
+      if (item.ttl < Math.floor(Date.now() / 1000)) {
+        this.log.debug(`Entry has expired at ${item.ttl} for ${providerId}`)
+        return null
+      }
+      return {
+        state: JSON.parse(item.state),
+        updatedAtInMs: item.updatedAt
+      }
+    } catch (error: any) {
+      this.log.error(`Failed to read health score from DB: ${JSON.stringify(error)}`)
+      throw error
+    }
+  }
+
+  async write(providerId: string, state: ProviderState, updatedAtInMs: number, prevUpdatedAtInMs?: number): Promise<any> {
+    const ttlInS = Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S
+
+    if (prevUpdatedAtInMs === undefined) {
+      const putParams: DocumentClient.PutItemInput = {
+        TableName: this.dbTableName,
+        Item: {
+          chainIdProviderName: providerId,
+          updatedAt: updatedAtInMs,
+          ttl: ttlInS,
+          state: JSON.stringify(state),
+        }
+      }
+      return this.ddbClient.put(putParams).promise()
+    }
+
+    const updateParams: DocumentClient.UpdateItemInput = {
+      TableName: this.dbTableName,
+      Key: { chainIdProviderName: providerId },
+      UpdateExpression: UPDATE_EXPRESSION,
+      ExpressionAttributeNames: EXPRESSION_ATTRIBUTE_NAMES,
+      ExpressionAttributeValues: this.getExpressionAttributeValues(state, updatedAtInMs, prevUpdatedAtInMs, ttlInS),
+      ConditionExpression: CONDITION_EXPRESSION,
+    }
+    return this.ddbClient.update(updateParams).promise()
+  }
+
+  private getExpressionAttributeValues(state: ProviderState, updatedAtInMs: number, prevUpdatedAtInMs: number, ttlInS: number): {[key: string]: any} {
+    let attributes: {[key: string]: any} = {}
+    attributes[':updatedAtInMs'] = updatedAtInMs
+    attributes[':prevUpdatedAtInMs'] = prevUpdatedAtInMs
+    attributes[':ttl'] = ttlInS
+    attributes[':state'] = JSON.stringify(state)
+    return attributes
+  }
+}
