@@ -14,7 +14,7 @@ import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
-import { HealthStateSyncer, SyncResult } from './HealthStateSyncer'
+import { ProviderStateSyncer, SyncResult } from './ProviderStateSyncer'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -36,7 +36,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly log: Logger
 
   private enableDbSync: boolean
-  private healthStateSyncer: HealthStateSyncer
+  private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
 
   constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
@@ -53,13 +53,13 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       if (dbTableName === undefined) {
         throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
       }
-      this.healthStateSyncer = new HealthStateSyncer(
+      this.providerStateSyncer = new ProviderStateSyncer(
         dbTableName,
         this.providerId,
         this.config.DB_SYNC_INTERVAL_IN_S,
         log
       )
-      this.maybeSyncHealthScoreAndUpdateHealthyStatus()
+      this.maybeSyncAndUpdateProviderState()
     }
   }
 
@@ -128,6 +128,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     })
   }
 
+  // Notice that AWS metrics have to be non-negative.
   logHealthMetrics() {
     metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
   }
@@ -162,17 +163,17 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
       if (this.enableDbSync) {
-        this.maybeSyncHealthScoreAndUpdateHealthyStatus()
+        this.maybeSyncAndUpdateProviderState()
       }
     }
   }
 
-  private maybeSyncHealthScoreAndUpdateHealthyStatus() {
-    this.healthStateSyncer
-      .maybeSyncHealthScoreWithDb(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
+  private maybeSyncAndUpdateProviderState() {
+    this.providerStateSyncer
+      .maybeSyncProviderState(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
-          this.healthScoreAtLastSync = syncResult.healthScore
+          this.healthScoreAtLastSync = syncResult.state.healthScore
           this.healthScore = this.healthScoreAtLastSync
           this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
           this.updateHealthyStatus()

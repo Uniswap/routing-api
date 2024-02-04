@@ -5,7 +5,7 @@ import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { Config } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
-import { HealthStateSyncer } from '../../../../lib/rpc/HealthStateSyncer'
+import { ProviderStateSyncer } from '../../../../lib/rpc/ProviderStateSyncer'
 
 chai.use(chaiAsPromised)
 
@@ -64,7 +64,7 @@ describe('SingleJsonRpcProvider', () => {
 
   it('provider call failed', async () => {
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
-    getBlockNumber.resolves()
+    // getBlockNumber.resolves()
     getBlockNumber.rejects('error')
     const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordError' as any)
 
@@ -91,9 +91,12 @@ describe('SingleJsonRpcProvider', () => {
   it('maybeSyncHealthScore', async () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
-    const stubSyncer = sandbox.createStubInstance(HealthStateSyncer)
-    stubSyncer.maybeSyncHealthScoreWithDb.returns(Promise.resolve({ synced: true, healthScore: DB_HEALTH_SCORE }))
-    provider['healthStateSyncer'] = stubSyncer
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.maybeSyncProviderState.returns(Promise.resolve({
+      synced: true,
+      state: { healthScore: DB_HEALTH_SCORE }
+    }))
+    provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)

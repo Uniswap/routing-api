@@ -1,5 +1,5 @@
 export interface ProviderState {
-  [key: string]: number | string,
+  [key: string]: any,
 }
 
 export interface ProviderStateWithTimestamp {
