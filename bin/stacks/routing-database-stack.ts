@@ -40,8 +40,8 @@ export const DynamoDBTableProps = {
     Name: 'TokenPropertiesCachingDb',
     PartitionKeyName: 'chainIdTokenAddress',
   },
-  RpcProviderHealthDbTable: {
-    Name: 'RpcProviderHealth',
+  RpcProviderStateDbTable: {
+    Name: 'RpcProviderState',
     PartitionKeyName: 'chainIdProviderName',
   },
   TTLAttributeName: 'ttl',
@@ -60,7 +60,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
   public readonly cachedV2PairsDynamoDb: aws_dynamodb.Table
   public readonly tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
-  public readonly rpcProviderHealthDynamoDb: aws_dynamodb.Table
+  public readonly rpcProviderStateDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
     super(scope, name, props)
@@ -149,10 +149,10 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
     )
 
     // Creates a Table for storing health state of RPC providers
-    this.rpcProviderHealthDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderHealthDbTable.Name, {
-      tableName: DynamoDBTableProps.RpcProviderHealthDbTable.Name,
+    this.rpcProviderStateDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderStateDbTable.Name, {
+      tableName: DynamoDBTableProps.RpcProviderStateDbTable.Name,
       partitionKey: {
-        name: DynamoDBTableProps.RpcProviderHealthDbTable.PartitionKeyName,
+        name: DynamoDBTableProps.RpcProviderStateDbTable.PartitionKeyName,
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,

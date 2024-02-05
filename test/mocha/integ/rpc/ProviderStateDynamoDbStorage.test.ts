@@ -14,7 +14,7 @@ import { ProviderStateDynamoDbStorage } from '../../../../lib/rpc/ProviderStateD
 chai.use(chaiAsPromised)
 
 const DB_TABLE = {
-  TableName: DynamoDBTableProps.RpcProviderHealthDbTable.Name,
+  TableName: DynamoDBTableProps.RpcProviderStateDbTable.Name,
   KeySchema: [
     {
       AttributeName: 'chainIdProviderName',
@@ -43,7 +43,7 @@ const log = bunyan.createLogger({
 
 describe('ProviderStateDynamoDbStorage', () => {
   setupTables(DB_TABLE)
-  const storage: ProviderStateStorage = new ProviderStateDynamoDbStorage(DynamoDBTableProps.RpcProviderHealthDbTable.Name,log)
+  const storage: ProviderStateStorage = new ProviderStateDynamoDbStorage(DynamoDBTableProps.RpcProviderStateDbTable.Name,log)
 
   it('write state to DB then read from it', async () => {
     const state: ProviderState = {

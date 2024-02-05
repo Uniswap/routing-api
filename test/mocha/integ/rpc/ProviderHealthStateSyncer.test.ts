@@ -11,7 +11,7 @@ const log = bunyan.createLogger({
 })
 
 describe('HealthStateSyncer', () => {
-  const syncer = new ProviderStateSyncer(DynamoDBTableProps.RpcProviderHealthDbTable.Name, 'providerId', 5, log)
+  const syncer = new ProviderStateSyncer(DynamoDBTableProps.RpcProviderStateDbTable.Name, 'providerId', 5, log)
   let sandbox: SinonSandbox
 
   beforeEach(() => {
