@@ -14,7 +14,12 @@ export class ProviderStateSyncer {
   lastSyncTimestampInMs: number = 0
   stateStorage: ProviderStateStorage
 
-  constructor(dbTableName: string, private readonly providerId: string, private readonly syncIntervalInS: number, private readonly log: Logger) {
+  constructor(
+    dbTableName: string,
+    private readonly providerId: string,
+    private readonly syncIntervalInS: number,
+    private readonly log: Logger
+  ) {
     this.stateStorage = new ProviderStateDynamoDbStorage(dbTableName, log)
   }
 
@@ -38,7 +43,8 @@ export class ProviderStateSyncer {
     }
     this.log.debug({ storedState })
 
-    const newHealthScore = storedState === null ? localHealthScore : storedState.state.healthScore + localHealthScoreDiff
+    const newHealthScore =
+      storedState === null ? localHealthScore : storedState.state.healthScore + localHealthScoreDiff
     const prevUpdatedAtInMs = storedState == null ? undefined : storedState.updatedAtInMs
     const newState = { healthScore: newHealthScore }
     try {

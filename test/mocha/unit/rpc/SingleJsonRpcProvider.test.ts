@@ -91,10 +91,12 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.maybeSyncProviderState.returns(Promise.resolve({
-      synced: true,
-      state: { healthScore: DB_HEALTH_SCORE }
-    }))
+    stubSyncer.maybeSyncProviderState.returns(
+      Promise.resolve({
+        synced: true,
+        state: { healthScore: DB_HEALTH_SCORE },
+      })
+    )
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)

@@ -42,7 +42,7 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
       }
       return {
         state: JSON.parse(item.state),
-        updatedAtInMs: item.updatedAt
+        updatedAtInMs: item.updatedAt,
       }
     } catch (error: any) {
       this.log.error(`Failed to read health score from DB: ${JSON.stringify(error)}`)
@@ -54,7 +54,12 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
   // as the version number which we will check during a DB entry update.
   // This is to prevent ignoring change that's just get written to DB from another writer.
   // If optimistic DB write fails, we stop and will rely on caller to try again later.
-  async write(providerId: string, state: ProviderState, updatedAtInMs: number, prevUpdatedAtInMs?: number): Promise<any> {
+  async write(
+    providerId: string,
+    state: ProviderState,
+    updatedAtInMs: number,
+    prevUpdatedAtInMs?: number
+  ): Promise<any> {
     const ttlInS = Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S
 
     if (prevUpdatedAtInMs === undefined) {
@@ -65,7 +70,7 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
           updatedAt: updatedAtInMs,
           ttl: ttlInS,
           state: JSON.stringify(state),
-        }
+        },
       }
       return this.ddbClient.put(putParams).promise()
     }
@@ -81,8 +86,13 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
     return this.ddbClient.update(updateParams).promise()
   }
 
-  private getExpressionAttributeValues(state: ProviderState, updatedAtInMs: number, prevUpdatedAtInMs: number, ttlInS: number): {[key: string]: any} {
-    let attributes: {[key: string]: any} = {}
+  private getExpressionAttributeValues(
+    state: ProviderState,
+    updatedAtInMs: number,
+    prevUpdatedAtInMs: number,
+    ttlInS: number
+  ): { [key: string]: any } {
+    let attributes: { [key: string]: any } = {}
     attributes[':updatedAtInMs'] = updatedAtInMs
     attributes[':prevUpdatedAtInMs'] = prevUpdatedAtInMs
     attributes[':ttl'] = ttlInS

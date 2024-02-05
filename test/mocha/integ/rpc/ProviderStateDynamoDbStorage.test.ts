@@ -7,7 +7,7 @@ import chaiAsPromised from 'chai-as-promised'
 import {
   ProviderState,
   ProviderStateStorage,
-  ProviderStateWithTimestamp
+  ProviderStateWithTimestamp,
 } from '../../../../lib/rpc/ProviderStateStorage'
 import { ProviderStateDynamoDbStorage } from '../../../../lib/rpc/ProviderStateDynamoDbStorage'
 
@@ -43,7 +43,10 @@ const log = bunyan.createLogger({
 
 describe('ProviderStateDynamoDbStorage', () => {
   setupTables(DB_TABLE)
-  const storage: ProviderStateStorage = new ProviderStateDynamoDbStorage(DynamoDBTableProps.RpcProviderStateDbTable.Name,log)
+  const storage: ProviderStateStorage = new ProviderStateDynamoDbStorage(
+    DynamoDBTableProps.RpcProviderStateDbTable.Name,
+    log
+  )
 
   it('write state to DB then read from it', async () => {
     const state: ProviderState = {
