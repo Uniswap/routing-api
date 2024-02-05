@@ -64,7 +64,6 @@ describe('SingleJsonRpcProvider', () => {
 
   it('provider call failed', async () => {
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
-    // getBlockNumber.resolves()
     getBlockNumber.rejects('error')
     const spy = sandbox.spy(SingleJsonRpcProvider.prototype, 'recordError' as any)
 
