@@ -179,6 +179,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
           this.updateHealthyStatus()
         }
       })
+      .catch((err: any) => {
+        this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      })
   }
 
   private updateHealthyStatus() {
