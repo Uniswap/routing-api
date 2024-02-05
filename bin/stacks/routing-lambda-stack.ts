@@ -194,7 +194,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     if (enableProvisionedConcurrency) {
       const target = new asg.ScalableTarget(this, 'RoutingProvConcASG', {
         serviceNamespace: asg.ServiceNamespace.LAMBDA,
-        maxCapacity: provisionedConcurrency * 5,
+        maxCapacity: provisionedConcurrency * 10,
         minCapacity: provisionedConcurrency,
         resourceId: `function:${this.routingLambdaAlias.lambda.functionName}:${this.routingLambdaAlias.aliasName}`,
         scalableDimension: 'lambda:function:ProvisionedConcurrency',
@@ -203,7 +203,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       target.node.addDependency(this.routingLambdaAlias)
 
       target.scaleToTrackMetric('RoutingProvConcTracking', {
-        targetValue: 0.8,
+        targetValue: 0.7,
         predefinedMetric: asg.PredefinedMetric.LAMBDA_PROVISIONED_CONCURRENCY_UTILIZATION,
       })
     }
