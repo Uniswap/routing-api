@@ -48,7 +48,6 @@ export class ProviderStateSyncer {
     const prevUpdatedAtInMs = storedState == null ? undefined : storedState.updatedAtInMs
     const newState = { healthScore: newHealthScore }
     try {
-      // await this.writeHealthScoreToDb(newHealthScore, oldUpdatedAtInMs, timestampInMs)
       await this.stateStorage.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
       this.lastSyncTimestampInMs = timestampInMs
       return { synced: true, state: newState }
