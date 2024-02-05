@@ -105,7 +105,7 @@ describe('SingleJsonRpcProvider', () => {
     expect(blockNumber).equals(123456)
 
     // Wait to make sure all callbacks are executed.
-    await delay(100)
+    await delay(10)
 
     expect(provider['healthScore']).equals(DB_HEALTH_SCORE)
     expect(provider['healthScoreAtLastSync']).equals(DB_HEALTH_SCORE)

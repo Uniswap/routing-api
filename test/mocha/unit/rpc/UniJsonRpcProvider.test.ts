@@ -151,7 +151,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     uniProvider.logProviderHealthScores()
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     // Provider0's health score has been up, but it's not considered fully recovered yet
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
@@ -165,7 +165,7 @@ describe('UniJsonRpcProvider', () => {
     uniProvider.logProviderHealthScores()
 
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     // Provider0 is fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
@@ -225,7 +225,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     // 1 second isn't enough to start re-evaluate the failed provider.
@@ -239,7 +239,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     // Provider0 has recovered quite a bit. But still not enough to be considered as fully recovered.
@@ -255,7 +255,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
