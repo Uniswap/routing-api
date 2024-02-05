@@ -144,6 +144,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionBips,
         portionAmount,
         portionRecipient,
+        gasToken,
       },
       requestInjected: {
         router,
@@ -242,6 +243,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       // override usedCachedRoutes to false. This is to ensure that we don't use
       // accidentally override usedCachedRoutes in the normal path.
       ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
+      ...(gasToken ? { gasToken } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
@@ -306,6 +308,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             routingConfig: routingConfig,
             swapParams,
             intent,
+            gasToken,
           },
           `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
             currencyOut.symbol
@@ -331,6 +334,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             type,
             routingConfig: routingConfig,
             swapParams,
+            gasToken,
           },
           `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
             currencyIn.symbol
@@ -369,6 +373,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       estimatedGasUsed,
       estimatedGasUsedQuoteToken,
       estimatedGasUsedUSD,
+      estimatedGasUsedGasToken,
       gasPriceWei,
       methodParameters,
       blockNumber,
@@ -523,6 +528,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteGasAndPortionAdjustedDecimals: quoteGasAndPortionAdjusted?.toExact(),
       gasUseEstimateQuote: estimatedGasUsedQuoteToken.quotient.toString(),
       gasUseEstimateQuoteDecimals: estimatedGasUsedQuoteToken.toExact(),
+      gasUseEstimateGasToken: estimatedGasUsedGasToken?.quotient.toString(),
+      gasUseEstimateGasTokenDecimals: estimatedGasUsedGasToken?.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
       simulationStatus: simulationStatusToString(simulationStatus, log),
