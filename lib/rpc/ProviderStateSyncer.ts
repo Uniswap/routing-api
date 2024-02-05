@@ -7,6 +7,9 @@ export interface SyncResult {
   state: ProviderState
 }
 
+// Periodically sync provider state (health, performance, etc.) to a storage backend.
+// The frequency of sync is controlled by syncInterval.
+// If lambda is recycled before the next successful sync, the unsynced data may be lost.
 export class ProviderStateSyncer {
   lastSyncTimestampInMs: number = 0
   stateStorage: ProviderStateStorage
@@ -15,6 +18,11 @@ export class ProviderStateSyncer {
     this.stateStorage = new ProviderStateDynamoDbStorage(dbTableName, log)
   }
 
+  // Each sync with DB has the following process:
+  // 1. Read the DB to get DB stored health score for this provider
+  // 2. Add local accumulated health score diff to the DB stored health score to get new health score
+  // 3. Write back new health score to DB
+  // 4. Update local health score with the new health score and refresh healthy state accordingly
   async maybeSyncProviderState(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.syncIntervalInS) {

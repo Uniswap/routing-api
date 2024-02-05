@@ -50,6 +50,10 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
     }
   }
 
+  // We use optimistic write strategy to handle READ-WRITE data race. The "updatedAt" field in DB entry serves
+  // as the version number which we will check during a DB entry update.
+  // This is to prevent ignoring change that's just get written to DB from another writer.
+  // If optimistic DB write fails, we stop and will rely on caller to try again later.
   async write(providerId: string, state: ProviderState, updatedAtInMs: number, prevUpdatedAtInMs?: number): Promise<any> {
     const ttlInS = Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S
 

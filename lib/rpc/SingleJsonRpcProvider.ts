@@ -184,10 +184,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private updateHealthyStatus() {
     if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
       this.healthy = false
-      this.log.debug(`${this.url} drops to unhealthy`)
+      this.log.warn(`${this.url} drops to unhealthy`)
     } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
       this.healthy = true
-      this.log.debug(`${this.url} resumes to healthy`)
+      this.log.warn(`${this.url} resumes to healthy`)
     }
   }
 
