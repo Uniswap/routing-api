@@ -5,12 +5,12 @@ import { expect } from 'chai'
 import Sinon, { SinonSandbox } from 'sinon'
 
 const log = bunyan.createLogger({
-  name: 'HealthStateSyncerTest',
+  name: 'ProviderStateSyncerTest',
   serializers: bunyan.stdSerializers,
   level: bunyan.ERROR,
 })
 
-describe('HealthStateSyncer', () => {
+describe('ProviderStateSyncer', () => {
   const syncer = new ProviderStateSyncer(DynamoDBTableProps.RpcProviderStateDbTable.Name, 'providerId', 5, log)
   let sandbox: SinonSandbox
 
