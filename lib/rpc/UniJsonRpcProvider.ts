@@ -159,11 +159,13 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
+        // Fire and forget. Don't care about its result and it won't throw.
+        // It's done this way because We don't want to block the return of this function.
         provider.evaluateForRecovery()
         count++
       }
     }
-    this.log.debug(`Evaluated ${count} unhealthy providers`)
+    this.log.debug(`Evaluate ${count} unhealthy providers`)
   }
 
   logProviderHealthScores() {

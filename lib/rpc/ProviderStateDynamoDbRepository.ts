@@ -73,6 +73,7 @@ export class ProviderStateDynamoDbRepository implements ProviderStateRepository 
         },
       }
       await this.ddbClient.put(putParams).promise()
+      return
     }
 
     const updateParams: DocumentClient.UpdateItemInput = {

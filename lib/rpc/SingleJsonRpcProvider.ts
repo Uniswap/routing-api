@@ -121,12 +121,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     // No reward for normal operation.
   }
 
-  evaluateForRecovery() {
+  async evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
-    // Fire and forget. Won't wait for this RPC call to return.
-    this.getBlockNumber().catch((error: any) => {
-      this.log.error(`Swallow error for shadow evaluate call: ${JSON.stringify(error)}`)
-    })
+    try {
+      await this.getBlockNumber()
+    } catch (error: any) {
+      this.log.error(`Encounter error for shadow evaluate call: ${JSON.stringify(error)}`)
+      // Swallow the error.
+    }
   }
 
   // Notice that AWS metrics have to be non-negative.
@@ -169,20 +171,19 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  private maybeSyncAndUpdateProviderState() {
-    this.providerStateSyncer
-      .maybeSyncWithRepository(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
-      .then((syncResult: SyncResult) => {
-        if (syncResult.synced) {
-          this.healthScoreAtLastSync = syncResult.state.healthScore
-          this.healthScore = this.healthScoreAtLastSync
-          this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
-          this.updateHealthyStatus()
-        }
-      })
-      .catch((err: any) => {
-        this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
-      })
+  private async maybeSyncAndUpdateProviderState() {
+    try {
+      const syncResult: SyncResult = await this.providerStateSyncer.maybeSyncWithRepository(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
+      if (syncResult.synced) {
+        this.healthScoreAtLastSync = syncResult.state.healthScore
+        this.healthScore = this.healthScoreAtLastSync
+        this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
+        this.updateHealthyStatus()
+      }
+    } catch (err: any) {
+      this.log.error(`Encountered error when sync provider state: ${JSON.stringify(err)}`)
+      // Won't throw. A fail of sync won't affect how we do health state update locally.
+    }
   }
 
   private updateHealthyStatus() {
