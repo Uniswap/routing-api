@@ -7,12 +7,12 @@ export interface ProviderStateWithTimestamp {
   updatedAtInMs: number
 }
 
-export abstract class ProviderStateStorage {
+export abstract class ProviderStateRepository {
   abstract read(providerId: string): Promise<ProviderStateWithTimestamp | null>
   abstract write(
     providerId: string,
     state: ProviderState,
     updatedAtInMs: number,
     prevUpdatedAtInMs?: number
-  ): Promise<any>
+  ): Promise<void>
 }

@@ -6,10 +6,10 @@ import Sinon from 'sinon'
 import chaiAsPromised from 'chai-as-promised'
 import {
   ProviderState,
-  ProviderStateStorage,
+  ProviderStateRepository,
   ProviderStateWithTimestamp,
-} from '../../../../lib/rpc/ProviderStateStorage'
-import { ProviderStateDynamoDbStorage } from '../../../../lib/rpc/ProviderStateDynamoDbStorage'
+} from '../../../../lib/rpc/ProviderStateRepository'
+import { ProviderStateDynamoDbRepository } from '../../../../lib/rpc/ProviderStateDynamoDbRepository'
 
 chai.use(chaiAsPromised)
 
@@ -41,9 +41,9 @@ const log = bunyan.createLogger({
   level: bunyan.DEBUG,
 })
 
-describe('ProviderStateDynamoDbStorage', () => {
+describe('ProviderStateDynamoDbRepository', () => {
   setupTables(DB_TABLE)
-  const storage: ProviderStateStorage = new ProviderStateDynamoDbStorage(
+  const storage: ProviderStateRepository = new ProviderStateDynamoDbRepository(
     DynamoDBTableProps.RpcProviderStateDbTable.Name,
     log
   )

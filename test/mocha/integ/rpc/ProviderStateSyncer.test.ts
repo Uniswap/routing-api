@@ -23,11 +23,11 @@ describe('ProviderStateSyncer', () => {
   })
 
   it('sync health score succeeds: no previous DB result', async () => {
-    const readStub = sandbox.stub(syncer.stateStorage, 'read')
+    const readStub = sandbox.stub(syncer.stateRepository, 'read')
     readStub.resolves(null)
 
-    const writeStub = sandbox.stub(syncer.stateStorage, 'write')
-    writeStub.resolves({})
+    const writeStub = sandbox.stub(syncer.stateRepository, 'write')
+    writeStub.resolves()
 
     const localHealthScoreDiff = -100
     const localHealthScore = -1100
@@ -35,7 +35,7 @@ describe('ProviderStateSyncer', () => {
     const clock = Sinon.useFakeTimers(timestamp)
     let syncResult
     try {
-      syncResult = await syncer.maybeSyncProviderState(localHealthScoreDiff, localHealthScore)
+      syncResult = await syncer.maybeSyncWithRepository(localHealthScoreDiff, localHealthScore)
     } finally {
       clock.restore()
     }

@@ -123,6 +123,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
+    // Fire and forget. Won't wait for this RPC call to return.
     this.getBlockNumber().catch((error: any) => {
       this.log.error(`Swallow error for shadow evaluate call: ${JSON.stringify(error)}`)
     })
@@ -170,7 +171,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private maybeSyncAndUpdateProviderState() {
     this.providerStateSyncer
-      .maybeSyncProviderState(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
+      .maybeSyncWithRepository(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
       .then((syncResult: SyncResult) => {
         if (syncResult.synced) {
           this.healthScoreAtLastSync = syncResult.state.healthScore

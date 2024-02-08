@@ -91,7 +91,7 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.maybeSyncProviderState.returns(
+    stubSyncer.maybeSyncWithRepository.returns(
       Promise.resolve({
         synced: true,
         state: { healthScore: DB_HEALTH_SCORE },

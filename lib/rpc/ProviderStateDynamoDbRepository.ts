@@ -1,4 +1,4 @@
-import { ProviderStateStorage, ProviderState, ProviderStateWithTimestamp } from './ProviderStateStorage'
+import { ProviderStateRepository, ProviderState, ProviderStateWithTimestamp } from './ProviderStateRepository'
 import Logger from 'bunyan'
 import { DynamoDB } from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
@@ -16,7 +16,7 @@ const EXPRESSION_ATTRIBUTE_NAMES = {
 
 const CONDITION_EXPRESSION = '#updatedAt = :prevUpdatedAtInMs'
 
-export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
+export class ProviderStateDynamoDbRepository implements ProviderStateRepository {
   private ddbClient: DynamoDB.DocumentClient
   private DB_TTL_IN_S: number = 30
 
@@ -59,7 +59,7 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
     state: ProviderState,
     updatedAtInMs: number,
     prevUpdatedAtInMs?: number
-  ): Promise<any> {
+  ): Promise<void> {
     const ttlInS = Math.floor(updatedAtInMs / 1000) + this.DB_TTL_IN_S
 
     if (prevUpdatedAtInMs === undefined) {
@@ -72,7 +72,7 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
           state: JSON.stringify(state),
         },
       }
-      return this.ddbClient.put(putParams).promise()
+      await this.ddbClient.put(putParams).promise()
     }
 
     const updateParams: DocumentClient.UpdateItemInput = {
@@ -80,10 +80,10 @@ export class ProviderStateDynamoDbStorage implements ProviderStateStorage {
       Key: { chainIdProviderName: providerId },
       UpdateExpression: UPDATE_EXPRESSION,
       ExpressionAttributeNames: EXPRESSION_ATTRIBUTE_NAMES,
-      ExpressionAttributeValues: this.getExpressionAttributeValues(state, updatedAtInMs, prevUpdatedAtInMs, ttlInS),
+      ExpressionAttributeValues: this.getExpressionAttributeValues(state, updatedAtInMs, prevUpdatedAtInMs!, ttlInS),
       ConditionExpression: CONDITION_EXPRESSION,
     }
-    return this.ddbClient.update(updateParams).promise()
+    await this.ddbClient.update(updateParams).promise()
   }
 
   private getExpressionAttributeValues(

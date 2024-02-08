@@ -1,6 +1,6 @@
 import Logger from 'bunyan'
-import { ProviderState, ProviderStateStorage, ProviderStateWithTimestamp } from './ProviderStateStorage'
-import { ProviderStateDynamoDbStorage } from './ProviderStateDynamoDbStorage'
+import { ProviderState, ProviderStateRepository, ProviderStateWithTimestamp } from './ProviderStateRepository'
+import { ProviderStateDynamoDbRepository } from './ProviderStateDynamoDbRepository'
 
 export interface SyncResult {
   synced: boolean
@@ -12,7 +12,7 @@ export interface SyncResult {
 // If lambda is recycled before the next successful sync, the unsynced data may be lost.
 export class ProviderStateSyncer {
   lastSyncTimestampInMs: number = 0
-  stateStorage: ProviderStateStorage
+  stateRepository: ProviderStateRepository
 
   constructor(
     dbTableName: string,
@@ -20,7 +20,7 @@ export class ProviderStateSyncer {
     private readonly syncIntervalInS: number,
     private readonly log: Logger
   ) {
-    this.stateStorage = new ProviderStateDynamoDbStorage(dbTableName, log)
+    this.stateRepository = new ProviderStateDynamoDbRepository(dbTableName, log)
   }
 
   // Each sync with DB has the following process:
@@ -28,7 +28,7 @@ export class ProviderStateSyncer {
   // 2. Add local accumulated health score diff to the DB stored health score to get new health score
   // 3. Write back new health score to DB
   // 4. Update local health score with the new health score and refresh healthy state accordingly
-  async maybeSyncProviderState(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
+  async maybeSyncWithRepository(localHealthScoreDiff: number, localHealthScore: number): Promise<SyncResult> {
     const timestampInMs = Date.now()
     if (timestampInMs - this.lastSyncTimestampInMs < 1000 * this.syncIntervalInS) {
       // Limit sync frequency to at most every syncIntervalInS seconds
@@ -37,7 +37,7 @@ export class ProviderStateSyncer {
 
     let storedState: ProviderStateWithTimestamp | null = null
     try {
-      storedState = await this.stateStorage.read(this.providerId)
+      storedState = await this.stateRepository.read(this.providerId)
     } catch (err: any) {
       this.log.error(`Failed to read from DB: ${JSON.stringify(err)}. Sync failed.`)
     }
@@ -45,10 +45,11 @@ export class ProviderStateSyncer {
 
     const newHealthScore =
       storedState === null ? localHealthScore : storedState.state.healthScore + localHealthScoreDiff
-    const prevUpdatedAtInMs = storedState == null ? undefined : storedState.updatedAtInMs
+    const prevUpdatedAtInMs = storedState === null ? undefined : storedState.updatedAtInMs
     const newState = { healthScore: newHealthScore }
+
     try {
-      await this.stateStorage.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
+      await this.stateRepository.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
       this.lastSyncTimestampInMs = timestampInMs
       return { synced: true, state: newState }
     } catch (err: any) {
