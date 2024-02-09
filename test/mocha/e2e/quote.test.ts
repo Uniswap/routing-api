@@ -2383,7 +2383,9 @@ describe('quote', function () {
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
+    [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_SEPOLIA]: () => USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: () => USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CUSD_CELO,
@@ -2403,7 +2405,9 @@ describe('quote', function () {
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
+    [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_SEPOLIA]: () => DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: () => DAI_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CEUR_CELO,
@@ -2421,6 +2425,7 @@ describe('quote', function () {
   for (const chain of _.filter(
     SUPPORTED_CHAINS,
     (c) =>
+      c != ChainId.OPTIMISM_SEPOLIA &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
