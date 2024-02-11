@@ -77,16 +77,23 @@ export class ProviderStateSyncer {
   private calculateNewState(oldState: ProviderState | null, stateDiff: ProviderStateDiff): ProviderState {
     const newHealthScore = oldState === null ? stateDiff.healthScore : oldState.healthScore + stateDiff.healthScoreDiff
 
-    const timestampInMs = Date.now()
+    const timestampNowInMs = Date.now()
     const latencies: LatencyEvaluation[] = []
+    const timestampSet = new Set<number>
+
+    const shouldAdd = (timestampInMs: number, timestampSet: Set<number>, minTimestampInMs: number): boolean => {
+      return !timestampSet.has(timestampInMs) && timestampInMs > minTimestampInMs
+    }
+
     if (oldState !== null && oldState) {
       for (const latency of oldState.latencies) {
-        if (latency.timestampInMs > timestampInMs - 1000 * this.latencyStatHistoryWindowLengthInS) {
+        if (shouldAdd(latency.timestampInMs, timestampSet, timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS)) {
           latencies.push(latency)
+          timestampSet.add(latency.timestampInMs)
         }
       }
     }
-    if (stateDiff.latency.timestampInMs > timestampInMs - 1000 * this.latencyStatHistoryWindowLengthInS) {
+    if (shouldAdd(stateDiff.latency.timestampInMs, timestampSet, timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS)) {
       latencies.push(stateDiff.latency)
     }
 
@@ -96,8 +103,8 @@ export class ProviderStateSyncer {
     }
   }
 
-  private shouldSync(timestampInMs: number): boolean {
+  private shouldSync(timestampNowInMs: number): boolean {
     // Limit sync frequency to at most every syncIntervalInS seconds
-    return timestampInMs - this.lastSyncTimestampInMs >= 1000 * this.syncIntervalInS
+    return timestampNowInMs - this.lastSyncTimestampInMs >= 1000 * this.syncIntervalInS
   }
 }

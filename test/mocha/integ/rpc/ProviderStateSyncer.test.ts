@@ -1,6 +1,6 @@
 import { ProviderStateSyncer } from '../../../../lib/rpc/ProviderStateSyncer'
 import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
-import { ProviderState } from '../../../../lib/rpc/ProviderState'
+import { ProviderState, ProviderStateDiff } from '../../../../lib/rpc/ProviderState'
 import { default as bunyan } from 'bunyan'
 import { expect } from 'chai'
 import Sinon, { SinonSandbox } from 'sinon'
@@ -59,6 +59,74 @@ describe('ProviderStateSyncer', () => {
     expect(writeStub.getCall(0).args[1]).deep.equals({
       healthScore: -1100,
       latencies: [{ timestampInMs: lastLatencyEvaluationTimestampInMs, latencyInMs: 222 }],
+    })
+  })
+
+  it('test calculateNewState: old state is null', async () => {
+    const timestamp = Date.now()
+    const stateDiff: ProviderStateDiff = {
+      healthScore: 0,
+      healthScoreDiff: -100,
+      latency: {
+        timestampInMs: timestamp,
+        latencyInMs: 1000,
+      }
+    }
+    const newState = syncer['calculateNewState'](null, stateDiff)
+    expect(newState).deep.equals({
+        healthScore: 0,
+        latencies:
+          [
+            {
+              timestampInMs: timestamp,
+              latencyInMs: 1000
+            }
+          ]
+      }
+    )
+    console.log(`${JSON.stringify(newState)}`)
+  })
+
+  it('test calculateNewState: old state is not null', async () => {
+    const timestamp = Date.now()
+    const oldState: ProviderState = {
+      healthScore: -500,
+      latencies: [
+        {
+          timestampInMs: timestamp - 2000,
+          latencyInMs: 2000,
+        },
+        {
+          timestampInMs: timestamp - 1000,
+          latencyInMs: 1000,
+        },
+      ]
+    }
+    const stateDiff: ProviderStateDiff = {
+      healthScore: 0,
+      healthScoreDiff: -100,
+      latency: {
+        timestampInMs: timestamp,
+        latencyInMs: 100,
+      }
+    }
+    const newState = syncer['calculateNewState'](oldState, stateDiff)
+    expect(newState).deep.equals({
+      healthScore: -600,
+      latencies: [
+        {
+          timestampInMs: timestamp - 2000,
+          latencyInMs: 2000
+        },
+        {
+          timestampInMs: timestamp - 1000,
+          latencyInMs: 1000
+        },
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 100
+        }
+      ]
     })
   })
 })

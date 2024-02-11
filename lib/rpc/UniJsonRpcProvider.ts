@@ -180,18 +180,19 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // Shadow call to other health providers that are not selected for performing current request
   // to gather their health states from time to time.
-  private checkOtherHealthyProvider(selectedProviderId: string) {
+  private checkOtherHealthyProvider(selectedProvider: SingleJsonRpcProvider, methodName: string, args: any[]) {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
-      if (provider.providerId != selectedProviderId) {
+      if (provider.providerId != selectedProvider.providerId) {
         if (
           provider.hasEnoughWaitSinceLastLatencyEvaluation(
-            1000 * this.config.HEALTHY_PROVIDER_SHADOW_EVALUATION_WAIT_PERIOD_IN_S
+            1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
           )
         ) {
-          // TODO(jie): 得判断当前api method是什么，如果是白名单之内的，我们就shadow call!
-          provider.evaluateLatency()
+          // Fire and forget. Don't care about its result and it won't throw.
+          // It's done this way because We don't want to block the return of this function.
+          provider.evaluateLatency(methodName, args)
           count++
         }
       }
@@ -246,7 +247,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw error
     } finally {
       this.lastUsedProvider = selectedProvider
-      this.checkOtherHealthyProvider(selectedProvider.providerId)
+      this.checkOtherHealthyProvider(selectedProvider, fnName, args)
       this.checkUnhealthyProviders()
     }
   }

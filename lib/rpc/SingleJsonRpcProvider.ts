@@ -17,6 +17,8 @@ import { Network } from '@ethersproject/networks'
 import { ProviderStateSyncer } from './ProviderStateSyncer'
 import { ProviderState } from './ProviderState'
 
+const MAJOR_METHOD_NAMES: string[] = ['eth_blockNumber', 'eth_call']
+
 interface SingleCallPerf {
   methodName: string
   succeed: boolean
@@ -145,7 +147,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
-      // TODO(jie): 这里，对于healthy的provider，也要看API method name来决定是否要记录latency
+      if (this.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
+        && perf.methodName in MAJOR_METHOD_NAMES) {
+        this.lastEvaluatedLatencyInMs = perf.latencyInMs
+        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+      }
     }
     // No reward for normal operation.
   }
@@ -155,15 +161,19 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     try {
       await this.getBlockNumber()
     } catch (error: any) {
-      this.log.error(`Encounter error for shadow evaluate call: ${JSON.stringify(error)}`)
+      this.log.error(`Encounter error for shadow evaluate recovery call: ${JSON.stringify(error)}`)
       // Swallow the error.
     }
   }
 
-  evaluateLatency() {
-    // TODO(jie): 这里就不要每次都call getBlockNumber了！
-    // TODO(jie): 这个应该采用上面传进来的method name才更make sense
-    // this.lastEvaluatedLatencyInMs = <latency>
+  async evaluateLatency(methodName: string, ...args: any[]) {
+    this.log.debug(`${this.url}: Evaluate for latency...`)
+    try {
+      await (this as any)[`${methodName}`](...args)
+    } catch (error: any) {
+      this.log.error(`Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
+      // Swallow the error.
+    }
   }
 
   // Notice that AWS metrics have to be non-negative.
@@ -202,6 +212,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
       if (this.enableDbSync) {
+        // Won't check the sync result.
         this.maybeSyncAndUpdateProviderState()
       }
     }
