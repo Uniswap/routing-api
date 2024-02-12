@@ -151,6 +151,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         && perf.methodName in MAJOR_METHOD_NAMES) {
         this.lastEvaluatedLatencyInMs = perf.latencyInMs
         this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+        this.logLatencyMetrics()
       }
     }
     // No reward for normal operation.
@@ -179,6 +180,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // Notice that AWS metrics have to be non-negative.
   logHealthMetrics() {
     metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
+  }
+
+  logLatencyMetrics() {
+    metric.putMetric(`${this.metricPrefix}_evaluated_latency`, this.lastEvaluatedLatencyInMs, MetricLoggerUnit.None)
   }
 
   // Wrap another layer only for the sake of ease unit testing.
