@@ -33,6 +33,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachedV3PoolsDynamoDb: aws_dynamodb.Table
   cachedV2PairsDynamoDb: aws_dynamodb.Table
   tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
+  rpcProviderStateDynamoDb: aws_dynamodb.Table
   unicornSecret: string
   uniRpcProviderConfig: string
 }
@@ -61,6 +62,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       cachedV3PoolsDynamoDb,
       cachedV2PairsDynamoDb,
       tokenPropertiesCachingDynamoDb,
+      rpcProviderStateDynamoDb,
       unicornSecret,
       uniRpcProviderConfig,
     } = props
@@ -84,6 +86,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     cachedV3PoolsDynamoDb.grantReadWriteData(lambdaRole)
     cachedV2PairsDynamoDb.grantReadWriteData(lambdaRole)
     tokenPropertiesCachingDynamoDb.grantReadWriteData(lambdaRole)
+    rpcProviderStateDynamoDb.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -129,6 +132,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
         CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
         V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
+        RPC_PROVIDER_HEALTH_TABLE_NAME: DynamoDBTableProps.RpcProviderStateDbTable.Name,
 
         // tokenPropertiesCachingDynamoDb.tableName is the correct format.
         // we will start using the correct ones going forward

@@ -13,7 +13,8 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
-import { Networkish } from '@ethersproject/networks'
+import { Network } from '@ethersproject/networks'
+import { ProviderStateSyncer, SyncResult } from './ProviderStateSyncer'
 
 interface SingleCallPerf {
   succeed: boolean
@@ -25,24 +26,41 @@ interface SingleCallPerf {
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   readonly url: string
   readonly providerName: string
+  readonly providerId: string
 
-  private healthScore
-  private healthy: boolean
-  private lastCallTimestampInMs: number
+  private healthScore: number = 0
+  private healthy: boolean = true
+  private lastCallTimestampInMs: number = 0
   private config: Config
   private readonly metricPrefix: string
   private readonly log: Logger
 
-  constructor(network: Networkish, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
+  private enableDbSync: boolean
+  private providerStateSyncer: ProviderStateSyncer
+  private healthScoreAtLastSync: number = 0
+
+  constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
     super(url, network)
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)
-    this.healthScore = 0
-    this.healthy = true
-    this.lastCallTimestampInMs = 0
+    this.providerId = `${network.chainId.toString()}_${this.providerName}`
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
+    this.enableDbSync = config.ENABLE_DB_SYNC
+    if (this.enableDbSync) {
+      const dbTableName = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
+      if (dbTableName === undefined) {
+        throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
+      }
+      this.providerStateSyncer = new ProviderStateSyncer(
+        dbTableName,
+        this.providerId,
+        this.config.DB_SYNC_INTERVAL_IN_S,
+        log
+      )
+      this.maybeSyncAndUpdateProviderState()
+    }
   }
 
   isHealthy() {
@@ -100,24 +118,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.recordProviderRecovery(perf.startTimestampInMs - this.lastCallTimestampInMs)
       }
     }
-    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
-      this.healthy = false
-      this.log.debug(`${this.url} drops to unhealthy`)
-    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
-      this.healthy = true
-      this.log.debug(`${this.url} resumes to healthy`)
-    }
     // No reward for normal operation.
   }
 
-  evaluateForRecovery() {
+  async evaluateForRecovery() {
     this.log.debug(`${this.url}: Evaluate for recovery...`)
-    this.getBlockNumber().catch((error: any) => {
-      // Swallow the error
-      this.log.error(`Swallow error for shadow evaluate call: ${JSON.stringify(error)}`)
-    })
+    try {
+      await this.getBlockNumber()
+    } catch (error: any) {
+      this.log.error(`Encounter error for shadow evaluate call: ${JSON.stringify(error)}`)
+      // Swallow the error.
+    }
   }
 
+  // Notice that AWS metrics have to be non-negative.
   logHealthMetrics() {
     metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
   }
@@ -128,27 +142,61 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return super.getBlockNumber()
   }
 
-  private wrappedFunctionCall(fnName: string, fn: (...args: any[]) => Promise<any>, ...args: any[]): Promise<any> {
+  private async wrappedFunctionCall(
+    fnName: string,
+    fn: (...args: any[]) => Promise<any>,
+    ...args: any[]
+  ): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
       succeed: true,
       latencyInMs: 0,
       startTimestampInMs: Date.now(),
     }
-    return fn(...args)
-      .then((response: any) => {
-        return response
-      })
-      .catch((error: any) => {
-        perf.succeed = false
-        this.log.error(JSON.stringify(error))
-        throw error
-      })
-      .finally(() => {
-        perf.latencyInMs = Date.now() - perf.startTimestampInMs
-        this.checkLastCallPerformance(fnName, perf)
-        this.lastCallTimestampInMs = perf.startTimestampInMs
-      })
+    try {
+      return await fn(...args)
+    } catch (error: any) {
+      perf.succeed = false
+      this.log.error(JSON.stringify(error))
+      throw error
+    } finally {
+      perf.latencyInMs = Date.now() - perf.startTimestampInMs
+      this.checkLastCallPerformance(fnName, perf)
+      this.updateHealthyStatus()
+      this.lastCallTimestampInMs = perf.startTimestampInMs
+
+      if (this.enableDbSync) {
+        this.maybeSyncAndUpdateProviderState()
+      }
+    }
+  }
+
+  private async maybeSyncAndUpdateProviderState() {
+    try {
+      const syncResult: SyncResult = await this.providerStateSyncer.maybeSyncWithRepository(
+        this.healthScore - this.healthScoreAtLastSync,
+        this.healthScore
+      )
+      if (syncResult.synced) {
+        this.healthScoreAtLastSync = syncResult.state.healthScore
+        this.healthScore = this.healthScoreAtLastSync
+        this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
+        this.updateHealthyStatus()
+      }
+    } catch (err: any) {
+      this.log.error(`Encountered error when sync provider state: ${JSON.stringify(err)}`)
+      // Won't throw. A fail of sync won't affect how we do health state update locally.
+    }
+  }
+
+  private updateHealthyStatus() {
+    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
+      this.healthy = false
+      this.log.warn(`${this.url} drops to unhealthy`)
+    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
+      this.healthy = true
+      this.log.warn(`${this.url} resumes to healthy`)
+    }
   }
 
   ///////////////////// Begin of override functions /////////////////////

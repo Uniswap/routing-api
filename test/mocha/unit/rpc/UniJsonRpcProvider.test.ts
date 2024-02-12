@@ -16,6 +16,8 @@ const TEST_CONFIG: Config = {
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
+  ENABLE_DB_SYNC: false,
+  DB_SYNC_INTERVAL_IN_S: 5,
 }
 
 const log = bunyan.createLogger({
@@ -25,9 +27,9 @@ const log = bunyan.createLogger({
 })
 
 const createNewSingleJsonRpcProviders = () => [
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_0`, log),
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_1`, log),
-  new SingleJsonRpcProvider(ChainId.MAINNET, `url_2`, log),
+  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_0`, log, TEST_CONFIG),
+  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_1`, log, TEST_CONFIG),
+  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_2`, log, TEST_CONFIG),
 ]
 
 const SINGLE_RPC_PROVIDERS = { [ChainId.MAINNET]: createNewSingleJsonRpcProviders() }
@@ -149,7 +151,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     uniProvider.logProviderHealthScores()
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     // Provider0's health score has been up, but it's not considered fully recovered yet
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
@@ -163,7 +165,7 @@ describe('UniJsonRpcProvider', () => {
     uniProvider.logProviderHealthScores()
 
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     // Provider0 is fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
@@ -223,7 +225,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     // 1 second isn't enough to start re-evaluate the failed provider.
@@ -237,7 +239,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     // Provider0 has recovered quite a bit. But still not enough to be considered as fully recovered.
@@ -253,7 +255,7 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
     // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(100)
+    await delay(10)
 
     uniProvider.logProviderHealthScores()
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])

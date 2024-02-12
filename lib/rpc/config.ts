@@ -7,6 +7,8 @@ export interface Config {
   RECOVER_SCORE_PER_MS: number
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: number
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: number
+  ENABLE_DB_SYNC: boolean
+  DB_SYNC_INTERVAL_IN_S: number
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -27,4 +29,8 @@ export const DEFAULT_CONFIG: Config = {
   // This is added to prevent an unhealthy provider gain too much recovery score only by
   // waiting a long time to be evaluated.
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 60000,
+  // Flag to enable health state sync with DB.
+  ENABLE_DB_SYNC: true,
+  // Time interval to sync with health states from DB
+  DB_SYNC_INTERVAL_IN_S: 5,
 }

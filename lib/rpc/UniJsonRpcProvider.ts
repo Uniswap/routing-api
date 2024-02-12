@@ -159,20 +159,22 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     let count = 0
     for (const provider of this.providers) {
       if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
+        // Fire and forget. Don't care about its result and it won't throw.
+        // It's done this way because We don't want to block the return of this function.
         provider.evaluateForRecovery()
         count++
       }
     }
-    this.log.debug(`Evaluated ${count} unhealthy providers`)
+    this.log.debug(`Evaluate ${count} unhealthy providers`)
   }
 
   logProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      this.log.debug(`=== Healthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`Healthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
       provider.logHealthMetrics()
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      this.log.debug(`=== Unhealthy provider ===\turl: ${provider.url}, \tscore: ${provider['healthScore']}`)
+      this.log.debug(`Unhealthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
       provider.logHealthMetrics()
     }
   }
@@ -201,24 +203,20 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return sessionId
   }
 
-  private wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
+  private async wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
     this.log.debug(
       `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
-    return (selectedProvider as any)
-      [`${fnName}`](...args)
-      .then((response: any) => {
-        return response
-      })
-      .catch((error: any) => {
-        this.log.error(JSON.stringify(error))
-        throw error
-      })
-      .finally(() => {
-        this.lastUsedProvider = selectedProvider
-        this.checkUnhealthyProvider()
-      })
+    try {
+      return await (selectedProvider as any)[`${fnName}`](...args)
+    } catch (error: any) {
+      this.log.error(JSON.stringify(error))
+      throw error
+    } finally {
+      this.lastUsedProvider = selectedProvider
+      this.checkUnhealthyProvider()
+    }
   }
 
   ///////////////////// Begin of override functions /////////////////////
