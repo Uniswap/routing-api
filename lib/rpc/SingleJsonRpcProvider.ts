@@ -173,7 +173,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private async maybeSyncAndUpdateProviderState() {
     try {
-      const syncResult: SyncResult = await this.providerStateSyncer.maybeSyncWithRepository(this.healthScore - this.healthScoreAtLastSync, this.healthScore)
+      const syncResult: SyncResult = await this.providerStateSyncer.maybeSyncWithRepository(
+        this.healthScore - this.healthScoreAtLastSync,
+        this.healthScore
+      )
       if (syncResult.synced) {
         this.healthScoreAtLastSync = syncResult.state.healthScore
         this.healthScore = this.healthScoreAtLastSync
