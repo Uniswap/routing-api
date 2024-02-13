@@ -738,6 +738,9 @@ describe('UniJsonRpcProvider', () => {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
     }
 
+    const timestamp = Date.now()
+    sandbox.useFakeTimers(timestamp)
+
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.resolves(123)
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
@@ -756,12 +759,9 @@ describe('UniJsonRpcProvider', () => {
     expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
 
-    // this.lastEvaluatedLatencyInMs = perf.latencyInMs
-    // this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-    console.log(uniProvider['providers'][1]['lastEvaluatedLatencyInMs'])
-    console.log(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs'])
-
-    console.log(uniProvider['providers'][2]['lastEvaluatedLatencyInMs'])
-    console.log(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs'])
+    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
   })
 })
