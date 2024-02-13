@@ -97,6 +97,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       gasPriceProvider: gasPriceProviderOnChain,
       simulator,
       routeCachingProvider,
+      v2Supported,
     } = dependencies[chainIdEnum]!
 
     let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
@@ -128,6 +129,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           routeCachingProvider,
           tokenValidatorProvider,
           tokenPropertiesProvider,
+          v2Supported,
         })
         break
     }

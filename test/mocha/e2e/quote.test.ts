@@ -12,6 +12,7 @@ import {
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
+  USDC_NATIVE_ARBITRUM,
   USDT_MAINNET,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
@@ -72,6 +73,8 @@ const BULLET_WHT_TAX = new Token(
   BigNumber.from(500),
   BigNumber.from(500)
 )
+
+const V2_SUPPORTED_PAIRS = [[WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM]]
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
@@ -2411,6 +2414,7 @@ describe('quote', function () {
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => USDC_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_ONE]: () => WETH9[ChainId.ARBITRUM_ONE],
     [ChainId.ARBITRUM_SEPOLIA]: () => USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => USDC_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: () => USDC_ON(ChainId.POLYGON_MUMBAI),
@@ -2433,6 +2437,7 @@ describe('quote', function () {
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
+    [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_ARBITRUM,
     [ChainId.ARBITRUM_SEPOLIA]: () => DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => DAI_ON(ChainId.POLYGON),
     [ChainId.POLYGON_MUMBAI]: () => DAI_ON(ChainId.POLYGON_MUMBAI),
@@ -2514,6 +2519,36 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
+
+        it(`${erc1.symbol} -> ${erc2.symbol} v2 only`, async () => {
+          const isV2PairRoutable = V2_SUPPORTED_PAIRS.find((pair) => pair[0]!.equals(erc1) && pair[1]!.equals(erc2))
+
+          if (!isV2PairRoutable) {
+            return
+          }
+
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: erc1.address,
+            tokenInChainId: chain,
+            tokenOutAddress: erc2.address,
+            tokenOutChainId: chain,
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
+            protocols: 'v2',
+            type,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+
+          try {
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const { status } = response
+
+            expect(status).to.equal(200)
+          } catch (err: any) {
+            fail(JSON.stringify(err.response.data))
+          }
+        })
+
         const native = NATIVE_CURRENCY[chain]
         it(`${native} -> erc20`, async () => {
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE

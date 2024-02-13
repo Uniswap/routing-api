@@ -102,6 +102,7 @@ export type ContainerDependencies = {
   routeCachingProvider?: IRouteCachingProvider
   tokenValidatorProvider: TokenValidatorProvider
   tokenPropertiesProvider: ITokenPropertiesProvider
+  v2Supported: ChainId[]
 }
 
 export interface ContainerInjected {
@@ -372,6 +373,18 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             })
           }
 
+          const v2Supported = [
+            ChainId.MAINNET,
+            ChainId.GOERLI,
+            ChainId.SEPOLIA,
+            ChainId.ARBITRUM_ONE,
+            ChainId.OPTIMISM,
+            ChainId.POLYGON,
+            ChainId.BASE,
+            ChainId.BNB,
+            ChainId.AVALANCHE,
+          ]
+
           return {
             chainId,
             dependencies: {
@@ -400,6 +413,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               routeCachingProvider,
               tokenValidatorProvider,
               tokenPropertiesProvider,
+              v2Supported,
             },
           }
         })
