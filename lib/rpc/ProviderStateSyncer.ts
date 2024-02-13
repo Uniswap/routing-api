@@ -29,7 +29,8 @@ export class ProviderStateSyncer {
     localHealthScoreDiff: number,
     localHealthScore: number,
     lastEvaluatedLatencyInMs: number,
-    lastLatencyEvaluationTimestampInMs: number
+    lastLatencyEvaluationTimestampInMs: number,
+    lastLatencyEvaluationApiName: string
   ): Promise<ProviderState | null> {
     const timestampInMs = Date.now()
 
@@ -51,6 +52,7 @@ export class ProviderStateSyncer {
       latency: {
         timestampInMs: lastLatencyEvaluationTimestampInMs,
         latencyInMs: lastEvaluatedLatencyInMs,
+        apiName: lastLatencyEvaluationApiName,
       },
     }
 

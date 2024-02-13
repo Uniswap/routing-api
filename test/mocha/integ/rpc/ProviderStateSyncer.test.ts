@@ -37,6 +37,7 @@ describe('ProviderStateSyncer', () => {
     const localHealthScore = -1100
     const lastEvaluatedLatencyInMs = 222
     const lastLatencyEvaluationTimestampInMs = timestamp - 1000
+    const lastLatencyEvaluationApiName = 'someApi'
 
     let syncResult: ProviderState | null
     try {
@@ -44,7 +45,8 @@ describe('ProviderStateSyncer', () => {
         localHealthScoreDiff,
         localHealthScore,
         lastEvaluatedLatencyInMs,
-        lastLatencyEvaluationTimestampInMs
+        lastLatencyEvaluationTimestampInMs,
+        lastLatencyEvaluationApiName
       )
     } finally {
       clock.restore()
@@ -58,7 +60,13 @@ describe('ProviderStateSyncer', () => {
     console.log(writeArg)
     expect(writeStub.getCall(0).args[1]).deep.equals({
       healthScore: -1100,
-      latencies: [{ timestampInMs: lastLatencyEvaluationTimestampInMs, latencyInMs: 222 }],
+      latencies: [
+        {
+          timestampInMs: lastLatencyEvaluationTimestampInMs,
+          latencyInMs: 222,
+          apiName: 'someApi',
+        },
+      ],
     })
   })
 
@@ -70,6 +78,7 @@ describe('ProviderStateSyncer', () => {
       latency: {
         timestampInMs: timestamp,
         latencyInMs: 1000,
+        apiName: 'api1',
       },
     }
     const newState = syncer['calculateNewState'](null, stateDiff)
@@ -79,6 +88,7 @@ describe('ProviderStateSyncer', () => {
         {
           timestampInMs: timestamp,
           latencyInMs: 1000,
+          apiName: 'api1',
         },
       ],
     })
@@ -93,10 +103,12 @@ describe('ProviderStateSyncer', () => {
         {
           timestampInMs: timestamp - 2000,
           latencyInMs: 2000,
+          apiName: 'api1',
         },
         {
           timestampInMs: timestamp - 1000,
           latencyInMs: 1000,
+          apiName: 'api2',
         },
       ],
     }
@@ -106,6 +118,7 @@ describe('ProviderStateSyncer', () => {
       latency: {
         timestampInMs: timestamp,
         latencyInMs: 100,
+        apiName: 'api3',
       },
     }
     const newState = syncer['calculateNewState'](oldState, stateDiff)
@@ -115,14 +128,17 @@ describe('ProviderStateSyncer', () => {
         {
           timestampInMs: timestamp - 2000,
           latencyInMs: 2000,
+          apiName: 'api1',
         },
         {
           timestampInMs: timestamp - 1000,
           latencyInMs: 1000,
+          apiName: 'api2',
         },
         {
           timestampInMs: timestamp,
           latencyInMs: 100,
+          apiName: 'api3',
         },
       ],
     })

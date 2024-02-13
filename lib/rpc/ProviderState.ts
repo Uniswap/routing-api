@@ -1,4 +1,5 @@
 export interface LatencyEvaluation {
+  apiName: string
   timestampInMs: number
   latencyInMs: number
 }

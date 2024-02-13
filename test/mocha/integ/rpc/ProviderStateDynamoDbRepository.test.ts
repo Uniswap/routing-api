@@ -53,10 +53,12 @@ describe('ProviderStateDynamoDbRepository', () => {
         {
           timestampInMs: timestamp,
           latencyInMs: 200,
+          apiName: 'api1',
         },
         {
           timestampInMs: timestamp - 1000,
           latencyInMs: 400,
+          apiName: 'api2',
         },
       ],
     }
@@ -82,6 +84,7 @@ describe('ProviderStateDynamoDbRepository', () => {
         {
           timestampInMs: timestamp,
           latencyInMs: 200,
+          apiName: 'someApi',
         },
       ],
     }
@@ -101,6 +104,7 @@ describe('ProviderStateDynamoDbRepository', () => {
         {
           timestampInMs: timestamp,
           latencyInMs: 200,
+          apiName: 'someApi',
         },
       ],
     }
@@ -117,6 +121,7 @@ describe('ProviderStateDynamoDbRepository', () => {
         {
           timestampInMs: timestamp,
           latencyInMs: 200,
+          apiName: 'someApi',
         },
       ],
     }

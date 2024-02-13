@@ -3,7 +3,7 @@ import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider
 import Sinon, { SinonSandbox } from 'sinon'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { Config } from '../../../../lib/rpc/config'
+import { SingleJsonRpcProviderConfig } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
 import { ProviderStateSyncer } from '../../../../lib/rpc/ProviderStateSyncer'
 import { ProviderState } from '../../../../lib/rpc/ProviderState'
@@ -14,14 +14,13 @@ const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-const config: Config = {
+const config: SingleJsonRpcProviderConfig = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
   HEALTH_SCORE_FALLBACK_THRESHOLD: -70,
   HEALTH_SCORE_RECOVER_THRESHOLD: -10,
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
   ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
@@ -118,14 +117,17 @@ describe('SingleJsonRpcProvider', () => {
         {
           timestampInMs: timestampInMs,
           latencyInMs: 222,
+          apiName: 'api1',
         },
         {
           timestampInMs: timestampInMs - 1000,
           latencyInMs: 444,
+          apiName: 'api2',
         },
         {
           timestampInMs: timestampInMs - 350000,
           latencyInMs: 789,
+          apiName: 'api3',
         },
       ],
     }

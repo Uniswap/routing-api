@@ -1,5 +1,5 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
-import { Config, DEFAULT_CONFIG } from './config'
+import { DEFAULT_SINGLE_PROVIDER_CONFIG, SingleJsonRpcProviderConfig } from './config'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import {
   BlockTag,
@@ -17,7 +17,7 @@ import { Network } from '@ethersproject/networks'
 import { ProviderStateSyncer } from './ProviderStateSyncer'
 import { ProviderState } from './ProviderState'
 
-const MAJOR_METHOD_NAMES: string[] = ['eth_blockNumber', 'eth_call']
+const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call']
 
 interface SingleCallPerf {
   methodName: string
@@ -39,9 +39,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private lastLatencyEvaluationTimestampInMs: number = 0
   private lastEvaluatedLatencyInMs: number = 0
+  private lastLatencyEvaluationApiName: string
   private recentAverageLatencyInMs: number = 0
 
-  private config: Config
+  private config: SingleJsonRpcProviderConfig
   private readonly metricPrefix: string
   private readonly log: Logger
 
@@ -49,7 +50,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
 
-  constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
+  constructor(
+    network: Network,
+    url: string,
+    log: Logger,
+    config: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
+  ) {
     super(url, network)
     this.url = url
     this.log = log
@@ -149,10 +155,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
       if (
         this.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S) &&
-        perf.methodName in MAJOR_METHOD_NAMES
+        MAJOR_METHOD_NAMES.includes(perf.methodName)
       ) {
         this.lastEvaluatedLatencyInMs = perf.latencyInMs
         this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+        this.lastLatencyEvaluationApiName = perf.methodName
         this.logLatencyMetrics()
       }
     }
@@ -185,7 +192,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   logLatencyMetrics() {
-    metric.putMetric(`${this.metricPrefix}_evaluated_latency`, this.lastEvaluatedLatencyInMs, MetricLoggerUnit.None)
+    metric.putMetric(
+      `${this.metricPrefix}_evaluated_latency_${this.lastLatencyEvaluationApiName}`,
+      this.lastEvaluatedLatencyInMs,
+      MetricLoggerUnit.None
+    )
   }
 
   // Wrap another layer only for the sake of ease unit testing.
@@ -231,7 +242,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.healthScore - this.healthScoreAtLastSync,
         this.healthScore,
         this.lastEvaluatedLatencyInMs,
-        this.lastLatencyEvaluationTimestampInMs
+        this.lastLatencyEvaluationTimestampInMs,
+        this.lastLatencyEvaluationApiName
       )
       if (newState !== null) {
         // Update health state

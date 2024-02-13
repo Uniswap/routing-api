@@ -14,7 +14,7 @@ import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
-import { Config, DEFAULT_CONFIG } from './config'
+import { DEFAULT_UNI_PROVIDER_CONFIG, UniJsonRpcProviderConfig } from './config'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   readonly chainId: ChainId = ChainId.MAINNET
@@ -37,7 +37,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
   private allowProviderAutoSwitch: boolean = true
 
-  private config: Config
+  private config: UniJsonRpcProviderConfig
 
   private readonly log: Logger
 
@@ -48,7 +48,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     ranking?: number[],
     weights?: number[],
     allowProviderAutoSwitch?: boolean,
-    config: Config = DEFAULT_CONFIG
+    config: UniJsonRpcProviderConfig = DEFAULT_UNI_PROVIDER_CONFIG
   ) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
@@ -184,7 +184,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
-      if (provider.providerId != selectedProvider.providerId) {
+      if (provider.url != selectedProvider.url) {
         if (provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
           // Fire and forget. Don't care about its result and it won't throw.
           // It's done this way because We don't want to block the return of this function.
@@ -243,7 +243,9 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw error
     } finally {
       this.lastUsedProvider = selectedProvider
-      this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+      if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
+        this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+      }
       this.checkUnhealthyProviders()
     }
   }
