@@ -147,8 +147,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
-      if (this.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
-        && perf.methodName in MAJOR_METHOD_NAMES) {
+      if (
+        this.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S) &&
+        perf.methodName in MAJOR_METHOD_NAMES
+      ) {
         this.lastEvaluatedLatencyInMs = perf.latencyInMs
         this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
         this.logLatencyMetrics()

@@ -70,20 +70,18 @@ describe('ProviderStateSyncer', () => {
       latency: {
         timestampInMs: timestamp,
         latencyInMs: 1000,
-      }
+      },
     }
     const newState = syncer['calculateNewState'](null, stateDiff)
     expect(newState).deep.equals({
-        healthScore: 0,
-        latencies:
-          [
-            {
-              timestampInMs: timestamp,
-              latencyInMs: 1000
-            }
-          ]
-      }
-    )
+      healthScore: 0,
+      latencies: [
+        {
+          timestampInMs: timestamp,
+          latencyInMs: 1000,
+        },
+      ],
+    })
     console.log(`${JSON.stringify(newState)}`)
   })
 
@@ -100,7 +98,7 @@ describe('ProviderStateSyncer', () => {
           timestampInMs: timestamp - 1000,
           latencyInMs: 1000,
         },
-      ]
+      ],
     }
     const stateDiff: ProviderStateDiff = {
       healthScore: 0,
@@ -108,7 +106,7 @@ describe('ProviderStateSyncer', () => {
       latency: {
         timestampInMs: timestamp,
         latencyInMs: 100,
-      }
+      },
     }
     const newState = syncer['calculateNewState'](oldState, stateDiff)
     expect(newState).deep.equals({
@@ -116,17 +114,17 @@ describe('ProviderStateSyncer', () => {
       latencies: [
         {
           timestampInMs: timestamp - 2000,
-          latencyInMs: 2000
+          latencyInMs: 2000,
         },
         {
           timestampInMs: timestamp - 1000,
-          latencyInMs: 1000
+          latencyInMs: 1000,
         },
         {
           timestampInMs: timestamp,
-          latencyInMs: 100
-        }
-      ]
+          latencyInMs: 100,
+        },
+      ],
     })
   })
 })

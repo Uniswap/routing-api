@@ -185,11 +185,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     let count = 0
     for (let provider of healthyProviders) {
       if (provider.providerId != selectedProvider.providerId) {
-        if (
-          provider.hasEnoughWaitSinceLastLatencyEvaluation(
-            1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
-          )
-        ) {
+        if (provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
           // Fire and forget. Don't care about its result and it won't throw.
           // It's done this way because We don't want to block the return of this function.
           provider.evaluateLatency(methodName, args)
