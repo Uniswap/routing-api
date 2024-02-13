@@ -12,7 +12,7 @@ import {
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
-  USDC_NATIVE_ARBITRUM, USDC_NATIVE_OPTIMISM,
+  USDC_NATIVE_ARBITRUM, USDC_NATIVE_OPTIMISM, USDC_NATIVE_POLYGON,
   USDT_MAINNET,
   WBTC_MAINNET
 } from '@uniswap/smart-order-router'
@@ -39,6 +39,7 @@ import { resetAndFundAtBlock } from '../../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndApprove'
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
+import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
 
 const { ethers } = hre
 
@@ -77,6 +78,7 @@ const BULLET_WHT_TAX = new Token(
 const V2_SUPPORTED_PAIRS = [
   [WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM],
   [WETH9[ChainId.OPTIMISM], USDC_NATIVE_OPTIMISM],
+  [WRAPPED_NATIVE_CURRENCY[ChainId.POLYGON], USDC_NATIVE_POLYGON],
 ]
 
 const axios = axiosStatic.create()
@@ -2421,6 +2423,7 @@ describe('quote', function () {
     [ChainId.ARBITRUM_ONE]: () => WETH9[ChainId.ARBITRUM_ONE],
     [ChainId.ARBITRUM_SEPOLIA]: () => USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => USDC_ON(ChainId.POLYGON),
+    [ChainId.POLYGON]: () => WRAPPED_NATIVE_CURRENCY[ChainId.POLYGON],
     [ChainId.POLYGON_MUMBAI]: () => USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CUSD_CELO,
     [ChainId.CELO_ALFAJORES]: () => CUSD_CELO_ALFAJORES,
@@ -2438,13 +2441,14 @@ describe('quote', function () {
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
-    [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_OPTIMISM,
+    [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_ARBITRUM,
     [ChainId.ARBITRUM_SEPOLIA]: () => DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => DAI_ON(ChainId.POLYGON),
+    [ChainId.POLYGON]: () => USDC_NATIVE_POLYGON,
     [ChainId.POLYGON_MUMBAI]: () => DAI_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CEUR_CELO,
     [ChainId.CELO_ALFAJORES]: () => CEUR_CELO_ALFAJORES,
