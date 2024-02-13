@@ -12,9 +12,9 @@ import {
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
   USDC_MAINNET,
-  USDC_NATIVE_ARBITRUM,
+  USDC_NATIVE_ARBITRUM, USDC_NATIVE_OPTIMISM,
   USDT_MAINNET,
-  WBTC_MAINNET,
+  WBTC_MAINNET
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
@@ -74,7 +74,10 @@ const BULLET_WHT_TAX = new Token(
   BigNumber.from(500)
 )
 
-const V2_SUPPORTED_PAIRS = [[WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM]]
+const V2_SUPPORTED_PAIRS = [
+  [WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM],
+  [WETH9[ChainId.OPTIMISM], USDC_NATIVE_OPTIMISM],
+]
 
 const axios = axiosStatic.create()
 axiosRetry(axios, {
@@ -2411,6 +2414,7 @@ describe('quote', function () {
     [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
+    [ChainId.OPTIMISM]: () => WETH9[ChainId.OPTIMISM],
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => USDC_ON(ChainId.ARBITRUM_ONE),
@@ -2434,6 +2438,7 @@ describe('quote', function () {
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
+    [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
