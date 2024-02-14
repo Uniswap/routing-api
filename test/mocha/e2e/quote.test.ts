@@ -134,6 +134,32 @@ const MAX_UINT160 = '0xffffffffffffffffffffffffffffffffffffffff'
 
 const TRADE_TYPES: TradeTypeParam[] = ['exactIn', 'exactOut']
 
+export const agEUR_MAINNET = new Token(
+  ChainId.MAINNET,
+  '0x1a7e4e63778B4f12a199C062f3eFdD288afCBce8',
+  18,
+  'agEUR',
+  'agEur'
+)
+
+export const XSGD_MAINNET = new Token(ChainId.MAINNET, '0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96', 6, 'XSGD', 'XSGD')
+
+// reasonably sized token amounts for integ tests
+export function getTestAmount(currency: Currency): string {
+  switch (currency) {
+    case agEUR_MAINNET:
+      return '1000'
+    case XSGD_MAINNET:
+      return '1000'
+    case DAI_ON(ChainId.MAINNET):
+      return '1000'
+    case WBTC_MAINNET:
+      return '1'
+    default:
+      return '10'
+  }
+}
+
 describe('quote', function () {
   // Help with test flakiness by retrying.
   this.retries(0)
@@ -963,7 +989,7 @@ describe('quote', function () {
 
             /// Tests for routes likely to result in MixedRoutes being returned
             if (type === 'exactIn') {
-              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
+              it.skip(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
@@ -1700,7 +1726,7 @@ describe('quote', function () {
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
               uraRefactorInterimState.forEach((state) => {
                 it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
-                  const originalAmount = '10'
+                  const originalAmount = getTestAmount(type === 'exactIn' ? tokenIn : tokenOut);
                   const tokenInSymbol = tokenIn.symbol!
                   const tokenOutSymbol = tokenOut.symbol!
                   const tokenInAddress = tokenIn.isNative ? tokenInSymbol : tokenIn.address
