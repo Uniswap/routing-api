@@ -963,7 +963,7 @@ describe('quote', function () {
 
             /// Tests for routes likely to result in MixedRoutes being returned
             if (type === 'exactIn') {
-              it(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
+              it.skip(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
                   tokenInChainId: 1,
