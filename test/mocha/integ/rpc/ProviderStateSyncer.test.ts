@@ -140,4 +140,49 @@ describe('ProviderStateSyncer', () => {
       ],
     })
   })
+
+  it('test calculateNewState: old state is not null and duplicates with new diff', async () => {
+    const timestamp = Date.now()
+    const oldState: ProviderState = {
+      healthScore: -500,
+      latencies: [
+        {
+          timestampInMs: timestamp - 2000,
+          latencyInMs: 2000,
+          apiName: 'api1',
+        },
+        {
+          timestampInMs: timestamp - 1000,
+          latencyInMs: 1000,
+          apiName: 'api2',
+        },
+      ],
+    }
+    const stateDiff: ProviderStateDiff = {
+      healthScore: 0,
+      healthScoreDiff: -100,
+      latency: {
+        timestampInMs: timestamp - 1000,
+        latencyInMs: 100,
+        apiName: 'api3',
+      },
+    }
+    const newState = syncer['calculateNewState'](oldState, stateDiff)
+    // Diff is not included.
+    expect(newState).deep.equals({
+      healthScore: -600,
+      latencies: [
+        {
+          timestampInMs: timestamp - 2000,
+          latencyInMs: 2000,
+          apiName: 'api1',
+        },
+        {
+          timestampInMs: timestamp - 1000,
+          latencyInMs: 1000,
+          apiName: 'api2',
+        },
+      ],
+    })
+  })
 })

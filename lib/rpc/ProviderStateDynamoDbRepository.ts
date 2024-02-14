@@ -98,7 +98,7 @@ export class ProviderStateDynamoDbRepository implements ProviderStateRepository 
     attributes[':updatedAtInMs'] = updatedAtInMs
     attributes[':prevUpdatedAtInMs'] = prevUpdatedAtInMs
     attributes[':ttl'] = ttlInS
-    attributes[':state'] = JSON.stringify(state)
+    attributes[':state'] = state
     return attributes
   }
 }

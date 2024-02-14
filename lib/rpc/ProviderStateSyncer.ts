@@ -44,7 +44,7 @@ export class ProviderStateSyncer {
     } catch (err: any) {
       this.log.error(`Failed to read from sync storage: ${JSON.stringify(err)}. Sync failed.`)
     }
-    this.log.debug({ storedState })
+    this.log.debug({ storedState }, 'Loaded stored state')
 
     const stateDiff: ProviderStateDiff = {
       healthScore: localHealthScore,
@@ -81,29 +81,21 @@ export class ProviderStateSyncer {
 
     const timestampNowInMs = Date.now()
     const latencies: LatencyEvaluation[] = []
+    const timestampSet = new Set<number>()
 
     const shouldAdd = (timestampInMs: number, minTimestampInMs: number): boolean => {
-      return timestampInMs > minTimestampInMs
+      return !timestampSet.has(timestampInMs) && timestampInMs > minTimestampInMs
     }
 
-    if (oldState !== null && oldState) {
+    if (oldState !== null) {
       for (const latency of oldState.latencies) {
-        if (
-          shouldAdd(
-            latency.timestampInMs,
-            timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS
-          )
-        ) {
+        if (shouldAdd(latency.timestampInMs, timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS)) {
           latencies.push(latency)
+          timestampSet.add(latency.timestampInMs)
         }
       }
     }
-    if (
-      shouldAdd(
-        stateDiff.latency.timestampInMs,
-        timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS
-      )
-    ) {
+    if (shouldAdd(stateDiff.latency.timestampInMs, timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS)) {
       latencies.push(stateDiff.latency)
     }
 

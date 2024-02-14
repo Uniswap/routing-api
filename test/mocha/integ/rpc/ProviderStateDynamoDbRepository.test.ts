@@ -68,6 +68,7 @@ describe('ProviderStateDynamoDbRepository', () => {
 
     expect(readState !== null)
     expect(readState!.state.healthScore).equal(-10)
+    expect(readState!.state.latencies.length).equal(2)
     expect(readState!.state.latencies[0].timestampInMs).equal(timestamp)
     expect(readState!.state.latencies[0].latencyInMs).equal(200)
     expect(readState!.state.latencies[1].timestampInMs).equal(timestamp - 1000)
@@ -109,8 +110,18 @@ describe('ProviderStateDynamoDbRepository', () => {
       ],
     }
     await storage.write(PROVIDER_ID, state, timestamp)
-
+    // Timestamp match, write succeeds.
     await storage.write(PROVIDER_ID, state, timestamp + 1000, timestamp)
+
+    // Check the content of DB.
+    // This is necessary because this time DB entry is updated, not written (they have different
+    // implementations).
+    const readState: ProviderStateWithTimestamp | null = await storage.read(PROVIDER_ID)
+    expect(readState !== null)
+    expect(readState!.state.healthScore).equal(-10)
+    expect(readState!.state.latencies.length).equal(1)
+    expect(readState!.state.latencies[0].timestampInMs).equal(timestamp)
+    expect(readState!.state.latencies[0].latencyInMs).equal(200)
   })
 
   it('write state to DB then write it again:: Timestamp mismatch', async () => {
@@ -126,7 +137,7 @@ describe('ProviderStateDynamoDbRepository', () => {
       ],
     }
     await storage.write(PROVIDER_ID, state, timestamp)
-
+    // Timestamp mismatch, write fails.
     await expect(storage.write(PROVIDER_ID, state, timestamp + 1000, timestamp + 100)).to.be.rejectedWith(Error)
   })
 })

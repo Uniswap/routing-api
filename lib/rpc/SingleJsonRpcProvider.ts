@@ -162,6 +162,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
         this.lastLatencyEvaluationApiName = perf.methodName
         this.logLatencyMetrics()
+        this.log.debug(
+          {
+            lastEvaluatedLatencyInMs: this.lastEvaluatedLatencyInMs,
+            lastLatencyEvaluationTimestampInMs: this.lastLatencyEvaluationTimestampInMs,
+            lastLatencyEvaluationApiName: this.lastLatencyEvaluationApiName,
+          },
+          'Latency evaluation recorded'
+        )
       }
     }
     // No reward for normal operation.
