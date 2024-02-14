@@ -76,6 +76,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
+      // Fire and forget. Won't check the sync result.
       this.maybeSyncAndUpdateProviderState()
     }
   }

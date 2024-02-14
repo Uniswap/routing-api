@@ -35,7 +35,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
 
   // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
-  private allowProviderAutoSwitch: boolean = true
+  private readonly allowProviderAutoSwitch: boolean = true
 
   private config: UniJsonRpcProviderConfig
 

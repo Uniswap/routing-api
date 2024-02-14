@@ -19,7 +19,7 @@ const CONDITION_EXPRESSION = '#updatedAt = :prevUpdatedAtInMs'
 
 export class ProviderStateDynamoDbRepository implements ProviderStateRepository {
   private ddbClient: DynamoDB.DocumentClient
-  private DB_TTL_IN_S: number = 30
+  private DB_TTL_IN_S: number = 300
 
   constructor(private dbTableName: string, private log: Logger) {
     this.ddbClient = new DynamoDB.DocumentClient()
