@@ -230,7 +230,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
       if (this.enableDbSync) {
-        // Won't check the sync result.
+        // Fire and forget. Won't check the sync result.
         this.maybeSyncAndUpdateProviderState()
       }
     }
