@@ -1,5 +1,5 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
-import { Config, DEFAULT_CONFIG } from './config'
+import { DEFAULT_SINGLE_PROVIDER_CONFIG, SingleJsonRpcProviderConfig } from './config'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import {
   BlockTag,
@@ -14,9 +14,13 @@ import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
-import { ProviderStateSyncer, SyncResult } from './ProviderStateSyncer'
+import { ProviderStateSyncer } from './ProviderStateSyncer'
+import { ProviderState } from './ProviderState'
+
+const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call']
 
 interface SingleCallPerf {
+  methodName: string
   succeed: boolean
   latencyInMs: number
   startTimestampInMs: number
@@ -30,8 +34,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private healthScore: number = 0
   private healthy: boolean = true
+
   private lastCallTimestampInMs: number = 0
-  private config: Config
+
+  private lastLatencyEvaluationTimestampInMs: number = 0
+  private lastEvaluatedLatencyInMs: number = 0
+  private lastLatencyEvaluationApiName: string
+  private recentAverageLatencyInMs: number = 0
+
+  private config: SingleJsonRpcProviderConfig
   private readonly metricPrefix: string
   private readonly log: Logger
 
@@ -39,7 +50,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
 
-  constructor(network: Network, url: string, log: Logger, config: Config = DEFAULT_CONFIG) {
+  constructor(
+    network: Network,
+    url: string,
+    log: Logger,
+    config: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
+  ) {
     super(url, network)
     this.url = url
     this.log = log
@@ -57,8 +73,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         dbTableName,
         this.providerId,
         this.config.DB_SYNC_INTERVAL_IN_S,
+        this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
+      // Fire and forget. Won't check the sync result.
       this.maybeSyncAndUpdateProviderState()
     }
   }
@@ -67,9 +85,26 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return this.healthy
   }
 
-  hasEnoughWaitSinceLastCall(): boolean {
-    this.log.debug(`${this.url}: score ${this.healthScore}, waited ${Date.now() - this.lastCallTimestampInMs} ms`)
-    return Date.now() - this.lastCallTimestampInMs > this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS
+  recentAverageLatency() {
+    return this.recentAverageLatencyInMs
+  }
+
+  hasEnoughWaitSinceLastCall(waitTimeRequirementInMs: number): boolean {
+    this.log.debug(
+      `${this.url}: hasEnoughWaitSinceLastCall? score ${this.healthScore}, waited ${
+        Date.now() - this.lastCallTimestampInMs
+      } ms, wait requirement: ${waitTimeRequirementInMs} ms`
+    )
+    return Date.now() - this.lastCallTimestampInMs > waitTimeRequirementInMs
+  }
+
+  hasEnoughWaitSinceLastLatencyEvaluation(waitTimeRequirementInMs: number): boolean {
+    this.log.debug(
+      `${this.url}: hasEnoughWaitSinceLastLatencyEvaluation? waited ${
+        Date.now() - this.lastLatencyEvaluationTimestampInMs
+      } ms, wait requirement: ${waitTimeRequirementInMs} ms`
+    )
+    return Date.now() - this.lastLatencyEvaluationTimestampInMs > waitTimeRequirementInMs
   }
 
   private recordError(method: string) {
@@ -117,6 +152,25 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       if (perf.startTimestampInMs - this.lastCallTimestampInMs > 0) {
         this.recordProviderRecovery(perf.startTimestampInMs - this.lastCallTimestampInMs)
       }
+      this.lastCallTimestampInMs = perf.startTimestampInMs
+
+      if (
+        this.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S) &&
+        MAJOR_METHOD_NAMES.includes(perf.methodName)
+      ) {
+        this.lastEvaluatedLatencyInMs = perf.latencyInMs
+        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+        this.lastLatencyEvaluationApiName = perf.methodName
+        this.logLatencyMetrics()
+        this.log.debug(
+          {
+            lastEvaluatedLatencyInMs: this.lastEvaluatedLatencyInMs,
+            lastLatencyEvaluationTimestampInMs: this.lastLatencyEvaluationTimestampInMs,
+            lastLatencyEvaluationApiName: this.lastLatencyEvaluationApiName,
+          },
+          'Latency evaluation recorded'
+        )
+      }
     }
     // No reward for normal operation.
   }
@@ -126,7 +180,17 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     try {
       await this.getBlockNumber()
     } catch (error: any) {
-      this.log.error(`Encounter error for shadow evaluate call: ${JSON.stringify(error)}`)
+      this.log.error(`Encounter error for shadow evaluate recovery call: ${JSON.stringify(error)}`)
+      // Swallow the error.
+    }
+  }
+
+  async evaluateLatency(methodName: string, ...args: any[]) {
+    this.log.debug(`${this.url}: Evaluate for latency...`)
+    try {
+      await (this as any)[`${methodName}`](...args)
+    } catch (error: any) {
+      this.log.error(`Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
       // Swallow the error.
     }
   }
@@ -134,6 +198,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   // Notice that AWS metrics have to be non-negative.
   logHealthMetrics() {
     metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
+  }
+
+  logLatencyMetrics() {
+    metric.putMetric(
+      `${this.metricPrefix}_evaluated_latency_${this.lastLatencyEvaluationApiName}`,
+      this.lastEvaluatedLatencyInMs,
+      MetricLoggerUnit.None
+    )
   }
 
   // Wrap another layer only for the sake of ease unit testing.
@@ -149,6 +221,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   ): Promise<any> {
     this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
     const perf: SingleCallPerf = {
+      methodName: fnName,
       succeed: true,
       latencyInMs: 0,
       startTimestampInMs: Date.now(),
@@ -166,6 +239,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastCallTimestampInMs = perf.startTimestampInMs
 
       if (this.enableDbSync) {
+        // Fire and forget. Won't check the sync result.
         this.maybeSyncAndUpdateProviderState()
       }
     }
@@ -173,18 +247,25 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private async maybeSyncAndUpdateProviderState() {
     try {
-      const syncResult: SyncResult = await this.providerStateSyncer.maybeSyncWithRepository(
+      const newState: ProviderState | null = await this.providerStateSyncer.maybeSyncWithRepository(
         this.healthScore - this.healthScoreAtLastSync,
-        this.healthScore
+        this.healthScore,
+        this.lastEvaluatedLatencyInMs,
+        this.lastLatencyEvaluationTimestampInMs,
+        this.lastLatencyEvaluationApiName
       )
-      if (syncResult.synced) {
-        this.healthScoreAtLastSync = syncResult.state.healthScore
+      if (newState !== null) {
+        // Update health state
+        this.healthScoreAtLastSync = newState.healthScore
         this.healthScore = this.healthScoreAtLastSync
-        this.log.debug(`Synced with DB: new health score ${this.healthScore}`)
+        this.log.debug(`Synced with storage: new health score ${this.healthScore}`)
         this.updateHealthyStatus()
+
+        // Update latency stat
+        this.updateLatencyStat(newState)
       }
     } catch (err: any) {
-      this.log.error(`Encountered error when sync provider state: ${JSON.stringify(err)}`)
+      this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
       // Won't throw. A fail of sync won't affect how we do health state update locally.
     }
   }
@@ -197,6 +278,19 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.healthy = true
       this.log.warn(`${this.url} resumes to healthy`)
     }
+  }
+
+  private updateLatencyStat(state: ProviderState) {
+    const timestampInMs = Date.now()
+    let latencySum = 0
+    let latencyCount = 0
+    for (const latency of state.latencies) {
+      if (latency.timestampInMs > timestampInMs - 1000 * this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S) {
+        latencySum += latency.latencyInMs
+        latencyCount++
+      }
+    }
+    this.recentAverageLatencyInMs = latencySum / latencyCount
   }
 
   ///////////////////// Begin of override functions /////////////////////

@@ -1,6 +1,4 @@
-export interface ProviderState {
-  [key: string]: any
-}
+import { ProviderState } from './ProviderState'
 
 export interface ProviderStateWithTimestamp {
   state: ProviderState

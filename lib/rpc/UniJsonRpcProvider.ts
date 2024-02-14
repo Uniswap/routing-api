@@ -14,6 +14,7 @@ import { LRUCache } from 'lru-cache'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
+import { DEFAULT_UNI_PROVIDER_CONFIG, UniJsonRpcProviderConfig } from './config'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   readonly chainId: ChainId = ChainId.MAINNET
@@ -34,7 +35,9 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
 
   // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
-  private allowProviderAutoSwitch: boolean = true
+  private readonly allowProviderAutoSwitch: boolean = true
+
+  private config: UniJsonRpcProviderConfig
 
   private readonly log: Logger
 
@@ -44,12 +47,14 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     log: Logger,
     ranking?: number[],
     weights?: number[],
-    allowProviderAutoSwitch?: boolean
+    allowProviderAutoSwitch?: boolean,
+    config: UniJsonRpcProviderConfig = DEFAULT_UNI_PROVIDER_CONFIG
   ) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
     this.connection.url
     this.log = log
+    this.config = config
 
     if (isEmpty(singleRpcProviders)) {
       throw new Error('Empty singlePrcProviders')
@@ -154,11 +159,16 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  private checkUnhealthyProvider() {
+  // Shadow call to all unhealthy providers to get some idea about their latest health state.
+  // We will rate limit it to one request per config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS per lambda instance.
+  private checkUnhealthyProviders() {
     this.log.debug('After serving a call, check unhealthy providers')
     let count = 0
     for (const provider of this.providers) {
-      if (!provider.isHealthy() && provider.hasEnoughWaitSinceLastCall()) {
+      if (
+        !provider.isHealthy() &&
+        provider.hasEnoughWaitSinceLastCall(this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS)
+      ) {
         // Fire and forget. Don't care about its result and it won't throw.
         // It's done this way because We don't want to block the return of this function.
         provider.evaluateForRecovery()
@@ -166,6 +176,24 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
     this.log.debug(`Evaluate ${count} unhealthy providers`)
+  }
+
+  // Shadow call to other health providers that are not selected for performing current request
+  // to gather their health states from time to time.
+  private checkOtherHealthyProvider(selectedProvider: SingleJsonRpcProvider, methodName: string, args: any[]) {
+    const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
+    let count = 0
+    for (let provider of healthyProviders) {
+      if (provider.url != selectedProvider.url) {
+        if (provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
+          // Fire and forget. Don't care about its result and it won't throw.
+          // It's done this way because We don't want to block the return of this function.
+          provider.evaluateLatency(methodName, args)
+          count++
+        }
+      }
+    }
+    this.log.debug(`Evaluated ${count} other healthy providers`)
   }
 
   logProviderHealthScores() {
@@ -215,7 +243,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw error
     } finally {
       this.lastUsedProvider = selectedProvider
-      this.checkUnhealthyProvider()
+      if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
+        this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+      }
+      this.checkUnhealthyProviders()
     }
   }
 
