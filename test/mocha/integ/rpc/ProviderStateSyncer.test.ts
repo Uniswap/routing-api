@@ -56,8 +56,6 @@ describe('ProviderStateSyncer', () => {
     expect(syncResult!.healthScore).equals(localHealthScore)
     expect(syncer.lastSyncTimestampInMs).equals(timestamp)
 
-    const writeArg = writeStub.getCall(0).args[1]
-    console.log(writeArg)
     expect(writeStub.getCall(0).args[1]).deep.equals({
       healthScore: -1100,
       latencies: [
@@ -92,7 +90,6 @@ describe('ProviderStateSyncer', () => {
         },
       ],
     })
-    console.log(`${JSON.stringify(newState)}`)
   })
 
   it('test calculateNewState: old state is not null', async () => {

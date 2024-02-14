@@ -272,7 +272,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private updateLatencyStat(state: ProviderState) {
-    console.log(state)
     const timestampInMs = Date.now()
     let latencySum = 0
     let latencyCount = 0

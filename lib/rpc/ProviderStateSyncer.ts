@@ -81,10 +81,9 @@ export class ProviderStateSyncer {
 
     const timestampNowInMs = Date.now()
     const latencies: LatencyEvaluation[] = []
-    const timestampSet = new Set<number>()
 
-    const shouldAdd = (timestampInMs: number, timestampSet: Set<number>, minTimestampInMs: number): boolean => {
-      return !timestampSet.has(timestampInMs) && timestampInMs > minTimestampInMs
+    const shouldAdd = (timestampInMs: number, minTimestampInMs: number): boolean => {
+      return timestampInMs > minTimestampInMs
     }
 
     if (oldState !== null && oldState) {
@@ -92,19 +91,16 @@ export class ProviderStateSyncer {
         if (
           shouldAdd(
             latency.timestampInMs,
-            timestampSet,
             timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS
           )
         ) {
           latencies.push(latency)
-          timestampSet.add(latency.timestampInMs)
         }
       }
     }
     if (
       shouldAdd(
         stateDiff.latency.timestampInMs,
-        timestampSet,
         timestampNowInMs - 1000 * this.latencyStatHistoryWindowLengthInS
       )
     ) {
