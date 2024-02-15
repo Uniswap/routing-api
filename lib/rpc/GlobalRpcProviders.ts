@@ -30,19 +30,6 @@ export class GlobalRpcProviders {
     prodConfig: ProdConfig,
     singleConfig: SingleJsonRpcProviderConfig
   ) {
-    // // Only Avalanche is supported for now.
-    // const infuraAvalancheUrl = process.env[`WEB3_RPC_${ChainId.AVALANCHE.toString()}`]!
-    // if (infuraAvalancheUrl === undefined) {
-    //   throw new Error(
-    //     `Infura Avalanche URL isn't provided by environment variable WEB3_RPC_${ChainId.AVALANCHE.toString()}`
-    //   )
-    // }
-    // GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
-    //   [
-    //     ChainId.AVALANCHE,
-    //     [new SingleJsonRpcProvider({ name: 'avalanche', chainId: ChainId.AVALANCHE }, infuraAvalancheUrl, log, config)],
-    //   ],
-    // ])
     GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map()
     for (const [chainId, chainConfig] of prodConfig) {
       if (!chainConfig.useMultiProvider) {

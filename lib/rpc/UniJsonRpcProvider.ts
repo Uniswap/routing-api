@@ -23,6 +23,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // If provided, we will use this weight to decide the probability of choosing
   // one of the healthy providers.
+  // If not provided, we will only give non-zero weight to the first provider.
   private urlWeight: Record<string, number> = {}
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
