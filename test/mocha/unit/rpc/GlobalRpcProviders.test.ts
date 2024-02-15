@@ -44,7 +44,7 @@ describe('GlobalRpcProviders', () => {
       useMultiProvider: true,
       allowAutoSwitch: true,
       providerInitialWeights: [1, 1],
-      providerUrls: ['url0', 'url1'],
+      providerUrls: ['https://avalanche-mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e', 'https://delicate-twilight-fog.avalanche-mainnet.quiknode.pro/cfc8a4515c34559a8f39a0baf2fe46649188aba6/ext/bc/C/rpc/'],
     })
 
     const jsonStr = JSON.stringify(Array.from(prodConfig.entries()))
