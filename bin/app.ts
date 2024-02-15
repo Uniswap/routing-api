@@ -309,7 +309,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   tenderlyProject: process.env.TENDERLY_PROJECT!,
   tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
   unicornSecret: process.env.UNICORN_SECRET!,
-  uniRpcProviderConfig: process.env.UNI_RPC_PROVIDER_CONFIG!,
+  uniRpcProviderConfig: process.env.UNI_RPC_PROVIDER_PROD_CONFIG!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

@@ -139,7 +139,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         ...jsonRpcProviders,
-        UNI_RPC_PROVIDER_CONFIG: uniRpcProviderConfig,
+        UNI_RPC_PROVIDER_PROD_CONFIG: uniRpcProviderConfig,
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(

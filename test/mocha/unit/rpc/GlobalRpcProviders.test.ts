@@ -3,6 +3,7 @@ import { default as bunyan, default as Logger } from 'bunyan'
 import { ChainId } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
+import { ChainConfig, ProdConfig } from '../../../../lib/rpc/ProdConfig'
 
 const log: Logger = bunyan.createLogger({ name: 'test' })
 
@@ -27,11 +28,35 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
 }
 
 describe('GlobalRpcProviders', () => {
+  it('test serialization and deserialization of ProdConfig', () => {
+    const prodConfig: ProdConfig = new Map<ChainId, ChainConfig>()
+    // prodConfig.set(ChainId.MAINNET, {
+    //   useMultiProvider: false
+    // })
+    // prodConfig.set(ChainId.AVALANCHE, {
+    //   useMultiProvider: true,
+    //   allowAutoSwitch: true,
+    //   providerInitialWeights: [1, 1],
+    //   providerUrls: ['url0', 'url1']
+    // })
+
+    prodConfig.set(ChainId.AVALANCHE, {
+      useMultiProvider: true,
+      allowAutoSwitch: true,
+      providerInitialWeights: [1, 1],
+      providerUrls: ['url0', 'url1'],
+    })
+
+    const jsonStr = JSON.stringify(Array.from(prodConfig.entries()))
+    console.log(jsonStr)
+    const prodConfig2 = new Map<ChainId, ChainConfig>(JSON.parse(jsonStr))
+    expect(prodConfig).deep.equal(prodConfig2)
+  })
+
   it('Prepare global UniJsonRpcProvider by reading config', () => {
     process.env = {
-      UNI_RPC_PROVIDER_CONFIG: '{"1": "false", "43114": "true"}',
-      WEB3_RPC_1: 'url_1',
-      WEB3_RPC_43114: 'url_43114',
+      UNI_RPC_PROVIDER_PROD_CONFIG:
+        '[[1,{"useMultiProvider":false}],[43114,{"useMultiProvider":true,"allowAutoSwitch":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]]',
     }
 
     expect(
@@ -42,13 +67,24 @@ describe('GlobalRpcProviders', () => {
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.BNB
+      )
+    ).to.be.false
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
         ChainId.AVALANCHE
       )
     ).to.be.true
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).get(
-        ChainId.AVALANCHE
-      )?.chainId
-    ).to.be.equal(ChainId.AVALANCHE)
+
+    const avaUniProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.AVALANCHE)!
+    expect(avaUniProvider['allowProviderAutoSwitch']).to.be.true
+    expect(avaUniProvider['urlWeight']).to.deep.equal({ url0: 2, url1: 1 })
+    expect(avaUniProvider['providers'][0].url).to.equal('url0')
+    expect(avaUniProvider['providers'][1].url).to.equal('url1')
   })
 })
