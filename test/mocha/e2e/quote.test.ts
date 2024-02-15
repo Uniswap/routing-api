@@ -2424,14 +2424,14 @@ describe('quote', function () {
     [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISM]: () => WETH9[ChainId.OPTIMISM],
+    [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => USDC_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_ONE]: () => WETH9[ChainId.ARBITRUM_ONE],
+    [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_ARBITRUM,
     [ChainId.ARBITRUM_SEPOLIA]: () => USDC_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => USDC_ON(ChainId.POLYGON),
-    [ChainId.POLYGON]: () => WRAPPED_NATIVE_CURRENCY[ChainId.POLYGON],
+    [ChainId.POLYGON]: () => USDC_NATIVE_POLYGON,
     [ChainId.POLYGON_MUMBAI]: () => USDC_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CUSD_CELO,
     [ChainId.CELO_ALFAJORES]: () => CUSD_CELO_ALFAJORES,
@@ -2440,8 +2440,10 @@ describe('quote', function () {
     [ChainId.ARBITRUM_GOERLI]: () => null,
     [ChainId.BNB]: () => USDC_ON(ChainId.BNB),
     [ChainId.AVALANCHE]: () => USDC_ON(ChainId.AVALANCHE),
+    [ChainId.AVALANCHE]: () => USDC_NATIVE_AVAX,
     [ChainId.BASE_GOERLI]: () => USDC_ON(ChainId.BASE_GOERLI),
     [ChainId.BASE]: () => USDC_ON(ChainId.BASE),
+    [ChainId.BASE]: () => USDC_NATIVE_BASE,
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
@@ -2449,14 +2451,11 @@ describe('quote', function () {
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
-    [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
     [ChainId.ARBITRUM_ONE]: () => DAI_ON(ChainId.ARBITRUM_ONE),
-    [ChainId.ARBITRUM_ONE]: () => USDC_NATIVE_ARBITRUM,
     [ChainId.ARBITRUM_SEPOLIA]: () => DAI_ON(ChainId.ARBITRUM_ONE),
     [ChainId.POLYGON]: () => DAI_ON(ChainId.POLYGON),
-    [ChainId.POLYGON]: () => USDC_NATIVE_POLYGON,
     [ChainId.POLYGON_MUMBAI]: () => DAI_ON(ChainId.POLYGON_MUMBAI),
     [ChainId.CELO]: () => CEUR_CELO,
     [ChainId.CELO_ALFAJORES]: () => CEUR_CELO_ALFAJORES,
@@ -2515,14 +2514,24 @@ describe('quote', function () {
           }
         })
 
-        it(`erc20 -> erc20`, async () => {
+        it(`${wrappedNative.symbol} -> erc20 v2 only`, async () => {
+          const isV2PairRoutable = V2_SUPPORTED_PAIRS.find(
+            (pair) => pair[0]!.equals(wrappedNative) && pair[1]!.equals(erc1)
+          )
+
+          if (!isV2PairRoutable) {
+            return
+          }
+
           const quoteReq: QuoteQueryParams = {
-            tokenInAddress: erc1.address,
+            tokenInAddress: wrappedNative.address,
             tokenInChainId: chain,
-            tokenOutAddress: erc2.address,
+            tokenOutAddress: erc1.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, erc1, erc2, '1'),
+            amount: await getAmountFromToken(type, wrappedNative, erc1, '1'),
             type,
+            enableUniversalRouter: true,
+            protocols: 'v2',
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2533,24 +2542,17 @@ describe('quote', function () {
 
             expect(status).to.equal(200)
           } catch (err: any) {
-            fail(JSON.stringify(err.response.data))
+            fail(JSON.stringify(err))
           }
         })
 
-        it(`${erc1.symbol} -> ${erc2.symbol} v2 only`, async () => {
-          const isV2PairRoutable = V2_SUPPORTED_PAIRS.find((pair) => pair[0]!.equals(erc1) && pair[1]!.equals(erc2))
-
-          if (!isV2PairRoutable) {
-            return
-          }
-
+        it(`erc20 -> erc20`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, '1'),
-            protocols: 'v2',
             type,
           }
 
