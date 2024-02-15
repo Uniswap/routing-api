@@ -2,7 +2,7 @@ import { ChainId } from '@uniswap/sdk-core'
 
 export interface ChainConfig {
   useMultiProvider: boolean
-  allowAutoSwitch?: boolean
+  sessionAllowProviderFallbackWhenUnhealthy?: boolean
   providerInitialWeights?: number[]
   providerUrls?: string[]
 }

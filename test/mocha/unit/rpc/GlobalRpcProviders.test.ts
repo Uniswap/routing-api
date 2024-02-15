@@ -11,6 +11,7 @@ const UNI_PROVIDER_TEST_CONFIG: UniJsonRpcProviderConfig = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   ENABLE_SHADOW_LATENCY_EVALUATION: false,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
+  DEFAULT_INITIAL_WEIGHT: 1000,
 }
 
 const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
@@ -30,25 +31,7 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
 describe('GlobalRpcProviders', () => {
   it('test serialization and deserialization of ProdConfig', () => {
     const prodConfig: ProdConfig = new Map<ChainId, ChainConfig>()
-    // prodConfig.set(ChainId.MAINNET, {
-    //   useMultiProvider: false
-    // })
-    // prodConfig.set(ChainId.AVALANCHE, {
-    //   useMultiProvider: true,
-    //   allowAutoSwitch: true,
-    //   providerInitialWeights: [1, 1],
-    //   providerUrls: ['url0', 'url1']
-    // })
-
-    prodConfig.set(ChainId.AVALANCHE, {
-      useMultiProvider: true,
-      allowAutoSwitch: true,
-      providerInitialWeights: [1, 1],
-      providerUrls: ['https://avalanche-mainnet.infura.io/v3/1251f92fb3044883b08bd8913471ba6e', 'https://delicate-twilight-fog.avalanche-mainnet.quiknode.pro/cfc8a4515c34559a8f39a0baf2fe46649188aba6/ext/bc/C/rpc/'],
-    })
-
     const jsonStr = JSON.stringify(Array.from(prodConfig.entries()))
-    console.log(jsonStr)
     const prodConfig2 = new Map<ChainId, ChainConfig>(JSON.parse(jsonStr))
     expect(prodConfig).deep.equal(prodConfig2)
   })
@@ -56,7 +39,7 @@ describe('GlobalRpcProviders', () => {
   it('Prepare global UniJsonRpcProvider by reading config', () => {
     process.env = {
       UNI_RPC_PROVIDER_PROD_CONFIG:
-        '[[1,{"useMultiProvider":false}],[43114,{"useMultiProvider":true,"allowAutoSwitch":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]]',
+        '[[1,{"useMultiProvider":false}],[43114,{"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]]',
     }
 
     expect(
@@ -82,7 +65,7 @@ describe('GlobalRpcProviders', () => {
       UNI_PROVIDER_TEST_CONFIG,
       SINGLE_PROVIDER_TEST_CONFIG
     ).get(ChainId.AVALANCHE)!
-    expect(avaUniProvider['allowProviderAutoSwitch']).to.be.true
+    expect(avaUniProvider['sessionAllowProviderFallbackWhenUnhealthy']).to.be.true
     expect(avaUniProvider['urlWeight']).to.deep.equal({ url0: 2, url1: 1 })
     expect(avaUniProvider['providers'][0].url).to.equal('url0')
     expect(avaUniProvider['providers'][1].url).to.equal('url1')
