@@ -1,3 +1,5 @@
+import { ChainId } from '@uniswap/sdk-core'
+
 export interface CommonConfig {
   // Wait time for recording next latency evaluation result.
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: number
@@ -54,3 +56,13 @@ export const DEFAULT_SINGLE_PROVIDER_CONFIG: SingleJsonRpcProviderConfig = {
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
 }
+
+export interface ProviderConfig {
+  url: string
+}
+
+export interface ChainConfig {
+  providerWeights?: number[]
+}
+
+export type ProdConfig = Map<ChainId, ChainConfig>

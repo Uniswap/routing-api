@@ -66,7 +66,6 @@ export class GlobalRpcProviders {
             chainId,
             GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(chainId)!,
             log,
-            GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(chainId),
             GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(chainId),
             true,
             uniConfig

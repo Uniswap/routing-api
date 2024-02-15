@@ -21,9 +21,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private readonly providers: SingleJsonRpcProvider[] = []
 
-  // Used to remember the user-specified precedence or provider URLs. 0 means highest
-  private readonly urlPrecedence: Record<string, number> = {}
-
   // If provided, we will use this weight to decide the probability of choosing
   // one of the healthy providers.
   private readonly urlWeight: Record<string, number> = {}
@@ -45,7 +42,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     chainId: ChainId,
     singleRpcProviders: SingleJsonRpcProvider[],
     log: Logger,
-    ranking?: number[],
     weights?: number[],
     allowProviderAutoSwitch?: boolean,
     config: UniJsonRpcProviderConfig = DEFAULT_UNI_PROVIDER_CONFIG
@@ -60,19 +56,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw new Error('Empty singlePrcProviders')
     }
 
-    if (ranking !== undefined && weights !== undefined && ranking.length != weights.length) {
-      throw new Error('urls and weights need to have the same length')
-    }
-
     this.chainId = chainId
     this.providers = singleRpcProviders
     for (let i = 0; i < this.providers.length; i++) {
       const url = this.providers[i].url
-      if (ranking !== undefined) {
-        this.urlPrecedence[url] = ranking[i]
-      } else {
-        this.urlPrecedence[url] = i
-      }
       if (weights != undefined) {
         if (weights[i] <= 0) {
           throw new Error(`Invalid weight: ${weights[i]}. Weight needs to be a positive number`)
@@ -89,7 +76,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
     if (this.totallyDisableFallback) {
       const providers = [...this.providers]
-      this.reorderProviders(providers)
       this.log.debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
       return providers[0]
     }
@@ -111,8 +97,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     if (isEmpty(healthyProviders)) {
       throw new Error('No healthy provider available')
     }
-
-    this.reorderProviders(healthyProviders)
 
     if (isEmpty(this.urlWeight)) {
       this.log.debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
@@ -139,12 +123,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     throw new Error('Encounter error when selecting preferred provider')
-  }
-
-  private reorderProviders(providers: SingleJsonRpcProvider[]) {
-    providers.sort((a, b) => {
-      return this.urlPrecedence[a.url] - this.urlPrecedence[b.url]
-    })
   }
 
   private calculateHealthyProviderUrlWeightSum(healthyProviders: SingleJsonRpcProvider[]): number {
