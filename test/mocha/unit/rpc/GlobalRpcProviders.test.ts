@@ -3,7 +3,6 @@ import { default as bunyan, default as Logger } from 'bunyan'
 import { ChainId } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
-import { ChainConfig, ProdConfig } from '../../../../lib/rpc/ProdConfig'
 
 const log: Logger = bunyan.createLogger({ name: 'test' })
 
@@ -29,17 +28,10 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
 }
 
 describe('GlobalRpcProviders', () => {
-  it('test serialization and deserialization of ProdConfig', () => {
-    const prodConfig: ProdConfig = new Map<ChainId, ChainConfig>()
-    const jsonStr = JSON.stringify(Array.from(prodConfig.entries()))
-    const prodConfig2 = new Map<ChainId, ChainConfig>(JSON.parse(jsonStr))
-    expect(prodConfig).deep.equal(prodConfig2)
-  })
-
   it('Prepare global UniJsonRpcProvider by reading config', () => {
     process.env = {
       UNI_RPC_PROVIDER_PROD_CONFIG:
-        '[[1,{"useMultiProvider":false}],[43114,{"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]]',
+        '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]',
     }
 
     expect(
