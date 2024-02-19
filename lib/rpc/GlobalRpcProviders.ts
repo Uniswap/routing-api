@@ -22,7 +22,6 @@ export class GlobalRpcProviders {
     if (prodConfigStr === undefined) {
       throw new Error('Environment variable UNI_RPC_PROVIDER_PROD_CONFIG is missing!')
     }
-    // return new Map<ChainId, ChainConfig>(JSON.parse(prodConfigStr))
     const decodeResult = ProdConfigCodec.decode(JSON.parse(prodConfigStr))
     if (isLeft(decodeResult)) {
       throw new Error('Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation!')

@@ -1,5 +1,4 @@
 import * as t from 'io-ts'
-// import { ChainId } from '@uniswap/sdk-core'
 
 export const ProdConfigCodec = t.array(
   t.intersection([
@@ -16,12 +15,3 @@ export const ProdConfigCodec = t.array(
 )
 
 export type ProdConfig = t.TypeOf<typeof ProdConfigCodec>
-
-// export interface ChainConfig {
-//   useMultiProvider: boolean
-//   sessionAllowProviderFallbackWhenUnhealthy?: boolean
-//   providerInitialWeights?: number[]
-//   providerUrls?: string[]
-// }
-
-// export type ProdConfig = Map<ChainId, ChainConfig>
