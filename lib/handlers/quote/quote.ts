@@ -173,7 +173,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           case 'v2':
             if (
               chainId === ChainId.MAINNET ||
-              ['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
             ) {
               protocols.push(Protocol.V2)
             }
@@ -184,7 +184,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           case 'mixed':
             if (
               chainId === ChainId.MAINNET ||
-              ['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
             ) {
               protocols.push(Protocol.MIXED)
             }
