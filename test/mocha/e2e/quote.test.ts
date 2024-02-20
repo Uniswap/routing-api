@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { AllowanceTransfer, PermitSingle } from '@uniswap/permit2-sdk'
-import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Rounding, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Rounding, SWAP_ROUTER_02_ADDRESSES, Token, WETH9 } from '@uniswap/sdk-core'
 import {
   CEUR_CELO,
   CEUR_CELO_ALFAJORES,
@@ -10,7 +10,6 @@ import {
   ID_TO_NETWORK_NAME,
   NATIVE_CURRENCY,
   parseAmount,
-  SWAP_ROUTER_02_ADDRESSES,
   USDC_BNB,
   USDC_MAINNET,
   USDC_NATIVE_ARBITRUM,
