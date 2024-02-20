@@ -10,7 +10,7 @@ import {
   routeAmountsToString,
   SimulationStatus,
   SwapOptions,
-  SwapRoute
+  SwapRoute,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -22,7 +22,7 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   INTENT_SPECIFIC_CONFIG,
-  QUOTE_SPEED_CONFIG
+  QUOTE_SPEED_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusToString } from './util/simulation'
