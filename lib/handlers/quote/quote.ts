@@ -3,14 +3,14 @@ import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
+  ID_TO_NETWORK_NAME,
+  IMetric,
   IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
-  SwapRoute,
-  SwapOptions,
   SimulationStatus,
-  IMetric,
-  ID_TO_NETWORK_NAME,
+  SwapOptions,
+  SwapRoute,
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -20,9 +20,9 @@ import { ContainerInjected, RequestInjected } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
-  QUOTE_SPEED_CONFIG,
-  INTENT_SPECIFIC_CONFIG,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
+  INTENT_SPECIFIC_CONFIG,
+  QUOTE_SPEED_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusToString } from './util/simulation'
@@ -171,13 +171,23 @@ export class QuoteHandler extends APIGLambdaHandler<
       for (const protocolStr of protocolsStr) {
         switch (protocolStr.toLowerCase()) {
           case 'v2':
-            protocols.push(Protocol.V2)
+            if (
+              chainId === ChainId.MAINNET ||
+              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+            ) {
+              protocols.push(Protocol.V2)
+            }
             break
           case 'v3':
             protocols.push(Protocol.V3)
             break
           case 'mixed':
-            protocols.push(Protocol.MIXED)
+            if (
+              chainId === ChainId.MAINNET ||
+              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+            ) {
+              protocols.push(Protocol.MIXED)
+            }
             break
           default:
             return {
