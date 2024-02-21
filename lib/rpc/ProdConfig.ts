@@ -1,17 +1,21 @@
-import * as t from 'io-ts'
+import Joi from '@hapi/joi'
 
-export const ProdConfigCodec = t.array(
-  t.intersection([
-    t.type({
-      chainId: t.number,
-      useMultiProvider: t.boolean,
-    }),
-    t.partial({
-      sessionAllowProviderFallbackWhenUnhealthy: t.boolean,
-      providerInitialWeights: t.array(t.number),
-      providerUrls: t.array(t.string),
-    }),
-  ])
+export interface ChainConfig {
+  chainId: number
+  useMultiProvider: boolean
+  sessionAllowProviderFallbackWhenUnhealthy?: boolean
+  providerInitialWeights?: number[]
+  providerUrls?: string[]
+}
+
+export type ProdConfig = ChainConfig[]
+
+export const ProdConfigJoi = Joi.array().items(
+  Joi.object({
+    chainId: Joi.number().required(),
+    useMultiProvider: Joi.boolean().required(),
+    sessionAllowProviderFallbackWhenUnhealthy: Joi.boolean().optional(),
+    providerInitialWeights: Joi.array().items(Joi.number()).optional(),
+    providerUrls: Joi.array().items(Joi.string()).optional(),
+  })
 )
-
-export type ProdConfig = t.TypeOf<typeof ProdConfigCodec>

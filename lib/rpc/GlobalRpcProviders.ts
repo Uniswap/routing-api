@@ -8,9 +8,8 @@ import {
   SingleJsonRpcProviderConfig,
   UniJsonRpcProviderConfig,
 } from './config'
-import { ProdConfig, ProdConfigCodec } from './ProdConfig'
+import { ProdConfig, ProdConfigJoi } from './ProdConfig'
 import { chainIdToNetworkName } from './utils'
-import { isLeft } from 'fp-ts/lib/These'
 
 export class GlobalRpcProviders {
   private static SINGLE_RPC_PROVIDERS: Map<ChainId, SingleJsonRpcProvider[]> | null = null
@@ -22,11 +21,11 @@ export class GlobalRpcProviders {
     if (prodConfigStr === undefined) {
       throw new Error('Environment variable UNI_RPC_PROVIDER_PROD_CONFIG is missing!')
     }
-    const decodeResult = ProdConfigCodec.decode(JSON.parse(prodConfigStr))
-    if (isLeft(decodeResult)) {
-      throw new Error('Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation!')
+    const validation = ProdConfigJoi.validate(JSON.parse(prodConfigStr))
+    if (validation.error) {
+      throw new Error(`Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation: ${validation.error}`)
     }
-    return decodeResult.right
+    return validation.value as ProdConfig
   }
 
   private static initGlobalSingleRpcProviders(

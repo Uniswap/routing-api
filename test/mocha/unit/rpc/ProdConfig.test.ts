@@ -1,7 +1,5 @@
 import { expect } from 'chai'
-import { ProdConfig, ProdConfigCodec } from '../../../../lib/rpc/ProdConfig'
-import { isLeft } from 'fp-ts/lib/These'
-import { PathReporter } from 'io-ts/PathReporter'
+import { ProdConfig, ProdConfigJoi } from '../../../../lib/rpc/ProdConfig'
 
 describe('ProdConfig', () => {
   it('test generate json string from ProdConfig', () => {
@@ -30,12 +28,11 @@ describe('ProdConfig', () => {
     const jsonStr =
       '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
     const object = JSON.parse(jsonStr)
-    const decodeResult = ProdConfigCodec.decode(object)
-    if (isLeft(decodeResult)) {
-      console.log(PathReporter.report(decodeResult))
-      throw new Error('Fail to decode or validate json str')
+    const validation = ProdConfigJoi.validate(object)
+    if (validation.error) {
+      throw new Error(`Fail to decode or validate json str: ${validation.error}`)
     }
-    const prodConfig: ProdConfig = decodeResult.right
+    const prodConfig: ProdConfig = validation.value as ProdConfig
     expect(prodConfig.length).equal(2)
     expect(prodConfig[0]).deep.equal({
       chainId: 1,
@@ -51,12 +48,24 @@ describe('ProdConfig', () => {
   })
 
   it('test parse json string into ProdConfig with validation, bad cases', () => {
-    let jsonStr = '{"yummy": "yummy"}'
-    let decodeResult = ProdConfigCodec.decode(JSON.parse(jsonStr))
-    expect(isLeft(decodeResult))
+    let jsonStr = '[{"yummy": "yummy"}]'
+    let object = JSON.parse(jsonStr)
+    let validation = ProdConfigJoi.validate(object)
+    console.log(validation.error)
+    expect(validation.error !== undefined)
 
-    jsonStr = '[{"chainId":1}]'
-    decodeResult = ProdConfigCodec.decode(JSON.parse(jsonStr))
-    expect(isLeft(decodeResult))
+    jsonStr =
+      '[{"chainId":123,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":["x","y"],"providerUrls":["url1","url2"]}]'
+    object = JSON.parse(jsonStr)
+    validation = ProdConfigJoi.validate(object)
+    console.log(validation.error)
+    expect(validation.error !== undefined)
+
+    jsonStr =
+      '[{"chainId":123},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":["x","y"],"providerUrls":["url1","url2"]}]'
+    object = JSON.parse(jsonStr)
+    validation = ProdConfigJoi.validate(object)
+    console.log(validation.error)
+    expect(validation.error !== undefined)
   })
 })
