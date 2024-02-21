@@ -18,7 +18,6 @@ describe('ProdConfig', () => {
     ]
 
     const jsonStr = JSON.stringify(prodConfig)
-    console.log(jsonStr)
     expect(jsonStr).equal(
       '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
     )
@@ -51,21 +50,18 @@ describe('ProdConfig', () => {
     let jsonStr = '[{"yummy": "yummy"}]'
     let object = JSON.parse(jsonStr)
     let validation = ProdConfigJoi.validate(object)
-    console.log(validation.error)
     expect(validation.error !== undefined)
 
     jsonStr =
       '[{"chainId":123,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":["x","y"],"providerUrls":["url1","url2"]}]'
     object = JSON.parse(jsonStr)
     validation = ProdConfigJoi.validate(object)
-    console.log(validation.error)
     expect(validation.error !== undefined)
 
     jsonStr =
       '[{"chainId":123},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":["x","y"],"providerUrls":["url1","url2"]}]'
     object = JSON.parse(jsonStr)
     validation = ProdConfigJoi.validate(object)
-    console.log(validation.error)
     expect(validation.error !== undefined)
   })
 })
