@@ -2475,9 +2475,7 @@ describe('quote', function () {
       c != ChainId.OPTIMISM_SEPOLIA &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_GOERLI &&
-      c != ChainId.CELO_ALFAJORES &&
-      c != ChainId.GOERLI &&
-      c != ChainId.SEPOLIA
+      c != ChainId.CELO_ALFAJORES
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
@@ -2547,6 +2545,11 @@ describe('quote', function () {
         })
 
         it(`erc20 -> erc20`, async () => {
+          if (chain === ChainId.SEPOLIA) {
+            // Sepolia doesn't have sufficient liquidity on DAI pools yet
+            return
+          }
+
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
@@ -2570,6 +2573,11 @@ describe('quote', function () {
 
         const native = NATIVE_CURRENCY[chain]
         it(`${native} -> erc20`, async () => {
+          if (chain === ChainId.SEPOLIA) {
+            // Sepolia doesn't have sufficient liquidity on DAI pools yet
+            return
+          }
+
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
           // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
           const baseErc20 = chain == ChainId.BASE ? USDC_ON(ChainId.BASE) : erc2
@@ -2595,6 +2603,11 @@ describe('quote', function () {
           }
         })
         it(`has quoteGasAdjusted values`, async () => {
+          if (chain === ChainId.SEPOLIA) {
+            // Sepolia doesn't have sufficient liquidity on DAI pools yet
+            return
+          }
+
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
