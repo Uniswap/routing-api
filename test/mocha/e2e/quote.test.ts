@@ -2547,7 +2547,7 @@ describe('quote', function () {
         it(`erc20 -> erc20`, async () => {
           if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
-            return;
+            return
           }
 
           const quoteReq: QuoteQueryParams = {
@@ -2575,7 +2575,7 @@ describe('quote', function () {
         it(`${native} -> erc20`, async () => {
           if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
-            return;
+            return
           }
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
@@ -2605,9 +2605,9 @@ describe('quote', function () {
         it(`has quoteGasAdjusted values`, async () => {
           if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
-            return;
+            return
           }
-          
+
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
