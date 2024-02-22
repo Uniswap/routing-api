@@ -1,6 +1,6 @@
 [
   {
     "chainId": 43114,
-    "useMultiProvider": false
+    "useMultiProviderProb": 0
   }
 ]

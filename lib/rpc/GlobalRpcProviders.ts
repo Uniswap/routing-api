@@ -48,17 +48,16 @@ export class GlobalRpcProviders {
   ) {
     GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map()
     for (const chainConfig of prodConfig) {
-      if (!chainConfig.useMultiProvider) {
-        continue
-      }
       const chainId = chainConfig.chainId as ChainId
-      let providers: SingleJsonRpcProvider[] = []
-      for (const providerUrl of chainConfig.providerUrls!) {
-        providers.push(
-          new SingleJsonRpcProvider({ name: chainIdToNetworkName(chainId), chainId }, providerUrl, log, singleConfig)
-        )
+      if (Math.random() < chainConfig.useMultiProviderProb) {
+        let providers: SingleJsonRpcProvider[] = []
+        for (const providerUrl of chainConfig.providerUrls!) {
+          providers.push(
+            new SingleJsonRpcProvider({ name: chainIdToNetworkName(chainId), chainId }, providerUrl, log, singleConfig)
+          )
+        }
+        GlobalRpcProviders.SINGLE_RPC_PROVIDERS.set(chainId, providers)
       }
-      GlobalRpcProviders.SINGLE_RPC_PROVIDERS.set(chainId, providers)
     }
   }
 
@@ -74,12 +73,9 @@ export class GlobalRpcProviders {
 
     GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map()
     for (const chainConfig of prodConfig) {
-      if (!chainConfig.useMultiProvider) {
-        continue
-      }
       const chainId = chainConfig.chainId as ChainId
       if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(chainId)) {
-        throw new Error(`No RPC providers configured for chain ${chainId.toString()}`)
+        continue
       }
       GlobalRpcProviders.UNI_RPC_PROVIDERS.set(
         chainId,
