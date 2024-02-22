@@ -24,7 +24,7 @@ export class GlobalRpcProviders {
     const validation = ProdConfigJoi.validate(JSON.parse(prodConfigStr))
     if (validation.error) {
       throw new Error(
-        `Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation: ${validation.error.message}`
+        `Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation: Value: ${prodConfigStr}, Error: ${validation.error.message}`
       )
     }
     return validation.value as ProdConfig
