@@ -189,7 +189,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      uniRpcProviderConfig: uniRpcProviderConfig.secretValue.toString(),
+      uniRpcProviderConfig: uniRpcProviderConfig.secretValueFromJson('prod-config').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -213,7 +213,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      uniRpcProviderConfig: uniRpcProviderConfig.secretValue.toString(),
+      uniRpcProviderConfig: uniRpcProviderConfig.secretValueFromJson('prod-config').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
