@@ -11,6 +11,7 @@ const UNI_PROVIDER_TEST_CONFIG: UniJsonRpcProviderConfig = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   ENABLE_SHADOW_LATENCY_EVALUATION: false,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
+  DEFAULT_INITIAL_WEIGHT: 1000,
 }
 
 const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
@@ -58,7 +59,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -337,64 +337,7 @@ describe('UniJsonRpcProvider', () => {
     }
   })
 
-  it('test selectPreferredProvider: without custom ranking nor weights', async () => {
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
-  })
-
-  it('test selectPreferredProvider: with custom ranking', async () => {
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      [2, 1, 0],
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
-    )
-    for (const provider of uniProvider['providers']) {
-      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
-    }
-
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
-
-    // Two failed calls makes provider2 unhealthy
-    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
-    getBlockNumber2.rejects('error')
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
-
-    // Two failed calls makes provider1 unhealthy
-    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
-    getBlockNumber1.rejects('error')
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-
+  it('test selectPreferredProvider: without weights', async () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
   })
 
@@ -403,7 +346,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       [4, 1, 3],
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -429,32 +371,11 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
   })
 
-  it('test reorderHealthyProviders()', () => {
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      [2, 0, 1],
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
-    )
-    for (const provider of uniProvider['providers']) {
-      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
-    }
-    const providers = uniProvider['providers']
-    uniProvider['reorderProviders'](providers)
-    expect(providers[0].url).to.be.equal('url_1')
-    expect(providers[1].url).to.be.equal('url_2')
-    expect(providers[2].url).to.be.equal('url_0')
-  })
-
   it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider', async () => {
     const uniProvider1 = new UniJsonRpcProvider(
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -467,7 +388,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -519,61 +439,6 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider2['selectPreferredProvider']().url).equals('url_2')
   })
 
-  it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider, but with different rankings', async () => {
-    const uniProvider1 = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
-      log,
-      [0, 2, 1],
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
-    )
-    for (const provider of uniProvider1['providers']) {
-      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
-    }
-
-    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
-    getBlockNumber0.rejects('error')
-
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
-    expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
-
-    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
-    getBlockNumber1.rejects('error')
-
-    // Two failed calls makes provider1 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
-    expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
-  })
-
   it('test session support: with provider weights', async () => {
     const sessionId = uniProvider.createNewSessionId()
 
@@ -581,7 +446,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       [4, 1, 3],
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -623,7 +487,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       undefined,
       UNI_PROVIDER_TEST_CONFIG
@@ -674,7 +537,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       false,
       UNI_PROVIDER_TEST_CONFIG
@@ -729,7 +591,6 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
       undefined,
       undefined,
       CUSTOM_UNI_PROVIDER_CONFIG
