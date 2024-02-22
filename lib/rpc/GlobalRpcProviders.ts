@@ -2,96 +2,87 @@ import { ChainId } from '@uniswap/sdk-core'
 import { SingleJsonRpcProvider } from './SingleJsonRpcProvider'
 import { UniJsonRpcProvider } from './UniJsonRpcProvider'
 import Logger from 'bunyan'
+import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import {
   DEFAULT_SINGLE_PROVIDER_CONFIG,
   DEFAULT_UNI_PROVIDER_CONFIG,
   SingleJsonRpcProviderConfig,
   UniJsonRpcProviderConfig,
 } from './config'
-import { ProdConfig, ProdConfigJoi } from './ProdConfig'
-import { chainIdToNetworkName } from './utils'
 
 export class GlobalRpcProviders {
+  private static readonly PROVIDER_RPC_URL_RANKING: Map<ChainId, number[] | undefined> = new Map([
+    [ChainId.AVALANCHE, undefined],
+  ])
+
+  private static readonly PROVIDER_RPC_URL_WEIGHTS: Map<ChainId, number[] | undefined> = new Map([
+    [ChainId.AVALANCHE, undefined],
+  ])
+
   private static SINGLE_RPC_PROVIDERS: Map<ChainId, SingleJsonRpcProvider[]> | null = null
 
   private static UNI_RPC_PROVIDERS: Map<ChainId, UniJsonRpcProvider> | null = null
 
-  private static getProdConfig(): ProdConfig {
-    const prodConfigStr = process.env['UNI_RPC_PROVIDER_PROD_CONFIG']!
-    if (prodConfigStr === undefined) {
-      throw new Error('Environment variable UNI_RPC_PROVIDER_PROD_CONFIG is missing!')
-    }
-    const validation = ProdConfigJoi.validate(JSON.parse(prodConfigStr))
-    if (validation.error) {
+  private static initGlobalSingleRpcProviders(log: Logger, config: SingleJsonRpcProviderConfig) {
+    // Only Avalanche is supported for now.
+    const infuraAvalancheUrl = process.env[`WEB3_RPC_${ChainId.AVALANCHE.toString()}`]!
+    if (infuraAvalancheUrl === undefined) {
       throw new Error(
-        `Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation: Value: ${prodConfigStr}, Error: ${validation.error.message}`
+        `Infura Avalanche URL isn't provided by environment variable WEB3_RPC_${ChainId.AVALANCHE.toString()}`
       )
     }
-    return validation.value as ProdConfig
-  }
-
-  private static initGlobalSingleRpcProviders(
-    log: Logger,
-    prodConfig: ProdConfig,
-    singleConfig: SingleJsonRpcProviderConfig
-  ) {
-    GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map()
-    for (const chainConfig of prodConfig) {
-      if (!chainConfig.useMultiProvider) {
-        continue
-      }
-      const chainId = chainConfig.chainId as ChainId
-      let providers: SingleJsonRpcProvider[] = []
-      for (const providerUrl of chainConfig.providerUrls!) {
-        providers.push(
-          new SingleJsonRpcProvider({ name: chainIdToNetworkName(chainId), chainId }, providerUrl, log, singleConfig)
-        )
-      }
-      GlobalRpcProviders.SINGLE_RPC_PROVIDERS.set(chainId, providers)
-    }
+    GlobalRpcProviders.SINGLE_RPC_PROVIDERS = new Map([
+      [
+        ChainId.AVALANCHE,
+        [new SingleJsonRpcProvider({ name: 'avalanche', chainId: ChainId.AVALANCHE }, infuraAvalancheUrl, log, config)],
+      ],
+    ])
+    return GlobalRpcProviders.SINGLE_RPC_PROVIDERS
   }
 
   private static initGlobalUniRpcProviders(
     log: Logger,
-    prodConfig: ProdConfig,
     uniConfig: UniJsonRpcProviderConfig,
     singleConfig: SingleJsonRpcProviderConfig
   ) {
     if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
-      GlobalRpcProviders.initGlobalSingleRpcProviders(log, prodConfig, singleConfig)
+      GlobalRpcProviders.initGlobalSingleRpcProviders(log, singleConfig)
     }
+    const rpcConfigStr = process.env['UNI_RPC_PROVIDER_CONFIG']!
+    if (rpcConfigStr === undefined) {
+      throw new Error('Environment variable UNI_RPC_PROVIDER_CONFIG is missing!')
+    }
+    const rpcConfig = JSON.parse(rpcConfigStr)
 
     GlobalRpcProviders.UNI_RPC_PROVIDERS = new Map()
-    for (const chainConfig of prodConfig) {
-      if (!chainConfig.useMultiProvider) {
-        continue
-      }
-      const chainId = chainConfig.chainId as ChainId
-      if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(chainId)) {
-        throw new Error(`No RPC providers configured for chain ${chainId.toString()}`)
-      }
-      GlobalRpcProviders.UNI_RPC_PROVIDERS.set(
-        chainId,
-        new UniJsonRpcProvider(
+    for (let chainId of SUPPORTED_CHAINS) {
+      if (rpcConfig[chainId.toString()] === 'true') {
+        if (!GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.has(chainId)) {
+          throw new Error(`No RPC providers configured for chain ${chainId.toString()}`)
+        }
+        GlobalRpcProviders.UNI_RPC_PROVIDERS.set(
           chainId,
-          GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(chainId)!,
-          log,
-          chainConfig.providerInitialWeights,
-          true,
-          uniConfig
+          new UniJsonRpcProvider(
+            chainId,
+            GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(chainId)!,
+            log,
+            GlobalRpcProviders.PROVIDER_RPC_URL_RANKING.get(chainId),
+            GlobalRpcProviders.PROVIDER_RPC_URL_WEIGHTS.get(chainId),
+            true,
+            uniConfig
+          )
         )
-      )
+      }
     }
     return GlobalRpcProviders.UNI_RPC_PROVIDERS
   }
 
   static getGlobalSingleRpcProviders(
     log: Logger,
-    singleConfig: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
+    config: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
   ): Map<ChainId, SingleJsonRpcProvider[]> {
-    const prodConfig = GlobalRpcProviders.getProdConfig()
     if (GlobalRpcProviders.SINGLE_RPC_PROVIDERS === null) {
-      GlobalRpcProviders.initGlobalSingleRpcProviders(log, prodConfig, singleConfig)
+      GlobalRpcProviders.initGlobalSingleRpcProviders(log, config)
     }
     return GlobalRpcProviders.SINGLE_RPC_PROVIDERS!
   }
@@ -101,9 +92,8 @@ export class GlobalRpcProviders {
     uniConfig: UniJsonRpcProviderConfig = DEFAULT_UNI_PROVIDER_CONFIG,
     singleConfig: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
   ): Map<ChainId, UniJsonRpcProvider> {
-    const prodConfig = GlobalRpcProviders.getProdConfig()
     if (GlobalRpcProviders.UNI_RPC_PROVIDERS === null) {
-      GlobalRpcProviders.initGlobalUniRpcProviders(log, prodConfig, uniConfig, singleConfig)
+      GlobalRpcProviders.initGlobalUniRpcProviders(log, uniConfig, singleConfig)
     }
     return GlobalRpcProviders.UNI_RPC_PROVIDERS!
   }
