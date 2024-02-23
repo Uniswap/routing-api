@@ -41,7 +41,6 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyProject: string
       tenderlyAccessKey: string
       unicornSecret: string
-      uniRpcProviderConfig: string
     }
   ) {
     super(parent, name, props)
@@ -62,7 +61,6 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
-      uniRpcProviderConfig,
     } = props
 
     const {
@@ -113,7 +111,6 @@ export class RoutingAPIStack extends cdk.Stack {
       tokenPropertiesCachingDynamoDb,
       rpcProviderStateDynamoDb,
       unicornSecret,
-      uniRpcProviderConfig,
     })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')
