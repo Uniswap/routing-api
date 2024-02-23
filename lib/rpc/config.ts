@@ -10,6 +10,8 @@ export interface UniJsonRpcProviderConfig extends CommonConfig {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: number
   // Do shadow calls on other non-selected healthy providers to monitor their latencies
   ENABLE_SHADOW_LATENCY_EVALUATION: boolean
+  // Default initial provider's weight, if not specified.
+  DEFAULT_INITIAL_WEIGHT: 1000
 }
 
 export interface SingleJsonRpcProviderConfig extends CommonConfig {
@@ -39,6 +41,7 @@ export const DEFAULT_UNI_PROVIDER_CONFIG: UniJsonRpcProviderConfig = {
   RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
   ENABLE_SHADOW_LATENCY_EVALUATION: true,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
+  DEFAULT_INITIAL_WEIGHT: 1000,
 }
 
 export const DEFAULT_SINGLE_PROVIDER_CONFIG: SingleJsonRpcProviderConfig = {
