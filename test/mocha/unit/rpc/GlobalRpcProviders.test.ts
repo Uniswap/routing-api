@@ -30,26 +30,45 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
 describe('GlobalRpcProviders', () => {
   it('Prepare global UniJsonRpcProvider by reading config', () => {
     process.env = {
-      UNI_RPC_PROVIDER_PROD_CONFIG:
-        '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[2,1],"providerUrls":["url0","url1"]}]',
+      URL0: 'url0',
+      URL1: 'url1',
     }
+    const rpcProviderProdConfig = [
+      { chainId: 1, useMultiProvider: false },
+      {
+        chainId: 43114,
+        useMultiProvider: true,
+        sessionAllowProviderFallbackWhenUnhealthy: true,
+        providerInitialWeights: [2, 1],
+        providerUrls: ['URL0', 'URL1'],
+      },
+    ]
 
     expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.MAINNET
-      )
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
     ).to.be.false
 
     expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.BNB
-      )
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.BNB)
     ).to.be.false
 
     expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.AVALANCHE
-      )
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
     ).to.be.true
 
     const avaUniProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
