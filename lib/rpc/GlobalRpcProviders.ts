@@ -18,15 +18,11 @@ export class GlobalRpcProviders {
   private static UNI_RPC_PROVIDERS: Map<ChainId, UniJsonRpcProvider> | null = null
 
   private static validateProdConfig(config?: object): ProdConfig {
-    let validation
-    if (config !== undefined) {
-      validation = ProdConfigJoi.validate(config)
-    } else {
-      validation = ProdConfigJoi.validate(PROD_CONFIG)
-    }
+    const prodConfigInput = config !== undefined ? config : PROD_CONFIG
+    const validation = ProdConfigJoi.validate(prodConfigInput)
     if (validation.error) {
       throw new Error(
-        `Environment variable UNI_RPC_PROVIDER_PROD_CONFIG failed data validation: Value: ${PROD_CONFIG}, Error: ${validation.error.message}`
+        `ProdConfig failed data validation: Value: ${prodConfigInput}, Error: ${validation.error.message}`
       )
     }
     const prodConfig: ProdConfig = validation.value as ProdConfig
