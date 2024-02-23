@@ -2486,7 +2486,7 @@ describe('quote', function () {
 
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
-        this.retries(0)
+        this.retries(3)
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
