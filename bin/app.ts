@@ -35,7 +35,6 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject: string
       tenderlyAccessKey: string
       unicornSecret: string
-      uniRpcProviderConfig: string
     }
   ) {
     super(scope, id, props)
@@ -54,7 +53,6 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
-      uniRpcProviderConfig,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -72,7 +70,6 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
-      uniRpcProviderConfig,
     })
     this.url = url
   }
@@ -161,10 +158,6 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
     })
 
-    const uniRpcProviderConfig = sm.Secret.fromSecretAttributes(this, 'UniRpcProviderConfig', {
-      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:UniRpcProviderConfig-22p6Rd',
-    })
-
     // Parse AWS Secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
@@ -189,7 +182,6 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      uniRpcProviderConfig: uniRpcProviderConfig.secretValue.toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -213,7 +205,6 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      uniRpcProviderConfig: uniRpcProviderConfig.secretValue.toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -309,7 +300,6 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   tenderlyProject: process.env.TENDERLY_PROJECT!,
   tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
   unicornSecret: process.env.UNICORN_SECRET!,
-  uniRpcProviderConfig: process.env.UNI_RPC_PROVIDER_CONFIG!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

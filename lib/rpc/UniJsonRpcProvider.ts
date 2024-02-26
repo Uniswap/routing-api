@@ -21,21 +21,17 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private readonly providers: SingleJsonRpcProvider[] = []
 
-  // Used to remember the user-specified precedence or provider URLs. 0 means highest
-  private readonly urlPrecedence: Record<string, number> = {}
-
   // If provided, we will use this weight to decide the probability of choosing
   // one of the healthy providers.
-  private readonly urlWeight: Record<string, number> = {}
+  // If not provided, we will only give non-zero weight to the first provider.
+  private urlWeight: Record<string, number> = {}
 
   private lastUsedProvider: SingleJsonRpcProvider | null = null
-
-  private totallyDisableFallback: boolean = false
 
   private sessionCache: LRUCache<string, SingleJsonRpcProvider> = new LRUCache({ max: 1000 })
 
   // If true, it's allowed to use a different provider if the preferred provider isn't healthy.
-  private readonly allowProviderAutoSwitch: boolean = true
+  private readonly sessionAllowProviderFallbackWhenUnhealthy: boolean = true
 
   private config: UniJsonRpcProviderConfig
 
@@ -45,14 +41,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     chainId: ChainId,
     singleRpcProviders: SingleJsonRpcProvider[],
     log: Logger,
-    ranking?: number[],
     weights?: number[],
-    allowProviderAutoSwitch?: boolean,
+    sessionAllowProviderFallbackWhenUnhealthy?: boolean,
     config: UniJsonRpcProviderConfig = DEFAULT_UNI_PROVIDER_CONFIG
   ) {
     // Dummy super constructor call is needed.
     super('dummy_url', { chainId, name: 'dummy_network' })
-    this.connection.url
     this.log = log
     this.config = config
 
@@ -60,45 +54,57 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw new Error('Empty singlePrcProviders')
     }
 
-    if (ranking !== undefined && weights !== undefined && ranking.length != weights.length) {
-      throw new Error('urls and weights need to have the same length')
+    if (weights !== undefined) {
+      if (singleRpcProviders.length != weights!.length) {
+        throw new Error('weights should have same length as providers')
+      }
     }
 
     this.chainId = chainId
+
     this.providers = singleRpcProviders
+
     for (let i = 0; i < this.providers.length; i++) {
       const url = this.providers[i].url
-      if (ranking !== undefined) {
-        this.urlPrecedence[url] = ranking[i]
-      } else {
-        this.urlPrecedence[url] = i
-      }
       if (weights != undefined) {
         if (weights[i] <= 0) {
           throw new Error(`Invalid weight: ${weights[i]}. Weight needs to be a positive number`)
         }
         this.urlWeight[url] = weights[i]
+      } else {
+        // If weights is undefined, we assume provider[0] has non-zero weights and all other provider will have zero weight
+        this.urlWeight[url] = i == 0 ? this.config.DEFAULT_INITIAL_WEIGHT : 0
       }
     }
 
-    if (allowProviderAutoSwitch !== undefined) {
-      this.allowProviderAutoSwitch = allowProviderAutoSwitch
+    if (sessionAllowProviderFallbackWhenUnhealthy !== undefined) {
+      this.sessionAllowProviderFallbackWhenUnhealthy = sessionAllowProviderFallbackWhenUnhealthy
     }
   }
 
-  private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
-    if (this.totallyDisableFallback) {
-      const providers = [...this.providers]
-      this.reorderProviders(providers)
-      this.log.debug(`Use provider ${providers[0].url} for chain ${this.chainId.toString()}`)
-      return providers[0]
+  private selectOneOfHealthyProvidersBasedOnWeights(healthyProviders: SingleJsonRpcProvider[]): SingleJsonRpcProvider {
+    const urlWeightSum = this.calculateHealthyProviderUrlWeightSum(healthyProviders)
+    const rand = Math.random() * urlWeightSum
+    // No need to use binary search since the size of healthy providers is very small.
+    let accumulatedWeight: number = 0
+    for (const provider of healthyProviders) {
+      accumulatedWeight += this.urlWeight[provider.url]
+      if (accumulatedWeight >= rand) {
+        this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
+        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
+        return provider
+      }
     }
+    throw new Error('Encounter error when selecting preferred provider')
+  }
 
+  private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
+    // If session is used, stick to the last provider, if possible.
     if (sessionId !== undefined && this.sessionCache.has(sessionId)) {
       const provider = this.sessionCache.get(sessionId)!
       if (provider.isHealthy()) {
         return provider
-      } else if (!this.allowProviderAutoSwitch) {
+      } else if (!this.sessionAllowProviderFallbackWhenUnhealthy) {
         throw new Error(
           `Forced to use the same provider during the session but the provider (${provider.providerName}) is unhealthy`
         )
@@ -112,39 +118,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw new Error('No healthy provider available')
     }
 
-    this.reorderProviders(healthyProviders)
-
-    if (isEmpty(this.urlWeight)) {
-      this.log.debug(`Use provider ${healthyProviders[0].url} for chain ${this.chainId.toString()}`)
-      if (sessionId !== undefined) {
-        this.sessionCache.set(sessionId, healthyProviders[0])
-      }
-      return healthyProviders[0]
+    const selectedProvider = this.selectOneOfHealthyProvidersBasedOnWeights(healthyProviders)
+    if (sessionId !== undefined) {
+      this.sessionCache.set(sessionId, selectedProvider)
     }
-
-    const urlWeightSum = this.calculateHealthyProviderUrlWeightSum(healthyProviders)
-    const rand = Math.random() * urlWeightSum
-    // No need to use binary search since the size of healthy providers is very small.
-    let accumulatedWeight: number = 0
-    for (const provider of healthyProviders) {
-      accumulatedWeight += this.urlWeight[provider.url]
-      if (accumulatedWeight >= rand) {
-        this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
-        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
-        if (sessionId !== undefined) {
-          this.sessionCache.set(sessionId, provider)
-        }
-        return provider
-      }
-    }
-
-    throw new Error('Encounter error when selecting preferred provider')
-  }
-
-  private reorderProviders(providers: SingleJsonRpcProvider[]) {
-    providers.sort((a, b) => {
-      return this.urlPrecedence[a.url] - this.urlPrecedence[b.url]
-    })
+    return selectedProvider
   }
 
   private calculateHealthyProviderUrlWeightSum(healthyProviders: SingleJsonRpcProvider[]): number {
@@ -219,10 +197,6 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   get lastUsedUrl() {
     return this.lastUsedProvider?.url
-  }
-
-  disableFallback() {
-    this.totallyDisableFallback = true
   }
 
   createNewSessionId(): string {
