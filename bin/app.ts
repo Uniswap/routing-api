@@ -12,6 +12,7 @@ import 'source-map-support/register'
 import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
+
 dotenv.config()
 
 export class RoutingAPIStage extends Stage {
@@ -162,8 +163,20 @@ export class RoutingAPIPipeline extends Stack {
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
       // TODO: Change this to `JSON_RPC_PROVIDER_${}` to be consistent with SOR
-      const key = `WEB3_RPC_${chainId}`
-      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+      if (chainId === ChainId.AVALANCHE) {
+        jsonRpcProviders[`WEB3_RPC_${chainId}`] = jsonRpcProvidersSecret
+          .secretValueFromJson(`WEB3_RPC_${chainId}`)
+          .toString()
+        jsonRpcProviders[`WEB3_RPC_${chainId}_NIRVANA`] = jsonRpcProvidersSecret
+          .secretValueFromJson(`WEB3_RPC_${chainId}_NIRVANA`)
+          .toString()
+        jsonRpcProviders[`WEB3_RPC_${chainId}_QUICKNODE`] = jsonRpcProvidersSecret
+          .secretValueFromJson(`WEB3_RPC_${chainId}_QUICKNODE`)
+          .toString()
+      } else {
+        const key = `WEB3_RPC_${chainId}`
+        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+      }
     })
 
     // Beta us-east-2
@@ -279,8 +292,10 @@ const jsonRpcProviders = {
   WEB3_RPC_42220: process.env.JSON_RPC_PROVIDER_42220!,
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
   WEB3_RPC_56: process.env.JSON_RPC_PROVIDER_56!,
-  WEB3_RPC_43114: process.env.JSON_RPC_PROVIDER_43114!,
   WEB3_RPC_8453: process.env.JSON_RPC_PROVIDER_8453!,
+  WEB3_RPC_43114: process.env.JSON_RPC_PROVIDER_43114!,
+  WEB3_RPC_43114_NIRVANA: process.env.JSON_RPC_PROVIDER_43114_NIRVANA!,
+  WEB3_RPC_43114_QUICKNODE: process.env.JSON_RPC_PROVIDER_43114_QUICKNODE!,
 }
 
 // Local dev stack
