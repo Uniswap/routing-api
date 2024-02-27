@@ -44,10 +44,14 @@ export const DEFAULT_UNI_PROVIDER_CONFIG: UniJsonRpcProviderConfig = {
   DEFAULT_INITIAL_WEIGHT: 1000,
 }
 
+// Health score needs to drop below a certain threshold to trigger circuit break (all potentially fallback to other
+// providers). If we set the threshold to the lowest possible, there will never be a circuit break.
+const NEVER_FALLBACK = Number.MIN_SAFE_INTEGER
+
 export const DEFAULT_SINGLE_PROVIDER_CONFIG: SingleJsonRpcProviderConfig = {
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -20,
-  HEALTH_SCORE_FALLBACK_THRESHOLD: -999990,
+  HEALTH_SCORE_FALLBACK_THRESHOLD: NEVER_FALLBACK,
   HEALTH_SCORE_RECOVER_THRESHOLD: -200,
   MAX_LATENCY_ALLOWED_IN_MS: 4000,
   RECOVER_SCORE_PER_MS: 0.01,

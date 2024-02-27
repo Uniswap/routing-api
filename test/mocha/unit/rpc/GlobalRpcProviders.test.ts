@@ -100,7 +100,17 @@ describe('GlobalRpcProviders', () => {
     expect(avaUniProvider['providers'][1].url).to.equal('url1')
   })
 
+  // You may need to update this test if you modified rpcProviderProdConfig.json
   it('Prepare global UniJsonRpcProvider by reading config file', () => {
+    process.env = {
+      WEB3_RPC_43114: 'infura_43114',
+      WEB3_RPC_43114_NIRVANA: 'nirvana_43114',
+      WEB3_RPC_43114_QUICKNODE: 'quicknode_43114',
+    }
+
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0009)
+
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
         ChainId.MAINNET
@@ -112,6 +122,25 @@ describe('GlobalRpcProviders', () => {
         ChainId.BNB
       )
     ).to.be.false
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.AVALANCHE
+      )
+    ).to.be.true
+
+    const uniRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.AVALANCHE)!
+    expect(uniRpcProvider['providers'][0].url).equal('infura_43114')
+    expect(uniRpcProvider['providers'][1].url).equal('nirvana_43114')
+    expect(uniRpcProvider['providers'][2].url).equal('quicknode_43114')
+
+    cleanUp()
+
+    randStub.returns(0.001)
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
