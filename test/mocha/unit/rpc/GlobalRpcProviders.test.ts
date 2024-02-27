@@ -27,8 +27,17 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
 }
 
+const cleanUp = () => {
+  GlobalRpcProviders['UNI_RPC_PROVIDERS'] = null
+  GlobalRpcProviders['SINGLE_RPC_PROVIDERS'] = null
+}
+
 describe('GlobalRpcProviders', () => {
-  it('Prepare global UniJsonRpcProvider by reading config', () => {
+  afterEach(() => {
+    cleanUp()
+  })
+
+  it('Prepare global UniJsonRpcProvider by reading given config', () => {
     process.env = {
       URL0: 'url0',
       URL1: 'url1',
@@ -80,5 +89,30 @@ describe('GlobalRpcProviders', () => {
     expect(avaUniProvider['urlWeight']).to.deep.equal({ url0: 2, url1: 1 })
     expect(avaUniProvider['providers'][0].url).to.equal('url0')
     expect(avaUniProvider['providers'][1].url).to.equal('url1')
+  })
+
+  it('Prepare global UniJsonRpcProvider by reading config file', () => {
+    process.env = {
+      URL0: 'url0',
+      URL1: 'url1',
+    }
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.MAINNET
+      )
+    ).to.be.false
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.BNB
+      )
+    ).to.be.false
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.AVALANCHE
+      )
+    ).to.be.false
   })
 })
