@@ -375,6 +375,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v2Supported = [
             ChainId.MAINNET,
+            ChainId.SEPOLIA,
             ChainId.ARBITRUM_ONE,
             ChainId.OPTIMISM,
             ChainId.POLYGON,
