@@ -3,6 +3,7 @@ import { default as bunyan, default as Logger } from 'bunyan'
 import { ChainId } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
+import Sinon, { SinonSandbox } from 'sinon'
 
 const log: Logger = bunyan.createLogger({ name: 'test' })
 
@@ -33,7 +34,14 @@ const cleanUp = () => {
 }
 
 describe('GlobalRpcProviders', () => {
+  let sandbox: SinonSandbox
+
+  beforeEach(() => {
+    sandbox = Sinon.createSandbox()
+  })
+
   afterEach(() => {
+    sandbox.restore()
     cleanUp()
   })
 
@@ -43,10 +51,10 @@ describe('GlobalRpcProviders', () => {
       URL1: 'url1',
     }
     const rpcProviderProdConfig = [
-      { chainId: 1, useMultiProvider: false },
+      { chainId: 1, useMultiProviderProb: 0 },
       {
         chainId: 43114,
-        useMultiProvider: true,
+        useMultiProviderProb: 1,
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [2, 1],
         providerUrls: ['URL0', 'URL1'],
@@ -83,7 +91,8 @@ describe('GlobalRpcProviders', () => {
     const avaUniProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
       UNI_PROVIDER_TEST_CONFIG,
-      SINGLE_PROVIDER_TEST_CONFIG
+      SINGLE_PROVIDER_TEST_CONFIG,
+      rpcProviderProdConfig
     ).get(ChainId.AVALANCHE)!
     expect(avaUniProvider['sessionAllowProviderFallbackWhenUnhealthy']).to.be.true
     expect(avaUniProvider['urlWeight']).to.deep.equal({ url0: 2, url1: 1 })
@@ -92,11 +101,6 @@ describe('GlobalRpcProviders', () => {
   })
 
   it('Prepare global UniJsonRpcProvider by reading config file', () => {
-    process.env = {
-      URL0: 'url0',
-      URL1: 'url1',
-    }
-
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
         ChainId.MAINNET
@@ -114,5 +118,142 @@ describe('GlobalRpcProviders', () => {
         ChainId.AVALANCHE
       )
     ).to.be.false
+  })
+
+  it('Prepare global UniJsonRpcProvider by reading config: Use prob to decide feature switch', () => {
+    process.env = {
+      URL0: 'url0',
+      URL1: 'url1',
+    }
+
+    const rpcProviderProdConfig = [
+      {
+        chainId: 1,
+        useMultiProviderProb: 0.3,
+        providerUrls: ['URL0', 'URL1'],
+      },
+      {
+        chainId: 43114,
+        useMultiProviderProb: 0.7,
+        sessionAllowProviderFallbackWhenUnhealthy: true,
+        providerInitialWeights: [2, 1],
+        providerUrls: ['URL0', 'URL1'],
+      },
+    ]
+
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.true
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.true
+    cleanUp()
+
+    randStub.returns(0.29)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.true
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.true
+    cleanUp()
+
+    randStub.returns(0.3)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.false
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.true
+    cleanUp()
+
+    randStub.returns(0.69)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.false
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.true
+    cleanUp()
+
+    randStub.returns(0.7)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.false
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.false
+    cleanUp()
+
+    randStub.returns(0.9)
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.MAINNET)
+    ).to.be.false
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(
+        log,
+        UNI_PROVIDER_TEST_CONFIG,
+        SINGLE_PROVIDER_TEST_CONFIG,
+        rpcProviderProdConfig
+      ).has(ChainId.AVALANCHE)
+    ).to.be.false
+    cleanUp()
   })
 })

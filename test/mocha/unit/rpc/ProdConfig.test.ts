@@ -6,11 +6,11 @@ describe('ProdConfig', () => {
     const prodConfig: ProdConfig = [
       {
         chainId: 1,
-        useMultiProvider: false,
+        useMultiProviderProb: 0,
       },
       {
         chainId: 43114,
-        useMultiProvider: true,
+        useMultiProviderProb: 1,
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [-1, -1],
         providerUrls: ['url1', 'url2'],
@@ -19,13 +19,13 @@ describe('ProdConfig', () => {
 
     const jsonStr = JSON.stringify(prodConfig)
     expect(jsonStr).equal(
-      '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
+      '[{"chainId":1,"useMultiProviderProb":0},{"chainId":43114,"useMultiProviderProb":1,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
     )
   })
 
   it('test parse json string into ProdConfig with validation, good case', () => {
     const jsonStr =
-      '[{"chainId":1,"useMultiProvider":false},{"chainId":43114,"useMultiProvider":true,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
+      '[{"chainId":1,"useMultiProviderProb":0},{"chainId":43114,"useMultiProviderProb":1,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
     const object = JSON.parse(jsonStr)
     const validation = ProdConfigJoi.validate(object)
     if (validation.error) {
@@ -35,11 +35,11 @@ describe('ProdConfig', () => {
     expect(prodConfig.length).equal(2)
     expect(prodConfig[0]).deep.equal({
       chainId: 1,
-      useMultiProvider: false,
+      useMultiProviderProb: 0,
     })
     expect(prodConfig[1]).deep.equal({
       chainId: 43114,
-      useMultiProvider: true,
+      useMultiProviderProb: 1,
       sessionAllowProviderFallbackWhenUnhealthy: true,
       providerInitialWeights: [-1, -1],
       providerUrls: ['url1', 'url2'],
