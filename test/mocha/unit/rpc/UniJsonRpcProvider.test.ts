@@ -3,7 +3,11 @@ import { assert, expect } from 'chai'
 import { UniJsonRpcProvider } from '../../../../lib/rpc/UniJsonRpcProvider'
 import { ChainId } from '@uniswap/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
-import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
+import {
+  ProviderSpecialWeight,
+  SingleJsonRpcProviderConfig,
+  UniJsonRpcProviderConfig,
+} from '../../../../lib/rpc/config'
 import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
 
@@ -338,15 +342,19 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('test selectPreferredProvider: without weights', async () => {
+    // If no weights is provided, it's the same as using -1 for all weights,
+    // Always select the first healthy provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
     expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
   })
 
-  it('test selectPreferredProvider: with weights', async () => {
+  it('test selectPreferredProvider: with non-zero weights', async () => {
     uniProvider = new UniJsonRpcProvider(
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [4, 1, 3],
+      [3, 1, 4],
       undefined,
       UNI_PROVIDER_TEST_CONFIG
     )
@@ -355,20 +363,189 @@ describe('UniJsonRpcProvider', () => {
     }
 
     const randStub = sandbox.stub(Math, 'random')
+    // [0.0, 0.5] -> url_2, probability of being selected = 4 / 8
     randStub.returns(0.0)
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     randStub.returns(0.1)
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     randStub.returns(0.5)
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // (0.5, 0.875] -> url_, probability of being selected = 3 / 8
     randStub.returns(0.51)
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
-    randStub.returns(0.62)
-    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
     randStub.returns(0.63)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.875)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+
+    // (0.875, 1) -> url_1, probability of being selected = 1 / 8
+    randStub.returns(0.876)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+  })
+
+  it('test selectPreferredProvider: with weights that can be 0, case 1', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [3, ProviderSpecialWeight.NEVER, 4],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    const randStub = sandbox.stub(Math, 'random')
+    // [0.0, 4/7(0.571)] -> url_2, probability of being selected = 4 / 7
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.57)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // (4/7(0.571), 1) -> url_0, probability of being selected = 3 / 7
+    randStub.returns(0.572)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.8)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+
+    // url_1 will never be selected
+  })
+
+  it('test selectPreferredProvider: with weights that can be 0, case 2', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Only url_2 is able to be selected
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.5)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.8)
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     randStub.returns(0.99)
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+  })
+
+  it('test selectPreferredProvider: with weights that can be zero, case 3', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    const randStub = sandbox.stub(Math, 'random')
+    // [0.0, 1) -> url_2, probability of being selected = 4 / 4
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.57)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.8)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // url_0 and url_1 will never be selected
+  })
+
+  it('test selectPreferredProvider: with weights that can be 0 or -1, case 1', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [ProviderSpecialWeight.AS_FALLBACK, ProviderSpecialWeight.NEVER, 3],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Only url_2 is able to be selected
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.5)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.8)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+  })
+
+  it('test selectPreferredProvider: with weights that can be 0 or -1, case 2', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.AS_FALLBACK],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Only url_2 is able to be selected
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.1)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.5)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.8)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    randStub.returns(0.99)
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+  })
+
+  it('test selectPreferredProvider: with weights that can be 0 or -1, case 3', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // No provider is able to be selected
+    expect(function () {
+      uniProvider['selectPreferredProvider']()
+    }).to.throw(Error)
   })
 
   it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider', async () => {
@@ -463,21 +640,21 @@ describe('UniJsonRpcProvider', () => {
     const randStub = sandbox.stub(Math, 'random')
     randStub.returns(0.9)
     await uniProvider.getBlockNumber(sessionId)
-    expect(uniProvider.lastUsedUrl).equals('url_2')
+    expect(uniProvider.lastUsedUrl).equals('url_1')
 
-    // Will always use url_2 for later requests if specified with the above session id.
+    // Will always use url_1 for later requests if specified with the above session id.
 
     randStub.returns(0.1)
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_0')
     await uniProvider.getBlockNumber(sessionId)
-    expect(uniProvider.lastUsedUrl).equals('url_2')
+    expect(uniProvider.lastUsedUrl).equals('url_1')
 
     randStub.returns(0.6)
     await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    await uniProvider.getBlockNumber(sessionId)
     expect(uniProvider.lastUsedUrl).equals('url_2')
+    await uniProvider.getBlockNumber(sessionId)
+    expect(uniProvider.lastUsedUrl).equals('url_1')
   })
 
   it('test session support: allow provider auto switch', async () => {

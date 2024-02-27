@@ -57,3 +57,14 @@ export const DEFAULT_SINGLE_PROVIDER_CONFIG: SingleJsonRpcProviderConfig = {
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
 }
+
+export enum ProviderSpecialWeight {
+  // Provider will never receive any traffic.
+  // However, it's still being perceived as one of available healthy provider.
+  // This is useful when we want to do shadow calls to collect performance metrics.
+  NEVER = 0,
+
+  // Provider will be able to serve as a fallback. For detailed logic, please see the TSDoc for
+  // UniJsonRpcProvider's constructor
+  AS_FALLBACK = -1,
+}
