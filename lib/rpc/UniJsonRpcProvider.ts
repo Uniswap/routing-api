@@ -37,6 +37,21 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private readonly log: Logger
 
+  /**
+   *
+   * @param chainId
+   * @param singleRpcProviders
+   * @param log
+   * @param weights
+   *  Positive value represents provider weight when selecting from different healthy providers.
+   *  It's usually a positive integer value.
+   *  Special values:
+   *    NEVER(0) means this provider will never be able to be selected.
+   *    AS_FALLBACK(-1) means this provider will only be able to be selected when no healthy provider has positive weights. In that case, the first healthy provider with -1 will be selected.
+   *  Not providing this argument means using -1 for all weight values.
+   * @param sessionAllowProviderFallbackWhenUnhealthy
+   * @param config
+   */
   constructor(
     chainId: ChainId,
     singleRpcProviders: SingleJsonRpcProvider[],
@@ -54,10 +69,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw new Error('Empty singlePrcProviders')
     }
 
-    if (weights !== undefined) {
-      if (singleRpcProviders.length != weights!.length) {
-        throw new Error('weights should have same length as providers')
-      }
+    if (weights !== undefined && singleRpcProviders.length != weights!.length) {
+      throw new Error('weights, if provided, should have the same length as providers')
     }
 
     this.chainId = chainId
@@ -67,13 +80,9 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     for (let i = 0; i < this.providers.length; i++) {
       const url = this.providers[i].url
       if (weights != undefined) {
-        if (weights[i] <= 0) {
-          throw new Error(`Invalid weight: ${weights[i]}. Weight needs to be a positive number`)
-        }
         this.urlWeight[url] = weights[i]
       } else {
-        // If weights is undefined, we assume provider[0] has non-zero weights and all other provider will have zero weight
-        this.urlWeight[url] = i == 0 ? this.config.DEFAULT_INITIAL_WEIGHT : 0
+        this.urlWeight[url] = -1
       }
     }
 
@@ -84,14 +93,33 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private selectOneOfHealthyProvidersBasedOnWeights(healthyProviders: SingleJsonRpcProvider[]): SingleJsonRpcProvider {
     const urlWeightSum = this.calculateHealthyProviderUrlWeightSum(healthyProviders)
+    if (urlWeightSum === 0) {
+      for (const provider of healthyProviders) {
+        if (this.urlWeight[provider.url] == -1) {
+          return provider
+        }
+      }
+      throw new Error(
+        'Cannot select provider because url weight sum is 0 but no healthy provider is allowed to be used'
+      )
+    }
+
+    // Sort providers based on url weight, from large to small
+    healthyProviders.sort((a, b) => {
+      return this.urlWeight[b.url] - this.urlWeight[a.url]
+    })
+
     const rand = Math.random() * urlWeightSum
     // No need to use binary search since the size of healthy providers is very small.
     let accumulatedWeight: number = 0
     for (const provider of healthyProviders) {
-      accumulatedWeight += this.urlWeight[provider.url]
+      let weight = this.urlWeight[provider.url]
+      if (weight == -1) {
+        weight = 0
+      }
+      accumulatedWeight += weight
       if (accumulatedWeight >= rand) {
         this.log.debug(`accumulatedWeight: ${accumulatedWeight} >= rand: ${rand}, urlWeightSum: ${urlWeightSum}`)
-        this.log.debug(`Use provider ${provider.url} for chain ${this.chainId.toString()}`)
         return provider
       }
     }
@@ -119,22 +147,25 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     const selectedProvider = this.selectOneOfHealthyProvidersBasedOnWeights(healthyProviders)
+    this.log.debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
+
     if (sessionId !== undefined) {
       this.sessionCache.set(sessionId, selectedProvider)
     }
+
     return selectedProvider
   }
 
   private calculateHealthyProviderUrlWeightSum(healthyProviders: SingleJsonRpcProvider[]): number {
-    if (!isEmpty(this.urlWeight)) {
-      let urlWeightSum = 0
-      for (const provider of healthyProviders) {
-        urlWeightSum += this.urlWeight[provider.url]
+    let urlWeightSum = 0
+    for (const provider of healthyProviders) {
+      let weight = this.urlWeight[provider.url]
+      if (weight == -1) {
+        weight = 0
       }
-      return urlWeightSum
-    } else {
-      throw new Error('Weights are not provided')
+      urlWeightSum += weight
     }
+    return urlWeightSum
   }
 
   // Shadow call to all unhealthy providers to get some idea about their latest health state.
