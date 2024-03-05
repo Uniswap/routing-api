@@ -58,12 +58,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     let result: Response<QuoteResponse> | ErrorResponse
 
     try {
-
       for (const chainId of SUPPORTED_CHAINS) {
-          if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
-            const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
-            provider.forceAttachToNewSession()
-          }
+        if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+          const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+          provider.forceAttachToNewSession()
+        }
       }
 
       result = await this.handleRequestInternal(params, startTime)

@@ -247,7 +247,9 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private async wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
     if (this.attachedSessionId !== null) {
-      this.log.debug(`UniJsonRpcProvider for chain ${this.chainId} currently attached to session id ${this.attachedSessionId}`)
+      this.log.debug(
+        `UniJsonRpcProvider for chain ${this.chainId} currently attached to session id ${this.attachedSessionId}`
+      )
       sessionId = this.attachedSessionId
     }
 
