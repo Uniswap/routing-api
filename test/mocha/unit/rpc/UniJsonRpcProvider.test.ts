@@ -761,6 +761,42 @@ describe('UniJsonRpcProvider', () => {
     }
   })
 
+  it('test session support: attached session', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      [4, 1, 3],
+      undefined,
+      UNI_PROVIDER_TEST_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    getBlockNumber1.resolves(123)
+    getBlockNumber2.resolves(123)
+
+    uniProvider.forceAttachToNewSession()
+
+    await uniProvider.getBlockNumber()
+    const url = uniProvider.lastUsedUrl
+
+    // Will always use the same url for later requests even not specified with the above session id.
+
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals(url)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals(url)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals(url)
+    await uniProvider.getBlockNumber()
+    expect(uniProvider.lastUsedUrl).equals(url)
+  })
+
   it('Test do shadow evaluate call for other healthy providers', async () => {
     const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
     CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true

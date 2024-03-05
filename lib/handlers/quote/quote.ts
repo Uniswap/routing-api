@@ -16,7 +16,7 @@ import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
-import { ContainerInjected, RequestInjected } from '../injector-sor'
+import { ContainerInjected, RequestInjected, SUPPORTED_CHAINS } from '../injector-sor'
 import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
@@ -32,6 +32,7 @@ import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
+import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -57,6 +58,14 @@ export class QuoteHandler extends APIGLambdaHandler<
     let result: Response<QuoteResponse> | ErrorResponse
 
     try {
+
+      for (const chainId of SUPPORTED_CHAINS) {
+          if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+            const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+            provider.forceAttachToNewSession()
+          }
+      }
+
       result = await this.handleRequestInternal(params, startTime)
 
       switch (result.statusCode) {
