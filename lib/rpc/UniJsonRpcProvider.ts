@@ -257,6 +257,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
+    selectedProvider.logProviderSelection()
     try {
       return await (selectedProvider as any)[`${fnName}`](...args)
     } catch (error: any) {
