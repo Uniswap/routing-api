@@ -208,6 +208,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
+  logProviderSelection() {
+    metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
+  }
+
   // Wrap another layer only for the sake of ease unit testing.
   // We will test this API to represent the tests of other similar implemented APIs.
   private _getBlockNumber(): Promise<number> {

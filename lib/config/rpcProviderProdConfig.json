@@ -2,7 +2,7 @@
   {
     "chainId": 43114,
     "useMultiProviderProb": 0.01,
-    "providerInitialWeights": [-1, 0, 0],
-    "providerUrls": ["WEB3_RPC_43114", "WEB3_RPC_43114_NIRVANA", "WEB3_RPC_43114_QUICKNODE"]
+    "providerInitialWeights": [19, 1, 0],
+    "providerUrls": ["WEB3_RPC_43114", "WEB3_RPC_43114_QUICKNODE", "WEB3_RPC_43114_NIRVANA"]
   }
 ]

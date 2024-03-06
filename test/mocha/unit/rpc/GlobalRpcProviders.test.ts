@@ -104,8 +104,8 @@ describe('GlobalRpcProviders', () => {
   it('Prepare global UniJsonRpcProvider by reading config file', () => {
     process.env = {
       WEB3_RPC_43114: 'infura_43114',
-      WEB3_RPC_43114_NIRVANA: 'nirvana_43114',
       WEB3_RPC_43114_QUICKNODE: 'quicknode_43114',
+      WEB3_RPC_43114_NIRVANA: 'nirvana_43114',
     }
 
     const randStub = sandbox.stub(Math, 'random')
@@ -113,21 +113,15 @@ describe('GlobalRpcProviders', () => {
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.MAINNET
-      )
-    ).to.be.false
-
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.BNB
-      )
-    ).to.be.false
-
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
         ChainId.AVALANCHE
       )
     ).to.be.true
+
+    expect(
+      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
+        ChainId.MAINNET
+      )
+    ).to.be.false
 
     const uniRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
@@ -135,8 +129,8 @@ describe('GlobalRpcProviders', () => {
       SINGLE_PROVIDER_TEST_CONFIG
     ).get(ChainId.AVALANCHE)!
     expect(uniRpcProvider['providers'][0].url).equal('infura_43114')
-    expect(uniRpcProvider['providers'][1].url).equal('nirvana_43114')
-    expect(uniRpcProvider['providers'][2].url).equal('quicknode_43114')
+    expect(uniRpcProvider['providers'][1].url).equal('quicknode_43114')
+    expect(uniRpcProvider['providers'][2].url).equal('nirvana_43114')
 
     cleanUp()
 
