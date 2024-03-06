@@ -37,6 +37,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   private readonly log: Logger
 
+  // Force attach a session id to this instance.
+  // For later RPC calls, we will treat this as the session id, even if the RPC call itself doesn't specify one.
+  attachedSessionId: string | null = null
+
   /**
    *
    * @param chainId
@@ -129,12 +133,13 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   private selectPreferredProvider(sessionId?: string): SingleJsonRpcProvider {
     // If session is used, stick to the last provider, if possible.
     if (sessionId !== undefined && this.sessionCache.has(sessionId)) {
-      const provider = this.sessionCache.get(sessionId)!
-      if (provider.isHealthy()) {
-        return provider
+      const selectedProvider = this.sessionCache.get(sessionId)!
+      if (selectedProvider.isHealthy()) {
+        this.log.debug(`Use provider ${selectedProvider.url} for chain ${this.chainId.toString()}`)
+        return selectedProvider
       } else if (!this.sessionAllowProviderFallbackWhenUnhealthy) {
         throw new Error(
-          `Forced to use the same provider during the session but the provider (${provider.providerName}) is unhealthy`
+          `Forced to use the same provider during the session but the provider (${selectedProvider.providerName}) is unhealthy`
         )
       }
     }
@@ -236,7 +241,18 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     return sessionId
   }
 
+  forceAttachToNewSession() {
+    this.attachedSessionId = this.createNewSessionId()
+  }
+
   private async wrappedFunctionCall(fnName: string, sessionId?: string, ...args: any[]): Promise<any> {
+    if (this.attachedSessionId !== null) {
+      this.log.debug(
+        `UniJsonRpcProvider for chain ${this.chainId} currently attached to session id ${this.attachedSessionId}`
+      )
+      sessionId = this.attachedSessionId
+    }
+
     this.log.debug(
       `UniJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, sessionId: ${sessionId}, args: ${[...args]}`
     )

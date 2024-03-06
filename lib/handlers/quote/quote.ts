@@ -32,6 +32,7 @@ import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-
 import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
+import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -57,6 +58,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     let result: Response<QuoteResponse> | ErrorResponse
 
     try {
+      if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+        const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+        provider.forceAttachToNewSession()
+      }
+
       result = await this.handleRequestInternal(params, startTime)
 
       switch (result.statusCode) {
