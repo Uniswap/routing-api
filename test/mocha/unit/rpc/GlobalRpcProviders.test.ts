@@ -109,7 +109,7 @@ describe('GlobalRpcProviders', () => {
     }
 
     const randStub = sandbox.stub(Math, 'random')
-    randStub.returns(0.09)
+    randStub.returns(0.9)
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
@@ -134,7 +134,7 @@ describe('GlobalRpcProviders', () => {
 
     cleanUp()
 
-    randStub.returns(0.1)
+    randStub.returns(1.0)
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
