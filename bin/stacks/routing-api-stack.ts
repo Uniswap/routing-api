@@ -16,6 +16,7 @@ import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
+import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = [ChainId.GOERLI, ChainId.POLYGON_MUMBAI]
 
@@ -224,6 +225,8 @@ export class RoutingAPIStack extends cdk.Stack {
       poolCacheLambdaNameArray,
       ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
     })
+
+    new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack')
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)
 
