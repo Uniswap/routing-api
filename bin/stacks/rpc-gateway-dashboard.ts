@@ -73,7 +73,6 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
     super(scope, name)
 
     const region = cdk.Stack.of(this).region
-
     const NETWORKS = [ChainId.AVALANCHE]
 
     const perChainWidgets: any[] = _.flatMap(NETWORKS, (chainId) => [
@@ -109,7 +108,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           region,
           stat: 'Maximum',
           period: 300,
-          title: `(Negative) Provider health score for ${ID_TO_NETWORK_NAME(chainId)}`,
+          title: `Provider (negative) health score for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
           yAxis: {
             left: {
@@ -128,9 +127,9 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           view: 'timeSeries',
           stacked: false,
           region,
-          stat: 'Maximum',
+          stat: 'p99',
           period: 300,
-          title: `Provider latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          title: `Provider p99 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
           yAxis: {
             left: {
@@ -141,8 +140,6 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
         },
       },
     ])
-
-    console.log(JSON.stringify(perChainWidgets))
 
     new aws_cloudwatch.CfnDashboard(this, 'RpcGatewayDashboard', {
       dashboardName: `RpcGatewayDashboard`,
