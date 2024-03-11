@@ -159,25 +159,29 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
     })
 
-    // Parse AWS Secret
+    // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
       // TODO: Change this to `JSON_RPC_PROVIDER_${}` to be consistent with SOR
-      if (chainId === ChainId.AVALANCHE) {
-        jsonRpcProviders[`WEB3_RPC_${chainId}`] = jsonRpcProvidersSecret
-          .secretValueFromJson(`WEB3_RPC_${chainId}`)
-          .toString()
-        jsonRpcProviders[`WEB3_RPC_${chainId}_NIRVANA`] = jsonRpcProvidersSecret
-          .secretValueFromJson(`WEB3_RPC_${chainId}_NIRVANA`)
-          .toString()
-        jsonRpcProviders[`WEB3_RPC_${chainId}_QUICKNODE`] = jsonRpcProvidersSecret
-          .secretValueFromJson(`WEB3_RPC_${chainId}_QUICKNODE`)
-          .toString()
-      } else {
-        const key = `WEB3_RPC_${chainId}`
-        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
-      }
+      const key = `WEB3_RPC_${chainId}`
+      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
     })
+
+    // Load RPC provider URLs from AWS secret (for RPC Gateway)
+    const RPC_GATEWAY_PROVIDERS = [
+      // Avalanche
+      'WEB3_RPC_43114_INFURA',
+      'WEB3_RPC_43114_NIRVANA',
+      'WEB3_RPC_43114_QUICKNODE',
+      // Optimism
+      'WEB3_RPC_10_INFURA',
+      'WEB3_RPC_10_NIRVANA',
+      'WEB3_RPC_10_QUICKNODE',
+      'WEB3_RPC_10_ALCHEMY',
+    ]
+    for (const provider of RPC_GATEWAY_PROVIDERS) {
+      jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
+    }
 
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
@@ -293,9 +297,14 @@ const jsonRpcProviders = {
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
   WEB3_RPC_56: process.env.JSON_RPC_PROVIDER_56!,
   WEB3_RPC_8453: process.env.JSON_RPC_PROVIDER_8453!,
-  WEB3_RPC_43114: process.env.JSON_RPC_PROVIDER_43114!,
-  WEB3_RPC_43114_NIRVANA: process.env.JSON_RPC_PROVIDER_43114_NIRVANA!,
-  WEB3_RPC_43114_QUICKNODE: process.env.JSON_RPC_PROVIDER_43114_QUICKNODE!,
+  // Following is for RPC Gateway
+  WEB3_RPC_43114_INFURA: process.env.WEB3_RPC_43114_INFURA!,
+  WEB3_RPC_43114_NIRVANA: process.env.WEB3_RPC_43114_NIRVANA!,
+  WEB3_RPC_43114_QUICKNODE: process.env.WEB3_RPC_43114_QUICKNODE!,
+  WEB3_RPC_10_INFURA: process.env.WEB3_RPC_10_INFURA!,
+  WEB3_RPC_10_NIRVANA: process.env.WEB3_RPC_10_NIRVANA!,
+  WEB3_RPC_10_QUICKNODE: process.env.WEB3_RPC_10_QUICKNODE!,
+  WEB3_RPC_10_ALCHEMY: process.env.WEB3_RPC_10_ALCHEMY!,
 }
 
 // Local dev stack
