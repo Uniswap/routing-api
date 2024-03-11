@@ -143,14 +143,20 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
       const dependenciesByChainArray = await Promise.all(
         _.map(SUPPORTED_CHAINS, async (chainId: ChainId) => {
-          const url = process.env[`WEB3_RPC_${chainId.toString()}`]!
-          if (!url) {
-            log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
-            return { chainId, dependencies: {} as ContainerDependencies }
-            // This router instance will not be able to route through any chain
-            // for which RPC URL is not set
-            // For now, if RPC URL is not set for a chain, a request to route
-            // on the chain will return Err 500
+          let url = ''
+          if (!GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+            // Check existence of env var for chain that doesn't use RPC gateway.
+            // (If use RPC gateway, the check for env var will be executed elsewhere.)
+            // TODO(jie): Remove this check once we migrate all chains to RPC gateway.
+            url = process.env[`WEB3_RPC_${chainId.toString()}`]!
+            if (!url) {
+              log.fatal({ chainId: chainId }, `Fatal: No Web3 RPC endpoint set for chain`)
+              return { chainId, dependencies: {} as ContainerDependencies }
+              // This router instance will not be able to route through any chain
+              // for which RPC URL is not set
+              // For now, if RPC URL is not set for a chain, a request to route
+              // on the chain will return Err 500
+            }
           }
 
           let timeout: number
@@ -165,6 +171,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           let provider: StaticJsonRpcProvider
           if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+            // Use RPC gateway.
             provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
           } else {
             provider = new DefaultEVMClient({

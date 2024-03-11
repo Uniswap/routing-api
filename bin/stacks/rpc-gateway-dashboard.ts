@@ -5,7 +5,10 @@ import { Construct } from 'constructs'
 import _ from 'lodash'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
 
-const providerForChain: Map<ChainId, string[]> = new Map([[ChainId.AVALANCHE, ['INFURA', 'QUIKNODE', 'NIRVANA']]])
+const providerForChain: Map<ChainId, string[]> = new Map([
+  [ChainId.AVALANCHE, ['INFURA', 'QUIKNODE', 'NIRVANA']],
+  [ChainId.OPTIMISM, ['INFURA', 'QUIKNODE', 'NIRVANA', 'ALCHEMY']],
+])
 
 function getSelectMetricsForChain(chainId: ChainId) {
   const metrics = []
@@ -73,7 +76,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
     super(scope, name)
 
     const region = cdk.Stack.of(this).region
-    const NETWORKS = [ChainId.AVALANCHE]
+    const NETWORKS = [ChainId.AVALANCHE, ChainId.OPTIMISM]
 
     const perChainWidgets: any[] = _.flatMap(NETWORKS, (chainId) => [
       {

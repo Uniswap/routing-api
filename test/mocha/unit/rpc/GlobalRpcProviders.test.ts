@@ -103,9 +103,13 @@ describe('GlobalRpcProviders', () => {
   // You may need to update this test if you modified rpcProviderProdConfig.json
   it('Prepare global UniJsonRpcProvider by reading config file', () => {
     process.env = {
-      WEB3_RPC_43114: 'infura_43114',
+      WEB3_RPC_43114_INFURA: 'infura_43114',
       WEB3_RPC_43114_QUICKNODE: 'quicknode_43114',
       WEB3_RPC_43114_NIRVANA: 'nirvana_43114',
+      WEB3_RPC_10_INFURA: 'infura_10',
+      WEB3_RPC_10_QUICKNODE: 'quicknode_10',
+      WEB3_RPC_10_NIRVANA: 'nirvana_10',
+      WEB3_RPC_10_ALCHEMY: 'alchemy_10',
     }
 
     const randStub = sandbox.stub(Math, 'random')
@@ -119,23 +123,32 @@ describe('GlobalRpcProviders', () => {
 
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.MAINNET
+        ChainId.OPTIMISM
       )
-    ).to.be.false
+    ).to.be.true
 
-    const uniRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+    const uniRpcProviderAvalanche = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
       UNI_PROVIDER_TEST_CONFIG,
       SINGLE_PROVIDER_TEST_CONFIG
     ).get(ChainId.AVALANCHE)!
-    expect(uniRpcProvider['providers'][0].url).equal('infura_43114')
-    expect(uniRpcProvider['providers'][1].url).equal('quicknode_43114')
-    expect(uniRpcProvider['providers'][2].url).equal('nirvana_43114')
+    expect(uniRpcProviderAvalanche['providers'][0].url).equal('infura_43114')
+    expect(uniRpcProviderAvalanche['providers'][1].url).equal('quicknode_43114')
+    expect(uniRpcProviderAvalanche['providers'][2].url).equal('nirvana_43114')
+
+    const uniRpcProviderOptimism = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.OPTIMISM)!!
+    expect(uniRpcProviderOptimism['providers'][0].url).equal('infura_10')
+    expect(uniRpcProviderOptimism['providers'][1].url).equal('quicknode_10')
+    expect(uniRpcProviderOptimism['providers'][2].url).equal('nirvana_10')
+    expect(uniRpcProviderOptimism['providers'][3].url).equal('alchemy_10')
 
     cleanUp()
 
     randStub.returns(1.0)
-
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
         ChainId.AVALANCHE
