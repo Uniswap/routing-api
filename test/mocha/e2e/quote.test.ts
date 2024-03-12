@@ -11,6 +11,7 @@ import {
   NATIVE_CURRENCY,
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
+  USDB_BLAST,
   USDC_BNB,
   USDC_MAINNET,
   USDC_NATIVE_ARBITRUM,
@@ -19,7 +20,7 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDT_MAINNET,
-  WBTC_MAINNET,
+  WBTC_MAINNET
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
