@@ -140,7 +140,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
     super(scope, name)
 
     const region = cdk.Stack.of(this).region
-    const NETWORKS = [ChainId.AVALANCHE, ChainId.OPTIMISM]
+    const NETWORKS = [ChainId.AVALANCHE, ChainId.OPTIMISM, ChainId.CELO, ChainId.BNB, ChainId.POLYGON, ChainId.BASE]
 
     const perChainWidgets: any[] = _.flatMap(NETWORKS, (chainId) => [
       {
@@ -215,7 +215,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           view: 'timeSeries',
           stacked: false,
           region,
-          stat: 'p99',
+          stat: 'Sum',
           period: 300,
           title: `Provider high latency occurrence for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
@@ -236,7 +236,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           view: 'timeSeries',
           stacked: false,
           region,
-          stat: 'p99',
+          stat: 'Sum',
           period: 300,
           title: `Provider failed occurrence for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
@@ -257,7 +257,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           view: 'timeSeries',
           stacked: false,
           region,
-          stat: 'p99',
+          stat: 'Sum',
           period: 300,
           title: `Provider success occurrence for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
