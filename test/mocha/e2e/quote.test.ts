@@ -2599,7 +2599,7 @@ describe('quote', function () {
 
           if (chain === ChainId.BLAST) {
             // Blast doesn't have DAI or USDC yet
-            return;
+            return
           }
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
