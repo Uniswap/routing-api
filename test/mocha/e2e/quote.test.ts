@@ -20,7 +20,7 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDT_MAINNET,
-  WBTC_MAINNET
+  WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
@@ -2489,7 +2489,7 @@ describe('quote', function () {
       c != ChainId.ZORA &&
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
-    // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
+      // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
       // We will re-enable this test once the pool has more WETH
       c != ChainId.BLAST
   )) {

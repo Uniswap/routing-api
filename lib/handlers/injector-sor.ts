@@ -390,7 +390,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BASE,
             ChainId.BNB,
             ChainId.AVALANCHE,
-            ChainId.BLAST
+            ChainId.BLAST,
           ]
 
           return {
