@@ -2488,10 +2488,7 @@ describe('quote', function () {
       // We will follow up supporting ZORA and ROOTSTOCK
       c != ChainId.ZORA &&
       c != ChainId.ZORA_SEPOLIA &&
-      c != ChainId.ROOTSTOCK &&
-      // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-      // We will re-enable this test once the pool has more WETH
-      c != ChainId.BLAST
+      c != ChainId.ROOTSTOCK
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
