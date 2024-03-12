@@ -2478,7 +2478,10 @@ describe('quote', function () {
       c != ChainId.OPTIMISM_SEPOLIA &&
       c != ChainId.POLYGON_MUMBAI &&
       c != ChainId.ARBITRUM_GOERLI &&
-      c != ChainId.CELO_ALFAJORES
+      c != ChainId.CELO_ALFAJORES &&
+      // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
+      // We will re-enable this test once the pool has more WETH
+      c != ChainId.BLAST
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
@@ -2493,15 +2496,12 @@ describe('quote', function () {
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
-          // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1';
-
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: wrappedNative.address,
             tokenInChainId: chain,
             tokenOutAddress: erc1.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, wrappedNative, erc1, amount),
+            amount: await getAmountFromToken(type, wrappedNative, erc1, '1'),
             type,
             enableUniversalRouter: true,
           }
@@ -2556,15 +2556,12 @@ describe('quote', function () {
             return
           }
 
-          // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1';
-
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, erc1, erc2, amount),
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
             type,
           }
 
@@ -2585,11 +2582,6 @@ describe('quote', function () {
           if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
-          }
-
-          if (chain == ChainId.BLAST) {
-            // Blast doesn't have DAI or USDC yet
-            return;
           }
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
@@ -2622,15 +2614,12 @@ describe('quote', function () {
             return
           }
 
-          // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1';
-
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
             tokenInChainId: chain,
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, erc1, erc2, amount),
+            amount: await getAmountFromToken(type, erc1, erc2, '1'),
             type,
           }
 
