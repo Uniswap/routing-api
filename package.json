@@ -52,7 +52,7 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.1",
     "fishery": "^2.2.2",
-    "hardhat": "^2.6.8",
+    "hardhat": "^2.20.0",
     "jest": "^29.5.0",
     "json-schema-to-ts": "^1.6.4",
     "mocha": "^8.4.0",
