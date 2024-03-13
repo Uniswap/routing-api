@@ -297,6 +297,7 @@ const jsonRpcProviders = {
   WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
   WEB3_RPC_56: process.env.JSON_RPC_PROVIDER_56!,
   WEB3_RPC_8453: process.env.JSON_RPC_PROVIDER_8453!,
+  WEB3_RPC_81457: process.env.JSON_RPC_PROVIDER_81457!,
   // Following is for RPC Gateway
   WEB3_RPC_43114_INFURA: process.env.WEB3_RPC_43114_INFURA!,
   WEB3_RPC_43114_NIRVANA: process.env.WEB3_RPC_43114_NIRVANA!,

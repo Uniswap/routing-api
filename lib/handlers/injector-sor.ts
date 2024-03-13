@@ -69,6 +69,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BNB,
   ChainId.AVALANCHE,
   ChainId.BASE,
+  ChainId.BLAST,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -389,6 +390,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BASE,
             ChainId.BNB,
             ChainId.AVALANCHE,
+            ChainId.BLAST,
           ]
 
           return {
