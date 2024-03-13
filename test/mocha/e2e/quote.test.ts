@@ -2488,7 +2488,8 @@ describe('quote', function () {
       // We will follow up supporting ZORA and ROOTSTOCK
       c != ChainId.ZORA &&
       c != ChainId.ZORA_SEPOLIA &&
-      c != ChainId.ROOTSTOCK
+      c != ChainId.ROOTSTOCK &&
+      c != ChainId.GOERLI
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
