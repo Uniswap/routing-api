@@ -178,20 +178,6 @@ export class RoutingAPIPipeline extends Stack {
       'WEB3_RPC_10_NIRVANA',
       'WEB3_RPC_10_QUICKNODE',
       'WEB3_RPC_10_ALCHEMY',
-      // Celo
-      'WEB3_RPC_42220_INFURA',
-      'WEB3_RPC_42220_QUICKNODE',
-      // BNB
-      'WEB3_RPC_56_QUICKNODE',
-      // Polygon
-      'WEB3_RPC_137_INFURA',
-      'WEB3_RPC_137_QUICKNODE',
-      'WEB3_RPC_137_ALCHEMY',
-      // Base
-      'WEB3_RPC_8453_INFURA',
-      'WEB3_RPC_8453_QUICKNODE',
-      'WEB3_RPC_8453_ALCHEMY',
-      'WEB3_RPC_8453_NIRVANA',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -320,16 +306,6 @@ const jsonRpcProviders = {
   WEB3_RPC_10_NIRVANA: process.env.WEB3_RPC_10_NIRVANA!,
   WEB3_RPC_10_QUICKNODE: process.env.WEB3_RPC_10_QUICKNODE!,
   WEB3_RPC_10_ALCHEMY: process.env.WEB3_RPC_10_ALCHEMY!,
-  WEB3_RPC_42220_INFURA: process.env.WEB3_RPC_42220_INFURA!,
-  WEB3_RPC_42220_QUICKNODE: process.env.WEB3_RPC_42220_QUICKNODE!,
-  WEB3_RPC_56_QUICKNODE: process.env.WEB3_RPC_56_QUICKNODE!,
-  WEB3_RPC_137_INFURA: process.env.WEB3_RPC_137_INFURA!,
-  WEB3_RPC_137_QUICKNODE: process.env.WEB3_RPC_137_QUICKNODE!,
-  WEB3_RPC_137_ALCHEMY: process.env.WEB3_RPC_137_ALCHEMY!,
-  WEB3_RPC_8453_INFURA: process.env.WEB3_RPC_8453_INFURA!,
-  WEB3_RPC_8453_QUICKNODE: process.env.WEB3_RPC_8453_QUICKNODE!,
-  WEB3_RPC_8453_ALCHEMY: process.env.WEB3_RPC_8453_ALCHEMY!,
-  WEB3_RPC_8453_NIRVANA: process.env.WEB3_RPC_8453_NIRVANA!,
 }
 
 // Local dev stack
