@@ -10,34 +10,5 @@
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0, 0, 0],
     "providerUrls": ["WEB3_RPC_10_INFURA", "WEB3_RPC_10_QUICKNODE", "WEB3_RPC_10_NIRVANA", "WEB3_RPC_10_ALCHEMY"]
-  },
-  {
-    "chainId": 42220,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["WEB3_RPC_42220_INFURA", "WEB3_RPC_42220_QUICKNODE"]
-  },
-  {
-    "chainId": 56,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [1],
-    "providerUrls": ["WEB3_RPC_56_QUICKNODE"]
-  },
-  {
-    "chainId": 137,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [1, 0, 0],
-    "providerUrls": ["WEB3_RPC_137_INFURA", "WEB3_RPC_137_QUICKNODE", "WEB3_RPC_137_ALCHEMY"]
-  },
-  {
-    "chainId": 8453,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [1, 0, 0, 0],
-    "providerUrls": [
-      "WEB3_RPC_8453_INFURA",
-      "WEB3_RPC_8453_QUICKNODE",
-      "WEB3_RPC_8453_ALCHEMY",
-      "WEB3_RPC_8453_NIRVANA"
-    ]
   }
 ]
