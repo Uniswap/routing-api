@@ -103,13 +103,23 @@ describe('GlobalRpcProviders', () => {
   // You may need to update this test if you modified rpcProviderProdConfig.json
   it('Prepare global UniJsonRpcProvider by reading config file', () => {
     process.env = {
-      WEB3_RPC_43114_INFURA: 'infura_43114',
-      WEB3_RPC_43114_QUICKNODE: 'quicknode_43114',
-      WEB3_RPC_43114_NIRVANA: 'nirvana_43114',
-      WEB3_RPC_10_INFURA: 'infura_10',
-      WEB3_RPC_10_QUICKNODE: 'quicknode_10',
-      WEB3_RPC_10_NIRVANA: 'nirvana_10',
-      WEB3_RPC_10_ALCHEMY: 'alchemy_10',
+      INFURA_43114: 'infura_43114',
+      QUICKNODE_43114: 'quicknode_43114',
+      NIRVANA_43114: 'nirvana_43114',
+      INFURA_10: 'infura_10',
+      QUICKNODE_10: 'quicknode_10',
+      NIRVANA_10: 'nirvana_10',
+      ALCHEMY_10: 'alchemy_10',
+      INFURA_42220: 'infura_42220',
+      QUICKNODE_42220: 'quicknode_42220',
+      QUICKNODE_56: 'quicknode_56',
+      INFURA_137: 'infura_137',
+      QUICKNODE_137: 'quicknode_137',
+      ALCHEMY_137: 'alchemy_137',
+      INFURA_8453: 'infura_8453',
+      QUICKNODE_8453: 'quicknode_8453',
+      ALCHEMY_8453: 'alchemy_8453',
+      NIRVANA_8453: 'nirvana_8453',
     }
 
     const randStub = sandbox.stub(Math, 'random')
@@ -145,6 +155,40 @@ describe('GlobalRpcProviders', () => {
     expect(uniRpcProviderOptimism['providers'][1].url).equal('quicknode_10')
     expect(uniRpcProviderOptimism['providers'][2].url).equal('nirvana_10')
     expect(uniRpcProviderOptimism['providers'][3].url).equal('alchemy_10')
+
+    const uniRpcProviderCelo = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.CELO)!!
+    expect(uniRpcProviderCelo['providers'][0].url).equal('infura_42220')
+    expect(uniRpcProviderCelo['providers'][1].url).equal('quicknode_42220')
+
+    const uniRpcProviderBnb = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.BNB)!!
+    expect(uniRpcProviderBnb['providers'][0].url).equal('quicknode_56')
+
+    const uniRpcProviderPolygon = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.POLYGON)!
+    expect(uniRpcProviderPolygon['providers'][0].url).equal('infura_137')
+    expect(uniRpcProviderPolygon['providers'][1].url).equal('quicknode_137')
+    expect(uniRpcProviderPolygon['providers'][2].url).equal('alchemy_137')
+
+    const uniRpcProviderBase = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.BASE)!
+    expect(uniRpcProviderBase['providers'][0].url).equal('infura_8453')
+    expect(uniRpcProviderBase['providers'][1].url).equal('quicknode_8453')
+    expect(uniRpcProviderBase['providers'][2].url).equal('alchemy_8453')
+    expect(uniRpcProviderBase['providers'][3].url).equal('nirvana_8453')
 
     cleanUp()
 
