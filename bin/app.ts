@@ -183,20 +183,6 @@ export class RoutingAPIPipeline extends Stack {
       'NIRVANA_10',
       'QUICKNODE_10',
       'ALCHEMY_10',
-      // Celo
-      'INFURA_42220',
-      'QUICKNODE_42220',
-      // BNB
-      'QUICKNODE_56',
-      // Polygon
-      'INFURA_137',
-      'QUICKNODE_137',
-      'ALCHEMY_137',
-      // Base
-      'INFURA_8453',
-      'QUICKNODE_8453',
-      'ALCHEMY_8453',
-      'NIRVANA_8453',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
