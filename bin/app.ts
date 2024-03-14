@@ -168,7 +168,13 @@ export class RoutingAPIPipeline extends Stack {
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
       if (!rpcGatewayEnabledChainIds.includes(chainId)) {
         const key = `WEB3_RPC_${chainId}`
-        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+        try {
+          jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+        } catch (err) {
+          new CfnOutput(this, key, {
+            value: 'Missing provider URL from secret',
+          })
+        }
       }
     })
 
@@ -199,7 +205,13 @@ export class RoutingAPIPipeline extends Stack {
       'NIRVANA_8453',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
-      jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
+      try {
+        jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
+      } catch (err) {
+        new CfnOutput(this, provider, {
+          value: 'Missing provider URL from secret',
+        })
+      }
     }
 
     // Beta us-east-2
