@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
-import { Duration } from 'aws-cdk-lib'
+import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -64,6 +64,10 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       rpcProviderStateDynamoDb,
       unicornSecret,
     } = props
+
+    new CfnOutput(this, 'jsonRpcProviders', {
+      value: JSON.stringify(jsonRpcProviders),
+    })
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),

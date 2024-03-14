@@ -169,9 +169,6 @@ export class RoutingAPIPipeline extends Stack {
       if (!rpcGatewayEnabledChainIds.includes(chainId)) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
-        new CfnOutput(this, key, {
-          value: jsonRpcProviders[key],
-        })
       }
     })
 
@@ -203,9 +200,6 @@ export class RoutingAPIPipeline extends Stack {
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
-      new CfnOutput(this, provider, {
-        value: jsonRpcProviders[provider],
-      })
     }
 
     // Beta us-east-2
