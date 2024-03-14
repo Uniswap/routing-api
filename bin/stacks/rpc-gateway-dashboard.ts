@@ -201,7 +201,49 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           yAxis: {
             left: {
               showUnits: false,
-              label: 'Requests',
+              label: 'Ms',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getLatencyMetricsForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'p90',
+          period: 300,
+          title: `Provider p90 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Ms',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getLatencyMetricsForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'p50',
+          period: 300,
+          title: `Provider p50 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Ms',
             },
           },
         },
