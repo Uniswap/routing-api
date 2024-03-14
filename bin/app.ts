@@ -13,6 +13,7 @@ import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
 import { getRpcGatewayEnabledChainIds } from '../lib/rpc/ProdConfig'
+import { chainIdToNetworkName } from '../lib/rpc/utils'
 
 dotenv.config()
 
@@ -168,10 +169,13 @@ export class RoutingAPIPipeline extends Stack {
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
       if (!rpcGatewayEnabledChainIds.includes(chainId)) {
         const key = `WEB3_RPC_${chainId}`
-        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
-        new CfnOutput(this, key, {
-          value: jsonRpcProviders[key]
-        })
+        try {
+          jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+        } catch (err) {
+          new CfnOutput(this, key, {
+            value: 'Missing provider URL from secret',
+          })
+        }
       }
     })
 
@@ -202,10 +206,13 @@ export class RoutingAPIPipeline extends Stack {
       'NIRVANA_8453',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
-      jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
-      new CfnOutput(this, provider, {
-        value: jsonRpcProviders[provider]
-      })
+      try {
+        jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
+      } catch (err) {
+        new CfnOutput(this, provider, {
+          value: 'Missing provider URL from secret',
+        })
+      }
     }
 
     // Beta us-east-2
