@@ -13,7 +13,6 @@ import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
 import { getRpcGatewayEnabledChainIds } from '../lib/rpc/ProdConfig'
-import { chainIdToNetworkName } from '../lib/rpc/utils'
 
 dotenv.config()
 
