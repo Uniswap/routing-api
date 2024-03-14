@@ -1,14 +1,1 @@
-[
-  {
-    "chainId": 43114,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [9, 1, 0],
-    "providerUrls": ["INFURA_43114", "QUICKNODE_43114", "NIRVANA_43114"]
-  },
-  {
-    "chainId": 10,
-    "useMultiProviderProb": 1,
-    "providerInitialWeights": [1, 0, 0, 0],
-    "providerUrls": ["INFURA_10", "QUICKNODE_10", "NIRVANA_10", "ALCHEMY_10"]
-  }
-]
+[]

@@ -100,62 +100,6 @@ describe('GlobalRpcProviders', () => {
     expect(avaUniProvider['providers'][1].url).to.equal('url1')
   })
 
-  // You may need to update this test if you modified rpcProviderProdConfig.json
-  it('Prepare global UniJsonRpcProvider by reading config file', () => {
-    process.env = {
-      INFURA_43114: 'infura_43114',
-      QUICKNODE_43114: 'quicknode_43114',
-      NIRVANA_43114: 'nirvana_43114',
-      INFURA_10: 'infura_10',
-      QUICKNODE_10: 'quicknode_10',
-      NIRVANA_10: 'nirvana_10',
-      ALCHEMY_10: 'alchemy_10',
-    }
-
-    const randStub = sandbox.stub(Math, 'random')
-    randStub.returns(0.9)
-
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.AVALANCHE
-      )
-    ).to.be.true
-
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.OPTIMISM
-      )
-    ).to.be.true
-
-    const uniRpcProviderAvalanche = GlobalRpcProviders.getGlobalUniRpcProviders(
-      log,
-      UNI_PROVIDER_TEST_CONFIG,
-      SINGLE_PROVIDER_TEST_CONFIG
-    ).get(ChainId.AVALANCHE)!
-    expect(uniRpcProviderAvalanche['providers'][0].url).equal('infura_43114')
-    expect(uniRpcProviderAvalanche['providers'][1].url).equal('quicknode_43114')
-    expect(uniRpcProviderAvalanche['providers'][2].url).equal('nirvana_43114')
-
-    const uniRpcProviderOptimism = GlobalRpcProviders.getGlobalUniRpcProviders(
-      log,
-      UNI_PROVIDER_TEST_CONFIG,
-      SINGLE_PROVIDER_TEST_CONFIG
-    ).get(ChainId.OPTIMISM)!!
-    expect(uniRpcProviderOptimism['providers'][0].url).equal('infura_10')
-    expect(uniRpcProviderOptimism['providers'][1].url).equal('quicknode_10')
-    expect(uniRpcProviderOptimism['providers'][2].url).equal('nirvana_10')
-    expect(uniRpcProviderOptimism['providers'][3].url).equal('alchemy_10')
-
-    cleanUp()
-
-    randStub.returns(1.0)
-    expect(
-      GlobalRpcProviders.getGlobalUniRpcProviders(log, UNI_PROVIDER_TEST_CONFIG, SINGLE_PROVIDER_TEST_CONFIG).has(
-        ChainId.AVALANCHE
-      )
-    ).to.be.false
-  })
-
   it('Prepare global UniJsonRpcProvider by reading config: Use prob to decide feature switch', () => {
     process.env = {
       URL0: 'url0',
