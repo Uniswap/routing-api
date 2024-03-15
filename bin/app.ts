@@ -164,6 +164,9 @@ export class RoutingAPIPipeline extends Stack {
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
       const key = `WEB3_RPC_${chainId}`
       jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+      new CfnOutput(this, key, {
+        value: jsonRpcProviders[key],
+      })
     })
 
     // Beta us-east-2
