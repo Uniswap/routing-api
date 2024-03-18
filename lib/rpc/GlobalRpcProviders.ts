@@ -36,7 +36,6 @@ export class GlobalRpcProviders {
           throw new Error(`Environmental variable ${urlEnvVar} isn't defined!`)
         }
         chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
-        console.log(`jiejie: ${urlEnvVar}: ${chainConfig.providerUrls[i]}`)
       }
     }
     return prodConfig
