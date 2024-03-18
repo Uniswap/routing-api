@@ -315,7 +315,7 @@ describe('GlobalRpcProviders', () => {
       SINGLE_PROVIDER_TEST_CONFIG
     ).get(ChainId.BASE)!
     expect(uniRpcProviderBase['providers'][0].url).equal('https://base-mainnet.infura.io/v3/key12')
-    expect(uniRpcProviderBase['providers'][1].url).equal('https://host13.base0-mainnet.quiknode.pro/key13')
+    expect(uniRpcProviderBase['providers'][1].url).equal('https://host13.base-mainnet.quiknode.pro/key13')
     expect(uniRpcProviderBase['providers'][2].url).equal('https://base-mainnet.g.alchemy.com/v2/key14')
     expect(uniRpcProviderBase['providers'][3].url).equal('https://base.nirvanalabs.xyz/host15?apikey=key15')
 

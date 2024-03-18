@@ -72,7 +72,7 @@ export function generateProviderUrl(key: string, value: string): string {
       return `https://${tokens[0]}.matic.quiknode.pro/${tokens[1]}`
     }
     case 'QUICKNODE_8453': {
-      return `https://${tokens[0]}.base0-mainnet.quiknode.pro/${tokens[1]}`
+      return `https://${tokens[0]}.base-mainnet.quiknode.pro/${tokens[1]}`
     }
     // Alchemy
     case 'ALCHEMY_10': {
