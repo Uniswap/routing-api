@@ -119,7 +119,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v3PoolProvider,
           onChainQuoteProvider,
           gasPriceProvider,
-          v3GasModelFactory: new V3HeuristicGasModelFactory(),
+          v3GasModelFactory: new V3HeuristicGasModelFactory(provider),
           blockedTokenListProvider,
           tokenProvider,
           v2PoolProvider,
