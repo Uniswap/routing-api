@@ -8,8 +8,8 @@
   {
     "chainId": 10,
     "useMultiProviderProb": 1,
-    "providerInitialWeights": [1, 0, 0, 0],
-    "providerUrls": ["INFURA_10", "QUICKNODE_10", "NIRVANA_10", "ALCHEMY_10"]
+    "providerInitialWeights": [1, 0, 0],
+    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"]
   },
   {
     "chainId": 42220,

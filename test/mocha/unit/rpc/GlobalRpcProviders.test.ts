@@ -282,8 +282,7 @@ describe('GlobalRpcProviders', () => {
     ).get(ChainId.OPTIMISM)!!
     expect(uniRpcProviderOptimism['providers'][0].url).equal('https://optimism-mainnet.infura.io/v3/key3')
     expect(uniRpcProviderOptimism['providers'][1].url).equal('https://host3.optimism.quiknode.pro/key3')
-    expect(uniRpcProviderOptimism['providers'][2].url).equal('https://optimism.nirvanalabs.xyz/host4?apikey=key4')
-    expect(uniRpcProviderOptimism['providers'][3].url).equal('https://opt-mainnet.g.alchemy.com/v2/key5')
+    expect(uniRpcProviderOptimism['providers'][2].url).equal('https://opt-mainnet.g.alchemy.com/v2/key5')
 
     const uniRpcProviderCelo = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
