@@ -12,6 +12,7 @@ import 'source-map-support/register'
 import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
+import { getRpcGatewayEnabledChainIds } from '../lib/rpc/ProdConfig'
 
 dotenv.config()
 
@@ -159,15 +160,53 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
     })
 
+    // Read chains that uses RPC gateway.
+    const rpcGatewayEnabledChainIds = getRpcGatewayEnabledChainIds()
+
     // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
-      const key = `WEB3_RPC_${chainId}`
-      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
-      new CfnOutput(this, key, {
-        value: jsonRpcProviders[key],
-      })
+      if (!rpcGatewayEnabledChainIds.includes(chainId)) {
+        const key = `WEB3_RPC_${chainId}`
+        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+        new CfnOutput(this, key, {
+          value: jsonRpcProviders[key],
+        })
+      }
     })
+
+    // Load RPC provider URLs from AWS secret (for RPC Gateway)
+    const RPC_GATEWAY_PROVIDERS = [
+      // Avalanche
+      'INFURA_43114',
+      'NIRVANA_43114',
+      'QUICKNODE_43114',
+      // Optimism
+      'INFURA_10',
+      'NIRVANA_10',
+      'QUICKNODE_10',
+      'ALCHEMY_10',
+      // Celo
+      'INFURA_42220',
+      'QUICKNODE_42220',
+      // BNB
+      'QUICKNODE_56',
+      // Polygon
+      'INFURA_137',
+      'QUICKNODE_137',
+      'ALCHEMY_137',
+      // Base
+      'INFURA_8453',
+      'QUICKNODE_8453',
+      'ALCHEMY_8453',
+      'NIRVANA_8453',
+    ]
+    for (const provider of RPC_GATEWAY_PROVIDERS) {
+      jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
+      new CfnOutput(this, provider, {
+        value: jsonRpcProviders[provider],
+      })
+    }
 
     // Beta us-east-2
     const betaUsEast2Stage = new RoutingAPIStage(this, 'beta-us-east-2', {
