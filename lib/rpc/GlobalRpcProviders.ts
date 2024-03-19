@@ -9,7 +9,7 @@ import {
   UniJsonRpcProviderConfig,
 } from './config'
 import { ProdConfig, ProdConfigJoi } from './ProdConfig'
-import { chainIdToNetworkName, generateProviderUrl } from './utils'
+import { chainIdToNetworkName } from './utils'
 import PROD_CONFIG from '../config/rpcProviderProdConfig.json'
 
 export class GlobalRpcProviders {
@@ -35,7 +35,7 @@ export class GlobalRpcProviders {
         if (process.env[urlEnvVar] === undefined) {
           throw new Error(`Environmental variable ${urlEnvVar} isn't defined!`)
         }
-        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
+        chainConfig.providerUrls[i] = process.env[urlEnvVar]!
       }
     }
     return prodConfig
