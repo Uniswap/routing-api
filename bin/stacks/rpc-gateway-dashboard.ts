@@ -180,7 +180,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           yAxis: {
             left: {
               showUnits: false,
-              label: 'Score (in negative)',
+              label: 'Requests',
             },
           },
         },
