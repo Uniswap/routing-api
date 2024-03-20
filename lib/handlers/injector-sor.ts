@@ -33,7 +33,7 @@ import {
   IRouteCachingProvider,
   CachingV2PoolProvider,
   TokenValidatorProvider,
-  ITokenPropertiesProvider,
+  ITokenPropertiesProvider, IOnChainQuoteProvider
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -54,6 +54,7 @@ import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/p
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -96,7 +97,7 @@ export type ContainerDependencies = {
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   multicallProvider: UniswapMulticallProvider
-  onChainQuoteProvider?: OnChainQuoteProvider
+  onChainQuoteProvider?: IOnChainQuoteProvider,
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
   routeCachingProvider?: IRouteCachingProvider
@@ -268,8 +269,60 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
           // 200*725k < 150m
-          let quoteProvider: OnChainQuoteProvider | undefined = undefined
+          let quoteProvider: IOnChainQuoteProvider | undefined = undefined
           switch (chainId) {
+            case ChainId.MAINNET:
+              const currentQuoteProvider = new OnChainQuoteProvider(
+                chainId,
+                provider,
+                multicall2Provider,
+                {
+                    retries: 2,
+                    minTimeout: 100,
+                    maxTimeout: 1000,
+                  },
+                  {
+                    multicallChunk: 210,
+                    gasLimitPerCall: 705_000,
+                    quoteMinSuccessRate: 0.15,
+                  },
+                  {
+                    gasLimitOverride: 2_000_000,
+                    multicallChunk: 70,
+                  }
+                )
+              const targetQuoteProvider = new OnChainQuoteProvider(
+                chainId,
+                provider,
+                multicall2Provider,
+                {
+                    retries: 2,
+                    minTimeout: 100,
+                    maxTimeout: 1000,
+                  },
+                  {
+                    multicallChunk: 210,
+                    gasLimitPerCall: 705_000,
+                    quoteMinSuccessRate: 0.15,
+                  },
+                  {
+                    gasLimitOverride: 2_000_000,
+                    multicallChunk: 70,
+                  },
+                {
+                  gasLimitOverride: 1_300_000,
+                  multicallChunk: 110,
+                },
+                {
+                  baseBlockOffset: 0,
+                  rollback: { enabled: false },
+                },
+                '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24',
+              );
+              quoteProvider = new TrafficSwitchOnChainQuoteProvider(
+                { currentQuoteProvider: currentQuoteProvider, targetQuoteProvider: targetQuoteProvider },
+              )
+              break
             case ChainId.BASE:
             case ChainId.OPTIMISM:
               quoteProvider = new OnChainQuoteProvider(
