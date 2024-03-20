@@ -1,4 +1,4 @@
-import { SingleJsonRpcProvider } from './SingleJsonRpcProvider'
+import { MAJOR_METHOD_NAMES, SingleJsonRpcProvider } from './SingleJsonRpcProvider'
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -174,18 +174,21 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   // Shadow call to all unhealthy providers to get some idea about their latest health state.
-  // We will rate limit it to one request per config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS per lambda instance.
-  private checkUnhealthyProviders() {
+  private checkUnhealthyProviders(selectedProvider: SingleJsonRpcProvider) {
     this.log.debug('After serving a call, check unhealthy providers')
+    const unhealthyProviders = this.providers.filter((provider) => !provider.isHealthy())
     let count = 0
-    for (const provider of this.providers) {
+    for (const provider of unhealthyProviders) {
+      if (provider.url === selectedProvider.url) {
+        continue
+      }
       if (
-        !provider.isHealthy() &&
-        provider.hasEnoughWaitSinceLastCall(this.config.RECOVER_EVALUATION_WAIT_PERIOD_IN_MS)
+        !provider.isEvaluatingHealthiness() &&
+        provider.hasEnoughWaitSinceLastHealthinessEvaluation(1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S)
       ) {
         // Fire and forget. Don't care about its result and it won't throw.
         // It's done this way because We don't want to block the return of this function.
-        provider.evaluateForRecovery()
+        provider.evaluateHealthiness()
         count++
       }
     }
@@ -198,13 +201,18 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
-      if (provider.url != selectedProvider.url) {
-        if (provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
-          // Fire and forget. Don't care about its result and it won't throw.
-          // It's done this way because We don't want to block the return of this function.
-          provider.evaluateLatency(methodName, args)
-          count++
-        }
+      if (provider.url === selectedProvider.url) {
+        continue
+      }
+      if (
+        !provider.isEvaluatingLatency() &&
+        MAJOR_METHOD_NAMES.includes(methodName) &&
+        provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
+      ) {
+        // Fire and forget. Don't care about its result and it won't throw.
+        // It's done this way because We don't want to block the return of this function.
+        provider.evaluateLatency(methodName, args)
+        count++
       }
     }
     this.log.debug(`Evaluated ${count} other healthy providers`)
@@ -268,7 +276,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
         this.checkOtherHealthyProvider(selectedProvider, fnName, args)
       }
-      this.checkUnhealthyProviders()
+      this.checkUnhealthyProviders(selectedProvider)
     }
   }
 

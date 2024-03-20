@@ -12,13 +12,14 @@ import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider
 import { default as bunyan } from 'bunyan'
 
 const UNI_PROVIDER_TEST_CONFIG: UniJsonRpcProviderConfig = {
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 0,
   ENABLE_SHADOW_LATENCY_EVALUATION: false,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
   DEFAULT_INITIAL_WEIGHT: 1000,
 }
 
 const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 0,
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
   HEALTH_SCORE_FALLBACK_THRESHOLD: -70,
@@ -35,7 +36,7 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
 const log = bunyan.createLogger({
   name: 'SingleJsonRpcProviderTest',
   serializers: bunyan.stdSerializers,
-  level: bunyan.ERROR,
+  level: bunyan.DEBUG,
 })
 
 const createNewSingleJsonRpcProviders = () => [
@@ -236,7 +237,6 @@ describe('UniJsonRpcProvider', () => {
 
     // We advance some time. During this the failed provider starts recovering.
     const unhealthyProvider = uniProvider['providers'][0]
-    const scoreBeforeRecovering = unhealthyProvider['healthScore']
     getBlockNumber0.resolves(123)
     // Dial back provider's last call time to simulate that it has some period of recovery.
     unhealthyProvider['lastCallTimestampInMs'] -= 1000
@@ -250,7 +250,6 @@ describe('UniJsonRpcProvider', () => {
     // 1 second isn't enough to start re-evaluate the failed provider.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    expect(unhealthyProvider['healthScore']).equals(scoreBeforeRecovering)
 
     // Dial back provider's last call time to simulate that it has some period of recovery.
     unhealthyProvider['lastCallTimestampInMs'] -= 10000
@@ -822,12 +821,14 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
     getBlockNumber2.resolves(123)
 
+    const spy0 = sandbox.spy(uniProvider['providers'][0], 'evaluateLatency')
     const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateLatency')
     const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateLatency')
 
     await uniProvider.getBlockNumber()
 
     // Shadow evaluate call should be made
+    expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
     expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
     expect(spy2.callCount).to.equal(1)
@@ -835,7 +836,90 @@ describe('UniJsonRpcProvider', () => {
 
     expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationApiName']).equals('getBlockNumber')
     expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationApiName']).equals('getBlockNumber')
+
+    // Selected provider should also record latency.
+    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+  })
+
+  it('Test we will not do shadow latency check calls too frequently', async () => {
+    const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
+    CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
+    CUSTOM_UNI_PROVIDER_CONFIG.LATENCY_EVALUATION_WAIT_PERIOD_IN_S = 15
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      CUSTOM_UNI_PROVIDER_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    const timestamp = Date.now()
+    sandbox.useFakeTimers(timestamp)
+
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
+
+    const spy0 = sandbox.spy(uniProvider['providers'][0], 'evaluateLatency')
+    const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateLatency')
+    const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateLatency')
+
+    await uniProvider.getBlockNumber()
+
+    // Shadow evaluate call should be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(1)
+    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.callCount).to.equal(1)
+    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+
+    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+
+    // Advance 1 second.
+    sandbox.clock.tick(1000)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    await uniProvider.getBlockNumber()
+
+    // 1 second is not long enough to allow another latency evaluation shadow call.
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+
+    // Advance another 15 seconds.
+    sandbox.clock.tick(15000)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    await uniProvider.getBlockNumber()
+
+    expect(spy1.callCount).to.equal(1)
+    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+    expect(spy2.callCount).to.equal(1)
+    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equal(timestamp + 16000)
   })
 })
