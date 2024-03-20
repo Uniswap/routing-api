@@ -271,7 +271,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           // 200*725k < 150m
           let quoteProvider: IOnChainQuoteProvider | undefined = undefined
           switch (chainId) {
-            case ChainId.MAINNET:
+            case ChainId.POLYGON:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
