@@ -33,7 +33,9 @@ import {
   IRouteCachingProvider,
   CachingV2PoolProvider,
   TokenValidatorProvider,
-  ITokenPropertiesProvider, IOnChainQuoteProvider
+  ITokenPropertiesProvider,
+  IOnChainQuoteProvider,
+  NEW_QUOTER_V2_ADDRESSES,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -55,6 +57,13 @@ import { PortionProvider } from '@uniswap/smart-order-router/build/main/provider
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
+import {
+  BATCH_PARAMS,
+  BLOCK_NUMBER_CONFIGS,
+  GAS_ERROR_FAILURE_OVERRIDES,
+  RETRY_OPTIONS,
+  SUCCESS_RATE_FAILURE_OVERRIDES,
+} from '../util/onChainQuoteProviderConfigs'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -97,7 +106,7 @@ export type ContainerDependencies = {
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
   multicallProvider: UniswapMulticallProvider
-  onChainQuoteProvider?: IOnChainQuoteProvider,
+  onChainQuoteProvider?: IOnChainQuoteProvider
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
   routeCachingProvider?: IRouteCachingProvider
@@ -276,52 +285,28 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 chainId,
                 provider,
                 multicall2Provider,
-                {
-                    retries: 2,
-                    minTimeout: 100,
-                    maxTimeout: 1000,
-                  },
-                  {
-                    multicallChunk: 210,
-                    gasLimitPerCall: 705_000,
-                    quoteMinSuccessRate: 0.15,
-                  },
-                  {
-                    gasLimitOverride: 2_000_000,
-                    multicallChunk: 70,
-                  }
-                )
+                RETRY_OPTIONS[chainId],
+                BATCH_PARAMS[chainId],
+                GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                BLOCK_NUMBER_CONFIGS[chainId]
+              )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
                 multicall2Provider,
-                {
-                    retries: 2,
-                    minTimeout: 100,
-                    maxTimeout: 1000,
-                  },
-                  {
-                    multicallChunk: 210,
-                    gasLimitPerCall: 705_000,
-                    quoteMinSuccessRate: 0.15,
-                  },
-                  {
-                    gasLimitOverride: 2_000_000,
-                    multicallChunk: 70,
-                  },
-                {
-                  gasLimitOverride: 1_300_000,
-                  multicallChunk: 110,
-                },
-                {
-                  baseBlockOffset: 0,
-                  rollback: { enabled: false },
-                },
-                '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24',
-              );
-              quoteProvider = new TrafficSwitchOnChainQuoteProvider(
-                { currentQuoteProvider: currentQuoteProvider, targetQuoteProvider: targetQuoteProvider },
+                RETRY_OPTIONS[chainId],
+                BATCH_PARAMS[chainId],
+                GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                BLOCK_NUMBER_CONFIGS[chainId],
+                NEW_QUOTER_V2_ADDRESSES[chainId],
+                `ChainId_${chainId}_Shadow_Quoter`
               )
+              quoteProvider = new TrafficSwitchOnChainQuoteProvider({
+                currentQuoteProvider: currentQuoteProvider,
+                targetQuoteProvider: targetQuoteProvider,
+              })
               break
             case ChainId.BASE:
             case ChainId.OPTIMISM:
