@@ -14,10 +14,14 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
   private readonly currentQuoteProvider: IOnChainQuoteProvider
   private readonly targetQuoteProvider: IOnChainQuoteProvider
 
-  protected readonly SHOULD_SWITCH_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchPercentage > this.getRandomPercentage()
-  protected readonly SHOULD_SAMPLE_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = () =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchExactInPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = () =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingExactInPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = () =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchExactOutPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = () =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingExactOutPercentage > this.getRandomPercentage()
 
   constructor(props: TrafficSwitchOnChainQuoteProviderProps) {
     this.currentQuoteProvider = props.currentQuoteProvider
@@ -32,8 +36,8 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     routesWithQuotes: RouteWithQuotes<TRoute>[]
     blockNumber: BigNumber
   }> {
-    const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
-    const switchTraffic = this.SHOULD_SWITCH_TRAFFIC()
+    const sampleTraffic = this.SHOULD_SAMPLE_EXACT_IN_TRAFFIC()
+    const switchTraffic = this.SHOULD_SWITCH_EXACT_IN_TRAFFIC()
 
     let currentQuote
     let targetQuote
@@ -66,8 +70,8 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     routesWithQuotes: RouteWithQuotes<TRoute>[]
     blockNumber: BigNumber
   }> {
-    const sampleTraffic = this.SHOULD_SAMPLE_TRAFFIC()
-    const switchTraffic = this.SHOULD_SWITCH_TRAFFIC()
+    const sampleTraffic = this.SHOULD_SWITCH_EXACT_OUT_TRAFFIC()
+    const switchTraffic = this.SHOULD_SAMPLE_EXACT_OUT_TRAFFIC()
 
     let currentQuote
     let targetQuote
