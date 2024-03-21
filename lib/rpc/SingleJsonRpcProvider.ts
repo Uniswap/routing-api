@@ -153,7 +153,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastLatencyEvaluationApiName = perf.methodName
       this.logLatencyMetrics()
       this.evaluatingLatency = false
-    } else if (perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs > 1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S) {
+    } else if (
+      perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
+      1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
+    ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
       this.lastLatencyEvaluationApiName = perf.methodName
@@ -176,7 +179,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastLatencyEvaluationApiName = perf.methodName
       this.logLatencyMetrics()
       this.evaluatingLatency = false
-    } else if (perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs > 1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S) {
+    } else if (
+      perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
+      1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
+    ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
       this.lastLatencyEvaluationApiName = perf.methodName
