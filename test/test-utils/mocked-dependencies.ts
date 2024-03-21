@@ -1,4 +1,10 @@
-import { V3PoolProvider } from '@uniswap/smart-order-router'
+import {
+  OnChainQuoteProvider,
+  RouteWithQuotes,
+  USDC_MAINNET,
+  V3PoolProvider,
+  WRAPPED_NATIVE_CURRENCY,
+} from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import {
   buildMockV3PoolAccessor,
@@ -9,6 +15,10 @@ import {
   WETH9_USDT_LOW,
 } from './mocked-data'
 import sinon from 'sinon'
+import { V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { ChainId, CurrencyAmount } from '@uniswap/sdk-core'
+import { AmountQuote } from '@uniswap/smart-order-router/build/main/providers/on-chain-quote-provider'
+import { BigNumber } from 'ethers'
 
 export function getMockedV3PoolProvider(
   pools: Pool[] = [USDC_DAI_LOW, USDC_DAI_MEDIUM, USDC_WETH_LOW, WETH9_USDT_LOW, DAI_USDT_LOW]
@@ -23,6 +33,31 @@ export function getMockedV3PoolProvider(
   }))
 
   return mockV3PoolProvider
+}
+
+export function getMockedOnChainQuoteProvider(): sinon.SinonStubbedInstance<OnChainQuoteProvider> {
+  const mockedQuoteProvider = sinon.createStubInstance(OnChainQuoteProvider)
+  const route = new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET)
+  const quotes: AmountQuote[] = [
+    {
+      amount: CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000'),
+      quote: BigNumber.from('1000000000000000000'),
+      sqrtPriceX96AfterList: [BigNumber.from(100)],
+      initializedTicksCrossedList: [1, 1, 1],
+      gasEstimate: BigNumber.from(100),
+    },
+  ]
+  const routesWithQuotes: RouteWithQuotes<V3Route>[] = [[route, quotes]]
+  mockedQuoteProvider.getQuotesManyExactIn.resolves({
+    routesWithQuotes: routesWithQuotes,
+    blockNumber: BigNumber.from(0),
+  })
+  mockedQuoteProvider.getQuotesManyExactOut.resolves({
+    routesWithQuotes: routesWithQuotes,
+    blockNumber: BigNumber.from(0),
+  })
+
+  return mockedQuoteProvider
 }
 
 export const TEST_ROUTE_TABLE = {
