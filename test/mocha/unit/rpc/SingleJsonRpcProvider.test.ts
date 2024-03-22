@@ -15,6 +15,7 @@ const delay = (ms: number) => {
 }
 
 const config: SingleJsonRpcProviderConfig = {
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 5,
   ERROR_PENALTY: -50,
   HIGH_LATENCY_PENALTY: -50,
   HEALTH_SCORE_FALLBACK_THRESHOLD: -70,

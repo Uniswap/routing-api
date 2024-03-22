@@ -4,6 +4,7 @@ import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { Construct } from 'constructs'
 import _ from 'lodash'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
+import { MAJOR_METHOD_NAMES } from '../../lib/rpc/SingleJsonRpcProvider'
 
 const providerForChain: Map<ChainId, string[]> = new Map([
   [ChainId.AVALANCHE, ['INFURA', 'QUIKNODE', 'NIRVANA']],
@@ -51,26 +52,18 @@ function getHealthScoreMetricsForChain(chainId: ChainId) {
 function getLatencyMetricsForChain(chainId: ChainId) {
   const metrics = []
   for (const providerName of providerForChain.get(chainId)!) {
-    metrics.push([
-      'Uniswap',
-      `RPC_GATEWAY_${chainId}_${providerName}_evaluated_latency_getBlockNumber`,
-      'Service',
-      'RoutingAPI',
-      {
-        id: `getBlockNumber_latency_${chainId}_${providerName}`,
-        label: `${providerName} getBlockNumber latency on ${ID_TO_NETWORK_NAME(chainId)}`,
-      },
-    ])
-    metrics.push([
-      'Uniswap',
-      `RPC_GATEWAY_${chainId}_${providerName}_evaluated_latency_call`,
-      'Service',
-      'RoutingAPI',
-      {
-        id: `call_latency_${chainId}_${providerName}`,
-        label: `${providerName} call latency on ${ID_TO_NETWORK_NAME(chainId)}`,
-      },
-    ])
+    for (const methodName of MAJOR_METHOD_NAMES) {
+      metrics.push([
+        'Uniswap',
+        `RPC_GATEWAY_${chainId}_${providerName}_evaluated_latency_${methodName}`,
+        'Service',
+        'RoutingAPI',
+        {
+          id: `${methodName}_latency_${chainId}_${providerName}`,
+          label: `${providerName} ${methodName} latency on ${ID_TO_NETWORK_NAME(chainId)}`,
+        },
+      ])
+    }
   }
   return metrics
 }
@@ -180,7 +173,7 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           yAxis: {
             left: {
               showUnits: false,
-              label: 'Requests',
+              label: 'Score (in negative)',
             },
           },
         },

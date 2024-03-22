@@ -1,13 +1,13 @@
 export interface CommonConfig {
+  // For an unhealthy provider, if it hasn't been used for some time, we can
+  // test it out to check its recovery. This defines the time it needs to wait
+  // before being tested again, in milliseconds.
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: number
   // Wait time for recording next latency evaluation result.
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: number
 }
 
 export interface UniJsonRpcProviderConfig extends CommonConfig {
-  // For an unhealthy provider, if it hasn't been used for some time, we can
-  // test it out to check its recovery. This defines the time it needs to wait
-  // before being tested again, in milliseconds.
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: number
   // Do shadow calls on other non-selected healthy providers to monitor their latencies
   ENABLE_SHADOW_LATENCY_EVALUATION: boolean
   // Default initial provider's weight, if not specified.
@@ -38,7 +38,7 @@ export interface SingleJsonRpcProviderConfig extends CommonConfig {
 }
 
 export const DEFAULT_UNI_PROVIDER_CONFIG: UniJsonRpcProviderConfig = {
-  RECOVER_EVALUATION_WAIT_PERIOD_IN_MS: 5000,
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 15,
   ENABLE_SHADOW_LATENCY_EVALUATION: true,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
   DEFAULT_INITIAL_WEIGHT: 1000,
@@ -59,6 +59,7 @@ export const DEFAULT_SINGLE_PROVIDER_CONFIG: SingleJsonRpcProviderConfig = {
   ENABLE_DB_SYNC: true,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
+  HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 15,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
 }
 
