@@ -153,8 +153,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.evaluatingLatency = false
     } else if (
       perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-      1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
-      &&
+        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
       MAJOR_METHOD_NAMES.includes(perf.methodName)
     ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
@@ -181,8 +180,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.evaluatingLatency = false
     } else if (
       perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-      1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
-      &&
+        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
       MAJOR_METHOD_NAMES.includes(perf.methodName)
     ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
