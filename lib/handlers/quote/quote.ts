@@ -69,6 +69,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 200:
         case 202:
           metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(`GET_QUOTE_200_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
           break
         case 400:
         case 403:
@@ -76,6 +77,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 408:
         case 409:
           metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(`GET_QUOTE_400_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
           log.error(
             {
               statusCode: result?.statusCode,
@@ -89,10 +91,12 @@ export class QuoteHandler extends APIGLambdaHandler<
           break
         case 500:
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
           break
       }
     } catch (err) {
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
 
       throw err
     } finally {
