@@ -59,7 +59,7 @@ function getLatencyMetricsForChain(chainId: ChainId) {
         'Service',
         'RoutingAPI',
         {
-          id: `getBlockNumber_latency_${chainId}_${providerName}`,
+          id: `${methodName}_latency_${chainId}_${providerName}`,
           label: `${providerName} ${methodName} latency on ${ID_TO_NETWORK_NAME(chainId)}`,
         },
       ])
