@@ -89,8 +89,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
-      // Fire and forget. Won't check the sync result.
-      this.maybeSyncAndUpdateProviderState()
     }
   }
 
@@ -156,6 +154,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } else if (
       perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
       1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
+      &&
+      MAJOR_METHOD_NAMES.includes(perf.methodName)
     ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
@@ -182,6 +182,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } else if (
       perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
       1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S
+      &&
+      MAJOR_METHOD_NAMES.includes(perf.methodName)
     ) {
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
