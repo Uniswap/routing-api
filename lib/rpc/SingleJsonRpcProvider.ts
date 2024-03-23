@@ -59,6 +59,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
+  private syncingDb: boolean = false
   private enableDbSync: boolean
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
@@ -303,7 +304,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
       this.updateHealthyStatus()
-      if (this.enableDbSync) {
+      if (this.enableDbSync && !this.syncingDb) {
+        this.syncingDb = true
         // Fire and forget. Won't check the sync result.
         this.maybeSyncAndUpdateProviderState()
       }
@@ -333,6 +335,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } catch (err: any) {
       this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
       // Won't throw. A fail of sync won't affect how we do health state update locally.
+    } finally {
+      this.syncingDb = false
     }
   }
 
