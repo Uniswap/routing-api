@@ -922,35 +922,4 @@ describe('UniJsonRpcProvider', () => {
 
     expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equal(timestamp + 16000)
   })
-
-  it('Real world shadow call', async () => {
-    const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
-    CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
-    uniProvider = new UniJsonRpcProvider(
-      ChainId.MAINNET,
-      [
-        new SingleJsonRpcProvider(
-          { name: 'celo', chainId: ChainId.CELO },
-          `https://celo-mainnet.infura.io/v3/6ba27904633943cd8f0ef0435af2202d`,
-          log,
-          SINGLE_PROVIDER_TEST_CONFIG
-        ),
-        new SingleJsonRpcProvider(
-          { name: 'celo', chainId: ChainId.CELO },
-          `https://young-cool-hill.celo-mainnet.quiknode.pro/9151cf5d793850c3dbfeee624437a0fdc1be741e/`,
-          log,
-          SINGLE_PROVIDER_TEST_CONFIG
-        ),
-      ],
-      log,
-      [1, 0],
-      undefined,
-      CUSTOM_UNI_PROVIDER_CONFIG
-    )
-    for (const provider of uniProvider['providers']) {
-      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
-    }
-
-    await uniProvider.getBlockNumber()
-  })
 })
