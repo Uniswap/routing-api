@@ -278,7 +278,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     fn: (...args: any[]) => Promise<any>,
     ...args: any[]
   ): Promise<any> {
-    this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: callType: ${callType}, provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`)
+    this.log.debug(
+      `SingleJsonRpcProvider: wrappedFunctionCall: callType: ${callType}, provider: ${
+        this.url
+      }, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`
+    )
     const perf: SingleCallPerf = {
       callType: callType,
       methodName: fnName,
@@ -290,7 +294,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       return await fn(...args)
     } catch (error: any) {
       perf.succeed = false
-      this.log.debug(`Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`)
+      this.log.debug(
+        `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`
+      )
       this.log.error(`Error details: ${JSON.stringify(error)}`)
       throw error
     } finally {
@@ -370,10 +376,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override getCode(
-    addressOrName: string | Promise<string>,
-    blockTag?: BlockTag | Promise<BlockTag>
-  ): Promise<string> {
+  override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
     return this.wrappedFunctionCall(CallType.NORMAL, 'getCode', super.getCode.bind(this), addressOrName, blockTag)
   }
 
@@ -400,9 +403,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override getTransaction(
-    transactionHash: string | Promise<string>
-  ): Promise<TransactionResponse> {
+  override getTransaction(transactionHash: string | Promise<string>): Promise<TransactionResponse> {
     return this.wrappedFunctionCall(CallType.NORMAL, 'getTransaction', super.getTransaction.bind(this), transactionHash)
   }
 
@@ -419,9 +420,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override getTransactionReceipt(
-    transactionHash: string | Promise<string>
-  ): Promise<TransactionReceipt> {
+  override getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt> {
     return this.wrappedFunctionCall(
       CallType.NORMAL,
       'getTransactionReceipt',
@@ -438,10 +437,13 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return this.wrappedFunctionCall(CallType.NORMAL, 'resolveName', super.resolveName.bind(this), name)
   }
 
-  override sendTransaction(
-    signedTransaction: string | Promise<string>
-  ): Promise<TransactionResponse> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'sendTransaction', super.sendTransaction.bind(this), signedTransaction)
+  override sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
+    return this.wrappedFunctionCall(
+      CallType.NORMAL,
+      'sendTransaction',
+      super.sendTransaction.bind(this),
+      signedTransaction
+    )
   }
 
   override waitForTransaction(
@@ -459,10 +461,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override call(
-    transaction: Deferrable<TransactionRequest>,
-    blockTag?: BlockTag | Promise<BlockTag>
-  ): Promise<string> {
+  override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
     return this.wrappedFunctionCall(CallType.NORMAL, 'call', super.call.bind(this), transaction, blockTag)
   }
 
@@ -479,7 +478,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private getBlockNumber_EvaluateHealthiness(): Promise<number> {
-    return this.wrappedFunctionCall(CallType.HEALTH_CHECK, 'getBlockNumber', this._getBlockNumber.bind(this) )
+    return this.wrappedFunctionCall(CallType.HEALTH_CHECK, 'getBlockNumber', this._getBlockNumber.bind(this))
   }
 
   // @ts-ignore

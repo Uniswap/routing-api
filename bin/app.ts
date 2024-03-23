@@ -280,7 +280,9 @@ const jsonRpcProviders = {
   WEB3_RPC_56: process.env.WEB3_RPC_56!,
   WEB3_RPC_8453: process.env.WEB3_RPC_8453!,
   // The followings are for RPC Gateway
-  // Optimism
+  INFURA_43114: process.env.INFURA_43114!,
+  NIRVANA_43114: process.env.NIRVANA_43114!,
+  QUICKNODE_43114: process.env.QUICKNODE_43114!,
   INFURA_10: process.env.INFURA_10!,
   NIRVANA_10: process.env.NIRVANA_10!,
   QUICKNODE_10: process.env.QUICKNODE_10!,
