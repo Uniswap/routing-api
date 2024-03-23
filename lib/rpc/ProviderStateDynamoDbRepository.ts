@@ -85,6 +85,8 @@ export class ProviderStateDynamoDbRepository implements ProviderStateRepository 
       ExpressionAttributeValues: this.getExpressionAttributeValues(state, updatedAtInMs, prevUpdatedAtInMs!, ttlInS),
       ConditionExpression: CONDITION_EXPRESSION,
     }
+    console.log(`jiejie: updatedAtInMs: ${updatedAtInMs}, prevUpdatedAtInMs: ${prevUpdatedAtInMs}`)
+    console.log(`jiejie: updateParams: ${JSON.stringify(updateParams)}`)
     await this.ddbClient.update(updateParams).promise()
   }
 
