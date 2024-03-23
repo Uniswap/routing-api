@@ -69,6 +69,7 @@ export class ProviderStateSyncer {
     try {
       await this.stateRepository.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
       this.lastSyncTimestampInMs = timestampInMs
+      this.log.error(`Succeed write to sync storage.`)
       return newState
     } catch (err: any) {
       this.log.error(`Failed to write to sync storage: ${JSON.stringify(err)}. Sync failed.`)
