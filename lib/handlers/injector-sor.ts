@@ -121,7 +121,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     const log: Logger = bunyan.createLogger({
       name: this.injectorName,
       serializers: bunyan.stdSerializers,
-      level: bunyan.DEBUG,
+      level: bunyan.INFO,
     })
     setGlobalLogger(log)
 
