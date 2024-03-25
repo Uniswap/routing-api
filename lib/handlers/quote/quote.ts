@@ -69,6 +69,16 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 200:
         case 202:
           metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(
+            `GET_QUOTE_200_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
+            1,
+            MetricLoggerUnit.Count
+          )
+          metric.putMetric(
+            `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            1,
+            MetricLoggerUnit.Count
+          )
           break
         case 400:
         case 403:
@@ -76,6 +86,16 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 408:
         case 409:
           metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(
+            `GET_QUOTE_400_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
+            1,
+            MetricLoggerUnit.Count
+          )
+          metric.putMetric(
+            `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            1,
+            MetricLoggerUnit.Count
+          )
           log.error(
             {
               statusCode: result?.statusCode,
@@ -89,16 +109,38 @@ export class QuoteHandler extends APIGLambdaHandler<
           break
         case 500:
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(
+            `GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
+            1,
+            MetricLoggerUnit.Count
+          )
+          metric.putMetric(
+            `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            1,
+            MetricLoggerUnit.Count
+          )
           break
       }
     } catch (err) {
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+        1,
+        MetricLoggerUnit.Count
+      )
 
       throw err
     } finally {
       // This metric is logged after calling the internal handler to correlate with the status metrics
       metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+        1,
+        MetricLoggerUnit.Count
+      )
+
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
 
       metric.putMetric(

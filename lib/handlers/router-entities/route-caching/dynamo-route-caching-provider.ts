@@ -339,6 +339,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
         protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
         intent: 'caching',
+        requestSource: 'routing-api',
       },
     }
 
