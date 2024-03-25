@@ -462,7 +462,7 @@ export class RoutingAPIStack extends cdk.Stack {
           return
         }
 
-        const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+        const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         const metric = new MathExpression({
           expression: '100*(response200/(invocations-response400))',
           usingMetrics: {
@@ -495,7 +495,6 @@ export class RoutingAPIStack extends cdk.Stack {
           comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
           threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
           evaluationPeriods: 2,
-          actionsEnabled: false, // we disable per-requestsource per-chain alarm, because of the potential high amount of alarms oncall can receive during incident
         })
         successRateByRequestSourceAndChainIdAlarm.push(alarm)
       })
