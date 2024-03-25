@@ -454,6 +454,53 @@ export class RoutingAPIStack extends cdk.Stack {
       successRateByRequestSourceAlarm.push(alarm)
     })
 
+    // Alarms for high 500 error rate for each request source and chain id
+    const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
+    REQUEST_SOURCES.forEach((requestSource) => {
+      SUPPORTED_CHAINS.forEach((chainId) => {
+        if (CHAINS_NOT_MONITORED.includes(chainId)) {
+          return
+        }
+
+        const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+        const metric = new MathExpression({
+          expression: '100*(response200/(invocations-response400))',
+          usingMetrics: {
+            invocations: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              statistic: 'sum',
+            }),
+            response400: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              statistic: 'sum',
+            }),
+            response200: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              statistic: 'sum',
+            }),
+          },
+        })
+        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+          alarmName,
+          metric,
+          comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+          threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
+          evaluationPeriods: 2,
+          actionsEnabled: false, // we disable per-requestsource per-chain alarm, because of the potential high amount of alarms oncall can receive during incident
+        })
+        successRateByRequestSourceAndChainIdAlarm.push(alarm)
+      })
+    })
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -471,6 +518,9 @@ export class RoutingAPIStack extends cdk.Stack {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       successRateByRequestSourceAlarm.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      successRateByRequestSourceAndChainIdAlarm.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }
