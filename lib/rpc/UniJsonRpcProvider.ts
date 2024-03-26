@@ -183,8 +183,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         continue
       }
       if (
-        !provider.isEvaluatingHealthiness() &&
-        provider.hasEnoughWaitSinceLastHealthinessEvaluation(1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S)
+        (!provider.isEvaluatingHealthiness() &&
+          provider.hasEnoughWaitSinceLastHealthinessEvaluation(
+            1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S
+          )) ||
+        provider.hasEnoughWaitSinceLastHealthinessEvaluation(2 * 1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S)
       ) {
         // Fire and forget. Don't care about its result and it won't throw.
         // It's done this way because We don't want to block the return of this function.
@@ -204,10 +207,13 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       if (provider.url === selectedProvider.url) {
         continue
       }
+      if (!MAJOR_METHOD_NAMES.includes(methodName)) {
+        continue
+      }
       if (
-        !provider.isEvaluatingLatency() &&
-        MAJOR_METHOD_NAMES.includes(methodName) &&
-        provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
+        (!provider.isEvaluatingLatency() &&
+          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) ||
+        provider.hasEnoughWaitSinceLastLatencyEvaluation(2 * 1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
       ) {
         // Fire and forget. Don't care about its result and it won't throw.
         // It's done this way because We don't want to block the return of this function.
