@@ -184,8 +184,9 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
       if (
         (!provider.isEvaluatingHealthiness() &&
-          provider.hasEnoughWaitSinceLastHealthinessEvaluation(1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S))
-        ||
+          provider.hasEnoughWaitSinceLastHealthinessEvaluation(
+            1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S
+          )) ||
         provider.hasEnoughWaitSinceLastHealthinessEvaluation(2 * 1000 * this.config.HEALTH_EVALUATION_WAIT_PERIOD_IN_S)
       ) {
         // Fire and forget. Don't care about its result and it won't throw.
@@ -207,12 +208,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         continue
       }
       if (!MAJOR_METHOD_NAMES.includes(methodName)) {
-        continue;
+        continue
       }
       if (
         (!provider.isEvaluatingLatency() &&
-          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S))
-        ||
+          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) ||
         provider.hasEnoughWaitSinceLastLatencyEvaluation(2 * 1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
       ) {
         // Fire and forget. Don't care about its result and it won't throw.
