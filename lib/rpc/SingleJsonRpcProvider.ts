@@ -304,7 +304,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } catch (error: any) {
       perf.succeed = false
       this.log.debug(
-        `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}, error details: ${JSON.stringify(error)}`
+        `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
+          ...args,
+        ])}, error details: ${JSON.stringify(error)}`
       )
       throw error
     } finally {
