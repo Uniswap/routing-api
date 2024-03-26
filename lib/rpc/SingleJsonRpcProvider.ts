@@ -273,12 +273,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
   }
 
-  logDbSync(success: boolean) {
-    if (success) {
-      metric.putMetric(`${this.metricPrefix}_db_sync_success`, 1, MetricLoggerUnit.Count)
-    } else {
-      metric.putMetric(`${this.metricPrefix}_db_sync_fail`, 1, MetricLoggerUnit.Count)
-    }
+  logDbSyncSuccess() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_success`, 1, MetricLoggerUnit.Count)
+  }
+
+  logDbSyncFailure() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_fail`, 1, MetricLoggerUnit.Count)
   }
 
   private async wrappedFunctionCall(
@@ -341,10 +341,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update latency stat
         this.updateLatencyStat(newState)
       }
-      this.logDbSync(true)
+      this.logDbSyncSuccess()
     } catch (err: any) {
       this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
-      this.logDbSync(false)
+      this.logDbSyncFailure()
       // Won't throw. A fail of sync won't affect how we do health state update locally.
     } finally {
       this.syncingDb = false
