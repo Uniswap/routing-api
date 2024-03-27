@@ -266,14 +266,20 @@ export class RoutingAPIPipeline extends Stack {
 const app = new cdk.App()
 
 const jsonRpcProviders = {
-  WEB3_RPC_1: process.env.JSON_RPC_PROVIDER_1!,
-  WEB3_RPC_42161: process.env.JSON_RPC_PROVIDER_42161!,
-  WEB3_RPC_421613: process.env.JSON_RPC_PROVIDER_421613!,
-  WEB3_RPC_80001: process.env.JSON_RPC_PROVIDER_80001!,
-  WEB3_RPC_11155111: process.env.JSON_RPC_PROVIDER_11155111!,
-  WEB3_RPC_44787: process.env.JSON_RPC_PROVIDER_44787!,
-
-  // Following is for RPC Gateway
+  WEB3_RPC_1: process.env.WEB3_RPC_1!,
+  WEB3_RPC_11155111: process.env.WEB3_RPC_11155111!,
+  WEB3_RPC_44787: process.env.WEB3_RPC_44787!,
+  WEB3_RPC_80001: process.env.WEB3_RPC_80001!,
+  WEB3_RPC_81457: process.env.WEB3_RPC_81457!,
+  WEB3_RPC_42161: process.env.WEB3_RPC_42161!,
+  WEB3_RPC_421613: process.env.WEB3_RPC_421613!,
+  WEB3_RPC_10: process.env.WEB3_RPC_10!,
+  WEB3_RPC_137: process.env.WEB3_RPC_137!,
+  WEB3_RPC_42220: process.env.WEB3_RPC_42220!,
+  WEB3_RPC_43114: process.env.WEB3_RPC_43114!,
+  WEB3_RPC_56: process.env.WEB3_RPC_56!,
+  WEB3_RPC_8453: process.env.WEB3_RPC_8453!,
+  // The followings are for RPC Gateway
   INFURA_43114: process.env.INFURA_43114!,
   NIRVANA_43114: process.env.NIRVANA_43114!,
   QUICKNODE_43114: process.env.QUICKNODE_43114!,
