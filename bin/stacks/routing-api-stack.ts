@@ -18,8 +18,10 @@ import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
+import { TESTNETS } from '../../lib/util/testNets'
 
-export const CHAINS_NOT_MONITORED: ChainId[] = [ChainId.GOERLI, ChainId.POLYGON_MUMBAI]
+export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
+export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -417,6 +419,9 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for high 500 error rate for each request source
     const successRateByRequestSourceAlarm: cdk.aws_cloudwatch.Alarm[] = []
     REQUEST_SOURCES.forEach((requestSource) => {
+      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
+        return
+      }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
       const metric = new MathExpression({
         expression: '100*(response200/(invocations-response400))',
@@ -458,10 +463,6 @@ export class RoutingAPIStack extends cdk.Stack {
     const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
     REQUEST_SOURCES.forEach((requestSource) => {
       SUPPORTED_CHAINS.forEach((chainId) => {
-        if (CHAINS_NOT_MONITORED.includes(chainId)) {
-          return
-        }
-
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         const metric = new MathExpression({
           expression: '100*(response200/(invocations-response400))',
