@@ -922,4 +922,125 @@ describe('UniJsonRpcProvider', () => {
 
     expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equal(timestamp + 16000)
   })
+
+  it('Test we will not do shadow latency check calls too frequently, simultaneous multi entry', async () => {
+    const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
+    CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
+    CUSTOM_UNI_PROVIDER_CONFIG.LATENCY_EVALUATION_WAIT_PERIOD_IN_S = 15
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      undefined,
+      undefined,
+      CUSTOM_UNI_PROVIDER_CONFIG
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    const timestamp = Date.now()
+    sandbox.useFakeTimers(timestamp)
+
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
+
+    const spy0 = sandbox.spy(uniProvider['providers'][0], 'evaluateLatency')
+    const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateLatency')
+    const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateLatency')
+
+    // Make 5 calls in parallel.
+    await Promise.all([
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+    ])
+
+    // Shadow evaluate call should be made because we are currently 2 times far away from last latency evaluation timestamp than the threshold.
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(5)
+    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.callCount).to.equal(5)
+    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+
+    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
+
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    // Make another 5 calls in parallel.
+    await Promise.all([
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+    ])
+
+    // No shadow call should be made.
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    // Advance 1 second.
+    sandbox.clock.tick(1000)
+
+    // Make another 5 calls in parallel.
+    await Promise.all([
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+    ])
+
+    // 1 second is not long enough to allow another latency evaluation shadow call.
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    // Advance another 15 seconds.
+    sandbox.clock.tick(15000)
+
+    // Make another 5 calls in parallel.
+    await Promise.all([
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+      uniProvider.getBlockNumber(),
+    ])
+
+    // Waited long enough to be able to make shadow calls. However, due to the locking mechanism, only 1 call is made to each shadow provider.
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(1)
+    expect(spy2.callCount).to.equal(1)
+
+    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
+    expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+  })
 })
