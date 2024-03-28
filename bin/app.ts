@@ -12,7 +12,6 @@ import 'source-map-support/register'
 import { SUPPORTED_CHAINS } from '../lib/handlers/injector-sor'
 import { STAGE } from '../lib/util/stage'
 import { RoutingAPIStack } from './stacks/routing-api-stack'
-import { getRpcGatewayEnabledChainIds } from '../lib/rpc/ProdConfig'
 
 dotenv.config()
 
@@ -160,19 +159,14 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
     })
 
-    // Read chains that uses RPC gateway.
-    const rpcGatewayEnabledChainIds = getRpcGatewayEnabledChainIds()
-
     // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
-      if (!rpcGatewayEnabledChainIds.includes(chainId)) {
-        const key = `WEB3_RPC_${chainId}`
-        jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
-        new CfnOutput(this, key, {
-          value: jsonRpcProviders[key],
-        })
-      }
+      const key = `WEB3_RPC_${chainId}`
+      jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
+      new CfnOutput(this, key, {
+        value: jsonRpcProviders[key],
+      })
     })
 
     // Load RPC provider URLs from AWS secret (for RPC Gateway)
