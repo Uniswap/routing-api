@@ -462,7 +462,14 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for high 500 error rate for each request source and chain id
     const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
     REQUEST_SOURCES.forEach((requestSource) => {
+      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
+        return
+      }
+
       SUPPORTED_CHAINS.forEach((chainId) => {
+        if (CHAINS_NOT_MONITORED.includes(chainId)) {
+          return
+        }
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         const metric = new MathExpression({
           expression: '100*(response200/(invocations-response400))',
