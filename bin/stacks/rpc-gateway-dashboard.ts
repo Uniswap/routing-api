@@ -138,8 +138,8 @@ function getDbSyncSuccessMetricsForChain(chainId: ChainId) {
       'RoutingAPI',
       {
         id: `db_sync_success_${chainId}_${providerName}`,
-        label: `${providerName} db sync success ${ID_TO_NETWORK_NAME(chainId)}`
-      }
+        label: `${providerName} db sync success ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
     ])
   }
   return metrics
@@ -155,8 +155,8 @@ function getDbSyncFailMetricsForChain(chainId: ChainId) {
       'RoutingAPI',
       {
         id: `db_sync_fail_${chainId}_${providerName}`,
-        label: `${providerName} db sync fail ${ID_TO_NETWORK_NAME(chainId)}`
-      }
+        label: `${providerName} db sync fail ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
     ])
   }
   return metrics
@@ -172,8 +172,8 @@ function getEvaluateLatencyMetricsForChain(chainId: ChainId) {
       'RoutingAPI',
       {
         id: `evaluate_latency_${chainId}_${providerName}`,
-        label: `${providerName} (Shadow) Evaluate latency for ${ID_TO_NETWORK_NAME(chainId)}`
-      }
+        label: `${providerName} (Shadow) Evaluate latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
     ])
   }
   return metrics
@@ -189,8 +189,8 @@ function getCheckHealthMetricsForChain(chainId: ChainId) {
       'RoutingAPI',
       {
         id: `check_health_${chainId}_${providerName}`,
-        label: `${providerName} (Shadow) Check health for ${ID_TO_NETWORK_NAME(chainId)}`
-      }
+        label: `${providerName} (Shadow) Check health for ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
     ])
   }
   return metrics

@@ -90,7 +90,9 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.syncWithRepository.returns(Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState))
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
@@ -107,7 +109,9 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.syncWithRepository.returns(Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState))
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
@@ -132,7 +136,9 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.syncWithRepository.returns(Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState))
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)

@@ -334,8 +334,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.updateHealthyStatus()
       if (this.enableDbSync) {
         if (
-          (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S))
-          ||
+          (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)) ||
           this.hasEnoughWaitSinceLastDbSync(2 * 1000 * this.config.DB_SYNC_INTERVAL_IN_S)
         ) {
           this.syncingDb = true
