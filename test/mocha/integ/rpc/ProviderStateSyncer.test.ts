@@ -12,7 +12,7 @@ const log = bunyan.createLogger({
 })
 
 describe('ProviderStateSyncer', () => {
-  const syncer = new ProviderStateSyncer(DynamoDBTableProps.RpcProviderStateDbTable.Name, 'providerId', 5, 300, log)
+  const syncer = new ProviderStateSyncer(DynamoDBTableProps.RpcProviderStateDbTable.Name, 'providerId', 300, log)
   let sandbox: SinonSandbox
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('ProviderStateSyncer', () => {
 
     let syncResult: ProviderState | null
     try {
-      syncResult = await syncer.maybeSyncWithRepository(
+      syncResult = await syncer.syncWithRepository(
         localHealthScoreDiff,
         localHealthScore,
         lastEvaluatedLatencyInMs,
@@ -54,7 +54,6 @@ describe('ProviderStateSyncer', () => {
 
     expect(syncResult !== null)
     expect(syncResult!.healthScore).equals(localHealthScore)
-    expect(syncer.lastSyncTimestampInMs).equals(timestamp)
 
     expect(writeStub.getCall(0).args[1]).deep.equals({
       healthScore: -1100,

@@ -63,6 +63,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private enableDbSync: boolean
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
+  private lastDbSyncTimestampInMs: number = 0
 
   constructor(
     network: Network,
@@ -86,7 +87,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.providerStateSyncer = new ProviderStateSyncer(
         dbTableName,
         this.providerId,
-        this.config.DB_SYNC_INTERVAL_IN_S,
         this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
@@ -117,6 +117,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       } ms, wait requirement: ${waitTimeRequirementInMs} ms`
     )
     return Date.now() - this.lastHealthinessEvaluationTimestampInMs > waitTimeRequirementInMs
+  }
+
+  hasEnoughWaitSinceLastDbSync(waitTimeRequirementInMs: number): boolean {
+    this.log.debug(
+      `${this.url}: hasEnoughWaitSinceLastDbSync? waited ${
+        Date.now() - this.lastDbSyncTimestampInMs
+      } ms, wait requirement: ${waitTimeRequirementInMs} ms`
+    )
+    return Date.now() - this.lastDbSyncTimestampInMs > waitTimeRequirementInMs
   }
 
   isEvaluatingHealthiness(): boolean {
@@ -323,18 +332,24 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
       this.updateHealthyStatus()
-      if (this.enableDbSync && !this.syncingDb) {
-        this.syncingDb = true
-        // Fire and forget. Won't check the sync result.
-        this.maybeSyncAndUpdateProviderState()
+      if (this.enableDbSync) {
+        if (
+          (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S))
+          ||
+          this.hasEnoughWaitSinceLastDbSync(2 * 1000 * this.config.DB_SYNC_INTERVAL_IN_S)
+        ) {
+          this.syncingDb = true
+          // Fire and forget. Won't check the sync result.
+          this.syncAndUpdateProviderState()
+        }
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
     }
   }
 
-  private async maybeSyncAndUpdateProviderState() {
+  private async syncAndUpdateProviderState() {
     try {
-      const newState: ProviderState | null = await this.providerStateSyncer.maybeSyncWithRepository(
+      const newState: ProviderState | null = await this.providerStateSyncer.syncWithRepository(
         this.healthScore - this.healthScoreAtLastSync,
         this.healthScore,
         this.lastEvaluatedLatencyInMs,
@@ -351,6 +366,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update latency stat
         this.updateLatencyStat(newState)
       }
+      this.lastDbSyncTimestampInMs = Date.now()
       this.log.debug('Successfully synced with DB and updated states')
       this.logDbSyncSuccess()
     } catch (err: any) {
