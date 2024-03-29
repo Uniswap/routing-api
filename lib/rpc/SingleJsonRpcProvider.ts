@@ -228,6 +228,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   async evaluateHealthiness() {
     this.log.debug(`${this.url}: Evaluate healthiness for unhealthy provider...`)
+    this.logCheckHealth()
     this.evaluatingHealthiness = true
     try {
       await this.getBlockNumber_EvaluateHealthiness()
@@ -239,6 +240,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   async evaluateLatency(methodName: string, ...args: any[]) {
     this.log.debug(`${this.url}: Evaluate for latency... methodName: ${methodName}`)
+    this.logEvaluateLatency()
     this.evaluatingLatency = true
     try {
       await (this as any)[`${methodName}_EvaluateLatency`](...args)
@@ -269,16 +271,24 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
+  logCheckHealth() {
+    metric.putMetric(`${this.metricPrefix}_check_health`, 1, MetricLoggerUnit.Count)
+  }
+
+  logEvaluateLatency() {
+    metric.putMetric(`${this.metricPrefix}_evaluate_latency`, 1, MetricLoggerUnit.Count)
+  }
+
   logProviderSelection() {
     metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
   }
 
   logDbSyncSuccess() {
-    metric.putMetric(`${this.metricPrefix}_db_sync_success`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_db_sync_SUCCESS`, 1, MetricLoggerUnit.Count)
   }
 
   logDbSyncFailure() {
-    metric.putMetric(`${this.metricPrefix}_db_sync_fail`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_db_sync_FAIL`, 1, MetricLoggerUnit.Count)
   }
 
   private async wrappedFunctionCall(
@@ -341,6 +351,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update latency stat
         this.updateLatencyStat(newState)
       }
+      this.log.debug('Successfully synced with DB and updated states')
       this.logDbSyncSuccess()
     } catch (err: any) {
       this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
