@@ -275,7 +275,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    if (currencyIn.equals(currencyOut)) {
+    // We need bo wrap both tokens, because the comparison includes comparing native currency vs token.
+    if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
       return {
         statusCode: 400,
         errorCode: 'TOKEN_IN_OUT_SAME',

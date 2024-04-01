@@ -2365,6 +2365,29 @@ describe('quote', function () {
           })
         })
 
+        it(`tokens are the same after getting wrapped`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'ETH',
+            tokenInChainId: 1,
+            tokenOutAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            tokenOutChainId: 1,
+            amount: await getAmount(1, type, 'ETH', 'WETH', '1'),
+            type,
+            recipient: alice.address,
+            slippageTolerance: SLIPPAGE,
+            deadline: '360',
+            algorithm,
+            enableUniversalRouter: true,
+          }
+          await callAndExpectFail(quoteReq, {
+            status: 400,
+            data: {
+              detail: 'tokenIn and tokenOut must be different',
+              errorCode: 'TOKEN_IN_OUT_SAME',
+            },
+          })
+        })
+
         it(`recipient is an invalid address`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDT',
