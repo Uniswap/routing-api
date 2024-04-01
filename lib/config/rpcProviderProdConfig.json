@@ -1,7 +1,7 @@
 [
   {
     "chainId": 42220,
-    "useMultiProviderProb": 0.01,
+    "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_42220", "INFURA_42220"]
   },
