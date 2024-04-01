@@ -153,8 +153,7 @@ describe('SingleJsonRpcProvider', () => {
       provider.getBlockNumber(),
       provider.getBlockNumber(),
     ])
-    // All 5 calls end up with DB sync because provider's lastDbSyncTimestampInMs is too old.
-    expect(syncSpy.callCount).equals(5)
+    expect(syncSpy.callCount).equals(1)
     syncSpy.resetHistory()
 
     await Promise.all([
