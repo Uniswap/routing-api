@@ -63,6 +63,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private enableDbSync: boolean
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
+  private lastDbSyncTimestampInMs: number = 0
 
   constructor(
     network: Network,
@@ -86,7 +87,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.providerStateSyncer = new ProviderStateSyncer(
         dbTableName,
         this.providerId,
-        this.config.DB_SYNC_INTERVAL_IN_S,
         this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
@@ -117,6 +117,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       } ms, wait requirement: ${waitTimeRequirementInMs} ms`
     )
     return Date.now() - this.lastHealthinessEvaluationTimestampInMs > waitTimeRequirementInMs
+  }
+
+  hasEnoughWaitSinceLastDbSync(waitTimeRequirementInMs: number): boolean {
+    this.log.debug(
+      `${this.url}: hasEnoughWaitSinceLastDbSync? waited ${
+        Date.now() - this.lastDbSyncTimestampInMs
+      } ms, wait requirement: ${waitTimeRequirementInMs} ms`
+    )
+    return Date.now() - this.lastDbSyncTimestampInMs > waitTimeRequirementInMs
   }
 
   isEvaluatingHealthiness(): boolean {
@@ -228,6 +237,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   async evaluateHealthiness() {
     this.log.debug(`${this.url}: Evaluate healthiness for unhealthy provider...`)
+    this.logCheckHealth()
     this.evaluatingHealthiness = true
     try {
       await this.getBlockNumber_EvaluateHealthiness()
@@ -239,6 +249,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   async evaluateLatency(methodName: string, ...args: any[]) {
     this.log.debug(`${this.url}: Evaluate for latency... methodName: ${methodName}`)
+    this.logEvaluateLatency()
     this.evaluatingLatency = true
     try {
       await (this as any)[`${methodName}_EvaluateLatency`](...args)
@@ -269,16 +280,24 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
+  logCheckHealth() {
+    metric.putMetric(`${this.metricPrefix}_check_health`, 1, MetricLoggerUnit.Count)
+  }
+
+  logEvaluateLatency() {
+    metric.putMetric(`${this.metricPrefix}_evaluate_latency`, 1, MetricLoggerUnit.Count)
+  }
+
   logProviderSelection() {
     metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
   }
 
   logDbSyncSuccess() {
-    metric.putMetric(`${this.metricPrefix}_db_sync_success`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_db_sync_SUCCESS`, 1, MetricLoggerUnit.Count)
   }
 
   logDbSyncFailure() {
-    metric.putMetric(`${this.metricPrefix}_db_sync_fail`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_db_sync_FAIL`, 1, MetricLoggerUnit.Count)
   }
 
   private async wrappedFunctionCall(
@@ -313,18 +332,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
       this.updateHealthyStatus()
-      if (this.enableDbSync && !this.syncingDb) {
-        this.syncingDb = true
-        // Fire and forget. Won't check the sync result.
-        this.maybeSyncAndUpdateProviderState()
+      if (this.enableDbSync) {
+        if (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)) {
+          this.syncingDb = true
+          // Fire and forget. Won't check the sync result.
+          this.syncAndUpdateProviderState()
+        }
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
     }
   }
 
-  private async maybeSyncAndUpdateProviderState() {
+  private async syncAndUpdateProviderState() {
     try {
-      const newState: ProviderState | null = await this.providerStateSyncer.maybeSyncWithRepository(
+      const newState: ProviderState | null = await this.providerStateSyncer.syncWithRepository(
         this.healthScore - this.healthScoreAtLastSync,
         this.healthScore,
         this.lastEvaluatedLatencyInMs,
@@ -341,6 +362,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update latency stat
         this.updateLatencyStat(newState)
       }
+      this.lastDbSyncTimestampInMs = Date.now()
+      this.log.debug('Successfully synced with DB and updated states')
       this.logDbSyncSuccess()
     } catch (err: any) {
       this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
