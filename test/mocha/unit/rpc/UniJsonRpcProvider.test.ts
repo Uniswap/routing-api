@@ -962,11 +962,10 @@ describe('UniJsonRpcProvider', () => {
       uniProvider.getBlockNumber(),
     ])
 
-    // Shadow evaluate call should be made because we are currently 2 times far away from last latency evaluation timestamp than the threshold.
     expect(spy0.callCount).to.equal(0)
-    expect(spy1.callCount).to.equal(5)
+    expect(spy1.callCount).to.equal(1)
     expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
-    expect(spy2.callCount).to.equal(5)
+    expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
 
     expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
