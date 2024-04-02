@@ -205,8 +205,8 @@ function getRpcGatewayQuoteCountForChain(chainId: ChainId) {
     'RoutingAPI',
     {
       id: `quote_count_${chainId}`,
-      label: `Quote request count for ${ID_TO_NETWORK_NAME(chainId)}`
-    }
+      label: `Quote request count for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
   ])
   return metrics
 }
@@ -220,8 +220,8 @@ function getRpcGatewayQuoteLatencyForChain(chainId: ChainId) {
     'RoutingAPI',
     {
       id: `quote_latency_${chainId}`,
-      label: `Quote latency for ${ID_TO_NETWORK_NAME(chainId)}`
-    }
+      label: `Quote latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
   ])
   return metrics
 }
@@ -235,8 +235,8 @@ function getRpcGatewayQuote5xxCountForChain(chainId: ChainId) {
     'RoutingAPI',
     {
       id: `quote_5xx_count_${chainId}`,
-      label: `Quote request 5xx count for ${ID_TO_NETWORK_NAME(chainId)}`
-    }
+      label: `Quote request 5xx count for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
   ])
   return metrics
 }

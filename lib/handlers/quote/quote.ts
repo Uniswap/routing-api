@@ -153,7 +153,11 @@ export class QuoteHandler extends APIGLambdaHandler<
 
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
       if (useRpcGateway) {
-        metric.putMetric(`RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+        metric.putMetric(
+          `RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+          Date.now() - startTime,
+          MetricLoggerUnit.Milliseconds
+        )
       }
 
       metric.putMetric(
