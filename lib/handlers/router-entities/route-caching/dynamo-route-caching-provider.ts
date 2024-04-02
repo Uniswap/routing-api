@@ -168,7 +168,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
         const filteredItems = result.Items
           // Older routes might not have the protocol field, so we keep them if they don't have it
-          .filter((record) => !record.protocol || protocols.includes(record.protocol))
+          .filter(
+            (record) =>
+              !record.protocol ||
+              protocols.includes(record.protocol) ||
+              // we explicitly filter out the expired routes here,
+              // because "You can still update the expired items that are pending deletion,
+              // including changing or removing their TTL attributes"
+              // (https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html)
+              record.item.ttl >= Math.floor(Date.now() / 1000)
+          )
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
