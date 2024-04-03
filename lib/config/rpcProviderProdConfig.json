@@ -10,5 +10,11 @@
     "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1, 0, 0],
     "providerUrls": ["INFURA_43114", "QUICKNODE_43114", "NIRVANA_43114"]
+  },
+  {
+    "chainId": 56,
+    "useMultiProviderProb": 0.01,
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_56"]
   }
 ]
