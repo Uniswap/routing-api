@@ -16,5 +16,11 @@
     "useMultiProviderProb": 0.01,
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_56"]
+  },
+  {
+    "chainId": 10,
+    "useMultiProviderProb": 0.01,
+    "providerInitialWeights": [1, 0, 0],
+    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"]
   }
 ]
