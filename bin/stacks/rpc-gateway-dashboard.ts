@@ -196,6 +196,51 @@ function getCheckHealthMetricsForChain(chainId: ChainId) {
   return metrics
 }
 
+function getRpcGatewayQuoteCountForChain(chainId: ChainId) {
+  const metrics = []
+  metrics.push([
+    'Uniswap',
+    `RPC_GATEWAY_GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+    'Service',
+    'RoutingAPI',
+    {
+      id: `quote_count_${chainId}`,
+      label: `Quote request count for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
+  ])
+  return metrics
+}
+
+function getRpcGatewayQuoteLatencyForChain(chainId: ChainId) {
+  const metrics = []
+  metrics.push([
+    'Uniswap',
+    `RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+    'Service',
+    'RoutingAPI',
+    {
+      id: `quote_latency_${chainId}`,
+      label: `Quote latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
+  ])
+  return metrics
+}
+
+function getRpcGatewayQuote5xxCountForChain(chainId: ChainId) {
+  const metrics = []
+  metrics.push([
+    'Uniswap',
+    `RPC_GATEWAY_GET_QUOTE_500_CHAINID: ${chainId}`,
+    'Service',
+    'RoutingAPI',
+    {
+      id: `quote_5xx_count_${chainId}`,
+      label: `Quote request 5xx count for ${ID_TO_NETWORK_NAME(chainId)}`,
+    },
+  ])
+  return metrics
+}
+
 export class RpcGatewayDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string) {
     super(scope, name)
@@ -452,6 +497,111 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
             left: {
               showUnits: false,
               label: 'Occurrences',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getRpcGatewayQuoteCountForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: `Quote count for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Occurrences',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getRpcGatewayQuote5xxCountForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: `Quote 5xx count for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Occurrences',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getRpcGatewayQuoteLatencyForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'p99',
+          period: 300,
+          title: `Quote p99 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Ms',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getRpcGatewayQuoteLatencyForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'p90',
+          period: 300,
+          title: `Quote p90 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Ms',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getRpcGatewayQuoteLatencyForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'p50',
+          period: 300,
+          title: `Quote p50 latency for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Ms',
             },
           },
         },
