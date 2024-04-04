@@ -13,7 +13,7 @@
   },
   {
     "chainId": 56,
-    "useMultiProviderProb": 0.01,
+    "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_56"]
   },
