@@ -19,7 +19,7 @@
   },
   {
     "chainId": 10,
-    "useMultiProviderProb": 0.01,
+    "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1, 0, 0],
     "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"]
   }
