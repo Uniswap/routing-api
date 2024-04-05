@@ -20,7 +20,7 @@ const providerNameForChain: Map<ChainId, string[]> = new Map([
 
 function getProviderNameForChain(chainId: ChainId): string[] {
   if (providerNameForChain.has(chainId)) {
-    return providerNameForChain.get(chainId)!;
+    return providerNameForChain.get(chainId)!
   } else {
     return ['INFURA']
   }
