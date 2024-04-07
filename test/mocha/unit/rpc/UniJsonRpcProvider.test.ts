@@ -1072,7 +1072,6 @@ describe('UniJsonRpcProvider', () => {
   it('Test use of latencyEvaluationSampleProb', async () => {
     const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
     CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
-    CUSTOM_UNI_PROVIDER_CONFIG.LATENCY_EVALUATION_WAIT_PERIOD_IN_S = 15
     uniProvider = new UniJsonRpcProvider(
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
