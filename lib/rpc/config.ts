@@ -7,6 +7,7 @@ export interface CommonConfig {
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: number
 }
 
+// Config here applies to all chains.
 export interface UniJsonRpcProviderConfig extends CommonConfig {
   // Do shadow calls on other non-selected healthy providers to monitor their latencies
   ENABLE_SHADOW_LATENCY_EVALUATION: boolean
@@ -14,6 +15,7 @@ export interface UniJsonRpcProviderConfig extends CommonConfig {
   DEFAULT_INITIAL_WEIGHT: 1000
 }
 
+// Config here applies to all chains.
 export interface SingleJsonRpcProviderConfig extends CommonConfig {
   ERROR_PENALTY: number
   HIGH_LATENCY_PENALTY: number
@@ -29,7 +31,7 @@ export interface SingleJsonRpcProviderConfig extends CommonConfig {
   // This is added to prevent an unhealthy provider gain too much recovery score only by
   // waiting a long time to be evaluated.
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: number
-  // Flag to enable health state sync with DB.
+  // Flag to enable health state sync with DB. This is usually always true, but the flag is here to test without DB for UT.
   ENABLE_DB_SYNC: boolean
   // Time interval to sync with health states from DB
   DB_SYNC_INTERVAL_IN_S: number

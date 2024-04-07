@@ -37,6 +37,9 @@ export class GlobalRpcProviders {
         }
         chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
       }
+      chainConfig.dbSyncSampleProb = chainConfig.dbSyncSampleProb ?? 1.0
+      chainConfig.latencyEvaluationSampleProb = chainConfig.latencyEvaluationSampleProb ?? 1.0
+      chainConfig.healthCheckSampleProb = chainConfig.healthCheckSampleProb ?? 1.0
     }
     return prodConfig
   }
@@ -53,7 +56,13 @@ export class GlobalRpcProviders {
         let providers: SingleJsonRpcProvider[] = []
         for (const providerUrl of chainConfig.providerUrls!) {
           providers.push(
-            new SingleJsonRpcProvider({ name: chainIdToNetworkName(chainId), chainId }, providerUrl, log, singleConfig)
+            new SingleJsonRpcProvider(
+              { name: chainIdToNetworkName(chainId), chainId },
+              providerUrl,
+              log,
+              singleConfig,
+              chainConfig.dbSyncSampleProb!
+            )
           )
         }
         GlobalRpcProviders.SINGLE_RPC_PROVIDERS.set(chainId, providers)
