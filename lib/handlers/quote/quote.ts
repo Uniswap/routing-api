@@ -56,9 +56,10 @@ export class QuoteHandler extends APIGLambdaHandler<
     const startTime = Date.now()
 
     let result: Response<QuoteResponse> | ErrorResponse
+    const useRpcGateway = GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)
 
     try {
-      if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
+      if (useRpcGateway) {
         const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
         provider.forceAttachToNewSession()
       }
@@ -109,6 +110,9 @@ export class QuoteHandler extends APIGLambdaHandler<
           break
         case 500:
           metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          if (useRpcGateway) {
+            metric.putMetric(`RPC_GATEWAY_GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          }
           metric.putMetric(
             `GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
             1,
@@ -123,6 +127,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     } catch (err) {
       metric.putMetric(`GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      if (useRpcGateway) {
+        metric.putMetric(`RPC_GATEWAY_GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      }
       metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(
         `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
@@ -135,6 +142,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       // This metric is logged after calling the internal handler to correlate with the status metrics
       metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      if (useRpcGateway) {
+        metric.putMetric(`RPC_GATEWAY_GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+      }
       metric.putMetric(
         `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
         1,
@@ -142,6 +152,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       )
 
       metric.putMetric(`GET_QUOTE_LATENCY_CHAIN_${chainId}`, Date.now() - startTime, MetricLoggerUnit.Milliseconds)
+      if (useRpcGateway) {
+        metric.putMetric(
+          `RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+          Date.now() - startTime,
+          MetricLoggerUnit.Milliseconds
+        )
+      }
 
       metric.putMetric(
         `GET_QUOTE_LATENCY_CHAIN_${chainId}_QUOTE_SPEED_${quoteSpeed ?? 'standard'}`,
