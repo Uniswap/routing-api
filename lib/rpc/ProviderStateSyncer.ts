@@ -38,7 +38,7 @@ export class ProviderStateSyncer {
     } catch (err: any) {
       this.log.error(`Failed to read from sync storage: ${JSON.stringify(err)}. Sync failed.`)
     }
-    this.log.debug({ storedState }, 'Loaded stored state')
+    this.log.debug({ storedState }, `${this.providerId}: Loaded stored state`)
 
     const stateDiff: ProviderStateDiff = {
       healthScore: localHealthScore,
@@ -49,6 +49,7 @@ export class ProviderStateSyncer {
         apiName: lastLatencyEvaluationApiName,
       },
     }
+    this.log.debug({ stateDiff }, `${this.providerId}: State diff`)
 
     let newState: ProviderState
     let prevUpdatedAtInMs: number | undefined
@@ -59,6 +60,7 @@ export class ProviderStateSyncer {
       newState = this.calculateNewState(storedState.state, stateDiff)
       prevUpdatedAtInMs = storedState.updatedAtInMs
     }
+    this.log.debug({ newState }, `${this.providerId}: Calculated new state`)
 
     try {
       await this.stateRepository.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
