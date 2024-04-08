@@ -276,6 +276,14 @@ describe('GlobalRpcProviders', () => {
     expect(uniRpcProviderCelo['providers'][0].url).equal('https://host7.celo-mainnet.quiknode.pro/key7')
     expect(uniRpcProviderCelo['providers'][1].url).equal('https://celo-mainnet.infura.io/v3/key6')
 
+    const sepoliaRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.SEPOLIA)!!
+    expect(sepoliaRpcProvider['providers'][0].url).equal('https://sepolia.infura.io/v3/key16')
+    expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia.g.alchemy.com/v2/key17')
+
     cleanUp()
   })
 })
