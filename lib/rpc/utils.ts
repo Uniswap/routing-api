@@ -45,6 +45,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'INFURA_8453': {
       return `https://base-mainnet.infura.io/v3/${tokens[0]}`
     }
+    case 'INFURA_11155111': {
+      return `https://sepolia.infura.io/v3/${tokens[0]}`
+    }
     // Nirvana
     case 'NIRVANA_43114': {
       return `https://avax.nirvanalabs.xyz/${tokens[0]}/ext/bc/C/rpc?apikey=${tokens[1]}`
@@ -83,6 +86,9 @@ export function generateProviderUrl(key: string, value: string): string {
     }
     case 'ALCHEMY_8453': {
       return `https://base-mainnet.g.alchemy.com/v2/${tokens[0]}`
+    }
+    case 'ALCHEMY_11155111': {
+      return `https://eth-sepolia.g.alchemy.com/v2/${tokens[0]}`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
