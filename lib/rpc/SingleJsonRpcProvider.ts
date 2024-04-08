@@ -219,7 +219,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private checkLastCallPerformance(perf: SingleCallPerf) {
     const method = perf.methodName
-    this.log.debug(`checkLastCallPerformance: method: ${method}`)
+    this.log.debug(`${this.providerId}: checkLastCallPerformance: method: ${method}`)
     if (!perf.succeed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(perf)
@@ -333,7 +333,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.checkLastCallPerformance(perf)
       this.updateHealthyStatus()
       if (this.enableDbSync) {
-        if (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)) {
+        if (
+          !this.syncingDb &&
+          MAJOR_METHOD_NAMES.includes(perf.methodName) &&
+          this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)
+        ) {
           this.syncingDb = true
           // Fire and forget. Won't check the sync result.
           this.syncAndUpdateProviderState()
@@ -356,17 +360,17 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update health state
         this.healthScoreAtLastSync = newState.healthScore
         this.healthScore = this.healthScoreAtLastSync
-        this.log.debug(`Synced with storage: new health score ${this.healthScore}`)
+        this.log.debug(`${this.providerId}: Synced with storage: new health score ${this.healthScore}`)
         this.updateHealthyStatus()
 
         // Update latency stat
         this.updateLatencyStat(newState)
       }
       this.lastDbSyncTimestampInMs = Date.now()
-      this.log.debug('Successfully synced with DB and updated states')
+      this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)
       this.logDbSyncSuccess()
     } catch (err: any) {
-      this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      this.log.error(`${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
       this.logDbSyncFailure()
       // Won't throw. A fail of sync won't affect how we do health state update locally.
     } finally {

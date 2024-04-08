@@ -219,4 +219,29 @@ describe('SingleJsonRpcProvider', () => {
     provider['updateLatencyStat'](state)
     expect(provider.recentAverageLatency()).equals(333)
   })
+
+  it('test DB sync with latency for API we do not care', async () => {
+    provider['enableDbSync'] = true
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    await provider.getBlockNumber()
+    // Sync normally.
+    expect(syncSpy.callCount).equals(1)
+    syncSpy.resetHistory()
+
+    sandbox.stub(require('../../../../lib/rpc/SingleJsonRpcProvider'), 'MAJOR_METHOD_NAMES').value(['call'])
+    await provider.getBlockNumber()
+    // Won't sync because "getBlockNumber" isn't included in MAJOR_METHOD_NAMES
+    expect(syncSpy.callCount).equals(0)
+  })
 })
