@@ -269,11 +269,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   logLatencyMetrics(methodName: string, latencyInMs: number) {
-    // metric.putMetric(
-    //   `${this.metricPrefix}_evaluated_latency_${this.lastLatencyEvaluationApiName}`,
-    //   this.lastEvaluatedLatencyInMs,
-    //   MetricLoggerUnit.None
-    // )
     metric.putMetric(
       `${this.metricPrefix}_evaluated_latency_${methodName}`,
       latencyInMs,
