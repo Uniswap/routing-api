@@ -261,6 +261,8 @@ describe('GlobalRpcProviders', () => {
       QUICKNODE_8453: 'host13,key13',
       ALCHEMY_8453: 'key14',
       NIRVANA_8453: 'host15,key15',
+      INFURA_11155111: 'key16',
+      ALCHEMY_11155111: 'key17',
     }
 
     const randStub = sandbox.stub(Math, 'random')
