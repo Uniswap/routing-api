@@ -165,7 +165,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
       if (
         perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
+          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
         MAJOR_METHOD_NAMES.includes(perf.methodName)
       ) {
         this.lastEvaluatedLatencyInMs = perf.latencyInMs
@@ -194,7 +194,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
       if (
         perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
+          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
         MAJOR_METHOD_NAMES.includes(perf.methodName)
       ) {
         this.lastEvaluatedLatencyInMs = perf.latencyInMs
@@ -269,11 +269,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   logLatencyMetrics(methodName: string, latencyInMs: number) {
-    metric.putMetric(
-      `${this.metricPrefix}_evaluated_latency_${methodName}`,
-      latencyInMs,
-      MetricLoggerUnit.None
-    )
+    metric.putMetric(`${this.metricPrefix}_evaluated_latency_${methodName}`, latencyInMs, MetricLoggerUnit.None)
   }
 
   logCheckHealth() {

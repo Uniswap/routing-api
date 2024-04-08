@@ -16,6 +16,7 @@ const providerNameForChain: Map<ChainId, string[]> = new Map([
   [ChainId.BNB, ['QUIKNODE']],
   [ChainId.POLYGON, ['INFURA', 'QUIKNODE', 'ALCHEMY']],
   [ChainId.BASE, ['INFURA', 'QUIKNODE', 'ALCHEMY', 'NIRVANA']],
+  [ChainId.SEPOLIA, ['INFURA', 'ALCHEMY']],
 ])
 
 function getProviderNameForChain(chainId: ChainId): string[] {

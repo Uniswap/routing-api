@@ -261,6 +261,8 @@ describe('GlobalRpcProviders', () => {
       QUICKNODE_8453: 'host13,key13',
       ALCHEMY_8453: 'key14',
       NIRVANA_8453: 'host15,key15',
+      INFURA_11155111: 'key16',
+      ALCHEMY_11155111: 'key17',
     }
 
     const randStub = sandbox.stub(Math, 'random')
@@ -273,6 +275,14 @@ describe('GlobalRpcProviders', () => {
     ).get(ChainId.CELO)!!
     expect(uniRpcProviderCelo['providers'][0].url).equal('https://host7.celo-mainnet.quiknode.pro/key7')
     expect(uniRpcProviderCelo['providers'][1].url).equal('https://celo-mainnet.infura.io/v3/key6')
+
+    const sepoliaRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG
+    ).get(ChainId.SEPOLIA)!!
+    expect(sepoliaRpcProvider['providers'][0].url).equal('https://sepolia.infura.io/v3/key16')
+    expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia.g.alchemy.com/v2/key17')
 
     cleanUp()
   })
