@@ -140,6 +140,40 @@ function getFailedMetricsForChain(chainId: ChainId) {
   return metrics
 }
 
+function getDbSyncRequestedMetricsForChain(chainId: ChainId) {
+  const metrics = []
+  for (const providerName of getProviderNameForChain(chainId)) {
+    metrics.push([
+      'Uniswap',
+      `RPC_GATEWAY_${chainId}_${providerName}_db_sync_REQUESTED`,
+      'Service',
+      'RoutingAPI',
+      {
+        id: `db_sync_success_${chainId}_${providerName}`,
+        label: `${providerName} db sync requested ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
+    ])
+  }
+  return metrics
+}
+
+function getDbSyncSampledMetricsForChain(chainId: ChainId) {
+  const metrics = []
+  for (const providerName of getProviderNameForChain(chainId)) {
+    metrics.push([
+      'Uniswap',
+      `RPC_GATEWAY_${chainId}_${providerName}_db_sync_SAMPLED`,
+      'Service',
+      'RoutingAPI',
+      {
+        id: `db_sync_success_${chainId}_${providerName}`,
+        label: `${providerName} db sync sampled ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
+    ])
+  }
+  return metrics
+}
+
 function getDbSyncSuccessMetricsForChain(chainId: ChainId) {
   const metrics = []
   for (const providerName of getProviderNameForChain(chainId)) {
@@ -689,6 +723,48 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
             left: {
               showUnits: false,
               label: 'Requests',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getDbSyncRequestedMetricsForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: `DB sync requested for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Occurrences',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getDbSyncSampledMetricsForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Sum',
+          period: 300,
+          title: `DB sync sampled for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'Occurrences',
             },
           },
         },

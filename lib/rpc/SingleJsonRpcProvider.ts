@@ -1,5 +1,5 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
-import { DEFAULT_SINGLE_PROVIDER_CONFIG, SingleJsonRpcProviderConfig } from './config'
+import { SingleJsonRpcProviderConfig } from './config'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import {
   BlockTag,
@@ -61,6 +61,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private syncingDb: boolean = false
   private enableDbSync: boolean
+  private dbSyncSampleProb: number
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
   private lastDbSyncTimestampInMs: number = 0
@@ -69,7 +70,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     network: Network,
     url: string,
     log: Logger,
-    config: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
+    config: SingleJsonRpcProviderConfig,
+    dbSyncSampleProb: number
   ) {
     super(url, network)
     this.url = url
@@ -79,6 +81,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
     this.enableDbSync = config.ENABLE_DB_SYNC
+    this.dbSyncSampleProb = dbSyncSampleProb
+
     if (this.enableDbSync) {
       const dbTableName = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
       if (dbTableName === undefined) {
@@ -284,6 +288,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
   }
 
+  logDbSyncRequested() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_REQUESTED`, 1, MetricLoggerUnit.Count)
+  }
+
+  logDbSyncSampled() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_SAMPLED`, 1, MetricLoggerUnit.Count)
+  }
+
   logDbSyncSuccess() {
     metric.putMetric(`${this.metricPrefix}_db_sync_SUCCESS`, 1, MetricLoggerUnit.Count)
   }
@@ -330,9 +342,13 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
           MAJOR_METHOD_NAMES.includes(perf.methodName) &&
           this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)
         ) {
-          this.syncingDb = true
-          // Fire and forget. Won't check the sync result.
-          this.syncAndUpdateProviderState()
+          this.logDbSyncRequested()
+          if (Math.random() < this.dbSyncSampleProb) {
+            this.logDbSyncSampled()
+            this.syncingDb = true
+            // Fire and forget. Won't check the sync result.
+            this.syncAndUpdateProviderState()
+          }
         }
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
