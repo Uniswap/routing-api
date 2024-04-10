@@ -17,18 +17,21 @@
     "chainId": 56,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_56"]
+    "providerUrls": ["QUICKNODE_56"],
+    "enableDbSync": true
   },
   {
     "chainId": 10,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0, 0],
-    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"]
+    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"],
+    "enableDbSync": true
   },
   {
     "chainId": 11155111,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0],
-    "providerUrls": ["INFURA_11155111", "ALCHEMY_11155111"]
+    "providerUrls": ["INFURA_11155111", "ALCHEMY_11155111"],
+    "enableDbSync": true
   }
 ]
