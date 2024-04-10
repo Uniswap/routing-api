@@ -25,7 +25,7 @@ describe('ProdConfig', () => {
 
   it('test parse json string into ProdConfig with validation, good case', () => {
     const jsonStr =
-      '[{"chainId":1,"useMultiProviderProb":0},{"chainId":43114,"useMultiProviderProb":1,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"]}]'
+      '[{"chainId":1,"useMultiProviderProb":0},{"chainId":43114,"useMultiProviderProb":1,"sessionAllowProviderFallbackWhenUnhealthy":true,"providerInitialWeights":[-1,-1],"providerUrls":["url1","url2"],"enableDbSync": true}]'
     const object = JSON.parse(jsonStr)
     const validation = ProdConfigJoi.validate(object)
     if (validation.error) {
@@ -36,6 +36,10 @@ describe('ProdConfig', () => {
     expect(prodConfig[0]).deep.equal({
       chainId: 1,
       useMultiProviderProb: 0,
+      dbSyncSampleProb: 1,
+      healthCheckSampleProb: 1,
+      latencyEvaluationSampleProb: 1,
+      enableDbSync: false,
     })
     expect(prodConfig[1]).deep.equal({
       chainId: 43114,
@@ -43,6 +47,10 @@ describe('ProdConfig', () => {
       sessionAllowProviderFallbackWhenUnhealthy: true,
       providerInitialWeights: [-1, -1],
       providerUrls: ['url1', 'url2'],
+      dbSyncSampleProb: 1,
+      healthCheckSampleProb: 1,
+      latencyEvaluationSampleProb: 1,
+      enableDbSync: true,
     })
   })
 
