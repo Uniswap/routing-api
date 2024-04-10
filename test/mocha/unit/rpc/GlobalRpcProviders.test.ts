@@ -263,11 +263,15 @@ describe('GlobalRpcProviders', () => {
       NIRVANA_8453: 'host15,key15',
       INFURA_11155111: 'key16',
       ALCHEMY_11155111: 'key17',
+      INFURA_42161: 'key18',
+      QUICKNODE_42161: 'host19,key19',
+      NIRVANA_42161: 'host20,key20',
+      ALCHEMY_42161: 'key21',
     }
 
     const randStub = sandbox.stub(Math, 'random')
-
     randStub.returns(0.0)
+
     const uniRpcProviderCelo = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
       UNI_PROVIDER_TEST_CONFIG,
@@ -280,10 +284,22 @@ describe('GlobalRpcProviders', () => {
     const sepoliaRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
       UNI_PROVIDER_TEST_CONFIG,
-      SINGLE_PROVIDER_TEST_CONFIG
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
     ).get(ChainId.SEPOLIA)!!
     expect(sepoliaRpcProvider['providers'][0].url).equal('https://sepolia.infura.io/v3/key16')
     expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia.g.alchemy.com/v2/key17')
+
+    const arbitrumRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.ARBITRUM_ONE)!!
+    expect(arbitrumRpcProvider['providers'][0].url).equal('https://arbitrum-mainnet.infura.io/v3/key18')
+    expect(arbitrumRpcProvider['providers'][1].url).equal('https://host19.arbitrum-mainnet.quiknode.pro/key19')
+    expect(arbitrumRpcProvider['providers'][2].url).equal('https://arb.nirvanalabs.xyz/host20?apikey=key20')
+    expect(arbitrumRpcProvider['providers'][3].url).equal('https://arb-mainnet.g.alchemy.com/v2/key21')
 
     cleanUp()
   })
