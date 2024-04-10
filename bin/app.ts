@@ -196,6 +196,11 @@ export class RoutingAPIPipeline extends Stack {
       // Sepolia
       'INFURA_11155111',
       'ALCHEMY_11155111',
+      // Arbitrum
+      'INFURA_42161',
+      'QUICKNODE_42161',
+      'NIRVANA_42161',
+      'ALCHEMY_42161',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -340,6 +345,11 @@ const jsonRpcProviders = {
   // Sepolia
   INFURA_11155111: process.env.INFURA_11155111!,
   ALCHEMY_11155111: process.env.ALCHEMY_11155111!,
+  // Arbitrum
+  INFURA_42161: process.env.INFURA_42161!,
+  QUICKNODE_42161: process.env.QUICKNODE_42161!,
+  NIRVANA_42161: process.env.NIRVANA_42161!,
+  ALCHEMY_42161: process.env.ALCHEMY_42161!,
 }
 
 // Local dev stack

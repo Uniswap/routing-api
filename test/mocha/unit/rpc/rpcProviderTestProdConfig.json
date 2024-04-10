@@ -28,5 +28,11 @@
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["INFURA_11155111", "ALCHEMY_11155111"]
+  },
+  {
+    "chainId": 42161,
+    "useMultiProviderProb": 1,
+    "providerInitialWeights": [1, 1, 1, 1],
+    "providerUrls": ["INFURA_42161", "QUICKNODE_42161", "NIRVANA_42161", "ALCHEMY_42161"]
   }
 ]
