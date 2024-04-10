@@ -71,6 +71,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     url: string,
     log: Logger,
     config: SingleJsonRpcProviderConfig,
+    enableDbSync: boolean,
     dbSyncSampleProb: number
   ) {
     super(url, network)
@@ -80,7 +81,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.providerId = `${network.chainId.toString()}_${this.providerName}`
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
-    this.enableDbSync = config.ENABLE_DB_SYNC
+    this.enableDbSync = enableDbSync
     this.dbSyncSampleProb = dbSyncSampleProb
 
     if (this.enableDbSync) {

@@ -27,9 +27,14 @@ export class GlobalRpcProviders {
     }
     const prodConfig: ProdConfig = validation.value as ProdConfig
     for (let chainConfig of prodConfig) {
-      chainConfig.dbSyncSampleProb = chainConfig.dbSyncSampleProb ?? 1.0
-      chainConfig.latencyEvaluationSampleProb = chainConfig.latencyEvaluationSampleProb ?? 1.0
-      chainConfig.healthCheckSampleProb = chainConfig.healthCheckSampleProb ?? 1.0
+      // chainConfig.dbSyncSampleProb = chainConfig.dbSyncSampleProb ?? 1.0
+      // chainConfig.latencyEvaluationSampleProb = chainConfig.latencyEvaluationSampleProb ?? 1.0
+      // chainConfig.healthCheckSampleProb = chainConfig.healthCheckSampleProb ?? 1.0
+      // chainConfig.enableDbSync = chainConfig.enableDbSync ?? false
+      console.log(`jiejie: 1: ${chainConfig.dbSyncSampleProb}`)
+      console.log(`jiejie: 2: ${chainConfig.latencyEvaluationSampleProb}`)
+      console.log(`jiejie: 3: ${chainConfig.healthCheckSampleProb}`)
+      console.log(`jiejie: 4: ${chainConfig.enableDbSync}`)
 
       if (!chainConfig.providerUrls) {
         continue
@@ -62,6 +67,7 @@ export class GlobalRpcProviders {
               providerUrl,
               log,
               singleConfig,
+              chainConfig.enableDbSync!,
               chainConfig.dbSyncSampleProb!
             )
           )
