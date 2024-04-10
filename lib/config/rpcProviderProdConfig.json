@@ -31,7 +31,6 @@
     "chainId": 11155111,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0],
-    "providerUrls": ["INFURA_11155111", "ALCHEMY_11155111"],
-    "enableDbSync": true
+    "providerUrls": ["INFURA_11155111", "ALCHEMY_11155111"]
   }
 ]
