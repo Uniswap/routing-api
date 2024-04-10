@@ -3,29 +3,25 @@
     "chainId": 42220,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_42220", "INFURA_42220"],
-    "enableDbSync": true
+    "providerUrls": ["QUICKNODE_42220", "INFURA_42220"]
   },
   {
     "chainId": 43114,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0, 0],
-    "providerUrls": ["INFURA_43114", "QUICKNODE_43114", "NIRVANA_43114"],
-    "enableDbSync": true
+    "providerUrls": ["INFURA_43114", "QUICKNODE_43114", "NIRVANA_43114"]
   },
   {
     "chainId": 56,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_56"],
-    "enableDbSync": true
+    "providerUrls": ["QUICKNODE_56"]
   },
   {
     "chainId": 10,
     "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0, 0],
-    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"],
-    "enableDbSync": true
+    "providerUrls": ["INFURA_10", "QUICKNODE_10", "ALCHEMY_10"]
   },
   {
     "chainId": 11155111,
