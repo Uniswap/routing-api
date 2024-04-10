@@ -4,6 +4,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
 import Sinon, { SinonSandbox } from 'sinon'
+import TEST_PROD_CONFIG from './rpcProviderTestProdConfig.json'
 
 const log: Logger = bunyan.createLogger({ name: 'test' })
 
@@ -23,7 +24,6 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
@@ -271,7 +271,8 @@ describe('GlobalRpcProviders', () => {
     const uniRpcProviderCelo = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
       UNI_PROVIDER_TEST_CONFIG,
-      SINGLE_PROVIDER_TEST_CONFIG
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
     ).get(ChainId.CELO)!!
     expect(uniRpcProviderCelo['providers'][0].url).equal('https://host7.celo-mainnet.quiknode.pro/key7')
     expect(uniRpcProviderCelo['providers'][1].url).equal('https://celo-mainnet.infura.io/v3/key6')

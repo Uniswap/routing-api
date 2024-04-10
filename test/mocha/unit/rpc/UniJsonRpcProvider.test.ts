@@ -27,7 +27,6 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
@@ -45,6 +44,7 @@ const createNewSingleJsonRpcProviders = () => [
     `url_0`,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
+    false,
     1.0
   ),
   new SingleJsonRpcProvider(
@@ -52,6 +52,7 @@ const createNewSingleJsonRpcProviders = () => [
     `url_1`,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
+    false,
     1.0
   ),
   new SingleJsonRpcProvider(
@@ -59,6 +60,7 @@ const createNewSingleJsonRpcProviders = () => [
     `url_2`,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
+    false,
     1.0
   ),
 ]

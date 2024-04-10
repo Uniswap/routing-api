@@ -19,7 +19,6 @@ const config: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
@@ -44,6 +43,7 @@ describe('SingleJsonRpcProvider', () => {
       'provider_0_url',
       log,
       config,
+      false,
       1.0
     )
     sandbox = Sinon.createSandbox()
@@ -205,6 +205,7 @@ describe('SingleJsonRpcProvider', () => {
       'provider_0_url',
       log,
       config,
+      false,
       0.5
     )
     provider['enableDbSync'] = true
