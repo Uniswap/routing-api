@@ -201,6 +201,11 @@ export class RoutingAPIPipeline extends Stack {
       'QUICKNODE_42161',
       'NIRVANA_42161',
       'ALCHEMY_42161',
+      // Ethereum
+      'INFURA_1',
+      'QUICKNODE_1',
+      'NIRVANA_1',
+      'ALCHEMY_1',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -350,6 +355,11 @@ const jsonRpcProviders = {
   QUICKNODE_42161: process.env.QUICKNODE_42161!,
   NIRVANA_42161: process.env.NIRVANA_42161!,
   ALCHEMY_42161: process.env.ALCHEMY_42161!,
+  // Ethereum
+  INFURA_1: process.env.INFURA_1!,
+  QUICKNODE_1: process.env.QUICKNODE_1!,
+  NIRVANA_1: process.env.NIRVANA_1!,
+  ALCHEMY_1: process.env.ALCHEMY_1!,
 }
 
 // Local dev stack
