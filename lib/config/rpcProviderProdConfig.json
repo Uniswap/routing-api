@@ -49,7 +49,7 @@
   },
   {
     "chainId": 1,
-    "useMultiProviderProb": 0.01,
+    "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1, 0, 0, 0],
     "providerUrls": ["INFURA_1", "QUICKNODE_1", "NIRVANA_1", "ALCHEMY_1"]
   }
