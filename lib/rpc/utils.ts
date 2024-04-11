@@ -51,6 +51,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'INFURA_1': {
       return `https://mainnet.infura.io/v3/${tokens[0]}`
     }
+    case 'INFURA_81457': {
+      return `https://blast-mainnet.infura.io/v3/${tokens[0]}`
+    }
     // Nirvana
     case 'NIRVANA_43114': {
       return `https://avax.nirvanalabs.xyz/${tokens[0]}/ext/bc/C/rpc?apikey=${tokens[1]}`
@@ -91,6 +94,9 @@ export function generateProviderUrl(key: string, value: string): string {
     }
     case 'QUICKNODE_1': {
       return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`
+    }
+    case 'QUICKNODE_81457': {
+      return `https://${tokens[0]}.blast-mainnet.quiknode.pro/${tokens[1]}`
     }
     // Alchemy
     case 'ALCHEMY_10': {
