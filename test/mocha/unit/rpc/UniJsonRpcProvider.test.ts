@@ -27,7 +27,6 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
@@ -40,9 +39,30 @@ const log = bunyan.createLogger({
 })
 
 const createNewSingleJsonRpcProviders = () => [
-  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_0`, log, SINGLE_PROVIDER_TEST_CONFIG),
-  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_1`, log, SINGLE_PROVIDER_TEST_CONFIG),
-  new SingleJsonRpcProvider({ name: 'mainnet', chainId: ChainId.MAINNET }, `url_2`, log, SINGLE_PROVIDER_TEST_CONFIG),
+  new SingleJsonRpcProvider(
+    { name: 'mainnet', chainId: ChainId.MAINNET },
+    `url_0`,
+    log,
+    SINGLE_PROVIDER_TEST_CONFIG,
+    false,
+    1.0
+  ),
+  new SingleJsonRpcProvider(
+    { name: 'mainnet', chainId: ChainId.MAINNET },
+    `url_1`,
+    log,
+    SINGLE_PROVIDER_TEST_CONFIG,
+    false,
+    1.0
+  ),
+  new SingleJsonRpcProvider(
+    { name: 'mainnet', chainId: ChainId.MAINNET },
+    `url_2`,
+    log,
+    SINGLE_PROVIDER_TEST_CONFIG,
+    false,
+    1.0
+  ),
 ]
 
 const SINGLE_RPC_PROVIDERS = { [ChainId.MAINNET]: createNewSingleJsonRpcProviders() }
@@ -64,9 +84,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -353,9 +373,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [3, 1, 4],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [3, 1, 4]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -390,9 +411,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [3, ProviderSpecialWeight.NEVER, 4],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [3, ProviderSpecialWeight.NEVER, 4]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -423,9 +445,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -450,9 +473,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, 4]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -479,9 +503,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [ProviderSpecialWeight.AS_FALLBACK, ProviderSpecialWeight.NEVER, 3],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [ProviderSpecialWeight.AS_FALLBACK, ProviderSpecialWeight.NEVER, 3]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -506,9 +531,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.AS_FALLBACK],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.AS_FALLBACK]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -533,9 +559,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.NEVER]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -552,9 +579,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider1['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -564,9 +591,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider2['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -622,9 +649,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [4, 1, 3],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [4, 1, 3]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -663,9 +691,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -713,9 +741,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      false,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -765,9 +793,10 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      [4, 1, 3],
-      undefined,
-      UNI_PROVIDER_TEST_CONFIG
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [4, 1, 3]
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -803,9 +832,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      CUSTOM_UNI_PROVIDER_CONFIG
+      CUSTOM_UNI_PROVIDER_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -849,14 +878,13 @@ describe('UniJsonRpcProvider', () => {
   it('Test we will not do shadow latency check calls too frequently', async () => {
     const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
     CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
-    CUSTOM_UNI_PROVIDER_CONFIG.LATENCY_EVALUATION_WAIT_PERIOD_IN_S = 15
     uniProvider = new UniJsonRpcProvider(
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      CUSTOM_UNI_PROVIDER_CONFIG
+      CUSTOM_UNI_PROVIDER_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -931,9 +959,9 @@ describe('UniJsonRpcProvider', () => {
       ChainId.MAINNET,
       SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
       log,
-      undefined,
-      undefined,
-      CUSTOM_UNI_PROVIDER_CONFIG
+      CUSTOM_UNI_PROVIDER_CONFIG,
+      1.0,
+      1.0
     )
     for (const provider of uniProvider['providers']) {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
@@ -1041,5 +1069,122 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
     expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
+  })
+
+  it('Test use of latencyEvaluationSampleProb', async () => {
+    const CUSTOM_UNI_PROVIDER_CONFIG = UNI_PROVIDER_TEST_CONFIG
+    CUSTOM_UNI_PROVIDER_CONFIG.ENABLE_SHADOW_LATENCY_EVALUATION = true
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      CUSTOM_UNI_PROVIDER_CONFIG,
+      0.5,
+      1.0
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.resolves(123)
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.resolves(123)
+
+    const spy0 = sandbox.spy(uniProvider['providers'][0], 'evaluateLatency')
+    const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateLatency')
+    const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateLatency')
+
+    const randStub = sandbox.stub(Math, 'random')
+
+    randStub.returns(0.6)
+    await uniProvider.getBlockNumber()
+    // 0.6 >= 0.5, Shadow evaluate call should not be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    randStub.returns(0.5)
+    await uniProvider.getBlockNumber()
+    // 0.5 >= 0.5, Shadow evaluate call should not be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    randStub.returns(0.4)
+    await uniProvider.getBlockNumber()
+    // 0.4 < 0.5, Shadow evaluate call should be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(1)
+    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.callCount).to.equal(1)
+    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+  })
+
+  it('Test use of healthCheckSampleProb', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      0.5
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Make provider1 and provider2 unhealthy
+    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
+    getBlockNumber0.resolves(123)
+
+    uniProvider['providers'][1]['healthy'] = false
+    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
+    getBlockNumber1.rejects('error')
+
+    uniProvider['providers'][2]['healthy'] = false
+    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
+    getBlockNumber2.rejects('error')
+
+    const spy0 = sandbox.spy(uniProvider['providers'][0], 'evaluateHealthiness')
+    const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateHealthiness')
+    const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateHealthiness')
+
+    const randStub = sandbox.stub(Math, 'random')
+
+    randStub.returns(0.6)
+    await uniProvider.getBlockNumber()
+    // 0.6 >= 0.5, Shadow evaluate call should not be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    randStub.returns(0.5)
+    await uniProvider.getBlockNumber()
+    // 0.5 >= 0.5, Shadow evaluate call should not be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(0)
+    expect(spy2.callCount).to.equal(0)
+    spy0.resetHistory()
+    spy1.resetHistory()
+    spy2.resetHistory()
+
+    randStub.returns(0.4)
+    await uniProvider.getBlockNumber()
+    // 0.4 < 0.5, Shadow evaluate call should be made
+    expect(spy0.callCount).to.equal(0)
+    expect(spy1.callCount).to.equal(1)
+    expect(spy2.callCount).to.equal(1)
   })
 })

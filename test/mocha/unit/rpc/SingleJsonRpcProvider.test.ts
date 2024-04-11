@@ -19,7 +19,6 @@ const config: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
@@ -43,7 +42,9 @@ describe('SingleJsonRpcProvider', () => {
       },
       'provider_0_url',
       log,
-      config
+      config,
+      false,
+      1.0
     )
     sandbox = Sinon.createSandbox()
   })
@@ -192,6 +193,51 @@ describe('SingleJsonRpcProvider', () => {
     // Only 1 sync will be made.
     expect(syncSpy.callCount).equals(1)
     syncSpy.resetHistory()
+  })
+
+  it('test DB sync with sample prob', async () => {
+    // Create SingleJsonRpcProvider with dbSyncSampleProb
+    provider = new SingleJsonRpcProvider(
+      {
+        chainId: ChainId.MAINNET,
+        name: 'mainnet',
+      },
+      'provider_0_url',
+      log,
+      config,
+      false,
+      0.5
+    )
+    provider['enableDbSync'] = true
+
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    const randStub = sandbox.stub(Math, 'random')
+
+    randStub.returns(0.6)
+    await provider.getBlockNumber()
+    // 0.6 >= 0.5, not able to sync.
+    expect(syncSpy.callCount).equals(0)
+
+    randStub.returns(0.5)
+    await provider.getBlockNumber()
+    // 0.5 >= 0.5, not able to sync.
+    expect(syncSpy.callCount).equals(0)
+
+    randStub.returns(0.4)
+    await provider.getBlockNumber()
+    // 0.4 < 0.5, able to sync.
+    expect(syncSpy.callCount).equals(1)
   })
 
   it('test updateLatencyStat', async () => {
