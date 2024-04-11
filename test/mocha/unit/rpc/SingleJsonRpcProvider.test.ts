@@ -10,10 +10,6 @@ import { ProviderState } from '../../../../lib/rpc/ProviderState'
 
 chai.use(chaiAsPromised)
 
-const delay = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 const config: SingleJsonRpcProviderConfig = {
   HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 5,
   ERROR_PENALTY: -50,
@@ -23,9 +19,8 @@ const config: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.01,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
-  LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15000,
+  LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
 }
 
@@ -47,7 +42,9 @@ describe('SingleJsonRpcProvider', () => {
       },
       'provider_0_url',
       log,
-      config
+      config,
+      false,
+      1.0
     )
     sandbox = Sinon.createSandbox()
   })
@@ -90,11 +87,13 @@ describe('SingleJsonRpcProvider', () => {
     expect(spy.calledOnce).to.be.true
   })
 
-  it('maybeSyncHealthScore', async () => {
+  it('test sync and update states with DB', async () => {
     provider['enableDbSync'] = true
     const DB_HEALTH_SCORE = -1000
     const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
-    stubSyncer.maybeSyncWithRepository.returns(Promise.resolve({ healthScore: DB_HEALTH_SCORE } as ProviderState))
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
     provider['providerStateSyncer'] = stubSyncer
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
@@ -103,11 +102,142 @@ describe('SingleJsonRpcProvider', () => {
     const blockNumber = await provider.getBlockNumber()
     expect(blockNumber).equals(123456)
 
-    // Wait to make sure all callbacks are executed.
-    await delay(10)
-
     expect(provider['healthScore']).equals(DB_HEALTH_SCORE)
     expect(provider['healthScoreAtLastSync']).equals(DB_HEALTH_SCORE)
+  })
+
+  it('test DB sync rate limit', async () => {
+    provider['enableDbSync'] = true
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    await provider.getBlockNumber()
+    await provider.getBlockNumber()
+    await provider.getBlockNumber()
+    await provider.getBlockNumber()
+    await provider.getBlockNumber()
+
+    // Only 1 sync happened.
+    expect(syncSpy.callCount).equals(1)
+  })
+
+  it('test DB sync rate limit, simultaneous multi entry', async () => {
+    const timestamp = Date.now()
+    sandbox.useFakeTimers(timestamp)
+
+    provider['enableDbSync'] = true
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    await Promise.all([
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+    ])
+    expect(syncSpy.callCount).equals(1)
+    syncSpy.resetHistory()
+
+    await Promise.all([
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+    ])
+    // No sync will be made because just synced.
+    expect(syncSpy.callCount).equals(0)
+    syncSpy.resetHistory()
+
+    // Advance 1 second
+    sandbox.clock.tick(1000)
+    // No sync will be made because 1 second is way shorter than sync interval.
+    await Promise.all([
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+    ])
+    expect(syncSpy.callCount).equals(0)
+    syncSpy.resetHistory()
+
+    // Advance another 5 second which is DB sync interval.
+    sandbox.clock.tick(5000)
+    await Promise.all([
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+      provider.getBlockNumber(),
+    ])
+    // Only 1 sync will be made.
+    expect(syncSpy.callCount).equals(1)
+    syncSpy.resetHistory()
+  })
+
+  it('test DB sync with sample prob', async () => {
+    // Create SingleJsonRpcProvider with dbSyncSampleProb
+    provider = new SingleJsonRpcProvider(
+      {
+        chainId: ChainId.MAINNET,
+        name: 'mainnet',
+      },
+      'provider_0_url',
+      log,
+      config,
+      false,
+      0.5
+    )
+    provider['enableDbSync'] = true
+
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    const randStub = sandbox.stub(Math, 'random')
+
+    randStub.returns(0.6)
+    await provider.getBlockNumber()
+    // 0.6 >= 0.5, not able to sync.
+    expect(syncSpy.callCount).equals(0)
+
+    randStub.returns(0.5)
+    await provider.getBlockNumber()
+    // 0.5 >= 0.5, not able to sync.
+    expect(syncSpy.callCount).equals(0)
+
+    randStub.returns(0.4)
+    await provider.getBlockNumber()
+    // 0.4 < 0.5, able to sync.
+    expect(syncSpy.callCount).equals(1)
   })
 
   it('test updateLatencyStat', async () => {
@@ -134,5 +264,30 @@ describe('SingleJsonRpcProvider', () => {
     }
     provider['updateLatencyStat'](state)
     expect(provider.recentAverageLatency()).equals(333)
+  })
+
+  it('test DB sync with latency for API we do not care', async () => {
+    provider['enableDbSync'] = true
+    const DB_HEALTH_SCORE = -1000
+    const stubSyncer = sandbox.createStubInstance(ProviderStateSyncer)
+    stubSyncer.syncWithRepository.returns(
+      Promise.resolve({ healthScore: DB_HEALTH_SCORE, latencies: [] } as ProviderState)
+    )
+    provider['providerStateSyncer'] = stubSyncer
+
+    const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
+    getBlockNumber.resolves(123456)
+
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderState' as any)
+
+    await provider.getBlockNumber()
+    // Sync normally.
+    expect(syncSpy.callCount).equals(1)
+    syncSpy.resetHistory()
+
+    sandbox.stub(require('../../../../lib/rpc/SingleJsonRpcProvider'), 'MAJOR_METHOD_NAMES').value(['call'])
+    await provider.getBlockNumber()
+    // Won't sync because "getBlockNumber" isn't included in MAJOR_METHOD_NAMES
+    expect(syncSpy.callCount).equals(0)
   })
 })

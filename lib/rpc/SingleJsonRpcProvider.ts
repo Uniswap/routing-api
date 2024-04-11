@@ -1,5 +1,5 @@
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
-import { DEFAULT_SINGLE_PROVIDER_CONFIG, SingleJsonRpcProviderConfig } from './config'
+import { SingleJsonRpcProviderConfig } from './config'
 import { metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 import {
   BlockTag,
@@ -59,15 +59,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private readonly metricPrefix: string
   private readonly log: Logger
 
+  private syncingDb: boolean = false
   private enableDbSync: boolean
+  private dbSyncSampleProb: number
   private providerStateSyncer: ProviderStateSyncer
   private healthScoreAtLastSync: number = 0
+  private lastDbSyncTimestampInMs: number = 0
 
   constructor(
     network: Network,
     url: string,
     log: Logger,
-    config: SingleJsonRpcProviderConfig = DEFAULT_SINGLE_PROVIDER_CONFIG
+    config: SingleJsonRpcProviderConfig,
+    enableDbSync: boolean,
+    dbSyncSampleProb: number
   ) {
     super(url, network)
     this.url = url
@@ -76,7 +81,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.providerId = `${network.chainId.toString()}_${this.providerName}`
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
-    this.enableDbSync = config.ENABLE_DB_SYNC
+    this.enableDbSync = enableDbSync
+    this.dbSyncSampleProb = dbSyncSampleProb
+
     if (this.enableDbSync) {
       const dbTableName = process.env['RPC_PROVIDER_HEALTH_TABLE_NAME']!
       if (dbTableName === undefined) {
@@ -85,7 +92,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.providerStateSyncer = new ProviderStateSyncer(
         dbTableName,
         this.providerId,
-        this.config.DB_SYNC_INTERVAL_IN_S,
         this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
         log
       )
@@ -118,6 +124,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return Date.now() - this.lastHealthinessEvaluationTimestampInMs > waitTimeRequirementInMs
   }
 
+  hasEnoughWaitSinceLastDbSync(waitTimeRequirementInMs: number): boolean {
+    this.log.debug(
+      `${this.url}: hasEnoughWaitSinceLastDbSync? waited ${
+        Date.now() - this.lastDbSyncTimestampInMs
+      } ms, wait requirement: ${waitTimeRequirementInMs} ms`
+    )
+    return Date.now() - this.lastDbSyncTimestampInMs > waitTimeRequirementInMs
+  }
+
   isEvaluatingHealthiness(): boolean {
     console.log(`evaluatingHealthiness: ${this.evaluatingHealthiness}`)
     return this.evaluatingHealthiness
@@ -146,20 +161,22 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastHealthinessEvaluationTimestampInMs = perf.startTimestampInMs
       this.evaluatingHealthiness = false
     } else if (perf.callType === CallType.LATENCY_EVALUATION) {
+      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
       this.lastLatencyEvaluationApiName = perf.methodName
-      this.logLatencyMetrics()
       this.evaluatingLatency = false
-    } else if (
-      perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
-      MAJOR_METHOD_NAMES.includes(perf.methodName)
-    ) {
-      this.lastEvaluatedLatencyInMs = perf.latencyInMs
-      this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-      this.lastLatencyEvaluationApiName = perf.methodName
-      this.logLatencyMetrics()
+    } else {
+      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
+      if (
+        perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
+          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
+        MAJOR_METHOD_NAMES.includes(perf.methodName)
+      ) {
+        this.lastEvaluatedLatencyInMs = perf.latencyInMs
+        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+        this.lastLatencyEvaluationApiName = perf.methodName
+      }
     }
 
     this.healthScore += this.config.HIGH_LATENCY_PENALTY
@@ -173,20 +190,22 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastHealthinessEvaluationTimestampInMs = perf.startTimestampInMs
       this.evaluatingHealthiness = false
     } else if (perf.callType === CallType.LATENCY_EVALUATION) {
+      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
       this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
       this.lastLatencyEvaluationApiName = perf.methodName
-      this.logLatencyMetrics()
       this.evaluatingLatency = false
-    } else if (
-      perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-        1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
-      MAJOR_METHOD_NAMES.includes(perf.methodName)
-    ) {
-      this.lastEvaluatedLatencyInMs = perf.latencyInMs
-      this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-      this.lastLatencyEvaluationApiName = perf.methodName
-      this.logLatencyMetrics()
+    } else {
+      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
+      if (
+        perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
+          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
+        MAJOR_METHOD_NAMES.includes(perf.methodName)
+      ) {
+        this.lastEvaluatedLatencyInMs = perf.latencyInMs
+        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
+        this.lastLatencyEvaluationApiName = perf.methodName
+      }
     }
 
     if (this.healthScore === 0) {
@@ -209,7 +228,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private checkLastCallPerformance(perf: SingleCallPerf) {
     const method = perf.methodName
-    this.log.debug(`checkLastCallPerformance: method: ${method}`)
+    this.log.debug(`${this.providerId}: checkLastCallPerformance: method: ${method}`)
     if (!perf.succeed) {
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(perf)
@@ -227,9 +246,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   async evaluateHealthiness() {
     this.log.debug(`${this.url}: Evaluate healthiness for unhealthy provider...`)
+    this.logCheckHealth()
     this.evaluatingHealthiness = true
     try {
-      await this.getBlockNumber(CallType.HEALTH_CHECK)
+      await this.getBlockNumber_EvaluateHealthiness()
     } catch (error: any) {
       this.log.error(`Encounter error for shadow call for evaluating healthiness: ${JSON.stringify(error)}`)
       // Swallow the error.
@@ -237,10 +257,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   async evaluateLatency(methodName: string, ...args: any[]) {
-    this.log.debug(`${this.url}: Evaluate for latency...`)
+    this.log.debug(`${this.url}: Evaluate for latency... methodName: ${methodName}`)
+    this.logEvaluateLatency()
     this.evaluatingLatency = true
     try {
-      await (this as any)[`${methodName}`](CallType.LATENCY_EVALUATION, ...args)
+      await (this as any)[`${methodName}_EvaluateLatency`](...args)
     } catch (error: any) {
       this.log.error(`Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
       // Swallow the error.
@@ -252,30 +273,36 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
   }
 
-  logLatencyMetrics() {
-    metric.putMetric(
-      `${this.metricPrefix}_evaluated_latency_${this.lastLatencyEvaluationApiName}`,
-      this.lastEvaluatedLatencyInMs,
-      MetricLoggerUnit.None
-    )
-    this.log.debug(
-      {
-        lastEvaluatedLatencyInMs: this.lastEvaluatedLatencyInMs,
-        lastLatencyEvaluationTimestampInMs: this.lastLatencyEvaluationTimestampInMs,
-        lastLatencyEvaluationApiName: this.lastLatencyEvaluationApiName,
-      },
-      'Latency evaluation recorded'
-    )
+  logLatencyMetrics(methodName: string, latencyInMs: number) {
+    metric.putMetric(`${this.metricPrefix}_evaluated_latency_${methodName}`, latencyInMs, MetricLoggerUnit.None)
+  }
+
+  logCheckHealth() {
+    metric.putMetric(`${this.metricPrefix}_check_health`, 1, MetricLoggerUnit.Count)
+  }
+
+  logEvaluateLatency() {
+    metric.putMetric(`${this.metricPrefix}_evaluate_latency`, 1, MetricLoggerUnit.Count)
   }
 
   logProviderSelection() {
     metric.putMetric(`${this.metricPrefix}_selected`, 1, MetricLoggerUnit.Count)
   }
 
-  // Wrap another layer only for the sake of ease unit testing.
-  // We will test this API to represent the tests of other similar implemented APIs.
-  private _getBlockNumber(): Promise<number> {
-    return super.getBlockNumber()
+  logDbSyncRequested() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_REQUESTED`, 1, MetricLoggerUnit.Count)
+  }
+
+  logDbSyncSampled() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_SAMPLED`, 1, MetricLoggerUnit.Count)
+  }
+
+  logDbSyncSuccess() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_SUCCESS`, 1, MetricLoggerUnit.Count)
+  }
+
+  logDbSyncFailure() {
+    metric.putMetric(`${this.metricPrefix}_db_sync_FAIL`, 1, MetricLoggerUnit.Count)
   }
 
   private async wrappedFunctionCall(
@@ -284,7 +311,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     fn: (...args: any[]) => Promise<any>,
     ...args: any[]
   ): Promise<any> {
-    this.log.debug(`SingleJsonRpcProvider: wrappedFunctionCall: fnName: ${fnName}, fn: ${fn}, args: ${[...args]}`)
+    this.log.debug(
+      `SingleJsonRpcProvider: wrappedFunctionCall: callType: ${callType}, provider: ${
+        this.url
+      }, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`
+    )
     const perf: SingleCallPerf = {
       callType: callType,
       methodName: fnName,
@@ -296,23 +327,38 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       return await fn(...args)
     } catch (error: any) {
       perf.succeed = false
-      this.log.error(JSON.stringify(error))
+      this.log.debug(
+        `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
+          ...args,
+        ])}, error details: ${JSON.stringify(error)}`
+      )
       throw error
     } finally {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
       this.updateHealthyStatus()
       if (this.enableDbSync) {
-        // Fire and forget. Won't check the sync result.
-        this.maybeSyncAndUpdateProviderState()
+        if (
+          !this.syncingDb &&
+          MAJOR_METHOD_NAMES.includes(perf.methodName) &&
+          this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)
+        ) {
+          this.logDbSyncRequested()
+          if (Math.random() < this.dbSyncSampleProb) {
+            this.logDbSyncSampled()
+            this.syncingDb = true
+            // Fire and forget. Won't check the sync result.
+            this.syncAndUpdateProviderState()
+          }
+        }
       }
       this.lastCallTimestampInMs = perf.startTimestampInMs
     }
   }
 
-  private async maybeSyncAndUpdateProviderState() {
+  private async syncAndUpdateProviderState() {
     try {
-      const newState: ProviderState | null = await this.providerStateSyncer.maybeSyncWithRepository(
+      const newState: ProviderState | null = await this.providerStateSyncer.syncWithRepository(
         this.healthScore - this.healthScoreAtLastSync,
         this.healthScore,
         this.lastEvaluatedLatencyInMs,
@@ -323,15 +369,21 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         // Update health state
         this.healthScoreAtLastSync = newState.healthScore
         this.healthScore = this.healthScoreAtLastSync
-        this.log.debug(`Synced with storage: new health score ${this.healthScore}`)
+        this.log.debug(`${this.providerId}: Synced with storage: new health score ${this.healthScore}`)
         this.updateHealthyStatus()
 
         // Update latency stat
         this.updateLatencyStat(newState)
       }
+      this.lastDbSyncTimestampInMs = Date.now()
+      this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)
+      this.logDbSyncSuccess()
     } catch (err: any) {
-      this.log.error(`Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      this.log.error(`${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      this.logDbSyncFailure()
       // Won't throw. A fail of sync won't affect how we do health state update locally.
+    } finally {
+      this.syncingDb = false
     }
   }
 
@@ -360,46 +412,40 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   ///////////////////// Begin of override functions /////////////////////
 
-  override getBlockNumber(callType = CallType.NORMAL): Promise<number> {
-    return this.wrappedFunctionCall(callType, 'getBlockNumber', this._getBlockNumber.bind(this))
+  override getBlockNumber(): Promise<number> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getBlockNumber', this._getBlockNumber.bind(this))
   }
 
   override getBlockWithTransactions(
-    blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>,
-    callType = CallType.NORMAL
+    blockHashOrBlockTag: BlockTag | string | Promise<BlockTag | string>
   ): Promise<BlockWithTransactions> {
     return this.wrappedFunctionCall(
-      callType,
+      CallType.NORMAL,
       'getBlockWithTransactions',
       super.getBlockWithTransactions.bind(this),
       blockHashOrBlockTag
     )
   }
 
-  override getCode(
-    addressOrName: string | Promise<string>,
-    blockTag?: BlockTag | Promise<BlockTag>,
-    callType = CallType.NORMAL
-  ): Promise<string> {
-    return this.wrappedFunctionCall(callType, 'getCode', super.getCode.bind(this), addressOrName, blockTag)
+  override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getCode', super.getCode.bind(this), addressOrName, blockTag)
   }
 
-  override getGasPrice(callType = CallType.NORMAL): Promise<BigNumber> {
-    return this.wrappedFunctionCall(callType, 'getGasPrice', super.getGasPrice.bind(this))
+  override getGasPrice(): Promise<BigNumber> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getGasPrice', super.getGasPrice.bind(this))
   }
 
-  override getLogs(filter: Filter, callType = CallType.NORMAL): Promise<Array<Log>> {
-    return this.wrappedFunctionCall(callType, 'getLogs', super.getLogs.bind(this), filter)
+  override getLogs(filter: Filter): Promise<Array<Log>> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getLogs', super.getLogs.bind(this), filter)
   }
 
   override getStorageAt(
     addressOrName: string | Promise<string>,
     position: BigNumberish | Promise<BigNumberish>,
-    blockTag?: BlockTag | Promise<BlockTag>,
-    callType = CallType.NORMAL
+    blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<string> {
     return this.wrappedFunctionCall(
-      callType,
+      CallType.NORMAL,
       'getStorageAt',
       super.getStorageAt.bind(this),
       addressOrName,
@@ -408,20 +454,16 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override getTransaction(
-    transactionHash: string | Promise<string>,
-    callType = CallType.NORMAL
-  ): Promise<TransactionResponse> {
-    return this.wrappedFunctionCall(callType, 'getTransaction', super.getTransaction.bind(this), transactionHash)
+  override getTransaction(transactionHash: string | Promise<string>): Promise<TransactionResponse> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getTransaction', super.getTransaction.bind(this), transactionHash)
   }
 
   override getTransactionCount(
     addressOrName: string | Promise<string>,
-    blockTag?: BlockTag | Promise<BlockTag>,
-    callType = CallType.NORMAL
+    blockTag?: BlockTag | Promise<BlockTag>
   ): Promise<number> {
     return this.wrappedFunctionCall(
-      callType,
+      CallType.NORMAL,
       'getTransactionCount',
       super.getTransactionCount.bind(this),
       addressOrName,
@@ -429,41 +471,39 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override getTransactionReceipt(
-    transactionHash: string | Promise<string>,
-    callType = CallType.NORMAL
-  ): Promise<TransactionReceipt> {
+  override getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt> {
     return this.wrappedFunctionCall(
-      callType,
+      CallType.NORMAL,
       'getTransactionReceipt',
       super.getTransactionReceipt.bind(this),
       transactionHash
     )
   }
 
-  override lookupAddress(address: string | Promise<string>, callType = CallType.NORMAL): Promise<string | null> {
-    return this.wrappedFunctionCall(callType, 'lookupAddress', super.lookupAddress.bind(this), address)
+  override lookupAddress(address: string | Promise<string>): Promise<string | null> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'lookupAddress', super.lookupAddress.bind(this), address)
   }
 
-  override resolveName(name: string | Promise<string>, callType = CallType.NORMAL): Promise<string | null> {
-    return this.wrappedFunctionCall(callType, 'resolveName', super.resolveName.bind(this), name)
+  override resolveName(name: string | Promise<string>): Promise<string | null> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'resolveName', super.resolveName.bind(this), name)
   }
 
-  override sendTransaction(
-    signedTransaction: string | Promise<string>,
-    callType = CallType.NORMAL
-  ): Promise<TransactionResponse> {
-    return this.wrappedFunctionCall(callType, 'sendTransaction', super.sendTransaction.bind(this), signedTransaction)
+  override sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
+    return this.wrappedFunctionCall(
+      CallType.NORMAL,
+      'sendTransaction',
+      super.sendTransaction.bind(this),
+      signedTransaction
+    )
   }
 
   override waitForTransaction(
     transactionHash: string,
     confirmations?: number,
-    timeout?: number,
-    callType = CallType.NORMAL
+    timeout?: number
   ): Promise<TransactionReceipt> {
     return this.wrappedFunctionCall(
-      callType,
+      CallType.NORMAL,
       'waitForTransaction',
       super.waitForTransaction.bind(this),
       transactionHash,
@@ -472,14 +512,41 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     )
   }
 
-  override call(
-    transaction: Deferrable<TransactionRequest>,
-    blockTag?: BlockTag | Promise<BlockTag>,
-    callType = CallType.NORMAL
-  ): Promise<string> {
-    return this.wrappedFunctionCall(callType, 'call', super.call.bind(this), transaction, blockTag)
+  override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'call', super.call.bind(this), transaction, blockTag)
   }
-  override send(method: string, params: Array<any>, callType = CallType.NORMAL): Promise<any> {
-    return this.wrappedFunctionCall(callType, 'send', super.send.bind(this), method, params)
+
+  override send(method: string, params: Array<any>): Promise<any> {
+    return this.wrappedFunctionCall(CallType.NORMAL, 'send', super.send.bind(this), method, params)
+  }
+
+  ///////////////////// Begin of special functions /////////////////////
+
+  // Wrap another layer only for the sake of ease unit testing.
+  // We will test this API to represent the tests of other similar implemented APIs.
+  private _getBlockNumber(): Promise<number> {
+    return super.getBlockNumber()
+  }
+
+  private getBlockNumber_EvaluateHealthiness(): Promise<number> {
+    return this.wrappedFunctionCall(CallType.HEALTH_CHECK, 'getBlockNumber', this._getBlockNumber.bind(this))
+  }
+
+  // @ts-ignore
+  private getBlockNumber_EvaluateLatency(): Promise<number> {
+    return this.wrappedFunctionCall(CallType.LATENCY_EVALUATION, 'getBlockNumber', this._getBlockNumber.bind(this))
+  }
+
+  // @ts-ignore
+  private call_EvaluateLatency(
+    transaction: Deferrable<TransactionRequest>,
+    blockTag?: BlockTag | Promise<BlockTag>
+  ): Promise<string> {
+    return this.wrappedFunctionCall(CallType.LATENCY_EVALUATION, 'call', super.call.bind(this), transaction, blockTag)
+  }
+
+  // @ts-ignore
+  private send_EvaluateLatency(method: string, params: Array<any>): Promise<any> {
+    return this.wrappedFunctionCall(CallType.LATENCY_EVALUATION, 'send', super.send.bind(this), method, params)
   }
 }

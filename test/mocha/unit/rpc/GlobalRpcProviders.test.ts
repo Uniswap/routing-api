@@ -4,6 +4,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import { expect } from 'chai'
 import { SingleJsonRpcProviderConfig, UniJsonRpcProviderConfig } from '../../../../lib/rpc/config'
 import Sinon, { SinonSandbox } from 'sinon'
+import TEST_PROD_CONFIG from './rpcProviderTestProdConfig.json'
 
 const log: Logger = bunyan.createLogger({ name: 'test' })
 
@@ -23,7 +24,6 @@ const SINGLE_PROVIDER_TEST_CONFIG: SingleJsonRpcProviderConfig = {
   MAX_LATENCY_ALLOWED_IN_MS: 500,
   RECOVER_SCORE_PER_MS: 0.005,
   RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS: 20000,
-  ENABLE_DB_SYNC: false,
   DB_SYNC_INTERVAL_IN_S: 5,
   LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S: 300,
   LATENCY_EVALUATION_WAIT_PERIOD_IN_S: 15,
@@ -48,8 +48,8 @@ describe('GlobalRpcProviders', () => {
 
   it('Prepare global UniJsonRpcProvider by reading given config', () => {
     process.env = {
-      URL0: 'url0',
-      URL1: 'url1',
+      INFURA_43114: 'key0',
+      QUICKNODE_43114: 'node1,key1',
     }
     const rpcProviderProdConfig = [
       { chainId: 1, useMultiProviderProb: 0 },
@@ -58,7 +58,7 @@ describe('GlobalRpcProviders', () => {
         useMultiProviderProb: 1,
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [2, 1],
-        providerUrls: ['URL0', 'URL1'],
+        providerUrls: ['INFURA_43114', 'QUICKNODE_43114'],
       },
     ]
 
@@ -95,30 +95,34 @@ describe('GlobalRpcProviders', () => {
       SINGLE_PROVIDER_TEST_CONFIG,
       rpcProviderProdConfig
     ).get(ChainId.AVALANCHE)!
+    const url0 = 'https://avalanche-mainnet.infura.io/v3/key0'
+    const url1 = 'https://node1.avalanche-mainnet.quiknode.pro/key1/ext/bc/C/rpc/'
     expect(avaUniProvider['sessionAllowProviderFallbackWhenUnhealthy']).to.be.true
-    expect(avaUniProvider['urlWeight']).to.deep.equal({ url0: 2, url1: 1 })
-    expect(avaUniProvider['providers'][0].url).to.equal('url0')
-    expect(avaUniProvider['providers'][1].url).to.equal('url1')
+    expect(avaUniProvider['urlWeight']).to.deep.equal({ [url0]: 2, [url1]: 1 })
+    expect(avaUniProvider['providers'][0].url).to.equal(url0)
+    expect(avaUniProvider['providers'][1].url).to.equal(url1)
   })
 
   it('Prepare global UniJsonRpcProvider by reading config: Use prob to decide feature switch', () => {
     process.env = {
-      URL0: 'url0',
-      URL1: 'url1',
+      INFURA_10: 'key0',
+      QUICKNODE_10: 'node1,key1',
+      INFURA_43114: 'key2',
+      QUICKNODE_43114: 'node3,key3',
     }
 
     const rpcProviderProdConfig = [
       {
-        chainId: 1,
+        chainId: 10,
         useMultiProviderProb: 0.3,
-        providerUrls: ['URL0', 'URL1'],
+        providerUrls: ['INFURA_10', 'QUICKNODE_10'],
       },
       {
         chainId: 43114,
         useMultiProviderProb: 0.7,
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [2, 1],
-        providerUrls: ['URL0', 'URL1'],
+        providerUrls: ['INFURA_43114', 'QUICKNODE_43114'],
       },
     ]
 
@@ -130,7 +134,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.true
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -149,7 +153,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.true
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -168,7 +172,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.false
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -187,7 +191,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.false
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -206,7 +210,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.false
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -225,7 +229,7 @@ describe('GlobalRpcProviders', () => {
         UNI_PROVIDER_TEST_CONFIG,
         SINGLE_PROVIDER_TEST_CONFIG,
         rpcProviderProdConfig
-      ).has(ChainId.MAINNET)
+      ).has(ChainId.OPTIMISM)
     ).to.be.false
     expect(
       GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -235,6 +239,79 @@ describe('GlobalRpcProviders', () => {
         rpcProviderProdConfig
       ).has(ChainId.AVALANCHE)
     ).to.be.false
+    cleanUp()
+  })
+
+  it('Prepare global UniJsonRpcProvider by reading config file', () => {
+    process.env = {
+      INFURA_43114: 'key0',
+      QUICKNODE_43114: 'host1,key1',
+      NIRVANA_43114: 'host2,key2',
+      INFURA_10: 'key3',
+      QUICKNODE_10: 'host3,key3',
+      NIRVANA_10: 'host4,key4',
+      ALCHEMY_10: 'key5',
+      INFURA_42220: 'key6',
+      QUICKNODE_42220: 'host7,key7',
+      QUICKNODE_56: 'host8,key8',
+      INFURA_137: 'key9',
+      QUICKNODE_137: 'host10,key10',
+      ALCHEMY_137: 'key11',
+      INFURA_8453: 'key12',
+      QUICKNODE_8453: 'host13,key13',
+      ALCHEMY_8453: 'key14',
+      NIRVANA_8453: 'host15,key15',
+      INFURA_11155111: 'key16',
+      ALCHEMY_11155111: 'key17',
+      INFURA_42161: 'key18',
+      QUICKNODE_42161: 'host19,key19',
+      NIRVANA_42161: 'host20,key20',
+      ALCHEMY_42161: 'key21',
+    }
+
+    const randStub = sandbox.stub(Math, 'random')
+    randStub.returns(0.0)
+
+    const uniRpcProviderCelo = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.CELO)!!
+    expect(uniRpcProviderCelo['providers'][0].url).equal('https://host7.celo-mainnet.quiknode.pro/key7')
+    expect(uniRpcProviderCelo['providers'][1].url).equal('https://celo-mainnet.infura.io/v3/key6')
+
+    const sepoliaRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.SEPOLIA)!!
+    expect(sepoliaRpcProvider['providers'][0].url).equal('https://sepolia.infura.io/v3/key16')
+    expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia.g.alchemy.com/v2/key17')
+
+    const arbitrumRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.ARBITRUM_ONE)!!
+    expect(arbitrumRpcProvider['providers'][0].url).equal('https://arbitrum-mainnet.infura.io/v3/key18')
+    expect(arbitrumRpcProvider['providers'][1].url).equal('https://host19.arbitrum-mainnet.quiknode.pro/key19')
+    expect(arbitrumRpcProvider['providers'][2].url).equal('https://arb.nirvanalabs.xyz/host20?apikey=key20')
+    expect(arbitrumRpcProvider['providers'][3].url).equal('https://arb-mainnet.g.alchemy.com/v2/key21')
+
+    const baseRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.BASE)!!
+    expect(baseRpcProvider['providers'][0].url).equal('https://host13.base-mainnet.quiknode.pro/key13')
+    expect(baseRpcProvider['providers'][1].url).equal('https://base-mainnet.infura.io/v3/key12')
+    expect(baseRpcProvider['providers'][2].url).equal('https://base-mainnet.g.alchemy.com/v2/key14')
+    expect(baseRpcProvider['providers'][3].url).equal('https://base.nirvanalabs.xyz/host15?apikey=key15')
+
     cleanUp()
   })
 })

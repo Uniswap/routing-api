@@ -16,7 +16,7 @@ The best way to develop and test the API is to deploy your own instance to AWS.
 2. Create .env file in the root directory of the project with :
    ```
    THROTTLE_PER_FIVE_MINS = '' # Optional
-   JSON_RPC_PROVIDER_{CHAIN ID} = { RPC Provider}
+   WEB3_RPC_{CHAIN ID} = { RPC Provider}
    # RPC Providers must be set for the following CHAIN IDs:
    # MAINNET = 1
    # ROPSTEN = 3

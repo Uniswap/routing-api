@@ -7,13 +7,11 @@ import { LatencyEvaluation, ProviderState, ProviderStateDiff } from './ProviderS
 // The frequency of sync is controlled by syncInterval.
 // If lambda is recycled before the next successful sync, the unsynced data may be lost.
 export class ProviderStateSyncer {
-  lastSyncTimestampInMs: number = 0
   stateRepository: ProviderStateRepository
 
   constructor(
     dbTableName: string,
     private readonly providerId: string,
-    private readonly syncIntervalInS: number,
     private readonly latencyStatHistoryWindowLengthInS: number,
     private readonly log: Logger
   ) {
@@ -25,7 +23,7 @@ export class ProviderStateSyncer {
   // 2. Add local accumulated health score diff to the DB stored health score to get new health score
   // 3. Write back new health score to DB
   // 4. Update local health score with the new health score and refresh healthy state accordingly
-  async maybeSyncWithRepository(
+  async syncWithRepository(
     localHealthScoreDiff: number,
     localHealthScore: number,
     lastEvaluatedLatencyInMs: number,
@@ -34,17 +32,13 @@ export class ProviderStateSyncer {
   ): Promise<ProviderState | null> {
     const timestampInMs = Date.now()
 
-    if (!this.shouldSync(timestampInMs)) {
-      return null
-    }
-
     let storedState: ProviderStateWithTimestamp | null = null
     try {
       storedState = await this.stateRepository.read(this.providerId)
     } catch (err: any) {
       this.log.error(`Failed to read from sync storage: ${JSON.stringify(err)}. Sync failed.`)
     }
-    this.log.debug({ storedState }, 'Loaded stored state')
+    this.log.debug({ storedState }, `${this.providerId}: Loaded stored state`)
 
     const stateDiff: ProviderStateDiff = {
       healthScore: localHealthScore,
@@ -55,6 +49,7 @@ export class ProviderStateSyncer {
         apiName: lastLatencyEvaluationApiName,
       },
     }
+    this.log.debug({ stateDiff }, `${this.providerId}: State diff`)
 
     let newState: ProviderState
     let prevUpdatedAtInMs: number | undefined
@@ -65,10 +60,10 @@ export class ProviderStateSyncer {
       newState = this.calculateNewState(storedState.state, stateDiff)
       prevUpdatedAtInMs = storedState.updatedAtInMs
     }
+    this.log.debug({ newState }, `${this.providerId}: Calculated new state`)
 
     try {
       await this.stateRepository.write(this.providerId, newState, timestampInMs, prevUpdatedAtInMs)
-      this.lastSyncTimestampInMs = timestampInMs
       return newState
     } catch (err: any) {
       this.log.error(`Failed to write to sync storage: ${JSON.stringify(err)}. Sync failed.`)
@@ -103,10 +98,5 @@ export class ProviderStateSyncer {
       healthScore: newHealthScore,
       latencies: latencies,
     }
-  }
-
-  private shouldSync(timestampNowInMs: number): boolean {
-    // Limit sync frequency to at most every syncIntervalInS seconds
-    return timestampNowInMs - this.lastSyncTimestampInMs >= 1000 * this.syncIntervalInS
   }
 }

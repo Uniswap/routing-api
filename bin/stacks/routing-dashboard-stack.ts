@@ -9,6 +9,7 @@ import { CachedRoutesWidgetsFactory } from '../../lib/dashboards/cached-routes-w
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
 import { RpcProvidersWidgetsFactory } from '../../lib/dashboards/rpc-providers-widgets-factory'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
+import { TESTNETS } from '../../lib/util/testNets'
 
 export const NAMESPACE = 'Uniswap'
 
@@ -34,15 +35,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
 
     const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
     const region = cdk.Stack.of(this).region
-
-    const TESTNETS = [
-      ChainId.ARBITRUM_GOERLI,
-      ChainId.POLYGON_MUMBAI,
-      ChainId.GOERLI,
-      ChainId.SEPOLIA,
-      ChainId.CELO_ALFAJORES,
-      ChainId.BASE_GOERLI,
-    ]
 
     const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
 

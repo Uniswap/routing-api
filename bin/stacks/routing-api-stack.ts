@@ -18,8 +18,10 @@ import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
+import { TESTNETS } from '../../lib/util/testNets'
 
-export const CHAINS_NOT_MONITORED: ChainId[] = [ChainId.GOERLI, ChainId.POLYGON_MUMBAI]
+export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
+export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -162,8 +164,8 @@ export class RoutingAPIStack extends cdk.Stack {
           priority: 0,
           statement: {
             rateBasedStatement: {
-              // Limit is per 5 mins, i.e. 120 requests every 5 mins
-              limit: throttlingOverride ? parseInt(throttlingOverride) : 120,
+              // Limit is per 5 mins, i.e. 200 requests every 5 mins
+              limit: throttlingOverride ? parseInt(throttlingOverride) : 200,
               // API is of type EDGE so is fronted by Cloudfront as a proxy.
               // Use the ip set in X-Forwarded-For by Cloudfront, not the regular IP
               // which would just resolve to Cloudfronts IP.
@@ -417,6 +419,9 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for high 500 error rate for each request source
     const successRateByRequestSourceAlarm: cdk.aws_cloudwatch.Alarm[] = []
     REQUEST_SOURCES.forEach((requestSource) => {
+      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
+        return
+      }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
       const metric = new MathExpression({
         expression: '100*(response200/(invocations-response400))',
@@ -457,11 +462,14 @@ export class RoutingAPIStack extends cdk.Stack {
     // Alarms for high 500 error rate for each request source and chain id
     const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
     REQUEST_SOURCES.forEach((requestSource) => {
+      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
+        return
+      }
+
       SUPPORTED_CHAINS.forEach((chainId) => {
         if (CHAINS_NOT_MONITORED.includes(chainId)) {
           return
         }
-
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         const metric = new MathExpression({
           expression: '100*(response200/(invocations-response400))',

@@ -9,7 +9,7 @@ import {
   UniJsonRpcProviderConfig,
 } from './config'
 import { ProdConfig, ProdConfigJoi } from './ProdConfig'
-import { chainIdToNetworkName } from './utils'
+import { chainIdToNetworkName, generateProviderUrl } from './utils'
 import PROD_CONFIG from '../config/rpcProviderProdConfig.json'
 
 export class GlobalRpcProviders {
@@ -35,7 +35,7 @@ export class GlobalRpcProviders {
         if (process.env[urlEnvVar] === undefined) {
           throw new Error(`Environmental variable ${urlEnvVar} isn't defined!`)
         }
-        chainConfig.providerUrls[i] = process.env[urlEnvVar]!
+        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
       }
     }
     return prodConfig
@@ -53,7 +53,14 @@ export class GlobalRpcProviders {
         let providers: SingleJsonRpcProvider[] = []
         for (const providerUrl of chainConfig.providerUrls!) {
           providers.push(
-            new SingleJsonRpcProvider({ name: chainIdToNetworkName(chainId), chainId }, providerUrl, log, singleConfig)
+            new SingleJsonRpcProvider(
+              { name: chainIdToNetworkName(chainId), chainId },
+              providerUrl,
+              log,
+              singleConfig,
+              chainConfig.enableDbSync!,
+              chainConfig.dbSyncSampleProb!
+            )
           )
         }
         GlobalRpcProviders.SINGLE_RPC_PROVIDERS.set(chainId, providers)
@@ -83,9 +90,11 @@ export class GlobalRpcProviders {
           chainId,
           GlobalRpcProviders.SINGLE_RPC_PROVIDERS!.get(chainId)!,
           log,
+          uniConfig,
+          chainConfig.latencyEvaluationSampleProb!,
+          chainConfig.healthCheckSampleProb!,
           chainConfig.providerInitialWeights,
-          true,
-          uniConfig
+          true
         )
       )
     }
