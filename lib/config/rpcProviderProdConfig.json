@@ -55,7 +55,7 @@
   },
   {
     "chainId": 81457,
-    "useMultiProviderProb": 0.01,
+    "useMultiProviderProb": 0.1,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_81457", "INFURA_81457"]
   }
