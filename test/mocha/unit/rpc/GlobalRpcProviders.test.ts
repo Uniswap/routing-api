@@ -267,6 +267,10 @@ describe('GlobalRpcProviders', () => {
       QUICKNODE_42161: 'host19,key19',
       NIRVANA_42161: 'host20,key20',
       ALCHEMY_42161: 'key21',
+      INFURA_1: 'key22',
+      QUICKNODE_1: 'host23,key23',
+      NIRVANA_1: 'host24,key24',
+      ALCHEMY_1: 'key25',
     }
 
     const randStub = sandbox.stub(Math, 'random')
@@ -311,6 +315,17 @@ describe('GlobalRpcProviders', () => {
     expect(baseRpcProvider['providers'][1].url).equal('https://base-mainnet.infura.io/v3/key12')
     expect(baseRpcProvider['providers'][2].url).equal('https://base-mainnet.g.alchemy.com/v2/key14')
     expect(baseRpcProvider['providers'][3].url).equal('https://base.nirvanalabs.xyz/host15?apikey=key15')
+
+    const ethRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.MAINNET)!!
+    expect(ethRpcProvider['providers'][0].url).equal('https://mainnet.infura.io/v3/key22')
+    expect(ethRpcProvider['providers'][1].url).equal('https://host23.quiknode.pro/key23')
+    expect(ethRpcProvider['providers'][2].url).equal('https://ethereum.nirvanalabs.xyz/host24?apikey=key24')
+    expect(ethRpcProvider['providers'][3].url).equal('https://eth-mainnet.g.alchemy.com/v2/key25')
 
     cleanUp()
   })
