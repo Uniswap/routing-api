@@ -301,6 +301,17 @@ describe('GlobalRpcProviders', () => {
     expect(arbitrumRpcProvider['providers'][2].url).equal('https://arb.nirvanalabs.xyz/host20?apikey=key20')
     expect(arbitrumRpcProvider['providers'][3].url).equal('https://arb-mainnet.g.alchemy.com/v2/key21')
 
+    const baseRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      SINGLE_PROVIDER_TEST_CONFIG,
+      TEST_PROD_CONFIG
+    ).get(ChainId.BASE)!!
+    expect(baseRpcProvider['providers'][0].url).equal('https://host13.base-mainnet.quiknode.pro/key13')
+    expect(baseRpcProvider['providers'][1].url).equal('https://base-mainnet.infura.io/v3/key12')
+    expect(baseRpcProvider['providers'][2].url).equal('https://base-mainnet.g.alchemy.com/v2/key14')
+    expect(baseRpcProvider['providers'][3].url).equal('https://base.nirvanalabs.xyz/host15?apikey=key15')
+
     cleanUp()
   })
 })
