@@ -1,4 +1,4 @@
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { MetricLoggerUnit, USDC_MAINNET } from '@uniswap/smart-order-router'
 import { TrafficSwitchOnChainQuoteProvider } from '../../../../../../lib/handlers/quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
@@ -9,9 +9,19 @@ import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router'
 import { getMockedOnChainQuoteProvider } from '../../../../../test-utils/mocked-dependencies'
 
 describe('TrafficSwitchOnChainQuoteProvider', () => {
-  const spy = sinon.spy(metric, 'putMetric')
   const amountIns = [CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000')]
   const routes = [new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET)]
+
+  let spy: SinonSpy;
+
+  beforeEach(() => {
+    spy = sinon.spy(metric, 'putMetric')
+  });
+
+  afterEach(() => {
+    spy.restore()
+  });
+
 
   it('switch exact in traffic and sample quotes', async () => {
     spy.withArgs('ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)
