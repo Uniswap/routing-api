@@ -24,15 +24,15 @@ import {
 describe('TrafficSwitchV3PoolProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
 
-  let spy: SinonSpy;
+  let spy: SinonSpy
 
   beforeEach(() => {
     spy = sinon.spy(metric, 'putMetric')
-  });
+  })
 
   afterEach(() => {
     spy.restore()
-  });
+  })
 
   it('switch traffic and sample pools with accurate pricing and liquidity', async () => {
     spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_QUOTE_MATCH', 1, MetricLoggerUnit.None)

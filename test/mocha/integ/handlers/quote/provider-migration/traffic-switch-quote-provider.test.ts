@@ -12,16 +12,15 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
   const amountIns = [CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000')]
   const routes = [new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET)]
 
-  let spy: SinonSpy;
+  let spy: SinonSpy
 
   beforeEach(() => {
     spy = sinon.spy(metric, 'putMetric')
-  });
+  })
 
   afterEach(() => {
     spy.restore()
-  });
-
+  })
 
   it('switch exact in traffic and sample quotes', async () => {
     spy.withArgs('ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL', 1, MetricLoggerUnit.None)
