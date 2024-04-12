@@ -1,6 +1,6 @@
 import { IOnChainQuoteProvider, log, metric, MetricLoggerUnit, OnChainQuotes } from '@uniswap/smart-order-router'
 import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
 import { BigNumber } from 'ethers'
@@ -8,20 +8,22 @@ import { BigNumber } from 'ethers'
 export type TrafficSwitchOnChainQuoteProviderProps = {
   currentQuoteProvider: IOnChainQuoteProvider
   targetQuoteProvider: IOnChainQuoteProvider
+  chainId: ChainId
 }
 
 export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider {
   private readonly currentQuoteProvider: IOnChainQuoteProvider
   private readonly targetQuoteProvider: IOnChainQuoteProvider
+  private readonly chainId: ChainId
 
-  protected readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchExactInPercentage > this.getRandomPercentage()
-  protected readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingExactInPercentage > this.getRandomPercentage()
-  protected readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.switchExactOutPercentage > this.getRandomPercentage()
-  protected readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = () =>
-    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION.samplingExactOutPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (chainId: ChainId) =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION(chainId).switchExactInPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (chainId: ChainId) =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION(chainId).samplingExactInPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (chainId: ChainId) =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION(chainId).switchExactOutPercentage > this.getRandomPercentage()
+  protected readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (chainId: ChainId) =>
+    QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION(chainId).samplingExactOutPercentage > this.getRandomPercentage()
 
   private readonly EXACT_IN_METRIC = 'EXACT_IN'
   private readonly EXACT_OUT_METRIC = 'EXACT_OUT'
@@ -29,6 +31,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
   constructor(props: TrafficSwitchOnChainQuoteProviderProps) {
     this.currentQuoteProvider = props.currentQuoteProvider
     this.targetQuoteProvider = props.targetQuoteProvider
+    this.chainId = props.chainId
   }
 
   async getQuotesManyExactIn<TRoute extends V3Route | V2Route | MixedRoute>(
@@ -36,18 +39,26 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     routes: TRoute[],
     providerConfig?: ProviderConfig
   ): Promise<OnChainQuotes<TRoute>> {
-    const sampleTraffic = this.SHOULD_SAMPLE_EXACT_IN_TRAFFIC()
-    const switchTraffic = this.SHOULD_SWITCH_EXACT_IN_TRAFFIC()
+    const sampleTraffic = this.SHOULD_SAMPLE_EXACT_IN_TRAFFIC(this.chainId)
+    const switchTraffic = this.SHOULD_SWITCH_EXACT_IN_TRAFFIC(this.chainId)
 
     let [currentRoutesWithQuotes, targetRoutesWithQuotes]: [
       OnChainQuotes<TRoute> | undefined,
       OnChainQuotes<TRoute> | undefined
     ] = [undefined, undefined]
 
-    metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TOTAL`, 1, MetricLoggerUnit.None)
+    metric.putMetric(
+      `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TOTAL_CHAIN_ID_${this.chainId}`,
+      1,
+      MetricLoggerUnit.None
+    )
 
     if (sampleTraffic) {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_SAMPLING`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_SAMPLING_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
       const startTime = Date.now()
       let targetQuoteFailedError = undefined
 
@@ -55,7 +66,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         this.currentQuoteProvider.getQuotesManyExactIn(amountIns, routes, providerConfig).then((res) => {
           const endTime = Date.now()
           metric.putMetric(
-            `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_CURRENT_LATENCIES`,
+            `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_CURRENT_LATENCIES_CHAIN_ID_${this.chainId}`,
             endTime - startTime,
             MetricLoggerUnit.Milliseconds
           )
@@ -66,7 +77,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
           .then((res) => {
             const endTime = Date.now()
             metric.putMetric(
-              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_LATENCIES`,
+              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_LATENCIES_CHAIN_ID_${this.chainId}`,
               endTime - startTime,
               MetricLoggerUnit.Milliseconds
             )
@@ -84,7 +95,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         // but the new quoter threw error, and we swallowed exception here. This is the case worth tracking.
         log.error({ targetQuoteFailedError }, 'Target quoter failed to return quotes')
         metric.putMetric(
-          `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_FAILED`,
+          `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_FAILED_CHAIN_ID_${this.chainId}`,
           1,
           MetricLoggerUnit.None
         )
@@ -96,14 +107,22 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     }
 
     if (switchTraffic) {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
 
       return (
         targetRoutesWithQuotes ??
         (await this.targetQuoteProvider.getQuotesManyExactIn(amountIns, routes, providerConfig))
       )
     } else {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_CURRENT`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_CURRENT_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
 
       return (
         currentRoutesWithQuotes ??
@@ -117,17 +136,25 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     routes: TRoute[],
     providerConfig?: ProviderConfig
   ): Promise<OnChainQuotes<TRoute>> {
-    const sampleTraffic = this.SHOULD_SWITCH_EXACT_OUT_TRAFFIC()
-    const switchTraffic = this.SHOULD_SAMPLE_EXACT_OUT_TRAFFIC()
+    const sampleTraffic = this.SHOULD_SWITCH_EXACT_OUT_TRAFFIC(this.chainId)
+    const switchTraffic = this.SHOULD_SAMPLE_EXACT_OUT_TRAFFIC(this.chainId)
 
     let [currentRoutesWithQuotes, targetRoutesWithQuotes]: [
       OnChainQuotes<TRoute> | undefined,
       OnChainQuotes<TRoute> | undefined
     ] = [undefined, undefined]
-    metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TOTAL`, 1, MetricLoggerUnit.None)
+    metric.putMetric(
+      `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TOTAL_CHAIN_ID_${this.chainId}`,
+      1,
+      MetricLoggerUnit.None
+    )
 
     if (sampleTraffic) {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_SAMPLING`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_SAMPLING_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
       const startTime = Date.now()
       let targetQuoteFailedError = undefined
 
@@ -135,7 +162,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         await this.currentQuoteProvider.getQuotesManyExactOut(amountOuts, routes, providerConfig).then((res) => {
           const endTime = Date.now()
           metric.putMetric(
-            `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_CURRENT_LATENCIES`,
+            `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_CURRENT_LATENCIES_CHAIN_ID_${this.chainId}`,
             endTime - startTime,
             MetricLoggerUnit.Milliseconds
           )
@@ -146,7 +173,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
           .then((res) => {
             const endTime = Date.now()
             metric.putMetric(
-              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET_LATENCIES`,
+              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET_LATENCIES_CHAIN_ID_${this.chainId}`,
               endTime - startTime,
               MetricLoggerUnit.Milliseconds
             )
@@ -164,7 +191,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         // but the new quoter threw error, and we swallowed exception here. This is the case worth tracking.
         log.error({ targetQuoteFailedError }, 'Target quoter failed to return quotes')
         metric.putMetric(
-          `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET_FAILED`,
+          `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET_FAILED_CHAIN_ID_${this.chainId}`,
           1,
           MetricLoggerUnit.None
         )
@@ -176,14 +203,22 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     }
 
     if (switchTraffic) {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_TARGET_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
 
       return (
         targetRoutesWithQuotes ??
         (await this.targetQuoteProvider.getQuotesManyExactOut(amountOuts, routes, providerConfig))
       )
     } else {
-      metric.putMetric(`ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_CURRENT`, 1, MetricLoggerUnit.None)
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_OUT_METRIC}_TRAFFIC_CURRENT_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
+      )
 
       return (
         currentRoutesWithQuotes ??
@@ -206,7 +241,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         'Current and target quote providers returned different number of routes with quotes'
       )
       metric.putMetric(
-        `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_ROUTES_WITH_QUOTES_MISMATCH`,
+        `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_ROUTES_WITH_QUOTES_MISMATCH_CHAIN_ID_${this.chainId}`,
         1,
         MetricLoggerUnit.None
       )
@@ -232,7 +267,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
             'Current and target quote providers returned different number of quotes'
           )
           metric.putMetric(
-            `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH`,
+            `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${this.chainId}`,
             1,
             MetricLoggerUnit.None
           )
@@ -255,7 +290,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
               'Current and target quote providers returned different quotes'
             )
             metric.putMetric(
-              `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH`,
+              `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${this.chainId}`,
               1,
               MetricLoggerUnit.None
             )

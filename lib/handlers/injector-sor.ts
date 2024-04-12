@@ -307,6 +307,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               quoteProvider = new TrafficSwitchOnChainQuoteProvider({
                 currentQuoteProvider: currentQuoteProvider,
                 targetQuoteProvider: targetQuoteProvider,
+                chainId: chainId,
               })
               break
             case ChainId.BASE:
