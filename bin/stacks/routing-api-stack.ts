@@ -19,7 +19,7 @@ import { RoutingDatabaseStack } from './routing-database-stack'
 import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
 import { TESTNETS } from '../../lib/util/testNets'
-import { getRpcGatewayEnabledChainIds } from '../../lib/rpc/ProdConfig'
+import { getRpcGatewayEnabledChainIds, getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
@@ -511,49 +511,45 @@ export class RoutingAPIStack extends cdk.Stack {
 
     // const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
     const rpcGatewayLatencyAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
-    getRpcGatewayEnabledChainIds().forEach((chainId: ChainId) => {
-
-      SUPPORTED_CHAINS.forEach((chainId) => {
-        if (CHAINS_NOT_MONITORED.includes(chainId)) {
-          return
-        }
-        const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+    for (const [chainId, providerNames] of rpcGatewayLatencyAlarmPerChainIdAndProvider) {
+      for (const providerName of providerNames) {
+        const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
         const metric = new MathExpression({
           expression: '100*(response200/(invocations-response400))',
           usingMetrics: {
-            invocations: new aws_cloudwatch.Metric({
+            successCalls: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
+              statistic: 'sum'
             }),
             response400: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
+              statistic: 'sum'
             }),
             response200: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-          },
+              statistic: 'sum'
+            })
+          }
         })
         const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
           alarmName,
           metric,
           comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
           threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-          evaluationPeriods: 2,
+          evaluationPeriods: 2
         })
         successRateByRequestSourceAndChainIdAlarm.push(alarm)
-      })
-    })
+      }
+    }
 
     // const metric = new MathExpression({
     //   expression: '100*(response200/(invocations-response400))',
