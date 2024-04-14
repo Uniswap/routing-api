@@ -1,7 +1,7 @@
 import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
 import { ChainId } from '@uniswap/sdk-core'
-import { CfnOutput, Duration } from 'aws-cdk-lib'
+import { aws_lambda, CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -509,73 +509,81 @@ export class RoutingAPIStack extends cdk.Stack {
       })
     })
 
-    // const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    const rpcGatewayLatencyAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
-    for (const [chainId, providerNames] of rpcGatewayLatencyAlarmPerChainIdAndProvider) {
-      for (const providerName of providerNames) {
-        const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
-        const metric = new MathExpression({
-          expression: '100*(response200/(invocations-response400))',
-          usingMetrics: {
-            successCalls: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum'
-            }),
-            response400: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum'
-            }),
-            response200: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum'
-            })
-          }
-        })
-        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-          alarmName,
-          metric,
-          comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-          threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-          evaluationPeriods: 2
-        })
-        successRateByRequestSourceAndChainIdAlarm.push(alarm)
-      }
-    }
+    // TODO(jie): Enable these ErrorRate alarms
+    // const rpcGatewayErrorRateAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
+    // for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
+    //   for (const providerName of providerNames) {
+    //     const alarmName = `RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-${chainId}-Provider-${providerName}`
+    //     const metric = new MathExpression({
+    //       expression: '100*(callFails/(callSuccesses+callFails))',
+    //       usingMetrics: {
+    //         callSuccesses: new aws_cloudwatch.Metric({
+    //           namespace: 'Uniswap',
+    //           metricName: `RPC_GATEWAY_${chainId}_${providerName}_SUCCESS`,
+    //           dimensionsMap: { Service: 'RoutingAPI' },
+    //           unit: aws_cloudwatch.Unit.COUNT,
+    //           statistic: 'sum'
+    //         }),
+    //         callFails: new aws_cloudwatch.Metric({
+    //           namespace: 'Uniswap',
+    //           metricName: `RPC_GATEWAY_${chainId}_${providerName}_FAILED`,
+    //           dimensionsMap: { Service: 'RoutingAPI' },
+    //           unit: aws_cloudwatch.Unit.COUNT,
+    //           statistic: 'sum'
+    //         }),
+    //       }
+    //     })
+    //     const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+    //       alarmName,
+    //       metric,
+    //       comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    //       threshold: 50, // This is alarm will trigger if error rate >= 50%
+    //       evaluationPeriods: 2
+    //     })
+    //     rpcGatewayErrorRateAlarmPerChainIdAndProvider.push(alarm)
+    //   }
+    // }
 
-    // const metric = new MathExpression({
-    //   expression: '100*(response200/(invocations-response400))',
-    //   usingMetrics: {
-    //     invocations: new aws_cloudwatch.Metric({
-    //       namespace: 'Uniswap',
-    //       metricName: `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-    //       dimensionsMap: { Service: 'RoutingAPI' },
-    //       unit: aws_cloudwatch.Unit.COUNT,
-    //       statistic: 'sum',
-    //     }),
-    //     response400: new aws_cloudwatch.Metric({
-    //       namespace: 'Uniswap',
-    //       metricName: `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-    //       dimensionsMap: { Service: 'RoutingAPI' },
-    //       unit: aws_cloudwatch.Unit.COUNT,
-    //       statistic: 'sum',
-    //     }),
-    //     response200: new aws_cloudwatch.Metric({
-    //       namespace: 'Uniswap',
-    //       metricName: `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-    //       dimensionsMap: { Service: 'RoutingAPI' },
-    //       unit: aws_cloudwatch.Unit.COUNT,
-    //       statistic: 'sum',
-    //     }),
-    //   },
+    // TODO(jie): Figure out how to write latency alarms
+    // const rpcGatewayLatencyAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
+    // for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
+    //   for (const providerName of providerNames) {
+    //     const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
+    //     const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+    //       alarmName,
+    //       metric: api.metricLatency({
+    //         period: Duration.minutes(5),
+    //         statistic: 'p90',
+    //       }),
+    //       threshold: 3500,
+    //       evaluationPeriods: 3,
+    //     })
+    //     const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+    //       `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
+    //       metric,
+    //       comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    //       threshold: 50, // This is alarm will trigger if fail rate >= 50%
+    //       evaluationPeriods: 2
+    //     })
+    //     rpcGatewayErrorRateAlarmPerChainIdAndProvider.push(alarm)
+    //   }
+    // }
+
+    // TODO(jie): Remove this test alarm after testing it
+    // const jieTestAlarmFromCode = new aws_cloudwatch.Alarm(this, 'JieTestAlarmFromCode', {
+    //   alarmName: 'JieTestAlarmFromCode',
+    //   metric: 'RPC_GATEWAY_GET_QUOTE_REQUESTED_CHAINID: 42220',
+    //   namespace: 'Uniswap',
+    //   statistic: 'sum',
+    //   dimensionsMap: { Service: 'RoutingAPI' },
+    //   evaluationPeriods: 1,
+    //   threshold: 3,
+    //   period: 60,
+    //   comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+    // })
+    // TODO(jie): Add LambdaAction to this alarm
+    // jieTestAlarmFromCode.addAlarmAction(new aws_cloudwatch_actions.LambdaAction())
+
 
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
