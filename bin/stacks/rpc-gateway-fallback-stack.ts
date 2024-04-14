@@ -11,7 +11,6 @@ export interface RpcGatewayFallbackStackProps extends cdk.NestedStackProps {
 }
 
 export class RpcGatewayFallbackStack extends cdk.NestedStack {
-
   constructor(scope: Construct, name: string, props?: RpcGatewayFallbackStackProps) {
     super(scope, name, props)
 
