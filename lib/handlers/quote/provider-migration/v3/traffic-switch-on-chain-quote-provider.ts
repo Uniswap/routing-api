@@ -288,7 +288,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         const currentQuote = currentQuotes[j]
         const targetQuote = targetQuotes[j]
 
-        if (!currentQuote.quote?.eq(targetQuote.quote ?? BigNumber.from(0))) {
+        if (!(currentQuote.quote ?? BigNumber.from(0)).eq(targetQuote.quote ?? BigNumber.from(0))) {
           log.error(
             {
               currentQuote: currentQuote.quote,
