@@ -3,7 +3,7 @@ import { DynamoDBCachingV3PoolProvider } from '../../../../../../lib/handlers/po
 import { getMockedV3PoolProvider, TEST_ROUTE_TABLE } from '../../../../../test-utils/mocked-dependencies'
 import { CachingV3PoolProvider, MetricLoggerUnit, NodeJSCache } from '@uniswap/smart-order-router'
 import NodeCache from 'node-cache'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 import { ChainId, Token } from '@uniswap/sdk-core'
 import { encodeSqrtRatioX96, FeeAmount, Pool } from '@uniswap/v3-sdk'
 import {
@@ -23,7 +23,16 @@ import {
 
 describe('TrafficSwitchV3PoolProvider', async () => {
   setupTables(TEST_ROUTE_TABLE)
-  const spy = sinon.spy(metric, 'putMetric')
+
+  let spy: SinonSpy
+
+  beforeEach(() => {
+    spy = sinon.spy(metric, 'putMetric')
+  })
+
+  afterEach(() => {
+    spy.restore()
+  })
 
   it('switch traffic and sample pools with accurate pricing and liquidity', async () => {
     spy.withArgs('V3_POOL_PROVIDER_POOL_CURRENT_QUOTE_MATCH', 1, MetricLoggerUnit.None)
