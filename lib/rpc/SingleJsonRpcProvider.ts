@@ -230,14 +230,16 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     const method = perf.methodName
     this.log.debug(`${this.providerId}: checkLastCallPerformance: method: ${method}`)
     if (!perf.succeed) {
+      metric.putMetric(`${this.metricPrefix}_FAILED`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
       this.recordError(perf)
     } else {
+      metric.putMetric(`${this.metricPrefix}_SUCCESS`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
       if (perf.latencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
         metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS_HIGH_LATENCY`, 1, MetricLoggerUnit.Count)
         this.recordHighLatency(perf)
       } else {
-        metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
         this.log.debug(`${this.url} method: ${method} succeeded`)
         this.recordProviderCallSuccess(perf, perf.startTimestampInMs - this.lastCallTimestampInMs)
       }
