@@ -282,6 +282,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           switch (chainId) {
             case ChainId.SEPOLIA:
             case ChainId.POLYGON_MUMBAI:
+            case ChainId.MAINNET:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
@@ -290,7 +291,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BATCH_PARAMS[chainId],
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId]
+                BLOCK_NUMBER_CONFIGS[chainId],
+                '' // metric prefix is empty for current provider
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
