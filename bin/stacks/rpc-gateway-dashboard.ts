@@ -7,27 +7,17 @@ import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/
 import { MAJOR_METHOD_NAMES } from '../../lib/rpc/SingleJsonRpcProvider'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { TESTNETS } from '../../lib/util/testNets'
+import { getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
 
-// TODO: Update this map as we launch more chains on RPC gateway
-const providerNameForChain: Map<ChainId, string[]> = new Map([
-  [ChainId.AVALANCHE, ['INFURA', 'QUIKNODE', 'NIRVANA']],
-  [ChainId.OPTIMISM, ['INFURA', 'QUIKNODE', 'NIRVANA', 'ALCHEMY']],
-  [ChainId.CELO, ['INFURA', 'QUIKNODE']],
-  [ChainId.BNB, ['QUIKNODE']],
-  [ChainId.POLYGON, ['INFURA', 'QUIKNODE', 'ALCHEMY']],
-  [ChainId.BASE, ['QUIKNODE', 'ALCHEMY', 'NIRVANA']],
-  [ChainId.SEPOLIA, ['INFURA', 'ALCHEMY']],
-  [ChainId.ARBITRUM_ONE, ['INFURA', 'QUIKNODE', 'ALCHEMY', 'NIRVANA']],
-  [ChainId.MAINNET, ['INFURA', 'QUIKNODE', 'NIRVANA', 'ALCHEMY']],
-  [ChainId.BLAST, ['QUIKNODE', 'INFURA']],
-])
+const providerNameForChain: Map<ChainId, string[]> = getRpcGatewayEnabledChains()
 
 function getProviderNameForChain(chainId: ChainId): string[] {
-  if (providerNameForChain.has(chainId)) {
-    return providerNameForChain.get(chainId)!
-  } else {
-    return ['INFURA']
+  if (!providerNameForChain.has(chainId)) {
+    return []
   }
+  const providerNames = providerNameForChain.get(chainId)!
+  // Due to historical reason, we used 'QUIKNODE' rather than 'QUICKNODE' for metric names.
+  return providerNames.map((name) => (name === 'QUICKNODE' ? 'QUIKNODE' : name))
 }
 
 function getSelectMetricsForChain(chainId: ChainId) {
