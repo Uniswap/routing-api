@@ -32,7 +32,7 @@ export const ProdConfigJoi = Joi.array().items(
 
 // Return a map of chain id and its provider names
 export function getRpcGatewayEnabledChains(config?: object): Map<ChainId, string[]> {
-  const prodConfigInput = config !== undefined ? config : PROD_CONFIG
+  const prodConfigInput = config ?? PROD_CONFIG
   const validation = ProdConfigJoi.validate(prodConfigInput)
   if (validation.error) {
     throw new Error(`ProdConfig failed data validation: Value: ${prodConfigInput}, Error: ${validation.error.message}`)
@@ -43,6 +43,7 @@ export function getRpcGatewayEnabledChains(config?: object): Map<ChainId, string
     if (chainConfig.providerUrls) {
       result.set(
         chainConfig.chainId,
+        // Extract the provider name. For example, from "INFURA_8453" to "INFURA"
         chainConfig.providerUrls.map((url: string) => url.substring(0, url.indexOf('_')))
       )
     }
