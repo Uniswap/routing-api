@@ -1,49 +1,51 @@
 import * as cdk from 'aws-cdk-lib'
-import { aws_cloudwatch, aws_cloudwatch_actions, aws_lambda, aws_lambda_nodejs } from 'aws-cdk-lib'
+import { aws_cloudwatch, aws_cloudwatch_actions, aws_iam, aws_lambda, aws_lambda_nodejs } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-// import * as aws_iam from 'aws-cdk-lib/aws-iam'
 import path from 'path'
 import { getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
 import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
-
-export interface RpcGatewayFallbackStackProps extends cdk.NestedStackProps {
-  // TODO(jie): Will put DB used here
-}
+import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export class RpcGatewayFallbackStack extends cdk.NestedStack {
-  constructor(scope: Construct, name: string, props?: RpcGatewayFallbackStackProps) {
+  constructor(scope: Construct, name: string, props?: cdk.NestedStackProps) {
     super(scope, name, props)
 
-    // const lambdaRole = new aws_iam.Role(this, 'ProviderFallbackLambdaRole', {
-    //   assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
-    //   managedPolicies: [
-    //     aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
-    //     aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaRole'),
-    //     aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLambdaInsightsExecutionRolePolicy'),
-    //     aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
-    //   ],
-    // })
-    // TODO(jie): Make the DB you use grantReadWriteData to providerFallbackLambdaRole
+    const lambdaRole = new aws_iam.Role(this, 'ProviderFallbackLambdaRole', {
+      assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaRole'),
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLambdaInsightsExecutionRolePolicy'),
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
+      ],
+    })
 
-    // const region = cdk.Stack.of(this).region
+    const region = cdk.Stack.of(this).region
 
     const providerFallbackLambda = new aws_lambda_nodejs.NodejsFunction(this, 'ProviderFallbackLambda', {
-      // role: lambdaRole,
+      role: lambdaRole,
       runtime: aws_lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, '../../lib/rpc/fallbackHandler.ts'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(5),
+      memorySize: 1024,
       description: 'Provider Fallback Lambda',
-      // TODO(jie): Add other properties
       bundling: {
         minify: true,
         sourceMap: true,
       },
-      awsSdkConnectionReuse: true,
+      layers: [
+        aws_lambda.LayerVersion.fromLayerVersionArn(
+          this,
+          'InsightsLayer',
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
+        ),
+      ],
+      tracing: aws_lambda.Tracing.ACTIVE,
+      logRetention: RetentionDays.TWO_WEEKS,
     })
 
     // TODO(jie): Enable these ErrorRate alarms
-    // const rpcGatewayErrorRateAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
     for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
       for (const providerName of providerNames) {
         const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName
@@ -90,18 +92,18 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
           evaluationPeriods: 1,
         })
 
-        const lambdaAliasName = `Fallback-${chainId}-${providerNameFix}`
+        const lambdaAliasName = `ErrorRate-${chainId}-${providerNameFix}`
         const lambdaAlias = new aws_lambda.Alias(this, lambdaAliasName, {
           aliasName: lambdaAliasName,
           version: providerFallbackLambda.currentVersion,
         })
 
-        const lambdaAction = new aws_cloudwatch_actions.LambdaAction(lambdaAlias)
-        alarm.addAlarmAction(lambdaAction)
+        alarm.addAlarmAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
       }
     }
 
     // TODO(jie): Figure out how to write latency alarms
+    // TODO(jie): Connect lambda call and alarm action
     // const rpcGatewayLatencyAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
     // for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
     //   for (const providerName of providerNames) {
