@@ -292,7 +292,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
-                '' // metric prefix is empty for current provider
+                `ChainId_${chainId}_Quoter`
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,

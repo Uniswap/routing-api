@@ -59,7 +59,6 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         1,
         MetricLoggerUnit.None
       )
-      const startTime = Date.now()
       let currentQuoterSucceeded = false
       let targetQuoterSuceeded = false
 
@@ -67,22 +66,10 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         ;[currentRoutesWithQuotes, targetRoutesWithQuotes] = await Promise.all([
           this.currentQuoteProvider.getQuotesManyExactIn(amountIns, routes, providerConfig).then((res) => {
             currentQuoterSucceeded = true
-            const endTime = Date.now()
-            metric.putMetric(
-              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_CURRENT_LATENCIES_CHAIN_ID_${this.chainId}`,
-              endTime - startTime,
-              MetricLoggerUnit.Milliseconds
-            )
             return res
           }),
           this.targetQuoteProvider.getQuotesManyExactIn(amountIns, routes, providerConfig).then((res) => {
             targetQuoterSuceeded = true
-            const endTime = Date.now()
-            metric.putMetric(
-              `ON_CHAIN_QUOTE_PROVIDER_${this.EXACT_IN_METRIC}_TRAFFIC_TARGET_LATENCIES_CHAIN_ID_${this.chainId}`,
-              endTime - startTime,
-              MetricLoggerUnit.Milliseconds
-            )
             return res
           }),
         ])
