@@ -10,12 +10,9 @@ export class FallbackHandler {
       // TODO implement
       const response = {
         statusCode: 200,
-        body: JSON.stringify('Jiejie received alarm!!'),
+        body: JSON.stringify('Received alarm!!'),
       }
-      console.log(`jiejie: received alarm!`)
-      console.log(`jiejie: event looks like this`)
-      console.log(`${JSON.stringify(event)}`)
-      this.log.debug(event, `jiejie used bunyan logger in handler`)
+      this.log.debug(event, 'received event object')
       return response
     }
   }
