@@ -35,7 +35,8 @@ import {
   TokenValidatorProvider,
   ITokenPropertiesProvider,
   IOnChainQuoteProvider,
-  NEW_QUOTER_V2_ADDRESSES, QUOTER_V2_ADDRESSES
+  NEW_QUOTER_V2_ADDRESSES,
+  QUOTER_V2_ADDRESSES,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
