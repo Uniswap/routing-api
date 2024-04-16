@@ -25,8 +25,8 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
     const providerFallbackLambda = new aws_lambda_nodejs.NodejsFunction(this, 'ProviderFallbackLambda', {
       role: lambdaRole,
       runtime: aws_lambda.Runtime.NODEJS_18_X,
-      entry: path.join(__dirname, '../../lib/rpc/fallbackHandler.ts'),
-      handler: 'handler',
+      entry: path.join(__dirname, '../../lib/rpc/handler/index.ts'),
+      handler: 'fallbackHandler',
       timeout: cdk.Duration.seconds(5),
       memorySize: 1024,
       description: 'Provider Fallback Lambda',
@@ -42,7 +42,11 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
-      logRetention: RetentionDays.TWO_WEEKS,
+      logRetention: RetentionDays.ONE_MONTH,
+
+      environment: {
+
+      }
     })
 
     // TODO(jie): Enable these ErrorRate alarms
@@ -88,7 +92,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
           alarmName,
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-          threshold: 5, // This is alarm will trigger if error rate >= 50%
+          threshold: 150,
           evaluationPeriods: 1,
         })
 
