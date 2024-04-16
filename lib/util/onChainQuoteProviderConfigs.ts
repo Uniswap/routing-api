@@ -10,6 +10,7 @@ import {
   DEFAULT_RETRY_OPTIONS,
   DEFAULT_SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '@uniswap/smart-order-router/build/main/util/onchainQuoteProviderConfigs'
+import { ChainId } from '@uniswap/sdk-core'
 
 export const RETRY_OPTIONS = {
   ...constructSameRetryOptionsMap(DEFAULT_RETRY_OPTIONS),
@@ -29,4 +30,8 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES = {
 
 export const BLOCK_NUMBER_CONFIGS = {
   ...constructSameBlockNumberConfigsMap(DEFAULT_BLOCK_NUMBER_CONFIGS),
+}
+
+export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId: number]: number } = {
+  [ChainId.MAINNET]: 19662663,
 }
