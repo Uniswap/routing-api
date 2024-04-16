@@ -35,7 +35,7 @@ import {
   TokenValidatorProvider,
   ITokenPropertiesProvider,
   IOnChainQuoteProvider,
-  NEW_QUOTER_V2_ADDRESSES,
+  NEW_QUOTER_V2_ADDRESSES, QUOTER_V2_ADDRESSES
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -292,6 +292,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
+                QUOTER_V2_ADDRESSES[chainId],
                 `ChainId_${chainId}_Quoter`
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
