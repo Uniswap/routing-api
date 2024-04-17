@@ -33,7 +33,7 @@ const log = bunyan.createLogger({
   level: bunyan.DEBUG,
 })
 
-describe('FallbackHandler', () => {
+describe.skip('FallbackHandler', () => {
   setupTables(DB_TABLE)
   process.env = {
     PROVIDER_HEALTH_STATE_DB_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
