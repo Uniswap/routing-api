@@ -5,15 +5,14 @@ import { default as bunyan, default as Logger } from 'bunyan'
 const log: Logger = bunyan.createLogger({
   name: 'Root',
   serializers: bunyan.stdSerializers,
-  // TODO(jie): Change to ERROR
-  level: bunyan.DEBUG,
+  level: bunyan.ERROR,
 })
 
 let fallbackHandler: FallbackHandler
 try {
   fallbackHandler = new FallbackHandler(log)
 } catch (error) {
-  log.fatal({ error }, 'Fatal error')
+  log.fatal({ error }, 'Unable to construct FallbackHandler')
   throw error
 }
 

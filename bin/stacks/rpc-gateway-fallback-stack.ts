@@ -58,6 +58,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       },
     })
 
+    // Add error rate alarms for each {chainId, provider} pair.
     for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
       for (const providerName of providerNames) {
         const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName
@@ -104,6 +105,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       }
     }
 
+    // Add latency alarms for each {chainId, provider} pair.
     for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
       for (const providerName of providerNames) {
         const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName

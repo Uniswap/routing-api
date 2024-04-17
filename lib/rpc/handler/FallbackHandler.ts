@@ -30,8 +30,8 @@ export class FallbackHandler {
   get handler() {
     return async (event: object) => {
       const alarmEvent = this.readAlarmEvent(event)
-      this.log.debug(event, 'Received event object')
-      this.log.debug(alarmEvent, 'Parsed alarmEvent')
+      this.log.debug({ event }, 'Received event object')
+      this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
       if (
         (alarmEvent.previousState === 'OK' || alarmEvent.previousState === 'INSUFFICIENT_DATA') &&
