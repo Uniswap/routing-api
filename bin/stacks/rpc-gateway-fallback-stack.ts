@@ -112,6 +112,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
         })
 
         alarm.addAlarmAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
+        alarm.addOkAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
       }
     }
 
