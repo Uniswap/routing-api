@@ -304,7 +304,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
               currentQuote: currentQuote,
               targetQuote: targetQuote,
             },
-            'Current and target quote providers returned different quotes'
+            `Current and target quote providers returned different quotes at block ${targetRoutesWithQuotes.blockNumber}`
           )
           metric.putMetric(
             `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${this.chainId}`,
