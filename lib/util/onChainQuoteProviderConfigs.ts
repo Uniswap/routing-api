@@ -43,7 +43,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.ARBITRUM_ONE]: -1,
   [ChainId.ARBITRUM_GOERLI]: -1,
   [ChainId.ARBITRUM_SEPOLIA]: -1,
-  [ChainId.POLYGON]: -1,
+  [ChainId.POLYGON]: 55938282,
   [ChainId.POLYGON_MUMBAI]: 48054046,
   [ChainId.CELO]: -1,
   [ChainId.CELO_ALFAJORES]: -1,
@@ -63,15 +63,15 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
 export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.MAINNET]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
   [ChainId.GOERLI]: 0,
-  [ChainId.SEPOLIA]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
+  [ChainId.SEPOLIA]: 17540 * 2, // 17540 is the single tick.cross cost on sepolia. We multiply by 2 to be safe.
   [ChainId.OPTIMISM]: 0,
   [ChainId.OPTIMISM_GOERLI]: 0,
   [ChainId.OPTIMISM_SEPOLIA]: 0,
   [ChainId.ARBITRUM_ONE]: 0,
   [ChainId.ARBITRUM_GOERLI]: 0,
   [ChainId.ARBITRUM_SEPOLIA]: 0,
-  [ChainId.POLYGON]: 0,
-  [ChainId.POLYGON_MUMBAI]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
+  [ChainId.POLYGON]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
+  [ChainId.POLYGON_MUMBAI]: 17540 * 2, // 17540 is the single tick.cross cost on polygon-mumbai. We multiply by 2 to be safe.
   [ChainId.CELO]: 0,
   [ChainId.CELO_ALFAJORES]: 0,
   [ChainId.GNOSIS]: 0,
