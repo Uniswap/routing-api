@@ -4,6 +4,7 @@ import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
 import { BigNumber } from 'ethers'
+import { NEW_QUOTER_DEPLOY_BLOCK } from '../../../../util/onChainQuoteProviderConfigs'
 
 export type TrafficSwitchOnChainQuoteProviderProps = {
   currentQuoteProvider: IOnChainQuoteProvider
@@ -215,6 +216,11 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     currentRoutesWithQuotes: OnChainQuotes<TRoute>,
     targetRoutesWithQuotes: OnChainQuotes<TRoute>
   ): void {
+    // If the quote comparison happens right on or before the quote deploy block, we skip the entire comparison
+    if (targetRoutesWithQuotes.blockNumber.lte(NEW_QUOTER_DEPLOY_BLOCK[this.chainId])) {
+      return
+    }
+
     if (!currentRoutesWithQuotes.blockNumber.eq(targetRoutesWithQuotes.blockNumber)) {
       log.error(
         {
@@ -222,6 +228,11 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
           targetQuoteRoutesBlockNumber: targetRoutesWithQuotes.blockNumber,
         },
         'Current and target quote providers returned different block numbers'
+      )
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_BLOCK_NUM_MISMATCH_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
       )
 
       return
