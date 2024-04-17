@@ -1,12 +1,14 @@
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
-import { MetricLoggerUnit, USDC_MAINNET, WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router'
+import { MetricLoggerUnit, RouteWithQuotes, USDC_MAINNET, WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router'
 import { TrafficSwitchOnChainQuoteProvider } from '../../../../../../lib/handlers/quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
 import { ChainId, CurrencyAmount } from '@uniswap/sdk-core'
 import { V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { USDC_WETH_LOW } from '../../../../../test-utils/mocked-data'
 import { getMockedOnChainQuoteProvider } from '../../../../../test-utils/mocked-dependencies'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { AmountQuote } from '@uniswap/smart-order-router/build/main/providers/on-chain-quote-provider'
+import { BigNumber } from 'ethers'
 
 describe('TrafficSwitchOnChainQuoteProvider', () => {
   const amountIns = [CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000')]
@@ -199,5 +201,65 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     // This is the case we will have to invoke currentQuoteProvider.getQuotesManyExactIn twice, because of the runtime error during sampling
     sinon.assert.calledTwice(currentQuoteProvider.getQuotesManyExactOut)
     sinon.assert.threw(targetQuoteProvider.getQuotesManyExactOut)
+  })
+
+  it('sample exact in quotes and current quoter out of gas for the quote', async () => {
+    spy.withArgs(
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      1,
+      MetricLoggerUnit.None
+    )
+    spy.withArgs(
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      1,
+      MetricLoggerUnit.None
+    )
+
+    const currentQuoteProvider = getMockedOnChainQuoteProvider()
+    const targetQuoteProvider = getMockedOnChainQuoteProvider()
+    const quotes: AmountQuote[] = [
+      {
+        amount: CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000'),
+        quote: BigNumber.from('1000000000000000000'),
+        sqrtPriceX96AfterList: [BigNumber.from(100)],
+        initializedTicksCrossedList: [1, 1, 1],
+        gasEstimate: BigNumber.from(999999),
+        gasLimit: BigNumber.from(1000000),
+      },
+    ]
+    const routesWithQuotes: RouteWithQuotes<V3Route>[] = [
+      [new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET), quotes],
+    ]
+
+    currentQuoteProvider.getQuotesManyExactIn.resolves({
+      routesWithQuotes: routesWithQuotes,
+      blockNumber: BigNumber.from(0),
+    })
+
+    const trafficSwitchProvider =
+      new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+      })({
+        currentQuoteProvider: currentQuoteProvider,
+        targetQuoteProvider: targetQuoteProvider,
+        chainId: ChainId.MAINNET,
+      })
+
+    await trafficSwitchProvider.getQuotesManyExactIn(amountIns, routes, providerConfig)
+
+    // We will check neither match nor mismatch metric was logged
+    sinon.assert.neverCalledWith(
+      spy,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      1,
+      MetricLoggerUnit.None
+    )
+    sinon.assert.neverCalledWith(
+      spy,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      1,
+      MetricLoggerUnit.None
+    )
+    sinon.assert.calledOnce(currentQuoteProvider.getQuotesManyExactIn)
   })
 })
