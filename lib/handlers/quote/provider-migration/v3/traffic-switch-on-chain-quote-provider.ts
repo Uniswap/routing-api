@@ -295,7 +295,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
             const gasLimit = currentQuote.gasLimit?.toNumber() ?? 0
 
             if (gasLimit - gasEstimate <= LIKELY_OUT_OF_GAS_THRESHOLD[this.chainId]) {
-              continue;
+              continue
             }
           }
 

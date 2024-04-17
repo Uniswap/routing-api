@@ -227,14 +227,14 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
         gasLimit: BigNumber.from(1000000),
       },
     ]
-    const routesWithQuotes: RouteWithQuotes<V3Route>[] = [[new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET), quotes]]
+    const routesWithQuotes: RouteWithQuotes<V3Route>[] = [
+      [new V3Route([USDC_WETH_LOW], WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], USDC_MAINNET), quotes],
+    ]
 
-    currentQuoteProvider.getQuotesManyExactIn.resolves(
-      {
-        routesWithQuotes: routesWithQuotes,
-        blockNumber: BigNumber.from(0),
-      }
-    )
+    currentQuoteProvider.getQuotesManyExactIn.resolves({
+      routesWithQuotes: routesWithQuotes,
+      blockNumber: BigNumber.from(0),
+    })
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
@@ -252,12 +252,14 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
       spy,
       `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}`,
       1,
-      MetricLoggerUnit.None)
+      MetricLoggerUnit.None
+    )
     sinon.assert.neverCalledWith(
       spy,
       `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}`,
       1,
-      MetricLoggerUnit.None)
+      MetricLoggerUnit.None
+    )
     sinon.assert.calledOnce(currentQuoteProvider.getQuotesManyExactIn)
   })
 })
