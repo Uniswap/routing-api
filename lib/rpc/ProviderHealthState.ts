@@ -1,5 +1,5 @@
 export enum ProviderHealthState {
-  HEALTHY ,
+  HEALTHY,
   UNHEALTHY,
   RECOVERED,
 }

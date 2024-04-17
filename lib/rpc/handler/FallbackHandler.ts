@@ -6,10 +6,10 @@ import { ProviderHealthStateDynamoDbRepository } from '../ProviderHealthStateDyn
 import { ProviderHealthState } from '../ProviderHealthState'
 
 interface AlarmEvent {
-  alarmName: string,
-  state: string,
-  providerId: string,
-  reason: string,
+  alarmName: string
+  state: string
+  providerId: string
+  reason: string
 }
 
 export class FallbackHandler {
@@ -26,7 +26,7 @@ export class FallbackHandler {
   }
 
   get handler() {
-    return async(event: object)=> {
+    return async (event: object) => {
       // TODO implement
       const alarmEvent = this.readAlarmEvent(event)
       this.log.debug(event, 'received event object')
