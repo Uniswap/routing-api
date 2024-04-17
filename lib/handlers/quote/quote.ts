@@ -33,6 +33,7 @@ import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
+import semver from 'semver'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -234,16 +235,15 @@ export class QuoteHandler extends APIGLambdaHandler<
     let protocols: Protocol[] = []
 
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(params.event.headers['x-request-source'] ?? params.requestQueryParams.source ?? '');
-    // const appVersion = params.event.headers['x-app-version'];
+    const appVersion = params.event.headers['x-app-version'];
+    // We will exclude V2 if isMobile and the appVersion is not present or is lower or equal than 1.24
+    const excludeV2 = isMobileRequest && (appVersion === undefined || semver.lte(appVersion, '1.24'))
 
     if (protocolsStr) {
       for (const protocolStr of protocolsStr) {
         switch (protocolStr.toUpperCase()) {
           case Protocol.V2:
-            if (
-              chainId === ChainId.MAINNET ||
-              !isMobileRequest
-            ) {
+            if (chainId === ChainId.MAINNET || !excludeV2) {
               protocols.push(Protocol.V2)
             }
             break
@@ -251,10 +251,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             protocols.push(Protocol.V3)
             break
           case Protocol.MIXED:
-            if (
-              chainId === ChainId.MAINNET ||
-              !isMobileRequest
-            ) {
+            if (chainId === ChainId.MAINNET || !excludeV2) {
               protocols.push(Protocol.MIXED)
             }
             break
