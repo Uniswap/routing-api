@@ -304,8 +304,6 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
             }
           }
 
-          if (currentQuote.gasEstimate?.toNumber() )
-
           log.error(
             {
               currentQuote: currentQuote.quote,
