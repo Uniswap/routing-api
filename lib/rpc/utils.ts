@@ -120,3 +120,7 @@ export function generateProviderUrl(key: string, value: string): string {
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
 }
+
+export function getProviderId(chainId: ChainId, providerName: string): string {
+  return `${chainId.toString()}_${providerName}`
+}
