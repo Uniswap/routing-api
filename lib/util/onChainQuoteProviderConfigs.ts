@@ -35,3 +35,7 @@ export const BLOCK_NUMBER_CONFIGS = {
 export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId: number]: number } = {
   [ChainId.MAINNET]: 19662663,
 }
+
+export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId: number]: number } = {
+  [ChainId.MAINNET]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
+}

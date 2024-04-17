@@ -4,7 +4,7 @@ import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
 import { BigNumber } from 'ethers'
-import { NEW_QUOTER_DEPLOY_BLOCK } from '../../../../util/onChainQuoteProviderConfigs'
+import { LIKELY_OUT_OF_GAS_THRESHOLD, NEW_QUOTER_DEPLOY_BLOCK } from '../../../../util/onChainQuoteProviderConfigs'
 
 export type TrafficSwitchOnChainQuoteProviderProps = {
   currentQuoteProvider: IOnChainQuoteProvider
@@ -287,6 +287,25 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         const targetQuote = targetQuotes[j]
 
         if (!(currentQuote.quote ?? BigNumber.from(0)).eq(targetQuote.quote ?? BigNumber.from(0))) {
+          if (!currentQuote.quote && targetQuote.quote) {
+            const gasEstimate = currentQuote.gasEstimate?.toNumber() ?? 0
+            const gasLimit = currentQuote.gasLimit?.toNumber() ?? 0
+
+            if (gasLimit - gasEstimate <= LIKELY_OUT_OF_GAS_THRESHOLD[this.chainId]) {
+              log.error(
+                {
+                  currentQuote: currentQuote,
+                  targetQuote: targetQuote,
+                },
+                'Current quote provider did not return a quote, but target quote provider did. ' +
+                'This is likely due to current quote provider hitting gas limit for some multicalls but still above the success rate threshold.'
+              )
+              continue;
+            }
+          }
+
+          if (currentQuote.gasEstimate?.toNumber() )
+
           log.error(
             {
               currentQuote: currentQuote.quote,
