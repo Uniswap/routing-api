@@ -58,58 +58,37 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       },
     })
 
-    // TODO(jie): Enable these ErrorRate alarms
     for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
       for (const providerName of providerNames) {
         const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName
         const alarmName = `RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-${chainId}-Provider-${providerNameFix}`
-        // TODO(jie): Use this for prod error rate alarm
-        // const metric = new MathExpression({
-        //   expression: '100*(callFails/(callSuccesses+callFails))',
-        //   usingMetrics: {
-        //     callSuccesses: new aws_cloudwatch.Metric({
-        //       namespace: 'Uniswap',
-        //       metricName: `RPC_GATEWAY_${chainId}_${providerNameFix}_SUCCESS`,
-        //       dimensionsMap: { Service: 'RoutingAPI' },
-        //       unit: aws_cloudwatch.Unit.COUNT,
-        //       statistic: 'sum'
-        //     }),
-        //     callFails: new aws_cloudwatch.Metric({
-        //       namespace: 'Uniswap',
-        //       metricName: `RPC_GATEWAY_${chainId}_${providerNameFix}_FAILED`,
-        //       dimensionsMap: { Service: 'RoutingAPI' },
-        //       unit: aws_cloudwatch.Unit.COUNT,
-        //       statistic: 'sum'
-        //     }),
-        //   }
-        // })
-        // const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        //   alarmName,
-        //   metric,
-        //   comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-        //   threshold: 150,
-        //   evaluationPeriods: 1,
-        // })
-
-        // TODO(jie): This is for test only. Should be removed after testing
         const metric = new MathExpression({
-          expression: 'callSuccesses',
+          expression: '100*(callFails/(callSuccesses+callFails))',
           usingMetrics: {
             callSuccesses: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `RPC_GATEWAY_${chainId}_${providerNameFix}_SUCCESS`,
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
+              period: cdk.Duration.minutes(5),
               statistic: 'sum',
-              period: cdk.Duration.seconds(30),
             }),
-          },
+            callFails: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `RPC_GATEWAY_${chainId}_${providerNameFix}_FAILED`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              period: cdk.Duration.minutes(5),
+              statistic: 'sum'
+            }),
+          }
         })
         const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
           alarmName,
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-          threshold: 150,
+          // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
+          threshold: 0.1,  // Alarm when error rate >= 0.1%
           evaluationPeriods: 1,
         })
 
@@ -125,30 +104,42 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       }
     }
 
-    // TODO(jie): Figure out how to write latency alarms
-    // TODO(jie): Connect lambda call and alarm action
-    // const rpcGatewayLatencyAlarmPerChainIdAndProvider: cdk.aws_cloudwatch.Alarm[] = []
-    // for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
-    //   for (const providerName of providerNames) {
-    //     const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
-    //     const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-    //       alarmName,
-    //       metric: api.metricLatency({
-    //         period: Duration.minutes(5),
-    //         statistic: 'p90',
-    //       }),
-    //       threshold: 3500,
-    //       evaluationPeriods: 3,
-    //     })
-    //     const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-    //       `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
-    //       metric,
-    //       comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-    //       threshold: 50, // This is alarm will trigger if fail rate >= 50%
-    //       evaluationPeriods: 2
-    //     })
-    //     rpcGatewayErrorRateAlarmPerChainIdAndProvider.push(alarm)
-    //   }
-    // }
+    for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
+      for (const providerName of providerNames) {
+        const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName
+        const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
+        const metric = new MathExpression({
+          expression: 'p50Latency',
+          usingMetrics: {
+            p50Latency: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `RPC_GATEWAY_${chainId}_${providerNameFix}_evaluated_latency_getBlockNumber`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.NONE,
+              period: cdk.Duration.minutes(5),
+              statistic: 'p50',
+            }),
+          }
+        })
+        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+          alarmName,
+          metric,
+          comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
+          threshold: 100,  // Alarm when latency >= 100ms
+          evaluationPeriods: 1,
+        })
+
+        const lambdaAliasName = `Latency-${chainId}-${providerNameFix}`
+        const lambdaAlias = new aws_lambda.Alias(this, lambdaAliasName, {
+          aliasName: lambdaAliasName,
+          version: providerFallbackLambda.currentVersion,
+        })
+
+        alarm.addAlarmAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
+        alarm.addOkAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
+        alarm.addInsufficientDataAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
+      }
+    }
   }
 }
