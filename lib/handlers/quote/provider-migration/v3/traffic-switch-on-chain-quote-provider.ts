@@ -287,6 +287,9 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         const targetQuote = targetQuotes[j]
 
         if (!(currentQuote.quote ?? BigNumber.from(0)).eq(targetQuote.quote ?? BigNumber.from(0))) {
+          // This is to deal with the case, where some quotes from the quoter multicalls failed,
+          // but still above the success rate threshold (https://github.com/Uniswap/smart-order-router/blob/main/src/providers/on-chain-quote-provider.ts#L496)
+          // so that the current quote failed, but the view-only quoter is more gas-efficient, and can return the quote.
           if (!currentQuote.quote && targetQuote.quote) {
             const gasEstimate = currentQuote.gasEstimate?.toNumber() ?? 0
             const gasLimit = currentQuote.gasLimit?.toNumber() ?? 0
