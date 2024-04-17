@@ -83,6 +83,14 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
         //     }),
         //   }
         // })
+        // const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        //   alarmName,
+        //   metric,
+        //   comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        //   threshold: 150,
+        //   evaluationPeriods: 1,
+        // })
+
         // TODO(jie): This is for test only. Should be removed after testing
         const metric = new MathExpression({
           expression: 'callSuccesses',
@@ -113,6 +121,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
 
         alarm.addAlarmAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
         alarm.addOkAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
+        alarm.addInsufficientDataAction(new aws_cloudwatch_actions.LambdaAction(lambdaAlias))
       }
     }
 
