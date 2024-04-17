@@ -79,16 +79,16 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
               period: cdk.Duration.minutes(5),
-              statistic: 'sum'
+              statistic: 'sum',
             }),
-          }
+          },
         })
         const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
           alarmName,
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
           // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
-          threshold: 0.1,  // Alarm when error rate >= 0.1%
+          threshold: 0.1, // Alarm when error rate >= 0.1%
           evaluationPeriods: 1,
         })
 
@@ -119,14 +119,14 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
               period: cdk.Duration.minutes(5),
               statistic: 'p50',
             }),
-          }
+          },
         })
         const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
           alarmName,
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
           // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
-          threshold: 100,  // Alarm when latency >= 100ms
+          threshold: 100, // Alarm when latency >= 100ms
           evaluationPeriods: 1,
         })
 
