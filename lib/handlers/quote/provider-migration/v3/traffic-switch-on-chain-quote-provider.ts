@@ -292,22 +292,14 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
             const gasLimit = currentQuote.gasLimit?.toNumber() ?? 0
 
             if (gasLimit - gasEstimate <= LIKELY_OUT_OF_GAS_THRESHOLD[this.chainId]) {
-              log.error(
-                {
-                  currentQuote: currentQuote,
-                  targetQuote: targetQuote,
-                },
-                'Current quote provider did not return a quote, but target quote provider did. ' +
-                'This is likely due to current quote provider hitting gas limit for some multicalls but still above the success rate threshold.'
-              )
               continue;
             }
           }
 
           log.error(
             {
-              currentQuote: currentQuote.quote,
-              targetQuote: targetQuote.quote,
+              currentQuote: currentQuote,
+              targetQuote: targetQuote,
             },
             'Current and target quote providers returned different quotes'
           )
