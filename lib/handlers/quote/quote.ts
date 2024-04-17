@@ -10,7 +10,7 @@ import {
   routeAmountsToString,
   SimulationStatus,
   SwapOptions,
-  SwapRoute,
+  SwapRoute
 } from '@uniswap/smart-order-router'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
@@ -22,7 +22,7 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   INTENT_SPECIFIC_CONFIG,
-  QUOTE_SPEED_CONFIG,
+  QUOTE_SPEED_CONFIG
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusToString } from './util/simulation'
@@ -232,24 +232,28 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     let protocols: Protocol[] = []
+
+    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(params.event.headers['x-request-source'] ?? params.requestQueryParams.source ?? '');
+    // const appVersion = params.event.headers['x-app-version'];
+
     if (protocolsStr) {
       for (const protocolStr of protocolsStr) {
-        switch (protocolStr.toLowerCase()) {
-          case 'v2':
+        switch (protocolStr.toUpperCase()) {
+          case Protocol.V2:
             if (
               chainId === ChainId.MAINNET ||
-              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+              !isMobileRequest
             ) {
               protocols.push(Protocol.V2)
             }
             break
-          case 'v3':
+          case Protocol.V3:
             protocols.push(Protocol.V3)
             break
-          case 'mixed':
+          case Protocol.MIXED:
             if (
               chainId === ChainId.MAINNET ||
-              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
+              !isMobileRequest
             ) {
               protocols.push(Protocol.MIXED)
             }
