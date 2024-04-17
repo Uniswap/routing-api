@@ -93,6 +93,7 @@ export class RoutingAPIStack extends cdk.Stack {
       cachedV2PairsDynamoDb,
       tokenPropertiesCachingDynamoDb,
       rpcProviderStateDynamoDb,
+      rpcProviderHealthStateDynamoDb,
     } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
@@ -231,7 +232,7 @@ export class RoutingAPIStack extends cdk.Stack {
     })
 
     new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack')
-    new RpcGatewayFallbackStack(this, 'RpcGatewayFallbackStack')
+    new RpcGatewayFallbackStack(this, 'RpcGatewayFallbackStack', { rpcProviderHealthStateDynamoDb })
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)
 

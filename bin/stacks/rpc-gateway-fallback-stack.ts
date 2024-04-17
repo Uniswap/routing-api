@@ -5,9 +5,15 @@ import path from 'path'
 import { getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
 import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
+import { DynamoDBTableProps } from './routing-database-stack'
+import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
+
+export interface RpcGatewayFallbackStackPros extends cdk.NestedStackProps {
+  rpcProviderHealthStateDynamoDb: aws_dynamodb.Table
+}
 
 export class RpcGatewayFallbackStack extends cdk.NestedStack {
-  constructor(scope: Construct, name: string, props?: cdk.NestedStackProps) {
+  constructor(scope: Construct, name: string, props: RpcGatewayFallbackStackPros) {
     super(scope, name, props)
 
     const lambdaRole = new aws_iam.Role(this, 'ProviderFallbackLambdaRole', {
@@ -19,6 +25,9 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
       ],
     })
+
+    const rpcHealthProviderStateDynamoDB = props.rpcProviderHealthStateDynamoDb
+    rpcHealthProviderStateDynamoDB.grantReadWriteData(lambdaRole)
 
     const region = cdk.Stack.of(this).region
 
@@ -45,8 +54,8 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       logRetention: RetentionDays.ONE_MONTH,
 
       environment: {
-
-      }
+        PROVIDER_HEALTH_STATE_DB_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
+      },
     })
 
     // TODO(jie): Enable these ErrorRate alarms

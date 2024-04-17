@@ -5,7 +5,7 @@ import { default as bunyan, default as Logger } from 'bunyan'
 const log: Logger = bunyan.createLogger({
   name: 'Root',
   serializers: bunyan.stdSerializers,
-  level: bunyan.DEBUG
+  level: bunyan.DEBUG,
 })
 
 let fallbackHandler: FallbackHandler
@@ -17,5 +17,5 @@ try {
 }
 
 module.exports = {
-  fallbackHandler: fallbackHandler.handler
+  fallbackHandler: fallbackHandler.handler,
 }

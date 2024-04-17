@@ -30,16 +30,13 @@ export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStat
     }
   }
 
-  async write(
-    providerId: string,
-    state: ProviderHealthState
-  ): Promise<void> {
+  async write(providerId: string, state: ProviderHealthState): Promise<void> {
     const putParams: DocumentClient.PutItemInput = {
       TableName: this.dbTableName,
       Item: {
         chainIdProviderName: providerId,
-        state: state
-      }
+        state: state,
+      },
     }
     await this.ddbClient.put(putParams).promise()
     return
