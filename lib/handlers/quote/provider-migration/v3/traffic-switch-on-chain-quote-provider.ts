@@ -4,6 +4,7 @@ import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
 import { BigNumber } from 'ethers'
+import { LIKELY_OUT_OF_GAS_THRESHOLD, NEW_QUOTER_DEPLOY_BLOCK } from '../../../../util/onChainQuoteProviderConfigs'
 
 export type TrafficSwitchOnChainQuoteProviderProps = {
   currentQuoteProvider: IOnChainQuoteProvider
@@ -215,6 +216,11 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     currentRoutesWithQuotes: OnChainQuotes<TRoute>,
     targetRoutesWithQuotes: OnChainQuotes<TRoute>
   ): void {
+    // If the quote comparison happens right on or before the quote deploy block, we skip the entire comparison
+    if (targetRoutesWithQuotes.blockNumber.lte(NEW_QUOTER_DEPLOY_BLOCK[this.chainId])) {
+      return
+    }
+
     if (!currentRoutesWithQuotes.blockNumber.eq(targetRoutesWithQuotes.blockNumber)) {
       log.error(
         {
@@ -222,6 +228,11 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
           targetQuoteRoutesBlockNumber: targetRoutesWithQuotes.blockNumber,
         },
         'Current and target quote providers returned different block numbers'
+      )
+      metric.putMetric(
+        `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_BLOCK_NUM_MISMATCH_CHAIN_ID_${this.chainId}`,
+        1,
+        MetricLoggerUnit.None
       )
 
       return
@@ -276,12 +287,24 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
         const targetQuote = targetQuotes[j]
 
         if (!(currentQuote.quote ?? BigNumber.from(0)).eq(targetQuote.quote ?? BigNumber.from(0))) {
+          // This is to deal with the case, where some quotes from the quoter multicalls failed,
+          // but still above the success rate threshold (https://github.com/Uniswap/smart-order-router/blob/main/src/providers/on-chain-quote-provider.ts#L496)
+          // so that the current quote failed, but the view-only quoter is more gas-efficient, and can return the quote.
+          if (!currentQuote.quote && targetQuote.quote) {
+            const gasEstimate = currentQuote.gasEstimate?.toNumber() ?? 0
+            const gasLimit = currentQuote.gasLimit?.toNumber() ?? 0
+
+            if (gasLimit - gasEstimate <= LIKELY_OUT_OF_GAS_THRESHOLD[this.chainId]) {
+              continue
+            }
+          }
+
           log.error(
             {
-              currentQuote: currentQuote.quote,
-              targetQuote: targetQuote.quote,
+              currentQuote: currentQuote,
+              targetQuote: targetQuote,
             },
-            'Current and target quote providers returned different quotes'
+            `Current and target quote providers returned different quotes at block ${targetRoutesWithQuotes.blockNumber}`
           )
           metric.putMetric(
             `ON_CHAIN_QUOTE_PROVIDER_${tradeTypeMetric}_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${this.chainId}`,

@@ -44,7 +44,8 @@ export function getMockedOnChainQuoteProvider(): sinon.SinonStubbedInstance<OnCh
       quote: BigNumber.from('1000000000000000000'),
       sqrtPriceX96AfterList: [BigNumber.from(100)],
       initializedTicksCrossedList: [1, 1, 1],
-      gasEstimate: BigNumber.from(100),
+      gasEstimate: BigNumber.from(10000),
+      gasLimit: BigNumber.from(1000000),
     },
   ]
   const routesWithQuotes: RouteWithQuotes<V3Route>[] = [[route, quotes]]
