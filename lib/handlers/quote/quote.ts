@@ -634,7 +634,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
     // We will exclude V2 if isMobile and the appVersion is not present or is lower or equal than 1.24
     const semverAppVersion = semver.coerce(appVersion)
-    const fixVersion = semver.coerce('1.25')!
+    const fixVersion = semver.coerce('1.24')!
     const excludeV2 = isMobileRequest && (semverAppVersion === null || semver.lt(semverAppVersion, fixVersion))
 
     if (requestedProtocols) {
