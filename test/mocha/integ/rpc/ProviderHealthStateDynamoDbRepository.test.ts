@@ -42,8 +42,11 @@ describe('ProviderHealthStateDynamoDbRepository', () => {
   )
 
   it('write state to DB then read from it', async () => {
-    await storage.write(PROVIDER_ID, ProviderHealthState.HEALTHY)
     let readState: ProviderHealthState | null = await storage.read(PROVIDER_ID)
+    expect(readState).to.be.null
+
+    await storage.write(PROVIDER_ID, ProviderHealthState.HEALTHY)
+    readState = await storage.read(PROVIDER_ID)
     expect(readState).equals(ProviderHealthState.HEALTHY)
 
     await storage.write(PROVIDER_ID, ProviderHealthState.UNHEALTHY)
