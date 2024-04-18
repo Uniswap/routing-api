@@ -26,6 +26,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.OPTIMISM]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -40,6 +45,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 15_000_000,
     quoteMinSuccessRate: 0.15,
   },
+  [ChainId.OPTIMISM]: {
+    multicallChunk: 110,
+    gasLimitPerCall: 1_200_000,
+    quoteMinSuccessRate: 0.1,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -52,6 +62,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 30_000_000,
     multicallChunk: 8,
   },
+  [ChainId.OPTIMISM]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -63,6 +77,10 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   [ChainId.ARBITRUM_ONE]: {
     gasLimitOverride: 30_000_000,
     multicallChunk: 8,
+  },
+  [ChainId.OPTIMISM]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
   },
 }
 
@@ -84,6 +102,14 @@ export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
       rollbackBlockOffset: -10,
     },
   },
+  [ChainId.OPTIMISM]: {
+    baseBlockOffset: -25,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -20,
+    },
+  },
 }
 
 // block -1 means it's never deployed
@@ -91,7 +117,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.MAINNET]: 19662663,
   [ChainId.GOERLI]: -1,
   [ChainId.SEPOLIA]: 5677582,
-  [ChainId.OPTIMISM]: -1,
+  [ChainId.OPTIMISM]: 118909709,
   [ChainId.OPTIMISM_GOERLI]: -1,
   [ChainId.OPTIMISM_SEPOLIA]: -1,
   [ChainId.ARBITRUM_ONE]: 202182926,
