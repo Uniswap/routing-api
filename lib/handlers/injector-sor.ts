@@ -285,6 +285,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.POLYGON_MUMBAI:
             case ChainId.MAINNET:
             case ChainId.POLYGON:
+            case ChainId.BASE:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
@@ -315,7 +316,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 chainId: chainId,
               })
               break
-            case ChainId.BASE:
             case ChainId.OPTIMISM:
               quoteProvider = new OnChainQuoteProvider(
                 chainId,

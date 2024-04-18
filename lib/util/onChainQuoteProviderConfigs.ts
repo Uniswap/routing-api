@@ -11,25 +11,53 @@ import {
   DEFAULT_SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '@uniswap/smart-order-router/build/main/util/onchainQuoteProviderConfigs'
 import { ChainId } from '@uniswap/sdk-core'
+import AsyncRetry from 'async-retry'
+import { BatchParams, BlockNumberConfig, FailureOverrides } from '@uniswap/smart-order-router'
 
-export const RETRY_OPTIONS = {
+export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined } = {
   ...constructSameRetryOptionsMap(DEFAULT_RETRY_OPTIONS),
+  [ChainId.BASE]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
-export const BATCH_PARAMS = {
+export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
   ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+  [ChainId.BASE]: {
+    multicallChunk: 110,
+    gasLimitPerCall: 1_200_000,
+    quoteMinSuccessRate: 0.1,
+  },
 }
 
-export const GAS_ERROR_FAILURE_OVERRIDES = {
+export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
   ...constructSameGasErrorFailureOverridesMap(DEFAULT_GAS_ERROR_FAILURE_OVERRIDES),
+  [ChainId.BASE]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
 }
 
-export const SUCCESS_RATE_FAILURE_OVERRIDES = {
+export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
   ...constructSameSuccessRateFailureOverridesMap(DEFAULT_SUCCESS_RATE_FAILURE_OVERRIDES),
+  [ChainId.BASE]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
 }
 
-export const BLOCK_NUMBER_CONFIGS = {
+export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
   ...constructSameBlockNumberConfigsMap(DEFAULT_BLOCK_NUMBER_CONFIGS),
+  [ChainId.BASE]: {
+    baseBlockOffset: -25,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -20,
+    },
+  },
 }
 
 // block -1 means it's never deployed
@@ -51,7 +79,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.MOONBEAM]: -1,
   [ChainId.BNB]: -1,
   [ChainId.AVALANCHE]: -1,
-  [ChainId.BASE]: -1,
+  [ChainId.BASE]: 13311537,
   [ChainId.BASE_GOERLI]: -1,
   [ChainId.ZORA]: -1,
   [ChainId.ZORA_SEPOLIA]: -1,
@@ -78,7 +106,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.MOONBEAM]: 0,
   [ChainId.BNB]: 0,
   [ChainId.AVALANCHE]: 0,
-  [ChainId.BASE]: 0,
+  [ChainId.BASE]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe
   [ChainId.BASE_GOERLI]: 0,
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,
