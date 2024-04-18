@@ -59,6 +59,14 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
         switchExactOutPercentage: 0.0,
         samplingExactOutPercentage: 0.5,
       } as QuoteProviderTrafficSwitchConfiguration
+    case ChainId.OPTIMISM:
+      // Optimism RPC eth_call traffic is about 1/10 of mainnet, so we can shadow sample 1% of traffic
+      return {
+        switchExactInPercentage: 0.0,
+        samplingExactInPercentage: 1,
+        switchExactOutPercentage: 0.0,
+        samplingExactOutPercentage: 1,
+      } as QuoteProviderTrafficSwitchConfiguration
     // If we accidentally switch a traffic, we have the protection to shadow sample only 0.1% of traffic
     default:
       return {

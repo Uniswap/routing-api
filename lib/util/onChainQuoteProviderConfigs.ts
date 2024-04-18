@@ -144,7 +144,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.MAINNET]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
   [ChainId.GOERLI]: 0,
   [ChainId.SEPOLIA]: 17540 * 2, // 17540 is the single tick.cross cost on sepolia. We multiply by 2 to be safe.
-  [ChainId.OPTIMISM]: 0,
+  [ChainId.OPTIMISM]: 17540 * 2, // 17540 is the single tick.cross cost on sepolia. We multiply by 2 to be safe.
   [ChainId.OPTIMISM_GOERLI]: 0,
   [ChainId.OPTIMISM_SEPOLIA]: 0,
   [ChainId.ARBITRUM_ONE]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
