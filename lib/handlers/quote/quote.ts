@@ -656,7 +656,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             }
             break
           default:
-            return undefined;
+            return undefined
         }
       }
 

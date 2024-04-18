@@ -43,7 +43,7 @@ describe('QuoteHandler', () => {
     it('returns undefined when a requested protocol is invalid', () => {
       expect(
         QuoteHandler.protocolsFromRequest(ChainId.BASE, ['v2', 'v3', 'mixed', 'miguel'], '', undefined, undefined)
-      ).toBeUndefined();
+      ).toBeUndefined()
     })
 
     describe('for mobile request', () => {
