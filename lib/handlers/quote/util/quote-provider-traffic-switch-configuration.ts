@@ -44,7 +44,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
         samplingExactOutPercentage: 0.1,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.ARBITRUM_ONE:
-      // Base RPC eth_call traffic is about half of mainnet, so we can shadow sample 0.2% of traffic
+      // Arbitrum RPC eth_call traffic is about half of mainnet, so we can shadow sample 0.2% of traffic
       return {
         switchExactInPercentage: 0.0,
         samplingExactInPercentage: 0.2,
