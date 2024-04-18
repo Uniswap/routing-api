@@ -240,7 +240,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       forceCrossProtocol
     )
 
-    if (protocols.length === 0) {
+    if (protocols === undefined) {
       return {
         statusCode: 400,
         errorCode: 'INVALID_PROTOCOL',
@@ -630,7 +630,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     requestSource: string,
     appVersion: string | undefined,
     forceCrossProtocol: boolean | undefined
-  ): Protocol[] {
+  ): Protocol[] | undefined {
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
     // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
     const semverAppVersion = semver.coerce(appVersion)
@@ -656,7 +656,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             }
             break
           default:
-            return []
+            return undefined
         }
       }
 
