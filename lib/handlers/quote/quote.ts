@@ -232,11 +232,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
+    const requestSource =
+      (params.event.headers && params.event.headers['x-request-source']) ?? params.requestQueryParams.source ?? ''
+    const appVersion = params.event.headers && params.event.headers['x-app-version']
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
       protocolsStr,
-      params.event.headers['x-request-source'] ?? params.requestQueryParams.source ?? '',
-      params.event.headers['x-app-version'],
+      requestSource,
+      appVersion,
       forceCrossProtocol
     )
 
