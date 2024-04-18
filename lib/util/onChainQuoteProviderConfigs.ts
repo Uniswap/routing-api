@@ -94,7 +94,8 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.OPTIMISM]: -1,
   [ChainId.OPTIMISM_GOERLI]: -1,
   [ChainId.OPTIMISM_SEPOLIA]: -1,
-  [ChainId.ARBITRUM_ONE]: 202182926,
+  // Arbitrum is special, it's using L1-ish block number (see https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/block-numbers-and-time)
+  [ChainId.ARBITRUM_ONE]: 19680034,
   [ChainId.ARBITRUM_GOERLI]: -1,
   [ChainId.ARBITRUM_SEPOLIA]: -1,
   [ChainId.POLYGON]: 55938282,
