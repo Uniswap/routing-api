@@ -122,7 +122,7 @@ describe('QuoteHandler', () => {
 
       it('allows v2 and mixed with mainnet, even when the requested source is mobile, and version 1.23, 1.23.5 or 1.24', () => {
         ['uniswap-ios', 'uniswap-android'].forEach(requestSource => {
-          ['1.23', '1.23.5', '1.24'].forEach(appVersion => {
+          ['1.23', '1.23.5', '1.24', '1.24', '1.24.test'].forEach(appVersion => {
             expect(
               QuoteHandler.protocolsFromRequest(
                 ChainId.MAINNET,
@@ -138,7 +138,7 @@ describe('QuoteHandler', () => {
 
       it('allows v2 and mixed with other chains, when the requested source is mobile, and version is 1.25 or greater', () => {
         ['uniswap-ios', 'uniswap-android'].forEach(requestSource => {
-          ['1.25', '1.25.5', '1.26'].forEach(appVersion => {
+          ['1.25', '1.25.5', '1.26', '1.26.test'].forEach(appVersion => {
             expect(
               QuoteHandler.protocolsFromRequest(
                 ChainId.BASE,
