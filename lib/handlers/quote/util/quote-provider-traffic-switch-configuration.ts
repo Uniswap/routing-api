@@ -47,9 +47,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
       // Arbitrum RPC eth_call traffic is about half of mainnet, so we can shadow sample 0.2% of traffic
       return {
         switchExactInPercentage: 0.0,
-        samplingExactInPercentage: 0.2,
+        samplingExactInPercentage: 100,
         switchExactOutPercentage: 0.0,
-        samplingExactOutPercentage: 0.2,
+        samplingExactOutPercentage: 100,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.POLYGON:
       // Total RPM for 'QuoteTotalCallsToProvider' is around 20k-30k (across all chains), so 0.1% means 20-30 RPM shadow sampling
