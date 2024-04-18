@@ -46,11 +46,11 @@ export class FallbackHandler {
         alarmEvent.previousState === 'ALARM' &&
         (alarmEvent.state === 'OK' || alarmEvent.state === 'INSUFFICIENT_DATA')
       ) {
-        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_RECOVERED`, 1, MetricLoggerUnit.Count)
+        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
         this.log.error(
-          `${alarmEvent.providerId} becomes RECOVERED due to ALARM=>${alarmEvent.state} in ${alarmEvent.alarmName}`
+          `${alarmEvent.providerId} becomes HEALTHY due to ALARM=>${alarmEvent.state} in ${alarmEvent.alarmName}`
         )
-        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.RECOVERED)
+        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.HEALTHY)
       }
 
       return {

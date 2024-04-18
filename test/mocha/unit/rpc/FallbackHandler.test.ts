@@ -137,6 +137,6 @@ describe('FallbackHandler', () => {
 
     expect(stubRepo.write.callCount).equals(2)
     expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'UNHEALTHY'])
-    expect(stubRepo.write.getCall(1).args).deep.equals(['56_QUIKNODE', 'RECOVERED'])
+    expect(stubRepo.write.getCall(1).args).deep.equals(['56_QUIKNODE', 'HEALTHY'])
   })
 })

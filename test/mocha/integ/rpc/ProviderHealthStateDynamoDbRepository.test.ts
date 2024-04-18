@@ -53,8 +53,8 @@ describe('ProviderHealthStateDynamoDbRepository', () => {
     readState = await storage.read(PROVIDER_ID)
     expect(readState).equals(ProviderHealthState.UNHEALTHY)
 
-    await storage.write(PROVIDER_ID, ProviderHealthState.RECOVERED)
+    await storage.write(PROVIDER_ID, ProviderHealthState.HEALTHY)
     readState = await storage.read(PROVIDER_ID)
-    expect(readState).equals(ProviderHealthState.RECOVERED)
+    expect(readState).equals(ProviderHealthState.HEALTHY)
   })
 })
