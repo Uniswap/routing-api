@@ -11,8 +11,15 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
   chainId: ChainId
 ): QuoteProviderTrafficSwitchConfiguration => {
   switch (chainId) {
-    // Mumbai and Sepolia together have well below 50 RPM, so we can shadow sample 100% of traffic
+    // Mumbai was deprecated on April 13th. Do not sample at all
     case ChainId.POLYGON_MUMBAI:
+      return {
+        switchExactInPercentage: 0.0,
+        samplingExactInPercentage: 0,
+        switchExactOutPercentage: 0.0,
+        samplingExactOutPercentage: 0,
+      } as QuoteProviderTrafficSwitchConfiguration
+    // Sepolia together have well below 50 RPM, so we can shadow sample 100% of traffic
     case ChainId.SEPOLIA:
       return {
         switchExactInPercentage: 0.0,
