@@ -632,7 +632,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     forceCrossProtocol: boolean | undefined
   ): Protocol[] {
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
-    // We will exclude V2 if isMobile and the appVersion is not present or is lower or equal than 1.24
+    // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
     const semverAppVersion = semver.coerce(appVersion)
     const fixVersion = semver.coerce('1.24')!
     const excludeV2 = isMobileRequest && (semverAppVersion === null || semver.lt(semverAppVersion, fixVersion))
