@@ -232,39 +232,20 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    let protocols: Protocol[] = []
+    const protocols = QuoteHandler.protocolsFromRequest(
+      chainId,
+      protocolsStr,
+      params.event.headers['x-request-source'] ?? params.requestQueryParams.source ?? '',
+      params.event.headers['x-app-version'],
+      forceCrossProtocol
+    );
 
-    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(params.event.headers['x-request-source'] ?? params.requestQueryParams.source ?? '');
-    const appVersion = params.event.headers['x-app-version'];
-    // We will exclude V2 if isMobile and the appVersion is not present or is lower or equal than 1.24
-    const excludeV2 = isMobileRequest && (appVersion === undefined || semver.lte(appVersion, '1.24'))
-
-    if (protocolsStr) {
-      for (const protocolStr of protocolsStr) {
-        switch (protocolStr.toUpperCase()) {
-          case Protocol.V2:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.V2)
-            }
-            break
-          case Protocol.V3:
-            protocols.push(Protocol.V3)
-            break
-          case Protocol.MIXED:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.MIXED)
-            }
-            break
-          default:
-            return {
-              statusCode: 400,
-              errorCode: 'INVALID_PROTOCOL',
-              detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
-            }
-        }
+    if (protocols.length === 0) {
+      return {
+        statusCode: 400,
+        errorCode: 'INVALID_PROTOCOL',
+        detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
       }
-    } else if (!forceCrossProtocol) {
-      protocols = [Protocol.V3]
     }
 
     // Parse user provided token address/symbol to Currency object.
@@ -640,6 +621,54 @@ export class QuoteHandler extends APIGLambdaHandler<
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  static protocolsFromRequest(
+    chainId: ChainId,
+    requestedProtocols: string[] | string | undefined,
+    requestSource: string,
+    appVersion: string | undefined,
+    forceCrossProtocol: boolean | undefined
+  ): Protocol[] {
+    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource);
+    // We will exclude V2 if isMobile and the appVersion is not present or is lower or equal than 1.24
+    const semverAppVersion = semver.coerce(appVersion)
+    const fixVersion = semver.coerce('1.25')!
+    const excludeV2 =
+      isMobileRequest && (
+        semverAppVersion === null ||
+        semver.lt(semverAppVersion, fixVersion)
+      )
+
+    if (requestedProtocols) {
+      let protocols: Protocol[] = []
+
+      for (const protocolStr of requestedProtocols) {
+        switch (protocolStr.toUpperCase()) {
+          case Protocol.V2:
+            if (chainId === ChainId.MAINNET || !excludeV2) {
+              protocols.push(Protocol.V2)
+            }
+            break
+          case Protocol.V3:
+            protocols.push(Protocol.V3)
+            break
+          case Protocol.MIXED:
+            if (chainId === ChainId.MAINNET || !excludeV2) {
+              protocols.push(Protocol.MIXED)
+            }
+            break
+          default:
+            return [];
+        }
+      }
+
+      return protocols;
+    } else if (!forceCrossProtocol) {
+      return [Protocol.V3]
+    } else {
+      return [];
     }
   }
 
