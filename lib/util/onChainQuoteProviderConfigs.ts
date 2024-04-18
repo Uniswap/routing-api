@@ -21,6 +21,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.ARBITRUM_ONE]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -30,6 +35,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 1_200_000,
     quoteMinSuccessRate: 0.1,
   },
+  [ChainId.ARBITRUM_ONE]: {
+    multicallChunk: 15,
+    gasLimitPerCall: 15_000_000,
+    quoteMinSuccessRate: 0.15,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -38,6 +48,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
+  [ChainId.ARBITRUM_ONE]: {
+    gasLimitOverride: 30_000_000,
+    multicallChunk: 8,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -45,6 +59,10 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   [ChainId.BASE]: {
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
+  },
+  [ChainId.ARBITRUM_ONE]: {
+    gasLimitOverride: 30_000_000,
+    multicallChunk: 8,
   },
 }
 
@@ -58,6 +76,14 @@ export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
       rollbackBlockOffset: -20,
     },
   },
+  [ChainId.ARBITRUM_ONE]: {
+    baseBlockOffset: 0,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -10,
+    },
+  },
 }
 
 // block -1 means it's never deployed
@@ -68,7 +94,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.OPTIMISM]: -1,
   [ChainId.OPTIMISM_GOERLI]: -1,
   [ChainId.OPTIMISM_SEPOLIA]: -1,
-  [ChainId.ARBITRUM_ONE]: -1,
+  [ChainId.ARBITRUM_ONE]: 202182926,
   [ChainId.ARBITRUM_GOERLI]: -1,
   [ChainId.ARBITRUM_SEPOLIA]: -1,
   [ChainId.POLYGON]: 55938282,
@@ -95,7 +121,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.OPTIMISM]: 0,
   [ChainId.OPTIMISM_GOERLI]: 0,
   [ChainId.OPTIMISM_SEPOLIA]: 0,
-  [ChainId.ARBITRUM_ONE]: 0,
+  [ChainId.ARBITRUM_ONE]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
   [ChainId.ARBITRUM_GOERLI]: 0,
   [ChainId.ARBITRUM_SEPOLIA]: 0,
   [ChainId.POLYGON]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
