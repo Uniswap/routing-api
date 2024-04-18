@@ -286,6 +286,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.MAINNET:
             case ChainId.POLYGON:
             case ChainId.BASE:
+            case ChainId.ARBITRUM_ONE:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
@@ -345,39 +346,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     enabled: true,
                     attemptsBeforeRollback: 1,
                     rollbackBlockOffset: -20,
-                  },
-                }
-              )
-              break
-            case ChainId.ARBITRUM_ONE:
-              quoteProvider = new OnChainQuoteProvider(
-                chainId,
-                provider,
-                multicall2Provider,
-                {
-                  retries: 2,
-                  minTimeout: 100,
-                  maxTimeout: 1000,
-                },
-                {
-                  multicallChunk: 15,
-                  gasLimitPerCall: 15_000_000,
-                  quoteMinSuccessRate: 0.15,
-                },
-                {
-                  gasLimitOverride: 30_000_000,
-                  multicallChunk: 8,
-                },
-                {
-                  gasLimitOverride: 30_000_000,
-                  multicallChunk: 8,
-                },
-                {
-                  baseBlockOffset: 0,
-                  rollback: {
-                    enabled: true,
-                    attemptsBeforeRollback: 1,
-                    rollbackBlockOffset: -10,
                   },
                 }
               )
