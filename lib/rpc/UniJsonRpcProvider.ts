@@ -234,10 +234,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   logProviderHealthiness() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      this.log.debug(`Healthy provider, url: ${provider.url}`)
+      this.log.debug(`Healthy provider: ${provider.url}`)
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      this.log.debug(`Unhealthy provider, url: ${provider.url}`)
+      this.log.debug(`Unhealthy provider: ${provider.url}`)
     }
   }
 

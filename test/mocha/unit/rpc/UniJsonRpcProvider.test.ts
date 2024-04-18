@@ -10,6 +10,7 @@ import {
 } from '../../../../lib/rpc/config'
 import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
+import { ProviderHealthState } from '../../../../lib/rpc/ProviderHealthState'
 
 const UNI_PROVIDER_TEST_CONFIG: UniJsonRpcProviderConfig = {
   HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 0,
@@ -71,9 +72,9 @@ const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = createNewSingleJsonRpcProviders()
 }
 
-const delay = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+// const delay = (ms: number) => {
+//   return new Promise((resolve) => setTimeout(resolve, ms))
+// }
 
 describe('UniJsonRpcProvider', () => {
   let uniProvider: UniJsonRpcProvider
@@ -114,6 +115,8 @@ describe('UniJsonRpcProvider', () => {
   })
 
   it('fallback when first provider becomes unhealthy', async () => {
+    // provider0 is unhealthy
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
@@ -121,25 +124,8 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
     getBlockNumber2.resolves(123)
 
-    uniProvider.logProviderHealthScores()
+    uniProvider.logProviderHealthiness()
 
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-
-    expect(uniProvider.lastUsedUrl).equals('url_0')
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
 
@@ -148,10 +134,12 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
     await uniProvider.getBlockNumber()
     expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider.logProviderHealthScores()
+    uniProvider.logProviderHealthiness()
   })
 
   it('unhealthy provider successfully recovered', async () => {
+    // provider0 is unhealthy
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
@@ -159,192 +147,25 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
     getBlockNumber2.resolves(123)
 
-    uniProvider.logProviderHealthScores()
+    uniProvider.logProviderHealthiness()
 
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-
-    expect(uniProvider.lastUsedUrl).equals('url_0')
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    uniProvider.logProviderHealthScores()
 
-    // This the failed provider starts recovering.
+    await uniProvider.getBlockNumber()
+    // provider1 is selected.
+    expect(uniProvider.lastUsedUrl).equals('url_1')
+
+    // provider0 then recovered.
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.HEALTHY
     getBlockNumber0.resolves(123)
 
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    uniProvider['providers'][0]['lastCallTimestampInMs'] -= 10000
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider.logProviderHealthScores()
-    // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(10)
-
-    // Provider0's health score has been up, but it's not considered fully recovered yet
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    uniProvider['providers'][0]['lastCallTimestampInMs'] -= 10000
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    uniProvider.logProviderHealthScores()
-
-    // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(10)
-
-    // Provider0 is fully recovered.
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
     expect(uniProvider.currentUnhealthyUrls).to.be.empty
 
-    // From now on, we go back to use the original preferred provider (provider0)
     await uniProvider.getBlockNumber()
+    // Back to select provider0.
     expect(uniProvider.lastUsedUrl).equals('url_0')
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.be.empty
-    uniProvider.logProviderHealthScores()
-
-    // Now later requests will be served with provider0
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_0')
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_0')
-  })
-
-  it('unhealthy provider has some challenge during recovering', async () => {
-    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
-    getBlockNumber0.rejects('error')
-    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
-    getBlockNumber1.resolves(123)
-    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
-    getBlockNumber2.resolves(123)
-
-    uniProvider.logProviderHealthScores()
-
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-
-    expect(uniProvider.lastUsedUrl).equals('url_0')
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    uniProvider.logProviderHealthScores()
-
-    // We advance some time. During this the failed provider starts recovering.
-    const unhealthyProvider = uniProvider['providers'][0]
-    getBlockNumber0.resolves(123)
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['lastCallTimestampInMs'] -= 1000
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(10)
-
-    uniProvider.logProviderHealthScores()
-    // 1 second isn't enough to start re-evaluate the failed provider.
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['lastCallTimestampInMs'] -= 10000
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(10)
-
-    uniProvider.logProviderHealthScores()
-    // Provider0 has recovered quite a bit. But still not enough to be considered as fully recovered.
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    expect(unhealthyProvider['healthScore']).gt(-50)
-    expect(unhealthyProvider['healthScore']).lt(-40)
-
-    getBlockNumber0.rejects('error during recovery evaluation')
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    unhealthyProvider['lastCallTimestampInMs'] -= 10000
-
-    await uniProvider.getBlockNumber()
-    expect(uniProvider.lastUsedUrl).equals('url_1')
-    // Give it some time for finishing async evaluation for unhealthy providers.
-    await delay(10)
-
-    uniProvider.logProviderHealthScores()
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.have.ordered.members(['url_0'])
-    // Provider0 failed again during recovery evaluation.
-    expect(unhealthyProvider['healthScore']).gt(-100)
-    expect(unhealthyProvider['healthScore']).lt(-90)
-  })
-
-  it('healthy provider can also drop score and resume score', async () => {
-    const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
-    getBlockNumber0.rejects('error')
-    const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
-    getBlockNumber1.resolves(123)
-    const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
-    getBlockNumber2.resolves(123)
-
-    uniProvider.logProviderHealthScores()
-
-    // One failed call reduce provider0's score, but it's still considered as healthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    const healthyProvider = uniProvider['providers'][0]
-    expect(healthyProvider['healthScore']).gte(-50)
-    expect(healthyProvider['healthScore']).lt(-49)
-
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    healthyProvider['lastCallTimestampInMs'] -= 2000
-    getBlockNumber0.resolves(123)
-
-    await uniProvider.getBlockNumber()
-    uniProvider.logProviderHealthScores()
-    expect(healthyProvider['healthScore']).gte(-40)
-    expect(healthyProvider['healthScore']).lt(-39)
-
-    // Dial back provider's last call time to simulate that it has some period of recovery.
-    healthyProvider['lastCallTimestampInMs'] -= 2000
-
-    await uniProvider.getBlockNumber()
-    uniProvider.logProviderHealthScores()
-    expect(healthyProvider['healthScore']).gte(-30)
-    expect(healthyProvider['healthScore']).lt(-29)
-
-    // Score deduct and resume doesn't make it a less-preferred provider, as long as it's considered as healthy
-    expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
-    expect(uniProvider.currentUnhealthyUrls).to.be.empty
   })
 
   it('no healthy provider available', async () => {
@@ -599,22 +420,10 @@ describe('UniJsonRpcProvider', () => {
       provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
     }
 
+    // Make provider0 unhealthy
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
-
-    // Two failed calls makes provider0 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_1')
@@ -623,19 +432,8 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
     getBlockNumber1.rejects('error')
 
-    // Two failed calls makes provider1 unhealthy
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    try {
-      await uniProvider.getBlockNumber()
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
+    // Make provider1 unhealthy
+    uniProvider['providers'][1]['healthState'] = ProviderHealthState.UNHEALTHY
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
@@ -711,23 +509,9 @@ describe('UniJsonRpcProvider', () => {
 
     // However, now provider0 throws error.
     getBlockNumber0.rejects('error')
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
 
-    // Two failed calls makes provider0 unhealthy.
-    try {
-      await uniProvider.getBlockNumber(sessionId)
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber(sessionId)
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-
-    uniProvider.logProviderHealthScores()
+    uniProvider.logProviderHealthiness()
 
     // Although we pass in a session id, we accept fallback to another provider.
     await uniProvider.getBlockNumber(sessionId)
@@ -761,22 +545,9 @@ describe('UniJsonRpcProvider', () => {
 
     // However, now provider0 throws error.
     getBlockNumber0.rejects('error')
+    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
 
-    // Two failed calls makes provider0 unhealthy.
-    try {
-      await uniProvider.getBlockNumber(sessionId)
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
-    try {
-      await uniProvider.getBlockNumber(sessionId)
-      assert(false, 'Should not reach')
-    } catch (err: any) {
-      expect(err.name).equals('error')
-    }
-    uniProvider.logProviderHealthScores()
+    uniProvider.logProviderHealthiness()
 
     // Although we pass in a session id, we accept fallback to another provider.
     try {
@@ -863,16 +634,8 @@ describe('UniJsonRpcProvider', () => {
     expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
 
-    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][1]['lastLatencyEvaluationApiName']).equals('getBlockNumber')
-    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][2]['lastLatencyEvaluationApiName']).equals('getBlockNumber')
-
-    // Selected provider should also record latency.
-    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
   })
 
   it('Test we will not do shadow latency check calls too frequently', async () => {
@@ -913,11 +676,7 @@ describe('UniJsonRpcProvider', () => {
     expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
 
-    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
 
     // Advance 1 second.
@@ -931,7 +690,6 @@ describe('UniJsonRpcProvider', () => {
     // 1 second is not long enough to allow another latency evaluation shadow call.
     expect(spy1.callCount).to.equal(0)
     expect(spy2.callCount).to.equal(0)
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
 
     // Advance another 15 seconds.
     sandbox.clock.tick(15000)
@@ -947,8 +705,6 @@ describe('UniJsonRpcProvider', () => {
     expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
-
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equal(timestamp + 16000)
   })
 
   it('Test we will not do shadow latency check calls too frequently, simultaneous multi entry', async () => {
@@ -996,11 +752,7 @@ describe('UniJsonRpcProvider', () => {
     expect(spy2.callCount).to.equal(1)
     expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
 
-    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
-    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
 
     spy0.resetHistory()
@@ -1063,11 +815,7 @@ describe('UniJsonRpcProvider', () => {
     expect(spy1.callCount).to.equal(1)
     expect(spy2.callCount).to.equal(1)
 
-    expect(uniProvider['providers'][0]['lastEvaluatedLatencyInMs']).equal(0)
-    expect(uniProvider['providers'][0]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
-    expect(uniProvider['providers'][1]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
-    expect(uniProvider['providers'][2]['lastEvaluatedLatencyInMs']).equal(0)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
   })
 
@@ -1146,11 +894,11 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.resolves(123)
 
-    uniProvider['providers'][1]['healthy'] = false
+    uniProvider['providers'][1]['healthState'] = ProviderHealthState.UNHEALTHY
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
     getBlockNumber1.rejects('error')
 
-    uniProvider['providers'][2]['healthy'] = false
+    uniProvider['providers'][2]['healthState'] = ProviderHealthState.UNHEALTHY
     const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
     getBlockNumber2.rejects('error')
 
