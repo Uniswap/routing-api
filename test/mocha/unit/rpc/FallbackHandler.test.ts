@@ -132,11 +132,20 @@ describe('FallbackHandler', () => {
     stubRepo.write.resolves()
     fallbackHandler['healthStateRepository'] = stubRepo
 
-    await fallbackHandler.handler(triggerEvent)
-    await fallbackHandler.handler(recoverEvent)
+    const response1 = await fallbackHandler.handler(triggerEvent)
+    const response2 = await fallbackHandler.handler(recoverEvent)
 
     expect(stubRepo.write.callCount).equals(2)
     expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'UNHEALTHY'])
     expect(stubRepo.write.getCall(1).args).deep.equals(['56_QUIKNODE', 'HEALTHY'])
+
+    expect(response1).deep.equals({
+      statusCode: 200,
+      body: ''
+    })
+    expect(response2).deep.equals({
+      statusCode: 200,
+      body: ''
+    })
   })
 })
