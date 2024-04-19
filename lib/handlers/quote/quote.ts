@@ -33,6 +33,7 @@ import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
+import semver from 'semver'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -231,39 +232,23 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    let protocols: Protocol[] = []
-    if (protocolsStr) {
-      for (const protocolStr of protocolsStr) {
-        switch (protocolStr.toLowerCase()) {
-          case 'v2':
-            if (
-              chainId === ChainId.MAINNET ||
-              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
-            ) {
-              protocols.push(Protocol.V2)
-            }
-            break
-          case 'v3':
-            protocols.push(Protocol.V3)
-            break
-          case 'mixed':
-            if (
-              chainId === ChainId.MAINNET ||
-              !['uniswap-ios', 'uniswap-android'].includes(params.requestQueryParams.source ?? '')
-            ) {
-              protocols.push(Protocol.MIXED)
-            }
-            break
-          default:
-            return {
-              statusCode: 400,
-              errorCode: 'INVALID_PROTOCOL',
-              detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
-            }
-        }
+    const requestSource =
+      (params.event.headers && params.event.headers['x-request-source']) ?? params.requestQueryParams.source ?? ''
+    const appVersion = params.event.headers && params.event.headers['x-app-version']
+    const protocols = QuoteHandler.protocolsFromRequest(
+      chainId,
+      protocolsStr,
+      requestSource,
+      appVersion,
+      forceCrossProtocol
+    )
+
+    if (protocols === undefined) {
+      return {
+        statusCode: 400,
+        errorCode: 'INVALID_PROTOCOL',
+        detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
       }
-    } else if (!forceCrossProtocol) {
-      protocols = [Protocol.V3]
     }
 
     // Parse user provided token address/symbol to Currency object.
@@ -639,6 +624,50 @@ export class QuoteHandler extends APIGLambdaHandler<
     return {
       statusCode: 200,
       body: result,
+    }
+  }
+
+  static protocolsFromRequest(
+    chainId: ChainId,
+    requestedProtocols: string[] | string | undefined,
+    requestSource: string,
+    appVersion: string | undefined,
+    forceCrossProtocol: boolean | undefined
+  ): Protocol[] | undefined {
+    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
+    // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
+    const semverAppVersion = semver.coerce(appVersion)
+    const fixVersion = semver.coerce('1.24')!
+    const excludeV2 = isMobileRequest && (semverAppVersion === null || semver.lt(semverAppVersion, fixVersion))
+
+    if (requestedProtocols) {
+      let protocols: Protocol[] = []
+
+      for (const protocolStr of requestedProtocols) {
+        switch (protocolStr.toUpperCase()) {
+          case Protocol.V2:
+            if (chainId === ChainId.MAINNET || !excludeV2) {
+              protocols.push(Protocol.V2)
+            }
+            break
+          case Protocol.V3:
+            protocols.push(Protocol.V3)
+            break
+          case Protocol.MIXED:
+            if (chainId === ChainId.MAINNET || !excludeV2) {
+              protocols.push(Protocol.MIXED)
+            }
+            break
+          default:
+            return undefined
+        }
+      }
+
+      return protocols
+    } else if (!forceCrossProtocol) {
+      return [Protocol.V3]
+    } else {
+      return []
     }
   }
 
