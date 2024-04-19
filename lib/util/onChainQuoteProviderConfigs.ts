@@ -31,6 +31,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.CELO]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -50,6 +55,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 1_200_000,
     quoteMinSuccessRate: 0.1,
   },
+  [ChainId.CELO]: {
+    multicallChunk: 10,
+    gasLimitPerCall: 5_000_000,
+    quoteMinSuccessRate: 0.1,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -66,6 +76,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
+  [ChainId.CELO]: {
+    gasLimitOverride: 5_000_000,
+    multicallChunk: 5,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -81,6 +95,10 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   [ChainId.OPTIMISM]: {
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
+  },
+  [ChainId.CELO]: {
+    gasLimitOverride: 6_250_000,
+    multicallChunk: 4,
   },
 }
 
