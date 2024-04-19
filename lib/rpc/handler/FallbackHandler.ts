@@ -31,42 +31,39 @@ export class FallbackHandler {
   }
 
   private buildHandler() {
-    return metricScope(
-      (metricsLogger: MetricsLogger) =>
-        async (event: object): Promise<APIGatewayProxyResult> => {
-          metricsLogger.setNamespace('Uniswap')
-          metricsLogger.setDimensions({ Service: 'RoutingAPI' })
-          const metric = new AWSMetricsLogger(metricsLogger)
+    return metricScope((metricsLogger: MetricsLogger) => async (event: object): Promise<APIGatewayProxyResult> => {
+      metricsLogger.setNamespace('Uniswap')
+      metricsLogger.setDimensions({ Service: 'RoutingAPI' })
+      const metric = new AWSMetricsLogger(metricsLogger)
 
-          const alarmEvent = this.readAlarmEvent(event)
-          this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
+      const alarmEvent = this.readAlarmEvent(event)
+      this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
-          if (
-            (alarmEvent.previousState === 'OK' || alarmEvent.previousState === 'INSUFFICIENT_DATA') &&
-            alarmEvent.state === 'ALARM'
-          ) {
-            metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
-            this.log.error(
-              `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
-            )
-            await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.UNHEALTHY)
-          } else if (
-            alarmEvent.previousState === 'ALARM' &&
-            (alarmEvent.state === 'OK' || alarmEvent.state === 'INSUFFICIENT_DATA')
-          ) {
-            metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
-            this.log.error(
-              `${alarmEvent.providerId} becomes HEALTHY due to ALARM=>${alarmEvent.state} in ${alarmEvent.alarmName}`
-            )
-            await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.HEALTHY)
-          }
+      if (
+        (alarmEvent.previousState === 'OK' || alarmEvent.previousState === 'INSUFFICIENT_DATA') &&
+        alarmEvent.state === 'ALARM'
+      ) {
+        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
+        this.log.error(
+          `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
+        )
+        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.UNHEALTHY)
+      } else if (
+        alarmEvent.previousState === 'ALARM' &&
+        (alarmEvent.state === 'OK' || alarmEvent.state === 'INSUFFICIENT_DATA')
+      ) {
+        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
+        this.log.error(
+          `${alarmEvent.providerId} becomes HEALTHY due to ALARM=>${alarmEvent.state} in ${alarmEvent.alarmName}`
+        )
+        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.HEALTHY)
+      }
 
-          return {
-            statusCode: 200,
-            body: ""
-          }
-        }
-    )
+      return {
+        statusCode: 200,
+        body: '',
+      }
+    })
   }
 
   get handler() {

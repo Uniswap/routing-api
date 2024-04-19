@@ -141,11 +141,11 @@ describe('FallbackHandler', () => {
 
     expect(response1).deep.equals({
       statusCode: 200,
-      body: ''
+      body: '',
     })
     expect(response2).deep.equals({
       statusCode: 200,
-      body: ''
+      body: '',
     })
   })
 })
