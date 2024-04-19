@@ -67,6 +67,14 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
         switchExactOutPercentage: 0.0,
         samplingExactOutPercentage: 1,
       } as QuoteProviderTrafficSwitchConfiguration
+    case ChainId.BLAST:
+      // Blast RPC eth_call traffic is about 1/10 of mainnet, so we can shadow sample 1% of traffic
+      return {
+        switchExactInPercentage: 0.0,
+        samplingExactInPercentage: 1,
+        switchExactOutPercentage: 0.0,
+        samplingExactOutPercentage: 1,
+      } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.BNB:
       // BNB RPC eth_call traffic is about 1/10 of mainnet, so we can shadow sample 1% of traffic
       return {
