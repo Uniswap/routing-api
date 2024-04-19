@@ -149,7 +149,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.GNOSIS]: -1,
   [ChainId.MOONBEAM]: -1,
   [ChainId.BNB]: 37990148,
-  [ChainId.AVALANCHE]: -1,
+  [ChainId.AVALANCHE]: 44406304,
   [ChainId.BASE]: 13311537,
   [ChainId.BASE_GOERLI]: -1,
   [ChainId.ZORA]: -1,
@@ -175,8 +175,8 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.CELO_ALFAJORES]: 0,
   [ChainId.GNOSIS]: 0,
   [ChainId.MOONBEAM]: 0,
-  [ChainId.BNB]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe
-  [ChainId.AVALANCHE]: 0,
+  [ChainId.BNB]: 17540 * 2, // 17540 is the single tick.cross cost on bnb. We multiply by 2 to be safe
+  [ChainId.AVALANCHE]: 17540 * 2, // 17540 is the single tick.cross cost on avax. We multiply by 2 to be safe
   [ChainId.BASE]: 17540 * 2, // 17540 is the single tick.cross cost on base. We multiply by 2 to be safe
   [ChainId.BASE_GOERLI]: 0,
   [ChainId.ZORA]: 0,
