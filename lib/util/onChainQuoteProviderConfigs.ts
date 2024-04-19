@@ -36,6 +36,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.BLAST]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -60,6 +65,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 5_000_000,
     quoteMinSuccessRate: 0.1,
   },
+  [ChainId.BLAST]: {
+    multicallChunk: 80,
+    gasLimitPerCall: 1_200_000,
+    quoteMinSuccessRate: 0.1,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -80,6 +90,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 5_000_000,
     multicallChunk: 5,
   },
+  [ChainId.BLAST]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -99,6 +113,10 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   [ChainId.CELO]: {
     gasLimitOverride: 6_250_000,
     multicallChunk: 4,
+  },
+  [ChainId.BLAST]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
   },
 }
 
@@ -128,6 +146,14 @@ export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
       rollbackBlockOffset: -20,
     },
   },
+  [ChainId.BLAST]: {
+    baseBlockOffset: -10,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -10,
+    },
+  },
 }
 
 // block -1 means it's never deployed
@@ -155,7 +181,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.ZORA]: -1,
   [ChainId.ZORA_SEPOLIA]: -1,
   [ChainId.ROOTSTOCK]: -1,
-  [ChainId.BLAST]: -1,
+  [ChainId.BLAST]: 2370179,
 }
 
 // 0 threshold means it's not deployed yet
@@ -182,5 +208,5 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,
   [ChainId.ROOTSTOCK]: 0,
-  [ChainId.BLAST]: 0,
+  [ChainId.BLAST]: 17540 * 2, // 17540 is the single tick.cross cost on blast. We multiply by 2 to be safe
 }
