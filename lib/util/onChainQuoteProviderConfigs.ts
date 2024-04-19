@@ -31,6 +31,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.CELO]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -50,6 +55,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 1_200_000,
     quoteMinSuccessRate: 0.1,
   },
+  [ChainId.CELO]: {
+    multicallChunk: 10,
+    gasLimitPerCall: 5_000_000,
+    quoteMinSuccessRate: 0.1,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -66,6 +76,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
+  [ChainId.CELO]: {
+    gasLimitOverride: 5_000_000,
+    multicallChunk: 5,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -81,6 +95,10 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   [ChainId.OPTIMISM]: {
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
+  },
+  [ChainId.CELO]: {
+    gasLimitOverride: 6_250_000,
+    multicallChunk: 4,
   },
 }
 
@@ -126,7 +144,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.ARBITRUM_SEPOLIA]: -1,
   [ChainId.POLYGON]: 55938282,
   [ChainId.POLYGON_MUMBAI]: 48054046,
-  [ChainId.CELO]: -1,
+  [ChainId.CELO]: 25166959,
   [ChainId.CELO_ALFAJORES]: -1,
   [ChainId.GNOSIS]: -1,
   [ChainId.MOONBEAM]: -1,
@@ -145,21 +163,21 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.MAINNET]: 17540 * 2, // 17540 is the single tick.cross cost on mainnet. We multiply by 2 to be safe.
   [ChainId.GOERLI]: 0,
   [ChainId.SEPOLIA]: 17540 * 2, // 17540 is the single tick.cross cost on sepolia. We multiply by 2 to be safe.
-  [ChainId.OPTIMISM]: 17540 * 2, // 17540 is the single tick.cross cost on sepolia. We multiply by 2 to be safe.
+  [ChainId.OPTIMISM]: 17540 * 2, // 17540 is the single tick.cross cost on optimism. We multiply by 2 to be safe.
   [ChainId.OPTIMISM_GOERLI]: 0,
   [ChainId.OPTIMISM_SEPOLIA]: 0,
-  [ChainId.ARBITRUM_ONE]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
+  [ChainId.ARBITRUM_ONE]: 17540 * 2, // 17540 is the single tick.cross cost on arbitrum. We multiply by 2 to be safe.
   [ChainId.ARBITRUM_GOERLI]: 0,
   [ChainId.ARBITRUM_SEPOLIA]: 0,
   [ChainId.POLYGON]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe.
   [ChainId.POLYGON_MUMBAI]: 17540 * 2, // 17540 is the single tick.cross cost on polygon-mumbai. We multiply by 2 to be safe.
-  [ChainId.CELO]: 0,
+  [ChainId.CELO]: 17540 * 2, // 17540 is the single tick.cross cost on celo. We multiply by 2 to be safe.
   [ChainId.CELO_ALFAJORES]: 0,
   [ChainId.GNOSIS]: 0,
   [ChainId.MOONBEAM]: 0,
   [ChainId.BNB]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe
   [ChainId.AVALANCHE]: 0,
-  [ChainId.BASE]: 17540 * 2, // 17540 is the single tick.cross cost on polygon. We multiply by 2 to be safe
+  [ChainId.BASE]: 17540 * 2, // 17540 is the single tick.cross cost on base. We multiply by 2 to be safe
   [ChainId.BASE_GOERLI]: 0,
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,

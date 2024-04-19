@@ -289,6 +289,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.ARBITRUM_ONE:
             case ChainId.OPTIMISM:
             case ChainId.BNB:
+            case ChainId.CELO:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
