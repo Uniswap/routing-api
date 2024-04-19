@@ -291,6 +291,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.BNB:
             case ChainId.CELO:
             case ChainId.AVALANCHE:
+            case ChainId.BLAST:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
