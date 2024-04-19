@@ -18,7 +18,7 @@ describe('FallbackHandler', () => {
     PROVIDER_HEALTH_STATE_DB_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
   }
   const fallbackHandler = new FallbackHandler(log)
-  const triggerEvent = JSON.parse(`
+  const okToAlarmEvent = JSON.parse(`
     {
       "source": "aws.cloudwatch",
       "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
@@ -66,7 +66,7 @@ describe('FallbackHandler', () => {
         }
       }
     }`)
-  const recoverEvent = JSON.parse(`
+  const alarmToOkEvent = JSON.parse(`
     {
       "source": "aws.cloudwatch",
       "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
@@ -116,7 +116,7 @@ describe('FallbackHandler', () => {
     }`)
 
   it('test readAlarmEvent', async () => {
-    const alarmEvent = fallbackHandler.readAlarmEvent(triggerEvent)
+    const alarmEvent = fallbackHandler.readAlarmEvent(okToAlarmEvent)
     console.log(alarmEvent)
     expect(alarmEvent.alarmName).equals('RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE')
     expect(alarmEvent.state).equals('ALARM')
@@ -132,8 +132,8 @@ describe('FallbackHandler', () => {
     stubRepo.write.resolves()
     fallbackHandler['healthStateRepository'] = stubRepo
 
-    const response1 = await fallbackHandler.handler(triggerEvent)
-    const response2 = await fallbackHandler.handler(recoverEvent)
+    const response1 = await fallbackHandler.handler(okToAlarmEvent)
+    const response2 = await fallbackHandler.handler(alarmToOkEvent)
 
     expect(stubRepo.write.callCount).equals(2)
     expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'UNHEALTHY'])
