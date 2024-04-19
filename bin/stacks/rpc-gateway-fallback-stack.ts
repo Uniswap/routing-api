@@ -36,7 +36,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       runtime: aws_lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, '../../lib/rpc/handler/index.ts'),
       handler: 'fallbackHandler',
-      timeout: cdk.Duration.seconds(5),
+      timeout: cdk.Duration.seconds(15),
       memorySize: 1024,
       description: 'Provider Fallback Lambda',
       bundling: {
@@ -51,7 +51,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
-      logRetention: RetentionDays.ONE_MONTH,
+      logRetention: RetentionDays.ONE_WEEK,
 
       environment: {
         PROVIDER_HEALTH_STATE_DB_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,

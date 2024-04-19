@@ -67,7 +67,7 @@ export class FallbackHandler {
   }
 
   get handler() {
-    return async (event: object) => {
+    return async (event: object): Promise<APIGatewayProxyResult> => {
       const handler = this.buildHandler()
       this.log.debug({ event }, 'Received event object')
       const response = await handler(event)

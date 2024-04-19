@@ -153,7 +153,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       }
     )
 
-    // TODO(jie): Remove this table after we fully migrate to rpcProviderHealthStateDynamoDb
+    // NOTICE: This table will become useless after we fully migrate to rpcProviderHealthStateDynamoDb
     this.rpcProviderStateDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderStateDbTable.Name, {
       tableName: DynamoDBTableProps.RpcProviderStateDbTable.Name,
       partitionKey: {
