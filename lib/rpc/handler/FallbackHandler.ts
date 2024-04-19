@@ -39,23 +39,17 @@ export class FallbackHandler {
       const alarmEvent = this.readAlarmEvent(event)
       this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
-      if (
-        (alarmEvent.previousState === 'OK' || alarmEvent.previousState === 'INSUFFICIENT_DATA') &&
-        alarmEvent.state === 'ALARM'
-      ) {
+      if (alarmEvent.state === 'ALARM') {
         await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.UNHEALTHY)
         metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
         this.log.error(
           `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
         )
-      } else if (
-        alarmEvent.previousState === 'ALARM' &&
-        (alarmEvent.state === 'OK' || alarmEvent.state === 'INSUFFICIENT_DATA')
-      ) {
+      } else if (alarmEvent.state === 'OK') {
         await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.HEALTHY)
         metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
         this.log.error(
-          `${alarmEvent.providerId} becomes HEALTHY due to ALARM=>${alarmEvent.state} in ${alarmEvent.alarmName}`
+          `${alarmEvent.providerId} becomes HEALTHY due to ${alarmEvent.previousState}=>OK in ${alarmEvent.alarmName}`
         )
       }
 

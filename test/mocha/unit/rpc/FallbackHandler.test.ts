@@ -114,6 +114,99 @@ describe('FallbackHandler', () => {
         }
       }
     }`)
+  // The following event json are pruned to only contains the fields we care.
+  const insufficientDataToAlarm = JSON.parse(`
+    {
+      "source": "aws.cloudwatch",
+      "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+      "accountId": "901338192186",
+      "time": "2024-04-16T08:47:36.960+0000",
+      "region": "us-east-2",
+      "alarmData": {
+        "alarmName": "RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+        "state": {
+          "value": "ALARM",
+          "reason": "Threshold Crossed: 1 datapoint [95.0 (16/04/24 08:33:00)] was not greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:43:36.957+0000\\",\\"startDate\\":\\"2024-04-16T08:33:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[95.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:33:00.000+0000\\",\\"value\\":95.0}]}",
+          "timestamp": "2024-04-16T08:47:36.960+0000"
+        },
+        "previousState": {
+          "value": "INSUFFICIENT_DATA",
+          "reason": "Threshold Crossed: 1 datapoint [161.0 (16/04/24 08:42:00)] was greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:47:36.958+0000\\",\\"startDate\\":\\"2024-04-16T08:42:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[161.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:42:00.000+0000\\",\\"value\\":161.0}]}",
+          "timestamp": "2024-04-16T08:43:36.960+0000"
+        }
+      }
+    }`)
+  const insufficientDataToOk = JSON.parse(`
+    {
+      "source": "aws.cloudwatch",
+      "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+      "accountId": "901338192186",
+      "time": "2024-04-16T08:47:36.960+0000",
+      "region": "us-east-2",
+      "alarmData": {
+        "alarmName": "RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+        "state": {
+          "value": "OK",
+          "reason": "Threshold Crossed: 1 datapoint [95.0 (16/04/24 08:33:00)] was not greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:43:36.957+0000\\",\\"startDate\\":\\"2024-04-16T08:33:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[95.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:33:00.000+0000\\",\\"value\\":95.0}]}",
+          "timestamp": "2024-04-16T08:47:36.960+0000"
+        },
+        "previousState": {
+          "value": "INSUFFICIENT_DATA",
+          "reason": "Threshold Crossed: 1 datapoint [161.0 (16/04/24 08:42:00)] was greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:47:36.958+0000\\",\\"startDate\\":\\"2024-04-16T08:42:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[161.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:42:00.000+0000\\",\\"value\\":161.0}]}",
+          "timestamp": "2024-04-16T08:43:36.960+0000"
+        }
+      }
+    }`)
+  const alarmToInsufficientData = JSON.parse(`
+    {
+      "source": "aws.cloudwatch",
+      "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+      "accountId": "901338192186",
+      "time": "2024-04-16T08:47:36.960+0000",
+      "region": "us-east-2",
+      "alarmData": {
+        "alarmName": "RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+        "state": {
+          "value": "INSUFFICIENT_DATA",
+          "reason": "Threshold Crossed: 1 datapoint [95.0 (16/04/24 08:33:00)] was not greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:43:36.957+0000\\",\\"startDate\\":\\"2024-04-16T08:33:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[95.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:33:00.000+0000\\",\\"value\\":95.0}]}",
+          "timestamp": "2024-04-16T08:47:36.960+0000"
+        },
+        "previousState": {
+          "value": "ALARM",
+          "reason": "Threshold Crossed: 1 datapoint [161.0 (16/04/24 08:42:00)] was greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:47:36.958+0000\\",\\"startDate\\":\\"2024-04-16T08:42:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[161.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:42:00.000+0000\\",\\"value\\":161.0}]}",
+          "timestamp": "2024-04-16T08:43:36.960+0000"
+        }
+      }
+    }`)
+  const okToInsufficientData = JSON.parse(`
+    {
+      "source": "aws.cloudwatch",
+      "alarmArn": "arn:aws:cloudwatch:us-east-2:901338192186:alarm:RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+      "accountId": "901338192186",
+      "time": "2024-04-16T08:47:36.960+0000",
+      "region": "us-east-2",
+      "alarmData": {
+        "alarmName": "RoutingAPI-RpcGateway-ErrorRateAlarm-ChainId-56-Provider-QUIKNODE",
+        "state": {
+          "value": "INSUFFICIENT_DATA",
+          "reason": "Threshold Crossed: 1 datapoint [95.0 (16/04/24 08:33:00)] was not greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:43:36.957+0000\\",\\"startDate\\":\\"2024-04-16T08:33:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[95.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:33:00.000+0000\\",\\"value\\":95.0}]}",
+          "timestamp": "2024-04-16T08:47:36.960+0000"
+        },
+        "previousState": {
+          "value": "OK",
+          "reason": "Threshold Crossed: 1 datapoint [161.0 (16/04/24 08:42:00)] was greater than or equal to the threshold (150.0).",
+          "reasonData": "{\\"version\\":\\"1.0\\",\\"queryDate\\":\\"2024-04-16T08:47:36.958+0000\\",\\"startDate\\":\\"2024-04-16T08:42:00.000+0000\\",\\"period\\":300,\\"recentDatapoints\\":[161.0],\\"threshold\\":150.0,\\"evaluatedDatapoints\\":[{\\"timestamp\\":\\"2024-04-16T08:42:00.000+0000\\",\\"value\\":161.0}]}",
+          "timestamp": "2024-04-16T08:43:36.960+0000"
+        }
+      }
+    }`)
 
   it('test readAlarmEvent', async () => {
     const alarmEvent = fallbackHandler.readAlarmEvent(okToAlarmEvent)
@@ -132,20 +225,36 @@ describe('FallbackHandler', () => {
     stubRepo.write.resolves()
     fallbackHandler['healthStateRepository'] = stubRepo
 
-    const response1 = await fallbackHandler.handler(okToAlarmEvent)
-    const response2 = await fallbackHandler.handler(alarmToOkEvent)
-
-    expect(stubRepo.write.callCount).equals(2)
+    const response = await fallbackHandler.handler(okToAlarmEvent)
+    expect(stubRepo.write.callCount).equals(1)
     expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'UNHEALTHY'])
-    expect(stubRepo.write.getCall(1).args).deep.equals(['56_QUIKNODE', 'HEALTHY'])
+    expect(response).deep.equals({
+      statusCode: 200,
+      body: '',
+    })
+    stubRepo.write.reset()
 
-    expect(response1).deep.equals({
-      statusCode: 200,
-      body: '',
-    })
-    expect(response2).deep.equals({
-      statusCode: 200,
-      body: '',
-    })
+    await fallbackHandler.handler(alarmToOkEvent)
+    expect(stubRepo.write.callCount).equals(1)
+    expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'HEALTHY'])
+    stubRepo.write.reset()
+
+    await fallbackHandler.handler(insufficientDataToAlarm)
+    expect(stubRepo.write.callCount).equals(1)
+    expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'UNHEALTHY'])
+    stubRepo.write.reset()
+
+    await fallbackHandler.handler(insufficientDataToOk)
+    expect(stubRepo.write.callCount).equals(1)
+    expect(stubRepo.write.getCall(0).args).deep.equals(['56_QUIKNODE', 'HEALTHY'])
+    stubRepo.write.reset()
+
+    await fallbackHandler.handler(alarmToInsufficientData)
+    expect(stubRepo.write.callCount).equals(0)
+    stubRepo.write.reset()
+
+    await fallbackHandler.handler(okToInsufficientData)
+    expect(stubRepo.write.callCount).equals(0)
+    stubRepo.write.reset()
   })
 })
