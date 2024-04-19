@@ -85,16 +85,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
       }
       this.healthStateRepository = new ProviderHealthStateDynamoDbRepository(dbTableName, log)
-      // It's better do synchronous DB sync when the lambda is created. The reason is that, a great amount of lambda
-      // creation often happens when there's a spike of requests. If the newly created lambdas has no idea about the
-      // provider health state, it will end up increasing the service's error rate quickly. When we also consider the
-      // lambda cold start fail rate, the consequence might be even worse.
-      //
-      // If the lambda is already up and running and we suppose it receives continuous requests, there will be no statistical
-      // difference in terms of impact of error rate between doing synchronous or asynchronous DB sync, because they
-      // both behaves like performing a sync at a constant time interval. Their expected response times for a provider
-      // failure are the same. So we choose to it asynchronously to reduce average response time for serving request.
-      await this.syncAndUpdateProviderHealthState()
+      // Fire and forget. Won't check the sync result. But usually the sync will finish before the end of initialization
+      // of the current lambda, so it should already know the latest provider health states before serving requests.
+      this.syncAndUpdateProviderHealthState()
     }
   }
 
