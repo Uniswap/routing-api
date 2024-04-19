@@ -37,7 +37,6 @@ export class FallbackHandler {
           metricsLogger.setNamespace('Uniswap')
           metricsLogger.setDimensions({ Service: 'RoutingAPI' })
           const metric = new AWSMetricsLogger(metricsLogger)
-          // setGlobalMetric(metric)
 
           const alarmEvent = this.readAlarmEvent(event)
           this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
