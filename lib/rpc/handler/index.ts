@@ -5,7 +5,8 @@ import { default as bunyan, default as Logger } from 'bunyan'
 const log: Logger = bunyan.createLogger({
   name: 'Root',
   serializers: bunyan.stdSerializers,
-  level: bunyan.ERROR,
+  // TODO(jie): Change to ERROR
+  level: bunyan.DEBUG,
 })
 
 let fallbackHandler: FallbackHandler
