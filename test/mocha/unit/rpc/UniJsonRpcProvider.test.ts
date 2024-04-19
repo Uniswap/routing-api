@@ -72,10 +72,6 @@ const resetRpcProviders = () => {
   SINGLE_RPC_PROVIDERS[ChainId.MAINNET] = createNewSingleJsonRpcProviders()
 }
 
-// const delay = (ms: number) => {
-//   return new Promise((resolve) => setTimeout(resolve, ms))
-// }
-
 describe('UniJsonRpcProvider', () => {
   let uniProvider: UniJsonRpcProvider
   let sandbox: SinonSandbox
