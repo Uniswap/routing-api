@@ -109,7 +109,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
     for (const [chainId, providerNames] of getRpcGatewayEnabledChains()) {
       for (const providerName of providerNames) {
         const providerNameFix = providerName === 'QUICKNODE' ? 'QUIKNODE' : providerName
-        const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerName}`
+        const alarmName = `RoutingAPI-RpcGateway-LatencyAlarm-ChainId-${chainId}-Provider-${providerNameFix}`
         const metric = new MathExpression({
           expression: 'p50Latency',
           usingMetrics: {
