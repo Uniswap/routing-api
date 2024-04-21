@@ -80,7 +80,7 @@ describe('FallbackHandler', () => {
     expect(alarmEvent.providerId).equals(PROVIDER_ID)
   })
 
-  it('test HealthinessUpdate', async() => {
+  it('test HealthinessUpdate', async () => {
     const change1 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.UNHEALTHY)
     expect(change1.isChanged()).equals(true)
     const change2 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
