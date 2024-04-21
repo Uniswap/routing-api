@@ -4,6 +4,21 @@ import { DynamoDB } from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { ProviderHealthState } from './ProviderHealthState'
 
+// Table item assignment
+const UPDATE_EXPRESSION = `SET 
+  #healthiness = :healthiness,
+  #ongoingAlarms = :ongoingAlarms,
+  #version = :version`
+
+// Table column names
+const EXPRESSION_ATTRIBUTE_NAMES = {
+  '#healthiness': 'healthiness',
+  '#ongoingAlarms': 'ongoingAlarms',
+  '#version': 'version',
+}
+
+const CONDITION_EXPRESSION = '#version = :baseVersion'
+
 export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStateRepository {
   private ddbClient: DynamoDB.DocumentClient
 
@@ -23,7 +38,11 @@ export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStat
         this.log.debug(`No health state found for ${providerId}`)
         return null
       }
-      return item.state
+      return {
+        healthiness: item.healthiness,
+        ongoingAlarms: item.ongoingAlarms,
+        version: item.version,
+      }
     } catch (error: any) {
       this.log.error(`Failed to read health state from DB: ${JSON.stringify(error)}`)
       throw error
@@ -35,10 +54,35 @@ export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStat
       TableName: this.dbTableName,
       Item: {
         chainIdProviderName: providerId,
-        state: state,
+        healthiness: state.healthiness,
+        ongoingAlarms: state.ongoingAlarms,
+        version: state.version,
       },
     }
     await this.ddbClient.put(putParams).promise()
     return
+  }
+
+  async update(providerId: string, state: ProviderHealthState): Promise<void> {
+    const updateParams: DocumentClient.UpdateItemInput = {
+      TableName: this.dbTableName,
+      Key: { chainIdProviderName: providerId },
+      UpdateExpression: UPDATE_EXPRESSION,
+      ExpressionAttributeNames: EXPRESSION_ATTRIBUTE_NAMES,
+      ExpressionAttributeValues: this.getExpressionAttributeValues(state),
+      ConditionExpression: CONDITION_EXPRESSION,
+    }
+    await this.ddbClient.update(updateParams).promise()
+  }
+
+  private getExpressionAttributeValues(
+    state: ProviderHealthState
+  ): { [key: string]: any } {
+    let attributes: { [key: string]: any } = {}
+    attributes[':healthiness'] = state.healthiness
+    attributes[':ongoingAlarms'] = state.ongoingAlarms
+    attributes[':baseVersion'] = state.version - 1
+    attributes[':version'] = state.version
+    return attributes
   }
 }

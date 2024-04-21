@@ -1,10 +1,13 @@
 import { setupTables } from '../../dbSetup'
 import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 import { default as bunyan } from 'bunyan'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import { ProviderHealthStateRepository } from '../../../../lib/rpc/ProviderHealthStateRepository'
 import { ProviderHealthStateDynamoDbRepository } from '../../../../lib/rpc/ProviderHealthStateDynamoDbRepository'
-import { ProviderHealthState } from '../../../../lib/rpc/ProviderHealthState'
+import { ProviderHealthiness, ProviderHealthState } from '../../../../lib/rpc/ProviderHealthState'
+import chaiAsPromised from 'chai-as-promised'
+
+chai.use(chaiAsPromised)
 
 const DB_TABLE = {
   TableName: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
@@ -41,20 +44,81 @@ describe('ProviderHealthStateDynamoDbRepository', () => {
     log
   )
 
-  it('write state to DB then read from it', async () => {
+  it('write state to DB then read from it, empty case', async () => {
     let readState: ProviderHealthState | null = await storage.read(PROVIDER_ID)
     expect(readState).to.be.null
+  })
 
-    await storage.write(PROVIDER_ID, ProviderHealthState.HEALTHY)
-    readState = await storage.read(PROVIDER_ID)
-    expect(readState).equals(ProviderHealthState.HEALTHY)
+  it('write state to DB then read from it, new item', async () => {
+    await storage.write(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 1
+    })
+    const readState = await storage.read(PROVIDER_ID)
+    expect(readState).deep.equals({
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 1
+    })
+  })
 
-    await storage.write(PROVIDER_ID, ProviderHealthState.UNHEALTHY)
-    readState = await storage.read(PROVIDER_ID)
-    expect(readState).equals(ProviderHealthState.UNHEALTHY)
+  it('write state can overwrite existing DB item', async () => {
+    await storage.write(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 1
+    })
+    await storage.write(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: ['alarm1'],
+      version: 1
+    })
+    const readState = await storage.read(PROVIDER_ID)
+    expect(readState).deep.equals({
+      healthiness: ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: ['alarm1'],
+      version: 1
+    })
+  })
 
-    await storage.write(PROVIDER_ID, ProviderHealthState.HEALTHY)
-    readState = await storage.read(PROVIDER_ID)
-    expect(readState).equals(ProviderHealthState.HEALTHY)
+  it('Update item, with expected base version', async () => {
+    await storage.write(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 1
+    })
+    await storage.update(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: ['alarm1'],
+      version: 2
+    })
+    const readState = await storage.read(PROVIDER_ID)
+    expect(readState).deep.equals({
+      healthiness: ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: ['alarm1'],
+      version: 2
+    })
+  })
+
+  it('Update item, with unexpected base version', async () => {
+    await storage.write(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 2
+    })
+    // This update should fail, because it expects the version of existing item is 1.
+    await expect(storage.update(PROVIDER_ID, {
+      healthiness: ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: ['alarm1'],
+      version: 2
+    })).to.be.rejectedWith(Error)
+    // DB entry isn't updated
+    const readState = await storage.read(PROVIDER_ID)
+    expect(readState).deep.equals({
+      healthiness: ProviderHealthiness.HEALTHY,
+      ongoingAlarms: [],
+      version: 2
+    })
   })
 })
