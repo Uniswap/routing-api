@@ -15,10 +15,9 @@ import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
 import { getProviderId } from './utils'
-import { ProviderHealthState } from './ProviderHealthState'
+import { ProviderHealthiness } from './ProviderHealthState'
 import { ProviderHealthStateRepository } from './ProviderHealthStateRepository'
 import { ProviderHealthStateDynamoDbRepository } from './ProviderHealthStateDynamoDbRepository'
-import { HealthState } from 'aws-sdk/clients/globalaccelerator'
 
 export const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call', 'send']
 
@@ -43,7 +42,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   readonly providerName: string
   readonly providerId: string
 
-  private healthState: ProviderHealthState = ProviderHealthState.HEALTHY
+  private healthiness: ProviderHealthiness = ProviderHealthiness.HEALTHY
 
   private evaluatingHealthiness: boolean = false
   private lastHealthinessEvaluationTimestampInMs: number = 0
@@ -87,12 +86,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.healthStateRepository = new ProviderHealthStateDynamoDbRepository(dbTableName, log)
       // Fire and forget. Won't check the sync result. But usually the sync will finish before the end of initialization
       // of the current lambda, so it should already know the latest provider health states before serving requests.
-      this.syncAndUpdateProviderHealthState()
+      this.syncAndUpdateProviderHealthiness()
     }
   }
 
   isHealthy() {
-    return this.healthState === ProviderHealthState.HEALTHY
+    return this.healthiness === ProviderHealthiness.HEALTHY
   }
 
   hasEnoughWaitSinceLastLatencyEvaluation(waitTimeRequirementInMs: number): boolean {
@@ -234,8 +233,8 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_db_sync_FAIL`, 1, MetricLoggerUnit.Count)
   }
 
-  logHealthStateChanged(newHealthState: HealthState) {
-    metric.putMetric(`${this.metricPrefix}_becomes_${newHealthState}`, 1, MetricLoggerUnit.Count)
+  logHealthinessChanged(newHealthiness: ProviderHealthiness) {
+    metric.putMetric(`${this.metricPrefix}_becomes_${newHealthiness}`, 1, MetricLoggerUnit.Count)
   }
 
   private async wrappedFunctionCall(
@@ -276,23 +275,25 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
             this.logDbSyncSampled()
             this.syncingDb = true
             // Fire and forget. Won't check the sync result.
-            this.syncAndUpdateProviderHealthState()
+            this.syncAndUpdateProviderHealthiness()
           }
         }
       }
     }
   }
 
-  private async syncAndUpdateProviderHealthState() {
+  private async syncAndUpdateProviderHealthiness() {
     try {
       const healthStateFromDb = await this.healthStateRepository.read(this.providerId)
       if (healthStateFromDb !== null) {
-        if (healthStateFromDb !== this.healthState) {
-          this.logHealthStateChanged(healthStateFromDb)
-          this.log.debug(`${this.providerId}: Health state changed! From ${this.healthState} to ${healthStateFromDb}`)
+        if (healthStateFromDb.healthiness !== this.healthiness) {
+          this.logHealthinessChanged(healthStateFromDb.healthiness)
+          this.log.debug(
+            `${this.providerId}: Health state changed! From ${this.healthiness} to ${healthStateFromDb.healthiness}`
+          )
         }
-        this.healthState = healthStateFromDb
-        this.log.debug(`${this.providerId}: Synced with storage: new health state ${this.healthState}`)
+        this.healthiness = healthStateFromDb.healthiness
+        this.log.debug(`${this.providerId}: Synced with storage: new health state ${this.healthiness}`)
       }
       this.lastDbSyncTimestampInMs = Date.now()
       this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)

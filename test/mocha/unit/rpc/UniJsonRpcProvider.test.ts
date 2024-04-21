@@ -10,7 +10,7 @@ import {
 } from '../../../../lib/rpc/config'
 import { SingleJsonRpcProvider } from '../../../../lib/rpc/SingleJsonRpcProvider'
 import { default as bunyan } from 'bunyan'
-import { ProviderHealthState } from '../../../../lib/rpc/ProviderHealthState'
+import { ProviderHealthiness } from '../../../../lib/rpc/ProviderHealthState'
 
 const UNI_PROVIDER_TEST_CONFIG: UniJsonRpcProviderConfig = {
   HEALTH_EVALUATION_WAIT_PERIOD_IN_S: 0,
@@ -112,7 +112,7 @@ describe('UniJsonRpcProvider', () => {
 
   it('fallback when first provider becomes unhealthy', async () => {
     // provider0 is unhealthy
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
@@ -135,7 +135,7 @@ describe('UniJsonRpcProvider', () => {
 
   it('unhealthy provider successfully recovered', async () => {
     // provider0 is unhealthy
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
@@ -153,7 +153,7 @@ describe('UniJsonRpcProvider', () => {
     expect(uniProvider.lastUsedUrl).equals('url_1')
 
     // provider0 then recovered.
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.HEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.HEALTHY
     getBlockNumber0.resolves(123)
 
     expect(uniProvider.currentHealthyUrls).to.have.ordered.members(['url_0', 'url_1', 'url_2'])
@@ -419,7 +419,7 @@ describe('UniJsonRpcProvider', () => {
     // Make provider0 unhealthy
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.rejects('error')
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_1')
@@ -429,7 +429,7 @@ describe('UniJsonRpcProvider', () => {
     getBlockNumber1.rejects('error')
 
     // Make provider1 unhealthy
-    uniProvider['providers'][1]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][1]['healthiness'] = ProviderHealthiness.UNHEALTHY
 
     expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
     expect(uniProvider1['selectPreferredProvider']().url).equals('url_2')
@@ -505,7 +505,7 @@ describe('UniJsonRpcProvider', () => {
 
     // However, now provider0 throws error.
     getBlockNumber0.rejects('error')
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
 
     uniProvider.logProviderHealthiness()
 
@@ -541,7 +541,7 @@ describe('UniJsonRpcProvider', () => {
 
     // However, now provider0 throws error.
     getBlockNumber0.rejects('error')
-    uniProvider['providers'][0]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
 
     uniProvider.logProviderHealthiness()
 
@@ -890,11 +890,11 @@ describe('UniJsonRpcProvider', () => {
     const getBlockNumber0 = sandbox.stub(uniProvider['providers'][0], '_getBlockNumber' as any)
     getBlockNumber0.resolves(123)
 
-    uniProvider['providers'][1]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][1]['healthiness'] = ProviderHealthiness.UNHEALTHY
     const getBlockNumber1 = sandbox.stub(uniProvider['providers'][1], '_getBlockNumber' as any)
     getBlockNumber1.rejects('error')
 
-    uniProvider['providers'][2]['healthState'] = ProviderHealthState.UNHEALTHY
+    uniProvider['providers'][2]['healthiness'] = ProviderHealthiness.UNHEALTHY
     const getBlockNumber2 = sandbox.stub(uniProvider['providers'][2], '_getBlockNumber' as any)
     getBlockNumber2.rejects('error')
 

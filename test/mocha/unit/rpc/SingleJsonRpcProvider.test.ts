@@ -5,8 +5,8 @@ import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { SingleJsonRpcProviderConfig } from '../../../../lib/rpc/config'
 import { default as bunyan } from 'bunyan'
-import { ProviderHealthState } from '../../../../lib/rpc/ProviderHealthState'
 import { ProviderHealthStateDynamoDbRepository } from '../../../../lib/rpc/ProviderHealthStateDynamoDbRepository'
+import { ProviderHealthiness } from '../../../../lib/rpc/ProviderHealthState'
 
 chai.use(chaiAsPromised)
 
@@ -79,7 +79,13 @@ describe('SingleJsonRpcProvider', () => {
   it('test sync and update states with DB', async () => {
     provider['enableDbSync'] = true
     const stubRepo = sandbox.createStubInstance(ProviderHealthStateDynamoDbRepository)
-    stubRepo.read.returns(Promise.resolve(ProviderHealthState.UNHEALTHY))
+    stubRepo.read.returns(
+      Promise.resolve({
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: ['alarm1'],
+        version: 1,
+      })
+    )
     provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
@@ -88,19 +94,25 @@ describe('SingleJsonRpcProvider', () => {
     const blockNumber = await provider.getBlockNumber()
     expect(blockNumber).equals(123456)
 
-    expect(provider['healthState']).equals(ProviderHealthState.UNHEALTHY)
+    expect(provider['healthiness']).equals(ProviderHealthiness.UNHEALTHY)
   })
 
   it('test DB sync rate limit', async () => {
     provider['enableDbSync'] = true
     const stubRepo = sandbox.createStubInstance(ProviderHealthStateDynamoDbRepository)
-    stubRepo.read.returns(Promise.resolve(ProviderHealthState.UNHEALTHY))
+    stubRepo.read.returns(
+      Promise.resolve({
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: ['alarm1'],
+        version: 1,
+      })
+    )
     provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
 
-    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthState' as any)
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthiness' as any)
 
     await provider.getBlockNumber()
     await provider.getBlockNumber()
@@ -118,13 +130,19 @@ describe('SingleJsonRpcProvider', () => {
 
     provider['enableDbSync'] = true
     const stubRepo = sandbox.createStubInstance(ProviderHealthStateDynamoDbRepository)
-    stubRepo.read.returns(Promise.resolve(ProviderHealthState.UNHEALTHY))
+    stubRepo.read.returns(
+      Promise.resolve({
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: ['alarm1'],
+        version: 1,
+      })
+    )
     provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
 
-    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthState' as any)
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthiness' as any)
 
     await Promise.all([
       provider.getBlockNumber(),
@@ -190,13 +208,19 @@ describe('SingleJsonRpcProvider', () => {
     provider['enableDbSync'] = true
 
     const stubRepo = sandbox.createStubInstance(ProviderHealthStateDynamoDbRepository)
-    stubRepo.read.returns(Promise.resolve(ProviderHealthState.UNHEALTHY))
+    stubRepo.read.returns(
+      Promise.resolve({
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: ['alarm1'],
+        version: 1,
+      })
+    )
     provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
 
-    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthState' as any)
+    const syncSpy = sandbox.spy(provider, 'syncAndUpdateProviderHealthiness' as any)
 
     const randStub = sandbox.stub(Math, 'random')
 
