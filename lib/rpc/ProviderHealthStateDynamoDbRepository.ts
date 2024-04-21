@@ -75,9 +75,7 @@ export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStat
     await this.ddbClient.update(updateParams).promise()
   }
 
-  private getExpressionAttributeValues(
-    state: ProviderHealthState
-  ): { [key: string]: any } {
+  private getExpressionAttributeValues(state: ProviderHealthState): { [key: string]: any } {
     let attributes: { [key: string]: any } = {}
     attributes[':healthiness'] = state.healthiness
     attributes[':ongoingAlarms'] = state.ongoingAlarms

@@ -4,7 +4,7 @@ export enum ProviderHealthiness {
 }
 
 export interface ProviderHealthState {
-  healthiness: ProviderHealthiness,
-  ongoingAlarms: string[],
-  version: number,
+  healthiness: ProviderHealthiness
+  ongoingAlarms: string[]
+  version: number
 }

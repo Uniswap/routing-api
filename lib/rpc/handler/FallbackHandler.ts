@@ -3,18 +3,25 @@ import { ChainId } from '@uniswap/sdk-core'
 import { getProviderId } from '../utils'
 import { ProviderHealthStateRepository } from '../ProviderHealthStateRepository'
 import { ProviderHealthStateDynamoDbRepository } from '../ProviderHealthStateDynamoDbRepository'
-import { ProviderHealthState } from '../ProviderHealthState'
+import { ProviderHealthiness, ProviderHealthState } from '../ProviderHealthState'
 import { MetricLoggerUnit } from '@uniswap/smart-order-router'
 import { metricScope, MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyResult } from 'aws-lambda'
 import { AWSMetricsLogger } from '../../handlers/router-entities/aws-metrics-logger'
 
-interface AlarmEvent {
+export interface AlarmEvent {
   alarmName: string
   state: string
-  previousState: string
+  previousState: string // Only for logging purpose. Not used in any logic.
   providerId: string
-  reason: string
+  reason: string // Only for logging purpose. Not used in any logic
+}
+
+export class HealthinessUpdate {
+  constructor(public oldHealthiness: ProviderHealthiness, public newHealthiness: ProviderHealthiness) {}
+  isChanged(): boolean {
+    return this.oldHealthiness === this.newHealthiness
+  }
 }
 
 export class FallbackHandler {
@@ -39,23 +46,15 @@ export class FallbackHandler {
       const alarmEvent = this.readAlarmEvent(event)
       this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
-      if (alarmEvent.state === 'ALARM') {
-        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.UNHEALTHY)
-        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
-        this.log.error(
-          `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
-        )
-      } else if (alarmEvent.state === 'OK') {
-        await this.healthStateRepository.write(alarmEvent.providerId, ProviderHealthState.HEALTHY)
-        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
-        this.log.error(
-          `${alarmEvent.providerId} becomes HEALTHY due to ${alarmEvent.previousState}=>OK in ${alarmEvent.alarmName}`
-        )
-      }
+      const healthinessUpdate = await this.processAlarm(alarmEvent, metric)
 
+      this.log.debug({ alarmEvent, healthinessUpdate }, 'Handler response')
       return {
         statusCode: 200,
-        body: '',
+        body: JSON.stringify({
+          alarmEvent,
+          healthinessUpdate,
+        }),
       }
     })
   }
@@ -87,5 +86,80 @@ export class FallbackHandler {
       reason: event.alarmData.state.reason,
       providerId: getProviderId(chainId, providerName),
     }
+  }
+
+  private async processAlarm(alarmEvent: AlarmEvent, metric: AWSMetricsLogger): Promise<HealthinessUpdate> {
+    let healthinessUpdate = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
+
+    if (alarmEvent.state === 'ALARM') {
+      healthinessUpdate = await this.updateDbItemWhenAlarm(alarmEvent)
+      if (healthinessUpdate.isChanged()) {
+        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
+        this.log.error(
+          `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
+        )
+      }
+    } else if (alarmEvent.state === 'OK') {
+      healthinessUpdate = await this.updateDbItemWhenOk(alarmEvent)
+      if (healthinessUpdate.isChanged()) {
+        metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
+        this.log.error(
+          `${alarmEvent.providerId} becomes HEALTHY due to ${alarmEvent.previousState}=>OK in ${alarmEvent.alarmName}`
+        )
+      }
+    }
+    return healthinessUpdate
+  }
+
+  private async updateDbItemWhenAlarm(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
+    const state: ProviderHealthState | null = await this.healthStateRepository.read(alarmEvent.providerId)
+    if (state === null) {
+      const newState: ProviderHealthState = {
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: [alarmEvent.alarmName],
+        version: 1,
+      }
+      await this.healthStateRepository.write(alarmEvent.providerId, newState)
+    } else {
+      const newOngoingAlarms = state.ongoingAlarms
+      if (!state.ongoingAlarms.includes(alarmEvent.alarmName)) {
+        newOngoingAlarms.push(alarmEvent.alarmName)
+      }
+      const newState: ProviderHealthState = {
+        healthiness: ProviderHealthiness.UNHEALTHY,
+        ongoingAlarms: newOngoingAlarms,
+        version: state.version + 1,
+      }
+      await this.healthStateRepository.update(alarmEvent.providerId, newState)
+    }
+
+    // Return true if it becomes unhealthy from healthy.
+    return new HealthinessUpdate(
+      state === null || state.healthiness === ProviderHealthiness.HEALTHY
+        ? ProviderHealthiness.HEALTHY
+        : ProviderHealthiness.UNHEALTHY,
+      ProviderHealthiness.UNHEALTHY
+    )
+  }
+
+  private async updateDbItemWhenOk(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
+    const state: ProviderHealthState | null = await this.healthStateRepository.read(alarmEvent.providerId)
+    if (state === null || state.healthiness === ProviderHealthiness.HEALTHY) {
+      return new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
+    }
+    if (!state.ongoingAlarms.includes(alarmEvent.alarmName)) {
+      return new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
+    }
+    const newOngoingAlarms = state.ongoingAlarms.filter((alarmName) => alarmName !== alarmEvent.alarmName)
+    const newState: ProviderHealthState = {
+      healthiness: newOngoingAlarms.length === 0 ? ProviderHealthiness.HEALTHY : ProviderHealthiness.UNHEALTHY,
+      ongoingAlarms: newOngoingAlarms,
+      version: state.version + 1,
+    }
+    await this.healthStateRepository.update(alarmEvent.providerId, newState)
+    return new HealthinessUpdate(
+      ProviderHealthiness.UNHEALTHY,
+      newOngoingAlarms.length === 0 ? ProviderHealthiness.HEALTHY : ProviderHealthiness.UNHEALTHY
+    )
   }
 }
