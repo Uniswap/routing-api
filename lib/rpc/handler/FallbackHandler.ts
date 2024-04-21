@@ -20,7 +20,7 @@ export interface AlarmEvent {
 export class HealthinessUpdate {
   constructor(public oldHealthiness: ProviderHealthiness, public newHealthiness: ProviderHealthiness) {}
   isChanged(): boolean {
-    return this.oldHealthiness === this.newHealthiness
+    return this.oldHealthiness !== this.newHealthiness
   }
 }
 

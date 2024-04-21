@@ -80,6 +80,13 @@ describe('FallbackHandler', () => {
     expect(alarmEvent.providerId).equals(PROVIDER_ID)
   })
 
+  it('test HealthinessUpdate', async() => {
+    const change1 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.UNHEALTHY)
+    expect(change1.isChanged()).equals(true)
+    const change2 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
+    expect(change2.isChanged()).equals(false)
+  })
+
   describe('verify we do DB update when alarm', async () => {
     let stubRepo: Sinon.SinonStubbedInstance<ProviderHealthStateDynamoDbRepository>
     let alarmEvent: AlarmEvent
