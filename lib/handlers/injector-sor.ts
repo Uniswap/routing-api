@@ -312,7 +312,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]! : NEW_QUOTER_V2_ADDRESSES[chainId]!,
+                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean) =>
                   useMixedRouteQuoter ? `ChainId_${chainId}_ShadowMixedQuoter` : `ChainId_${chainId}_ShadowV3Quoter`
               )
