@@ -609,8 +609,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       routeString,
       quoteId,
       hitsCachedRoutes: hitsCachedRoute,
-      portionBips: portionBips,
-      portionRecipient: portionRecipient,
+      portionBips: outputPortionAmount && portionBips,
+      portionRecipient: outputPortionAmount && portionRecipient,
       portionAmount: outputPortionAmount?.quotient.toString(),
       portionAmountDecimals: outputPortionAmount?.toExact(),
     }
