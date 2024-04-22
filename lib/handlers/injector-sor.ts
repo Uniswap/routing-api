@@ -35,8 +35,8 @@ import {
   TokenValidatorProvider,
   ITokenPropertiesProvider,
   IOnChainQuoteProvider,
+  MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   NEW_QUOTER_V2_ADDRESSES,
-  QUOTER_V2_ADDRESSES,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -300,9 +300,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BATCH_PARAMS[chainId],
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
-                QUOTER_V2_ADDRESSES[chainId],
-                `ChainId_${chainId}_Quoter`
+                BLOCK_NUMBER_CONFIGS[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -313,8 +311,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
-                NEW_QUOTER_V2_ADDRESSES[chainId],
-                `ChainId_${chainId}_Shadow_Quoter`
+                (useMixedRouteQuoter: boolean) =>
+                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
+                (chainId: ChainId, useMixedRouteQuoter: boolean) =>
+                  useMixedRouteQuoter ? `ChainId_${chainId}_ShadowMixedQuoter` : `ChainId_${chainId}_ShadowV3Quoter`
               )
               quoteProvider = new TrafficSwitchOnChainQuoteProvider({
                 currentQuoteProvider: currentQuoteProvider,
