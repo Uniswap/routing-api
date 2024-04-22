@@ -94,9 +94,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.AVALANCHE:
       // Avalanche RPC eth_call traffic is about 1/100 of mainnet, so we can shadow sample 10% of traffic
       return {
-        switchExactInPercentage: 0.0,
+        switchExactInPercentage: 1,
         samplingExactInPercentage: 10,
-        switchExactOutPercentage: 0.0,
+        switchExactOutPercentage: 1,
         samplingExactOutPercentage: 10,
       } as QuoteProviderTrafficSwitchConfiguration
     // If we accidentally switch a traffic, we have the protection to shadow sample only 0.1% of traffic
