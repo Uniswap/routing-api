@@ -16,6 +16,7 @@ import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
 import { ProviderStateSyncer } from './ProviderStateSyncer'
 import { ProviderState } from './ProviderState'
+import { getProviderId } from './utils'
 
 export const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call', 'send']
 
@@ -78,7 +79,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)
-    this.providerId = `${network.chainId.toString()}_${this.providerName}`
+    this.providerId = getProviderId(network.chainId, this.providerName)
     this.config = config
     this.metricPrefix = `RPC_GATEWAY_${this.network.chainId}_${this.providerName}`
     this.enableDbSync = enableDbSync
