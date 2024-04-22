@@ -232,9 +232,18 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    const requestSource =
-      (params.event.headers && params.event.headers['x-request-source']) ?? params.requestQueryParams.source ?? ''
+    const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
     const appVersion = params.event.headers && params.event.headers['x-app-version']
+
+    if (requestSourceHeader) {
+      metric.putMetric(`RequestSource.${requestSourceHeader}`, 1)
+    }
+
+    if (appVersion) {
+      metric.putMetric(`AppVersion.${appVersion}`, 1)
+    }
+
+    const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
       protocolsStr,
