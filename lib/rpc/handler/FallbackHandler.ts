@@ -17,13 +17,6 @@ export interface AlarmEvent {
   reason: string // Only for logging purpose. Not used in any logic
 }
 
-export class HealthinessUpdate {
-  constructor(public oldHealthiness: ProviderHealthiness, public newHealthiness: ProviderHealthiness) {}
-  isChanged(): boolean {
-    return this.oldHealthiness !== this.newHealthiness
-  }
-}
-
 export class FallbackHandler {
   private healthStateRepository: ProviderHealthStateRepository
   private log: Logger
@@ -46,14 +39,14 @@ export class FallbackHandler {
       const alarmEvent = this.readAlarmEvent(event)
       this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
-      const healthinessUpdate = await this.processAlarm(alarmEvent)
+      const healthinessTransition = await this.processAlarm(alarmEvent)
 
-      this.log.debug({ alarmEvent, healthinessUpdate }, 'Handler response')
+      this.log.debug({ alarmEvent, healthinessTransition }, 'Handler response')
       return {
         statusCode: 200,
         body: JSON.stringify({
           alarmEvent,
-          healthinessUpdate,
+          healthinessTransition,
         }),
       }
     })
@@ -88,30 +81,40 @@ export class FallbackHandler {
     }
   }
 
-  private async processAlarm(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
-    let healthinessUpdate = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
+  private async processAlarm(alarmEvent: AlarmEvent): Promise<{
+    oldHealthiness: ProviderHealthiness
+    newHealthiness: ProviderHealthiness
+  } | null> {
+    // let healthinessUpdate = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
 
     if (alarmEvent.state === 'ALARM') {
-      healthinessUpdate = await this.updateDbItemWhenAlarm(alarmEvent)
-      if (healthinessUpdate.isChanged()) {
+      const { oldHealthiness, newHealthiness } = await this.updateDbItemForAlarmEvent(alarmEvent)
+      if (oldHealthiness !== newHealthiness) {
         metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_UNHEALTHY`, 1, MetricLoggerUnit.Count)
         this.log.error(
           `${alarmEvent.providerId} becomes UNHEALTHY due to ${alarmEvent.previousState}=>ALARM in ${alarmEvent.alarmName}`
         )
       }
+      return { oldHealthiness, newHealthiness }
     } else if (alarmEvent.state === 'OK') {
-      healthinessUpdate = await this.updateDbItemWhenOk(alarmEvent)
-      if (healthinessUpdate.isChanged()) {
+      const { oldHealthiness, newHealthiness } = await this.updateDbItemForOkEvent(alarmEvent)
+      if (oldHealthiness !== newHealthiness) {
         metric.putMetric(`RPC_GATEWAY_FALLBACK_${alarmEvent.providerId}_INTO_HEALTHY`, 1, MetricLoggerUnit.Count)
         this.log.error(
           `${alarmEvent.providerId} becomes HEALTHY due to ${alarmEvent.previousState}=>OK in ${alarmEvent.alarmName}`
         )
       }
+      return { oldHealthiness, newHealthiness }
+    } else {
+      this.log.debug(`Ignored alarm state: ${alarmEvent.state}`)
+      return null
     }
-    return healthinessUpdate
   }
 
-  private async updateDbItemWhenAlarm(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
+  private async updateDbItemForAlarmEvent(alarmEvent: AlarmEvent): Promise<{
+    oldHealthiness: ProviderHealthiness
+    newHealthiness: ProviderHealthiness
+  }> {
     const state: ProviderHealthState | null = await this.healthStateRepository.read(alarmEvent.providerId)
     if (state === null) {
       const newState: ProviderHealthState = {
@@ -134,21 +137,31 @@ export class FallbackHandler {
     }
 
     // Return true if it becomes unhealthy from healthy.
-    return new HealthinessUpdate(
-      state === null || state.healthiness === ProviderHealthiness.HEALTHY
-        ? ProviderHealthiness.HEALTHY
-        : ProviderHealthiness.UNHEALTHY,
-      ProviderHealthiness.UNHEALTHY
-    )
+    return {
+      oldHealthiness:
+        state === null || state.healthiness === ProviderHealthiness.HEALTHY
+          ? ProviderHealthiness.HEALTHY
+          : ProviderHealthiness.UNHEALTHY,
+      newHealthiness: ProviderHealthiness.UNHEALTHY,
+    }
   }
 
-  private async updateDbItemWhenOk(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
+  private async updateDbItemForOkEvent(alarmEvent: AlarmEvent): Promise<{
+    oldHealthiness: ProviderHealthiness
+    newHealthiness: ProviderHealthiness
+  }> {
     const state: ProviderHealthState | null = await this.healthStateRepository.read(alarmEvent.providerId)
     if (state === null || state.healthiness === ProviderHealthiness.HEALTHY) {
-      return new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
+      return {
+        oldHealthiness: ProviderHealthiness.HEALTHY,
+        newHealthiness: ProviderHealthiness.HEALTHY,
+      }
     }
     if (!state.ongoingAlarms.includes(alarmEvent.alarmName)) {
-      return new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
+      return {
+        oldHealthiness: ProviderHealthiness.UNHEALTHY,
+        newHealthiness: ProviderHealthiness.UNHEALTHY,
+      }
     }
     const newOngoingAlarms = state.ongoingAlarms.filter((alarmName) => alarmName !== alarmEvent.alarmName)
     const newState: ProviderHealthState = {
@@ -157,9 +170,9 @@ export class FallbackHandler {
       version: state.version + 1,
     }
     await this.healthStateRepository.update(alarmEvent.providerId, newState)
-    return new HealthinessUpdate(
-      ProviderHealthiness.UNHEALTHY,
-      newOngoingAlarms.length === 0 ? ProviderHealthiness.HEALTHY : ProviderHealthiness.UNHEALTHY
-    )
+    return {
+      oldHealthiness: ProviderHealthiness.UNHEALTHY,
+      newHealthiness: newOngoingAlarms.length === 0 ? ProviderHealthiness.HEALTHY : ProviderHealthiness.UNHEALTHY,
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { DynamoDBTableProps } from '../../../../bin/stacks/routing-database-stack'
 import { default as bunyan } from 'bunyan'
 import { expect } from 'chai'
-import { AlarmEvent, FallbackHandler, HealthinessUpdate } from '../../../../lib/rpc/handler/FallbackHandler'
+import { AlarmEvent, FallbackHandler } from '../../../../lib/rpc/handler/FallbackHandler'
 import Sinon from 'sinon'
 import { ProviderHealthStateDynamoDbRepository } from '../../../../lib/rpc/ProviderHealthStateDynamoDbRepository'
 import { ProviderHealthiness } from '../../../../lib/rpc/ProviderHealthState'
@@ -80,13 +80,6 @@ describe('FallbackHandler', () => {
     expect(alarmEvent.providerId).equals(PROVIDER_ID)
   })
 
-  it('test HealthinessUpdate', async () => {
-    const change1 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.UNHEALTHY)
-    expect(change1.isChanged()).equals(true)
-    const change2 = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
-    expect(change2.isChanged()).equals(false)
-  })
-
   describe('verify we do DB update when alarm', async () => {
     let stubRepo: Sinon.SinonStubbedInstance<ProviderHealthStateDynamoDbRepository>
     let alarmEvent: AlarmEvent
@@ -115,7 +108,7 @@ describe('FallbackHandler', () => {
 
     it('no previous alarm, DB reads null', async () => {
       stubRepo.read.resolves(null)
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenAlarm'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForAlarmEvent'](alarmEvent)
 
       expect(stubRepo.update.callCount).equals(0)
       expect(stubRepo.write.callCount).equals(1)
@@ -125,9 +118,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1'],
         version: 1,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.HEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
 
     it('no previous alarm, DB reads healthy provider state', async () => {
@@ -136,7 +128,7 @@ describe('FallbackHandler', () => {
         ongoingAlarms: [],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenAlarm'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForAlarmEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(1)
@@ -146,9 +138,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1'],
         version: 2,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.HEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
 
     it('has previous alarm, new alarm event repeats', async () => {
@@ -157,7 +148,7 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1', 'alarm2'],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenAlarm'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForAlarmEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(1)
@@ -167,9 +158,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1', 'alarm2'],
         version: 2,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.UNHEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
 
     it('has previous alarm, new alarm event does not repeat', async () => {
@@ -178,7 +168,7 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm2'],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenAlarm'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForAlarmEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(1)
@@ -188,9 +178,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm2', 'alarm1'],
         version: 2,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.UNHEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
   })
 
@@ -222,13 +211,12 @@ describe('FallbackHandler', () => {
 
     it('no previous alarm, DB reads null', async () => {
       stubRepo.read.resolves(null)
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenOk'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForOkEvent'](alarmEvent)
 
       expect(stubRepo.update.callCount).equals(0)
       expect(stubRepo.write.callCount).equals(0)
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.HEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.HEALTHY)
     })
 
     it('no previous alarm, DB reads healthy provider state', async () => {
@@ -237,13 +225,12 @@ describe('FallbackHandler', () => {
         ongoingAlarms: [],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenOk'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForOkEvent'](alarmEvent)
 
       expect(stubRepo.update.callCount).equals(0)
       expect(stubRepo.write.callCount).equals(0)
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.HEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.HEALTHY)
     })
 
     it('has previous alarm, new alarm event repeats', async () => {
@@ -252,7 +239,7 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1', 'alarm2'],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenOk'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForOkEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(1)
@@ -262,9 +249,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm2'],
         version: 2,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.UNHEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
 
     it('has previous alarm, new alarm event repeats, all ongoing alarm cleared', async () => {
@@ -273,7 +259,7 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm1'],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenOk'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForOkEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(1)
@@ -283,9 +269,8 @@ describe('FallbackHandler', () => {
         ongoingAlarms: [],
         version: 2,
       })
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.HEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.UNHEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.HEALTHY)
     })
 
     it('has previous alarm, new alarm event does not repeat', async () => {
@@ -294,13 +279,12 @@ describe('FallbackHandler', () => {
         ongoingAlarms: ['alarm2'],
         version: 1,
       })
-      const healthinessUpdate = await fallbackHandler['updateDbItemWhenOk'](alarmEvent)
+      const { oldHealthiness, newHealthiness } = await fallbackHandler['updateDbItemForOkEvent'](alarmEvent)
 
       expect(stubRepo.write.callCount).equals(0)
       expect(stubRepo.update.callCount).equals(0)
-      expect(healthinessUpdate).deep.equals(
-        new HealthinessUpdate(ProviderHealthiness.UNHEALTHY, ProviderHealthiness.UNHEALTHY)
-      )
+      expect(oldHealthiness).equals(ProviderHealthiness.UNHEALTHY)
+      expect(newHealthiness).equals(ProviderHealthiness.UNHEALTHY)
     })
   })
 })
