@@ -151,7 +151,7 @@ describe('FallbackHandler', () => {
       )
     })
 
-    it('has previous alarm, new alarm repeats', async () => {
+    it('has previous alarm, new alarm event repeats', async () => {
       stubRepo.read.resolves({
         healthiness: ProviderHealthiness.UNHEALTHY,
         ongoingAlarms: ['alarm1', 'alarm2'],
@@ -172,7 +172,7 @@ describe('FallbackHandler', () => {
       )
     })
 
-    it('has previous alarm, new alarm does not repeat', async () => {
+    it('has previous alarm, new alarm event does not repeat', async () => {
       stubRepo.read.resolves({
         healthiness: ProviderHealthiness.UNHEALTHY,
         ongoingAlarms: ['alarm2'],
@@ -246,7 +246,7 @@ describe('FallbackHandler', () => {
       )
     })
 
-    it('has previous alarm, new alarm repeats', async () => {
+    it('has previous alarm, new alarm event repeats', async () => {
       stubRepo.read.resolves({
         healthiness: ProviderHealthiness.UNHEALTHY,
         ongoingAlarms: ['alarm1', 'alarm2'],
@@ -267,7 +267,7 @@ describe('FallbackHandler', () => {
       )
     })
 
-    it('has previous alarm, new alarm repeats, all ongoing alarm cleared', async () => {
+    it('has previous alarm, new alarm event repeats, all ongoing alarm cleared', async () => {
       stubRepo.read.resolves({
         healthiness: ProviderHealthiness.UNHEALTHY,
         ongoingAlarms: ['alarm1'],
@@ -288,7 +288,7 @@ describe('FallbackHandler', () => {
       )
     })
 
-    it('has previous alarm, new alarm does not repeat', async () => {
+    it('has previous alarm, new alarm event does not repeat', async () => {
       stubRepo.read.resolves({
         healthiness: ProviderHealthiness.UNHEALTHY,
         ongoingAlarms: ['alarm2'],

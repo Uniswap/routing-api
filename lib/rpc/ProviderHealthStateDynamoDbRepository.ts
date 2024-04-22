@@ -70,6 +70,9 @@ export class ProviderHealthStateDynamoDbRepository implements ProviderHealthStat
       UpdateExpression: UPDATE_EXPRESSION,
       ExpressionAttributeNames: EXPRESSION_ATTRIBUTE_NAMES,
       ExpressionAttributeValues: this.getExpressionAttributeValues(state),
+      // Use conditional update in combination with increasing version number to detect concurrent write conflicts.
+      // If write conflicts is detected, the later write will be dropped. But the invocation of this lambda will be
+      // retried for a maximum of 2 times, at 60 seconds delay per retry.
       ConditionExpression: CONDITION_EXPRESSION,
     }
     await this.ddbClient.update(updateParams).promise()
