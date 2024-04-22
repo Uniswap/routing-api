@@ -4,7 +4,7 @@ import { getProviderId } from '../utils'
 import { ProviderHealthStateRepository } from '../ProviderHealthStateRepository'
 import { ProviderHealthStateDynamoDbRepository } from '../ProviderHealthStateDynamoDbRepository'
 import { ProviderHealthiness, ProviderHealthState } from '../ProviderHealthState'
-import { MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { metric, MetricLoggerUnit, setGlobalMetric } from '@uniswap/smart-order-router'
 import { metricScope, MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyResult } from 'aws-lambda'
 import { AWSMetricsLogger } from '../../handlers/router-entities/aws-metrics-logger'
@@ -41,12 +41,12 @@ export class FallbackHandler {
     return metricScope((metricsLogger: MetricsLogger) => async (event: object): Promise<APIGatewayProxyResult> => {
       metricsLogger.setNamespace('Uniswap')
       metricsLogger.setDimensions({ Service: 'RoutingAPI' })
-      const metric = new AWSMetricsLogger(metricsLogger)
+      setGlobalMetric(new AWSMetricsLogger(metricsLogger))
 
       const alarmEvent = this.readAlarmEvent(event)
       this.log.debug({ alarmEvent }, 'Parsed alarmEvent')
 
-      const healthinessUpdate = await this.processAlarm(alarmEvent, metric)
+      const healthinessUpdate = await this.processAlarm(alarmEvent)
 
       this.log.debug({ alarmEvent, healthinessUpdate }, 'Handler response')
       return {
@@ -88,7 +88,7 @@ export class FallbackHandler {
     }
   }
 
-  private async processAlarm(alarmEvent: AlarmEvent, metric: AWSMetricsLogger): Promise<HealthinessUpdate> {
+  private async processAlarm(alarmEvent: AlarmEvent): Promise<HealthinessUpdate> {
     let healthinessUpdate = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
 
     if (alarmEvent.state === 'ALARM') {
