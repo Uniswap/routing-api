@@ -8,6 +8,7 @@ import { MAJOR_METHOD_NAMES } from '../../lib/rpc/SingleJsonRpcProvider'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { TESTNETS } from '../../lib/util/testNets'
 import { getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
+import { getProviderId } from '../../lib/rpc/utils'
 
 const providerNameForChain: Map<ChainId, string[]> = getRpcGatewayEnabledChains()
 
@@ -48,6 +49,34 @@ function getHealthScoreMetricsForChain(chainId: ChainId) {
       {
         id: `health_score_${chainId}_${providerName}`,
         label: `${providerName} health score on ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
+    ])
+  }
+  return metrics
+}
+
+function getProviderDbHealthStateChangeForChain(chainId: ChainId) {
+  const metrics = []
+  for (const providerName of getProviderNameForChain(chainId)) {
+    const providerId = getProviderId(chainId, providerName)
+    metrics.push([
+      'Uniswap',
+      `RPC_GATEWAY_FALLBACK_${providerId}_INTO_UNHEALTHY`,
+      'Service',
+      'RoutingAPI',
+      {
+        id: `db_into_unhealthy_${chainId}_${providerName}`,
+        label: `${providerName} DB into UNHEALTHY ${ID_TO_NETWORK_NAME(chainId)}`,
+      },
+    ])
+    metrics.push([
+      'Uniswap',
+      `RPC_GATEWAY_FALLBACK_${providerId}_INTO_HEALTHY`,
+      'Service',
+      'RoutingAPI',
+      {
+        id: `db_into_healthy_${chainId}_${providerName}`,
+        label: `${providerName} DB into HEALTHY ${ID_TO_NETWORK_NAME(chainId)}`,
       },
     ])
   }
@@ -590,6 +619,27 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
             left: {
               showUnits: false,
               label: 'Score (in negative)',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getProviderDbHealthStateChangeForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Maximum',
+          period: 300,
+          title: `Provider DB health change for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'DB health state changes',
             },
           },
         },
