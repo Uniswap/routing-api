@@ -3,6 +3,8 @@ import {
   IV2SubgraphProvider,
   IV3SubgraphProvider,
   log,
+  metric,
+  MetricLoggerUnit,
   V2SubgraphPool,
   V3SubgraphPool,
 } from '@uniswap/smart-order-router'
@@ -54,7 +56,13 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
 
   let result
   try {
+    const before = Date.now()
     result = await s3.getObject({ Key: key, Bucket: bucket }).promise()
+    const after = Date.now()
+
+    // Since we don't set the s3 request timeout, it's possible that the lambda timeout, because we even see latency metrics getting logged
+    // In case of increased lambda timeout due to cold start, we expect to see the sampling count of this latency metric to decrease
+    metric.putMetric(`S3GetObjectLatency_key_${key}`, after - before, MetricLoggerUnit.Milliseconds)
   } catch (err) {
     log.error({ bucket, key, err }, `Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
     throw new Error(`Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
