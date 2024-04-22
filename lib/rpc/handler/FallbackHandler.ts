@@ -85,8 +85,6 @@ export class FallbackHandler {
     oldHealthiness: ProviderHealthiness
     newHealthiness: ProviderHealthiness
   } | null> {
-    // let healthinessUpdate = new HealthinessUpdate(ProviderHealthiness.HEALTHY, ProviderHealthiness.HEALTHY)
-
     if (alarmEvent.state === 'ALARM') {
       const { oldHealthiness, newHealthiness } = await this.updateDbItemForAlarmEvent(alarmEvent)
       if (oldHealthiness !== newHealthiness) {
@@ -136,7 +134,6 @@ export class FallbackHandler {
       await this.healthStateRepository.update(alarmEvent.providerId, newState)
     }
 
-    // Return true if it becomes unhealthy from healthy.
     return {
       oldHealthiness:
         state === null || state.healthiness === ProviderHealthiness.HEALTHY
