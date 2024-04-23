@@ -40,7 +40,6 @@ export const DynamoDBTableProps = {
     Name: 'TokenPropertiesCachingDb',
     PartitionKeyName: 'chainIdTokenAddress',
   },
-  // NOTICE: This table is obsolete. Do not touch it.
   RpcProviderStateDbTable: {
     Name: 'RpcProviderState',
     PartitionKeyName: 'chainIdProviderName',
@@ -65,6 +64,7 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
   public readonly cachedV3PoolsDynamoDb: aws_dynamodb.Table
   public readonly cachedV2PairsDynamoDb: aws_dynamodb.Table
   public readonly tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
+  public readonly rpcProviderStateDynamoDb: aws_dynamodb.Table
   public readonly rpcProviderHealthStateDynamoDb: aws_dynamodb.Table
 
   constructor(scope: Construct, name: string, props: RoutingDatabaseStackProps) {
@@ -153,8 +153,8 @@ export class RoutingDatabaseStack extends cdk.NestedStack {
       }
     )
 
-    // NOTICE: This table has become useless after we fully migrate to rpcProviderHealthStateDynamoDb
-    new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderStateDbTable.Name, {
+    // NOTICE: This table will become useless after we fully migrate to rpcProviderHealthStateDynamoDb
+    this.rpcProviderStateDynamoDb = new aws_dynamodb.Table(this, DynamoDBTableProps.RpcProviderStateDbTable.Name, {
       tableName: DynamoDBTableProps.RpcProviderStateDbTable.Name,
       partitionKey: {
         name: DynamoDBTableProps.RpcProviderStateDbTable.PartitionKeyName,
