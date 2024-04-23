@@ -63,6 +63,10 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
     // Since we don't set the s3 request timeout, it's possible that the lambda timeout, because we even see latency metrics getting logged
     // In case of increased lambda timeout due to cold start, we expect to see the sampling count of this latency metric to decrease
     metric.putMetric(`S3GetObjectLatency_key_${key}`, after - before, MetricLoggerUnit.Milliseconds)
+    log.info(
+      { bucket, key },
+      `Downloaded s3 object for ${protocol} on ${chainId} with latency ${after - before} milliseconds.`
+    )
   } catch (err) {
     log.error({ bucket, key, err }, `Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
     throw new Error(`Failed to get pools from S3 for ${protocol} on chain ${chainId}`)
@@ -74,9 +78,18 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
     throw new Error(`Could not get subgraph pool cache from S3 for protocol ${protocol} on chain ${chainId}`)
   }
 
+  const before = Date.now()
   const pools = JSON.parse(poolsBuffer.toString('utf-8')) as TSubgraphPool[]
+  const after = Date.now()
 
-  log.info({ bucket, key }, `Got subgraph pools from S3 for protocol ${protocol} on ${chainId}. Num: ${pools.length}`)
+  log.info(
+    { bucket, key },
+    `Got subgraph pools from S3 for protocol ${protocol} on ${chainId}. Num: ${pools.length} with latency ${
+      after - before
+    } milliseconds.`
+  )
+
+  metric.putMetric(`S3GetObjectParseLatency_key_${key}`, after - before, MetricLoggerUnit.Milliseconds)
 
   POOL_CACHE.set<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(chainId, protocol), pools)
 
