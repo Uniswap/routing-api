@@ -14,9 +14,10 @@ import { Deferrable } from '@ethersproject/properties'
 import { deriveProviderName } from '../handlers/evm/provider/ProviderName'
 import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
-import { ProviderStateSyncer } from './ProviderStateSyncer'
-import { ProviderState } from './ProviderState'
 import { getProviderId } from './utils'
+import { ProviderHealthiness } from './ProviderHealthState'
+import { ProviderHealthStateRepository } from './ProviderHealthStateRepository'
+import { ProviderHealthStateDynamoDbRepository } from './ProviderHealthStateDynamoDbRepository'
 
 export const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call', 'send']
 
@@ -36,35 +37,27 @@ interface SingleCallPerf {
   startTimestampInMs: number
 }
 
-// TODO(jie): Implement block-aligned cache
 export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   readonly url: string
   readonly providerName: string
   readonly providerId: string
 
-  private healthScore: number = 0
-  private healthy: boolean = true
-
-  private lastCallTimestampInMs: number = 0
+  private healthiness: ProviderHealthiness = ProviderHealthiness.HEALTHY
 
   private evaluatingHealthiness: boolean = false
   private lastHealthinessEvaluationTimestampInMs: number = 0
 
   private evaluatingLatency: boolean = false
   private lastLatencyEvaluationTimestampInMs: number = 0
-  private lastEvaluatedLatencyInMs: number = 0
-  private lastLatencyEvaluationApiName: string
-  private recentAverageLatencyInMs: number = 0
 
   private config: SingleJsonRpcProviderConfig
   private readonly metricPrefix: string
   private readonly log: Logger
 
-  private syncingDb: boolean = false
   private enableDbSync: boolean
+  private syncingDb: boolean = false
   private dbSyncSampleProb: number
-  private providerStateSyncer: ProviderStateSyncer
-  private healthScoreAtLastSync: number = 0
+  private healthStateRepository: ProviderHealthStateRepository
   private lastDbSyncTimestampInMs: number = 0
 
   constructor(
@@ -90,21 +83,15 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       if (dbTableName === undefined) {
         throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
       }
-      this.providerStateSyncer = new ProviderStateSyncer(
-        dbTableName,
-        this.providerId,
-        this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S,
-        log
-      )
+      this.healthStateRepository = new ProviderHealthStateDynamoDbRepository(dbTableName, log)
+      // Fire and forget. Won't check the sync result. But usually the sync will finish before the end of initialization
+      // of the current lambda, so it should already know the latest provider health states before serving requests.
+      this.syncAndUpdateProviderHealthiness()
     }
   }
 
   isHealthy() {
-    return this.healthy
-  }
-
-  recentAverageLatency() {
-    return this.recentAverageLatencyInMs
+    return this.healthiness === ProviderHealthiness.HEALTHY
   }
 
   hasEnoughWaitSinceLastLatencyEvaluation(waitTimeRequirementInMs: number): boolean {
@@ -143,107 +130,40 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     return this.evaluatingLatency
   }
 
-  private recordError(perf: SingleCallPerf) {
+  private recordProviderCallError(perf: SingleCallPerf) {
+    this.logProviderCallFailureMetric(perf.methodName)
+    this.log.error(`Failed at calling provider: ${this.url}: method: ${perf.methodName}`)
+
     if (perf.callType === CallType.HEALTH_CHECK) {
       this.lastHealthinessEvaluationTimestampInMs = perf.startTimestampInMs
       this.evaluatingHealthiness = false
     } else if (perf.callType === CallType.LATENCY_EVALUATION) {
+      this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
       this.evaluatingLatency = false
     }
-
-    this.healthScore += this.config.ERROR_PENALTY
-    this.log.error(
-      `${this.url}: method: ${perf.methodName} error penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
-    )
   }
 
-  private recordHighLatency(perf: SingleCallPerf) {
+  private recordProviderCallSuccess(perf: SingleCallPerf) {
+    this.logProviderCallSuccessMetric(perf.methodName)
+    this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
+    this.log.debug(`Succeeded at calling provider: ${this.url} method: ${perf.methodName}`)
+
     if (perf.callType === CallType.HEALTH_CHECK) {
       this.lastHealthinessEvaluationTimestampInMs = perf.startTimestampInMs
       this.evaluatingHealthiness = false
     } else if (perf.callType === CallType.LATENCY_EVALUATION) {
-      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
-      this.lastEvaluatedLatencyInMs = perf.latencyInMs
       this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-      this.lastLatencyEvaluationApiName = perf.methodName
       this.evaluatingLatency = false
-    } else {
-      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
-      if (
-        perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
-        MAJOR_METHOD_NAMES.includes(perf.methodName)
-      ) {
-        this.lastEvaluatedLatencyInMs = perf.latencyInMs
-        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-        this.lastLatencyEvaluationApiName = perf.methodName
-      }
     }
-
-    this.healthScore += this.config.HIGH_LATENCY_PENALTY
-    this.log.error(
-      `${this.url}: method: ${perf.methodName}, high latency penalty ${this.config.ERROR_PENALTY}, score => ${this.healthScore}`
-    )
-  }
-
-  private recordProviderCallSuccess(perf: SingleCallPerf, timeFromLastCallInMs: number) {
-    if (perf.callType === CallType.HEALTH_CHECK) {
-      this.lastHealthinessEvaluationTimestampInMs = perf.startTimestampInMs
-      this.evaluatingHealthiness = false
-    } else if (perf.callType === CallType.LATENCY_EVALUATION) {
-      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
-      this.lastEvaluatedLatencyInMs = perf.latencyInMs
-      this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-      this.lastLatencyEvaluationApiName = perf.methodName
-      this.evaluatingLatency = false
-    } else {
-      this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
-      if (
-        perf.startTimestampInMs - this.lastLatencyEvaluationTimestampInMs >
-          1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S &&
-        MAJOR_METHOD_NAMES.includes(perf.methodName)
-      ) {
-        this.lastEvaluatedLatencyInMs = perf.latencyInMs
-        this.lastLatencyEvaluationTimestampInMs = perf.startTimestampInMs
-        this.lastLatencyEvaluationApiName = perf.methodName
-      }
-    }
-
-    if (this.healthScore === 0) {
-      return
-    }
-    if (timeFromLastCallInMs <= 0) {
-      return
-    }
-    timeFromLastCallInMs = Math.min(timeFromLastCallInMs, this.config.RECOVER_MAX_WAIT_TIME_TO_ACKNOWLEDGE_IN_MS)
-    this.healthScore += timeFromLastCallInMs * this.config.RECOVER_SCORE_PER_MS
-    if (this.healthScore > 0) {
-      this.healthScore = 0
-    }
-    this.log.debug(
-      `${this.url}: healthy: ${this.healthy}, recovery ${timeFromLastCallInMs} * ${
-        this.config.RECOVER_SCORE_PER_MS
-      } = ${timeFromLastCallInMs * this.config.RECOVER_SCORE_PER_MS}, score => ${this.healthScore}`
-    )
   }
 
   private checkLastCallPerformance(perf: SingleCallPerf) {
     const method = perf.methodName
     this.log.debug(`${this.providerId}: checkLastCallPerformance: method: ${method}`)
     if (!perf.succeed) {
-      metric.putMetric(`${this.metricPrefix}_FAILED`, 1, MetricLoggerUnit.Count)
-      metric.putMetric(`${this.metricPrefix}_${method}_FAILED`, 1, MetricLoggerUnit.Count)
-      this.recordError(perf)
+      this.recordProviderCallError(perf)
     } else {
-      metric.putMetric(`${this.metricPrefix}_SUCCESS`, 1, MetricLoggerUnit.Count)
-      metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS`, 1, MetricLoggerUnit.Count)
-      if (perf.latencyInMs > this.config.MAX_LATENCY_ALLOWED_IN_MS) {
-        metric.putMetric(`${this.metricPrefix}_${method}_SUCCESS_HIGH_LATENCY`, 1, MetricLoggerUnit.Count)
-        this.recordHighLatency(perf)
-      } else {
-        this.log.debug(`${this.url} method: ${method} succeeded`)
-        this.recordProviderCallSuccess(perf, perf.startTimestampInMs - this.lastCallTimestampInMs)
-      }
+      this.recordProviderCallSuccess(perf)
     }
   }
 
@@ -271,9 +191,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     }
   }
 
-  // Notice that AWS metrics have to be non-negative.
-  logHealthMetrics() {
-    metric.putMetric(`${this.metricPrefix}_health_score`, -this.healthScore, MetricLoggerUnit.None)
+  logProviderCallSuccessMetric(methodName: string) {
+    metric.putMetric(`${this.metricPrefix}_SUCCESS`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_${methodName}_SUCCESS`, 1, MetricLoggerUnit.Count)
+  }
+
+  logProviderCallFailureMetric(methodName: string) {
+    metric.putMetric(`${this.metricPrefix}_FAILED`, 1, MetricLoggerUnit.Count)
+    metric.putMetric(`${this.metricPrefix}_${methodName}_FAILED`, 1, MetricLoggerUnit.Count)
   }
 
   logLatencyMetrics(methodName: string, latencyInMs: number) {
@@ -308,6 +233,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_db_sync_FAIL`, 1, MetricLoggerUnit.Count)
   }
 
+  logHealthinessChanged(newHealthiness: ProviderHealthiness) {
+    metric.putMetric(`${this.metricPrefix}_becomes_${newHealthiness}`, 1, MetricLoggerUnit.Count)
+  }
+
   private async wrappedFunctionCall(
     callType: CallType,
     fnName: string,
@@ -339,44 +268,32 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } finally {
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
-      this.updateHealthyStatus()
       if (this.enableDbSync) {
-        if (
-          !this.syncingDb &&
-          MAJOR_METHOD_NAMES.includes(perf.methodName) &&
-          this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)
-        ) {
+        if (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)) {
           this.logDbSyncRequested()
           if (Math.random() < this.dbSyncSampleProb) {
             this.logDbSyncSampled()
             this.syncingDb = true
             // Fire and forget. Won't check the sync result.
-            this.syncAndUpdateProviderState()
+            this.syncAndUpdateProviderHealthiness()
           }
         }
       }
-      this.lastCallTimestampInMs = perf.startTimestampInMs
     }
   }
 
-  private async syncAndUpdateProviderState() {
+  private async syncAndUpdateProviderHealthiness() {
     try {
-      const newState: ProviderState | null = await this.providerStateSyncer.syncWithRepository(
-        this.healthScore - this.healthScoreAtLastSync,
-        this.healthScore,
-        this.lastEvaluatedLatencyInMs,
-        this.lastLatencyEvaluationTimestampInMs,
-        this.lastLatencyEvaluationApiName
-      )
-      if (newState !== null) {
-        // Update health state
-        this.healthScoreAtLastSync = newState.healthScore
-        this.healthScore = this.healthScoreAtLastSync
-        this.log.debug(`${this.providerId}: Synced with storage: new health score ${this.healthScore}`)
-        this.updateHealthyStatus()
-
-        // Update latency stat
-        this.updateLatencyStat(newState)
+      const healthStateFromDb = await this.healthStateRepository.read(this.providerId)
+      if (healthStateFromDb !== null) {
+        if (healthStateFromDb.healthiness !== this.healthiness) {
+          this.logHealthinessChanged(healthStateFromDb.healthiness)
+          this.log.debug(
+            `${this.providerId}: Health state changed! From ${this.healthiness} to ${healthStateFromDb.healthiness}`
+          )
+        }
+        this.healthiness = healthStateFromDb.healthiness
+        this.log.debug(`${this.providerId}: Synced with storage: new health state ${this.healthiness}`)
       }
       this.lastDbSyncTimestampInMs = Date.now()
       this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)
@@ -384,33 +301,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     } catch (err: any) {
       this.log.error(`${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
       this.logDbSyncFailure()
-      // Won't throw. A fail of sync won't affect how we do health state update locally.
+      // Won't throw. A fail of sync won't stop us from serving requests.
     } finally {
       this.syncingDb = false
     }
-  }
-
-  private updateHealthyStatus() {
-    if (this.healthy && this.healthScore < this.config.HEALTH_SCORE_FALLBACK_THRESHOLD) {
-      this.healthy = false
-      this.log.warn(`${this.url} drops to unhealthy`)
-    } else if (!this.healthy && this.healthScore > this.config.HEALTH_SCORE_RECOVER_THRESHOLD) {
-      this.healthy = true
-      this.log.warn(`${this.url} resumes to healthy`)
-    }
-  }
-
-  private updateLatencyStat(state: ProviderState) {
-    const timestampInMs = Date.now()
-    let latencySum = 0
-    let latencyCount = 0
-    for (const latency of state.latencies) {
-      if (latency.timestampInMs > timestampInMs - 1000 * this.config.LATENCY_STAT_HISTORY_WINDOW_LENGTH_IN_S) {
-        latencySum += latency.latencyInMs
-        latencyCount++
-      }
-    }
-    this.recentAverageLatencyInMs = latencySum / latencyCount
   }
 
   ///////////////////// Begin of override functions /////////////////////
