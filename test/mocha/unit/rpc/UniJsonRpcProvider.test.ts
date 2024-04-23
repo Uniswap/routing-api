@@ -391,6 +391,82 @@ describe('UniJsonRpcProvider', () => {
     }).to.throw(Error)
   })
 
+  it('test selectPreferredProvider: in combination with provider fallback and recover, case 1', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [1, ProviderSpecialWeight.NEVER, ProviderSpecialWeight.AS_FALLBACK]
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Should always use the primary provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+
+    // Primary provider fails.
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
+
+    // Should fallback to the next AS_FALLBACK provider
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // Primary provider recovers.
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.HEALTHY
+
+    // Should resume to the primary provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+  })
+
+  it('test selectPreferredProvider: in combination with provider fallback and recover, case 2', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1.0,
+      [1, ProviderSpecialWeight.AS_FALLBACK, ProviderSpecialWeight.AS_FALLBACK]
+    )
+    for (const provider of uniProvider['providers']) {
+      provider['config'] = SINGLE_PROVIDER_TEST_CONFIG
+    }
+
+    // Should always use the primary provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+
+    // Primary provider fails.
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.UNHEALTHY
+
+    // Should fallback to the next AS_FALLBACK provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+
+    // Fallback provider also fails.
+    uniProvider['providers'][1]['healthiness'] = ProviderHealthiness.UNHEALTHY
+
+    // Should fallback to the next AS_FALLBACK provider.
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+
+    // Another fallback provider also fails.
+    uniProvider['providers'][2]['healthiness'] = ProviderHealthiness.UNHEALTHY
+
+    // No provider is able to be selected.
+    expect(function () {
+      uniProvider['selectPreferredProvider']()
+    }).to.throw(Error)
+
+    // As provider recovers, we should resume provider selection.
+    uniProvider['providers'][2]['healthiness'] = ProviderHealthiness.HEALTHY
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_2')
+    uniProvider['providers'][1]['healthiness'] = ProviderHealthiness.HEALTHY
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_1')
+    uniProvider['providers'][0]['healthiness'] = ProviderHealthiness.HEALTHY
+    expect(uniProvider['selectPreferredProvider']().url).equals('url_0')
+  })
+
   it('multiple UniJsonRpcProvider share the same instances of SingleJsonRpcProvider', async () => {
     const uniProvider1 = new UniJsonRpcProvider(
       ChainId.MAINNET,
