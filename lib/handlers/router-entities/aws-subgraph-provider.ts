@@ -76,7 +76,11 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
 
   const pools = JSON.parse(poolsBuffer.toString('utf-8')) as TSubgraphPool[]
 
+  const before = Date.now()
   log.info({ bucket, key }, `Got subgraph pools from S3 for protocol ${protocol} on ${chainId}. Num: ${pools.length}`)
+  const after = Date.now()
+
+  metric.putMetric(`S3GetObjectParseLatency_key_${key}`, after - before, MetricLoggerUnit.Milliseconds)
 
   POOL_CACHE.set<TSubgraphPool[]>(LOCAL_POOL_CACHE_KEY(chainId, protocol), pools)
 
