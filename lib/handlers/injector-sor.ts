@@ -65,6 +65,7 @@ import {
   RETRY_OPTIONS,
   SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '../util/onChainQuoteProviderConfigs'
+import { v4 } from 'uuid/index'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -120,6 +121,7 @@ export interface ContainerInjected {
   dependencies: {
     [chainId in ChainId]?: ContainerDependencies
   }
+  activityId?: string
 }
 
 export abstract class InjectorSOR<Router, QueryParams> extends Injector<
@@ -129,10 +131,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
   QueryParams
 > {
   public async buildContainerInjected(): Promise<ContainerInjected> {
+    const activityId = v4()
     const log: Logger = bunyan.createLogger({
       name: this.injectorName,
       serializers: bunyan.stdSerializers,
       level: bunyan.INFO,
+      activityId: activityId,
     })
     setGlobalLogger(log)
 
@@ -416,6 +420,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
       return {
         dependencies: dependenciesByChain,
+        activityId: activityId,
       }
     } catch (err) {
       log.fatal({ err }, `Fatal: Failed to build container`)

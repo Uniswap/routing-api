@@ -29,6 +29,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
     log: Logger,
     metricsLogger: MetricsLogger
   ): Promise<RequestInjected<IRouter<AlphaRouterConfig | LegacyRoutingConfig>>> {
+    const { dependencies, activityId } = containerInjected
+
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
     // Sample 10% of all requests at the INFO log level for debugging purposes.
@@ -62,6 +64,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       type,
       algorithm,
       gasToken,
+      activityId: activityId,
     })
     setGlobalLogger(log)
 
@@ -73,8 +76,6 @@ export class QuoteHandlerInjector extends InjectorSOR<
     // Today API is restricted such that both tokens must be on the same chain.
     const chainId = tokenInChainId
     const chainIdEnum = ID_TO_CHAIN_ID(chainId)
-
-    const { dependencies } = containerInjected
 
     if (!dependencies[chainIdEnum]) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
