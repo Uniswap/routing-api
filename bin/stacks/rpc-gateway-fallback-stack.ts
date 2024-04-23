@@ -89,7 +89,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
           // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
-          threshold: 1.0, // Alarm when error rate >= 1.0%
+          threshold: 0.1, // Alarm when error rate >= 0.1%
           evaluationPeriods: 1,
         })
 
@@ -127,7 +127,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
           metric,
           comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
           // TODO(jie): Resume to a reasonable threshold once we verified the workflow in prod.
-          threshold: 150, // Alarm when latency >= 150ms
+          threshold: 100, // Alarm when latency >= 100ms
           evaluationPeriods: 1,
         })
 
