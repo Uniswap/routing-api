@@ -150,7 +150,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       }
     }
 
-    this.logProviderHealthiness()
+    this.logProviderHealthScores()
 
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     if (isEmpty(healthyProviders)) {
@@ -232,12 +232,14 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     this.log.debug(`Evaluated ${count} other healthy providers`)
   }
 
-  logProviderHealthiness() {
+  logProviderHealthScores() {
     for (const provider of this.providers.filter((provider) => provider.isHealthy())) {
-      this.log.debug(`Healthy provider: ${provider.url}`)
+      this.log.debug(`Healthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
+      provider.logHealthMetrics()
     }
     for (const provider of this.providers.filter((provider) => !provider.isHealthy())) {
-      this.log.debug(`Unhealthy provider: ${provider.url}`)
+      this.log.debug(`Unhealthy provider, url: ${provider.url}, score: ${provider['healthScore']}`)
+      provider.logHealthMetrics()
     }
   }
 
