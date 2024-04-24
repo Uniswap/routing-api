@@ -78,10 +78,10 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.BNB:
       // BNB RPC eth_call traffic is about 1/10 of mainnet, so we can shadow sample 1% of traffic
       return {
-        switchExactInPercentage: 1,
-        samplingExactInPercentage: 1,
-        switchExactOutPercentage: 1,
-        samplingExactOutPercentage: 1,
+        switchExactInPercentage: 100,
+        samplingExactInPercentage: 0,
+        switchExactOutPercentage: 100,
+        samplingExactOutPercentage: 0,
       }
     case ChainId.CELO:
       // Celo RPC eth_call traffic is about 1/100 of mainnet, so we can shadow sample 10% of traffic
