@@ -305,7 +305,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
                 (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : NEW_QUOTER_V2_ADDRESSES[chainId],
+                  useMixedRouteQuoter
+                    ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ?? '0xe544efae946f0008ae9a8d64493efa7886b73776'
+                    : NEW_QUOTER_V2_ADDRESSES[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
