@@ -38,9 +38,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.MAINNET:
       // Total RPM for 'QuoteTotalCallsToProvider' is around 20k-30k (across all chains), so 0.1% means 20-30 RPM shadow sampling
       return {
-        switchExactInPercentage: 100,
+        switchExactInPercentage: 1,
         samplingExactInPercentage: 0,
-        switchExactOutPercentage: 100,
+        switchExactOutPercentage: 1,
         samplingExactOutPercentage: 0,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.ARBITRUM_ONE:
@@ -54,9 +54,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.POLYGON:
       // Total RPM for 'QuoteTotalCallsToProvider' is around 20k-30k (across all chains), so 0.1% means 20-30 RPM shadow sampling
       return {
-        switchExactInPercentage: 100,
+        switchExactInPercentage: 1,
         samplingExactInPercentage: 0,
-        switchExactOutPercentage: 100,
+        switchExactOutPercentage: 1,
         samplingExactOutPercentage: 0,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.OPTIMISM:
