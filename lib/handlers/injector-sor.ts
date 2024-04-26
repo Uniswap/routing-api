@@ -62,6 +62,7 @@ import {
   BATCH_PARAMS,
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
+  NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   RETRY_OPTIONS,
   SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '../util/onChainQuoteProviderConfigs'
@@ -302,7 +303,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BATCH_PARAMS[chainId],
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId]
+                BLOCK_NUMBER_CONFIGS[chainId],
+                // We will only enable shadow sample mixed quoter on Base
+                (useMixedRouteQuoter: boolean) =>
+                  useMixedRouteQuoter ? NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
