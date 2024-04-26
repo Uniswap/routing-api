@@ -31,9 +31,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
       // Base RPC eth_call traffic is about double mainnet, so we can shadow sample 0.05% of traffic
       return {
         switchExactInPercentage: 100,
-        samplingExactInPercentage: 0,
+        samplingExactInPercentage: 1,
         switchExactOutPercentage: 100,
-        samplingExactOutPercentage: 0,
+        samplingExactOutPercentage: 1,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.MAINNET:
       // Total RPM for 'QuoteTotalCallsToProvider' is around 20k-30k (across all chains), so 0.1% means 20-30 RPM shadow sampling
