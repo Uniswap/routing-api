@@ -10,9 +10,9 @@ import {
   DEFAULT_RETRY_OPTIONS,
   DEFAULT_SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '@uniswap/smart-order-router/build/main/util/onchainQuoteProviderConfigs'
-import { ChainId } from '@uniswap/sdk-core'
+import { CHAIN_TO_ADDRESSES_MAP, ChainId } from '@uniswap/sdk-core'
 import AsyncRetry from 'async-retry'
-import { BatchParams, BlockNumberConfig, FailureOverrides } from '@uniswap/smart-order-router'
+import { AddressMap, BatchParams, BlockNumberConfig, FailureOverrides } from '@uniswap/smart-order-router'
 
 export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined } = {
   ...constructSameRetryOptionsMap(DEFAULT_RETRY_OPTIONS),
@@ -209,4 +209,11 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.ZORA_SEPOLIA]: 0,
   [ChainId.ROOTSTOCK]: 0,
   [ChainId.BLAST]: 17540 * 2, // 17540 is the single tick.cross cost on blast. We multiply by 2 to be safe
+}
+
+// TODO: Move this new addresses to SOR
+export const NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {
+  [ChainId.MAINNET]: CHAIN_TO_ADDRESSES_MAP[ChainId.MAINNET].v1MixedRouteQuoterAddress,
+  [ChainId.GOERLI]: CHAIN_TO_ADDRESSES_MAP[ChainId.GOERLI].v1MixedRouteQuoterAddress,
+  [ChainId.BASE]: '0xe544efae946f0008ae9a8d64493efa7886b73776',
 }
