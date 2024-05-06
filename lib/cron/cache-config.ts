@@ -7,9 +7,9 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.AVALANCHE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`;
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`
     default:
-      return undefined;
+      return undefined
   }
 }
 
