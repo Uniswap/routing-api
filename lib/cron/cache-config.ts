@@ -2,6 +2,14 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
+const v3SubgraphUrlOverride = (chainId: ChainId) => {
+  if (chainId === ChainId.AVALANCHE) {
+    return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
+  }
+
+  return undefined
+}
+
 export const chainProtocols = [
   // V3.
   {
@@ -38,7 +46,7 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.AVALANCHE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.AVALANCHE)),
   },
   {
     protocol: Protocol.V3,
