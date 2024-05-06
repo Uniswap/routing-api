@@ -3,11 +3,14 @@ import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-rou
 import { ChainId } from '@uniswap/sdk-core'
 
 const v3SubgraphUrlOverride = (chainId: ChainId) => {
-  if (chainId === ChainId.AVALANCHE) {
-    return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
+  switch (chainId) {
+    case ChainId.AVALANCHE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
+    case ChainId.BNB:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`
+    default:
+      return undefined
   }
-
-  return undefined
 }
 
 export const chainProtocols = [
@@ -40,7 +43,7 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.BNB,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.BNB)),
   },
   {
     protocol: Protocol.V3,
