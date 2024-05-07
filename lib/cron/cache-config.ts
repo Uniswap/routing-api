@@ -8,6 +8,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
     case ChainId.BNB:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`
+    case ChainId.BLAST:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-blast/api`
     default:
       return undefined
   }
@@ -56,6 +58,12 @@ export const chainProtocols = [
     chainId: ChainId.BASE,
     timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.BASE, 3, 90000),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.BLAST,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.BLAST, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.BLAST)),
   },
   // Currently there is no working V3 subgraph for Optimism so we use a static provider.
   // V2.
