@@ -69,15 +69,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
     this.poolCacheBucket3.addLifecycleRule({
       enabled: true,
-      // This isn't the right fix in the long run, but it will prevent the outage that we experienced when the V2 pool
-      // data expired (See https://www.notion.so/uniswaplabs/Routing-API-Mainnet-outage-V2-Subgraph-11527aab3bd540888f92b33017bf26b4 for more detail).
-      // The better short-term solution is to bake resilience into the V2SubgraphProvider (https://linear.app/uniswap/issue/ROUTE-31/use-v2-v3-fallback-provider-in-routing-api),
-      // instrument the pool cache lambda, and take measures to improve its success rate.
-
-      // Note that there is a trade-off here: we may serve stale V2 pools which can result in a suboptimal routing path if the file hasn't been recently updated.
-      // This stale data is preferred to no-data until we can implement the above measures.
-
-      // For now, choose an arbitrarily large TTL (in this case, 10 years) to prevent the key from being deleted.
+      // See the comment above for the reasoning behind this TTL.
       expiration: cdk.Duration.days(365 * 10),
     })
 
