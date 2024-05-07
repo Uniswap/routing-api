@@ -166,6 +166,7 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
         override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => false
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -180,6 +181,30 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     sinon.assert.threw(targetQuoteProvider.getQuotesManyExactIn)
   })
 
+  it('sample and switch exact in quotes and current quoter has runtime error', async () => {
+    const currentQuoteProvider = getMockedOnChainQuoteProvider()
+    const targetQuoteProvider = getMockedOnChainQuoteProvider()
+
+    currentQuoteProvider.getQuotesManyExactIn.throws()
+
+    const trafficSwitchProvider =
+      new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => true
+      })({
+        currentQuoteProvider: currentQuoteProvider,
+        targetQuoteProvider: targetQuoteProvider,
+        chainId: ChainId.MAINNET,
+      })
+
+    await trafficSwitchProvider.getQuotesManyExactIn(amountIns, routes, providerConfig)
+
+    sinon.assert.called(spy)
+    // We should only invoke targetQuoteProvider.getQuotesManyExactIn once
+    sinon.assert.calledOnce(targetQuoteProvider.getQuotesManyExactIn)
+    sinon.assert.threw(currentQuoteProvider.getQuotesManyExactIn)
+  })
+
   it('sample exact out quotes and target quoter has runtime error', async () => {
     const currentQuoteProvider = getMockedOnChainQuoteProvider()
     const targetQuoteProvider = getMockedOnChainQuoteProvider()
@@ -189,6 +214,7 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
         override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => false
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -201,6 +227,30 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     // This is the case we will have to invoke currentQuoteProvider.getQuotesManyExactIn twice, because of the runtime error during sampling
     sinon.assert.calledTwice(currentQuoteProvider.getQuotesManyExactOut)
     sinon.assert.threw(targetQuoteProvider.getQuotesManyExactOut)
+  })
+
+  it('switch and sample exact out quotes and target quoter has runtime error', async () => {
+    const currentQuoteProvider = getMockedOnChainQuoteProvider()
+    const targetQuoteProvider = getMockedOnChainQuoteProvider()
+
+    currentQuoteProvider.getQuotesManyExactOut.throws()
+
+    const trafficSwitchProvider =
+      new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
+        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+      })({
+        currentQuoteProvider: currentQuoteProvider,
+        targetQuoteProvider: targetQuoteProvider,
+        chainId: ChainId.MAINNET,
+      })
+
+    await trafficSwitchProvider.getQuotesManyExactOut(amountIns, routes, providerConfig)
+
+    sinon.assert.called(spy)
+    // We should only invoke targetQuoteProvider.getQuotesManyExactOut once
+    sinon.assert.calledOnce(targetQuoteProvider.getQuotesManyExactOut)
+    sinon.assert.threw(currentQuoteProvider.getQuotesManyExactOut)
   })
 
   it('sample exact in quotes and current quoter out of gas for the quote', async () => {
