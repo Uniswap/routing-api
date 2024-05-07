@@ -10,6 +10,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`
     case ChainId.BLAST:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-blast/api`
+    case ChainId.BASE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-base/api`
     default:
       return undefined
   }
@@ -45,25 +47,25 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.BNB,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.BNB)),
+    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BNB)),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.AVALANCHE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.AVALANCHE)),
+    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000, true, v3SubgraphUrlOverride(ChainId.AVALANCHE)),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.BASE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BASE, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.BASE, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BASE)),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.BLAST,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BLAST, 3, 90000, undefined, v3SubgraphUrlOverride(ChainId.BLAST)),
+    provider: new V3SubgraphProvider(ChainId.BLAST, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BLAST)),
   },
   // Currently there is no working V3 subgraph for Optimism so we use a static provider.
   // V2.
