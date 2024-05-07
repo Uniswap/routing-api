@@ -65,17 +65,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
   const serializedPools = JSON.stringify(pools)
   const compressedPools = zlib.deflateSync(serializedPools)
-  log.info(
-    `compression ratio for ${chainId} ${protocol} pool file is ${serializedPools.length}:${compressedPools.length}`
-  )
-  metric.putMetric(`${metricPrefix}.compression_ratio`, serializedPools.length / compressedPools.length)
-
-  const beforeDecompress = Date.now()
-  const decompressedPools = zlib.inflateSync(compressedPools)
-  metric.putMetric(`${metricPrefix}.decompression_latency`, Date.now() - beforeDecompress)
-
-  const parsedPools: V2SubgraphPool[] | V3SubgraphPool[] = JSON.parse(decompressedPools.toString())
-
   const [result, newResult] = await Promise.all([
     s3
       .putObject({
@@ -101,6 +90,17 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     `Successfully cached ${chainId} ${protocol} pools to S3 bucket ${process.env.POOL_CACHE_BUCKET_2} ${process.env.POOL_CACHE_BUCKET_3}`
   )
   metric.putMetric(`${metricPrefix}.latency`, Date.now() - beforeAll)
+
+  log.info(
+    `compression ratio for ${chainId} ${protocol} pool file is ${serializedPools.length}:${compressedPools.length}`
+  )
+  metric.putMetric(`${metricPrefix}.compression_ratio`, serializedPools.length / compressedPools.length)
+
+  const beforeDecompress = Date.now()
+  const decompressedPools = zlib.inflateSync(compressedPools)
+  metric.putMetric(`${metricPrefix}.decompression_latency`, Date.now() - beforeDecompress)
+
+  const parsedPools: V2SubgraphPool[] | V3SubgraphPool[] = JSON.parse(decompressedPools.toString())
 
   checkSum(pools, parsedPools, log, metric, chainId, protocol)
 })
