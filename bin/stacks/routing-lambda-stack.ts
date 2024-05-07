@@ -17,7 +17,9 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
+  poolCacheBucket3: aws_s3.Bucket
   poolCacheKey: string
+  poolCacheGzipKey: string
   jsonRpcProviders: { [chainName: string]: string }
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
@@ -45,7 +47,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     const {
       poolCacheBucket,
       poolCacheBucket2,
+      poolCacheBucket3,
       poolCacheKey,
+      poolCacheGzipKey,
       jsonRpcProviders,
       tokenListCacheBucket,
       provisionedConcurrency,
@@ -80,6 +84,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     })
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
+    poolCacheBucket3.grantRead(lambdaRole)
     tokenListCacheBucket.grantRead(lambdaRole)
     routesDynamoDb.grantReadWriteData(lambdaRole)
     routesDbCachingRequestFlagDynamoDb.grantReadWriteData(lambdaRole)
@@ -116,7 +121,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
+        POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
+        POOL_CACHE_GZIP_KEY: poolCacheGzipKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         TENDERLY_USER: tenderlyUser,

@@ -30,7 +30,9 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
 export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheBucket: aws_s3.Bucket
   public readonly poolCacheBucket2: aws_s3.Bucket
+  public readonly poolCacheBucket3: aws_s3.Bucket
   public readonly poolCacheKey: string
+  public readonly poolCacheGzipKey: string
   public readonly tokenListCacheBucket: aws_s3.Bucket
   public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly ipfsCleanPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
@@ -49,6 +51,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     // TODO: Remove and swap to the new bucket below. Kept around for the rollout, but all requests will go to bucket 2.
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
     this.poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
+    this.poolCacheBucket3 = new aws_s3.Bucket(this, 'PoolCacheBucket3')
 
     this.poolCacheBucket2.addLifecycleRule({
       enabled: true,
@@ -64,7 +67,14 @@ export class RoutingCachingStack extends cdk.NestedStack {
       expiration: cdk.Duration.days(365 * 10),
     })
 
+    this.poolCacheBucket3.addLifecycleRule({
+      enabled: true,
+      // See the comment above for the reasoning behind this TTL.
+      expiration: cdk.Duration.days(365 * 10),
+    })
+
     this.poolCacheKey = 'poolCache.json'
+    this.poolCacheGzipKey = 'poolCacheGzip.json'
 
     const { stage, route53Arn, pinata_key, pinata_secret, hosted_zone } = props
 
@@ -117,7 +127,9 @@ export class RoutingCachingStack extends cdk.NestedStack {
           environment: {
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_2: this.poolCacheBucket2.bucketName,
+            POOL_CACHE_BUCKET_3: this.poolCacheBucket3.bucketName,
             POOL_CACHE_KEY: this.poolCacheKey,
+            POOL_CACHE_GZIP_KEY: this.poolCacheGzipKey,
             ALCHEMY_QUERY_KEY: this.alchemyQueryKey ?? '',
             chainId: chainId.toString(),
             protocol,
@@ -130,6 +142,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
+      this.poolCacheBucket3.grantReadWrite(lambda)
       const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
         this,
         `RoutingAPI-SEV4-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
