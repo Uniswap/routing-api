@@ -36,6 +36,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject: string
       tenderlyAccessKey: string
       unicornSecret: string
+      alchemyQueryKey?: string
     }
   ) {
     super(scope, id, props)
@@ -54,6 +55,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
+      alchemyQueryKey,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -71,6 +73,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
+      alchemyQueryKey,
     })
     this.url = url
   }
@@ -159,6 +162,10 @@ export class RoutingAPIPipeline extends Stack {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:routing-api-internal-api-key-Z68NmB',
     })
 
+    const routingApiNewSecrets = sm.Secret.fromSecretAttributes(this, 'RoutingApiNewSecrets', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:RoutingApiNewSecrets-7EijpM',
+    })
+
     // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
@@ -233,6 +240,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
+      alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -256,6 +264,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
+      alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)

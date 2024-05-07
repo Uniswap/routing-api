@@ -46,6 +46,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyProject: string
       tenderlyAccessKey: string
       unicornSecret: string
+      alchemyQueryKey?: string
     }
   ) {
     super(parent, name, props)
@@ -66,6 +67,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyProject,
       tenderlyAccessKey,
       unicornSecret,
+      alchemyQueryKey,
     } = props
 
     const {
@@ -82,6 +84,7 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_key,
       pinata_secret,
       hosted_zone,
+      alchemyQueryKey,
     })
 
     const {
