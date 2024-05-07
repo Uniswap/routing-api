@@ -12,6 +12,8 @@ import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
 import NodeCache from 'node-cache'
 import { S3_POOL_CACHE_KEY } from '../../util/pool-cache-key'
+import { PoolCachingFilePrefixes } from '../../util/poolCachingFilePrefixes'
+import * as zlib from 'zlib'
 
 const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false })
 const LOCAL_POOL_CACHE_KEY = (chainId: ChainId, protocol: Protocol) => `pools${chainId}#${protocol}`
@@ -78,8 +80,16 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
     throw new Error(`Could not get subgraph pool cache from S3 for protocol ${protocol} on chain ${chainId}`)
   }
 
+  let poolString
+
+  if (key.startsWith(PoolCachingFilePrefixes.GzipText)) {
+    poolString = zlib.inflateSync(poolsBuffer as Buffer).toString('utf-8')
+  } else {
+    poolString = poolsBuffer.toString('utf-8')
+  }
+
   const before = Date.now()
-  const pools = JSON.parse(poolsBuffer.toString('utf-8')) as TSubgraphPool[]
+  const pools = JSON.parse(poolString) as TSubgraphPool[]
   const after = Date.now()
 
   log.info(
