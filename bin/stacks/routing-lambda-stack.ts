@@ -19,6 +19,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket2: aws_s3.Bucket
   poolCacheBucket3: aws_s3.Bucket
   poolCacheKey: string
+  poolCacheGzipKey: string
   jsonRpcProviders: { [chainName: string]: string }
   tokenListCacheBucket: aws_s3.Bucket
   provisionedConcurrency: number
@@ -48,6 +49,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       poolCacheBucket2,
       poolCacheBucket3,
       poolCacheKey,
+      poolCacheGzipKey,
       jsonRpcProviders,
       tokenListCacheBucket,
       provisionedConcurrency,
@@ -121,6 +123,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
         POOL_CACHE_KEY: poolCacheKey,
+        POOL_CACHE_GZIP_KEY: poolCacheGzipKey,
         TOKEN_LIST_CACHE_BUCKET: tokenListCacheBucket.bucketName,
         ETH_GAS_STATION_INFO_URL: ethGasStationInfoUrl,
         TENDERLY_USER: tenderlyUser,
