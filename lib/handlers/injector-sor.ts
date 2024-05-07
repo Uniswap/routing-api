@@ -20,8 +20,6 @@ import {
   IV3PoolProvider,
   IV3SubgraphProvider,
   LegacyGasPriceProvider,
-  metric,
-  MetricLoggerUnit,
   MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   NEW_QUOTER_V2_ADDRESSES,
   NodeJSCache,
@@ -271,7 +269,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                       { err },
                       'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
                     )
-                    metric.putMetric('V3SubgraphProviderPlainTextFallback', 1, MetricLoggerUnit.Count)
 
                     return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
                   })
@@ -300,7 +297,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                       { err },
                       'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
                     )
-                    metric.putMetric('V2SubgraphProviderPlainTextFallback', 1, MetricLoggerUnit.Count)
 
                     return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
                   })
