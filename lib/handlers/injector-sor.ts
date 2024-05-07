@@ -3,40 +3,40 @@ import {
   CachingGasStationProvider,
   CachingTokenListProvider,
   CachingTokenProviderWithFallback,
+  CachingV2PoolProvider,
   CachingV3PoolProvider,
   EIP1559GasPriceProvider,
-  FallbackTenderlySimulator,
-  TenderlySimulator,
   EthEstimateGasSimulator,
+  FallbackTenderlySimulator,
   IGasPriceProvider,
   IMetric,
-  Simulator,
+  IOnChainQuoteProvider,
+  IRouteCachingProvider,
   ITokenListProvider,
+  ITokenPropertiesProvider,
   ITokenProvider,
   IV2PoolProvider,
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
   LegacyGasPriceProvider,
+  MIXED_ROUTE_QUOTER_V1_ADDRESSES,
+  NEW_QUOTER_V2_ADDRESSES,
   NodeJSCache,
   OnChainGasPriceProvider,
   OnChainQuoteProvider,
   setGlobalLogger,
+  Simulator,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
-  TokenProvider,
+  TenderlySimulator,
   TokenPropertiesProvider,
+  TokenProvider,
+  TokenValidatorProvider,
   UniswapMulticallProvider,
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
-  IRouteCachingProvider,
-  CachingV2PoolProvider,
-  TokenValidatorProvider,
-  ITokenPropertiesProvider,
-  IOnChainQuoteProvider,
-  MIXED_ROUTE_QUOTER_V1_ADDRESSES,
-  NEW_QUOTER_V2_ADDRESSES,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -67,6 +67,8 @@ import {
   SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
+import { chainProtocols } from '../cron/cache-config'
+import { Protocol } from '@uniswap/router-sdk'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -142,7 +144,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     try {
       const {
         POOL_CACHE_BUCKET_2,
+        POOL_CACHE_BUCKET_3,
         POOL_CACHE_KEY,
+        POOL_CACHE_GZIP_KEY,
         TOKEN_LIST_CACHE_BUCKET,
         ROUTES_TABLE_NAME,
         ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME,
@@ -248,11 +252,26 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
               (async () => {
                 try {
-                  const subgraphProvider = await V3AWSSubgraphProvider.EagerBuild(
-                    POOL_CACHE_BUCKET_2!,
-                    POOL_CACHE_KEY!,
-                    chainId
+                  const chainProtocol = chainProtocols.find(
+                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V3
                   )
+
+                  if (!chainProtocol) {
+                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
+                  }
+
+                  const subgraphProvider = await V3AWSSubgraphProvider.EagerBuild(
+                    POOL_CACHE_BUCKET_3!,
+                    POOL_CACHE_GZIP_KEY!,
+                    chainId
+                  ).catch(async (err) => {
+                    log.error(
+                      { err },
+                      'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
+                    )
+
+                    return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
+                  })
                   return subgraphProvider
                 } catch (err) {
                   log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
@@ -261,11 +280,26 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               })(),
               (async () => {
                 try {
-                  const subgraphProvider = await V2AWSSubgraphProvider.EagerBuild(
-                    POOL_CACHE_BUCKET_2!,
-                    POOL_CACHE_KEY!,
-                    chainId
+                  const chainProtocol = chainProtocols.find(
+                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V2
                   )
+
+                  if (!chainProtocol) {
+                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
+                  }
+
+                  const subgraphProvider = await V2AWSSubgraphProvider.EagerBuild(
+                    POOL_CACHE_BUCKET_3!,
+                    POOL_CACHE_GZIP_KEY!,
+                    chainId
+                  ).catch(async (err) => {
+                    log.error(
+                      { err },
+                      'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
+                    )
+
+                    return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
+                  })
                   return subgraphProvider
                 } catch (err) {
                   return new StaticV2SubgraphProvider(chainId)

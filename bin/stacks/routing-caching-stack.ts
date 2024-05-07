@@ -16,6 +16,7 @@ import { Construct } from 'constructs'
 import * as path from 'path'
 import { chainProtocols } from '../../lib/cron/cache-config'
 import { STAGE } from '../../lib/util/stage'
+import { PoolCachingFilePrefixes } from '../../lib/util/poolCachingFilePrefixes'
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string
@@ -73,8 +74,8 @@ export class RoutingCachingStack extends cdk.NestedStack {
       expiration: cdk.Duration.days(365 * 10),
     })
 
-    this.poolCacheKey = 'poolCache.json'
-    this.poolCacheGzipKey = 'poolCacheGzip.json'
+    this.poolCacheKey = PoolCachingFilePrefixes.PlainText
+    this.poolCacheGzipKey = PoolCachingFilePrefixes.GzipText
 
     const { stage, route53Arn, pinata_key, pinata_secret, hosted_zone } = props
 
