@@ -107,7 +107,14 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.ARBITRUM_ONE,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.ARBITRUM_ONE, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)),
+    provider: new V2SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      1000,
+      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
   },
   {
     protocol: Protocol.V2,
