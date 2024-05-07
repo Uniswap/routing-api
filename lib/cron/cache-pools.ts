@@ -76,8 +76,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
   const parsedPools: V2SubgraphPool[] | V3SubgraphPool[] = JSON.parse(decompressedPools.toString())
 
-  checkSum(pools, parsedPools, log, metric, chainId, protocol)
-
   const [result, newResult] = await Promise.all([
     s3
       .putObject({
@@ -103,6 +101,8 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     `Successfully cached ${chainId} ${protocol} pools to S3 bucket ${process.env.POOL_CACHE_BUCKET_2} ${process.env.POOL_CACHE_BUCKET_3}`
   )
   metric.putMetric(`${metricPrefix}.latency`, Date.now() - beforeAll)
+
+  checkSum(pools, parsedPools, log, metric, chainId, protocol)
 })
 
 module.exports = { handler }
