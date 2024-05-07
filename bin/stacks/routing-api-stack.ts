@@ -73,6 +73,7 @@ export class RoutingAPIStack extends cdk.Stack {
     const {
       poolCacheBucket,
       poolCacheBucket2,
+      poolCacheBucket3,
       poolCacheKey,
       poolCacheLambdaNameArray,
       tokenListCacheBucket,
@@ -101,6 +102,7 @@ export class RoutingAPIStack extends cdk.Stack {
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
       poolCacheBucket,
       poolCacheBucket2,
+      poolCacheBucket3,
       poolCacheKey,
       jsonRpcProviders,
       tokenListCacheBucket,

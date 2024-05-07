@@ -8,6 +8,7 @@ import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
 import { chainProtocols } from './cache-config'
 import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger'
 import { metricScope } from 'aws-embedded-metrics'
+import * as zlib from 'zlib'
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
@@ -57,14 +58,24 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   const key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chainId, protocol)
 
   log.info(`Got ${pools.length} ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${key}`)
+  const compressedPools = zlib.deflateSync(JSON.stringify(pools))
+  log.info(`compressed pools to decompress ${zlib.inflateSync(compressedPools).length}`)
 
-  const result = await s3
+  const result = await Promise.all([s3
     .putObject({
       Bucket: process.env.POOL_CACHE_BUCKET_2!,
       Key: key,
       Body: JSON.stringify(pools),
     })
-    .promise()
+    .promise(),
+    s3
+      .putObject({
+        Bucket: process.env.POOL_CACHE_BUCKET_3!,
+        Key: key,
+        Body: compressedPools,
+      })
+      .promise()
+  ]);
 
   metric.putMetric(`${metricPrefix}.s3.latency`, Date.now() - beforeS3)
 

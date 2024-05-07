@@ -30,6 +30,7 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
 export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheBucket: aws_s3.Bucket
   public readonly poolCacheBucket2: aws_s3.Bucket
+  public readonly poolCacheBucket3: aws_s3.Bucket
   public readonly poolCacheKey: string
   public readonly tokenListCacheBucket: aws_s3.Bucket
   public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
@@ -49,8 +50,23 @@ export class RoutingCachingStack extends cdk.NestedStack {
     // TODO: Remove and swap to the new bucket below. Kept around for the rollout, but all requests will go to bucket 2.
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
     this.poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
+    this.poolCacheBucket3 = new aws_s3.Bucket(this, 'PoolCacheBucket3')
 
     this.poolCacheBucket2.addLifecycleRule({
+      enabled: true,
+      // This isn't the right fix in the long run, but it will prevent the outage that we experienced when the V2 pool
+      // data expired (See https://www.notion.so/uniswaplabs/Routing-API-Mainnet-outage-V2-Subgraph-11527aab3bd540888f92b33017bf26b4 for more detail).
+      // The better short-term solution is to bake resilience into the V2SubgraphProvider (https://linear.app/uniswap/issue/ROUTE-31/use-v2-v3-fallback-provider-in-routing-api),
+      // instrument the pool cache lambda, and take measures to improve its success rate.
+
+      // Note that there is a trade-off here: we may serve stale V2 pools which can result in a suboptimal routing path if the file hasn't been recently updated.
+      // This stale data is preferred to no-data until we can implement the above measures.
+
+      // For now, choose an arbitrarily large TTL (in this case, 10 years) to prevent the key from being deleted.
+      expiration: cdk.Duration.days(365 * 10),
+    })
+
+    this.poolCacheBucket3.addLifecycleRule({
       enabled: true,
       // This isn't the right fix in the long run, but it will prevent the outage that we experienced when the V2 pool
       // data expired (See https://www.notion.so/uniswaplabs/Routing-API-Mainnet-outage-V2-Subgraph-11527aab3bd540888f92b33017bf26b4 for more detail).
@@ -117,6 +133,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           environment: {
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_2: this.poolCacheBucket2.bucketName,
+            POOL_CACHE_BUCKET_3: this.poolCacheBucket3.bucketName,
             POOL_CACHE_KEY: this.poolCacheKey,
             ALCHEMY_QUERY_KEY: this.alchemyQueryKey ?? '',
             chainId: chainId.toString(),
@@ -130,6 +147,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
+      this.poolCacheBucket3.grantReadWrite(lambda)
       const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
         this,
         `RoutingAPI-SEV4-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
