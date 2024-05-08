@@ -87,9 +87,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
       // Celo RPC eth_call traffic is about 1/100 of mainnet, so we can shadow sample 10% of traffic
       return {
         switchExactInPercentage: 100,
-        samplingExactInPercentage: 1,
+        samplingExactInPercentage: 0,
         switchExactOutPercentage: 100,
-        samplingExactOutPercentage: 1,
+        samplingExactOutPercentage: 0,
       } as QuoteProviderTrafficSwitchConfiguration
     case ChainId.AVALANCHE:
       // Avalanche RPC eth_call traffic is about 1/100 of mainnet, so we can shadow sample 10% of traffic
