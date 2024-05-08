@@ -65,14 +65,13 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
   const serializedPools = JSON.stringify(pools)
   const compressedPools = zlib.deflateSync(serializedPools)
-  const result= await
-    s3
-      .putObject({
-        Bucket: process.env.POOL_CACHE_BUCKET_3!,
-        Key: compressedKey,
-        Body: compressedPools,
-      })
-      .promise()
+  const result = await s3
+    .putObject({
+      Bucket: process.env.POOL_CACHE_BUCKET_3!,
+      Key: compressedKey,
+      Body: compressedPools,
+    })
+    .promise()
 
   metric.putMetric(`${metricPrefix}.s3.latency`, Date.now() - beforeS3)
 
