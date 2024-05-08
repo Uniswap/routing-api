@@ -25,6 +25,7 @@ import {
   NodeJSCache,
   OnChainGasPriceProvider,
   OnChainQuoteProvider,
+  QUOTER_V2_ADDRESSES,
   setGlobalLogger,
   Simulator,
   StaticV2SubgraphProvider,
@@ -340,7 +341,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
                 (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId]
+                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : QUOTER_V2_ADDRESSES[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -352,7 +353,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
+                  useMixedRouteQuoter ? NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean) =>
                   useMixedRouteQuoter ? `ChainId_${chainId}_ShadowMixedQuoter` : `ChainId_${chainId}_ShadowV3Quoter`
               )
