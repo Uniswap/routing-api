@@ -17,6 +17,27 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
+const v2SubgraphUrlOverride = (chainId: ChainId) => {
+  switch (chainId) {
+    case ChainId.ARBITRUM_ONE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-arbitrum/api`
+    case ChainId.POLYGON:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-polygon/api`
+    case ChainId.OPTIMISM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-optimism/api`
+    case ChainId.AVALANCHE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-avalanche/api`
+    case ChainId.BNB:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-bsc/api`
+    case ChainId.BLAST:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-blast/api`
+    case ChainId.BASE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-base/api`
+    default:
+      return undefined
+  }
+}
+
 export const chainProtocols = [
   // V3.
   {
@@ -37,6 +58,13 @@ export const chainProtocols = [
     timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000),
   },
+  // Waiting for Alchemy subgraph
+  // {
+  //   protocol: Protocol.V3,
+  //   chainId: ChainId.OPTIMISM,
+  //   timeout: 90000,
+  //   provider: new V3SubgraphProvider(ChainId.OPTIMISM, 3, 90000),
+  // },
   {
     protocol: Protocol.V3,
     chainId: ChainId.CELO,
@@ -67,13 +95,67 @@ export const chainProtocols = [
     timeout: 90000,
     provider: new V3SubgraphProvider(ChainId.BLAST, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BLAST)),
   },
-  // Currently there is no working V3 subgraph for Optimism so we use a static provider.
-  // V2.
 
+  // V2.
   {
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 840000,
     provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000), // 1000 is the largest page size supported by thegraph
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      1000,
+      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.POLYGON,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.POLYGON, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.POLYGON)),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.OPTIMISM,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.OPTIMISM, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.OPTIMISM)),
+  },
+  // {
+  //   protocol: Protocol.V2,
+  //   chainId: ChainId.CELO,
+  //   timeout: 90000,
+  //   provider: new V2SubgraphProvider(ChainId.CELO, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.CELO)),
+  // },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.BNB, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BNB)),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.AVALANCHE,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.AVALANCHE, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.AVALANCHE)),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.BASE,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.BASE, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BASE)),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.BLAST,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(ChainId.BLAST, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BLAST)),
   },
 ]
