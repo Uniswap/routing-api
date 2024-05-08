@@ -4,6 +4,8 @@ import { ChainId } from '@uniswap/sdk-core'
 
 const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
+    case ChainId.MAINNET:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
     case ChainId.AVALANCHE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
     case ChainId.BNB:
@@ -44,7 +46,7 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.MAINNET,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 90000, true, v3SubgraphUrlOverride(ChainId.MAINNET)),
   },
   {
     protocol: Protocol.V3,
