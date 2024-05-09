@@ -66,8 +66,8 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     quoteMinSuccessRate: 0,
   },
   [ChainId.BLAST]: {
-    multicallChunk: 80,
-    gasLimitPerCall: 1_200_000,
+    multicallChunk: 1200,
+    gasLimitPerCall: 80_000,
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.AVALANCHE]: {
