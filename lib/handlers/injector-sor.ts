@@ -354,8 +354,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean) =>
                   useMixedRouteQuoter ? NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
-                (chainId: ChainId, useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? `ChainId_${chainId}_ShadowMixedQuoter` : `ChainId_${chainId}_ShadowV3Quoter`
+                (chainId: ChainId, useMixedRouteQuoter: boolean, optimisticCachedRoutes: boolean) =>
+                  useMixedRouteQuoter
+                    ? `ChainId_${chainId}_ShadowMixedQuoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
+                    : `ChainId_${chainId}_ShadowV3Quoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
               )
               quoteProvider = new TrafficSwitchOnChainQuoteProvider({
                 currentQuoteProvider: currentQuoteProvider,
