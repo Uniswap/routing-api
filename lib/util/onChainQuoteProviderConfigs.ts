@@ -32,7 +32,7 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     maxTimeout: 1000,
   },
   [ChainId.CELO]: {
-    retries: 2,
+    retries: 0,
     minTimeout: 100,
     maxTimeout: 1000,
   },
