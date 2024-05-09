@@ -70,6 +70,11 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     gasLimitPerCall: 1_200_000,
     quoteMinSuccessRate: 0.1,
   },
+  [ChainId.AVALANCHE]: {
+    multicallChunk: 420,
+    gasLimitPerCall: 375_000,
+    quoteMinSuccessRate: 0.15,
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
