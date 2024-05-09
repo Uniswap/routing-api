@@ -14,6 +14,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-blast/api`
     case ChainId.BASE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-base/api`
+    case ChainId.CELO:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-celo/api`
     default:
       return undefined
   }
@@ -71,7 +73,7 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.CELO,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.CELO, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.CELO, 3, 90000, true, v3SubgraphUrlOverride(ChainId.CELO)),
   },
   {
     protocol: Protocol.V3,
@@ -130,12 +132,6 @@ export const chainProtocols = [
     timeout: 90000,
     provider: new V2SubgraphProvider(ChainId.OPTIMISM, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.OPTIMISM)),
   },
-  // {
-  //   protocol: Protocol.V2,
-  //   chainId: ChainId.CELO,
-  //   timeout: 90000,
-  //   provider: new V2SubgraphProvider(ChainId.CELO, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.CELO)),
-  // },
   {
     protocol: Protocol.V2,
     chainId: ChainId.BNB,
