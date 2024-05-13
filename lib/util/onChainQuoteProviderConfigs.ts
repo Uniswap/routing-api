@@ -51,8 +51,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchPa
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.ARBITRUM_ONE]: {
-    multicallChunk: 15,
-    gasLimitPerCall: 15_000_000,
+    multicallChunk: 4500,
+    gasLimitPerCall: 50_000,
     quoteMinSuccessRate: 0.15,
   },
   [ChainId.OPTIMISM]: {
@@ -95,8 +95,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: Bat
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.ARBITRUM_ONE]: {
-    multicallChunk: 15,
-    gasLimitPerCall: 15_000_000,
+    multicallChunk: 1125,
+    gasLimitPerCall: 200_000,
     quoteMinSuccessRate: 0.15,
   },
   [ChainId.OPTIMISM]: {
