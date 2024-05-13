@@ -46,8 +46,8 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
 export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
   ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
   [ChainId.BASE]: {
-    multicallChunk: 110,
-    gasLimitPerCall: 1_200_000,
+    multicallChunk: 1760,
+    gasLimitPerCall: 75_000,
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.ARBITRUM_ONE]: {
@@ -90,8 +90,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchPa
 export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
   ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
   [ChainId.BASE]: {
-    multicallChunk: 110,
-    gasLimitPerCall: 1_200_000,
+    multicallChunk: 660,
+    gasLimitPerCall: 200_000,
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.ARBITRUM_ONE]: {
