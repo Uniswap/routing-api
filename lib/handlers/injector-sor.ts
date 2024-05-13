@@ -63,7 +63,6 @@ import {
   NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
-  NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   RETRY_OPTIONS,
   SUCCESS_RATE_FAILURE_OVERRIDES,
   OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
@@ -360,7 +359,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
+                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean, optimisticCachedRoutes: boolean) =>
                   useMixedRouteQuoter
                     ? `ChainId_${chainId}_ShadowMixedQuoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
