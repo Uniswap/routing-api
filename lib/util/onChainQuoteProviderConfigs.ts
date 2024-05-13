@@ -80,6 +80,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchPa
     gasLimitPerCall: 80_000,
     quoteMinSuccessRate: 0.15,
   },
+  [ChainId.POLYGON]: {
+    multicallChunk: 1850,
+    gasLimitPerCall: 80_000,
+    quoteMinSuccessRate: 0.15,
+  },
 }
 
 export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
@@ -117,6 +122,11 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: Bat
   [ChainId.BNB]: {
     multicallChunk: 2961,
     gasLimitPerCall: 50_000,
+    quoteMinSuccessRate: 0.15,
+  },
+  [ChainId.POLYGON]: {
+    multicallChunk: 987,
+    gasLimitPerCall: 150_000,
     quoteMinSuccessRate: 0.15,
   },
 }
