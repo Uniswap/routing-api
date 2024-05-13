@@ -60,12 +60,13 @@ import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
 import {
-  BATCH_PARAMS,
+  NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
   NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   RETRY_OPTIONS,
   SUCCESS_RATE_FAILURE_OVERRIDES,
+  OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
@@ -335,7 +336,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                BATCH_PARAMS[chainId],
+                (optimisticCachedRoutes) =>
+                  optimisticCachedRoutes
+                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId]
+                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId],
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
@@ -348,7 +352,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                BATCH_PARAMS[chainId],
+                (optimisticCachedRoutes) =>
+                  optimisticCachedRoutes
+                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId]
+                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId],
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],

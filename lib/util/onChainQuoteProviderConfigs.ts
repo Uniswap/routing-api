@@ -43,7 +43,7 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
   },
 }
 
-export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
+export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
   ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
   [ChainId.BASE]: {
     multicallChunk: 110,
@@ -61,8 +61,42 @@ export const BATCH_PARAMS: { [chainId: number]: BatchParams } = {
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.CELO]: {
-    multicallChunk: 16,
-    gasLimitPerCall: 3_120_000,
+    multicallChunk: 6240,
+    gasLimitPerCall: 80_000,
+    quoteMinSuccessRate: 0,
+  },
+  [ChainId.BLAST]: {
+    multicallChunk: 1200,
+    gasLimitPerCall: 80_000,
+    quoteMinSuccessRate: 0.1,
+  },
+  [ChainId.AVALANCHE]: {
+    multicallChunk: 2625,
+    gasLimitPerCall: 60_000,
+    quoteMinSuccessRate: 0.15,
+  },
+}
+
+export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
+  ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+  [ChainId.BASE]: {
+    multicallChunk: 110,
+    gasLimitPerCall: 1_200_000,
+    quoteMinSuccessRate: 0.1,
+  },
+  [ChainId.ARBITRUM_ONE]: {
+    multicallChunk: 15,
+    gasLimitPerCall: 15_000_000,
+    quoteMinSuccessRate: 0.15,
+  },
+  [ChainId.OPTIMISM]: {
+    multicallChunk: 110,
+    gasLimitPerCall: 1_200_000,
+    quoteMinSuccessRate: 0.1,
+  },
+  [ChainId.CELO]: {
+    multicallChunk: 3120,
+    gasLimitPerCall: 160_000,
     quoteMinSuccessRate: 0,
   },
   [ChainId.BLAST]: {
