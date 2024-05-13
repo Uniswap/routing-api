@@ -56,8 +56,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchPa
     quoteMinSuccessRate: 0.15,
   },
   [ChainId.OPTIMISM]: {
-    multicallChunk: 110,
-    gasLimitPerCall: 1_200_000,
+    multicallChunk: 1650,
+    gasLimitPerCall: 80_000,
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.CELO]: {
@@ -90,8 +90,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: Bat
     quoteMinSuccessRate: 0.15,
   },
   [ChainId.OPTIMISM]: {
-    multicallChunk: 110,
-    gasLimitPerCall: 1_200_000,
+    multicallChunk: 880,
+    gasLimitPerCall: 150_000,
     quoteMinSuccessRate: 0.1,
   },
   [ChainId.CELO]: {
