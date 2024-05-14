@@ -13,6 +13,7 @@ import {
 import { CHAIN_TO_ADDRESSES_MAP, ChainId } from '@uniswap/sdk-core'
 import AsyncRetry from 'async-retry'
 import { AddressMap, BatchParams, BlockNumberConfig, FailureOverrides } from '@uniswap/smart-order-router'
+import { Protocol } from '@uniswap/router-sdk'
 
 export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined } = {
   ...constructSameRetryOptionsMap(DEFAULT_RETRY_OPTIONS),
@@ -43,91 +44,191 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
   },
 }
 
-export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
-  ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
-  [ChainId.BASE]: {
-    multicallChunk: 1320,
-    gasLimitPerCall: 100_000,
-    quoteMinSuccessRate: 0.1,
+export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
+  [Protocol.V3]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 1320,
+      gasLimitPerCall: 100_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 3000,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 1650,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 6240,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 2625,
+      gasLimitPerCall: 60_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.MAINNET]: {
+      multicallChunk: 1974,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
   },
-  [ChainId.ARBITRUM_ONE]: {
-    multicallChunk: 3000,
-    gasLimitPerCall: 75_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.OPTIMISM]: {
-    multicallChunk: 1650,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0.1,
-  },
-  [ChainId.CELO]: {
-    multicallChunk: 6240,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0,
-  },
-  [ChainId.BLAST]: {
-    multicallChunk: 1200,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0.1,
-  },
-  [ChainId.AVALANCHE]: {
-    multicallChunk: 2625,
-    gasLimitPerCall: 60_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.BNB]: {
-    multicallChunk: 1850,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.POLYGON]: {
-    multicallChunk: 1850,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0.15,
+  [Protocol.MIXED]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 1320,
+      gasLimitPerCall: 100_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 3000,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 1650,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 6240,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 2625,
+      gasLimitPerCall: 60_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
   },
 }
 
-export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [chainId: number]: BatchParams } = {
-  ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
-  [ChainId.BASE]: {
-    multicallChunk: 660,
-    gasLimitPerCall: 200_000,
-    quoteMinSuccessRate: 0.1,
+export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
+  [Protocol.V3]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 660,
+      gasLimitPerCall: 200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 1125,
+      gasLimitPerCall: 200_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 880,
+      gasLimitPerCall: 150_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 3120,
+      gasLimitPerCall: 160_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 420,
+      gasLimitPerCall: 375_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 2961,
+      gasLimitPerCall: 50_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 987,
+      gasLimitPerCall: 150_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.MAINNET]: {
+      multicallChunk: 987,
+      gasLimitPerCall: 150_000,
+      quoteMinSuccessRate: 0.15,
+    },
   },
-  [ChainId.ARBITRUM_ONE]: {
-    multicallChunk: 1125,
-    gasLimitPerCall: 200_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.OPTIMISM]: {
-    multicallChunk: 880,
-    gasLimitPerCall: 150_000,
-    quoteMinSuccessRate: 0.1,
-  },
-  [ChainId.CELO]: {
-    multicallChunk: 3120,
-    gasLimitPerCall: 160_000,
-    quoteMinSuccessRate: 0,
-  },
-  [ChainId.BLAST]: {
-    multicallChunk: 1200,
-    gasLimitPerCall: 80_000,
-    quoteMinSuccessRate: 0.1,
-  },
-  [ChainId.AVALANCHE]: {
-    multicallChunk: 420,
-    gasLimitPerCall: 375_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.BNB]: {
-    multicallChunk: 2961,
-    gasLimitPerCall: 50_000,
-    quoteMinSuccessRate: 0.15,
-  },
-  [ChainId.POLYGON]: {
-    multicallChunk: 987,
-    gasLimitPerCall: 150_000,
-    quoteMinSuccessRate: 0.15,
+  [Protocol.MIXED]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 660,
+      gasLimitPerCall: 200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 1125,
+      gasLimitPerCall: 200_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 880,
+      gasLimitPerCall: 150_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 3120,
+      gasLimitPerCall: 160_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 420,
+      gasLimitPerCall: 375_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 2961,
+      gasLimitPerCall: 50_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 987,
+      gasLimitPerCall: 150_000,
+      quoteMinSuccessRate: 0.15,
+    },
   },
 }
 

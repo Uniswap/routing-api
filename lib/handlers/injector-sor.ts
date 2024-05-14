@@ -335,10 +335,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                (optimisticCachedRoutes) =>
-                  optimisticCachedRoutes
-                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId]
-                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId],
+                (optimisticCachedRoutes, useMixedRouteQuoter) => {
+                  const protocol = useMixedRouteQuoter ? Protocol.MIXED : Protocol.V3
+                  return optimisticCachedRoutes
+                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
+                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
+                },
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
@@ -351,10 +353,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                (optimisticCachedRoutes) =>
-                  optimisticCachedRoutes
-                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId]
-                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[chainId],
+                (optimisticCachedRoutes, useMixedRouteQuoter) => {
+                  const protocol = useMixedRouteQuoter ? Protocol.MIXED : Protocol.V3
+                  return optimisticCachedRoutes
+                    ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
+                    : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
+                },
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
