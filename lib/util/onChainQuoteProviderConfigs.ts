@@ -44,7 +44,7 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
   },
 }
 
-export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string] : { [chainId: number]: BatchParams } } = {
+export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
   [Protocol.V3]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
@@ -135,10 +135,10 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string] : { [ch
       gasLimitPerCall: 80_000,
       quoteMinSuccessRate: 0.15,
     },
-  }
+  },
 }
 
-export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string] : { [chainId: number]: BatchParams } } = {
+export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
   [Protocol.V3]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
@@ -229,7 +229,7 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string] : {
       gasLimitPerCall: 150_000,
       quoteMinSuccessRate: 0.15,
     },
-  }
+  },
 }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
