@@ -108,6 +108,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'ALCHEMY_8453': {
       return `https://base-mainnet.g.alchemy.com/v2/${tokens[0]}`
     }
+    case 'ALCHEMY_11155111': {
+      return `https://eth-sepolia.g.alchemy.com/v2/${tokens[0]}`
+    }
     case 'ALCHEMY_42161': {
       return `https://arb-mainnet.g.alchemy.com/v2/${tokens[0]}`
     }
