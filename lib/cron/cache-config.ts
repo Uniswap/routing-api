@@ -6,6 +6,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
+    case ChainId.OPTIMISM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-optimism-ii/api`
     case ChainId.AVALANCHE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-avalanche/api`
     case ChainId.BNB:
@@ -63,12 +65,12 @@ export const chainProtocols = [
     provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000),
   },
   // Waiting for Alchemy subgraph
-  // {
-  //   protocol: Protocol.V3,
-  //   chainId: ChainId.OPTIMISM,
-  //   timeout: 90000,
-  //   provider: new V3SubgraphProvider(ChainId.OPTIMISM, 3, 90000),
-  // },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.OPTIMISM,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(ChainId.OPTIMISM, 3, 90000, true, v3SubgraphUrlOverride(ChainId.OPTIMISM)),
+  },
   {
     protocol: Protocol.V3,
     chainId: ChainId.CELO,
