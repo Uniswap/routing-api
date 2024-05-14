@@ -100,22 +100,22 @@ export function generateProviderUrl(key: string, value: string): string {
     }
     // Alchemy
     case 'ALCHEMY_10': {
-      return `https://opt-mainnet.g.alchemy.com/v2/${tokens[0]}`
+      return `https://opt-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_137': {
-      return `https://polygon-mainnet.g.alchemy.com/v2/${tokens[0]}`
+      return `https://polygon-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_8453': {
-      return `https://base-mainnet.g.alchemy.com/v2/${tokens[0]}`
+      return `https://base-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_11155111': {
       return `https://eth-sepolia.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_42161': {
-      return `https://arb-mainnet.g.alchemy.com/v2/${tokens[0]}`
+      return `https://arb-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_1': {
-      return `https://eth-mainnet.g.alchemy.com/v2/${tokens[0]}`
+      return `https://eth-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)

@@ -305,7 +305,7 @@ describe('GlobalRpcProviders', () => {
     expect(arbitrumRpcProvider['providers'][0].url).equal('https://arbitrum-mainnet.infura.io/v3/key18')
     expect(arbitrumRpcProvider['providers'][1].url).equal('https://host19.arbitrum-mainnet.quiknode.pro/key19')
     expect(arbitrumRpcProvider['providers'][2].url).equal('https://arb.nirvanalabs.xyz/host20?apikey=key20')
-    expect(arbitrumRpcProvider['providers'][3].url).equal('https://arb-mainnet.g.alchemy.com/v2/key21')
+    expect(arbitrumRpcProvider['providers'][3].url).equal('https://arb-mainnet-fast.g.alchemy.com/v2/key21')
 
     const baseRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
@@ -315,7 +315,7 @@ describe('GlobalRpcProviders', () => {
     ).get(ChainId.BASE)!!
     expect(baseRpcProvider['providers'][0].url).equal('https://host13.base-mainnet.quiknode.pro/key13')
     expect(baseRpcProvider['providers'][1].url).equal('https://base-mainnet.infura.io/v3/key12')
-    expect(baseRpcProvider['providers'][2].url).equal('https://base-mainnet.g.alchemy.com/v2/key14')
+    expect(baseRpcProvider['providers'][2].url).equal('https://base-mainnet-fast.g.alchemy.com/v2/key14')
     expect(baseRpcProvider['providers'][3].url).equal('https://base.nirvanalabs.xyz/host15?apikey=key15')
 
     const ethRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
@@ -327,7 +327,7 @@ describe('GlobalRpcProviders', () => {
     expect(ethRpcProvider['providers'][0].url).equal('https://mainnet.infura.io/v3/key22')
     expect(ethRpcProvider['providers'][1].url).equal('https://host23.quiknode.pro/key23')
     expect(ethRpcProvider['providers'][2].url).equal('https://ethereum.nirvanalabs.xyz/host24?apikey=key24')
-    expect(ethRpcProvider['providers'][3].url).equal('https://eth-mainnet.g.alchemy.com/v2/key25')
+    expect(ethRpcProvider['providers'][3].url).equal('https://eth-mainnet-fast.g.alchemy.com/v2/key25')
 
     const blastRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
