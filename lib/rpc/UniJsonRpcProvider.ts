@@ -210,7 +210,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // Shadow call to other health providers that are not selected for performing current request
   // to gather their health states from time to time.
-  private checkOtherHealthyProvider(latency: number, selectedProvider: SingleJsonRpcProvider, methodName: string, args: any[]) {
+  private checkOtherHealthyProvider(
+    latency: number,
+    selectedProvider: SingleJsonRpcProvider,
+    methodName: string,
+    args: any[]
+  ) {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
