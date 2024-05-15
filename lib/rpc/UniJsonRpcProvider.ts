@@ -306,12 +306,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastUsedProvider = selectedProvider
       if (this.shouldEvaluate) {
         if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
-<<<<<<< HEAD
-          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
-=======
           // fire and forget to evaluate latency of other healthy providers
-          this.checkOtherHealthyProvider(selectedProvider, fnName, args)
->>>>>>> 032d99d (fix: fire and forget top level shadow latency evaluation)
+          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
         }
         this.checkUnhealthyProviders(selectedProvider)
       }
