@@ -256,7 +256,20 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       startTimestampInMs: Date.now(),
     }
     try {
-      return await fn(...args)
+      // TODO: consolidate start time here and above
+      perf.startTimestampInMs = Date.now()
+      const result = await fn(...args)
+      perf.latencyInMs = Date.now() - perf.startTimestampInMs
+
+      if (this.url.startsWith('https://eth-mainnet-fast.g.alchemy.com') && perf.latencyInMs >= 500) {
+        this.log.warn(
+          `Provider call latency is high: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
+            ...args,
+          ])}, latency: ${perf.latencyInMs}`
+        )
+      }
+
+      return result
     } catch (error: any) {
       perf.succeed = false
       this.log.debug(
@@ -266,7 +279,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       )
       throw error
     } finally {
-      perf.latencyInMs = Date.now() - perf.startTimestampInMs
       this.checkLastCallPerformance(perf)
       if (this.enableDbSync) {
         if (!this.syncingDb && this.hasEnoughWaitSinceLastDbSync(1000 * this.config.DB_SYNC_INTERVAL_IN_S)) {
