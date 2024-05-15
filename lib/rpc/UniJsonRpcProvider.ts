@@ -215,7 +215,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     selectedProvider: SingleJsonRpcProvider,
     methodName: string,
     args: any[]
-  ): Promise<void>  {
+  ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
