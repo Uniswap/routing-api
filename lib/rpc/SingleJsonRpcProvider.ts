@@ -21,7 +21,7 @@ import { ProviderHealthStateDynamoDbRepository } from './ProviderHealthStateDyna
 
 export const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call', 'send']
 
-enum CallType {
+export enum CallType {
   NORMAL,
   // Extra call to check health against an unhealthy provider
   HEALTH_CHECK,
@@ -145,7 +145,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
 
   private recordProviderCallSuccess(perf: SingleCallPerf) {
     this.logProviderCallSuccessMetric(perf.methodName)
-    this.logLatencyMetrics(perf.methodName, perf.latencyInMs)
+    this.logLatencyMetrics(perf.methodName, perf.latencyInMs, perf.callType)
     this.log.debug(`Succeeded at calling provider: ${this.url} method: ${perf.methodName}`)
 
     if (perf.callType === CallType.HEALTH_CHECK) {
@@ -201,8 +201,12 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_${methodName}_FAILED`, 1, MetricLoggerUnit.Count)
   }
 
-  logLatencyMetrics(methodName: string, latencyInMs: number) {
-    metric.putMetric(`${this.metricPrefix}_evaluated_latency_${methodName}`, latencyInMs, MetricLoggerUnit.None)
+  logLatencyMetrics(methodName: string, latencyInMs: number, callType: CallType) {
+    metric.putMetric(
+      `${this.metricPrefix}_evaluated_${callType}_latency_${methodName}`,
+      latencyInMs,
+      MetricLoggerUnit.Milliseconds
+    )
   }
 
   logCheckHealth() {
