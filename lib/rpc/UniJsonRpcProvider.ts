@@ -43,7 +43,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // A hacky public mutable field to ensure all the shadow calls for provider health evaluation
   // can only be invoked during the request processing path, but not during lambda initialization time
-  public shouldEvaluate: boolean = false
+  public shouldEvaluate: boolean = true
 
   /**
    *
