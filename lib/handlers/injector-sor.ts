@@ -192,8 +192,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           let provider: StaticJsonRpcProvider
           if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
             // Use RPC gateway.
-            provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!;
-            (provider as UniJsonRpcProvider).shouldEvaluate = false
+            provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+            ;(provider as UniJsonRpcProvider).shouldEvaluate = false
           } else {
             provider = new DefaultEVMClient({
               allProviders: [
