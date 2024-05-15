@@ -233,6 +233,16 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         count++
       }
     }
+
+    if (count > 0) {
+      // Not ideal to re-evaluate the latency of the selected provider, but since the wait time is 10min for selected provider
+      // the number of additional call from the selected provider should be low.
+      if (!selectedProvider.isEvaluatingLatency() &&
+        selectedProvider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
+        selectedProvider.evaluateLatency(methodName, args)
+      }
+    }
+
     this.log.debug(`Evaluated ${count} other healthy providers`)
   }
 
