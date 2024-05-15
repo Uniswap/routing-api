@@ -1,4 +1,4 @@
-import { MAJOR_METHOD_NAMES, SingleJsonRpcProvider } from './SingleJsonRpcProvider'
+import { CallType, MAJOR_METHOD_NAMES, SingleJsonRpcProvider } from './SingleJsonRpcProvider'
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -210,7 +210,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // Shadow call to other health providers that are not selected for performing current request
   // to gather their health states from time to time.
-  private checkOtherHealthyProvider(selectedProvider: SingleJsonRpcProvider, methodName: string, args: any[]) {
+  private checkOtherHealthyProvider(latency: number, selectedProvider: SingleJsonRpcProvider, methodName: string, args: any[]) {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
     for (let provider of healthyProviders) {
@@ -235,12 +235,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     if (count > 0) {
-      // Not ideal to re-evaluate the latency of the selected provider, but since the wait time is 10min for selected provider
-      // the number of additional call from the selected provider should be low.
-      if (!selectedProvider.isEvaluatingLatency() &&
-        selectedProvider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)) {
-        selectedProvider.evaluateLatency(methodName, args)
-      }
+      selectedProvider.logLatencyMetrics(methodName, latency, CallType.LATENCY_EVALUATION)
     }
 
     this.log.debug(`Evaluated ${count} other healthy providers`)
@@ -292,8 +287,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     )
     const selectedProvider = this.selectPreferredProvider(sessionId)
     selectedProvider.logProviderSelection()
+    let latency = 0
     try {
-      return await (selectedProvider as any)[`${fnName}`](...args)
+      const start = Date.now()
+      const result = await (selectedProvider as any)[`${fnName}`](...args)
+      latency = Date.now() - start
+      return result
     } catch (error: any) {
       this.log.error(JSON.stringify(error))
       throw error
@@ -301,7 +300,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastUsedProvider = selectedProvider
       if (this.shouldEvaluate) {
         if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
-          this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
         }
         this.checkUnhealthyProviders(selectedProvider)
       }
