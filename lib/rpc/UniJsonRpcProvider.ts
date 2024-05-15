@@ -41,6 +41,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   // For later RPC calls, we will treat this as the session id, even if the RPC call itself doesn't specify one.
   attachedSessionId: string | null = null
 
+  // A hacky public mutable field to ensure all the shadow calls for provider health evaluation
+  // can only be invoked during the request processing path, but not during lambda initialization time
+  public shouldEvaluate: boolean = true
+
   /**
    *
    * @param chainId
@@ -285,10 +289,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       throw error
     } finally {
       this.lastUsedProvider = selectedProvider
-      if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
-        this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+      if (this.shouldEvaluate) {
+        if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
+          this.checkOtherHealthyProvider(selectedProvider, fnName, args)
+        }
+        this.checkUnhealthyProviders(selectedProvider)
       }
-      this.checkUnhealthyProviders(selectedProvider)
     }
   }
 

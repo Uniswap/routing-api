@@ -70,6 +70,7 @@ import {
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
 import { Protocol } from '@uniswap/router-sdk'
+import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -192,6 +193,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)) {
             // Use RPC gateway.
             provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
+            ;(provider as UniJsonRpcProvider).shouldEvaluate = false
           } else {
             provider = new DefaultEVMClient({
               allProviders: [
