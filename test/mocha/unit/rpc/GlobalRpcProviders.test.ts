@@ -294,7 +294,7 @@ describe('GlobalRpcProviders', () => {
       TEST_PROD_CONFIG
     ).get(ChainId.SEPOLIA)!!
     expect(sepoliaRpcProvider['providers'][0].url).equal('https://sepolia.infura.io/v3/key16')
-    expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia.g.alchemy.com/v2/key17')
+    expect(sepoliaRpcProvider['providers'][1].url).equal('https://eth-sepolia-fast.g.alchemy.com/v2/key17')
 
     const arbitrumRpcProvider = GlobalRpcProviders.getGlobalUniRpcProviders(
       log,
