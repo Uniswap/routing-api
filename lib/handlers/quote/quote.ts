@@ -63,6 +63,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       if (useRpcGateway) {
         const provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId)!
         provider.forceAttachToNewSession()
+        provider.shouldEvaluate = true
       }
 
       result = await this.handleRequestInternal(params, startTime)
