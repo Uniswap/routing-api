@@ -226,19 +226,12 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         if (!MAJOR_METHOD_NAMES.includes(methodName)) {
           return
         }
-        if (Math.random() >= this.latencyEvaluationSampleProb) {
-          return
-        }
-        if (
-          !provider.isEvaluatingLatency() &&
-          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
-        ) {
-          // Within each provider latency shadow evaluation, we should do block I/O,
-          // because NodeJS runs in single thread, so it's important to make sure
-          // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-          await provider.evaluateLatency(methodName, args)
-          count++
-        }
+
+        // Within each provider latency shadow evaluation, we should do block I/O,
+        // because NodeJS runs in single thread, so it's important to make sure
+        // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
+        await provider.evaluateLatency(methodName, args)
+        count++
       })
     )
 
@@ -307,11 +300,20 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     } finally {
       this.lastUsedProvider = selectedProvider
       if (this.shouldEvaluate) {
-        if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
+        // We only want to probabilistically evaluate latency of other healthy providers,
+        // when there's session id populated. Session id being populated means it's from the request processing path.
+        if (
+          this.config.ENABLE_SHADOW_LATENCY_EVALUATION &&
+          Math.random() < this.latencyEvaluationSampleProb &&
+          sessionId
+        ) {
           // fire and forget to evaluate latency of other healthy providers
           this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
         }
-        this.checkUnhealthyProviders(selectedProvider)
+
+        if (Math.random() < this.healthCheckSampleProb && sessionId) {
+          this.checkUnhealthyProviders(selectedProvider)
+        }
       }
     }
   }
