@@ -739,7 +739,7 @@ describe('UniJsonRpcProvider', () => {
     const spy1 = sandbox.spy(uniProvider['providers'][1], 'evaluateLatency')
     const spy2 = sandbox.spy(uniProvider['providers'][2], 'evaluateLatency')
 
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
 
     // Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
@@ -757,7 +757,7 @@ describe('UniJsonRpcProvider', () => {
     spy1.resetHistory()
     spy2.resetHistory()
 
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
 
     // 1 second is not long enough to allow another latency evaluation shadow call.
     expect(spy1.callCount).to.equal(1)
@@ -769,7 +769,7 @@ describe('UniJsonRpcProvider', () => {
     spy1.resetHistory()
     spy2.resetHistory()
 
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
 
     expect(spy1.callCount).to.equal(1)
     expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
@@ -811,11 +811,11 @@ describe('UniJsonRpcProvider', () => {
 
     // Make 5 calls in parallel.
     await Promise.all([
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
     ])
 
     expect(spy0.callCount).to.equal(0)
@@ -875,11 +875,11 @@ describe('UniJsonRpcProvider', () => {
 
     // Make another 5 calls in parallel.
     await Promise.all([
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
-      uniProvider.getBlockNumber("sessionId"),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
+      uniProvider.getBlockNumber('sessionId'),
     ])
 
     // Waited long enough to be able to make shadow calls. However, due to the locking mechanism, only 1 call is made to each shadow provider.
@@ -920,7 +920,7 @@ describe('UniJsonRpcProvider', () => {
     const randStub = sandbox.stub(Math, 'random')
 
     randStub.returns(0.6)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.6 >= 0.5, Shadow evaluate call should not be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(0)
@@ -930,7 +930,7 @@ describe('UniJsonRpcProvider', () => {
     spy2.resetHistory()
 
     randStub.returns(0.5)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.5 >= 0.5, Shadow evaluate call should not be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(0)
@@ -940,7 +940,7 @@ describe('UniJsonRpcProvider', () => {
     spy2.resetHistory()
 
     randStub.returns(0.4)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.4 < 0.5, Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
@@ -981,7 +981,7 @@ describe('UniJsonRpcProvider', () => {
     const randStub = sandbox.stub(Math, 'random')
 
     randStub.returns(0.6)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.6 >= 0.5, Shadow evaluate call should not be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(0)
@@ -991,7 +991,7 @@ describe('UniJsonRpcProvider', () => {
     spy2.resetHistory()
 
     randStub.returns(0.5)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.5 >= 0.5, Shadow evaluate call should not be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(0)
@@ -1001,7 +1001,7 @@ describe('UniJsonRpcProvider', () => {
     spy2.resetHistory()
 
     randStub.returns(0.4)
-    await uniProvider.getBlockNumber("sessionId")
+    await uniProvider.getBlockNumber('sessionId')
     // 0.4 < 0.5, Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
