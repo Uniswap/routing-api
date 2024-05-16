@@ -44,62 +44,131 @@ const v2SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
+const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+const v3UntrackedUsdThreshold = 50000 // Pools need at least 50K USD (untracked) to be selected (for metrics only)
+
+const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
+const v2UntrackedUsdThreshold = 50000 // Pairs need at least 50K USD (untracked) to be selected (for metrics only)
+
 export const chainProtocols = [
   // V3.
   {
     protocol: Protocol.V3,
     chainId: ChainId.MAINNET,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.MAINNET, 3, 90000, true, v3SubgraphUrlOverride(ChainId.MAINNET)),
+    provider: new V3SubgraphProvider(
+      ChainId.MAINNET,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.MAINNET)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.ARBITRUM_ONE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.ARBITRUM_ONE, 3, 90000),
+    provider: new V3SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.POLYGON,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000),
+    provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000, true, v3TrackedEthThreshold, v3UntrackedUsdThreshold),
   },
   // Waiting for Alchemy subgraph
   {
     protocol: Protocol.V3,
     chainId: ChainId.OPTIMISM,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.OPTIMISM, 3, 90000, true, v3SubgraphUrlOverride(ChainId.OPTIMISM)),
+    provider: new V3SubgraphProvider(
+      ChainId.OPTIMISM,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.OPTIMISM)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.CELO,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.CELO, 3, 90000, true, v3SubgraphUrlOverride(ChainId.CELO)),
+    provider: new V3SubgraphProvider(
+      ChainId.CELO,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.CELO)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.BNB,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BNB, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BNB)),
+    provider: new V3SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.BNB)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.AVALANCHE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.AVALANCHE, 3, 90000, true, v3SubgraphUrlOverride(ChainId.AVALANCHE)),
+    provider: new V3SubgraphProvider(
+      ChainId.AVALANCHE,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.AVALANCHE)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.BASE,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BASE, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BASE)),
+    provider: new V3SubgraphProvider(
+      ChainId.BASE,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.BASE)
+    ),
   },
   {
     protocol: Protocol.V3,
     chainId: ChainId.BLAST,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.BLAST, 3, 90000, true, v3SubgraphUrlOverride(ChainId.BLAST)),
+    provider: new V3SubgraphProvider(
+      ChainId.BLAST,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.BLAST)
+    ),
   },
 
   // V2.
@@ -107,7 +176,15 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 840000,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000), // 1000 is the largest page size supported by thegraph
+    provider: new V2SubgraphProvider(
+      ChainId.MAINNET,
+      3,
+      900000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold
+    ), // 1000 is the largest page size supported by thegraph
   },
   {
     protocol: Protocol.V2,
@@ -119,6 +196,8 @@ export const chainProtocols = [
       90000,
       true,
       1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
@@ -126,36 +205,90 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.POLYGON,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.POLYGON, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.POLYGON)),
+    provider: new V2SubgraphProvider(
+      ChainId.POLYGON,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.POLYGON)
+    ),
   },
   {
     protocol: Protocol.V2,
     chainId: ChainId.OPTIMISM,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.OPTIMISM, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.OPTIMISM)),
+    provider: new V2SubgraphProvider(
+      ChainId.OPTIMISM,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.OPTIMISM)
+    ),
   },
   {
     protocol: Protocol.V2,
     chainId: ChainId.BNB,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.BNB, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BNB)),
+    provider: new V2SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.BNB)
+    ),
   },
   {
     protocol: Protocol.V2,
     chainId: ChainId.AVALANCHE,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.AVALANCHE, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.AVALANCHE)),
+    provider: new V2SubgraphProvider(
+      ChainId.AVALANCHE,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.AVALANCHE)
+    ),
   },
   {
     protocol: Protocol.V2,
     chainId: ChainId.BASE,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.BASE, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BASE)),
+    provider: new V2SubgraphProvider(
+      ChainId.BASE,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.BASE)
+    ),
   },
   {
     protocol: Protocol.V2,
     chainId: ChainId.BLAST,
     timeout: 90000,
-    provider: new V2SubgraphProvider(ChainId.BLAST, 3, 90000, true, 1000, v2SubgraphUrlOverride(ChainId.BLAST)),
+    provider: new V2SubgraphProvider(
+      ChainId.BLAST,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.BLAST)
+    ),
   },
 ]
