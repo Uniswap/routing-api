@@ -218,15 +218,15 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
-    for (let provider of healthyProviders) {
+    await Promise.all(healthyProviders.map(async (provider) => {
       if (provider.url === selectedProvider.url) {
-        continue
+        return;
       }
       if (!MAJOR_METHOD_NAMES.includes(methodName)) {
-        continue
+        return;
       }
       if (Math.random() >= this.latencyEvaluationSampleProb) {
-        continue
+        return;
       }
       if (
         !provider.isEvaluatingLatency() &&
@@ -238,7 +238,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         await provider.evaluateLatency(methodName, args)
         count++
       }
-    }
+    }));
 
     if (count > 0) {
       selectedProvider.logLatencyMetrics(methodName, latency, CallType.LATENCY_EVALUATION)
