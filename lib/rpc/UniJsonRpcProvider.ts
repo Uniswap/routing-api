@@ -218,27 +218,29 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
-    await Promise.all(healthyProviders.map(async (provider) => {
-      if (provider.url === selectedProvider.url) {
-        return;
-      }
-      if (!MAJOR_METHOD_NAMES.includes(methodName)) {
-        return;
-      }
-      if (Math.random() >= this.latencyEvaluationSampleProb) {
-        return;
-      }
-      if (
-        !provider.isEvaluatingLatency() &&
-        provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
-      ) {
-        // Within each provider latency shadow evaluation, we should do block I/O,
-        // because NodeJS runs in single thread, so it's important to make sure
-        // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        await provider.evaluateLatency(methodName, args)
-        count++
-      }
-    }));
+    await Promise.all(
+      healthyProviders.map(async (provider) => {
+        if (provider.url === selectedProvider.url) {
+          return
+        }
+        if (!MAJOR_METHOD_NAMES.includes(methodName)) {
+          return
+        }
+        if (Math.random() >= this.latencyEvaluationSampleProb) {
+          return
+        }
+        if (
+          !provider.isEvaluatingLatency() &&
+          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
+        ) {
+          // Within each provider latency shadow evaluation, we should do block I/O,
+          // because NodeJS runs in single thread, so it's important to make sure
+          // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
+          await provider.evaluateLatency(methodName, args)
+          count++
+        }
+      })
+    )
 
     if (count > 0) {
       selectedProvider.logLatencyMetrics(methodName, latency, CallType.LATENCY_EVALUATION)
