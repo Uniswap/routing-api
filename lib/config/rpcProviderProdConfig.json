@@ -61,6 +61,7 @@
     "useMultiProviderProb": 0.1,
     "latencyEvaluationSampleProb": 0.0005,
     "healthCheckSampleProb": 0.0005,
+    "useMultiProviderProb": 1,
     "providerInitialWeights": [1, 0, 0],
     "providerUrls": ["QUICKNODE_8453", "ALCHEMY_8453", "NIRVANA_8453"]
   },
