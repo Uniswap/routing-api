@@ -302,11 +302,18 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       if (this.shouldEvaluate) {
         // We only want to probabilistically evaluate latency of other healthy providers,
         // when there's session id populated. Session id being populated means it's from the request processing path.
-        if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION && Math.random() >= this.latencyEvaluationSampleProb && sessionId) {
+        if (
+          this.config.ENABLE_SHADOW_LATENCY_EVALUATION &&
+          Math.random() < this.latencyEvaluationSampleProb &&
+          sessionId
+        ) {
           // fire and forget to evaluate latency of other healthy providers
           this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
         }
-        this.checkUnhealthyProviders(selectedProvider)
+
+        if (Math.random() < this.healthCheckSampleProb && sessionId) {
+          this.checkUnhealthyProviders(selectedProvider)
+        }
       }
     }
   }
