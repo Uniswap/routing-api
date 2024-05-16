@@ -210,34 +210,37 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
 
   // Shadow call to other health providers that are not selected for performing current request
   // to gather their health states from time to time.
-  private checkOtherHealthyProvider(
+  private async checkOtherHealthyProvider(
     latency: number,
     selectedProvider: SingleJsonRpcProvider,
     methodName: string,
     args: any[]
-  ) {
+  ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
-    for (let provider of healthyProviders) {
-      if (provider.url === selectedProvider.url) {
-        continue
-      }
-      if (!MAJOR_METHOD_NAMES.includes(methodName)) {
-        continue
-      }
-      if (Math.random() >= this.latencyEvaluationSampleProb) {
-        continue
-      }
-      if (
-        !provider.isEvaluatingLatency() &&
-        provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
-      ) {
-        // Fire and forget. Don't care about its result and it won't throw.
-        // It's done this way because We don't want to block the return of this function.
-        provider.evaluateLatency(methodName, args)
-        count++
-      }
-    }
+    await Promise.all(
+      healthyProviders.map(async (provider) => {
+        if (provider.url === selectedProvider.url) {
+          return
+        }
+        if (!MAJOR_METHOD_NAMES.includes(methodName)) {
+          return
+        }
+        if (Math.random() >= this.latencyEvaluationSampleProb) {
+          return
+        }
+        if (
+          !provider.isEvaluatingLatency() &&
+          provider.hasEnoughWaitSinceLastLatencyEvaluation(1000 * this.config.LATENCY_EVALUATION_WAIT_PERIOD_IN_S)
+        ) {
+          // Within each provider latency shadow evaluation, we should do block I/O,
+          // because NodeJS runs in single thread, so it's important to make sure
+          // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
+          await provider.evaluateLatency(methodName, args)
+          count++
+        }
+      })
+    )
 
     if (count > 0) {
       selectedProvider.logLatencyMetrics(methodName, latency, CallType.LATENCY_EVALUATION)
@@ -305,6 +308,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       this.lastUsedProvider = selectedProvider
       if (this.shouldEvaluate) {
         if (this.config.ENABLE_SHADOW_LATENCY_EVALUATION) {
+          // fire and forget to evaluate latency of other healthy providers
           this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
         }
         this.checkUnhealthyProviders(selectedProvider)
