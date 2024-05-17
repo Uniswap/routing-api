@@ -42,7 +42,7 @@
   },
   {
     "chainId": 137,
-    "useMultiProviderProb": 0.1,
+    "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.005,
     "healthCheckSampleProb": 0.005,
     "providerInitialWeights": [1, 0, 0],
@@ -50,7 +50,7 @@
   },
   {
     "chainId": 42161,
-    "useMultiProviderProb": 0.1,
+    "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.002,
     "healthCheckSampleProb": 0.002,
     "providerInitialWeights": [1, 0, 0, 0],
@@ -58,7 +58,7 @@
   },
   {
     "chainId": 8453,
-    "useMultiProviderProb": 0.1,
+    "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.0005,
     "healthCheckSampleProb": 0.0005,
     "providerInitialWeights": [1, 0, 0],
@@ -74,7 +74,7 @@
   },
   {
     "chainId": 81457,
-    "useMultiProviderProb": 0.1,
+    "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.001,
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1, 0],
