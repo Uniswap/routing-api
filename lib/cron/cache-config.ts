@@ -6,6 +6,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
+    case ChainId.ARBITRUM_ONE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-arbitrum-ii/api`
     case ChainId.OPTIMISM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-optimism-ii/api`
     case ChainId.AVALANCHE:
@@ -76,7 +78,8 @@ export const chainProtocols = [
       90000,
       true,
       v3TrackedEthThreshold,
-      v3UntrackedUsdThreshold
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   {
