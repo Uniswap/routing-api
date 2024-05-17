@@ -99,7 +99,7 @@ export function generateProviderUrl(key: string, value: string): string {
       return `https://${tokens[0]}.blast-mainnet.quiknode.pro/${tokens[1]}`
     }
     // QuickNode RETH
-    case 'QUICKNODE_RETH_1': {
+    case 'QUICKNODERETH_1': {
       return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`
     }
     // Alchemy
