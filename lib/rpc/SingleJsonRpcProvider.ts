@@ -269,11 +269,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       const result = await fn(...args)
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
 
-
       return result
     } catch (error: any) {
       perf.succeed = false
-      this.log.error({ error },
+      this.log.error(
+        { error },
         `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
           ...args,
         ])}, error details: ${JSON.stringify(error)}`
@@ -312,7 +312,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)
       this.logDbSyncSuccess()
     } catch (err: any) {
-      this.log.error({ err }, `${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      this.log.error(
+        { err },
+        `${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`
+      )
       this.logDbSyncFailure()
       // Won't throw. A fail of sync won't stop us from serving requests.
     } finally {
