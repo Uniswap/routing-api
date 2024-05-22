@@ -217,6 +217,8 @@ export class RoutingAPIPipeline extends Stack {
       // Blast
       'QUICKNODE_81457',
       'INFURA_81457',
+      // ZORA
+      'QUICKNODE_7777777',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -376,6 +378,8 @@ const jsonRpcProviders = {
   // Blast
   QUICKNODE_81457: process.env.QUICKNODE_81457!,
   INFURA_81457: process.env.INFURA_81457!,
+  // Zora
+  QUICKNODE_7777777: process.env.QUICKNODE_7777777!,
 }
 
 // Local dev stack
