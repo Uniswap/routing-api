@@ -32,6 +32,7 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    # BNB = 56
    # BASE = 8453
    # BLAST = 81457
+   # ZORA = 7777777
    TENDERLY_USER = '' # For enabling Tenderly simulations
    TENDERLY_PROJECT = '' # For enabling Tenderly simulations
    TENDERLY_ACCESS_KEY = '' # For enabling Tenderly simulations

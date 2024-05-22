@@ -179,44 +179,46 @@ export class RoutingAPIPipeline extends Stack {
     // Load RPC provider URLs from AWS secret (for RPC Gateway)
     const RPC_GATEWAY_PROVIDERS = [
       // Optimism
-      'INFURA_10',
+      // 'INFURA_10',
       'QUICKNODE_10',
       'ALCHEMY_10',
       // Polygon
       'QUICKNODE_137',
-      'INFURA_137',
+      // 'INFURA_137',
       'ALCHEMY_137',
       // Celo
       'QUICKNODE_42220',
-      'INFURA_42220',
+      // 'INFURA_42220',
       // Avalanche
-      'INFURA_43114',
+      // 'INFURA_43114',
       'QUICKNODE_43114',
       'NIRVANA_43114',
       // BNB
       'QUICKNODE_56',
       // Base
       'QUICKNODE_8453',
-      'INFURA_8453',
+      // 'INFURA_8453',
       'ALCHEMY_8453',
       'NIRVANA_8453',
       // Sepolia
-      'INFURA_11155111',
+      // 'INFURA_11155111',
       'ALCHEMY_11155111',
       // Arbitrum
-      'INFURA_42161',
+      // 'INFURA_42161',
       'QUICKNODE_42161',
       'NIRVANA_42161',
       'ALCHEMY_42161',
       // Ethereum
-      'INFURA_1',
+      // 'INFURA_1',
       'QUICKNODE_1',
       'NIRVANA_1',
       'ALCHEMY_1',
       'QUICKNODERETH_1',
       // Blast
       'QUICKNODE_81457',
-      'INFURA_81457',
+      // 'INFURA_81457',
+      // ZORA
+      'QUICKNODE_7777777',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -339,43 +341,45 @@ const jsonRpcProviders = {
   WEB3_RPC_8453: process.env.WEB3_RPC_8453!,
   // The followings are for RPC Gateway
   // Optimism
-  INFURA_10: process.env.INFURA_10!,
+  // INFURA_10: process.env.INFURA_10!,
   QUICKNODE_10: process.env.QUICKNODE_10!,
   ALCHEMY_10: process.env.ALCHEMY_10!,
   // Polygon
   QUICKNODE_137: process.env.QUICKNODE_137!,
-  INFURA_137: process.env.INFURA_137!,
+  // INFURA_137: process.env.INFURA_137!,
   ALCHEMY_137: process.env.ALCHEMY_137!,
   // Celo
   QUICKNODE_42220: process.env.QUICKNODE_42220!,
-  INFURA_42220: process.env.INFURA_42220!,
+  // INFURA_42220: process.env.INFURA_42220!,
   // Avalanche
-  INFURA_43114: process.env.INFURA_43114!,
+  // INFURA_43114: process.env.INFURA_43114!,
   QUICKNODE_43114: process.env.QUICKNODE_43114!,
   NIRVANA_43114: process.env.NIRVANA_43114!,
   // BNB
   QUICKNODE_56: process.env.QUICKNODE_56!,
   // Base
   QUICKNODE_8453: process.env.QUICKNODE_8453!,
-  INFURA_8453: process.env.INFURA_8453!,
+  // INFURA_8453: process.env.INFURA_8453!,
   ALCHEMY_8453: process.env.ALCHEMY_8453!,
   NIRVANA_8453: process.env.NIRVANA_8453!,
   // Sepolia
-  INFURA_11155111: process.env.INFURA_11155111!,
+  // INFURA_11155111: process.env.INFURA_11155111!,
   ALCHEMY_11155111: process.env.ALCHEMY_11155111!,
   // Arbitrum
-  INFURA_42161: process.env.INFURA_42161!,
+  // INFURA_42161: process.env.INFURA_42161!,
   QUICKNODE_42161: process.env.QUICKNODE_42161!,
   NIRVANA_42161: process.env.NIRVANA_42161!,
   ALCHEMY_42161: process.env.ALCHEMY_42161!,
   // Ethereum
-  INFURA_1: process.env.INFURA_1!,
+  // INFURA_1: process.env.INFURA_1!,
   QUICKNODE_1: process.env.QUICKNODE_1!,
   NIRVANA_1: process.env.NIRVANA_1!,
   ALCHEMY_1: process.env.ALCHEMY_1!,
   // Blast
   QUICKNODE_81457: process.env.QUICKNODE_81457!,
-  INFURA_81457: process.env.INFURA_81457!,
+  // INFURA_81457: process.env.INFURA_81457!,
+  // Zora
+  QUICKNODE_7777777: process.env.QUICKNODE_7777777!,
 }
 
 // Local dev stack

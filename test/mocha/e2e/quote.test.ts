@@ -2509,7 +2509,6 @@ describe('quote', function () {
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
       // We will follow up supporting ZORA and ROOTSTOCK
-      c != ChainId.ZORA &&
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
       c != ChainId.GOERLI
@@ -2621,8 +2620,9 @@ describe('quote', function () {
             return
           }
 
-          if (chain === ChainId.BLAST) {
+          if (chain === ChainId.BLAST || chain === ChainId.ZORA) {
             // Blast doesn't have DAI or USDC yet
+            // Zora doesn't have DAI
             return
           }
 
