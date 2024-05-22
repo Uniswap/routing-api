@@ -174,7 +174,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     try {
       await this.getBlockNumber_EvaluateHealthiness()
     } catch (error: any) {
-      this.log.error(`Encounter error for shadow call for evaluating healthiness: ${JSON.stringify(error)}`)
+      this.log.error({ error }, `Encounter error for shadow call for evaluating healthiness: ${JSON.stringify(error)}`)
       // Swallow the error.
     }
   }
@@ -186,7 +186,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     try {
       await (this as any)[`${methodName}_EvaluateLatency`](...args)
     } catch (error: any) {
-      this.log.error(`Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
+      this.log.error({ error }, `Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
       // Swallow the error.
     }
   }
@@ -241,6 +241,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     metric.putMetric(`${this.metricPrefix}_becomes_${newHealthiness}`, 1, MetricLoggerUnit.Count)
   }
 
+  logSendMetrod(method: string) {
+    metric.putMetric(`${this.metricPrefix}_send_${method}`, 1, MetricLoggerUnit.Count)
+  }
+
   private async wrappedFunctionCall(
     callType: CallType,
     fnName: string,
@@ -265,18 +269,11 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       const result = await fn(...args)
       perf.latencyInMs = Date.now() - perf.startTimestampInMs
 
-      if (this.url.startsWith('https://eth-mainnet-fast.g.alchemy.com') && perf.latencyInMs >= 500) {
-        this.log.warn(
-          `Provider call latency is high: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
-            ...args,
-          ])}, latency: ${perf.latencyInMs}`
-        )
-      }
-
       return result
     } catch (error: any) {
       perf.succeed = false
-      this.log.debug(
+      this.log.error(
+        { error },
         `Provider call failed: provider: ${this.url}, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([
           ...args,
         ])}, error details: ${JSON.stringify(error)}`
@@ -315,7 +312,10 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.log.debug(`${this.providerId}: Successfully synced with DB and updated states`)
       this.logDbSyncSuccess()
     } catch (err: any) {
-      this.log.error(`${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`)
+      this.log.error(
+        { err },
+        `${this.providerId}: Encountered unhandled error when sync provider state: ${JSON.stringify(err)}`
+      )
       this.logDbSyncFailure()
       // Won't throw. A fail of sync won't stop us from serving requests.
     } finally {
@@ -430,6 +430,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   override send(method: string, params: Array<any>): Promise<any> {
+    this.logSendMetrod(method)
     return this.wrappedFunctionCall(CallType.NORMAL, 'send', super.send.bind(this), method, params)
   }
 

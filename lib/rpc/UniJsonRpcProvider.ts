@@ -295,7 +295,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       latency = Date.now() - start
       return result
     } catch (error: any) {
-      this.log.error(JSON.stringify(error))
+      this.log.error({ error }, JSON.stringify(error))
       throw error
     } finally {
       this.lastUsedProvider = selectedProvider
