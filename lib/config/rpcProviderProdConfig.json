@@ -79,5 +79,13 @@
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_81457", "INFURA_81457"]
+  },
+  {
+    "chainId": 7777777,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0.001,
+    "healthCheckSampleProb": 0.001,
+    "providerInitialWeights": [1, 0],
+    "providerUrls": ["QUICKNODE_7777777"]
   }
 ]

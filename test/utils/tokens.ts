@@ -31,7 +31,8 @@ import {
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
   USDC_BASE,
-  USDC_BASE_GOERLI, USDC_ZORA
+  USDC_BASE_GOERLI,
+  USDC_ZORA,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
