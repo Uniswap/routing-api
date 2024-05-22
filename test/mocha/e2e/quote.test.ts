@@ -2509,7 +2509,6 @@ describe('quote', function () {
       c != ChainId.ARBITRUM_GOERLI &&
       c != ChainId.CELO_ALFAJORES &&
       // We will follow up supporting ZORA and ROOTSTOCK
-      c != ChainId.ZORA &&
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
       c != ChainId.GOERLI
