@@ -16,8 +16,6 @@ import Logger from 'bunyan'
 import { Network } from '@ethersproject/networks'
 import { getProviderId } from './utils'
 import { ProviderHealthiness } from './ProviderHealthState'
-import { ProviderHealthStateRepository } from './ProviderHealthStateRepository'
-import { ProviderHealthStateDynamoDbRepository } from './ProviderHealthStateDynamoDbRepository'
 
 export const MAJOR_METHOD_NAMES: string[] = ['getBlockNumber', 'call', 'send']
 
@@ -57,7 +55,6 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   private enableDbSync: boolean
   private syncingDb: boolean = false
   private dbSyncSampleProb: number
-  private healthStateRepository: ProviderHealthStateRepository
   private lastDbSyncTimestampInMs: number = 0
 
   constructor(
@@ -83,10 +80,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       if (dbTableName === undefined) {
         throw new Error('Environment variable RPC_PROVIDER_HEALTH_TABLE_NAME is missing!')
       }
-      this.healthStateRepository = new ProviderHealthStateDynamoDbRepository(dbTableName, log)
       // Fire and forget. Won't check the sync result. But usually the sync will finish before the end of initialization
       // of the current lambda, so it should already know the latest provider health states before serving requests.
-      this.syncAndUpdateProviderHealthiness()
+      // this.syncAndUpdateProviderHealthiness()
     }
   }
 
@@ -288,13 +284,17 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
             this.logDbSyncSampled()
             this.syncingDb = true
             // Fire and forget. Won't check the sync result.
-            this.syncAndUpdateProviderHealthiness()
+            // HealthState DB Sync and auto-failover didn't work during the incident.
+            // We are commenting out the DB sync to unblock integ-test in Sepolia,
+            // because HealthState DB has a record for 11155111_ALCHEMY with UNHEALTHY
+            // this.syncAndUpdateProviderHealthiness()
           }
         }
       }
     }
   }
 
+  /*
   private async syncAndUpdateProviderHealthiness() {
     try {
       const healthStateFromDb = await this.healthStateRepository.read(this.providerId)
@@ -322,6 +322,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       this.syncingDb = false
     }
   }
+   */
 
   ///////////////////// Begin of override functions /////////////////////
 
