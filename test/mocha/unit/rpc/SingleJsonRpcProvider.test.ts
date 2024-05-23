@@ -86,7 +86,7 @@ describe('SingleJsonRpcProvider', () => {
         version: 1,
       })
     )
-    provider['healthStateRepository'] = stubRepo
+    // provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
@@ -107,7 +107,7 @@ describe('SingleJsonRpcProvider', () => {
         version: 1,
       })
     )
-    provider['healthStateRepository'] = stubRepo
+    // provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
@@ -137,7 +137,7 @@ describe('SingleJsonRpcProvider', () => {
         version: 1,
       })
     )
-    provider['healthStateRepository'] = stubRepo
+    // provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
@@ -215,7 +215,7 @@ describe('SingleJsonRpcProvider', () => {
         version: 1,
       })
     )
-    provider['healthStateRepository'] = stubRepo
+    // provider['healthStateRepository'] = stubRepo
 
     const getBlockNumber = sandbox.stub(SingleJsonRpcProvider.prototype, '_getBlockNumber' as any)
     getBlockNumber.resolves(123456)
