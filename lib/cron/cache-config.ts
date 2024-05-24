@@ -50,7 +50,7 @@ const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to 
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
 const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
-const v2UntrackedUsdThreshold = 1000 // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
+const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
 
 export const chainProtocols = [
   // V3.
@@ -179,7 +179,15 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 840000,
-    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000, v2TrackedEthThreshold, Number.MAX_VALUE), // 1000 is the largest page size supported by thegraph
+    provider: new V2SubgraphProvider(
+      ChainId.MAINNET,
+      3,
+      900000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold
+    ), // 1000 is the largest page size supported by thegraph
   },
   {
     protocol: Protocol.V2,
