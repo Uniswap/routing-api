@@ -50,7 +50,7 @@ const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to 
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
 const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
-const v2UntrackedUsdThreshold = 1000 // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
+const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
 
 export const chainProtocols = [
   // V3.
