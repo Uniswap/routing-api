@@ -224,12 +224,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           // either one of the below two conditions should allow us to filter out v2 route containing fantom,
           // we use both to be extra certain we can filter out
           ((cachedRoute.route as V2Route).path.find(
-            (token) => token.address === '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
+            (token) => token.address !== '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
           ) ||
             (cachedRoute.route as V2Route).pairs.find(
               (pair) =>
-                pair.token0.address === '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3' ||
-                pair.token1.address === '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
+                pair.token0.address !== '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3' ||
+                pair.token1.address !== '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
             ))
 
         if (!routeHasNoFantom) {
