@@ -179,15 +179,7 @@ export const chainProtocols = [
     protocol: Protocol.V2,
     chainId: ChainId.MAINNET,
     timeout: 840000,
-    provider: new V2SubgraphProvider(
-      ChainId.MAINNET,
-      3,
-      900000,
-      true,
-      1000,
-      v2TrackedEthThreshold,
-      Number.MAX_VALUE,
-    ), // 1000 is the largest page size supported by thegraph
+    provider: new V2SubgraphProvider(ChainId.MAINNET, 3, 900000, true, 1000, v2TrackedEthThreshold, Number.MAX_VALUE), // 1000 is the largest page size supported by thegraph
   },
   {
     protocol: Protocol.V2,
