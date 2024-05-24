@@ -4,7 +4,7 @@ import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import { Construct } from 'constructs'
 import _ from 'lodash'
 import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router/build/main/util/chains'
-import { MAJOR_METHOD_NAMES } from '../../lib/rpc/SingleJsonRpcProvider'
+import { CallType, MAJOR_METHOD_NAMES } from '../../lib/rpc/SingleJsonRpcProvider'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 import { TESTNETS } from '../../lib/util/testNets'
 import { getRpcGatewayEnabledChains } from '../../lib/rpc/ProdConfig'
@@ -97,16 +97,18 @@ function getLatencyMetricsForChain(chainId: ChainId) {
   const metrics = []
   for (const providerName of getProviderNameForChain(chainId)) {
     for (const methodName of MAJOR_METHOD_NAMES) {
-      metrics.push([
-        'Uniswap',
-        `RPC_GATEWAY_${chainId}_${providerName}_evaluated_latency_${methodName}`,
-        'Service',
-        'RoutingAPI',
-        {
-          id: `${methodName}_latency_${chainId}_${providerName}`,
-          label: `${providerName} ${methodName} latency on ${ID_TO_NETWORK_NAME(chainId)}`,
-        },
-      ])
+      for (const callType of Object.values(CallType)) {
+        metrics.push([
+          'Uniswap',
+          `RPC_GATEWAY_${chainId}_${providerName}_evaluated_${callType as CallType}_latency_${methodName}`,
+          'Service',
+          'RoutingAPI',
+          {
+            id: `${methodName}_latency_${chainId}_${providerName}`,
+            label: `${providerName} ${methodName} sampling latency on ${ID_TO_NETWORK_NAME(chainId)}`,
+          },
+        ])
+      }
     }
   }
   return metrics
@@ -214,23 +216,6 @@ function getDbSyncFailMetricsForChain(chainId: ChainId) {
       {
         id: `db_sync_fail_${chainId}_${providerName}`,
         label: `${providerName} db sync fail ${ID_TO_NETWORK_NAME(chainId)}`,
-      },
-    ])
-  }
-  return metrics
-}
-
-function getEvaluateLatencyMetricsForChain(chainId: ChainId) {
-  const metrics = []
-  for (const providerName of getProviderNameForChain(chainId)) {
-    metrics.push([
-      'Uniswap',
-      `RPC_GATEWAY_${chainId}_${providerName}_evaluate_latency`,
-      'Service',
-      'RoutingAPI',
-      {
-        id: `evaluate_latency_${chainId}_${providerName}`,
-        label: `${providerName} (Shadow) Evaluate latency for ${ID_TO_NETWORK_NAME(chainId)}`,
       },
     ])
   }
@@ -597,27 +582,6 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
         width: 24,
         type: 'metric',
         properties: {
-          metrics: getProviderDbHealthStateChangeForChain(chainId),
-          view: 'timeSeries',
-          stacked: false,
-          region,
-          stat: 'Maximum',
-          period: 300,
-          title: `Provider DB health change for ${ID_TO_NETWORK_NAME(chainId)}`,
-          setPeriodToTimeRange: true,
-          yAxis: {
-            left: {
-              showUnits: false,
-              label: 'DB health state changes',
-            },
-          },
-        },
-      },
-      {
-        height: 8,
-        width: 24,
-        type: 'metric',
-        properties: {
           metrics: getProviderHealthStateChangeForChain(chainId),
           view: 'timeSeries',
           stacked: false,
@@ -814,27 +778,6 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
           stat: 'Sum',
           period: 300,
           title: `DB sync fail for ${ID_TO_NETWORK_NAME(chainId)}`,
-          setPeriodToTimeRange: true,
-          yAxis: {
-            left: {
-              showUnits: false,
-              label: 'Occurrences',
-            },
-          },
-        },
-      },
-      {
-        height: 8,
-        width: 24,
-        type: 'metric',
-        properties: {
-          metrics: getEvaluateLatencyMetricsForChain(chainId),
-          view: 'timeSeries',
-          stacked: false,
-          region,
-          stat: 'Sum',
-          period: 300,
-          title: `(Shadow) Evaluate latency call for ${ID_TO_NETWORK_NAME(chainId)}`,
           setPeriodToTimeRange: true,
           yAxis: {
             left: {
