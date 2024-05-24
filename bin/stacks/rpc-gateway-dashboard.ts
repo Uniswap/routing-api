@@ -97,15 +97,15 @@ function getLatencyMetricsForChain(chainId: ChainId) {
   const metrics = []
   for (const providerName of getProviderNameForChain(chainId)) {
     for (const methodName of MAJOR_METHOD_NAMES) {
-      for (const callType of Object.values(CallType)) {
+      for (const callType in CallType) {
         metrics.push([
           'Uniswap',
-          `RPC_GATEWAY_${chainId}_${providerName}_evaluated_${callType as CallType}_latency_${methodName}`,
+          `RPC_GATEWAY_${chainId}_${providerName}_evaluated_${CallType[callType]}_latency_${methodName}`,
           'Service',
           'RoutingAPI',
           {
             id: `${methodName}_latency_${chainId}_${providerName}`,
-            label: `${providerName} ${methodName} sampling latency on ${ID_TO_NETWORK_NAME(chainId)}`,
+            label: `${providerName} ${methodName} ${callType} latency on ${ID_TO_NETWORK_NAME(chainId)}`,
           },
         ])
       }
@@ -573,6 +573,27 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
             left: {
               showUnits: false,
               label: 'Requests',
+            },
+          },
+        },
+      },
+      {
+        height: 8,
+        width: 24,
+        type: 'metric',
+        properties: {
+          metrics: getProviderDbHealthStateChangeForChain(chainId),
+          view: 'timeSeries',
+          stacked: false,
+          region,
+          stat: 'Maximum',
+          period: 300,
+          title: `Provider DB health change for ${ID_TO_NETWORK_NAME(chainId)}`,
+          setPeriodToTimeRange: true,
+          yAxis: {
+            left: {
+              showUnits: false,
+              label: 'DB health state changes',
             },
           },
         },
