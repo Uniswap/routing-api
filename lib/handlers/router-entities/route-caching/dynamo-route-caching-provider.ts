@@ -218,10 +218,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // we use the stringified route as identifier
         const routeId = routeToString(cachedRoute.route)
 
-        const routeHasNoFantom =
+        const routeHasNoFATMOM =
           cachedRoute.protocol === Protocol.V2 &&
           (cachedRoute.route as V2Route).chainId === ChainId.MAINNET &&
-          // either one of the below two conditions should allow us to filter out v2 route containing fantom,
+          // either one of the below two conditions should allow us to filter out v2 route containing FATMOM,
           // we use both to be extra certain we can filter out
           ((cachedRoute.route as V2Route).path.find(
             (token) => token.address !== '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
@@ -232,13 +232,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
                 pair.token1.address !== '0xe4b48B6bbAFcA1F82Ad2976E30A81c800C249Aa3'
             ))
 
-        if (!routeHasNoFantom) {
-          log.warn(`Route ${routeId} has Fantom, skipping. This is a temporary fix.`)
+        if (!routeHasNoFATMOM) {
+          log.warn(`Route ${routeId} has FATMOM, skipping. This is a temporary fix.`)
         }
 
         // Using a map to remove duplicates, we will the different percents of different routes.
         // We also filter by protocol, in case we are loading a route from a protocol that wasn't requested
-        if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol) && routeHasNoFantom) {
+        if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol) && routeHasNoFATMOM) {
           routesMap.set(routeId, cachedRoute)
         }
       })
