@@ -186,7 +186,7 @@ export const chainProtocols = [
       true,
       1000,
       v2TrackedEthThreshold,
-      v2UntrackedUsdThreshold
+      Number.MAX_VALUE,
     ), // 1000 is the largest page size supported by thegraph
   },
   {
