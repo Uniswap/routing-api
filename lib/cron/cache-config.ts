@@ -8,6 +8,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
     case ChainId.ARBITRUM_ONE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-arbitrum-ii/api`
+    case ChainId.POLYGON:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-polygon/api`
     case ChainId.OPTIMISM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-optimism-ii/api`
     case ChainId.AVALANCHE:
@@ -86,7 +88,15 @@ export const chainProtocols = [
     protocol: Protocol.V3,
     chainId: ChainId.POLYGON,
     timeout: 90000,
-    provider: new V3SubgraphProvider(ChainId.POLYGON, 3, 90000, true, v3TrackedEthThreshold, v3UntrackedUsdThreshold),
+    provider: new V3SubgraphProvider(
+      ChainId.POLYGON,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.POLYGON)
+    ),
   },
   // Waiting for Alchemy subgraph
   {
