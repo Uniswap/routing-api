@@ -37,6 +37,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyAccessKey: string
       unicornSecret: string
       alchemyQueryKey?: string
+      decentralizedNetworkApiKey?: string
     }
   ) {
     super(scope, id, props)
@@ -56,6 +57,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyAccessKey,
       unicornSecret,
       alchemyQueryKey,
+      decentralizedNetworkApiKey,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -74,6 +76,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyAccessKey,
       unicornSecret,
       alchemyQueryKey,
+      decentralizedNetworkApiKey,
     })
     this.url = url
   }
@@ -244,6 +247,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
+      decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -268,6 +272,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
+      decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)

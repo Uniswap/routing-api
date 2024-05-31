@@ -29,6 +29,8 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
 
 const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
+    case ChainId.MAINNET:
+      return `https://gateway-arbitrum.network.thegraph.com/api/${process.env.DCN_API_KEY}/subgraphs/id/AHjUuKYZTVPNXGKp6c2NcL5hEQWDfvSSrqVDGwzosjVn`
     case ChainId.ARBITRUM_ONE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-arbitrum/api`
     case ChainId.POLYGON:
@@ -196,7 +198,8 @@ export const chainProtocols = [
       true,
       1000,
       v2TrackedEthThreshold,
-      v2UntrackedUsdThreshold
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.MAINNET)
     ), // 1000 is the largest page size supported by thegraph
   },
   {
