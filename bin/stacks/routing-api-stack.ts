@@ -89,6 +89,7 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_secret,
       hosted_zone,
       alchemyQueryKey,
+      decentralizedNetworkApiKey
     })
 
     const {
