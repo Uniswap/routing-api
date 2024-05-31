@@ -76,7 +76,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyAccessKey,
       unicornSecret,
       alchemyQueryKey,
-      decentralizedNetworkApiKey
+      decentralizedNetworkApiKey,
     })
     this.url = url
   }
