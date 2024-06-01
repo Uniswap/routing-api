@@ -30,7 +30,7 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
 const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
-      return `https://gateway-arbitrum.network.thegraph.com/api/${process.env.DCN_API_KEY}/deployments/id/QmSsNGn5wC6p3TAHf6HcmExVN7tgy3fucAxmbpfmM9beTv`
+      return `https://gateway-arbitrum.network.thegraph.com/api/${process.env.DCN_API_KEY}/subgraphs/id/FEtpnfQ1aqF8um2YktEkfzFD11ZKrfurvBLPeQzv9JB1`
     case ChainId.ARBITRUM_ONE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-arbitrum/api`
     case ChainId.POLYGON:
