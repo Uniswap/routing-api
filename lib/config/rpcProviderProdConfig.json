@@ -26,7 +26,7 @@
   {
     "chainId": 10,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_10", "ALCHEMY_10"]
@@ -43,7 +43,7 @@
   {
     "chainId": 137,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.005,
+    "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.005,
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_137", "ALCHEMY_137"]
@@ -51,7 +51,7 @@
   {
     "chainId": 42161,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.002,
+    "latencyEvaluationSampleProb": 0.02,
     "healthCheckSampleProb": 0.002,
     "providerInitialWeights": [1, 0, 0],
     "providerUrls": ["QUICKNODE_42161", "NIRVANA_42161", "ALCHEMY_42161"]
@@ -67,7 +67,7 @@
   {
     "chainId": 1,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.001,
+    "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [0, 0, 1],
     "providerUrls": ["ALCHEMY_1", "NIRVANA_1", "QUICKNODE_1"]
