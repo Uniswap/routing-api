@@ -59,7 +59,7 @@
   {
     "chainId": 8453,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.0025,
+    "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.0005,
     "providerInitialWeights": [1, 0, 0],
     "providerUrls": ["QUICKNODE_8453", "ALCHEMY_8453"]
