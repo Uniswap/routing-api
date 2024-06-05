@@ -12,7 +12,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.1,
-    "providerInitialWeights": [1, 0],
+    "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_43114"]
   },
   {
@@ -53,7 +53,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.002,
-    "providerInitialWeights": [1, 0, 0],
+    "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_42161", "ALCHEMY_42161"]
   },
   {
@@ -61,7 +61,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.0005,
-    "providerInitialWeights": [1, 0, 0],
+    "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_8453", "ALCHEMY_8453"]
   },
   {
@@ -69,7 +69,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
-    "providerInitialWeights": [0, 0, 1],
+    "providerInitialWeights": [0, 1],
     "providerUrls": ["ALCHEMY_1", "QUICKNODE_1"]
   },
   {
