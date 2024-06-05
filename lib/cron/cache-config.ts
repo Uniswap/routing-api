@@ -79,7 +79,7 @@ export const chainProtocols = [
     timeout: 90000,
     provider: new V3SubgraphProvider(
       ChainId.ARBITRUM_ONE,
-      3,
+      5,
       90000,
       true,
       v3TrackedEthThreshold,
@@ -194,7 +194,7 @@ export const chainProtocols = [
     timeout: 840000,
     provider: new V2SubgraphProvider(
       ChainId.MAINNET,
-      3,
+      5,
       900000,
       true,
       1000,
