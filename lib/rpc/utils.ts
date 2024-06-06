@@ -102,7 +102,7 @@ export function generateProviderUrl(key: string, value: string): string {
       return `https://${tokens[0]}.zora-mainnet.quiknode.pro/${tokens[1]}`
     }
     // QuickNode test key
-    case 'QUICKNODE_TEST_1': {
+    case 'QUICKNODETEST_1': {
       return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`
     }
     // QuickNode RETH
