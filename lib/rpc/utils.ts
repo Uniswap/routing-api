@@ -101,6 +101,10 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'QUICKNODE_7777777': {
       return `https://${tokens[0]}.zora-mainnet.quiknode.pro/${tokens[1]}`
     }
+    // QuickNode test key
+    case 'QUICKNODE_TEST_1': {
+      return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`
+    }
     // QuickNode RETH
     case 'QUICKNODERETH_1': {
       return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`

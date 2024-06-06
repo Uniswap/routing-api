@@ -69,8 +69,8 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
-    "providerInitialWeights": [0, 1],
-    "providerUrls": ["ALCHEMY_1", "QUICKNODE_1"]
+    "providerInitialWeights": [0, 1, 0],
+    "providerUrls": ["ALCHEMY_1", "QUICKNODE_1", "QUICKNODE_TEST_1"]
   },
   {
     "chainId": 81457,
