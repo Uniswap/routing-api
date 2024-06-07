@@ -36,6 +36,7 @@ The best way to develop and test the API is to deploy your own instance to AWS.
    TENDERLY_USER = '' # For enabling Tenderly simulations
    TENDERLY_PROJECT = '' # For enabling Tenderly simulations
    TENDERLY_ACCESS_KEY = '' # For enabling Tenderly simulations
+   TENDERLY_NODE_API_KEY = '' # For enabling Tenderly node-level RPC access
    ```
 3. Install and build the package
    ```

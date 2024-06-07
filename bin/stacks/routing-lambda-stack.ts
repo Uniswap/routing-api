@@ -27,6 +27,7 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tenderlyUser: string
   tenderlyProject: string
   tenderlyAccessKey: string
+  tenderlyNodeApiKey: string
   chatbotSNSArn?: string
   routesDynamoDb: aws_dynamodb.Table
   routesDbCachingRequestFlagDynamoDb: aws_dynamodb.Table
@@ -58,6 +59,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      tenderlyNodeApiKey,
       routesDynamoDb,
       routesDbCachingRequestFlagDynamoDb,
       cachedRoutesDynamoDb,
@@ -117,7 +119,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
       description: 'Routing Lambda',
       environment: {
-        VERSION: '23',
+        VERSION: '24',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_2: poolCacheBucket2.bucketName,
@@ -129,6 +131,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_USER: tenderlyUser,
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
+        TENDERLY_NODE_API_KEY: tenderlyNodeApiKey,
         // WARNING: Dynamo table name should be the tableinstance.name, e.g. routesDynamoDb.tableName.
         //          But we tried and had seen lambd version error:
         //          The following resource(s) failed to create: [RoutingLambda2CurrentVersion49A1BB948389ce4f9c26b15e2ccb07b4c1bab726].

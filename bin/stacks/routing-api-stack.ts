@@ -45,6 +45,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyUser: string
       tenderlyProject: string
       tenderlyAccessKey: string
+      tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
       decentralizedNetworkApiKey?: string
@@ -67,6 +68,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
@@ -117,6 +119,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      tenderlyNodeApiKey,
       routesDynamoDb,
       routesDbCachingRequestFlagDynamoDb,
       cachedRoutesDynamoDb,
