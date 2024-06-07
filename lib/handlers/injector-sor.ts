@@ -37,7 +37,7 @@ import {
   UniswapMulticallProvider,
   V2PoolProvider,
   V2QuoteProvider,
-  V3PoolProvider
+  V3PoolProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -65,7 +65,7 @@ import {
   NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   RETRY_OPTIONS,
-  SUCCESS_RATE_FAILURE_OVERRIDES
+  SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
