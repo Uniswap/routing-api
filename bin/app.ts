@@ -220,7 +220,6 @@ export class RoutingAPIPipeline extends Stack {
       'NIRVANA_1',
       'ALCHEMY_1',
       'QUICKNODERETH_1',
-      'QUICKNODETEST_1',
       // Blast
       'QUICKNODE_81457',
       // 'INFURA_81457',
