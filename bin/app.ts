@@ -35,6 +35,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser: string
       tenderlyProject: string
       tenderlyAccessKey: string
+      tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
       decentralizedNetworkApiKey?: string
@@ -55,6 +56,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
@@ -74,6 +76,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
+      tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
@@ -246,6 +249,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
+      tenderlyNodeApiKey: tenderlyCreds.secretValueFromJson('tenderly-node-api-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
       decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
@@ -271,6 +275,7 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyUser: tenderlyCreds.secretValueFromJson('tenderly-user').toString(),
       tenderlyProject: tenderlyCreds.secretValueFromJson('tenderly-project').toString(),
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
+      tenderlyNodeApiKey: tenderlyCreds.secretValueFromJson('tenderly-node-api-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
       decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
@@ -404,6 +409,7 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   tenderlyUser: process.env.TENDERLY_USER!,
   tenderlyProject: process.env.TENDERLY_PROJECT!,
   tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
+  tenderlyNodeApiKey: process.env.TENDERLY_NODE_API_KEY!,
   unicornSecret: process.env.UNICORN_SECRET!,
 })
 

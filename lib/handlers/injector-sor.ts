@@ -60,12 +60,12 @@ import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
 import {
-  NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
+  NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
+  OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   RETRY_OPTIONS,
   SUCCESS_RATE_FAILURE_OVERRIDES,
-  OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
@@ -388,13 +388,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             process.env.TENDERLY_USER!,
             process.env.TENDERLY_PROJECT!,
             process.env.TENDERLY_ACCESS_KEY!,
+            process.env.TENDERLY_NODE_API_KEY!,
             v2PoolProvider,
             v3PoolProvider,
             provider,
             portionProvider,
             undefined,
             // The timeout for the underlying axios call to Tenderly, measured in milliseconds.
-            2.5 * 1000
+            2.5 * 1000,
+            10,
+            [ChainId.MAINNET]
           )
 
           const ethEstimateGasSimulator = new EthEstimateGasSimulator(
