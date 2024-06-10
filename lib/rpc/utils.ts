@@ -127,6 +127,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'ALCHEMY_1': {
       return `https://eth-mainnet-fast.g.alchemy.com/v2/${tokens[0]}`
     }
+    case 'ALCHEMY_324': {
+      return `https://zksync-mainnet.g.alchemy.com/v2/${tokens[0]}`
+    }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
 }

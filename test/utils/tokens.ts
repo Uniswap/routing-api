@@ -26,14 +26,14 @@ import {
   USDC_POLYGON,
   USDC_POLYGON_MUMBAI,
   USDC_SEPOLIA,
-  USDC_ZKSYNC,
   USDC_ZORA,
+  USDCE_ZKSYNC,
   USDT_ARBITRUM,
   USDT_BNB,
   USDT_GOERLI,
   USDT_MAINNET,
   USDT_OPTIMISM,
-  WRAPPED_NATIVE_CURRENCY,
+  WRAPPED_NATIVE_CURRENCY
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -137,7 +137,7 @@ export const USDC_ON = (chainId: ChainId): Token => {
     case ChainId.ZORA:
       return USDC_ZORA
     case ChainId.ZKSYNC:
-      return USDC_ZKSYNC
+      return USDCE_ZKSYNC
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }

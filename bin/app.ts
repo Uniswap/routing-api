@@ -393,6 +393,9 @@ const jsonRpcProviders = {
   // INFURA_81457: process.env.INFURA_81457!,
   // Zora
   QUICKNODE_7777777: process.env.QUICKNODE_7777777!,
+  // ZkSync
+  QUICKNODE_324: process.env.QUICKNODE_324!,
+  ALCHEMY_324: process.env.ALCHEMY_324!,
 }
 
 // Local dev stack
