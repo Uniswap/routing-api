@@ -87,5 +87,13 @@
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_7777777"]
+  },
+  {
+    "chainId": 324,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0.01,
+    "healthCheckSampleProb": 0.01,
+    "providerInitialWeights": [1, 0],
+    "providerUrls": ["QUICKNODE_324", "ALCHEMY_324"]
   }
 ]
