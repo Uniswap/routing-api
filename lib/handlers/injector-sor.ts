@@ -85,6 +85,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE,
   ChainId.BLAST,
   ChainId.ZORA,
+  ChainId.ZKSYNC,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 

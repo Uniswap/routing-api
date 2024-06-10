@@ -342,6 +342,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.ZORA_SEPOLIA]: -1,
   [ChainId.ROOTSTOCK]: -1,
   [ChainId.BLAST]: 2370179,
+  [ChainId.ZKSYNC]: 35982078,
 }
 
 // 0 threshold means it's not deployed yet
@@ -368,12 +369,13 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,
   [ChainId.ROOTSTOCK]: 0,
-  [ChainId.BLAST]: 17540 * 2, // 17540 is the single tick.cross cost on blast. We multiply by 2 to be safe
+  [ChainId.BLAST]: 17540 * 2, // 17540 is the single tick.cross cost on blast. We multiply by 2 to be safe,
+  [ChainId.ZKSYNC]: 17540 * 2, // 17540 is the single tick.cross cost on zkSync. We multiply by 2 to be safe
 }
 
 // TODO: Move this new addresses to SOR
 export const NEW_MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {
-  [ChainId.MAINNET]: CHAIN_TO_ADDRESSES_MAP[ChainId.MAINNET].v1MixedRouteQuoterAddress,
-  [ChainId.GOERLI]: CHAIN_TO_ADDRESSES_MAP[ChainId.GOERLI].v1MixedRouteQuoterAddress,
+  [ChainId.MAINNET]: CHAIN_TO_ADDRESSES_MAP[ChainId.MAINNET].mixedRouteQuoterV1Address,
+  [ChainId.GOERLI]: CHAIN_TO_ADDRESSES_MAP[ChainId.GOERLI].mixedRouteQuoterV1Address,
   [ChainId.BASE]: '0xe544efae946f0008ae9a8d64493efa7886b73776',
 }
