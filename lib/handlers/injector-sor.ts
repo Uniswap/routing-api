@@ -396,7 +396,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             undefined,
             // The timeout for the underlying axios call to Tenderly, measured in milliseconds.
             2.5 * 1000,
-            10,
+            20,
             [ChainId.MAINNET]
           )
 
