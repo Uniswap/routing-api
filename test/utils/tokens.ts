@@ -33,7 +33,7 @@ import {
   USDT_GOERLI,
   USDT_MAINNET,
   USDT_OPTIMISM,
-  WRAPPED_NATIVE_CURRENCY
+  WRAPPED_NATIVE_CURRENCY,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
