@@ -1,9 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
-import {
-  setGlobalLogger,
-  setGlobalMetric,
-  V2SubgraphProvider,
-} from '@uniswap/smart-order-router'
+import { setGlobalLogger, setGlobalMetric, V2SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
@@ -58,7 +54,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         v2SubgraphUrlOverride(ChainId.MAINNET)
       )
       const additionalPools = await v2MainnetSubgraphProvider.getPools()
-      const filteredPools = additionalPools.filter((pool) => pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c' || pool.id.toLowerCase() === '0x4622Df6fB2d9Bee0DCDaCF545aCDB6a2b2f4f863')
+      const filteredPools = additionalPools.filter(
+        (pool) =>
+          pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c' ||
+          pool.id.toLowerCase() === '0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863'
+      )
       log.info({ additionalPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
 
       filteredPools.forEach((pool) => pools.push(pool))
