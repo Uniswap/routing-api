@@ -2,7 +2,7 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
-const v3SubgraphUrlOverride = (chainId: ChainId) => {
+export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
@@ -51,7 +51,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
-const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
 export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
