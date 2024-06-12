@@ -2,7 +2,11 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
-const v3SubgraphUrlOverride = (chainId: ChainId) => {
+// during local cdk stack update, the env vars are not populated
+// make sure to fill in the env vars below
+// process.env.ALCHEMY_QUERY_KEY = ''
+
+export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
@@ -28,7 +32,7 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
-const v2SubgraphUrlOverride = (chainId: ChainId) => {
+export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-mainnet/api`
@@ -51,10 +55,10 @@ const v2SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
-const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
-const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
+export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
 const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
 
 export const chainProtocols = [

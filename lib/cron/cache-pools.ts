@@ -1,14 +1,26 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { setGlobalLogger, setGlobalMetric } from '@uniswap/smart-order-router'
+import { setGlobalLogger, setGlobalMetric, V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
-import { chainProtocols } from './cache-config'
+import {
+  chainProtocols,
+  v2SubgraphUrlOverride,
+  v2TrackedEthThreshold,
+  v3SubgraphUrlOverride,
+  v3TrackedEthThreshold,
+} from './cache-config'
 import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger'
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
+import dotenv from 'dotenv'
+
+// Needed for local stack dev, not needed for staging or prod
+// But it still doesn't work on the local cdk stack update,
+// so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
+dotenv.config()
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
@@ -41,6 +53,46 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   try {
     const beforeGetPool = Date.now()
     pools = await provider.getPools()
+
+    if (protocol === Protocol.V2 && chainId === ChainId.MAINNET) {
+      const v2MainnetSubgraphProvider = new V2SubgraphProvider(
+        ChainId.MAINNET,
+        5,
+        900000,
+        true,
+        1000,
+        v2TrackedEthThreshold,
+        0, // wstETH/DOG reserveUSD is 0, but the pool balance (https://app.uniswap.org/explore/pools/ethereum/0x801c868ce08fb5b396e6911eac351beb259d386c) is sufficiently hight
+        v2SubgraphUrlOverride(ChainId.MAINNET)
+      )
+      const additionalPools = await v2MainnetSubgraphProvider.getPools()
+      const filteredPools = additionalPools.filter(
+        (pool) => pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c'
+      )
+      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+
+      filteredPools.forEach((pool) => pools.push(pool))
+    }
+
+    if (protocol === Protocol.V3 && chainId === ChainId.MAINNET) {
+      const v3MainnetSubgraphProvider = new V3SubgraphProvider(
+        ChainId.MAINNET,
+        3,
+        90000,
+        true,
+        v3TrackedEthThreshold,
+        0, // wstETH/USDC totalValueLockedUSDUntracked is 0, but the pool balance (https://app.uniswap.org/explore/pools/ethereum/0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863) is sufficiently hight
+        v3SubgraphUrlOverride(ChainId.MAINNET)
+      )
+      const additionalPools = await v3MainnetSubgraphProvider.getPools()
+      const filteredPools = additionalPools.filter(
+        (pool) => pool.id.toLowerCase() === '0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863'
+      )
+      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+
+      filteredPools.forEach((pool) => pools.push(pool))
+    }
+
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
   } catch (err) {
     metric.putMetric(`${metricPrefix}.getPools.error`, 1)
