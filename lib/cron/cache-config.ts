@@ -28,7 +28,7 @@ const v3SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
-const v2SubgraphUrlOverride = (chainId: ChainId) => {
+export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-mainnet/api`
@@ -54,7 +54,7 @@ const v2SubgraphUrlOverride = (chainId: ChainId) => {
 const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
-const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
+export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
 const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
 
 export const chainProtocols = [

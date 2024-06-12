@@ -1,11 +1,15 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { setGlobalLogger, setGlobalMetric } from '@uniswap/smart-order-router'
+import {
+  setGlobalLogger,
+  setGlobalMetric,
+  V2SubgraphProvider,
+} from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { S3_POOL_CACHE_KEY } from '../util/pool-cache-key'
-import { chainProtocols } from './cache-config'
+import { chainProtocols, v2SubgraphUrlOverride, v2TrackedEthThreshold } from './cache-config'
 import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger'
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
@@ -41,6 +45,25 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   try {
     const beforeGetPool = Date.now()
     pools = await provider.getPools()
+
+    if (protocol === Protocol.V2 && chainId === ChainId.MAINNET) {
+      const v2MainnetSubgraphProvider = new V2SubgraphProvider(
+        ChainId.MAINNET,
+        5,
+        900000,
+        true,
+        1000,
+        v2TrackedEthThreshold,
+        1000, // Pairs need at least 1K USD (untracked) to be selected (for metrics only),
+        v2SubgraphUrlOverride(ChainId.MAINNET)
+      )
+      const additionalPools = await v2MainnetSubgraphProvider.getPools()
+      const filteredPools = additionalPools.filter((pool) => pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c' || pool.id.toLowerCase() === '0x4622Df6fB2d9Bee0DCDaCF545aCDB6a2b2f4f863')
+      log.info({ additionalPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+
+      filteredPools.forEach((pool) => pools.push(pool))
+    }
+
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
   } catch (err) {
     metric.putMetric(`${metricPrefix}.getPools.error`, 1)
