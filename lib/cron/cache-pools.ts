@@ -15,6 +15,12 @@ import {
 import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger'
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
+import dotenv from 'dotenv'
+
+// Needed for local stack dev, not needed for staging or prod
+// But it still doesn't work on the local cdk stack update,
+// so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
+dotenv.config()
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
@@ -63,7 +69,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       const filteredPools = additionalPools.filter(
         (pool) => pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c'
       )
-      log.info({ additionalPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
 
       filteredPools.forEach((pool) => pools.push(pool))
     }
@@ -82,7 +88,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       const filteredPools = additionalPools.filter(
         (pool) => pool.id.toLowerCase() === '0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863'
       )
-      log.info({ additionalPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
 
       filteredPools.forEach((pool) => pools.push(pool))
     }

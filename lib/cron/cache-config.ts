@@ -2,6 +2,10 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
+// during local cdk stack update, the env vars are not populated
+// make sure to fill in the env vars below
+// process.env.ALCHEMY_QUERY_KEY = ''
+
 export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
