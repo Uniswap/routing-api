@@ -239,7 +239,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             multicall2Provider,
             new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
           )
-          let tokenPropertiesProvider: TokenPropertiesProvider;
+          let tokenPropertiesProvider: TokenPropertiesProvider
           // Gradually switch to graphql token fee fetcher - Start with 10%.
           if (Math.random() <= 0.1) {
             const tokenFeeFetcherGraphQL = new GraphQLTokenFeeFetcher(chainId, provider)

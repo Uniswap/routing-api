@@ -14,7 +14,7 @@ query Token($chain: Chain!, $address: String!) {
             }
         }
     }
-`;
+`
 
 /* Query to get the token info by multiple addresses and chain */
 export const GRAPHQL_QUERY_MULTIPLE_TOKEN_INFO_BY_CONTRACTS = `
@@ -32,4 +32,4 @@ query Tokens($contracts: [ContractInput!]!) {
           }
       }
     }
-`;
+`

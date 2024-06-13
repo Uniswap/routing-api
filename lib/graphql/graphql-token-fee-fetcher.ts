@@ -1,6 +1,6 @@
 import {
   ITokenFeeFetcher,
-  OnChainTokenFeeFetcher
+  OnChainTokenFeeFetcher,
 } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { IUniGraphQLProvider, UniGraphQLProvider } from './graphql-provider'
 import { TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
@@ -13,76 +13,63 @@ import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { log, MetricLoggerUnit } from '@uniswap/smart-order-router'
 
 /* Implementation of the ITokenFeeFetcher interface to give access to Uniswap GraphQL API token fee data.
-* This fetcher is used to get token fees from GraphQL API and fallback to OnChainTokenFeeFetcher if GraphQL API fails
-* or not all addresses could be fetched.
-* Note: OnChainTokenFeeFetcher takes into account the provided blocknumber when retrieving token fees (through providerConfig),
-* but GraphQLTokenFeeFetcher always returns the latest token fee (GraphQl doesn't keep historical data).
-* FOT tax doesn't change often, hence ok to not use blocknumber here.
-* */
+ * This fetcher is used to get token fees from GraphQL API and fallback to OnChainTokenFeeFetcher if GraphQL API fails
+ * or not all addresses could be fetched.
+ * Note: OnChainTokenFeeFetcher takes into account the provided blocknumber when retrieving token fees (through providerConfig),
+ * but GraphQLTokenFeeFetcher always returns the latest token fee (GraphQl doesn't keep historical data).
+ * FOT tax doesn't change often, hence ok to not use blocknumber here.
+ * */
 export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
-  private readonly graphQLProvider: IUniGraphQLProvider;
-  private readonly onChainFeeFetcherFallback: ITokenFeeFetcher;
-  private readonly chainId: ChainId;
+  private readonly graphQLProvider: IUniGraphQLProvider
+  private readonly onChainFeeFetcherFallback: ITokenFeeFetcher
+  private readonly chainId: ChainId
 
   constructor(chainId: ChainId, rpcProvider: BaseProvider) {
-    this.graphQLProvider = new UniGraphQLProvider();
+    this.graphQLProvider = new UniGraphQLProvider()
     this.onChainFeeFetcherFallback = new OnChainTokenFeeFetcher(chainId, rpcProvider)
-    this.chainId = chainId;
+    this.chainId = chainId
   }
 
   async fetchFees(addresses: string[], providerConfig?: ProviderConfig): Promise<TokenFeeMap> {
-    let tokenFeeMap: TokenFeeMap = {};
+    let tokenFeeMap: TokenFeeMap = {}
 
     try {
-      const tokenFeeResponse: TokensInfoResponse = await this.graphQLProvider.getTokensInfo(this.chainId, addresses);
-      tokenFeeResponse.tokens.forEach(token => {
+      const tokenFeeResponse: TokensInfoResponse = await this.graphQLProvider.getTokensInfo(this.chainId, addresses)
+      tokenFeeResponse.tokens.forEach((token) => {
         if (token.feeData.buyFeeBps || token.feeData.sellFeeBps) {
-          const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined;
-          const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined;
-          tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps };
+          const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined
+          const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined
+          tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps }
         }
       })
 
-      metric.putMetric(
-        'GraphQLTokenFeeFetcherFetchFeesSuccess',
-        1,
-        MetricLoggerUnit.Count
-      );
+      metric.putMetric('GraphQLTokenFeeFetcherFetchFeesSuccess', 1, MetricLoggerUnit.Count)
     } catch (err) {
-      log.error(
-        { err },
-        `Error calling GraphQLTokenFeeFetcher for tokens: ${addresses}`
-      );
+      log.error({ err }, `Error calling GraphQLTokenFeeFetcher for tokens: ${addresses}`)
 
-      metric.putMetric(
-        'GraphQLTokenFeeFetcherFetchFeesFailure',
-        1,
-        MetricLoggerUnit.Count
-      );
+      metric.putMetric('GraphQLTokenFeeFetcherFetchFeesFailure', 1, MetricLoggerUnit.Count)
     }
 
     // If we couldn't fetch all addresses from GraphQL then use fallback on chain fetcher for the rest.
-    const addressesToFetchFeesWithFallbackFetcher = addresses.filter(
-      (address) => !tokenFeeMap[address]
-    );
+    const addressesToFetchFeesWithFallbackFetcher = addresses.filter((address) => !tokenFeeMap[address])
     if (addressesToFetchFeesWithFallbackFetcher.length > 0) {
       try {
         const tokenFeeMapFromFallback = await this.onChainFeeFetcherFallback.fetchFees(
           addressesToFetchFeesWithFallbackFetcher,
           providerConfig
-        );
+        )
         tokenFeeMap = {
           ...tokenFeeMap,
           ...tokenFeeMapFromFallback,
-        };
+        }
       } catch (err) {
         log.error(
           { err },
           `Error fetching fees for tokens ${addressesToFetchFeesWithFallbackFetcher} using onChain fallback`
-        );
+        )
       }
     }
 
-    return tokenFeeMap;
+    return tokenFeeMap
   }
 }

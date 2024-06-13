@@ -1,25 +1,25 @@
 export interface GraphQLResponse<T> {
-  data: T;
-  errors?: Array<{ message: string }>;
+  data: T
+  errors?: Array<{ message: string }>
 }
 
 export interface TokenInfoResponse {
-  token: TokenInfo;
+  token: TokenInfo
 }
 
 export interface TokensInfoResponse {
-  tokens: TokenInfo[];
+  tokens: TokenInfo[]
 }
 
 export interface TokenInfo {
-  name: string;
-  chain: string;
-  address: string;
-  decimals: number;
-  symbol: string;
-  standard: string;
+  name: string
+  chain: string
+  address: string
+  decimals: number
+  symbol: string
+  standard: string
   feeData: {
-    buyFeeBps: string;
-    sellFeeBps: string;
-  };
+    buyFeeBps: string
+    sellFeeBps: string
+  }
 }
