@@ -48,9 +48,9 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
-      decentralizedNetworkApiKey?: string,
-      uniGraphQLEndpoint: string,
-      uniGraphQLHeaderOrigin: string,
+      decentralizedNetworkApiKey?: string
+      uniGraphQLEndpoint: string
+      uniGraphQLHeaderOrigin: string
     }
   ) {
     super(parent, name, props)

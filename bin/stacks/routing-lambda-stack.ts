@@ -37,8 +37,8 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   cachedV2PairsDynamoDb: aws_dynamodb.Table
   tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
   rpcProviderHealthStateDynamoDb: aws_dynamodb.Table
-  unicornSecret: string,
-  uniGraphQLEndpoint: string,
+  unicornSecret: string
+  uniGraphQLEndpoint: string
   uniGraphQLHeaderOrigin: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {

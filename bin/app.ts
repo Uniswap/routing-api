@@ -38,9 +38,9 @@ export class RoutingAPIStage extends Stage {
       tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
-      decentralizedNetworkApiKey?: string,
-      uniGraphQLEndpoint: string,
-      uniGraphQLHeaderOrigin: string,
+      decentralizedNetworkApiKey?: string
+      uniGraphQLEndpoint: string
+      uniGraphQLHeaderOrigin: string
     }
   ) {
     super(scope, id, props)
