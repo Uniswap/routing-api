@@ -5,6 +5,8 @@ import { GraphQLTokenFeeFetcher } from '../../../../lib/graphql/graphql-token-fe
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { ID_TO_PROVIDER } from '@uniswap/smart-order-router'
 import { BigNumber } from 'ethers'
+import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { UniGraphQLProvider } from '../../../../lib/graphql/graphql-provider'
 
 dotenv.config()
 
@@ -32,13 +34,15 @@ const BITBOY = new Token(
 
 describe('integration test for GraphQLTokenFeeFetcher', () => {
   let tokenFeeFetcher: GraphQLTokenFeeFetcher
+  let onChainTokenFeeFetcher: OnChainTokenFeeFetcher
 
   beforeEach(() => {
     const chain = ChainId.MAINNET
     const chainProvider = ID_TO_PROVIDER(chain)
     const provider = new JsonRpcProvider(chainProvider, chain)
 
-    tokenFeeFetcher = new GraphQLTokenFeeFetcher(chain, provider)
+    onChainTokenFeeFetcher = new OnChainTokenFeeFetcher(chain, provider)
+    tokenFeeFetcher = new GraphQLTokenFeeFetcher(new UniGraphQLProvider(), onChainTokenFeeFetcher, chain)
   })
 
   it('Fetch WETH and BITBOY, should only return BITBOY', async () => {

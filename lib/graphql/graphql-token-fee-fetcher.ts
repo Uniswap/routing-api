@@ -1,13 +1,11 @@
 import {
-  ITokenFeeFetcher,
-  OnChainTokenFeeFetcher,
+  ITokenFeeFetcher
 } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
-import { IUniGraphQLProvider, UniGraphQLProvider } from './graphql-provider'
+import { IUniGraphQLProvider } from './graphql-provider'
 import { TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { TokensInfoResponse } from './graphql-schemas'
 import { BigNumber } from 'ethers'
-import { BaseProvider } from '@ethersproject/providers'
 import { ChainId } from '@uniswap/sdk-core'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { log, MetricLoggerUnit } from '@uniswap/smart-order-router'
@@ -24,9 +22,9 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
   private readonly onChainFeeFetcherFallback: ITokenFeeFetcher
   private readonly chainId: ChainId
 
-  constructor(chainId: ChainId, rpcProvider: BaseProvider) {
-    this.graphQLProvider = new UniGraphQLProvider()
-    this.onChainFeeFetcherFallback = new OnChainTokenFeeFetcher(chainId, rpcProvider)
+  constructor(graphQLProvider: IUniGraphQLProvider, onChainTokenFeeFetcherFallback: ITokenFeeFetcher, chainId: ChainId) {
+    this.graphQLProvider = graphQLProvider
+    this.onChainFeeFetcherFallback = onChainTokenFeeFetcherFallback
     this.chainId = chainId
   }
 
