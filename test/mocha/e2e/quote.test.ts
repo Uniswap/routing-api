@@ -1135,7 +1135,7 @@ describe('quote', function () {
                         await new Promise((f) => setTimeout(f, 1000))
                       }
                       const simulateFromAddress = tokenIn.equals(WETH9[ChainId.MAINNET]!)
-                        ? '0x2fEb1512183545f48f6b9C5b4EbfCaF49CfCa6F3'
+                        ? '0x6B44ba0a126a2A1a8aa6cD1AdeeD002e141Bcd44'
                         : '0x171d311eAcd2206d21Cb462d661C33F0eddadC03'
                       const quoteReq: QuoteQueryParams = {
                         tokenInAddress: tokenIn.address,
