@@ -1,6 +1,4 @@
-import {
-  ITokenFeeFetcher
-} from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { ITokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { IUniGraphQLProvider } from './graphql-provider'
 import { TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
@@ -22,7 +20,11 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
   private readonly onChainFeeFetcherFallback: ITokenFeeFetcher
   private readonly chainId: ChainId
 
-  constructor(graphQLProvider: IUniGraphQLProvider, onChainTokenFeeFetcherFallback: ITokenFeeFetcher, chainId: ChainId) {
+  constructor(
+    graphQLProvider: IUniGraphQLProvider,
+    onChainTokenFeeFetcherFallback: ITokenFeeFetcher,
+    chainId: ChainId
+  ) {
     this.graphQLProvider = graphQLProvider
     this.onChainFeeFetcherFallback = onChainTokenFeeFetcherFallback
     this.chainId = chainId

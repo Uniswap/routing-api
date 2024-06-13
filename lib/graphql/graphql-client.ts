@@ -9,11 +9,7 @@ export interface IGraphQLClient {
 
 /* Implementation of the IGraphQLClient interface to give access to any GraphQL API */
 export class GraphQLClient implements IGraphQLClient {
-
-  constructor(
-    private readonly endpoint: string,
-    private readonly headers: Record<string, string>
-  ) {}
+  constructor(private readonly endpoint: string, private readonly headers: Record<string, string>) {}
 
   async fetchData<T>(query: string, variables: { [key: string]: any } = {}): Promise<T> {
     const requestConfig: AxiosRequestConfig = {
