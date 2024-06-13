@@ -71,6 +71,7 @@ import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
 import { Protocol } from '@uniswap/router-sdk'
 import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
+import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -233,17 +234,28 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             sourceOfTruthPoolProvider: noCacheV3PoolProvider,
           })
 
-          const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider)
           const tokenValidatorProvider = new TokenValidatorProvider(
             chainId,
             multicall2Provider,
             new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
           )
-          const tokenPropertiesProvider = new TokenPropertiesProvider(
-            chainId,
-            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-            tokenFeeFetcher
-          )
+          let tokenPropertiesProvider: TokenPropertiesProvider;
+          // Gradually switch to graphql token fee fetcher - Start with 10%.
+          if (Math.random() <= 0.1) {
+            const tokenFeeFetcherGraphQL = new GraphQLTokenFeeFetcher(chainId, provider)
+            tokenPropertiesProvider = new TokenPropertiesProvider(
+              chainId,
+              new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
+              tokenFeeFetcherGraphQL
+            )
+          } else {
+            const tokenFeeFetcherOnChain = new OnChainTokenFeeFetcher(chainId, provider)
+            tokenPropertiesProvider = new TokenPropertiesProvider(
+              chainId,
+              new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
+              tokenFeeFetcherOnChain
+            )
+          }
           const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
           const v2PoolProvider = new CachingV2PoolProvider(
             chainId,
