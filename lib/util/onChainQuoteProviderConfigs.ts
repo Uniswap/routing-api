@@ -275,8 +275,8 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     multicallChunk: 45,
   },
   [ChainId.ZKSYNC]: {
-    gasLimitOverride: 1_000_000,
-    multicallChunk: 81,
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 27,
   },
 }
 
@@ -303,8 +303,8 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
     multicallChunk: 45,
   },
   [ChainId.ZKSYNC]: {
-    gasLimitOverride: 1_000_000,
-    multicallChunk: 81,
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 27,
   },
 }
 
