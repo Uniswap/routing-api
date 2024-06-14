@@ -19,9 +19,14 @@ export class GraphQLClient implements IGraphQLClient {
       data: { query, variables },
     }
 
-    let response: AxiosResponse<GraphQLResponse<T>>
     try {
-      response = await axios.request(requestConfig)
+      const response: AxiosResponse<GraphQLResponse<T>> = await axios.request(requestConfig)
+      const responseBody = response.data
+      if (responseBody.errors) {
+        throw new Error(`GraphQL error! ${JSON.stringify(responseBody.errors)}`)
+      }
+
+      return responseBody.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(`HTTP error! status: ${error.response?.status}`)
@@ -29,12 +34,5 @@ export class GraphQLClient implements IGraphQLClient {
         throw new Error(`Unexpected error: ${error}`)
       }
     }
-
-    const responseBody = response.data
-    if (responseBody.errors) {
-      throw new Error(`GraphQL error! ${JSON.stringify(responseBody.errors)}`)
-    }
-
-    return responseBody.data
   }
 }
