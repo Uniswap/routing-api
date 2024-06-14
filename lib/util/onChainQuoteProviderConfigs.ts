@@ -93,8 +93,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [cha
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 162,
-      gasLimitPerCall: 500_000,
+      multicallChunk: 1000,
+      gasLimitPerCall: 3_000_000,
       quoteMinSuccessRate: 0.15,
     },
   },
@@ -141,8 +141,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [cha
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 162,
-      gasLimitPerCall: 500_000,
+      multicallChunk: 1000,
+      gasLimitPerCall: 3_000_000,
       quoteMinSuccessRate: 0.15,
     },
   },
@@ -197,8 +197,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { 
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 162,
-      gasLimitPerCall: 500_000,
+      multicallChunk: 1000,
+      gasLimitPerCall: 3_000_000,
       quoteMinSuccessRate: 0.15,
     },
   },
