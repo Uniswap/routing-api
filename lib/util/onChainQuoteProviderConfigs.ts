@@ -93,9 +93,9 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [cha
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 1000,
-      gasLimitPerCall: 3_000_000,
-      quoteMinSuccessRate: 0.15,
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
     },
   },
   [Protocol.MIXED]: {
@@ -141,9 +141,9 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [cha
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 1000,
-      gasLimitPerCall: 3_000_000,
-      quoteMinSuccessRate: 0.15,
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
     },
   },
 }
@@ -197,9 +197,9 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { 
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 1000,
-      gasLimitPerCall: 3_000_000,
-      quoteMinSuccessRate: 0.15,
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
     },
   },
   [Protocol.MIXED]: {
@@ -245,9 +245,9 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { 
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
-      multicallChunk: 1000,
-      gasLimitPerCall: 3_000_000,
-      quoteMinSuccessRate: 0.15,
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
     },
   },
 }
@@ -276,7 +276,7 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
   },
   [ChainId.ZKSYNC]: {
     gasLimitOverride: 6_000_000,
-    multicallChunk: 250,
+    multicallChunk: 10,
   },
 }
 
@@ -304,7 +304,7 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
   },
   [ChainId.ZKSYNC]: {
     gasLimitOverride: 6_000_000,
-    multicallChunk: 250,
+    multicallChunk: 10,
   },
 }
 
