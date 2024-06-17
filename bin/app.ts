@@ -39,8 +39,6 @@ export class RoutingAPIStage extends Stage {
       unicornSecret: string
       alchemyQueryKey?: string
       decentralizedNetworkApiKey?: string
-      uniGraphQLEndpoint: string
-      uniGraphQLHeaderOrigin: string
     }
   ) {
     super(scope, id, props)
@@ -62,8 +60,6 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
-      uniGraphQLEndpoint,
-      uniGraphQLHeaderOrigin,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -84,8 +80,6 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
-      uniGraphQLEndpoint,
-      uniGraphQLHeaderOrigin,
     })
     this.url = url
   }
@@ -261,8 +255,6 @@ export class RoutingAPIPipeline extends Stack {
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
       decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
-      uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
-      uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -289,8 +281,6 @@ export class RoutingAPIPipeline extends Stack {
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
       decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
-      uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
-      uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -427,8 +417,6 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
   tenderlyNodeApiKey: process.env.TENDERLY_NODE_API_KEY!,
   unicornSecret: process.env.UNICORN_SECRET!,
-  uniGraphQLEndpoint: process.env.UNI_GRAPHQL_ENDPOINT!,
-  uniGraphQLHeaderOrigin: process.env.UNI_GRAPHQL_HEADER_ORIGIN!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

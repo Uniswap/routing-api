@@ -49,8 +49,6 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret: string
       alchemyQueryKey?: string
       decentralizedNetworkApiKey?: string
-      uniGraphQLEndpoint: string
-      uniGraphQLHeaderOrigin: string
     }
   ) {
     super(parent, name, props)
@@ -74,8 +72,6 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret,
       alchemyQueryKey,
       decentralizedNetworkApiKey,
-      uniGraphQLEndpoint,
-      uniGraphQLHeaderOrigin,
     } = props
 
     const {
@@ -133,8 +129,6 @@ export class RoutingAPIStack extends cdk.Stack {
       tokenPropertiesCachingDynamoDb,
       rpcProviderHealthStateDynamoDb,
       unicornSecret,
-      uniGraphQLEndpoint,
-      uniGraphQLHeaderOrigin,
     })
 
     const accessLogGroup = new aws_logs.LogGroup(this, 'RoutingAPIGAccessLogs')
