@@ -10,6 +10,9 @@ jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
+    env:
+      UNI_GRAPHQL_ENDPOINT: ${{ secrets.UNI_GRAPHQL_ENDPOINT }}
+      UNI_GRAPHQL_HEADER_ORIGIN: ${{ secrets.UNI_GRAPHQL_HEADER_ORIGIN }}
 
     steps:
       - name: Checkout Repo
