@@ -37,7 +37,7 @@ import {
   UniswapMulticallProvider,
   V2PoolProvider,
   V2QuoteProvider,
-  V3PoolProvider,
+  V3PoolProvider
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -65,7 +65,7 @@ import {
   NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   RETRY_OPTIONS,
-  SUCCESS_RATE_FAILURE_OVERRIDES,
+  SUCCESS_RATE_FAILURE_OVERRIDES
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
@@ -147,9 +147,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
     try {
       const {
-        POOL_CACHE_BUCKET_2,
         POOL_CACHE_BUCKET_3,
-        POOL_CACHE_KEY,
         POOL_CACHE_GZIP_KEY,
         TOKEN_LIST_CACHE_BUCKET,
         ROUTES_TABLE_NAME,
@@ -265,19 +263,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
                   }
 
-                  const subgraphProvider = await V3AWSSubgraphProvider.EagerBuild(
+                  return await V3AWSSubgraphProvider.EagerBuild(
                     POOL_CACHE_BUCKET_3!,
                     POOL_CACHE_GZIP_KEY!,
                     chainId
-                  ).catch(async (err) => {
-                    log.error(
-                      { err },
-                      'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
-                    )
-
-                    return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
-                  })
-                  return subgraphProvider
+                  )
                 } catch (err) {
                   log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
                   return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
@@ -293,19 +283,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
                   }
 
-                  const subgraphProvider = await V2AWSSubgraphProvider.EagerBuild(
+                  return await V2AWSSubgraphProvider.EagerBuild(
                     POOL_CACHE_BUCKET_3!,
                     POOL_CACHE_GZIP_KEY!,
                     chainId
-                  ).catch(async (err) => {
-                    log.error(
-                      { err },
-                      'compressed s3 subgraph pool caching unavailable, fall back to the existing s3 subgraph pool caching'
-                    )
-
-                    return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_2!, POOL_CACHE_KEY!, chainId)
-                  })
-                  return subgraphProvider
+                  )
                 } catch (err) {
                   return new StaticV2SubgraphProvider(chainId)
                 }
