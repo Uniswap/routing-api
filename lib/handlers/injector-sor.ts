@@ -247,7 +247,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             'onChainTokenFeeFetcher',
             'graphQLTokenFeeFetcher',
             0.0,
-            0.05
+            0.005
           )
 
           const tokenValidatorProvider = new TokenValidatorProvider(
