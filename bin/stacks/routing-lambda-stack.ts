@@ -38,6 +38,8 @@ export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   tokenPropertiesCachingDynamoDb: aws_dynamodb.Table
   rpcProviderHealthStateDynamoDb: aws_dynamodb.Table
   unicornSecret: string
+  uniGraphQLEndpoint: string
+  uniGraphQLHeaderOrigin: string
 }
 export class RoutingLambdaStack extends cdk.NestedStack {
   public readonly routingLambda: aws_lambda_nodejs.NodejsFunction
@@ -68,6 +70,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tokenPropertiesCachingDynamoDb,
       rpcProviderHealthStateDynamoDb,
       unicornSecret,
+      uniGraphQLEndpoint,
+      uniGraphQLHeaderOrigin,
     } = props
 
     new CfnOutput(this, 'jsonRpcProviders', {
@@ -147,6 +151,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         // we will start using the correct ones going forward
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
+        GQL_URL: uniGraphQLEndpoint,
+        GQL_H_ORGN: uniGraphQLHeaderOrigin,
         ...jsonRpcProviders,
       },
       layers: [
