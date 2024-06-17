@@ -129,9 +129,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
   log.info({ result }, `Done ${protocol} for ${chainId.toString()}`)
 
-  log.info(
-    `Successfully cached ${chainId} ${protocol} pools to S3 bucket ${process.env.POOL_CACHE_BUCKET_2} ${process.env.POOL_CACHE_BUCKET_3}`
-  )
+  log.info(`Successfully cached ${chainId} ${protocol} pools to S3 bucket ${process.env.POOL_CACHE_BUCKET_3}`)
   metric.putMetric(`${metricPrefix}.latency`, Date.now() - beforeAll)
 
   log.info(
