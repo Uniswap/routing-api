@@ -1,6 +1,7 @@
 import { TrafficSwitcher } from './traffic-switcher'
 import { ITokenFeeFetcher, TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { log } from '@uniswap/smart-order-router'
 
 type Address = string
 
@@ -58,6 +59,11 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       )
       commonKeysWithDifferentFees.forEach((k) => {
         this.logMetric(this.fetchFees.name, 'DIFFERENT_FEE_FOR__Address__' + k)
+        log.debug(
+          `TrafficSwitcherITokenFeeFetcher compareResultsForFetchFees: Different fee for address ${k}:  in control: ${JSON.stringify(
+            resultA[k]
+          )} and treatment: ${JSON.stringify(resultB[k])}`
+        )
       })
     }
   }
