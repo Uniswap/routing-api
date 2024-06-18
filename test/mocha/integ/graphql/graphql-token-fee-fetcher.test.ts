@@ -47,7 +47,9 @@ describe('integration test for GraphQLTokenFeeFetcher', () => {
 
   it('Fetch WETH and BITBOY, should only return BITBOY', async () => {
     const tokenFeeMap = await tokenFeeFetcher.fetchFees([WETH9[ChainId.MAINNET]!.address, BITBOY.address])
-    expect(tokenFeeMap[WETH9[ChainId.MAINNET]!.address]).to.be.undefined
+    expect(tokenFeeMap[WETH9[ChainId.MAINNET]!.address]).to.not.be.undefined
+    expect(tokenFeeMap[WETH9[ChainId.MAINNET]!.address]?.buyFeeBps).to.be.undefined
+    expect(tokenFeeMap[WETH9[ChainId.MAINNET]!.address]?.sellFeeBps).to.be.undefined
     expect(tokenFeeMap[BITBOY.address]).to.not.be.undefined
     expect(tokenFeeMap[BITBOY.address]?.buyFeeBps?._hex).equals(BITBOY.buyFeeBps?._hex)
     expect(tokenFeeMap[BITBOY.address]?.sellFeeBps?._hex).equals(BITBOY.sellFeeBps?._hex)
