@@ -36,10 +36,12 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
     try {
       const tokenFeeResponse: TokensInfoResponse = await this.graphQLProvider.getTokensInfo(this.chainId, addresses)
       tokenFeeResponse.tokens.forEach((token) => {
-        if (token.feeData.buyFeeBps || token.feeData.sellFeeBps) {
+        if (token.feeData?.buyFeeBps || token.feeData?.sellFeeBps) {
           const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined
           const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined
           tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps }
+        } else {
+          tokenFeeMap[token.address] = { buyFeeBps: undefined, sellFeeBps: undefined }
         }
       })
 

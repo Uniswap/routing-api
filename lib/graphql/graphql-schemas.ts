@@ -18,8 +18,8 @@ export interface TokenInfo {
   decimals: number
   symbol: string
   standard: string
-  feeData: {
-    buyFeeBps: string
-    sellFeeBps: string
+  feeData?: {
+    buyFeeBps?: string
+    sellFeeBps?: string
   }
 }
