@@ -5,22 +5,10 @@ import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers
 type Address = string
 
 export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFetcher> implements ITokenFeeFetcher {
-  constructor(
-    experimentName: string,
-    implementationA: ITokenFeeFetcher,
-    implementationB: ITokenFeeFetcher,
-    aliasA: string,
-    aliasB: string,
-    pctTrafficSwitchToB: number,
-    pctSamplingToCompare: number
-  ) {
-    super(experimentName, implementationA, implementationB, aliasA, aliasB, pctTrafficSwitchToB, pctSamplingToCompare)
-  }
-
   async fetchFees(addresses: Address[], providerConfig?: ProviderConfig): Promise<TokenFeeMap> {
     return this.trafficSwitchMethod(
-      () => this.implementationA.fetchFees(addresses, providerConfig),
-      () => this.implementationB.fetchFees(addresses, providerConfig),
+      () => this.props.control.fetchFees(addresses, providerConfig),
+      () => this.props.treatment.fetchFees(addresses, providerConfig),
       this.fetchFees.name,
       {},
       this.compareResultsForFetchFees.bind(this)
@@ -34,11 +22,11 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       return
     }
     if (!resultA) {
-      this.logComparisonResult(this.fetchFees.name, this.aliasA + '_IS_UNDEFINED', true)
+      this.logComparisonResult(this.fetchFees.name, this.props.aliasControl + '_IS_UNDEFINED', true)
       return
     }
     if (!resultB) {
-      this.logComparisonResult(this.fetchFees.name, this.aliasB + '_IS_UNDEFINED', true)
+      this.logComparisonResult(this.fetchFees.name, this.props.aliasTreatment + '_IS_UNDEFINED', true)
       return
     }
 
@@ -57,8 +45,12 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       const keysB = Object.keys(resultB)
       const missingInA = keysB.filter((k) => !keysA.includes(k))
       const missingInB = keysA.filter((k) => !keysB.includes(k))
-      missingInA.forEach((k) => this.logMetric(this.fetchFees.name, 'MISSING_IN_' + this.aliasA + '__Address__' + k))
-      missingInB.forEach((k) => this.logMetric(this.fetchFees.name, 'MISSING_IN_' + this.aliasB + '__Address__' + k))
+      missingInA.forEach((k) =>
+        this.logMetric(this.fetchFees.name, 'MISSING_IN_' + this.props.aliasControl + '__Address__' + k)
+      )
+      missingInB.forEach((k) =>
+        this.logMetric(this.fetchFees.name, 'MISSING_IN_' + this.props.aliasTreatment + '__Address__' + k)
+      )
       // find common keys with diffs
       const commonKeys = keysA.filter((k) => keysB.includes(k))
       const commonKeysWithDifferentFees = commonKeys.filter(

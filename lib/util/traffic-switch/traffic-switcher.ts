@@ -1,55 +1,51 @@
 import { log, metric, MetricLoggerUnit } from '@uniswap/smart-order-router'
 
+export interface TrafficSwitcherProps<TExperiment> {
+  control: TExperiment
+  treatment: TExperiment
+  aliasControl: string
+  aliasTreatment: string
+  customization: TrafficSwitchCustomization
+}
+
+export interface TrafficSwitchCustomization {
+  // pctEnabled is the percentage of traffic that will be switched to treatment
+  pctEnabled: number
+  // pctShadowSampling is the percentage of traffic that will be compared between control and treatment
+  pctShadowSampling: number
+}
+
 /*
   This class is a base class that can be used for traffic switching or sampling between two implementations of an interface.
   It provides the ability to switch traffic between two implementations based on a percentage,
   or to sample traffic between two implementations based on a percentage (one or the other, not both at the same time).
-  ExperimentName, aliasA and aliasB are unique identifiers and will be used for logging purposes.
+  ExperimentName, aliasControl and aliasTreatment are unique identifiers and will be used for logging purposes.
  */
-export abstract class TrafficSwitcher<T> {
+export abstract class TrafficSwitcher<TExperiment> {
   public static readonly METRIC_NAME_TEMPLATE: string = 'TRAFFIC_SWITCHER__{EXP}__{METHOD}__{METRIC}'
 
   // Used for logging purposes.
   protected readonly experimentName: string
-  protected readonly aliasA: string
-  protected readonly aliasB: string
-  // 2 implementations of the interface that we want to switch traffic between.
-  protected readonly implementationA: T
-  protected readonly implementationB: T
+  protected readonly props: TrafficSwitcherProps<TExperiment>
 
-  // pctTrafficSwitchToB is the percentage of traffic that will be switched to implementationB
-  protected readonly pctTrafficSwitchToB: number
-  // pctSamplingToCompare is the percentage of traffic that will be compared between implementationA and implementationB
-  protected readonly pctSamplingToCompare: number
-
-  constructor(
-    experimentName: string,
-    implementationA: T,
-    implementationB: T,
-    aliasA: string,
-    aliasB: string,
-    pctTrafficSwitchToB: number = 0.0,
-    pctSamplingToCompare: number = 0.0
-  ) {
-    if (pctTrafficSwitchToB < 0 || pctTrafficSwitchToB > 1) {
+  constructor(experimentName: string, props: TrafficSwitcherProps<TExperiment>) {
+    if (props.customization.pctEnabled < 0 || props.customization.pctEnabled > 1) {
       throw new Error('Percentages must be between 0 and 1')
     }
-    if (pctTrafficSwitchToB > 0 && pctSamplingToCompare > 0) {
-      throw new Error('Only one of pctTrafficSwitchToB and pctSamplingToCompare can be greater than 0')
+    if (props.customization.pctEnabled > 0 && props.customization.pctShadowSampling > 0) {
+      throw new Error('Only one of pctEnabled and pctShadowSampling can be greater than 0')
     }
 
     this.experimentName = experimentName
-    this.implementationA = implementationA
-    this.implementationB = implementationB
-    this.aliasA = aliasA
-    this.aliasB = aliasB
-    this.pctTrafficSwitchToB = pctTrafficSwitchToB
-    this.pctSamplingToCompare = pctSamplingToCompare
+    this.props = props
   }
 
   /* This method will do one of the following:
-   *  - Switch traffic between two implementations based on the pctTrafficSwitchToB percentage
-   *  - Sample traffic between two implementations based on the pctSamplingToCompare percentage
+   *  - Switch traffic between two implementations based on the pctEnabled percentage
+   *  - Sample traffic between two implementations based on the pctShadowSampling percentage
+   * Please note that sampling is done on a per method call basis.
+   * If a method is called multiple times during a request, it might or might not be sampled/traffic switched multiple times.
+   * TODO: Implement a way to sample/switch traffic on a per request basis (e.g. based on a requestId).
    */
   protected async trafficSwitchMethod<K>(
     methodA: () => Promise<K>,
@@ -64,8 +60,8 @@ export abstract class TrafficSwitcher<T> {
         // If in sampling mode, and we should sample, call both implementations and compare results
         // Note: here we'll wait for both implementations to finish before comparing results.
         const results: (K | undefined)[] = await this.allSettled<K>([
-          [methodA(), this.aliasA, methodName],
-          [methodB(), this.aliasB, methodName],
+          [methodA(), this.props.aliasControl, methodName],
+          [methodB(), this.props.aliasTreatment, methodName],
         ])
 
         // Compare the results if a comparison method is provided
@@ -89,22 +85,22 @@ export abstract class TrafficSwitcher<T> {
       }
     } else {
       // Otherwise we are in switch traffic mode, just call the selected implementation based on the traffic switch percentage
-      if (Math.random() < this.pctTrafficSwitchToB) {
-        this.logMetric(methodName, `SELECTED_IMPL__${this.aliasB}`)
+      if (Math.random() < this.props.customization.pctEnabled) {
+        this.logMetric(methodName, `SELECTED_IMPL__${this.props.aliasTreatment}`)
         return methodB()
       } else {
-        this.logMetric(methodName, `SELECTED_IMPL__${this.aliasA}`)
+        this.logMetric(methodName, `SELECTED_IMPL__${this.props.aliasControl}`)
         return methodA()
       }
     }
   }
 
   protected isSamplingEnabled(): boolean {
-    return this.pctSamplingToCompare > 0
+    return this.props.customization.pctShadowSampling > 0
   }
 
   protected shouldSample(): boolean {
-    return this.isSamplingEnabled() && Math.random() < this.pctSamplingToCompare
+    return this.isSamplingEnabled() && Math.random() < this.props.customization.pctShadowSampling
   }
 
   protected logComparisonResult(method: string, comparisonType: string, equals: boolean): void {

@@ -55,15 +55,16 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
     targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee200)
 
-    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher(
-      'Exp1',
-      currentFeeFetcher,
-      targetFeeFetcher,
-      'Current',
-      'Target',
-      1.0,
-      0.0
-    )
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 1.0,
+        pctShadowSampling: 0.0,
+      },
+    })
 
     const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
 
@@ -92,15 +93,16 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
     targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee200)
 
-    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher(
-      'Exp1',
-      currentFeeFetcher,
-      targetFeeFetcher,
-      'Current',
-      'Target',
-      0.0,
-      0.0
-    )
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 0.0,
+      },
+    })
 
     const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
 
@@ -129,15 +131,16 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
     targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
 
-    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher(
-      'Exp1',
-      currentFeeFetcher,
-      targetFeeFetcher,
-      'Current',
-      'Target',
-      0.0,
-      1.0
-    )
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 1.0,
+      },
+    })
 
     const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
 
@@ -174,15 +177,16 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
     targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee200)
 
-    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher(
-      'Exp1',
-      currentFeeFetcher,
-      targetFeeFetcher,
-      'Current',
-      'Target',
-      0.0,
-      1.0
-    )
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 1.0,
+      },
+    })
 
     const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
 
@@ -243,15 +247,16 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100)
     targetFeeFetcher.fetchFees.callsFake(methodFetchFeesThrowsException)
 
-    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher(
-      'Exp1',
-      currentFeeFetcher,
-      targetFeeFetcher,
-      'Current',
-      'Target',
-      0.0,
-      1.0
-    )
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 1.0,
+      },
+    })
 
     const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
 
