@@ -71,6 +71,9 @@ import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
 import { Protocol } from '@uniswap/router-sdk'
 import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
+import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
+import { UniGraphQLProvider } from '../graphql/graphql-provider'
+import { TrafficSwitcherITokenFeeFetcher } from '../util/traffic-switch/traffic-switcher-i-token-fee-fetcher'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -231,7 +234,23 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             sourceOfTruthPoolProvider: noCacheV3PoolProvider,
           })
 
-          const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider)
+          const onChainTokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider)
+          const graphQLTokenFeeFetcher = new GraphQLTokenFeeFetcher(
+            new UniGraphQLProvider(),
+            onChainTokenFeeFetcher,
+            chainId
+          )
+          const trafficSwitcherTokenFetcher = new TrafficSwitcherITokenFeeFetcher('TokenFetcherExperiment', {
+            control: onChainTokenFeeFetcher,
+            treatment: graphQLTokenFeeFetcher,
+            aliasControl: 'onChainTokenFeeFetcher',
+            aliasTreatment: 'graphQLTokenFeeFetcher',
+            customization: {
+              pctEnabled: 0.0,
+              pctShadowSampling: 0.005,
+            },
+          })
+
           const tokenValidatorProvider = new TokenValidatorProvider(
             chainId,
             multicall2Provider,
@@ -240,7 +259,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const tokenPropertiesProvider = new TokenPropertiesProvider(
             chainId,
             new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-            tokenFeeFetcher
+            trafficSwitcherTokenFetcher
           )
           const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
           const v2PoolProvider = new CachingV2PoolProvider(
