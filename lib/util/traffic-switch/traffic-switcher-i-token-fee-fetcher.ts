@@ -31,19 +31,28 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       return
     }
 
-    // We have results from both implementations, compare them as a whole
-    const identical = JSON.stringify(resultA) === JSON.stringify(resultB)
+    // We have results from both implementations, compare them as a whole.
+    // Before comparison, do some cleaning and keep only entries with a fee != 0.
+    // This is needed as different implementations can return empty/null entry, or entry with 0 fees.
+    const cleanResult = (result: TokenFeeMap): TokenFeeMap =>
+      Object.entries(result)
+        .filter(([_, v]) => !v.buyFeeBps?.eq(0) || !v.sellFeeBps?.eq(0))
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+    const cleanedResultA = cleanResult(resultA)
+    const cleanedResultB = cleanResult(resultB)
+
+    const identical = JSON.stringify(cleanedResultA) === JSON.stringify(cleanedResultB)
     this.logComparisonResult(this.fetchFees.name, 'IDENTICAL', identical)
 
     // Go deeper and let's do more granular custom comparisons
     if (!identical) {
       // Compare the number of results
-      const comparisonResultLength = Object.keys(resultA).length === Object.keys(resultB).length
+      const comparisonResultLength = Object.keys(cleanedResultA).length === Object.keys(cleanedResultB).length
       this.logComparisonResult(this.fetchFees.name, 'LENGTHS_MATCH', comparisonResultLength)
 
       // find and log the differences: what's missing in A, what's missing in B, and what's different
-      const keysA = Object.keys(resultA)
-      const keysB = Object.keys(resultB)
+      const keysA = Object.keys(cleanedResultA)
+      const keysB = Object.keys(cleanedResultB)
       const missingInA = keysB.filter((k) => !keysA.includes(k))
       const missingInB = keysA.filter((k) => !keysB.includes(k))
       missingInA.forEach((k) =>
@@ -55,14 +64,14 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       // find common keys with diffs
       const commonKeys = keysA.filter((k) => keysB.includes(k))
       const commonKeysWithDifferentFees = commonKeys.filter(
-        (k) => JSON.stringify(resultA[k]) !== JSON.stringify(resultB[k])
+        (k) => JSON.stringify(cleanedResultA[k]) !== JSON.stringify(cleanedResultB[k])
       )
       commonKeysWithDifferentFees.forEach((k) => {
         this.logMetric(this.fetchFees.name, 'DIFFERENT_FEE_FOR__Address__' + k)
         log.warn(
           `TrafficSwitcherITokenFeeFetcher compareResultsForFetchFees: Different fee for address ${k}:  in control: ${JSON.stringify(
-            resultA[k]
-          )} and treatment: ${JSON.stringify(resultB[k])}`
+            cleanedResultA[k]
+          )} and treatment: ${JSON.stringify(cleanedResultB[k])}`
         )
       })
     }
