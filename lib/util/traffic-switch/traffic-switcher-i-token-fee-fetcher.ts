@@ -45,8 +45,8 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
           (acc, [k, v]) => ({
             ...acc,
             [k]: {
-              buyFeeBps: v.buyFeeBps || BigNumber.from(0),
-              sellFeeBps: v.sellFeeBps || BigNumber.from(0),
+              buyFeeBps: v.buyFeeBps ?? BigNumber.from(0),
+              sellFeeBps: v.sellFeeBps ?? BigNumber.from(0),
             },
           }),
           {}
