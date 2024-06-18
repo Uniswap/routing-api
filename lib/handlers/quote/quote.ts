@@ -457,7 +457,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     } = swapRoute
 
     const estimatedGasUsed = this.adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest)
-    const estimatedGasUsedUSD = this.adhocCorrectGasUsedUSD(preProcessedEstimatedGasUsed, preProcessedEstimatedGasUsedUSD, chainId, isMobileRequest)
+    const estimatedGasUsedUSD = this.adhocCorrectGasUsedUSD(
+      preProcessedEstimatedGasUsed,
+      preProcessedEstimatedGasUsedUSD,
+      chainId,
+      isMobileRequest
+    )
 
     if (simulationStatus == SimulationStatus.Failed) {
       metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
@@ -814,7 +819,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
   }
 
-  private adhocCorrectGasUsedUSD(estimatedGasUsed: BigNumber, estimatedGasUsedUSD: CurrencyAmount<Currency>, chainId: ChainId, isMobileRequest: boolean): CurrencyAmount<Currency> {
+  private adhocCorrectGasUsedUSD(
+    estimatedGasUsed: BigNumber,
+    estimatedGasUsedUSD: CurrencyAmount<Currency>,
+    chainId: ChainId,
+    isMobileRequest: boolean
+  ): CurrencyAmount<Currency> {
     if (!isMobileRequest) {
       return estimatedGasUsedUSD
     }
@@ -827,7 +837,10 @@ export class QuoteHandler extends APIGLambdaHandler<
           return estimatedGasUsedUSD
         }
 
-        const correctedEstimateGasUsedUSD = JSBI.divide(JSBI.multiply(estimatedGasUsedUSD.quotient, JSBI.BigInt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)), JSBI.BigInt(estimatedGasUsed))
+        const correctedEstimateGasUsedUSD = JSBI.divide(
+          JSBI.multiply(estimatedGasUsedUSD.quotient, JSBI.BigInt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)),
+          JSBI.BigInt(estimatedGasUsed)
+        )
         return CurrencyAmount.fromRawAmount(estimatedGasUsedUSD.currency, correctedEstimateGasUsedUSD)
       default:
         return estimatedGasUsedUSD

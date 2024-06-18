@@ -7,19 +7,23 @@ describe('QuoteHandler', () => {
   describe('.protocolsFromRequest', () => {
     it('returns V3 when no protocols are requested', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
-      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, undefined)).toEqual([
-        Protocol.V3,
-      ])
+      expect(
+        QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, undefined)
+      ).toEqual([Protocol.V3])
     })
 
     it('returns V3 when forceCrossProtocols is false', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
-      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, false)).toEqual([Protocol.V3])
+      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, false)).toEqual([
+        Protocol.V3,
+      ])
     })
 
     it('returns empty when forceCrossProtocols is true', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
-      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, true)).toEqual([])
+      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, undefined, isMobileRequest, undefined, true)).toEqual(
+        []
+      )
     })
 
     it('returns requested protocols', () => {
@@ -31,25 +35,28 @@ describe('QuoteHandler', () => {
 
     it('returns a different set of requested protocols', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
-      expect(QuoteHandler.protocolsFromRequest(ChainId.MAINNET, ['v3', 'mixed'], isMobileRequest, undefined, undefined)).toEqual([
-        Protocol.V3,
-        Protocol.MIXED,
-      ])
+      expect(
+        QuoteHandler.protocolsFromRequest(ChainId.MAINNET, ['v3', 'mixed'], isMobileRequest, undefined, undefined)
+      ).toEqual([Protocol.V3, Protocol.MIXED])
     })
 
     it('works with other chains', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
-      expect(QuoteHandler.protocolsFromRequest(ChainId.BASE, ['v2', 'v3', 'mixed'], isMobileRequest, undefined, undefined)).toEqual([
-        Protocol.V2,
-        Protocol.V3,
-        Protocol.MIXED,
-      ])
+      expect(
+        QuoteHandler.protocolsFromRequest(ChainId.BASE, ['v2', 'v3', 'mixed'], isMobileRequest, undefined, undefined)
+      ).toEqual([Protocol.V2, Protocol.V3, Protocol.MIXED])
     })
 
     it('returns undefined when a requested protocol is invalid', () => {
       const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes('')
       expect(
-        QuoteHandler.protocolsFromRequest(ChainId.BASE, ['v2', 'v3', 'mixed', 'miguel'], isMobileRequest, undefined, undefined)
+        QuoteHandler.protocolsFromRequest(
+          ChainId.BASE,
+          ['v2', 'v3', 'mixed', 'miguel'],
+          isMobileRequest,
+          undefined,
+          undefined
+        )
       ).toBeUndefined()
     })
 
@@ -58,7 +65,13 @@ describe('QuoteHandler', () => {
         ;['uniswap-ios', 'uniswap-android'].forEach((requestSource) => {
           const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
           expect(
-            QuoteHandler.protocolsFromRequest(ChainId.BASE, ['v2', 'v3', 'mixed'], isMobileRequest, undefined, undefined)
+            QuoteHandler.protocolsFromRequest(
+              ChainId.BASE,
+              ['v2', 'v3', 'mixed'],
+              isMobileRequest,
+              undefined,
+              undefined
+            )
           ).toEqual([Protocol.V3])
         })
       })
