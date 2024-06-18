@@ -23,6 +23,31 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     return tokenFeeMap
   }
 
+  const methodFetchFeesReturnFee100AndUndefined = async (
+    addresses: string[],
+    _?: ProviderConfig
+  ): Promise<TokenFeeMap> => {
+    const tokenFeeMap: TokenFeeMap = {}
+    addresses.map((address) => {
+      tokenFeeMap[address] = {
+        buyFeeBps: BigNumber.from(100),
+        sellFeeBps: undefined,
+      }
+    })
+    return tokenFeeMap
+  }
+
+  const methodFetchFeesReturnFee100AndZero = async (addresses: string[], _?: ProviderConfig): Promise<TokenFeeMap> => {
+    const tokenFeeMap: TokenFeeMap = {}
+    addresses.map((address) => {
+      tokenFeeMap[address] = {
+        buyFeeBps: BigNumber.from(100),
+        sellFeeBps: BigNumber.from(0),
+      }
+    })
+    return tokenFeeMap
+  }
+
   const methodFetchFeesReturnFee200 = async (addresses: string[], _?: ProviderConfig): Promise<TokenFeeMap> => {
     const tokenFeeMap: TokenFeeMap = {}
     addresses.map((address) => {
@@ -44,6 +69,17 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
       tokenFeeMap[address] = {
         buyFeeBps: BigNumber.from(0),
         sellFeeBps: BigNumber.from(0),
+      }
+    })
+    return tokenFeeMap
+  }
+
+  const methodFetchFeesReturnFeeEmpty = async (addresses: string[], _?: ProviderConfig): Promise<TokenFeeMap> => {
+    const tokenFeeMap: TokenFeeMap = {}
+    addresses.map((address) => {
+      tokenFeeMap[address] = {
+        buyFeeBps: undefined,
+        sellFeeBps: undefined,
       }
     })
     return tokenFeeMap
@@ -332,6 +368,98 @@ describe('TrafficSwitcherITokenFeeFetcher', () => {
     for (const address in tokenFeeMap) {
       expect(tokenFeeMap[address]).to.deep.equal({
         buyFeeBps: BigNumber.from(0),
+        sellFeeBps: BigNumber.from(0),
+      })
+    }
+
+    sinon.assert.calledOnce(targetFeeFetcher.fetchFees)
+    sinon.assert.calledOnce(currentFeeFetcher.fetchFees)
+    sinon.assert.calledWith(
+      spy,
+      TrafficSwitcher.METRIC_NAME_TEMPLATE.replace('{EXP}', 'Exp1')
+        .replace('{METHOD}', 'fetchFees')
+        .replace('{METRIC}', 'COMPARISON_SAMPLE'),
+      1,
+      MetricLoggerUnit.Count
+    )
+    sinon.assert.calledWith(
+      spy,
+      TrafficSwitcher.METRIC_NAME_TEMPLATE.replace('{EXP}', 'Exp1')
+        .replace('{METHOD}', 'fetchFees')
+        .replace('{METRIC}', 'COMPARISON__IDENTICAL__RESULT__YES'),
+      1,
+      MetricLoggerUnit.Count
+    )
+  })
+
+  it('sampling traffic 100% should get results from both (Identical fee_empty/fee_zero), and return Current impl result', async () => {
+    const currentFeeFetcher = sinon.createStubInstance(OnChainTokenFeeFetcher)
+    const targetFeeFetcher = sinon.createStubInstance(GraphQLTokenFeeFetcher)
+    currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee0)
+    targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFeeEmpty)
+
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 1.0,
+      },
+    })
+
+    const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
+
+    for (const address in tokenFeeMap) {
+      expect(tokenFeeMap[address]).to.deep.equal({
+        buyFeeBps: BigNumber.from(0),
+        sellFeeBps: BigNumber.from(0),
+      })
+    }
+
+    sinon.assert.calledOnce(targetFeeFetcher.fetchFees)
+    sinon.assert.calledOnce(currentFeeFetcher.fetchFees)
+    sinon.assert.calledWith(
+      spy,
+      TrafficSwitcher.METRIC_NAME_TEMPLATE.replace('{EXP}', 'Exp1')
+        .replace('{METHOD}', 'fetchFees')
+        .replace('{METRIC}', 'COMPARISON_SAMPLE'),
+      1,
+      MetricLoggerUnit.Count
+    )
+    sinon.assert.calledWith(
+      spy,
+      TrafficSwitcher.METRIC_NAME_TEMPLATE.replace('{EXP}', 'Exp1')
+        .replace('{METHOD}', 'fetchFees')
+        .replace('{METRIC}', 'COMPARISON__IDENTICAL__RESULT__YES'),
+      1,
+      MetricLoggerUnit.Count
+    )
+  })
+
+  it('sampling traffic 100% should get results from both (Identical 100+undefined/0 fee), and return Current impl result', async () => {
+    const currentFeeFetcher = sinon.createStubInstance(OnChainTokenFeeFetcher)
+    const targetFeeFetcher = sinon.createStubInstance(GraphQLTokenFeeFetcher)
+    currentFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100AndZero)
+    targetFeeFetcher.fetchFees.callsFake(methodFetchFeesReturnFee100AndUndefined)
+
+    const trafficSwitchProvider = new TrafficSwitcherITokenFeeFetcher('Exp1', {
+      control: currentFeeFetcher,
+      treatment: targetFeeFetcher,
+      aliasControl: 'Current',
+      aliasTreatment: 'Target',
+      customization: {
+        pctEnabled: 0.0,
+        pctShadowSampling: 1.0,
+      },
+    })
+
+    const tokenFeeMap = await trafficSwitchProvider.fetchFees(['0x1', '0x2'], undefined)
+
+    for (const address in tokenFeeMap) {
+      expect(tokenFeeMap[address]).to.deep.equal({
+        buyFeeBps: BigNumber.from(100),
         sellFeeBps: BigNumber.from(0),
       })
     }

@@ -2,6 +2,7 @@ import { TrafficSwitcher } from './traffic-switcher'
 import { ITokenFeeFetcher, TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { log } from '@uniswap/smart-order-router'
+import { BigNumber } from 'ethers'
 
 type Address = string
 
@@ -33,11 +34,23 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
 
     // We have results from both implementations, compare them as a whole.
     // Before comparison, do some cleaning and keep only entries with a fee != 0.
-    // This is needed as different implementations can return empty/null entry, or entry with 0 fees.
+    // This is needed as different implementations can return empty/null entry, or entry with 0 fees (buy/sellFeeBps or both).
     const cleanResult = (result: TokenFeeMap): TokenFeeMap =>
       Object.entries(result)
-        .filter(([_, v]) => !v.buyFeeBps?.eq(0) || !v.sellFeeBps?.eq(0))
-        .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+        .filter(
+          ([_, v]) =>
+            (v.buyFeeBps !== undefined && !v.buyFeeBps.eq(0)) || (v.sellFeeBps !== undefined && !v.sellFeeBps.eq(0))
+        )
+        .reduce(
+          (acc, [k, v]) => ({
+            ...acc,
+            [k]: {
+              buyFeeBps: v.buyFeeBps ?? BigNumber.from(0),
+              sellFeeBps: v.sellFeeBps ?? BigNumber.from(0),
+            },
+          }),
+          {}
+        )
     const cleanedResultA = cleanResult(resultA)
     const cleanedResultB = cleanResult(resultB)
 
