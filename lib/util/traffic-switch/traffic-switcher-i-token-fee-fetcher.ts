@@ -59,7 +59,7 @@ export class TrafficSwitcherITokenFeeFetcher extends TrafficSwitcher<ITokenFeeFe
       )
       commonKeysWithDifferentFees.forEach((k) => {
         this.logMetric(this.fetchFees.name, 'DIFFERENT_FEE_FOR__Address__' + k)
-        log.debug(
+        log.warn(
           `TrafficSwitcherITokenFeeFetcher compareResultsForFetchFees: Different fee for address ${k}:  in control: ${JSON.stringify(
             resultA[k]
           )} and treatment: ${JSON.stringify(resultB[k])}`
