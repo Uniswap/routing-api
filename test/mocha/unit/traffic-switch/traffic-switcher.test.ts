@@ -11,8 +11,8 @@ interface ISimpleTester {
 class SimpleTesterControl implements ISimpleTester {
   async simpleMethod(): Promise<Record<string, number>> {
     return {
-      "0x1": 1,
-      "0x2": 2
+      '0x1': 1,
+      '0x2': 2,
     }
   }
 }
@@ -20,8 +20,8 @@ class SimpleTesterControl implements ISimpleTester {
 class SimpleTesterTreatment implements ISimpleTester {
   async simpleMethod(): Promise<Record<string, number>> {
     return {
-      "0x1": 1,
-      "0x2": 2
+      '0x1': 1,
+      '0x2': 2,
     }
   }
 }
@@ -37,7 +37,10 @@ class TrafficSwitcherISimpleTester extends TrafficSwitcher<ISimpleTester> implem
     )
   }
 
-  private compareResults(resultA: Record<string, number> | undefined, resultB: Record<string, number> | undefined): void {
+  private compareResults(
+    resultA: Record<string, number> | undefined,
+    resultB: Record<string, number> | undefined
+  ): void {
     // Check if both results are undefined or only one of them is. If so, log and return
     if (!resultA && !resultB) {
       this.logComparisonResult(this.simpleMethod.name, 'IDENTICAL', true)
@@ -90,14 +93,14 @@ describe('TrafficSwitcher', () => {
 
   const methodReturn100 = async (): Promise<Record<string, number>> => {
     return {
-      "0x1": 100,
-      "0x2": 100
+      '0x1': 100,
+      '0x2': 100,
     }
   }
   const methodReturn200 = async (): Promise<Record<string, number>> => {
     return {
-      "0x1": 200,
-      "0x2": 200
+      '0x1': 200,
+      '0x2': 200,
     }
   }
   const methodThrowsException = async (): Promise<Record<string, number>> => {
