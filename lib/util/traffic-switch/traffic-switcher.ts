@@ -67,9 +67,7 @@ export abstract class TrafficSwitcher<TExperiment> {
         // Compare the results if a comparison method is provided
         if (results && results.length == 2) {
           try {
-            if (comparisonMethod) {
-              comparisonMethod(results[0], results[1])
-            }
+            comparisonMethod && comparisonMethod(results[0], results[1])
           } catch (error) {
             log.error(`Error in TrafficSwitcher comparison method ${methodName}`, error)
             this.logMetric(methodName, 'COMPARISON_ERROR')
