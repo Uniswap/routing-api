@@ -34,6 +34,8 @@ import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import semver from 'semver'
+import { BigNumber } from '@ethersproject/bignumber'
+import { ZKSYNC_UPPER_SWAP_GAS_LIMIT } from '../../util/gasLimit'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -245,10 +247,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
+    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
       protocolsStr,
-      requestSource,
+      isMobileRequest,
       appVersion,
       forceCrossProtocol
     )
@@ -441,9 +444,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       quoteGasAdjusted,
       quoteGasAndPortionAdjusted,
       route,
-      estimatedGasUsed,
+      estimatedGasUsed: preProcessedEstimatedGasUsed,
       estimatedGasUsedQuoteToken,
-      estimatedGasUsedUSD,
+      estimatedGasUsedUSD: preProcessedEstimatedGasUsedUSD,
       estimatedGasUsedGasToken,
       gasPriceWei,
       methodParameters,
@@ -452,6 +455,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       hitsCachedRoute,
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
+
+    const estimatedGasUsed = this.adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest)
+    const estimatedGasUsedUSD = this.adhocCorrectGasUsedUSD(
+      preProcessedEstimatedGasUsed,
+      preProcessedEstimatedGasUsedUSD,
+      chainId,
+      isMobileRequest
+    )
 
     if (simulationStatus == SimulationStatus.Failed) {
       metric.putMetric('SimulationFailed', 1, MetricLoggerUnit.Count)
@@ -640,11 +651,10 @@ export class QuoteHandler extends APIGLambdaHandler<
   static protocolsFromRequest(
     chainId: ChainId,
     requestedProtocols: string[] | string | undefined,
-    requestSource: string,
+    isMobileRequest: boolean,
     appVersion: string | undefined,
     forceCrossProtocol: boolean | undefined
   ): Protocol[] | undefined {
-    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
     // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
     const semverAppVersion = semver.coerce(appVersion)
     const fixVersion = semver.coerce('1.24')!
@@ -787,6 +797,53 @@ export class QuoteHandler extends APIGLambdaHandler<
         },
         `Tracked Route for pair [${tradingPair}/${tradeType.toUpperCase()}] on chain [${chainId}] with route hash [${routeStringHash}] for amount [${amount.toExact()}]`
       )
+    }
+  }
+
+  private adhocCorrectGasUsed(estimatedGasUsed: BigNumber, chainId: ChainId, isMobileRequest: boolean): BigNumber {
+    if (!isMobileRequest) {
+      return estimatedGasUsed
+    }
+
+    switch (chainId) {
+      case ChainId.ZKSYNC:
+        if (estimatedGasUsed.gt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)) {
+          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
+          // although this is unlikely
+          return estimatedGasUsed
+        }
+
+        return ZKSYNC_UPPER_SWAP_GAS_LIMIT
+      default:
+        return estimatedGasUsed
+    }
+  }
+
+  private adhocCorrectGasUsedUSD(
+    estimatedGasUsed: BigNumber,
+    estimatedGasUsedUSD: CurrencyAmount<Currency>,
+    chainId: ChainId,
+    isMobileRequest: boolean
+  ): CurrencyAmount<Currency> {
+    if (!isMobileRequest) {
+      return estimatedGasUsedUSD
+    }
+
+    switch (chainId) {
+      case ChainId.ZKSYNC:
+        if (estimatedGasUsed.gt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)) {
+          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
+          // although this is unlikely
+          return estimatedGasUsedUSD
+        }
+
+        const correctedEstimateGasUsedUSD = JSBI.divide(
+          JSBI.multiply(estimatedGasUsedUSD.quotient, JSBI.BigInt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)),
+          JSBI.BigInt(estimatedGasUsed)
+        )
+        return CurrencyAmount.fromRawAmount(estimatedGasUsedUSD.currency, correctedEstimateGasUsedUSD)
+      default:
+        return estimatedGasUsedUSD
     }
   }
 
