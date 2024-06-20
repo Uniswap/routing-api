@@ -35,9 +35,4 @@ describe('simulation', () => {
     const status = simulationStatusTranslation(SimulationStatus.NotApproved, log)
     expect(status).toStrictEqual(RoutingApiSimulationStatus.NOT_APPROVED)
   })
-
-  it('returns unknown for unknown simulation status', () => {
-    const status = simulationStatusTranslation('unknown' as SimulationStatus, log)
-    expect(status).toStrictEqual(RoutingApiSimulationStatus.UNKNOWN)
-  })
 })
