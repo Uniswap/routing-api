@@ -11,7 +11,10 @@ export enum RoutingApiSimulationStatus {
   UNKNOWN = '',
 }
 
-export const simulationStatusTranslation = (simulationStatus: SimulationStatus | undefined, log: Logger): RoutingApiSimulationStatus => {
+export const simulationStatusTranslation = (
+  simulationStatus: SimulationStatus | undefined,
+  log: Logger
+): RoutingApiSimulationStatus => {
   switch (simulationStatus) {
     case undefined:
       return RoutingApiSimulationStatus.UNATTEMPTED

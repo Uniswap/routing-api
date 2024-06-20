@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { log, SimulationStatus } from '@uniswap/smart-order-router'
 import {
   RoutingApiSimulationStatus,
-  simulationStatusTranslation
+  simulationStatusTranslation,
 } from '../../../../../lib/handlers/quote/util/simulation'
 
 describe('simulation', () => {
