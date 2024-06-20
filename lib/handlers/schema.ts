@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi'
 import { MethodParameters } from '@uniswap/smart-order-router'
+import { RoutingApiSimulationStatus } from './quote/util/simulation'
 
 export type TokenInRoute = {
   address: string
@@ -90,7 +91,7 @@ export type QuoteResponse = {
   gasUseEstimateGasTokenDecimals?: string
   gasUseEstimateUSD: string
   simulationError?: boolean
-  simulationStatus: string
+  simulationStatus: RoutingApiSimulationStatus
   gasPriceWei: string
   blockNumber: string
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
