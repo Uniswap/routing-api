@@ -25,7 +25,7 @@ import {
   QUOTE_SPEED_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
-import { simulationStatusToString } from './util/simulation'
+import { simulationStatusTranslation } from './util/simulation'
 import Logger from 'bunyan'
 import { PAIRS_TO_TRACK } from './util/pairs-to-track'
 import { measureDistributionPercentChangeImpact } from '../../util/alpha-config-measurement'
@@ -614,7 +614,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       gasUseEstimateGasTokenDecimals: estimatedGasUsedGasToken?.toExact(),
       gasUseEstimate: estimatedGasUsed.toString(),
       gasUseEstimateUSD: estimatedGasUsedUSD.toExact(),
-      simulationStatus: simulationStatusToString(simulationStatus, log),
+      simulationStatus: simulationStatusTranslation(simulationStatus, log),
       simulationError: simulationStatus == SimulationStatus.Failed,
       gasPriceWei: gasPriceWei.toString(),
       route: routeResponse,
