@@ -203,12 +203,9 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   }
 
   const beforeS3 = Date.now()
-  const key = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_KEY!, chainId, protocol)
   const compressedKey = S3_POOL_CACHE_KEY(process.env.POOL_CACHE_GZIP_KEY!, chainId, protocol)
   log.info(
-    `Got ${
-      pools.length
-    } ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${key} and ${compressedKey}`
+    `Got ${pools.length} ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${compressedKey}`
   )
 
   const serializedPools = JSON.stringify(pools)
