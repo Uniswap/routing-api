@@ -84,6 +84,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       filteredPools.forEach((pool) => pools.push(pool))
 
       const filterOutPoolAddresses = [
+        // filter out AMPL-token pools with low liquidity
         '0x029c9f16d219486305716f8c623739f9c75ceabd',
         '0x037555fd11f9ba25b8b2240cac45c340023c0e3e',
         '0x04a3e942702d67f694397d5bbd6d3a724a59bb83',
@@ -187,6 +188,19 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         return shouldFilter
       })
       filteredPools.forEach((pool) => pools.push(pool))
+
+      pools = (pools as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
+        const shouldFilterOut =
+          // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
+          pool.token0.id.toLowerCase() === '0xD46bA6D942050d489DBd938a2C909A5d5039A161' &&
+          pool.token1.id.toLowerCase() === '0xD46bA6D942050d489DBd938a2C909A5d5039A161'
+
+        if (shouldFilterOut) {
+          log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+
+        return !shouldFilterOut
+      })
     }
 
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
