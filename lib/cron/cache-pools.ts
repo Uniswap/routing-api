@@ -192,8 +192,8 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       pools = (pools as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
         const shouldFilterOut =
           // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
-          pool.token0.id.toLowerCase() === '0xD46bA6D942050d489DBd938a2C909A5d5039A161' &&
-          pool.token1.id.toLowerCase() === '0xD46bA6D942050d489DBd938a2C909A5d5039A161'
+          pool.token0.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' &&
+          pool.token1.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161'
 
         if (shouldFilterOut) {
           log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
