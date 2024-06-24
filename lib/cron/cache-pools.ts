@@ -4,6 +4,7 @@ import {
   setGlobalMetric,
   V2SubgraphPool,
   V2SubgraphProvider,
+  V3SubgraphPool,
   V3SubgraphProvider,
 } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
@@ -72,11 +73,14 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         v2SubgraphUrlOverride(ChainId.MAINNET)
       )
       const additionalPools = await v2MainnetSubgraphProvider.getPools()
-      const filteredPools = additionalPools.filter(
-        (pool) => pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c'
-      )
-      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+      const filteredPools = additionalPools.filter((pool) => {
+        const shouldFilter = pool.id.toLowerCase() === '0x801c868ce08fb5b396e6911eac351beb259d386c'
 
+        if (shouldFilter) {
+          log.info(`Filtering pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+        return shouldFilter
+      })
       filteredPools.forEach((pool) => pools.push(pool))
 
       const filterOutPoolAddresses = [
@@ -150,13 +154,17 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         '0xfaa7e98e633a10e90b71a84200e10562e5302a92',
         '0xfdce1a334e5e33167709c5d9c60798a5b7884576',
         '0xfe2aa6db37531042bc4fdcad1fea3f6616a5bd54',
-      ]
+      ].map((address) => address.toLowerCase())
 
-      const filteredOutPools = (pools as Array<V2SubgraphPool>).filter(
-        (pool: V2SubgraphPool) => !filterOutPoolAddresses.includes(pool.id.toLowerCase())
-      )
-      log.info({ filteredOutPools }, `Additional filtered out pool for ${protocol} on ${chainId}`)
-      pools = filteredOutPools
+      pools = (pools as Array<V2SubgraphPool>).filter((pool: V2SubgraphPool) => {
+        const shouldFilterOut = filterOutPoolAddresses.includes(pool.id.toLowerCase())
+
+        if (shouldFilterOut) {
+          log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+
+        return !shouldFilterOut
+      })
     }
 
     if (protocol === Protocol.V3 && chainId === ChainId.MAINNET) {
@@ -170,11 +178,14 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         v3SubgraphUrlOverride(ChainId.MAINNET)
       )
       const additionalPools = await v3MainnetSubgraphProvider.getPools()
-      const filteredPools = additionalPools.filter(
-        (pool) => pool.id.toLowerCase() === '0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863'
-      )
-      log.info({ filteredPools }, `Additional filtered pool for ${protocol} on ${chainId}`)
+      const filteredPools = additionalPools.filter((pool: V3SubgraphPool) => {
+        const shouldFilter = pool.id.toLowerCase() === '0x4622df6fb2d9bee0dcdacf545acdb6a2b2f4f863'
 
+        if (shouldFilter) {
+          log.info(`Filtering pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+        return shouldFilter
+      })
       filteredPools.forEach((pool) => pools.push(pool))
     }
 
