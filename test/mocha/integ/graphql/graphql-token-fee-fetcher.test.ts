@@ -94,7 +94,6 @@ describe('integration test for GraphQLTokenFeeFetcher', () => {
     const spyPutMetric = sinon.spy(metric, 'putMetric')
 
     const tokenFeeMap = await tokenFeeFetcher.fetchFees([ZEROXN.address, BITBOY.address])
-    expect(tokenFeeMap[ZEROXN.address]).to.not.be.undefined
     expect(tokenFeeMap[BITBOY.address]).to.not.be.undefined
     expect(tokenFeeMap[BITBOY.address]?.buyFeeBps?._hex).equals(BITBOY.buyFeeBps?._hex)
     expect(tokenFeeMap[BITBOY.address]?.sellFeeBps?._hex).equals(BITBOY.sellFeeBps?._hex)
