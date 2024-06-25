@@ -36,6 +36,8 @@ import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import semver from 'semver'
 import { BigNumber } from '@ethersproject/bignumber'
 import { CELO_UPPER_SWAP_GAS_LIMIT, ZKSYNC_UPPER_SWAP_GAS_LIMIT } from '../../util/gasLimit'
+import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
+import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -456,8 +458,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
-    const estimatedGasUsed = this.adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest)
-    const estimatedGasUsedUSD = this.adhocCorrectGasUsedUSD(
+    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest)
+    const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
       preProcessedEstimatedGasUsedUSD,
       chainId,
@@ -797,73 +799,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         },
         `Tracked Route for pair [${tradingPair}/${tradeType.toUpperCase()}] on chain [${chainId}] with route hash [${routeStringHash}] for amount [${amount.toExact()}]`
       )
-    }
-  }
-
-  private adhocCorrectGasUsed(estimatedGasUsed: BigNumber, chainId: ChainId, isMobileRequest: boolean): BigNumber {
-    if (!isMobileRequest) {
-      return estimatedGasUsed
-    }
-
-    switch (chainId) {
-      case ChainId.ZKSYNC:
-        if (estimatedGasUsed.gt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)) {
-          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
-          // although this is unlikely
-          return estimatedGasUsed
-        }
-
-        return ZKSYNC_UPPER_SWAP_GAS_LIMIT
-      case ChainId.CELO:
-        if (estimatedGasUsed.gt(CELO_UPPER_SWAP_GAS_LIMIT)) {
-          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
-          // although this is unlikely
-          return estimatedGasUsed
-        }
-
-        return CELO_UPPER_SWAP_GAS_LIMIT
-      default:
-        return estimatedGasUsed
-    }
-  }
-
-  private adhocCorrectGasUsedUSD(
-    estimatedGasUsed: BigNumber,
-    estimatedGasUsedUSD: CurrencyAmount<Currency>,
-    chainId: ChainId,
-    isMobileRequest: boolean
-  ): CurrencyAmount<Currency> {
-    if (!isMobileRequest) {
-      return estimatedGasUsedUSD
-    }
-
-    switch (chainId) {
-      case ChainId.ZKSYNC:
-        if (estimatedGasUsed.gt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)) {
-          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
-          // although this is unlikely
-          return estimatedGasUsedUSD
-        }
-
-        const correctedEstimateGasUsedUSD = JSBI.divide(
-          JSBI.multiply(estimatedGasUsedUSD.quotient, JSBI.BigInt(ZKSYNC_UPPER_SWAP_GAS_LIMIT)),
-          JSBI.BigInt(estimatedGasUsed)
-        )
-        return CurrencyAmount.fromRawAmount(estimatedGasUsedUSD.currency, correctedEstimateGasUsedUSD)
-      case ChainId.CELO:
-        if (estimatedGasUsed.gt(CELO_UPPER_SWAP_GAS_LIMIT)) {
-          // this is a check to ensure that we don't return the gas used smaller than upper swap gas limit,
-          // although this is unlikely
-          return estimatedGasUsedUSD
-        }
-
-        const correctedEstimateGasUsedUSDCELO = JSBI.divide(
-          JSBI.multiply(estimatedGasUsedUSD.quotient, JSBI.BigInt(CELO_UPPER_SWAP_GAS_LIMIT)),
-          JSBI.BigInt(estimatedGasUsed)
-        )
-        return CurrencyAmount.fromRawAmount(estimatedGasUsedUSD.currency, correctedEstimateGasUsedUSDCELO)
-      default:
-        return estimatedGasUsedUSD
     }
   }
 
