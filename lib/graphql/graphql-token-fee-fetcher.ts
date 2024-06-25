@@ -7,6 +7,7 @@ import { BigNumber } from 'ethers'
 import { ChainId } from '@uniswap/sdk-core'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { log, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { TokenFeeUtils } from './token-fee-utils'
 
 /* Implementation of the ITokenFeeFetcher interface to give access to Uniswap GraphQL API token fee data.
  * This fetcher is used to get token fees from GraphQL API and fallback to OnChainTokenFeeFetcher if GraphQL API fails
@@ -33,21 +34,27 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
   async fetchFees(addresses: string[], providerConfig?: ProviderConfig): Promise<TokenFeeMap> {
     let tokenFeeMap: TokenFeeMap = {}
 
+    // Use GraphQL only for tokens that are not dynamic FOT. For dynamic FOT, use fallback (on chain) as we need latest data.
+    const addressesToFetchFeesWithGraphQL = addresses.filter((address) => !TokenFeeUtils.isDynamicFOT(address))
     try {
-      const tokenFeeResponse: TokensInfoResponse = await this.graphQLProvider.getTokensInfo(this.chainId, addresses)
-      tokenFeeResponse.tokens.forEach((token) => {
-        if (token.feeData?.buyFeeBps || token.feeData?.sellFeeBps) {
-          const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined
-          const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined
-          tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps }
-        } else {
-          tokenFeeMap[token.address] = { buyFeeBps: undefined, sellFeeBps: undefined }
-        }
-      })
-
-      metric.putMetric('GraphQLTokenFeeFetcherFetchFeesSuccess', 1, MetricLoggerUnit.Count)
+      if (addressesToFetchFeesWithGraphQL.length > 0) {
+        const tokenFeeResponse: TokensInfoResponse = await this.graphQLProvider.getTokensInfo(
+          this.chainId,
+          addressesToFetchFeesWithGraphQL
+        )
+        tokenFeeResponse.tokens.forEach((token) => {
+          if (token.feeData?.buyFeeBps || token.feeData?.sellFeeBps) {
+            const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined
+            const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined
+            tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps }
+          } else {
+            tokenFeeMap[token.address] = { buyFeeBps: undefined, sellFeeBps: undefined }
+          }
+        })
+        metric.putMetric('GraphQLTokenFeeFetcherFetchFeesSuccess', 1, MetricLoggerUnit.Count)
+      }
     } catch (err) {
-      log.error({ err }, `Error calling GraphQLTokenFeeFetcher for tokens: ${addresses}`)
+      log.error({ err }, `Error calling GraphQLTokenFeeFetcher for tokens: ${addressesToFetchFeesWithGraphQL}`)
 
       metric.putMetric('GraphQLTokenFeeFetcherFetchFeesFailure', 1, MetricLoggerUnit.Count)
     }
@@ -55,6 +62,7 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
     // If we couldn't fetch all addresses from GraphQL then use fallback on chain fetcher for the rest.
     const addressesToFetchFeesWithFallbackFetcher = addresses.filter((address) => !tokenFeeMap[address])
     if (addressesToFetchFeesWithFallbackFetcher.length > 0) {
+      metric.putMetric('GraphQLTokenFeeFetcherOnChainCallbackRequest', 1, MetricLoggerUnit.Count)
       try {
         const tokenFeeMapFromFallback = await this.onChainFeeFetcherFallback.fetchFees(
           addressesToFetchFeesWithFallbackFetcher,
