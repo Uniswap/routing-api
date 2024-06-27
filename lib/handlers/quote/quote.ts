@@ -457,7 +457,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
-    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest, isExtensionRequest)
+    const estimatedGasUsed = adhocCorrectGasUsed(
+      preProcessedEstimatedGasUsed,
+      chainId,
+      isMobileRequest,
+      isExtensionRequest
+    )
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
       preProcessedEstimatedGasUsedUSD,
