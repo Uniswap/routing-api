@@ -7,31 +7,21 @@ import { CELO_UPPER_SWAP_GAS_LIMIT, ZKSYNC_UPPER_SWAP_GAS_LIMIT } from '../../..
 describe('estimateGasUsed', () => {
   it('returns normal gas for mainnet', () => {
     const estimatedGasUsed = BigNumber.from(100)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.MAINNET, false, false)).toBe(estimatedGasUsed)
+    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.MAINNET, false)).toBe(estimatedGasUsed)
   })
 
   it('returns normal gas for zkSync', () => {
     const estimatedGasUsed = ZKSYNC_UPPER_SWAP_GAS_LIMIT.add(1)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.ZKSYNC, false, false)).toBe(estimatedGasUsed)
+    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.ZKSYNC, false)).toBe(estimatedGasUsed)
   })
 
-  it('returns upper limit gas for zkSync on mobile', () => {
+  it('returns upper limit gas for zkSync', () => {
     const estimatedGasUsed = ZKSYNC_UPPER_SWAP_GAS_LIMIT.sub(1)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.ZKSYNC, true, false)).toBe(ZKSYNC_UPPER_SWAP_GAS_LIMIT)
+    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.ZKSYNC, true)).toBe(ZKSYNC_UPPER_SWAP_GAS_LIMIT)
   })
 
-  it('returns upper limit gas for zkSync on extension', () => {
-    const estimatedGasUsed = ZKSYNC_UPPER_SWAP_GAS_LIMIT.sub(1)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.ZKSYNC, false, true)).toBe(ZKSYNC_UPPER_SWAP_GAS_LIMIT)
-  })
-
-  it('returns upper limit gas for celo on mobile', () => {
+  it('returns upper limit gas for celo', () => {
     const estimatedGasUsed = CELO_UPPER_SWAP_GAS_LIMIT.sub(1)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.CELO, true, false)).toBe(CELO_UPPER_SWAP_GAS_LIMIT)
-  })
-
-  it('returns normal gas for celo on extension', () => {
-    const estimatedGasUsed = CELO_UPPER_SWAP_GAS_LIMIT.add(1)
-    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.CELO, false, true)).toBe(estimatedGasUsed)
+    expect(adhocCorrectGasUsed(estimatedGasUsed, ChainId.CELO, true)).toBe(CELO_UPPER_SWAP_GAS_LIMIT)
   })
 })

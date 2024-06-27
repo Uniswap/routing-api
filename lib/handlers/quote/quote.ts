@@ -457,18 +457,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
-    const estimatedGasUsed = adhocCorrectGasUsed(
-      preProcessedEstimatedGasUsed,
-      chainId,
-      isMobileRequest,
-      isExtensionRequest
-    )
+    const shouldCorrectGas = isMobileRequest || isExtensionRequest
+    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, shouldCorrectGas)
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
       preProcessedEstimatedGasUsedUSD,
       chainId,
-      isMobileRequest,
-      isExtensionRequest
+      shouldCorrectGas
     )
 
     if (simulationStatus == SimulationStatus.Failed) {

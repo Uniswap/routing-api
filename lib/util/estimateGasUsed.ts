@@ -5,10 +5,9 @@ import { CELO_UPPER_SWAP_GAS_LIMIT, ZKSYNC_UPPER_SWAP_GAS_LIMIT } from './gasLim
 export function adhocCorrectGasUsed(
   estimatedGasUsed: BigNumber,
   chainId: ChainId,
-  isMobileRequest: boolean,
-  isExtensionRequest: boolean
+  shouldCorrectGas: boolean
 ): BigNumber {
-  if (!isMobileRequest && !isExtensionRequest) {
+  if (!shouldCorrectGas) {
     return estimatedGasUsed
   }
 
