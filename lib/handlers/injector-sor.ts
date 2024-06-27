@@ -246,7 +246,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             aliasControl: 'onChainTokenFeeFetcher',
             aliasTreatment: 'graphQLTokenFeeFetcher',
             customization: {
-              pctEnabled: 0.3,
+              pctEnabled: 0.7,
               pctShadowSampling: 0.0,
             },
           })
