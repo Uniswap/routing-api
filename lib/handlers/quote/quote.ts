@@ -248,6 +248,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
+    const isExtensionRequest = requestSource === 'uniswap-extension'
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
       protocolsStr,
@@ -456,12 +457,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
     } = swapRoute
 
-    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest)
+    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, isMobileRequest, isExtensionRequest)
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
       preProcessedEstimatedGasUsedUSD,
       chainId,
-      isMobileRequest
+      isMobileRequest,
+      isExtensionRequest
     )
 
     if (simulationStatus == SimulationStatus.Failed) {

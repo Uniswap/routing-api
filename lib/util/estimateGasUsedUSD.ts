@@ -7,9 +7,10 @@ export function adhocCorrectGasUsedUSD(
   estimatedGasUsed: BigNumber,
   estimatedGasUsedUSD: CurrencyAmount<Currency>,
   chainId: ChainId,
-  isMobileRequest: boolean
+  isMobileRequest: boolean,
+  isExtensionRequest: boolean
 ): CurrencyAmount<Currency> {
-  if (!isMobileRequest) {
+  if (!isMobileRequest && !isExtensionRequest) {
     return estimatedGasUsedUSD
   }
 
