@@ -7,9 +7,13 @@ export function adhocCorrectGasUsedUSD(
   estimatedGasUsed: BigNumber,
   estimatedGasUsedUSD: CurrencyAmount<Currency>,
   chainId: ChainId,
-  isMobileRequest: boolean
+  requestSource: string
 ): CurrencyAmount<Currency> {
-  if (!isMobileRequest) {
+  const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
+  const isExtensionRequest = requestSource === 'uniswap-extension'
+  const shouldCorrectGas = isMobileRequest || isExtensionRequest
+
+  if (!shouldCorrectGas) {
     return estimatedGasUsedUSD
   }
 

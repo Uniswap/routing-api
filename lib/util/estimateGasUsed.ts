@@ -2,12 +2,12 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId } from '@uniswap/sdk-core'
 import { CELO_UPPER_SWAP_GAS_LIMIT, ZKSYNC_UPPER_SWAP_GAS_LIMIT } from './gasLimit'
 
-export function adhocCorrectGasUsed(
-  estimatedGasUsed: BigNumber,
-  chainId: ChainId,
-  isMobileRequest: boolean
-): BigNumber {
-  if (!isMobileRequest) {
+export function adhocCorrectGasUsed(estimatedGasUsed: BigNumber, chainId: ChainId, requestSource: string): BigNumber {
+  const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
+  const isExtensionRequest = requestSource === 'uniswap-extension'
+  const shouldCorrectGas = isMobileRequest || isExtensionRequest
+
+  if (!shouldCorrectGas) {
     return estimatedGasUsed
   }
 
