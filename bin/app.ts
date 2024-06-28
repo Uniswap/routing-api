@@ -397,6 +397,7 @@ const jsonRpcProviders = {
   // Ethereum
   // INFURA_1: process.env.INFURA_1!,
   QUICKNODE_1: process.env.QUICKNODE_1!,
+  QUICKNODERETH_1: process.env.QUICKNODERETH_1!,
   NIRVANA_1: process.env.NIRVANA_1!,
   ALCHEMY_1: process.env.ALCHEMY_1!,
   // Blast
