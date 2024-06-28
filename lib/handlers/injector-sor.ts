@@ -240,7 +240,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             onChainTokenFeeFetcher,
             chainId
           )
-          const trafficSwitcherTokenFetcher = new TrafficSwitcherITokenFeeFetcher('TokenFetcherExperiment', {
+          const trafficSwitcherTokenFetcher = new TrafficSwitcherITokenFeeFetcher('TokenFetcherExperimentV2', {
             control: graphQLTokenFeeFetcher,
             treatment: onChainTokenFeeFetcher,
             aliasControl: 'graphQLTokenFeeFetcher',
