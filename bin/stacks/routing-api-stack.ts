@@ -369,17 +369,17 @@ export class RoutingAPIStack extends cdk.Stack {
         alarmName: 'RoutingAPI-SEV3-GQLTokenFeeFetcherFailureRate',
         metric: new MathExpression({
           expression:
-            '100*(GraphQLTokenFeeFetcherFetchFeesFailure/(GraphQLTokenFeeFetcherFetchFeesSuccess+GraphQLTokenFeeFetcherFetchFeesFailure))',
+            '100*(graphQLTokenFeeFetcherFetchFeesFailure/(graphQLTokenFeeFetcherFetchFeesSuccess+graphQLTokenFeeFetcherFetchFeesFailure))',
           period: Duration.minutes(5),
           usingMetrics: {
-            GraphQLTokenFeeFetcherFetchFeesSuccess: new aws_cloudwatch.Metric({
+            graphQLTokenFeeFetcherFetchFeesSuccess: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `GraphQLTokenFeeFetcherFetchFeesSuccess`,
               dimensionsMap: { Service: 'RoutingAPI' },
               unit: aws_cloudwatch.Unit.COUNT,
               statistic: 'sum',
             }),
-            GraphQLTokenFeeFetcherFetchFeesFailure: new aws_cloudwatch.Metric({
+            graphQLTokenFeeFetcherFetchFeesFailure: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
               metricName: `GraphQLTokenFeeFetcherFetchFeesFailure`,
               dimensionsMap: { Service: 'RoutingAPI' },
