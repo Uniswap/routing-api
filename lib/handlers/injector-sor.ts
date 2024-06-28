@@ -241,13 +241,13 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             chainId
           )
           const trafficSwitcherTokenFetcher = new TrafficSwitcherITokenFeeFetcher('TokenFetcherExperiment', {
-            control: onChainTokenFeeFetcher,
-            treatment: graphQLTokenFeeFetcher,
-            aliasControl: 'onChainTokenFeeFetcher',
-            aliasTreatment: 'graphQLTokenFeeFetcher',
+            control: graphQLTokenFeeFetcher,
+            treatment: onChainTokenFeeFetcher,
+            aliasControl: 'graphQLTokenFeeFetcher',
+            aliasTreatment: 'onChainTokenFeeFetcher',
             customization: {
-              pctEnabled: 0.7,
-              pctShadowSampling: 0.0,
+              pctEnabled: 0.0,
+              pctShadowSampling: 0.005,
             },
           })
 
