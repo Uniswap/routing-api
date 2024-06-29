@@ -69,7 +69,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
-    "providerInitialWeights": [1],
+    "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_1", "QUICKNODERETH_1"]
   },
   {
