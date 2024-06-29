@@ -28,8 +28,8 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.01,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_10", "ALCHEMY_10"]
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_10"]
   },
   {
     "chainId": 11155111,
@@ -45,32 +45,32 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.25,
     "healthCheckSampleProb": 0.005,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_137", "ALCHEMY_137"]
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_137"]
   },
   {
     "chainId": 42161,
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.002,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_42161", "ALCHEMY_42161"]
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_42161"]
   },
   {
     "chainId": 8453,
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.0005,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_8453", "ALCHEMY_8453"]
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_8453"]
   },
   {
     "chainId": 1,
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
-    "providerInitialWeights": [0, 1, 0],
-    "providerUrls": ["ALCHEMY_1", "QUICKNODE_1", "QUICKNODERETH_1"]
+    "providerInitialWeights": [1, 0],
+    "providerUrls": ["QUICKNODE_1", "QUICKNODERETH_1"]
   },
   {
     "chainId": 81457,
@@ -93,7 +93,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.01,
-    "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_324", "ALCHEMY_324"]
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_324"]
   }
 ]
