@@ -10,6 +10,7 @@ import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import { CacheMode, CachedRoute, CachedRoutes, UNI_MAINNET, USDC_MAINNET, V3Route } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
+import { set, reset } from 'mockdate'
 
 chai.use(chaiAsPromised)
 
@@ -188,5 +189,43 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_CACHED_ROUTES.blockNumber
     )
     expect(route).to.not.be.undefined
+  })
+
+  it('Filters out the expired cached routes', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+    const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
+    expect(insertedIntoCache).to.be.true
+
+    // Fetches route successfully from cache when it has been cached.
+    const route = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V2],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(route).to.not.be.undefined
+
+    const oneDayLater = new Date()
+    oneDayLater.setDate(oneDayLater.getDate() + 1)
+    oneDayLater.setSeconds(oneDayLater.getSeconds() + 1) // also add one second to the date to ensure the route is expired
+
+    // set the mock date to be one day later, as a way to test the route expiry without changing the provider class implementation
+    set(oneDayLater)
+
+    // Expect the same route to be expired
+    const expiredRoute = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V2],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(expiredRoute).to.be.undefined
+
+    // important to reset the mock date so that other tests are not affected
+    reset()
   })
 })
