@@ -214,7 +214,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     latency: number,
     selectedProvider: SingleJsonRpcProvider,
     methodName: string,
-    args: any[]
+    args: any[],
+    providerResponse: any
   ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
@@ -230,7 +231,16 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // Within each provider latency shadow evaluation, we should do block I/O,
         // because NodeJS runs in single thread, so it's important to make sure
         // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        await provider.evaluateLatency(methodName, args)
+        const evaluatedProviderResponse = await provider.evaluateLatency(methodName, args)
+        this.compareRpcResponses(
+          providerResponse,
+          evaluatedProviderResponse,
+          selectedProvider,
+          provider,
+          methodName,
+          args
+        )
+
         count++
       })
     )
@@ -240,6 +250,27 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     this.log.debug(`Evaluated ${count} other healthy providers`)
+  }
+
+  compareRpcResponses(
+    providerResponse: any,
+    evaluatedProviderResponse: any,
+    selectedProvider: SingleJsonRpcProvider,
+    otherProvider: SingleJsonRpcProvider,
+    methodName: string,
+    args: any[]
+  ) {
+    if (providerResponse !== evaluatedProviderResponse) {
+      this.log.error(
+        { methodName, args },
+        `Provider response mismatch: ${JSON.stringify(providerResponse)} from ${
+          selectedProvider.providerId
+        } vs ${JSON.stringify(evaluatedProviderResponse)} from ${otherProvider.providerId}`
+      )
+      selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
+    } else {
+      selectedProvider.logRpcResponseMatch(methodName, otherProvider)
+    }
   }
 
   logProviderHealthiness() {
@@ -289,9 +320,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     selectedProvider.logProviderSelection()
     let latency = 0
+    let result
     try {
       const start = Date.now()
-      const result = await (selectedProvider as any)[`${fnName}`](...args)
+      result = await (selectedProvider as any)[`${fnName}`](...args)
       latency = Date.now() - start
       return result
     } catch (error: any) {
@@ -308,7 +340,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
           sessionId
         ) {
           // fire and forget to evaluate latency of other healthy providers
-          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
+          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args, result)
         }
 
         if (Math.random() < this.healthCheckSampleProb && sessionId) {
