@@ -314,9 +314,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     if (serializedProviderResponse !== serializedEvaluatedProviderResponse) {
       this.log.error(
         { methodName, args },
-        `Provider response mismatch: ${serializedProviderResponse} from ${
-          selectedProvider.providerId
-        } vs ${serializedEvaluatedProviderResponse} from ${otherProvider.providerId}`
+        `Provider response mismatch: ${serializedProviderResponse} from ${selectedProvider.providerId} vs ${serializedEvaluatedProviderResponse} from ${otherProvider.providerId}`
       )
       selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
     } else {
