@@ -214,7 +214,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     latency: number,
     selectedProvider: SingleJsonRpcProvider,
     methodName: string,
-    args: any[]
+    args: any[],
+    providerResponse: any
   ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
@@ -230,7 +231,20 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // Within each provider latency shadow evaluation, we should do block I/O,
         // because NodeJS runs in single thread, so it's important to make sure
         // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        await provider.evaluateLatency(methodName, args)
+        const evaluatedProviderResponse = await (provider as any)[`evaluateLatency`](methodName, ...args)
+        // below invocation does not make the call/send RPC return the correct data
+        // both call and send will return "0x" for some reason
+        // I have to change to above invocation to make call/send return geniun RPC response
+        // const evaluatedProviderResponse = await provider.evaluateLatency(methodName, args)
+        this.compareRpcResponses(
+          providerResponse,
+          evaluatedProviderResponse,
+          selectedProvider,
+          provider,
+          methodName,
+          args
+        )
+
         count++
       })
     )
@@ -240,6 +254,72 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     this.log.debug(`Evaluated ${count} other healthy providers`)
+  }
+
+  compareRpcResponses(
+    providerResponse: any,
+    evaluatedProviderResponse: any,
+    selectedProvider: SingleJsonRpcProvider,
+    otherProvider: SingleJsonRpcProvider,
+    methodName: string,
+    args: any[]
+  ) {
+    // we need to serialized the response, because in case of send(),
+    // we might get an object back, e.g. eth_feeHistory response object
+    // {
+    //    "oldestBlock":"0x1347665",
+    //    "reward":[
+    //       [
+    //          "0x21f43815"
+    //       ],
+    //       [
+    //          "0x140eca05"
+    //       ],
+    //       [
+    //          "0x140eca05"
+    //       ],
+    //       [
+    //          "0x1374bed6"
+    //       ]
+    //    ],
+    //    "baseFeePerGas":[
+    //       "0x7750ad57",
+    //       "0x75d05b08",
+    //       "0x7ab15525",
+    //       "0x73f8e916",
+    //       "0x747ba29d"
+    //    ],
+    //    "gasUsedRatio":[
+    //       0.4496709,
+    //       0.6656448666666667,
+    //       0.28090306666666665,
+    //       0.5176126
+    //    ],
+    //    "baseFeePerBlobGas":[
+    //       "0x1",
+    //       "0x1",
+    //       "0x1",
+    //       "0x1",
+    //       "0x1"
+    //    ],
+    //    "blobGasUsedRatio":[
+    //       0.16666666666666666,
+    //       0.5,
+    //       0,
+    //       0.5
+    //    ]
+    // }
+    const serializedProviderResponse = JSON.stringify(providerResponse)
+    const serializedEvaluatedProviderResponse = JSON.stringify(evaluatedProviderResponse)
+    if (serializedProviderResponse !== serializedEvaluatedProviderResponse) {
+      this.log.error(
+        { methodName, args },
+        `Provider response mismatch: ${serializedProviderResponse} from ${selectedProvider.providerId} vs ${serializedEvaluatedProviderResponse} from ${otherProvider.providerId}`
+      )
+      selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
+    } else {
+      selectedProvider.logRpcResponseMatch(methodName, otherProvider)
+    }
   }
 
   logProviderHealthiness() {
@@ -289,9 +369,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     selectedProvider.logProviderSelection()
     let latency = 0
+    let result
     try {
       const start = Date.now()
-      const result = await (selectedProvider as any)[`${fnName}`](...args)
+      result = await (selectedProvider as any)[`${fnName}`](...args)
       latency = Date.now() - start
       return result
     } catch (error: any) {
@@ -308,7 +389,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
           sessionId
         ) {
           // fire and forget to evaluate latency of other healthy providers
-          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
+          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args, result)
         }
 
         if (Math.random() < this.healthCheckSampleProb && sessionId) {
