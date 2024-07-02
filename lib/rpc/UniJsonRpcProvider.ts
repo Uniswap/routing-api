@@ -231,7 +231,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // Within each provider latency shadow evaluation, we should do block I/O,
         // because NodeJS runs in single thread, so it's important to make sure
         // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        const evaluatedProviderResponse = await provider.evaluateLatency(methodName, args)
+        const evaluatedProviderResponse = await (provider as any)[`evaluateLatency`](methodName, ...args)
+        // below invocation does not make the call/send RPC return the correct data
+        // both call and send will return "0x" for some reason
+        // I have to change to above invocation to make call/send return geniun RPC response
+        // const evaluatedProviderResponse = await provider.evaluateLatency(methodName, args)
         this.compareRpcResponses(
           providerResponse,
           evaluatedProviderResponse,
@@ -260,12 +264,59 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     methodName: string,
     args: any[]
   ) {
-    if (providerResponse !== evaluatedProviderResponse) {
+    // we need to serialized the response, because in case of send(),
+    // we might get an object back, e.g. eth_feeHistory response object
+    // {
+    //    "oldestBlock":"0x1347665",
+    //    "reward":[
+    //       [
+    //          "0x21f43815"
+    //       ],
+    //       [
+    //          "0x140eca05"
+    //       ],
+    //       [
+    //          "0x140eca05"
+    //       ],
+    //       [
+    //          "0x1374bed6"
+    //       ]
+    //    ],
+    //    "baseFeePerGas":[
+    //       "0x7750ad57",
+    //       "0x75d05b08",
+    //       "0x7ab15525",
+    //       "0x73f8e916",
+    //       "0x747ba29d"
+    //    ],
+    //    "gasUsedRatio":[
+    //       0.4496709,
+    //       0.6656448666666667,
+    //       0.28090306666666665,
+    //       0.5176126
+    //    ],
+    //    "baseFeePerBlobGas":[
+    //       "0x1",
+    //       "0x1",
+    //       "0x1",
+    //       "0x1",
+    //       "0x1"
+    //    ],
+    //    "blobGasUsedRatio":[
+    //       0.16666666666666666,
+    //       0.5,
+    //       0,
+    //       0.5
+    //    ]
+    // }
+    const serializedProviderResponse = JSON.stringify(providerResponse)
+    const serializedEvaluatedProviderResponse = JSON.stringify(evaluatedProviderResponse)
+    if (serializedProviderResponse !== serializedEvaluatedProviderResponse) {
       this.log.error(
         { methodName, args },
-        `Provider response mismatch: ${JSON.stringify(providerResponse)} from ${
+        `Provider response mismatch: ${serializedProviderResponse} from ${
           selectedProvider.providerId
-        } vs ${JSON.stringify(evaluatedProviderResponse)} from ${otherProvider.providerId}`
+        } vs ${serializedEvaluatedProviderResponse} from ${otherProvider.providerId}`
       )
       selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
     } else {
