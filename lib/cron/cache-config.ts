@@ -11,8 +11,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-mainnet/api`
     case ChainId.ARBITRUM_ONE:
-      //https://thegraph.com/explorer/subgraphs/FbCGRftH4a3yZugY7TnbYgPJVEv2LvMT6oF1fxPe9aJM?view=Overview&chain=arbitrum-one
-      return `https://gateway-arbitrum.network.thegraph.com/api/${process.env.DCN_API_KEY}/subgraphs/id/FbCGRftH4a3yZugY7TnbYgPJVEv2LvMT6oF1fxPe9aJM`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-arbitrum-ii/api`
     case ChainId.POLYGON:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-polygon/api`
     case ChainId.OPTIMISM:
