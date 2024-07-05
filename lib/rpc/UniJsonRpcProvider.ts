@@ -1,7 +1,6 @@
 import {
   CALL_METHOD_NAME,
   CallType,
-  GET_BLOCK_NUMBER_METHOD_NAME,
   MAJOR_METHOD_NAMES,
   SEND_METHOD_NAME,
   SingleJsonRpcProvider,
@@ -22,7 +21,7 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
 import { UniJsonRpcProviderConfig } from './config'
-import { EthFeeHistory } from '../../test/utils/eth_feeHistory'
+import { EthFeeHistory } from '../util/eth_feeHistory'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   readonly chainId: ChainId = ChainId.MAINNET
@@ -272,60 +271,72 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     methodName: string,
     args: any[]
   ) {
-    if (methodName === GET_BLOCK_NUMBER_METHOD_NAME) {
-      // if it's get block number, there's no guarantee that two providers will return the same block number
-      // since the node might be syncing, so we don't need to compare the response
-      return
-    } else if (methodName === CALL_METHOD_NAME) {
-      // if it's eth_call, then we know the response data type is string, so we can compare directly
-      if (providerResponse !== evaluatedProviderResponse) {
-        this.log.error(
-          { methodName, args },
-          `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
-        )
-        selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
-      } else {
-        selectedProvider.logRpcResponseMatch(methodName, otherProvider)
-      }
-    } else if (methodName === SEND_METHOD_NAME) {
-      // send is complicated, because it could be eth_call, eth_blockNumber, eth_feeHistory, eth_estimateGas
-      // so we need to compare the response based on the method name
-      const underlyingMethodName = args[0]
-      const stitchedMethodName = `${SEND_METHOD_NAME}_${underlyingMethodName}`
-      if (underlyingMethodName === 'eth_call' || underlyingMethodName === 'eth_estimateGas') {
+    switch (methodName) {
+      case CALL_METHOD_NAME:
+        // if it's eth_call, then we know the response data type is string, so we can compare directly
         if (providerResponse !== evaluatedProviderResponse) {
           this.log.error(
-            { stitchedMethodName, args },
+            { methodName, args },
             `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
           )
-          selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+          selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
         } else {
-          selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+          selectedProvider.logRpcResponseMatch(methodName, otherProvider)
         }
-      } else if (underlyingMethodName === 'eth_feeHistory') {
-        const castedProviderResponse = providerResponse as EthFeeHistory
-        const castedEvaluatedProviderResponse = evaluatedProviderResponse as EthFeeHistory
-        const mismatch =
-          castedProviderResponse.oldestBlock !== castedEvaluatedProviderResponse.oldestBlock ||
-          JSON.stringify(castedProviderResponse.reward) !== JSON.stringify(castedEvaluatedProviderResponse.reward) ||
-          JSON.stringify(castedProviderResponse.baseFeePerGas) !==
-            JSON.stringify(castedEvaluatedProviderResponse.baseFeePerGas) ||
-          JSON.stringify(castedProviderResponse.gasUsedRatio) !==
-            JSON.stringify(castedEvaluatedProviderResponse.gasUsedRatio) ||
-          JSON.stringify(castedProviderResponse.baseFeePerBlobGas) !==
-            JSON.stringify(castedEvaluatedProviderResponse.baseFeePerBlobGas) ||
-          JSON.stringify(castedProviderResponse.blobGasUsedRatio) !==
-            JSON.stringify(castedEvaluatedProviderResponse.blobGasUsedRatio)
-        if (mismatch) {
-          this.log.error(
-            { stitchedMethodName, args },
-            `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
-          )
-          selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
-        } else {
-          selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+        break
+      case SEND_METHOD_NAME:
+        // send is complicated, because it could be eth_call, eth_blockNumber, eth_feeHistory, eth_estimateGas
+        // so we need to compare the response based on the method name
+        const underlyingMethodName = args[0]
+        const stitchedMethodName = `${SEND_METHOD_NAME}_${underlyingMethodName}`
+        switch (underlyingMethodName) {
+          case 'eth_call':
+          case 'eth_estimateGas':
+            if (providerResponse !== evaluatedProviderResponse) {
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            } else {
+              selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+            }
+            break
+          case 'eth_feeHistory':
+            const castedProviderResponse = providerResponse as EthFeeHistory
+            const castedEvaluatedProviderResponse = evaluatedProviderResponse as EthFeeHistory
+            const mismatch =
+              castedProviderResponse.oldestBlock !== castedEvaluatedProviderResponse.oldestBlock ||
+              JSON.stringify(castedProviderResponse.reward) !==
+                JSON.stringify(castedEvaluatedProviderResponse.reward) ||
+              JSON.stringify(castedProviderResponse.baseFeePerGas) !==
+                JSON.stringify(castedEvaluatedProviderResponse.baseFeePerGas) ||
+              JSON.stringify(castedProviderResponse.gasUsedRatio) !==
+                JSON.stringify(castedEvaluatedProviderResponse.gasUsedRatio) ||
+              JSON.stringify(castedProviderResponse.baseFeePerBlobGas) !==
+                JSON.stringify(castedEvaluatedProviderResponse.baseFeePerBlobGas) ||
+              JSON.stringify(castedProviderResponse.blobGasUsedRatio) !==
+                JSON.stringify(castedEvaluatedProviderResponse.blobGasUsedRatio)
+            if (mismatch) {
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            } else {
+              selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+            }
+            break
+          default:
+            // if it's get block number, there's no guarantee that two providers will return the same block number
+            // since the node might be syncing, so we don't need to compare the response
+            return
         }
-      }
+        break
+      default:
+        // if it's get block number, there's no guarantee that two providers will return the same block number
+        // since the node might be syncing, so we don't need to compare the response
+        return
     }
   }
 

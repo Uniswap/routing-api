@@ -1007,4 +1007,15 @@ describe('UniJsonRpcProvider', () => {
     expect(spy1.callCount).to.equal(1)
     expect(spy2.callCount).to.equal(1)
   })
+
+  it('Test compare RPC response for eth_blockNumber', async () => {
+    uniProvider = new UniJsonRpcProvider(
+      ChainId.MAINNET,
+      SINGLE_RPC_PROVIDERS[ChainId.MAINNET],
+      log,
+      UNI_PROVIDER_TEST_CONFIG,
+      1.0,
+      1
+    )
+  })
 })
