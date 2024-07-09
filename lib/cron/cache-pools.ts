@@ -83,6 +83,24 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       })
       filteredPools.forEach((pool) => pools.push(pool))
 
+      const manuallyIncludedPools: V2SubgraphPool[] = [
+        {
+          id: '0x801c868ce08fb5b396e6911eac351beb259d386c',
+          token0: {
+            id: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            symbol: 'wstETH',
+          },
+          token1: {
+            id: '0xbaac2b4491727d78d2b78815144570b9f2fe8899',
+            symbol: 'DOG',
+          },
+          supply: 706196.651729130972764273,
+          reserve: 818.040429522105562858,
+          reserveUSD: 5890000,
+        } as V2SubgraphPool,
+      ]
+      manuallyIncludedPools.forEach((pool) => pools.push(pool))
+
       const filterOutPoolAddresses = [
         // filter out AMPL-token pools with low liquidity
         '0x029c9f16d219486305716f8c623739f9c75ceabd',
