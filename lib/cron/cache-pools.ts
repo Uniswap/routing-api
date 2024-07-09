@@ -97,7 +97,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           supply: 706196.651729130972764273,
           reserve: 818.040429522105562858,
           reserveUSD: 5890000,
-        } as V2SubgraphPool
+        } as V2SubgraphPool,
       ]
       manuallyIncludedPools.forEach((pool) => pools.push(pool))
 
