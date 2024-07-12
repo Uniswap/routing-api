@@ -33,7 +33,6 @@ import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
-import semver from 'semver'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
 
@@ -248,13 +247,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
-    const protocols = QuoteHandler.protocolsFromRequest(
-      chainId,
-      protocolsStr,
-      isMobileRequest,
-      appVersion,
-      forceCrossProtocol
-    )
+    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, isMobileRequest)
 
     if (protocols === undefined) {
       return {
