@@ -246,8 +246,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
-    const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
-    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, isMobileRequest)
+    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, forceCrossProtocol)
 
     if (protocols === undefined) {
       return {
