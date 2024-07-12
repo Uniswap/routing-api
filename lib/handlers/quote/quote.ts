@@ -33,7 +33,6 @@ import { MetricsLogger } from 'aws-embedded-metrics'
 import { CurrencyLookup } from '../CurrencyLookup'
 import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
-import semver from 'semver'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
 
@@ -248,13 +247,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
     const isMobileRequest = ['uniswap-ios', 'uniswap-android'].includes(requestSource)
-    const protocols = QuoteHandler.protocolsFromRequest(
-      chainId,
-      protocolsStr,
-      isMobileRequest,
-      appVersion,
-      forceCrossProtocol
-    )
+    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, isMobileRequest)
 
     if (protocols === undefined) {
       return {
@@ -651,14 +644,9 @@ export class QuoteHandler extends APIGLambdaHandler<
   static protocolsFromRequest(
     chainId: ChainId,
     requestedProtocols: string[] | string | undefined,
-    isMobileRequest: boolean,
-    appVersion: string | undefined,
     forceCrossProtocol: boolean | undefined
   ): Protocol[] | undefined {
-    // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
-    const semverAppVersion = semver.coerce(appVersion)
-    const fixVersion = semver.coerce('1.24')!
-    const excludeV2 = isMobileRequest && (semverAppVersion === null || semver.lt(semverAppVersion, fixVersion))
+    const excludeV2 = false
 
     if (requestedProtocols) {
       let protocols: Protocol[] = []
