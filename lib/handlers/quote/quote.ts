@@ -651,14 +651,9 @@ export class QuoteHandler extends APIGLambdaHandler<
   static protocolsFromRequest(
     chainId: ChainId,
     requestedProtocols: string[] | string | undefined,
-    isMobileRequest: boolean,
-    appVersion: string | undefined,
     forceCrossProtocol: boolean | undefined
   ): Protocol[] | undefined {
-    // We will exclude V2 if isMobile and the appVersion is not present or is lower than 1.24
-    const semverAppVersion = semver.coerce(appVersion)
-    const fixVersion = semver.coerce('1.24')!
-    const excludeV2 = isMobileRequest && (semverAppVersion === null || semver.lt(semverAppVersion, fixVersion))
+    const excludeV2 = false
 
     if (requestedProtocols) {
       let protocols: Protocol[] = []
