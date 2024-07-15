@@ -1,4 +1,10 @@
-import { CallType, MAJOR_METHOD_NAMES, SingleJsonRpcProvider } from './SingleJsonRpcProvider'
+import {
+  CALL_METHOD_NAME,
+  CallType,
+  MAJOR_METHOD_NAMES,
+  SEND_METHOD_NAME,
+  SingleJsonRpcProvider,
+} from './SingleJsonRpcProvider'
 import { StaticJsonRpcProvider, TransactionRequest } from '@ethersproject/providers'
 import { isEmpty } from 'lodash'
 import { ChainId } from '@uniswap/sdk-core'
@@ -15,6 +21,8 @@ import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
 import { UniJsonRpcProviderConfig } from './config'
+import { EthFeeHistory } from '../util/eth_feeHistory'
+import { JsonRpcResponse } from 'hardhat/types'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   readonly chainId: ChainId = ChainId.MAINNET
@@ -214,7 +222,8 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     latency: number,
     selectedProvider: SingleJsonRpcProvider,
     methodName: string,
-    args: any[]
+    args: any[],
+    providerResponse: any
   ): Promise<void> {
     const healthyProviders = this.providers.filter((provider) => provider.isHealthy())
     let count = 0
@@ -230,7 +239,20 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // Within each provider latency shadow evaluation, we should do block I/O,
         // because NodeJS runs in single thread, so it's important to make sure
         // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        await provider.evaluateLatency(methodName, args)
+        const evaluatedProviderResponse = await provider[`evaluateLatency`](methodName, ...args)
+        // below invocation does not make the call/send RPC return the correct data
+        // both call and send will return "0x" for some reason
+        // I have to change to above invocation to make call/send return geniun RPC response
+        // const evaluatedProviderResponse = await provider.evaluateLatency(methodName, args)
+        this.compareRpcResponses(
+          providerResponse,
+          evaluatedProviderResponse,
+          selectedProvider,
+          provider,
+          methodName,
+          args
+        )
+
         count++
       })
     )
@@ -240,6 +262,108 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     }
 
     this.log.debug(`Evaluated ${count} other healthy providers`)
+  }
+
+  compareRpcResponses(
+    providerResponse: any,
+    evaluatedProviderResponse: any,
+    selectedProvider: SingleJsonRpcProvider,
+    otherProvider: SingleJsonRpcProvider,
+    methodName: string,
+    args: any[]
+  ) {
+    switch (methodName) {
+      case CALL_METHOD_NAME:
+        // if it's eth_call, then we know the response data type is string, so we can compare directly
+        if (providerResponse !== evaluatedProviderResponse) {
+          this.log.error(
+            { methodName, args },
+            `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+          )
+          selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
+        } else {
+          selectedProvider.logRpcResponseMatch(methodName, otherProvider)
+        }
+        break
+      case SEND_METHOD_NAME:
+        // send is complicated, because it could be eth_call, eth_blockNumber, eth_feeHistory, eth_estimateGas
+        // so we need to compare the response based on the method name
+        const underlyingMethodName = args[0]
+        const stitchedMethodName = `${SEND_METHOD_NAME}_${underlyingMethodName}`
+        const castedProviderResponse = providerResponse as JsonRpcResponse
+        const castedEvaluatedProviderResponse = evaluatedProviderResponse as JsonRpcResponse
+        switch (underlyingMethodName) {
+          // eth_call result type is string, so we can compare directly
+          case 'eth_call':
+          // eth_estimateGas result type is number, so we can compare directly without casting to number type
+          case 'eth_estimateGas':
+            if (castedProviderResponse.result !== castedEvaluatedProviderResponse.result) {
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider result mismatch: ${castedProviderResponse.result} from ${selectedProvider.providerId} vs ${castedEvaluatedProviderResponse.result} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
+              // when comparing the error, the most important part is the data field
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider error mismatch: ${JSON.stringify(castedProviderResponse.error)} from ${
+                  selectedProvider.providerId
+                } vs ${JSON.stringify(castedEvaluatedProviderResponse.error)} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            } else {
+              selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+            }
+            break
+          case 'eth_feeHistory':
+            if (castedProviderResponse.result && castedEvaluatedProviderResponse.result) {
+              const ethFeeHistory = castedProviderResponse.result as EthFeeHistory
+              const evaluatedEthFeeHistory = castedEvaluatedProviderResponse.result as EthFeeHistory
+
+              const mismatch =
+                ethFeeHistory.oldestBlock !== evaluatedEthFeeHistory.oldestBlock ||
+                JSON.stringify(ethFeeHistory.reward) !== JSON.stringify(evaluatedEthFeeHistory.reward) ||
+                JSON.stringify(ethFeeHistory.baseFeePerGas) !== JSON.stringify(evaluatedEthFeeHistory.baseFeePerGas) ||
+                JSON.stringify(ethFeeHistory.gasUsedRatio) !== JSON.stringify(evaluatedEthFeeHistory.gasUsedRatio) ||
+                JSON.stringify(ethFeeHistory.baseFeePerBlobGas) !==
+                  JSON.stringify(evaluatedEthFeeHistory.baseFeePerBlobGas) ||
+                JSON.stringify(ethFeeHistory.blobGasUsedRatio) !==
+                  JSON.stringify(evaluatedEthFeeHistory.blobGasUsedRatio)
+              if (mismatch) {
+                this.log.error(
+                  { stitchedMethodName, args },
+                  `Provider result mismatch: ${JSON.stringify(ethFeeHistory)} from ${
+                    selectedProvider.providerId
+                  } vs ${JSON.stringify(evaluatedEthFeeHistory)} from ${otherProvider.providerId}`
+                )
+                selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+              } else {
+                selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+              }
+            } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
+              // when comparing the error, the most important part is the data field
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider error mismatch: ${JSON.stringify(castedProviderResponse.error)} from ${
+                  selectedProvider.providerId
+                } vs ${JSON.stringify(castedEvaluatedProviderResponse.error)} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            }
+
+            break
+          default:
+            // if it's get block number, there's no guarantee that two providers will return the same block number
+            // since the node might be syncing, so we don't need to compare the response
+            return
+        }
+        break
+      default:
+        // if it's get block number, there's no guarantee that two providers will return the same block number
+        // since the node might be syncing, so we don't need to compare the response
+        return
+    }
   }
 
   logProviderHealthiness() {
@@ -289,9 +413,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
     const selectedProvider = this.selectPreferredProvider(sessionId)
     selectedProvider.logProviderSelection()
     let latency = 0
+    let result
     try {
       const start = Date.now()
-      const result = await (selectedProvider as any)[`${fnName}`](...args)
+      result = await (selectedProvider as any)[`${fnName}`](...args)
       latency = Date.now() - start
       return result
     } catch (error: any) {
@@ -308,7 +433,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
           sessionId
         ) {
           // fire and forget to evaluate latency of other healthy providers
-          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args)
+          this.checkOtherHealthyProvider(latency, selectedProvider, fnName, args, result)
         }
 
         if (Math.random() < this.healthCheckSampleProb && sessionId) {
