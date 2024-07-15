@@ -22,6 +22,7 @@ import { Deferrable } from '@ethersproject/properties'
 import Logger from 'bunyan'
 import { UniJsonRpcProviderConfig } from './config'
 import { EthFeeHistory } from '../util/eth_feeHistory'
+import { JsonRpcResponse } from 'hardhat/types'
 
 export class UniJsonRpcProvider extends StaticJsonRpcProvider {
   readonly chainId: ChainId = ChainId.MAINNET
@@ -289,10 +290,14 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // so we need to compare the response based on the method name
         const underlyingMethodName = args[0]
         const stitchedMethodName = `${SEND_METHOD_NAME}_${underlyingMethodName}`
+        const castedProviderResponse = providerResponse as JsonRpcResponse
+        const castedEvaluatedProviderResponse = evaluatedProviderResponse as JsonRpcResponse
         switch (underlyingMethodName) {
+          // eth_call result type is string, so we can compare directly
           case 'eth_call':
+          // eth_estimateGas result type is number, so we can compare directly without casting to number type
           case 'eth_estimateGas':
-            if (providerResponse !== evaluatedProviderResponse) {
+            if (castedProviderResponse.result !== castedProviderResponse.result) {
               this.log.error(
                 { stitchedMethodName, args },
                 `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
@@ -303,20 +308,20 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
             }
             break
           case 'eth_feeHistory':
-            const castedProviderResponse = providerResponse as EthFeeHistory
-            const castedEvaluatedProviderResponse = evaluatedProviderResponse as EthFeeHistory
+            const ethFeeHistory = castedProviderResponse.result as EthFeeHistory
+            const evaluatedEthFeeHistory = castedEvaluatedProviderResponse.result as EthFeeHistory
             const mismatch =
-              castedProviderResponse.oldestBlock !== castedEvaluatedProviderResponse.oldestBlock ||
-              JSON.stringify(castedProviderResponse.reward) !==
-                JSON.stringify(castedEvaluatedProviderResponse.reward) ||
-              JSON.stringify(castedProviderResponse.baseFeePerGas) !==
-                JSON.stringify(castedEvaluatedProviderResponse.baseFeePerGas) ||
-              JSON.stringify(castedProviderResponse.gasUsedRatio) !==
-                JSON.stringify(castedEvaluatedProviderResponse.gasUsedRatio) ||
-              JSON.stringify(castedProviderResponse.baseFeePerBlobGas) !==
-                JSON.stringify(castedEvaluatedProviderResponse.baseFeePerBlobGas) ||
-              JSON.stringify(castedProviderResponse.blobGasUsedRatio) !==
-                JSON.stringify(castedEvaluatedProviderResponse.blobGasUsedRatio)
+              ethFeeHistory.oldestBlock !== evaluatedEthFeeHistory.oldestBlock ||
+              JSON.stringify(ethFeeHistory.reward) !==
+                JSON.stringify(evaluatedEthFeeHistory.reward) ||
+              JSON.stringify(ethFeeHistory.baseFeePerGas) !==
+                JSON.stringify(evaluatedEthFeeHistory.baseFeePerGas) ||
+              JSON.stringify(ethFeeHistory.gasUsedRatio) !==
+                JSON.stringify(evaluatedEthFeeHistory.gasUsedRatio) ||
+              JSON.stringify(ethFeeHistory.baseFeePerBlobGas) !==
+                JSON.stringify(evaluatedEthFeeHistory.baseFeePerBlobGas) ||
+              JSON.stringify(ethFeeHistory.blobGasUsedRatio) !==
+                JSON.stringify(evaluatedEthFeeHistory.blobGasUsedRatio)
             if (mismatch) {
               this.log.error(
                 { stitchedMethodName, args },
