@@ -276,9 +276,11 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
       case CALL_METHOD_NAME:
         // if it's eth_call, then we know the response data type is string, so we can compare directly
         if (providerResponse !== evaluatedProviderResponse) {
+          // create a bogus error object to get the call stack
+          const error = new Error()
           this.log.error(
             { methodName, args },
-            `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+            `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}. Call stack ${error.stack}`
           )
           selectedProvider.logRpcResponseMismatch(methodName, otherProvider)
         } else {
