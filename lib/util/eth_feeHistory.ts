@@ -1,5 +1,5 @@
 export type EthFeeHistory = {
-  oldestBlock: number
+  oldestBlock: string
   reward: string[]
   baseFeePerGas: string[]
   gasUsedRatio: number[]

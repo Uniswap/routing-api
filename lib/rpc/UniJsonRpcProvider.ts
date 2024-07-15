@@ -297,10 +297,10 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
           case 'eth_call':
           // eth_estimateGas result type is number, so we can compare directly without casting to number type
           case 'eth_estimateGas':
-            if (castedProviderResponse.result !== castedProviderResponse.result) {
+            if (castedProviderResponse.result !== castedEvaluatedProviderResponse.result) {
               this.log.error(
                 { stitchedMethodName, args },
-                `Provider result mismatch: ${castedProviderResponse.result} from ${selectedProvider.providerId} vs ${castedProviderResponse.result} from ${otherProvider.providerId}`
+                `Provider result mismatch: ${castedProviderResponse.result} from ${selectedProvider.providerId} vs ${castedEvaluatedProviderResponse.result} from ${otherProvider.providerId}`
               )
               selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
             } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
@@ -342,6 +342,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
                 selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
               }
             } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
+              // when comparing the error, the most important part is the data field
               this.log.error(
                 { stitchedMethodName, args },
                 `Provider error mismatch: ${JSON.stringify(castedProviderResponse.error)} from ${
