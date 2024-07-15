@@ -300,7 +300,16 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
             if (castedProviderResponse.result !== castedProviderResponse.result) {
               this.log.error(
                 { stitchedMethodName, args },
-                `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+                `Provider result mismatch: ${castedProviderResponse.result} from ${selectedProvider.providerId} vs ${castedProviderResponse.result} from ${otherProvider.providerId}`
+              )
+              selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+            } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
+              // when comparing the error, the most important part is the data field
+              this.log.error(
+                { stitchedMethodName, args },
+                `Provider error mismatch: ${JSON.stringify(castedProviderResponse.error)} from ${
+                  selectedProvider.providerId
+                } vs ${JSON.stringify(castedEvaluatedProviderResponse.error)} from ${otherProvider.providerId}`
               )
               selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
             } else {
@@ -308,29 +317,40 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
             }
             break
           case 'eth_feeHistory':
-            const ethFeeHistory = castedProviderResponse.result as EthFeeHistory
-            const evaluatedEthFeeHistory = castedEvaluatedProviderResponse.result as EthFeeHistory
-            const mismatch =
-              ethFeeHistory.oldestBlock !== evaluatedEthFeeHistory.oldestBlock ||
-              JSON.stringify(ethFeeHistory.reward) !==
-                JSON.stringify(evaluatedEthFeeHistory.reward) ||
-              JSON.stringify(ethFeeHistory.baseFeePerGas) !==
-                JSON.stringify(evaluatedEthFeeHistory.baseFeePerGas) ||
-              JSON.stringify(ethFeeHistory.gasUsedRatio) !==
-                JSON.stringify(evaluatedEthFeeHistory.gasUsedRatio) ||
-              JSON.stringify(ethFeeHistory.baseFeePerBlobGas) !==
-                JSON.stringify(evaluatedEthFeeHistory.baseFeePerBlobGas) ||
-              JSON.stringify(ethFeeHistory.blobGasUsedRatio) !==
-                JSON.stringify(evaluatedEthFeeHistory.blobGasUsedRatio)
-            if (mismatch) {
+            if (castedProviderResponse.result && castedEvaluatedProviderResponse.result) {
+              const ethFeeHistory = castedProviderResponse.result as EthFeeHistory
+              const evaluatedEthFeeHistory = castedEvaluatedProviderResponse.result as EthFeeHistory
+
+              const mismatch =
+                ethFeeHistory.oldestBlock !== evaluatedEthFeeHistory.oldestBlock ||
+                JSON.stringify(ethFeeHistory.reward) !== JSON.stringify(evaluatedEthFeeHistory.reward) ||
+                JSON.stringify(ethFeeHistory.baseFeePerGas) !== JSON.stringify(evaluatedEthFeeHistory.baseFeePerGas) ||
+                JSON.stringify(ethFeeHistory.gasUsedRatio) !== JSON.stringify(evaluatedEthFeeHistory.gasUsedRatio) ||
+                JSON.stringify(ethFeeHistory.baseFeePerBlobGas) !==
+                  JSON.stringify(evaluatedEthFeeHistory.baseFeePerBlobGas) ||
+                JSON.stringify(ethFeeHistory.blobGasUsedRatio) !==
+                  JSON.stringify(evaluatedEthFeeHistory.blobGasUsedRatio)
+              if (mismatch) {
+                this.log.error(
+                  { stitchedMethodName, args },
+                  `Provider result mismatch: ${JSON.stringify(ethFeeHistory)} from ${
+                    selectedProvider.providerId
+                  } vs ${JSON.stringify(evaluatedEthFeeHistory)} from ${otherProvider.providerId}`
+                )
+                selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
+              } else {
+                selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
+              }
+            } else if (castedProviderResponse.error?.data !== castedEvaluatedProviderResponse.error?.data) {
               this.log.error(
                 { stitchedMethodName, args },
-                `Provider response mismatch: ${providerResponse} from ${selectedProvider.providerId} vs ${evaluatedProviderResponse} from ${otherProvider.providerId}`
+                `Provider error mismatch: ${JSON.stringify(castedProviderResponse.error)} from ${
+                  selectedProvider.providerId
+                } vs ${JSON.stringify(castedEvaluatedProviderResponse.error)} from ${otherProvider.providerId}`
               )
               selectedProvider.logRpcResponseMismatch(stitchedMethodName, otherProvider)
-            } else {
-              selectedProvider.logRpcResponseMatch(stitchedMethodName, otherProvider)
             }
+
             break
           default:
             // if it's get block number, there's no guarantee that two providers will return the same block number
