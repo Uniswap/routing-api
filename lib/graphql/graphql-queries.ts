@@ -11,6 +11,9 @@ query Token($chain: Chain!, $address: String!) {
             feeData {
                 buyFeeBps
                 sellFeeBps
+                feeTakenOnTransfer
+                externalTransferFailed
+                sellReverted
             }
         }
     }
