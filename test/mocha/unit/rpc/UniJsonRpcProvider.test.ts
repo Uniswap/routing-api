@@ -704,9 +704,9 @@ describe('UniJsonRpcProvider', () => {
     // Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
-    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy1.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(spy2.callCount).to.equal(1)
-    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.getCalls()[0].lastArg).to.equal('getBlockNumber')
 
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
@@ -746,9 +746,9 @@ describe('UniJsonRpcProvider', () => {
     // Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
-    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy1.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(spy2.callCount).to.equal(1)
-    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.getCalls()[0].lastArg).to.equal('getBlockNumber')
 
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
@@ -774,10 +774,10 @@ describe('UniJsonRpcProvider', () => {
     await uniProvider.getBlockNumber('sessionId')
 
     expect(spy1.callCount).to.equal(1)
-    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy1.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
     expect(spy2.callCount).to.equal(1)
-    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp + 16000)
   })
 
@@ -822,9 +822,9 @@ describe('UniJsonRpcProvider', () => {
 
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(5)
-    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy1.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(spy2.callCount).to.equal(5)
-    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.getCalls()[0].lastArg).to.equal('getBlockNumber')
 
     expect(uniProvider['providers'][1]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
     expect(uniProvider['providers'][2]['lastLatencyEvaluationTimestampInMs']).equals(timestamp)
@@ -946,9 +946,9 @@ describe('UniJsonRpcProvider', () => {
     // 0.4 < 0.5, Shadow evaluate call should be made
     expect(spy0.callCount).to.equal(0)
     expect(spy1.callCount).to.equal(1)
-    expect(spy1.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy1.getCalls()[0].lastArg).to.equal('getBlockNumber')
     expect(spy2.callCount).to.equal(1)
-    expect(spy2.getCalls()[0].firstArg).to.equal('getBlockNumber')
+    expect(spy2.getCalls()[0].lastArg).to.equal('getBlockNumber')
   })
 
   it('Test use of healthCheckSampleProb', async () => {
