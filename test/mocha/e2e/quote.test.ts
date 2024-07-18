@@ -80,6 +80,24 @@ const BULLET_WHT_TAX = new Token(
   BigNumber.from(500),
   BigNumber.from(500)
 )
+export const DFNDR = new Token(
+  ChainId.MAINNET,
+  '0x3f57c35633cb29834bb7577ba8052eab90f52a02',
+  18,
+  'DFNDR',
+  'Defender Bot',
+  false
+)
+export const DFNDR_WITH_TAX = new Token(
+  ChainId.MAINNET,
+  '0x3f57c35633cb29834bb7577ba8052eab90f52a02',
+  18,
+  'DFNDR',
+  'Defender Bot',
+  false,
+  BigNumber.from(500),
+  BigNumber.from(500)
+)
 
 const V2_SUPPORTED_PAIRS = [
   [WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM],
@@ -1114,6 +1132,7 @@ describe('quote', function () {
               const tokenInAndTokenOut = [
                 [BULLET, WETH9[ChainId.MAINNET]!],
                 [WETH9[ChainId.MAINNET]!, BULLET],
+                [WETH9[ChainId.MAINNET]!, DFNDR],
               ]
 
               tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
@@ -1156,9 +1175,12 @@ describe('quote', function () {
                         enableUniversalRouter: true,
                         // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
                         simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
+                        portionBips: FLAT_PORTION.bips,
+                        portionRecipient: FLAT_PORTION.recipient
                       }
 
                       const queryParams = qs.stringify(quoteReq)
+                      console.log(`${API}?${queryParams}`)
 
                       const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
                         `${API}?${queryParams}`
@@ -1192,6 +1214,13 @@ describe('quote', function () {
                           expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
                             new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(3)
                           )
+                        }
+
+                        // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
+                        if (tokenOut?.equals(DFNDR)) {
+                          expect(r.data.portionAmount).to.be.undefined
+                          expect(r.data.portionBips).to.be.undefined
+                          expect(r.data.portionRecipient).to.be.undefined
                         }
                       }
                     })
