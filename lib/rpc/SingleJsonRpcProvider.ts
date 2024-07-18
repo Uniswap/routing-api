@@ -183,18 +183,19 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     this.logEvaluateLatency()
     this.evaluatingLatency = true
     try {
-      if (methodName === 'call') {
-        const transaction: Deferrable<TransactionRequest> = args[0]
-        const blockTag: BlockTag | Promise<BlockTag> = args[1]
+      switch (methodName) {
+        case CALL_METHOD_NAME:
+          const transaction: Deferrable<TransactionRequest> = args[0]
+          const blockTag: BlockTag | Promise<BlockTag> = args[1]
 
-        return await this.call_EvaluateLatency(transaction, blockTag, latency)
-      } else if (methodName === 'send') {
-        const underlyingMethodName = args[0]
-        const params: Array<any> = args.splice(1)
+          return await this.call_EvaluateLatency(transaction, blockTag, latency)
+        case SEND_METHOD_NAME:
+          const underlyingMethodName = args[0]
+          const params: Array<any> = args.splice(1)
 
-        return await this.send_EvaluateLatency(underlyingMethodName, params, latency)
-      } else {
-        return await (this as any)[`${methodName}_EvaluateLatency`](...args)
+          return await this.send_EvaluateLatency(underlyingMethodName, params, latency)
+        default:
+          return await (this as any)[`${methodName}_EvaluateLatency`](...args)
       }
     } catch (error: any) {
       this.log.error({ error }, `Encounter error for shadow evaluate latency call: ${JSON.stringify(error)}`)
@@ -303,7 +304,9 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
         const evaluatedLatency = perf.latencyInMs
         this.log.error(
           { latency, evaluatedLatency },
-          `Slower evaluated latency for provider ${this.providerName}. SingleJsonRpcProvider: wrappedFunctionCall: callType: ${callType}, provider: ${
+          `Slower evaluated latency for provider ${
+            this.providerName
+          }. SingleJsonRpcProvider: wrappedFunctionCall: callType: ${callType}, provider: ${
             this.url
           }, fnName: ${fnName}, fn: ${fn}, args: ${JSON.stringify([...args])}`
         )
@@ -371,7 +374,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   ///////////////////// Begin of override functions /////////////////////
 
   override getBlockNumber(): Promise<number> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'getBlockNumber', this._getBlockNumber.bind(this))
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getBlockNumber', this._getBlockNumber.bind(this), undefined)
   }
 
   override getBlockWithTransactions(
@@ -387,11 +390,18 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   override getCode(addressOrName: string | Promise<string>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'getCode', super.getCode.bind(this), undefined, addressOrName, blockTag)
+    return this.wrappedFunctionCall(
+      CallType.NORMAL,
+      'getCode',
+      super.getCode.bind(this),
+      undefined,
+      addressOrName,
+      blockTag
+    )
   }
 
   override getGasPrice(): Promise<BigNumber> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'getGasPrice', super.getGasPrice.bind(this))
+    return this.wrappedFunctionCall(CallType.NORMAL, 'getGasPrice', super.getGasPrice.bind(this), undefined)
   }
 
   override getLogs(filter: Filter): Promise<Array<Log>> {
@@ -415,7 +425,13 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   override getTransaction(transactionHash: string | Promise<string>): Promise<TransactionResponse> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'getTransaction', super.getTransaction.bind(this), undefined, transactionHash)
+    return this.wrappedFunctionCall(
+      CallType.NORMAL,
+      'getTransaction',
+      super.getTransaction.bind(this),
+      undefined,
+      transactionHash
+    )
   }
 
   override getTransactionCount(
@@ -443,7 +459,13 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   override lookupAddress(address: string | Promise<string>): Promise<string | null> {
-    return this.wrappedFunctionCall(CallType.NORMAL, 'lookupAddress', super.lookupAddress.bind(this), undefined, address)
+    return this.wrappedFunctionCall(
+      CallType.NORMAL,
+      'lookupAddress',
+      super.lookupAddress.bind(this),
+      undefined,
+      address
+    )
   }
 
   override resolveName(name: string | Promise<string>): Promise<string | null> {
@@ -494,12 +516,17 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   }
 
   private getBlockNumber_EvaluateHealthiness(): Promise<number> {
-    return this.wrappedFunctionCall(CallType.HEALTH_CHECK, 'getBlockNumber', this._getBlockNumber.bind(this))
+    return this.wrappedFunctionCall(CallType.HEALTH_CHECK, 'getBlockNumber', this._getBlockNumber.bind(this), undefined)
   }
 
   // @ts-ignore
   private getBlockNumber_EvaluateLatency(): Promise<number> {
-    return this.wrappedFunctionCall(CallType.LATENCY_EVALUATION, 'getBlockNumber', this._getBlockNumber.bind(this), undefined)
+    return this.wrappedFunctionCall(
+      CallType.LATENCY_EVALUATION,
+      'getBlockNumber',
+      this._getBlockNumber.bind(this),
+      undefined
+    )
   }
 
   // @ts-ignore
@@ -508,7 +535,14 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
     blockTag?: BlockTag | Promise<BlockTag>,
     latency?: number
   ): Promise<string> {
-    return this.wrappedFunctionCall(CallType.LATENCY_EVALUATION, 'call', super.call.bind(this), latency, transaction, blockTag)
+    return this.wrappedFunctionCall(
+      CallType.LATENCY_EVALUATION,
+      'call',
+      super.call.bind(this),
+      latency,
+      transaction,
+      blockTag
+    )
   }
 
   // @ts-ignore
