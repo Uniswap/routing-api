@@ -1176,7 +1176,7 @@ describe('quote', function () {
                         // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
                         simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
                         portionBips: FLAT_PORTION.bips,
-                        portionRecipient: FLAT_PORTION.recipient
+                        portionRecipient: FLAT_PORTION.recipient,
                       }
 
                       const queryParams = qs.stringify(quoteReq)
