@@ -32,6 +32,9 @@ query Tokens($contracts: [ContractInput!]!) {
           feeData {
               buyFeeBps
               sellFeeBps
+              feeTakenOnTransfer
+              externalTransferFailed
+              sellReverted
           }
       }
     }

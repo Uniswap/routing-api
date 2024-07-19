@@ -1192,6 +1192,18 @@ describe('quote', function () {
 
                   const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
                   expect(quoteWithFlagOn).not.to.be.undefined
+
+                  // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
+                  if (tokenOut?.equals(DFNDR)) {
+                    expect(quoteWithFlagOn!.data.portionAmount).to.be.undefined
+                    expect(quoteWithFlagOn!.data.portionBips).to.be.undefined
+                    expect(quoteWithFlagOn!.data.portionRecipient).to.be.undefined
+                  } else {
+                    expect(quoteWithFlagOn!.data.portionAmount).to.be.not.undefined
+                    expect(quoteWithFlagOn!.data.portionBips).to.be.not.undefined
+                    expect(quoteWithFlagOn!.data.portionRecipient).to.be.not.undefined
+                  }
+
                   responses
                     .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
                     .forEach((r) => {
@@ -1214,13 +1226,6 @@ describe('quote', function () {
                           expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
                             new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(3)
                           )
-                        }
-
-                        // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
-                        if (tokenOut?.equals(DFNDR)) {
-                          expect(r.data.portionAmount).to.be.undefined
-                          expect(r.data.portionBips).to.be.undefined
-                          expect(r.data.portionRecipient).to.be.undefined
                         }
                       }
                     })
