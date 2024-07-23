@@ -284,11 +284,11 @@ export const chainProtocols = [
   {
     protocol: Protocol.V2,
     chainId: ChainId.BASE,
-    timeout: 90000,
+    timeout: 840000,
     provider: new V2SubgraphProvider(
       ChainId.BASE,
-      3,
-      90000,
+      5,
+      900000,
       true,
       1000,
       v2TrackedEthThreshold,
