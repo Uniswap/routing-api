@@ -207,6 +207,23 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       })
       filteredPools.forEach((pool) => pools.push(pool))
 
+      const manuallyIncludedPools: V3SubgraphPool[] = [
+        {
+          id: '0x109830a1aaad605bbf02a9dfa7b0b92ec2fb7daa',
+          feeTier: "100",
+          liquidity: "29225684102047357356897753",
+          token0: {
+            id: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+          },
+          token1: {
+            id: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+          },
+          tvlETH: 706196.651729130972764273,
+          tvlUSD: 140465485 // same as WETH/USDC 0.05%
+        } as V3SubgraphPool,
+      ]
+      manuallyIncludedPools.forEach((pool) => pools.push(pool))
+
       pools = (pools as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
         const shouldFilterOut =
           // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
