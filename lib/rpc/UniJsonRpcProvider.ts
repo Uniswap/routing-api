@@ -239,7 +239,7 @@ export class UniJsonRpcProvider extends StaticJsonRpcProvider {
         // Within each provider latency shadow evaluation, we should do block I/O,
         // because NodeJS runs in single thread, so it's important to make sure
         // we benchmark the latencies correctly based on the single-threaded sequential evaluation.
-        const evaluatedProviderResponse = await provider[`evaluateLatency`](latency, methodName, ...args)
+        const evaluatedProviderResponse = await provider[`evaluateLatency`](methodName, ...args)
         // below invocation does not make the call/send RPC return the correct data
         // both call and send will return "0x" for some reason
         // I have to change to above invocation to make call/send return geniun RPC response
