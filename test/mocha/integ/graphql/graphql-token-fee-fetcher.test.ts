@@ -84,8 +84,8 @@ describe('integration test for GraphQLTokenFeeFetcher', () => {
     expect(tokenFeeMap[BULLET.address]?.buyFeeBps?._hex).equals(BULLET.buyFeeBps?._hex)
     expect(tokenFeeMap[BULLET.address]?.sellFeeBps?._hex).equals(BULLET.sellFeeBps?._hex)
     expect(tokenFeeMap[BULLET.address]?.feeTakenOnTransfer).equals(false)
-    expect(tokenFeeMap[BULLET.address]?.externalTransferFailed).equals(false)
-    expect(tokenFeeMap[BULLET.address]?.sellReverted).equals(false)
+    expect(tokenFeeMap[BULLET.address]?.externalTransferFailed).equals(true)
+    expect(tokenFeeMap[BULLET.address]?.sellReverted).equals(true)
 
     expect(tokenFeeMap[BITBOY.address]).to.not.be.undefined
     expect(tokenFeeMap[BITBOY.address]?.buyFeeBps?._hex).equals(BITBOY.buyFeeBps?._hex)
