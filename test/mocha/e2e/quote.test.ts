@@ -1194,7 +1194,7 @@ describe('quote', function () {
                   expect(quoteWithFlagOn).not.to.be.undefined
 
                   // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
-                  if (tokenOut?.equals(DFNDR)) {
+                  if (!tokenOut?.equals(WETH9[ChainId.MAINNET])) {
                     expect(quoteWithFlagOn!.data.portionAmount).to.be.undefined
                     expect(quoteWithFlagOn!.data.portionBips).to.be.undefined
                     expect(quoteWithFlagOn!.data.portionRecipient).to.be.undefined
