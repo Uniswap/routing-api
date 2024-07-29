@@ -207,6 +207,21 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       })
       filteredPools.forEach((pool) => pools.push(pool))
 
+      pools = (pools as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
+        const shouldFilterOut =
+          // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
+          pool.token0.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||
+          pool.token1.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||
+          // also filter out WETH/wstETH pool, because later we want to re-add the pool with artificially high TVL
+          pool.id.toLowerCase() === '0x109830a1aaad605bbf02a9dfa7b0b92ec2fb7daa'
+
+        if (shouldFilterOut) {
+          log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+
+        return !shouldFilterOut
+      })
+
       const manuallyIncludedPools: V3SubgraphPool[] = [
         {
           id: '0x109830a1aaad605bbf02a9dfa7b0b92ec2fb7daa',
