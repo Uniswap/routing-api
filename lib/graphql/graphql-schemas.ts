@@ -21,5 +21,8 @@ export interface TokenInfo {
   feeData?: {
     buyFeeBps?: string
     sellFeeBps?: string
+    feeTakenOnTransfer?: boolean
+    externalTransferFailed?: boolean
+    sellReverted?: boolean
   }
 }

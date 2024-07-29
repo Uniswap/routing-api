@@ -80,6 +80,24 @@ const BULLET_WHT_TAX = new Token(
   BigNumber.from(500),
   BigNumber.from(500)
 )
+export const DFNDR = new Token(
+  ChainId.MAINNET,
+  '0x3f57c35633cb29834bb7577ba8052eab90f52a02',
+  18,
+  'DFNDR',
+  'Defender Bot',
+  false
+)
+export const DFNDR_WITH_TAX = new Token(
+  ChainId.MAINNET,
+  '0x3f57c35633cb29834bb7577ba8052eab90f52a02',
+  18,
+  'DFNDR',
+  'Defender Bot',
+  false,
+  BigNumber.from(500),
+  BigNumber.from(500)
+)
 
 const V2_SUPPORTED_PAIRS = [
   [WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM],
@@ -1114,6 +1132,7 @@ describe('quote', function () {
               const tokenInAndTokenOut = [
                 [BULLET, WETH9[ChainId.MAINNET]!],
                 [WETH9[ChainId.MAINNET]!, BULLET],
+                [WETH9[ChainId.MAINNET]!, DFNDR],
               ]
 
               tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
@@ -1156,9 +1175,12 @@ describe('quote', function () {
                         enableUniversalRouter: true,
                         // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
                         simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
+                        portionBips: FLAT_PORTION.bips,
+                        portionRecipient: FLAT_PORTION.recipient,
                       }
 
                       const queryParams = qs.stringify(quoteReq)
+                      console.log(`${API}?${queryParams}`)
 
                       const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
                         `${API}?${queryParams}`
@@ -1170,6 +1192,18 @@ describe('quote', function () {
 
                   const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
                   expect(quoteWithFlagOn).not.to.be.undefined
+
+                  // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
+                  if (!tokenOut?.equals(WETH9[ChainId.MAINNET])) {
+                    expect(quoteWithFlagOn!.data.portionAmount).to.be.undefined
+                    expect(quoteWithFlagOn!.data.portionBips).to.be.undefined
+                    expect(quoteWithFlagOn!.data.portionRecipient).to.be.undefined
+                  } else {
+                    expect(quoteWithFlagOn!.data.portionAmount).to.be.not.undefined
+                    expect(quoteWithFlagOn!.data.portionBips).to.be.not.undefined
+                    expect(quoteWithFlagOn!.data.portionRecipient).to.be.not.undefined
+                  }
+
                   responses
                     .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
                     .forEach((r) => {
