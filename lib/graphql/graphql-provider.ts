@@ -34,10 +34,27 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
    *  GraphQL Chain Enum located here: https://github.com/Uniswap/data-api-graphql/blob/main/graphql/schema.graphql#L155
    *  */
   private _chainIdToGraphQLChainName(chainId: ChainId): string | undefined {
-    // TODO: add complete list / use data-graphql-api to populate. Only MAINNET for now.
     switch (chainId) {
       case ChainId.MAINNET:
         return 'ETHEREUM'
+      case ChainId.ARBITRUM_ONE:
+        return 'ARBITRUM'
+      case ChainId.AVALANCHE:
+        return 'AVALANCHE'
+      case ChainId.OPTIMISM:
+        return 'OPTIMISM'
+      case ChainId.POLYGON:
+        return 'POLYGON'
+      case ChainId.CELO:
+        return 'CELO'
+      case ChainId.BNB:
+        return 'BNB'
+      case ChainId.BASE:
+        return 'BASE'
+      case ChainId.BLAST:
+        return 'BLAST'
+      case ChainId.ZORA:
+        return 'ZORA'
       default:
         throw new Error(`UniGraphQLProvider._chainIdToGraphQLChainName unsupported ChainId: ${chainId}`)
     }
