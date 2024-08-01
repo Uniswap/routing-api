@@ -150,6 +150,10 @@ export class QuoteHandler extends APIGLambdaHandler<
         MetricLoggerUnit.Count
       )
 
+      log.error(
+        `Quote 5XX Error on ${ID_TO_NETWORK_NAME(chainId)} with exception '${err}'`,
+      )
+
       throw err
     } finally {
       // This metric is logged after calling the internal handler to correlate with the status metrics
