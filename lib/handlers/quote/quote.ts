@@ -126,6 +126,16 @@ export class QuoteHandler extends APIGLambdaHandler<
             1,
             MetricLoggerUnit.Count
           )
+          log.error(
+            {
+              statusCode: result?.statusCode,
+              errorCode: result?.errorCode,
+              detail: result?.detail,
+            },
+            `Quote 5XX Error [${result?.statusCode}] on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${
+              result?.errorCode
+            }': ${result?.detail}`
+          )
           break
       }
     } catch (err) {
@@ -139,6 +149,8 @@ export class QuoteHandler extends APIGLambdaHandler<
         1,
         MetricLoggerUnit.Count
       )
+
+      log.error(`Quote 5XX Error on ${ID_TO_NETWORK_NAME(chainId)} with exception '${err}'`)
 
       throw err
     } finally {
