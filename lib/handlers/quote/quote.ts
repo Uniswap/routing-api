@@ -150,9 +150,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         MetricLoggerUnit.Count
       )
 
-      log.error(
-        `Quote 5XX Error on ${ID_TO_NETWORK_NAME(chainId)} with exception '${err}'`,
-      )
+      log.error(`Quote 5XX Error on ${ID_TO_NETWORK_NAME(chainId)} with exception '${err}'`)
 
       throw err
     } finally {
