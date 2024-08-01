@@ -8,13 +8,13 @@ import {
   metric,
   MetricLoggerUnit,
   routeToString,
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
-import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { PromiseResult } from 'aws-sdk/lib/request'
 
 interface ConstructorParams {
@@ -208,7 +208,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
     })
 
-    const routesMap: Map<string, CachedRoute<V3Route | V2Route | MixedRoute>> = new Map()
+    const routesMap: Map<string, CachedRoute<SupportedRoutes>> = new Map()
     let blockNumber: number = 0
     let originalAmount: string = ''
 

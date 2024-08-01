@@ -12,7 +12,8 @@ import {
   SwapOptions,
   SwapRoute,
 } from '@uniswap/smart-order-router'
-import { Pool } from '@uniswap/v3-sdk'
+import { Pool as V3Pool } from '@uniswap/v3-sdk'
+import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -35,6 +36,7 @@ import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
+import { Pair } from '@uniswap/v2-sdk'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -502,20 +504,23 @@ export class QuoteHandler extends APIGLambdaHandler<
           edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
         }
 
-        if (nextPool instanceof Pool) {
+        if (nextPool instanceof V4Pool) {
+          // TODO - ROUTE-220: Support V4 Pool
+          throw new Error(`V4 pools are not supported in quote response deserialization ${JSON.stringify(nextPool)}`)
+        } else if (nextPool instanceof V3Pool) {
           curRoute.push({
             type: 'v3-pool',
             address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),
-              address: tokenIn.address,
+              address: tokenIn.wrapped.address,
               symbol: tokenIn.symbol!,
             },
             tokenOut: {
               chainId: tokenOut.chainId,
               decimals: tokenOut.decimals.toString(),
-              address: tokenOut.address,
+              address: tokenOut.wrapped.address,
               symbol: tokenOut.symbol!,
             },
             fee: nextPool.fee.toString(),
@@ -525,7 +530,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountIn: edgeAmountIn,
             amountOut: edgeAmountOut,
           })
-        } else {
+        } else if (nextPool instanceof Pair) {
           const reserve0 = nextPool.reserve0
           const reserve1 = nextPool.reserve1
 
@@ -535,7 +540,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),
-              address: tokenIn.address,
+              address: tokenIn.wrapped.address,
               symbol: tokenIn.symbol!,
               buyFeeBps: this.deriveBuyFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
               sellFeeBps: this.deriveSellFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
@@ -543,7 +548,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             tokenOut: {
               chainId: tokenOut.chainId,
               decimals: tokenOut.decimals.toString(),
-              address: tokenOut.address,
+              address: tokenOut.wrapped.address,
               symbol: tokenOut.symbol!,
               buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
               sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
@@ -593,6 +598,8 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountIn: edgeAmountIn,
             amountOut: edgeAmountOut,
           })
+        } else {
+          throw new Error(`Unsupported pool type ${JSON.stringify(nextPool)}`)
         }
       }
 

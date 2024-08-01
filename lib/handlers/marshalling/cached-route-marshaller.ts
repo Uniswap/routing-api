@@ -1,5 +1,4 @@
-import { CachedRoute } from '@uniswap/smart-order-router'
-import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import { CachedRoute, SupportedRoutes } from '@uniswap/smart-order-router'
 import { MarshalledRoute, RouteMarshaller } from './route-marshaller'
 
 export interface MarshalledCachedRoute {
@@ -8,15 +7,15 @@ export interface MarshalledCachedRoute {
 }
 
 export class CachedRouteMarshaller {
-  public static marshal(cachedRoute: CachedRoute<V3Route | V2Route | MixedRoute>): MarshalledCachedRoute {
+  public static marshal(cachedRoute: CachedRoute<SupportedRoutes>): MarshalledCachedRoute {
     return {
       route: RouteMarshaller.marshal(cachedRoute.route),
       percent: cachedRoute.percent,
     }
   }
 
-  public static unmarshal(marshalledCachedRoute: MarshalledCachedRoute): CachedRoute<V3Route | V2Route | MixedRoute> {
-    return new CachedRoute<V3Route | V2Route | MixedRoute>({
+  public static unmarshal(marshalledCachedRoute: MarshalledCachedRoute): CachedRoute<SupportedRoutes> {
+    return new CachedRoute<SupportedRoutes>({
       route: RouteMarshaller.unmarshal(marshalledCachedRoute.route),
       percent: marshalledCachedRoute.percent,
     })

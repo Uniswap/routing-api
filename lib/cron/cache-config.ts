@@ -1,10 +1,19 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { V2SubgraphProvider, V3SubgraphProvider } from '@uniswap/smart-order-router'
+import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
 // process.env.ALCHEMY_QUERY_KEY = ''
+
+export const v4SubgraphUrlOverride = (chainId: ChainId) => {
+  switch (chainId) {
+    case ChainId.SEPOLIA:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-sepolia-test/api`
+    default:
+      return undefined
+  }
+}
 
 export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
@@ -53,6 +62,10 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return undefined
   }
 }
+
+// TODO: ROUTE-225 - follow up on v4 subgraph pools filtering threshold
+const v4TrackedEthThreshold = 0 // Pools need at least 0 of trackedEth to be selected
+const v4UntrackedUsdThreshold = 0 // Pools need at least 0k USD (untracked) to be selected (for metrics only)
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
@@ -309,6 +322,20 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.BLAST)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.SEPOLIA,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.SEPOLIA,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
   },
 ]
