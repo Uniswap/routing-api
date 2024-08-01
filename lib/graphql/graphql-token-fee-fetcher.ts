@@ -46,9 +46,24 @@ export class GraphQLTokenFeeFetcher implements ITokenFeeFetcher {
           if (token.feeData?.buyFeeBps || token.feeData?.sellFeeBps) {
             const buyFeeBps = token.feeData.buyFeeBps ? BigNumber.from(token.feeData.buyFeeBps) : undefined
             const sellFeeBps = token.feeData.sellFeeBps ? BigNumber.from(token.feeData.sellFeeBps) : undefined
-            tokenFeeMap[token.address] = { buyFeeBps, sellFeeBps }
+            const feeTakenOnTransfer = token.feeData.feeTakenOnTransfer
+            const externalTransferFailed = token.feeData.externalTransferFailed
+            const sellReverted = token.feeData.sellReverted
+            tokenFeeMap[token.address] = {
+              buyFeeBps,
+              sellFeeBps,
+              feeTakenOnTransfer,
+              externalTransferFailed,
+              sellReverted,
+            }
           } else {
-            tokenFeeMap[token.address] = { buyFeeBps: undefined, sellFeeBps: undefined }
+            tokenFeeMap[token.address] = {
+              buyFeeBps: undefined,
+              sellFeeBps: undefined,
+              feeTakenOnTransfer: false,
+              externalTransferFailed: false,
+              sellReverted: false,
+            }
           }
         })
         metric.putMetric('GraphQLTokenFeeFetcherFetchFeesSuccess', 1, MetricLoggerUnit.Count)
