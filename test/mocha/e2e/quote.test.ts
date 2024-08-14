@@ -2564,7 +2564,7 @@ describe('quote', function () {
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1'
+          const amount = chain === ChainId.BLAST ? (type === 'exactOut' ? '0.002' : '0.01') : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: wrappedNative.address,
