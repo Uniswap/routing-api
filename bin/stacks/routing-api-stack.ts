@@ -402,7 +402,7 @@ export class RoutingAPIStack extends cdk.Stack {
       }
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume is high enough over default period (5m) for 4xx errors (no route).
-      const invocationsThreshold = 500;
+      const invocationsThreshold = 500
       const metric = new MathExpression({
         expression: `IF(invocations > ${invocationsThreshold}, 100*(response400/invocations), 0)`,
         usingMetrics: {
