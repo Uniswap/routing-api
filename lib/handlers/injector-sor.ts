@@ -19,6 +19,7 @@ import {
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
+  IV4SubgraphProvider,
   LegacyGasPriceProvider,
   MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   NEW_QUOTER_V2_ADDRESSES,
@@ -30,6 +31,7 @@ import {
   Simulator,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
+  StaticV4SubgraphProvider,
   TenderlySimulator,
   TokenPropertiesProvider,
   TokenProvider,
@@ -45,7 +47,11 @@ import _ from 'lodash'
 import NodeCache from 'node-cache'
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
-import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
+import {
+  V2AWSSubgraphProvider,
+  V3AWSSubgraphProvider,
+  V4AWSSubgraphProvider,
+} from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
@@ -106,6 +112,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 
 export type ContainerDependencies = {
   provider: StaticJsonRpcProvider
+  v4SubgraphProvider: IV4SubgraphProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
@@ -268,42 +275,63 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
 
-          const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] =
-            await Promise.all([
-              AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
-              CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
-              (async () => {
-                try {
-                  const chainProtocol = chainProtocols.find(
-                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V3
-                  )
+          const [
+            tokenListProvider,
+            blockedTokenListProvider,
+            v4SubgraphProvider,
+            v3SubgraphProvider,
+            v2SubgraphProvider,
+          ] = await Promise.all([
+            AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
+            CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
+            (async () => {
+              try {
+                const chainProtocol = chainProtocols.find(
+                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V4
+                )
 
-                  if (!chainProtocol) {
-                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
-                  }
-
-                  return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-                } catch (err) {
-                  log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
-                  return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
+                if (!chainProtocol) {
+                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V4}`)
                 }
-              })(),
-              (async () => {
-                try {
-                  const chainProtocol = chainProtocols.find(
-                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V2
-                  )
 
-                  if (!chainProtocol) {
-                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
-                  }
+                return await V4AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
+              } catch (err) {
+                log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
+                return new StaticV4SubgraphProvider(chainId)
+              }
+            })(),
+            (async () => {
+              try {
+                const chainProtocol = chainProtocols.find(
+                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V3
+                )
 
-                  return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-                } catch (err) {
-                  return new StaticV2SubgraphProvider(chainId)
+                if (!chainProtocol) {
+                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
                 }
-              })(),
-            ])
+
+                return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
+              } catch (err) {
+                log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
+                return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
+              }
+            })(),
+            (async () => {
+              try {
+                const chainProtocol = chainProtocols.find(
+                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V2
+                )
+
+                if (!chainProtocol) {
+                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
+                }
+
+                return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
+              } catch (err) {
+                return new StaticV2SubgraphProvider(chainId)
+              }
+            })(),
+          ])
 
           const tokenProvider = new CachingTokenProviderWithFallback(
             chainId,
@@ -449,6 +477,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 ),
                 new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
               ),
+              v4SubgraphProvider,
               v3SubgraphProvider,
               onChainQuoteProvider: quoteProvider,
               v3PoolProvider,
