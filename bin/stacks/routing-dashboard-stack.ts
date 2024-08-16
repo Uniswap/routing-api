@@ -956,6 +956,27 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 },
               },
             },
+            {
+              type: 'metric',
+              width: 12,
+              height: 8,
+              properties: {
+                view: 'timeSeries',
+                stacked: false,
+                metrics: [
+                  [NAMESPACE, 'TenderlySimulationSwapRouter02Latencies', 'Service', 'RoutingAPI', { stat: 'p90' }],
+                  ['.', 'TenderlySimulationSwapRouter02Latencies', '.', '.', { stat: 'p99' }],
+                  ['.', 'TenderlySimulationSwapRouter02Latencies', '.', '.', { stat: 'p50' }],
+                  ['.', 'TenderlySimulationUniversalRouterLatencies', '.', '.', { stat: 'p90' }],
+                  ['.', 'TenderlySimulationUniversalRouterLatencies', '.', '.', { stat: 'p99' }],
+                  ['.', 'TenderlySimulationUniversalRouterLatencies', '.', '.', { stat: 'p50' }],
+                ],
+                region,
+                title: 'Tenderly Simulation Latencies',
+                period: 300,
+                stat: 'SampleCount',
+              },
+            },
           ])
           .concat(rpcProvidersWidgetsForRoutingDashboard),
       }),
