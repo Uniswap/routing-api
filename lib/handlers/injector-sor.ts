@@ -5,6 +5,7 @@ import {
   CachingTokenProviderWithFallback,
   CachingV2PoolProvider,
   CachingV3PoolProvider,
+  CachingV4PoolProvider,
   EIP1559GasPriceProvider,
   EthEstimateGasSimulator,
   FallbackTenderlySimulator,
@@ -40,6 +41,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
+  V4PoolProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -223,6 +225,15 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
           const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000)
 
+          // We didn't switch caching from in-memory to dynamo for V3, and we haven't seen perf degradation
+          // We switched caching from in-memory to dynamo for V2, and we haven't seen perf improvement
+          // V2 has a lot more pools than V3, so for V4 we don't need to pre-emptively switch to dynamo
+          const v4PoolProvider = new CachingV4PoolProvider(
+            chainId,
+            new V4PoolProvider(chainId, multicall2Provider),
+            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
+          )
+
           const noCacheV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
           const inMemoryCachingV3PoolProvider = new CachingV3PoolProvider(
             chainId,
@@ -297,7 +308,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 return await V4AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
               } catch (err) {
                 log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
-                return new StaticV4SubgraphProvider(chainId)
+                return new StaticV4SubgraphProvider(chainId, v4PoolProvider)
               }
             })(),
             (async () => {
