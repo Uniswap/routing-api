@@ -20,6 +20,7 @@ import {
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
+  IV4PoolProvider,
   IV4SubgraphProvider,
   LegacyGasPriceProvider,
   MIXED_ROUTE_QUOTER_V1_ADDRESSES,
@@ -295,53 +296,27 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           ] = await Promise.all([
             AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
             CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
-            (async () => {
-              try {
-                const chainProtocol = chainProtocols.find(
-                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V4
-                )
-
-                if (!chainProtocol) {
-                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V4}`)
-                }
-
-                return await V4AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-              } catch (err) {
-                log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
-                return new StaticV4SubgraphProvider(chainId, v4PoolProvider)
-              }
-            })(),
-            (async () => {
-              try {
-                const chainProtocol = chainProtocols.find(
-                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V3
-                )
-
-                if (!chainProtocol) {
-                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
-                }
-
-                return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-              } catch (err) {
-                log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
-                return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
-              }
-            })(),
-            (async () => {
-              try {
-                const chainProtocol = chainProtocols.find(
-                  (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V2
-                )
-
-                if (!chainProtocol) {
-                  throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
-                }
-
-                return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-              } catch (err) {
-                return new StaticV2SubgraphProvider(chainId)
-              }
-            })(),
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V4,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v4PoolProvider
+            )) as V4AWSSubgraphProvider,
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V3,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v3PoolProvider
+            )) as V3AWSSubgraphProvider,
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V2,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v2PoolProvider
+            )) as V2AWSSubgraphProvider,
           ])
 
           const tokenProvider = new CachingTokenProviderWithFallback(
@@ -516,6 +491,46 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     } catch (err) {
       log.fatal({ err }, `Fatal: Failed to build container`)
       throw err
+    }
+  }
+
+  private async instantiateSubgraphProvider(
+    chainId: ChainId,
+    protocol: Protocol,
+    poolCacheBucket: string,
+    poolCacheKey: string,
+    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider
+  ) {
+    try {
+      const chainProtocol = chainProtocols.find(
+        (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === protocol
+      )
+
+      if (!chainProtocol) {
+        throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${protocol}`)
+      }
+
+      switch (protocol) {
+        case Protocol.V4:
+          return await V4AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        case Protocol.V3:
+          return await V3AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        case Protocol.V2:
+          return await V2AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        default:
+          throw new Error(`Unsupported protocol ${protocol} for chain ${chainId} to instantiate subgraph provider`)
+      }
+    } catch (err) {
+      switch (protocol) {
+        case Protocol.V4:
+          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider)
+        case Protocol.V3:
+          return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
+        case Protocol.V2:
+          return new StaticV2SubgraphProvider(chainId)
+        default:
+          throw new Error(`Unsupported protocol ${protocol} for chain ${chainId} to instantiate subgraph provider`)
+      }
     }
   }
 }
