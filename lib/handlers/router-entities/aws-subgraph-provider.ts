@@ -106,6 +106,18 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
   return pools
 }
 
+export class V4AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> implements IV3SubgraphProvider {
+  constructor(chainId: ChainId, bucket: string, baseKey: string) {
+    super(chainId, Protocol.V4, bucket, baseKey)
+  }
+
+  public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
+    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V4)
+
+    return new V4AWSSubgraphProvider(chainId, bucket, baseKey)
+  }
+}
+
 export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> implements IV3SubgraphProvider {
   constructor(chainId: ChainId, bucket: string, baseKey: string) {
     super(chainId, Protocol.V3, bucket, baseKey)

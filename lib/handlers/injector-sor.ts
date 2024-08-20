@@ -5,6 +5,7 @@ import {
   CachingTokenProviderWithFallback,
   CachingV2PoolProvider,
   CachingV3PoolProvider,
+  CachingV4PoolProvider,
   EIP1559GasPriceProvider,
   EthEstimateGasSimulator,
   FallbackTenderlySimulator,
@@ -19,6 +20,8 @@ import {
   IV2SubgraphProvider,
   IV3PoolProvider,
   IV3SubgraphProvider,
+  IV4PoolProvider,
+  IV4SubgraphProvider,
   LegacyGasPriceProvider,
   MIXED_ROUTE_QUOTER_V1_ADDRESSES,
   NEW_QUOTER_V2_ADDRESSES,
@@ -30,6 +33,7 @@ import {
   Simulator,
   StaticV2SubgraphProvider,
   StaticV3SubgraphProvider,
+  StaticV4SubgraphProvider,
   TenderlySimulator,
   TokenPropertiesProvider,
   TokenProvider,
@@ -38,6 +42,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
+  V4PoolProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -45,7 +50,11 @@ import _ from 'lodash'
 import NodeCache from 'node-cache'
 import UNSUPPORTED_TOKEN_LIST from './../config/unsupported.tokenlist.json'
 import { BaseRInj, Injector } from './handler'
-import { V2AWSSubgraphProvider, V3AWSSubgraphProvider } from './router-entities/aws-subgraph-provider'
+import {
+  V2AWSSubgraphProvider,
+  V3AWSSubgraphProvider,
+  V4AWSSubgraphProvider,
+} from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
@@ -106,6 +115,7 @@ export interface RequestInjected<Router> extends BaseRInj {
 
 export type ContainerDependencies = {
   provider: StaticJsonRpcProvider
+  v4SubgraphProvider: IV4SubgraphProvider
   v3SubgraphProvider: IV3SubgraphProvider
   v2SubgraphProvider: IV2SubgraphProvider
   tokenListProvider: ITokenListProvider
@@ -216,6 +226,15 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const blockedTokenCache = new NodeJSCache<Token>(new NodeCache({ stdTTL: 3600, useClones: false }))
           const multicall2Provider = new UniswapMulticallProvider(chainId, provider, 375_000)
 
+          // We didn't switch caching from in-memory to dynamo for V3, and we haven't seen perf degradation
+          // We switched caching from in-memory to dynamo for V2, and we haven't seen perf improvement
+          // V2 has a lot more pools than V3, so for V4 we don't need to pre-emptively switch to dynamo
+          const v4PoolProvider = new CachingV4PoolProvider(
+            chainId,
+            new V4PoolProvider(chainId, multicall2Provider),
+            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
+          )
+
           const noCacheV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
           const inMemoryCachingV3PoolProvider = new CachingV3PoolProvider(
             chainId,
@@ -268,42 +287,37 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
 
-          const [tokenListProvider, blockedTokenListProvider, v3SubgraphProvider, v2SubgraphProvider] =
-            await Promise.all([
-              AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
-              CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
-              (async () => {
-                try {
-                  const chainProtocol = chainProtocols.find(
-                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V3
-                  )
-
-                  if (!chainProtocol) {
-                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V3}`)
-                  }
-
-                  return await V3AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-                } catch (err) {
-                  log.error({ err }, 'AWS Subgraph Provider unavailable, defaulting to Static Subgraph Provider')
-                  return new StaticV3SubgraphProvider(chainId, v3PoolProvider)
-                }
-              })(),
-              (async () => {
-                try {
-                  const chainProtocol = chainProtocols.find(
-                    (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === Protocol.V2
-                  )
-
-                  if (!chainProtocol) {
-                    throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${Protocol.V2}`)
-                  }
-
-                  return await V2AWSSubgraphProvider.EagerBuild(POOL_CACHE_BUCKET_3!, POOL_CACHE_GZIP_KEY!, chainId)
-                } catch (err) {
-                  return new StaticV2SubgraphProvider(chainId)
-                }
-              })(),
-            ])
+          const [
+            tokenListProvider,
+            blockedTokenListProvider,
+            v4SubgraphProvider,
+            v3SubgraphProvider,
+            v2SubgraphProvider,
+          ] = await Promise.all([
+            AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
+            CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V4,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v4PoolProvider
+            )) as V4AWSSubgraphProvider,
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V3,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v3PoolProvider
+            )) as V3AWSSubgraphProvider,
+            (await this.instantiateSubgraphProvider(
+              chainId,
+              Protocol.V2,
+              POOL_CACHE_BUCKET_3!,
+              POOL_CACHE_GZIP_KEY!,
+              v2PoolProvider
+            )) as V2AWSSubgraphProvider,
+          ])
 
           const tokenProvider = new CachingTokenProviderWithFallback(
             chainId,
@@ -449,6 +463,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 ),
                 new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
               ),
+              v4SubgraphProvider,
               v3SubgraphProvider,
               onChainQuoteProvider: quoteProvider,
               v3PoolProvider,
@@ -476,6 +491,46 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     } catch (err) {
       log.fatal({ err }, `Fatal: Failed to build container`)
       throw err
+    }
+  }
+
+  private async instantiateSubgraphProvider(
+    chainId: ChainId,
+    protocol: Protocol,
+    poolCacheBucket: string,
+    poolCacheKey: string,
+    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider
+  ) {
+    try {
+      const chainProtocol = chainProtocols.find(
+        (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === protocol
+      )
+
+      if (!chainProtocol) {
+        throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${protocol}`)
+      }
+
+      switch (protocol) {
+        case Protocol.V4:
+          return await V4AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        case Protocol.V3:
+          return await V3AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        case Protocol.V2:
+          return await V2AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+        default:
+          throw new Error(`Unsupported protocol ${protocol} for chain ${chainId} to instantiate subgraph provider`)
+      }
+    } catch (err) {
+      switch (protocol) {
+        case Protocol.V4:
+          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider)
+        case Protocol.V3:
+          return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
+        case Protocol.V2:
+          return new StaticV2SubgraphProvider(chainId)
+        default:
+          throw new Error(`Unsupported protocol ${protocol} for chain ${chainId} to instantiate subgraph provider`)
+      }
     }
   }
 }
