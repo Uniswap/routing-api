@@ -34,6 +34,14 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 3,
         },
+        v4PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 2,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 3,
+        },
         maxSwapsPerPath: 3,
         minSplits: 1,
         maxSplits: 7,
@@ -54,6 +62,14 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithBaseToken: 6,
         },
         v3PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 2,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 2,
+        },
+        v4PoolSelection: {
           topN: 2,
           topNDirectSwaps: 2,
           topNTokenInOut: 2,
@@ -91,6 +107,17 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithEachBaseToken: 3,
           topNWithBaseToken: 5,
         },
+        v4PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 3,
+          topNSecondHop: 1,
+          topNSecondHopForTokenAddress: new MapWithLowerCaseKey<number>([
+            ['0x5f98805a4e8be255a32880fdec7f6728c6568ba0', 2], // LUSD
+          ]),
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 5,
+        },
         maxSwapsPerPath: 3,
         minSplits: 1,
         maxSplits: 2,
@@ -111,6 +138,17 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNWithBaseToken: 6,
         },
         v3PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 3,
+          topNSecondHop: 1,
+          topNSecondHopForTokenAddress: new MapWithLowerCaseKey<number>([
+            ['0x5f98805a4e8be255a32880fdec7f6728c6568ba0', 2], // LUSD
+          ]),
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 5,
+        },
+        v4PoolSelection: {
           topN: 2,
           topNDirectSwaps: 2,
           topNTokenInOut: 3,
