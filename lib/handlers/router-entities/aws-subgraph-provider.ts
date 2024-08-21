@@ -7,6 +7,7 @@ import {
   MetricLoggerUnit,
   V2SubgraphPool,
   V3SubgraphPool,
+  V4SubgraphPool,
 } from '@uniswap/smart-order-router'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
@@ -106,7 +107,7 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
   return pools
 }
 
-export class V4AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> implements IV3SubgraphProvider {
+export class V4AWSSubgraphProvider extends AWSSubgraphProvider<V4SubgraphPool> implements IV3SubgraphProvider {
   constructor(chainId: ChainId, bucket: string, baseKey: string) {
     super(chainId, Protocol.V4, bucket, baseKey)
   }
