@@ -466,6 +466,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v4SubgraphProvider,
               v3SubgraphProvider,
               onChainQuoteProvider: quoteProvider,
+              v4PoolProvider,
               v3PoolProvider,
               v2PoolProvider,
               v2QuoteProvider: new V2QuoteProvider(),
