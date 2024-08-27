@@ -400,6 +400,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             process.env.TENDERLY_NODE_API_KEY!,
             v2PoolProvider,
             v3PoolProvider,
+            v4PoolProvider,
             provider,
             portionProvider,
             undefined,
@@ -414,6 +415,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             provider,
             v2PoolProvider,
             v3PoolProvider,
+            v4PoolProvider,
             portionProvider
           )
 
