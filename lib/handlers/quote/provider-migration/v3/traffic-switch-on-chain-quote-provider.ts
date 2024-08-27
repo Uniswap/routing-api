@@ -5,7 +5,7 @@ import {
   MetricLoggerUnit,
   OnChainQuotes,
   SupportedExactOutRoutes,
-  SupportedRoutes
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
