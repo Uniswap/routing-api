@@ -1,5 +1,12 @@
-import { IOnChainQuoteProvider, log, metric, MetricLoggerUnit, OnChainQuotes } from '@uniswap/smart-order-router'
-import { MixedRoute, V2Route, V3Route } from '@uniswap/smart-order-router/build/main/routers'
+import {
+  IOnChainQuoteProvider,
+  log,
+  metric,
+  MetricLoggerUnit,
+  OnChainQuotes,
+  SupportedExactOutRoutes,
+  SupportedRoutes,
+} from '@uniswap/smart-order-router'
 import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
@@ -35,7 +42,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     this.chainId = props.chainId
   }
 
-  async getQuotesManyExactIn<TRoute extends V3Route | V2Route | MixedRoute>(
+  async getQuotesManyExactIn<TRoute extends SupportedRoutes>(
     amountIns: CurrencyAmount<Currency>[],
     routes: TRoute[],
     providerConfig?: ProviderConfig
@@ -117,7 +124,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     }
   }
 
-  async getQuotesManyExactOut<TRoute extends V3Route>(
+  async getQuotesManyExactOut<TRoute extends SupportedExactOutRoutes>(
     amountOuts: CurrencyAmount<Currency>[],
     routes: TRoute[],
     providerConfig?: ProviderConfig
@@ -211,7 +218,7 @@ export class TrafficSwitchOnChainQuoteProvider implements IOnChainQuoteProvider 
     }
   }
 
-  private compareQuotes<TRoute extends V3Route | V2Route | MixedRoute>(
+  private compareQuotes<TRoute extends SupportedRoutes>(
     tradeTypeMetric: string,
     currentRoutesWithQuotes: OnChainQuotes<TRoute>,
     targetRoutesWithQuotes: OnChainQuotes<TRoute>
