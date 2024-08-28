@@ -984,8 +984,14 @@ export class RoutingDashboardStack extends cdk.NestedStack {
               properties: {
                 metrics: _.flatMap(MAINNETS, (chainId: ChainId) => {
                   return [
-                    [ NAMESPACE, `RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`, 'Service', 'RoutingAPI', {  label: `${ID_TO_NETWORK_NAME(chainId)} P90`, stat: 'p90' }],
-                    ['...', { label: `${ID_TO_NETWORK_NAME(chainId)} P50`,stat: 'p50'}],
+                    [
+                      NAMESPACE,
+                      `RPC_GATEWAY_GET_QUOTE_LATENCY_CHAIN_${chainId}`,
+                      'Service',
+                      'RoutingAPI',
+                      { label: `${ID_TO_NETWORK_NAME(chainId)} P90`, stat: 'p90' },
+                    ],
+                    ['...', { label: `${ID_TO_NETWORK_NAME(chainId)} P50`, stat: 'p50' }],
                   ]
                 }),
                 view: 'timeSeries',
