@@ -18,11 +18,7 @@ import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
-import {
-  QuoteResponse,
-  QuoteResponseSchemaJoi,
-  SupportedPoolInRoute,
-} from '../schema'
+import { QuoteResponse, QuoteResponseSchemaJoi, SupportedPoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
@@ -487,13 +483,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
     }
 
-    const routeResponse: Array<(SupportedPoolInRoute)[]> = []
+    const routeResponse: Array<SupportedPoolInRoute[]> = []
 
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
       const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
-      const curRoute: (SupportedPoolInRoute)[] = []
+      const curRoute: SupportedPoolInRoute[] = []
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i]
         const tokenIn = tokenPath[i]
@@ -512,7 +508,13 @@ export class QuoteHandler extends APIGLambdaHandler<
         if (nextPool instanceof V4Pool) {
           curRoute.push({
             type: 'v4-pool',
-            address: v4PoolProvider.getPoolId(nextPool.token0, nextPool.token1, nextPool.fee, nextPool.tickSpacing, nextPool.hooks).poolId,
+            address: v4PoolProvider.getPoolId(
+              nextPool.token0,
+              nextPool.token1,
+              nextPool.fee,
+              nextPool.tickSpacing,
+              nextPool.hooks
+            ).poolId,
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),
@@ -532,7 +534,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
             tickCurrent: nextPool.tickCurrent.toString(),
             amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut
+            amountOut: edgeAmountOut,
           })
         } else if (nextPool instanceof V3Pool) {
           curRoute.push({

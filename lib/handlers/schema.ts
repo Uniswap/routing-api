@@ -111,7 +111,7 @@ export type QuoteResponse = {
   simulationStatus: RoutingApiSimulationStatus
   gasPriceWei: string
   blockNumber: string
-  route: Array<(SupportedPoolInRoute)[]>
+  route: Array<SupportedPoolInRoute[]>
   routeString: string
   methodParameters?: MethodParameters
   hitsCachedRoutes?: boolean
