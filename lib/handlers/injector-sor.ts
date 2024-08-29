@@ -447,6 +447,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
           ]
 
+          const v4Supported = [ChainId.SEPOLIA]
+
           return {
             chainId,
             dependencies: {
@@ -478,6 +480,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               tokenValidatorProvider,
               tokenPropertiesProvider,
               v2Supported,
+              v4Supported,
             },
           }
         })
