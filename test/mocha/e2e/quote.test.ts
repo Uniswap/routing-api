@@ -20,6 +20,8 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDT_MAINNET,
+  V4_SEPOLIA_TEST_OP,
+  V4_SEPOLIA_TEST_USDC,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import {
@@ -2482,6 +2484,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => USDC_ON(1),
     [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_OP,
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
@@ -2514,6 +2517,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => DAI_ON(1),
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_USDC,
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
@@ -2563,6 +2567,11 @@ describe('quote', function () {
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
+          if (chain === ChainId.SEPOLIA && erc1.equals(V4_SEPOLIA_TEST_OP)) {
+            // there's no WETH/USDC v4 pool on Sepolia
+            return
+          }
+
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount = chain === ChainId.BLAST ? (type === 'exactOut' ? '0.002' : '0.01') : '1'
 
@@ -2620,8 +2629,8 @@ describe('quote', function () {
           }
         })
 
-        it(`erc20 -> erc20`, async () => {
-          if (chain === ChainId.SEPOLIA) {
+        it(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
+          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_OP)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
@@ -2635,6 +2644,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
+            protocols: 'v2,v3,v4,mixed',
             type,
           }
 
@@ -2689,7 +2699,7 @@ describe('quote', function () {
           }
         })
         it(`has quoteGasAdjusted values`, async () => {
-          if (chain === ChainId.SEPOLIA) {
+          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_OP)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
@@ -2703,6 +2713,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
+            protocols: 'v2,v3,v4,mixed',
             type,
           }
 

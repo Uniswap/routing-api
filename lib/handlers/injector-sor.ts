@@ -28,6 +28,7 @@ import {
   NodeJSCache,
   OnChainGasPriceProvider,
   OnChainQuoteProvider,
+  PROTOCOL_V4_QUOTER_ADDRESSES,
   QUOTER_V2_ADDRESSES,
   setGlobalLogger,
   Simulator,
@@ -104,6 +105,7 @@ const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
   metric: IMetric
+  v4PoolProvider: IV4PoolProvider
   v3PoolProvider: IV3PoolProvider
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
@@ -122,6 +124,7 @@ export type ContainerDependencies = {
   gasPriceProvider: IGasPriceProvider
   tokenProviderFromTokenList: ITokenProvider
   blockedTokenListProvider: ITokenListProvider
+  v4PoolProvider: IV4PoolProvider
   v3PoolProvider: IV3PoolProvider
   v2PoolProvider: IV2PoolProvider
   tokenProvider: ITokenProvider
@@ -358,8 +361,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
-                (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : QUOTER_V2_ADDRESSES[chainId]
+                (useMixedRouteQuoter: boolean, protocol: Protocol) =>
+                  useMixedRouteQuoter
+                    ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                    : protocol === Protocol.V3
+                    ? QUOTER_V2_ADDRESSES[chainId]
+                    : PROTOCOL_V4_QUOTER_ADDRESSES[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -375,8 +382,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
-                (useMixedRouteQuoter: boolean) =>
-                  useMixedRouteQuoter ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] : NEW_QUOTER_V2_ADDRESSES[chainId],
+                (useMixedRouteQuoter: boolean, protocol: Protocol) =>
+                  useMixedRouteQuoter
+                    ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                    : protocol === Protocol.V3
+                    ? NEW_QUOTER_V2_ADDRESSES[chainId]
+                    : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean, optimisticCachedRoutes: boolean) =>
                   useMixedRouteQuoter
                     ? `ChainId_${chainId}_ShadowMixedQuoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
@@ -447,6 +458,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
           ]
 
+          const v4Supported = [ChainId.SEPOLIA]
+
           return {
             chainId,
             dependencies: {
@@ -478,6 +491,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               tokenValidatorProvider,
               tokenPropertiesProvider,
               v2Supported,
+              v4Supported,
             },
           }
         })

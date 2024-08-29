@@ -11,6 +11,23 @@ export type TokenInRoute = {
   sellFeeBps?: string
 }
 
+export type SupportedPoolInRoute = V2PoolInRoute | V3PoolInRoute | V4PoolInRoute
+
+export type V4PoolInRoute = {
+  type: 'v4-pool'
+  address: string
+  tokenIn: TokenInRoute
+  tokenOut: TokenInRoute
+  sqrtRatioX96: string
+  liquidity: string
+  tickCurrent: string
+  fee: string
+  tickSpacing: string
+  hooks: string
+  amountIn?: string
+  amountOut?: string
+}
+
 export type V3PoolInRoute = {
   type: 'v3-pool'
   address: string
@@ -94,7 +111,7 @@ export type QuoteResponse = {
   simulationStatus: RoutingApiSimulationStatus
   gasPriceWei: string
   blockNumber: string
-  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
+  route: Array<SupportedPoolInRoute[]>
   routeString: string
   methodParameters?: MethodParameters
   hitsCachedRoutes?: boolean

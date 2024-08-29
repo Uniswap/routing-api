@@ -18,7 +18,7 @@ import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected } from '../injector-sor'
-import { QuoteResponse, QuoteResponseSchemaJoi, V2PoolInRoute, V3PoolInRoute } from '../schema'
+import { QuoteResponse, QuoteResponseSchemaJoi, SupportedPoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
@@ -235,6 +235,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         chainId,
         tokenProvider,
         tokenListProvider,
+        v4PoolProvider: v4PoolProvider,
         v3PoolProvider: v3PoolProvider,
         v2PoolProvider: v2PoolProvider,
         metric,
@@ -482,13 +483,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
     }
 
-    const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
+    const routeResponse: Array<SupportedPoolInRoute[]> = []
 
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
       const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
-      const curRoute: (V3PoolInRoute | V2PoolInRoute)[] = []
+      const curRoute: SupportedPoolInRoute[] = []
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i]
         const tokenIn = tokenPath[i]
@@ -505,8 +506,36 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
 
         if (nextPool instanceof V4Pool) {
-          // TODO - ROUTE-220: Support V4 Pool
-          throw new Error(`V4 pools are not supported in quote response deserialization ${JSON.stringify(nextPool)}`)
+          curRoute.push({
+            type: 'v4-pool',
+            address: v4PoolProvider.getPoolId(
+              nextPool.token0,
+              nextPool.token1,
+              nextPool.fee,
+              nextPool.tickSpacing,
+              nextPool.hooks
+            ).poolId,
+            tokenIn: {
+              chainId: tokenIn.chainId,
+              decimals: tokenIn.decimals.toString(),
+              address: tokenIn.wrapped.address,
+              symbol: tokenIn.symbol!,
+            },
+            tokenOut: {
+              chainId: tokenOut.chainId,
+              decimals: tokenOut.decimals.toString(),
+              address: tokenOut.wrapped.address,
+              symbol: tokenOut.symbol!,
+            },
+            fee: nextPool.fee.toString(),
+            tickSpacing: nextPool.tickSpacing.toString(),
+            hooks: nextPool.hooks.toString(),
+            liquidity: nextPool.liquidity.toString(),
+            sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
+            tickCurrent: nextPool.tickCurrent.toString(),
+            amountIn: edgeAmountIn,
+            amountOut: edgeAmountOut,
+          })
         } else if (nextPool instanceof V3Pool) {
           curRoute.push({
             type: 'v3-pool',
@@ -678,6 +707,9 @@ export class QuoteHandler extends APIGLambdaHandler<
             break
           case Protocol.V3:
             protocols.push(Protocol.V3)
+            break
+          case Protocol.V4:
+            protocols.push(Protocol.V4)
             break
           case Protocol.MIXED:
             if (chainId === ChainId.MAINNET || !excludeV2) {
