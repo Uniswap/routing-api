@@ -2644,6 +2644,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
+            protocols: 'v2,v3,v4,mixed',
             type,
           }
 
@@ -2712,6 +2713,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
+            protocols: 'v2,v3,v4,mixed',
             type,
           }
 

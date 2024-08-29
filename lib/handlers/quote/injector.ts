@@ -84,6 +84,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
 
     const {
       provider,
+      v4PoolProvider,
+      v4SubgraphProvider,
       v3PoolProvider,
       multicallProvider,
       tokenProvider,
@@ -115,6 +117,8 @@ export class QuoteHandlerInjector extends InjectorSOR<
         router = new AlphaRouter({
           chainId,
           provider,
+          v4SubgraphProvider,
+          v4PoolProvider,
           v3SubgraphProvider,
           multicall2Provider: multicallProvider,
           v3PoolProvider,
@@ -141,6 +145,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       log,
       metric,
       router,
+      v4PoolProvider,
       v3PoolProvider,
       v2PoolProvider,
       tokenProvider,
