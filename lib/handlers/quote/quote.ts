@@ -251,6 +251,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
     const appVersion = params.event.headers && params.event.headers['x-app-version']
+    const isV4Enabled = params.event.headers && params.event.headers['x-v4-enabled'] === '1'
+    const excludedProtocolsFromMixed = isV4Enabled ? undefined : [Protocol.V4]
 
     if (requestSourceHeader) {
       metric.putMetric(`RequestSource.${requestSourceHeader}`, 1)
@@ -261,7 +263,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
-    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, forceCrossProtocol)
+    const protocols = QuoteHandler.protocolsFromRequest(chainId, isV4Enabled, protocolsStr, forceCrossProtocol)
 
     if (protocols === undefined) {
       return {
@@ -325,6 +327,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       // accidentally override usedCachedRoutes in the normal path.
       ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
       ...(gasToken ? { gasToken } : {}),
+      ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
@@ -690,8 +693,9 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   static protocolsFromRequest(
     chainId: ChainId,
-    requestedProtocols: string[] | string | undefined,
-    forceCrossProtocol: boolean | undefined
+    isV4Enabled: boolean,
+    requestedProtocols?: string[] | string,
+    forceCrossProtocol?: boolean
   ): Protocol[] | undefined {
     const excludeV2 = false
 
@@ -709,7 +713,9 @@ export class QuoteHandler extends APIGLambdaHandler<
             protocols.push(Protocol.V3)
             break
           case Protocol.V4:
-            protocols.push(Protocol.V4)
+            if (isV4Enabled) {
+              protocols.push(Protocol.V4)
+            }
             break
           case Protocol.MIXED:
             if (chainId === ChainId.MAINNET || !excludeV2) {
