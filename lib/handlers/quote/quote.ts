@@ -42,7 +42,7 @@ import {
   convertStringRouterVersionToEnum,
   protocolVersionsToBeExcludedFromMixed,
   URVersionsToProtocolVersions,
-} from '../../util/SupportedProtocolVersions'
+} from '../../util/supportedProtocolVersions'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,

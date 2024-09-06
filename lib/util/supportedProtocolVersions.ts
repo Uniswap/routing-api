@@ -24,7 +24,7 @@ export const URVersionsToProtocolVersions: URVersionsToProtocolVersionsMapping =
 }
 
 export function protocolVersionsToBeExcludedFromMixed(universalRouterVersion: UniversalRouterVersion): Protocol[] {
-  return SUPPORTED_PROTOCOL_VERSIONS.filter((protocol) =>
-    URVersionsToProtocolVersions[universalRouterVersion].includes(protocol)
+  return SUPPORTED_PROTOCOL_VERSIONS.filter(
+    (protocol) => !URVersionsToProtocolVersions[universalRouterVersion].includes(protocol)
   )
 }
