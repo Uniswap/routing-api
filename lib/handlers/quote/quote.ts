@@ -10,7 +10,7 @@ import {
   routeAmountsToString,
   SimulationStatus,
   SwapOptions,
-  SwapRoute,
+  SwapRoute
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
@@ -23,7 +23,7 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   INTENT_SPECIFIC_CONFIG,
-  QUOTE_SPEED_CONFIG,
+  QUOTE_SPEED_CONFIG
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusTranslation } from './util/simulation'
@@ -37,6 +37,12 @@ import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
 import { Pair } from '@uniswap/v2-sdk'
+import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import {
+  convertStringRouterVersionToEnum,
+  protocolVersionsToBeExcludedFromMixed,
+  URVersionsToProtocolVersions
+} from '../../util/SupportedProtocolVersions'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -251,8 +257,10 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
     const appVersion = params.event.headers && params.event.headers['x-app-version']
-    const isV4Enabled = params.event.headers && params.event.headers['x-v4-enabled'] === '1'
-    const excludedProtocolsFromMixed = isV4Enabled ? undefined : [Protocol.V4]
+    const universalRouterVersion = convertStringRouterVersionToEnum(
+      params.event.headers && params.event.headers['x-universal-router-version']
+    );
+    const excludedProtocolsFromMixed = protocolVersionsToBeExcludedFromMixed(universalRouterVersion)
 
     if (requestSourceHeader) {
       metric.putMetric(`RequestSource.${requestSourceHeader}`, 1)
@@ -263,7 +271,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
-    const protocols = QuoteHandler.protocolsFromRequest(chainId, isV4Enabled, protocolsStr, forceCrossProtocol)
+    const protocols = QuoteHandler.protocolsFromRequest(chainId, universalRouterVersion, protocolsStr, forceCrossProtocol)
 
     if (protocols === undefined) {
       return {
@@ -693,7 +701,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   static protocolsFromRequest(
     chainId: ChainId,
-    isV4Enabled: boolean,
+    universalRouterVersion: UniversalRouterVersion,
     requestedProtocols?: string[] | string,
     forceCrossProtocol?: boolean
   ): Protocol[] | undefined {
@@ -706,14 +714,18 @@ export class QuoteHandler extends APIGLambdaHandler<
         switch (protocolStr.toUpperCase()) {
           case Protocol.V2:
             if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.V2)
+              if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V2)) {
+                protocols.push(Protocol.V2)
+              }
             }
             break
           case Protocol.V3:
-            protocols.push(Protocol.V3)
+            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V3)) {
+              protocols.push(Protocol.V3)
+            }
             break
           case Protocol.V4:
-            if (isV4Enabled) {
+            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V4)) {
               protocols.push(Protocol.V4)
             }
             break
