@@ -10,7 +10,7 @@ import {
   routeAmountsToString,
   SimulationStatus,
   SwapOptions,
-  SwapRoute
+  SwapRoute,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
@@ -23,7 +23,7 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   INTENT_SPECIFIC_CONFIG,
-  QUOTE_SPEED_CONFIG
+  QUOTE_SPEED_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
 import { simulationStatusTranslation } from './util/simulation'
@@ -41,7 +41,7 @@ import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 import {
   convertStringRouterVersionToEnum,
   protocolVersionsToBeExcludedFromMixed,
-  URVersionsToProtocolVersions
+  URVersionsToProtocolVersions,
 } from '../../util/SupportedProtocolVersions'
 
 export class QuoteHandler extends APIGLambdaHandler<
@@ -259,7 +259,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const appVersion = params.event.headers && params.event.headers['x-app-version']
     const universalRouterVersion = convertStringRouterVersionToEnum(
       params.event.headers && params.event.headers['x-universal-router-version']
-    );
+    )
     const excludedProtocolsFromMixed = protocolVersionsToBeExcludedFromMixed(universalRouterVersion)
 
     if (requestSourceHeader) {
@@ -271,7 +271,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
-    const protocols = QuoteHandler.protocolsFromRequest(chainId, universalRouterVersion, protocolsStr, forceCrossProtocol)
+    const protocols = QuoteHandler.protocolsFromRequest(
+      chainId,
+      universalRouterVersion,
+      protocolsStr,
+      forceCrossProtocol
+    )
 
     if (protocols === undefined) {
       return {
