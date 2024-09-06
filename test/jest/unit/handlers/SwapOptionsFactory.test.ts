@@ -10,7 +10,7 @@ import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@uniswap/unive
 import {
   SwapOptionsFactory,
   SwapOptionsSwapRouter02Input,
-  SwapOptionsUniversalRouterInput
+  SwapOptionsUniversalRouterInput,
 } from '../../../../lib/handlers/quote/SwapOptionsFactory'
 
 const MAINNET_UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS(UniversalRouterVersion.V1_2, ChainId.MAINNET)
