@@ -366,6 +366,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       currencyIn,
       currencyOut,
       tradeType: type,
+      universalRouterVersion,
       slippageTolerance,
       enableUniversalRouter,
       portionBips,
