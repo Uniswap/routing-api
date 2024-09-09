@@ -4,14 +4,8 @@ import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 export const SUPPORTED_PROTOCOL_VERSIONS = [Protocol.V2, Protocol.V3, Protocol.V4]
 
 export function convertStringRouterVersionToEnum(routerVersion?: string): UniversalRouterVersion {
-  switch (routerVersion) {
-    case UniversalRouterVersion.V1_2:
-      return UniversalRouterVersion.V1_2
-    case UniversalRouterVersion.V2_0:
-      return UniversalRouterVersion.V2_0
-    default:
-      return UniversalRouterVersion.V1_2
-  }
+  const validVersions = Object.values(UniversalRouterVersion)
+  return validVersions.find((v) => v === routerVersion) || UniversalRouterVersion.V1_2
 }
 
 export type URVersionsToProtocolVersionsMapping = {
