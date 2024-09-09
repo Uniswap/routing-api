@@ -11,6 +11,7 @@ describe('supported protocol versions', () => {
     expect(convertStringRouterVersionToEnum('1.2')).to.eq(UniversalRouterVersion.V1_2)
     expect(convertStringRouterVersionToEnum('2.0')).to.eq(UniversalRouterVersion.V2_0)
     expect(convertStringRouterVersionToEnum('3.0')).to.eq(UniversalRouterVersion.V1_2)
+    expect(convertStringRouterVersionToEnum(undefined)).to.eq(UniversalRouterVersion.V1_2)
   })
 
   it('should return protocol versions to be excluded from mixed', async () => {
