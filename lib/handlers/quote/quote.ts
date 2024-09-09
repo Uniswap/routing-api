@@ -37,6 +37,12 @@ import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
 import { Pair } from '@uniswap/v2-sdk'
+import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import {
+  convertStringRouterVersionToEnum,
+  protocolVersionsToBeExcludedFromMixed,
+  URVersionsToProtocolVersions,
+} from '../../util/supportedProtocolVersions'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -251,6 +257,10 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
     const appVersion = params.event.headers && params.event.headers['x-app-version']
+    const universalRouterVersion = convertStringRouterVersionToEnum(
+      params.event.headers?.['x-universal-router-version']
+    )
+    const excludedProtocolsFromMixed = protocolVersionsToBeExcludedFromMixed(universalRouterVersion)
 
     if (requestSourceHeader) {
       metric.putMetric(`RequestSource.${requestSourceHeader}`, 1)
@@ -261,7 +271,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
-    const protocols = QuoteHandler.protocolsFromRequest(chainId, protocolsStr, forceCrossProtocol)
+    const protocols = QuoteHandler.protocolsFromRequest(
+      chainId,
+      universalRouterVersion,
+      protocolsStr,
+      forceCrossProtocol
+    )
 
     if (protocols === undefined) {
       return {
@@ -325,6 +340,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       // accidentally override usedCachedRoutes in the normal path.
       ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
       ...(gasToken ? { gasToken } : {}),
+      ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
@@ -350,6 +366,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       currencyIn,
       currencyOut,
       tradeType: type,
+      universalRouterVersion,
       slippageTolerance,
       enableUniversalRouter,
       portionBips,
@@ -690,8 +707,9 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   static protocolsFromRequest(
     chainId: ChainId,
-    requestedProtocols: string[] | string | undefined,
-    forceCrossProtocol: boolean | undefined
+    universalRouterVersion: UniversalRouterVersion,
+    requestedProtocols?: string[] | string,
+    forceCrossProtocol?: boolean
   ): Protocol[] | undefined {
     const excludeV2 = false
 
@@ -702,14 +720,20 @@ export class QuoteHandler extends APIGLambdaHandler<
         switch (protocolStr.toUpperCase()) {
           case Protocol.V2:
             if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.V2)
+              if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V2)) {
+                protocols.push(Protocol.V2)
+              }
             }
             break
           case Protocol.V3:
-            protocols.push(Protocol.V3)
+            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V3)) {
+              protocols.push(Protocol.V3)
+            }
             break
           case Protocol.V4:
-            protocols.push(Protocol.V4)
+            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V4)) {
+              protocols.push(Protocol.V4)
+            }
             break
           case Protocol.MIXED:
             if (chainId === ChainId.MAINNET || !excludeV2) {

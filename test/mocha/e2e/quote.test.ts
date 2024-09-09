@@ -8,6 +8,7 @@ import {
   CUSD_CELO_ALFAJORES,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
+  MethodParameters,
   NATIVE_CURRENCY,
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
@@ -27,8 +28,8 @@ import {
 import {
   PERMIT2_ADDRESS,
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
+  UniversalRouterVersion,
 } from '@uniswap/universal-router-sdk'
-import { MethodParameters } from '@uniswap/smart-order-router'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
 import axiosRetry from 'axios-retry'
@@ -54,7 +55,7 @@ const { ethers } = hre
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(1)
+const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V1_2, 1)
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -2650,8 +2651,14 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
+          const headers = {
+            'x-universal-router-version': '2.0',
+          }
+
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: headers,
+            })
             const { status } = response
 
             expect(status).to.equal(200)
