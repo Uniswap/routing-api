@@ -5,9 +5,9 @@ export const SUPPORTED_PROTOCOL_VERSIONS = [Protocol.V2, Protocol.V3, Protocol.V
 
 export function convertStringRouterVersionToEnum(routerVersion?: string): UniversalRouterVersion {
   switch (routerVersion) {
-    case '1.2':
+    case UniversalRouterVersion.V1_2:
       return UniversalRouterVersion.V1_2
-    case '2.0':
+    case UniversalRouterVersion.V2_0:
       return UniversalRouterVersion.V2_0
     default:
       return UniversalRouterVersion.V1_2
