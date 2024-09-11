@@ -135,6 +135,7 @@ export class SwapOptionsFactory {
 
     const swapParams: SwapOptions = {
       type: SwapType.UNIVERSAL_ROUTER,
+      version: universalRouterVersion,
       deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
       recipient: recipient,
       slippageTolerance: parseSlippageTolerance(slippageTolerance),

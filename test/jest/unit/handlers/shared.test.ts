@@ -5,11 +5,12 @@ import {
   parseFeeOptions,
   parseFlatFeeOptions,
   parsePortionPercent,
-  populateFeeOptions,
+  populateFeeOptions
 } from '../../../../lib/handlers/shared'
 import { getAmount } from '../../../utils/tokens'
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
+import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 
 describe('shared', () => {
   it('parsePortionPercent', () => {
@@ -52,6 +53,7 @@ describe('shared', () => {
 
     const swapParams: SwapOptions = {
       type: SwapType.UNIVERSAL_ROUTER,
+      version: UniversalRouterVersion.V1_2,
       deadlineOrPreviousBlockhash: parseDeadline('1800'),
       recipient: '0x123',
       slippageTolerance: new Percent(5),
@@ -70,6 +72,7 @@ describe('shared', () => {
 
     const swapParams: SwapOptions = {
       type: SwapType.UNIVERSAL_ROUTER,
+      version: UniversalRouterVersion.V1_2,
       deadlineOrPreviousBlockhash: parseDeadline('1800'),
       recipient: '0x123',
       slippageTolerance: new Percent(5),
