@@ -2632,7 +2632,7 @@ describe('quote', function () {
 
         // TODO: re-enable sepolia v4 route e2e test, once SOR and routing-api updates the pool manager and state view contract address
         it.skip(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
-          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_OP)) {
+          if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
