@@ -5,7 +5,7 @@ import {
   parseFeeOptions,
   parseFlatFeeOptions,
   parsePortionPercent,
-  populateFeeOptions
+  populateFeeOptions,
 } from '../../../../lib/handlers/shared'
 import { getAmount } from '../../../utils/tokens'
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
