@@ -21,8 +21,8 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDT_MAINNET,
-  V4_SEPOLIA_TEST_OP,
-  V4_SEPOLIA_TEST_USDC,
+  V4_SEPOLIA_TEST_A,
+  V4_SEPOLIA_TEST_B,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import {
@@ -2485,7 +2485,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => USDC_ON(1),
     [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
-    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_OP,
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_A,
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
@@ -2518,7 +2518,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => DAI_ON(1),
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
-    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_USDC,
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_B,
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
@@ -2568,7 +2568,7 @@ describe('quote', function () {
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
-          if (chain === ChainId.SEPOLIA && erc1.equals(V4_SEPOLIA_TEST_OP)) {
+          if (chain === ChainId.SEPOLIA && erc1.equals(V4_SEPOLIA_TEST_A)) {
             // there's no WETH/USDC v4 pool on Sepolia
             return
           }
@@ -2707,7 +2707,7 @@ describe('quote', function () {
           }
         })
         it(`has quoteGasAdjusted values`, async () => {
-          if (chain === ChainId.SEPOLIA) {
+          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_A)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
@@ -2725,10 +2725,16 @@ describe('quote', function () {
             type,
           }
 
+          const headers = {
+            'x-universal-router-version': '2.0',
+          }
+
           const queryParams = qs.stringify(quoteReq)
 
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: headers,
+            })
             const {
               data: { quoteDecimals, quoteGasAdjustedDecimals },
               status,
