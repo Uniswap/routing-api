@@ -24,6 +24,7 @@ import {
   IV4SubgraphProvider,
   LegacyGasPriceProvider,
   MIXED_ROUTE_QUOTER_V1_ADDRESSES,
+  MIXED_ROUTE_QUOTER_V2_ADDRESSES,
   NEW_QUOTER_V2_ADDRESSES,
   NodeJSCache,
   OnChainGasPriceProvider,
@@ -361,9 +362,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
-                (useMixedRouteQuoter: boolean, protocol: Protocol) =>
+                (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
-                    ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                    ? mixedRouteContainsV4Pool
+                      ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
+                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
                     : protocol === Protocol.V3
                     ? QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId]
@@ -382,9 +385,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 GAS_ERROR_FAILURE_OVERRIDES[chainId],
                 SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
                 BLOCK_NUMBER_CONFIGS[chainId],
-                (useMixedRouteQuoter: boolean, protocol: Protocol) =>
+                (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
-                    ? MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                    ? mixedRouteContainsV4Pool
+                      ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
+                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
                     : protocol === Protocol.V3
                     ? NEW_QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
