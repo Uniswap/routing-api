@@ -1,9 +1,9 @@
 import { ChainId, TradeType } from '@uniswap/sdk-core'
-import { CachedRoutes } from '@uniswap/smart-order-router'
+import { CachedRoutes, getAddress } from '@uniswap/smart-order-router'
 
 interface PairTradeTypeChainIdArgs {
-  tokenIn: string
-  tokenOut: string
+  currencyIn: string
+  currencyOut: string
   tradeType: TradeType
   chainId: ChainId
 }
@@ -12,26 +12,26 @@ interface PairTradeTypeChainIdArgs {
  * Class used to model the partition key of the CachedRoutes cache database and configuration.
  */
 export class PairTradeTypeChainId {
-  public readonly tokenIn: string
-  public readonly tokenOut: string
+  public readonly currencyIn: string
+  public readonly currencyOut: string
   public readonly tradeType: TradeType
   public readonly chainId: ChainId
 
-  constructor({ tokenIn, tokenOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
-    this.tokenIn = tokenIn.toLowerCase() // All token addresses should be lower case for normalization.
-    this.tokenOut = tokenOut.toLowerCase() // All token addresses should be lower case for normalization.
+  constructor({ currencyIn, currencyOut, tradeType, chainId }: PairTradeTypeChainIdArgs) {
+    this.currencyIn = currencyIn.toLowerCase() // All currency addresses should be lower case for normalization.
+    this.currencyOut = currencyOut.toLowerCase() // All currency addresses should be lower case for normalization.
     this.tradeType = tradeType
     this.chainId = chainId
   }
 
   public toString(): string {
-    return `${this.tokenIn}/${this.tokenOut}/${this.tradeType}/${this.chainId}`
+    return `${this.currencyIn}/${this.currencyOut}/${this.tradeType}/${this.chainId}`
   }
 
   public static fromCachedRoutes(cachedRoutes: CachedRoutes): PairTradeTypeChainId {
     return new PairTradeTypeChainId({
-      tokenIn: cachedRoutes.tokenIn.address,
-      tokenOut: cachedRoutes.tokenOut.address,
+      currencyIn: getAddress(cachedRoutes.currencyIn),
+      currencyOut: getAddress(cachedRoutes.currencyOut),
       tradeType: cachedRoutes.tradeType,
       chainId: cachedRoutes.chainId,
     })
