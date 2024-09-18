@@ -1,14 +1,14 @@
 import { CachedRoutes } from '@uniswap/smart-order-router'
 import { ChainId, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
-import { MarshalledToken, TokenMarshaller } from './token-marshaller'
+import { MarshalledCurrency, TokenMarshaller } from './token-marshaller'
 import { CachedRouteMarshaller, MarshalledCachedRoute } from './cached-route-marshaller'
 
 export interface MarshalledCachedRoutes {
   routes: MarshalledCachedRoute[]
   chainId: ChainId
-  tokenIn: MarshalledToken
-  tokenOut: MarshalledToken
+  tokenIn: MarshalledCurrency
+  tokenOut: MarshalledCurrency
   protocolsCovered: Protocol[]
   blockNumber: number
   tradeType: TradeType
@@ -21,8 +21,8 @@ export class CachedRoutesMarshaller {
     return {
       routes: cachedRoutes.routes.map((route) => CachedRouteMarshaller.marshal(route)),
       chainId: cachedRoutes.chainId,
-      tokenIn: TokenMarshaller.marshal(cachedRoutes.tokenIn),
-      tokenOut: TokenMarshaller.marshal(cachedRoutes.tokenOut),
+      tokenIn: TokenMarshaller.marshal(cachedRoutes.currencyIn),
+      tokenOut: TokenMarshaller.marshal(cachedRoutes.currencyOut),
       protocolsCovered: cachedRoutes.protocolsCovered,
       blockNumber: cachedRoutes.blockNumber,
       tradeType: cachedRoutes.tradeType,
@@ -35,8 +35,8 @@ export class CachedRoutesMarshaller {
     return new CachedRoutes({
       routes: marshalledCachedRoutes.routes.map((route) => CachedRouteMarshaller.unmarshal(route)),
       chainId: marshalledCachedRoutes.chainId,
-      tokenIn: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenIn),
-      tokenOut: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenOut),
+      currencyIn: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenIn),
+      currencyOut: TokenMarshaller.unmarshal(marshalledCachedRoutes.tokenOut),
       protocolsCovered: marshalledCachedRoutes.protocolsCovered,
       blockNumber: marshalledCachedRoutes.blockNumber,
       tradeType: marshalledCachedRoutes.tradeType,

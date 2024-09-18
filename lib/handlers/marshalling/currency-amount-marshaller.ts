@@ -1,8 +1,8 @@
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
-import { MarshalledToken, TokenMarshaller } from './token-marshaller'
+import { MarshalledCurrency, TokenMarshaller } from './token-marshaller'
 
 export interface MarshalledCurrencyAmount {
-  currency: MarshalledToken
+  currency: MarshalledCurrency
   numerator: string
   denominator: string
 }
