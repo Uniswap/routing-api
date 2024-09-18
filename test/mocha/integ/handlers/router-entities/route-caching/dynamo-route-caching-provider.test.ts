@@ -96,8 +96,8 @@ const TEST_CACHED_ROUTE = new CachedRoute({ route: TEST_WETH_USDC_V3_ROUTE, perc
 const TEST_CACHED_ROUTES = new CachedRoutes({
   routes: [TEST_CACHED_ROUTE],
   chainId: TEST_CACHED_ROUTE.route.chainId,
-  tokenIn: WETH,
-  tokenOut: USDC_MAINNET,
+  currencyIn: WETH,
+  currencyOut: USDC_MAINNET,
   protocolsCovered: [TEST_CACHED_ROUTE.protocol],
   blockNumber: 0,
   tradeType: TradeType.EXACT_INPUT,
@@ -109,8 +109,8 @@ const TEST_UNCACHED_ROUTE = new CachedRoute({ route: TEST_UNI_USDC_ROUTE, percen
 const TEST_UNCACHED_ROUTES = new CachedRoutes({
   routes: [TEST_UNCACHED_ROUTE],
   chainId: TEST_UNCACHED_ROUTE.route.chainId,
-  tokenIn: UNI_MAINNET,
-  tokenOut: USDC_MAINNET,
+  currencyIn: UNI_MAINNET,
+  currencyOut: USDC_MAINNET,
   protocolsCovered: [TEST_UNCACHED_ROUTE.protocol],
   blockNumber: 0,
   tradeType: TradeType.EXACT_INPUT,

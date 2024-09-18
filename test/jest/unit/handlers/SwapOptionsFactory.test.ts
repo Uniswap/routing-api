@@ -5,7 +5,7 @@ import { TradeTypeParam } from '../../../../lib/handlers/quote/schema/quote-sche
 import { expect, jest } from '@jest/globals'
 import { SwapType } from '@uniswap/smart-order-router'
 import { utils } from 'ethers'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
+import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 
 import {
   SwapOptionsFactory,
@@ -13,7 +13,7 @@ import {
   SwapOptionsUniversalRouterInput,
 } from '../../../../lib/handlers/quote/SwapOptionsFactory'
 
-const MAINNET_UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS(ChainId.MAINNET)
+const MAINNET_UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS(UniversalRouterVersion.V1_2, ChainId.MAINNET)
 
 class universalRouterInputFactory extends Factory<SwapOptionsUniversalRouterInput> {
   withFees() {
@@ -48,6 +48,7 @@ const UniversalRouterInputFactory = universalRouterInputFactory.define(() => ({
   currencyIn: new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18, 'FOO', 'Foo'),
   currencyOut: new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000002', 18, 'BAR', 'Bar'),
   tradeType: 'exactIn' as TradeTypeParam,
+  universalRouterVersion: UniversalRouterVersion.V1_2,
   slippageTolerance: '0.5',
   amountRaw: '100000000000000000',
   deadline: '60',

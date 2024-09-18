@@ -1,6 +1,6 @@
 import { MixedRoute, V2Route, V3Route, V4Route } from '@uniswap/smart-order-router/build/main/routers'
 import { Protocol } from '@uniswap/router-sdk'
-import { MarshalledToken, TokenMarshaller } from './token-marshaller'
+import { MarshalledCurrency, TokenMarshaller } from './token-marshaller'
 import { MarshalledPair, PairMarshaller } from './pair-marshaller'
 import { MarshalledPool as V3MarshalledPool, PoolMarshaller as V3PoolMarshaller } from './v3/pool-marshaller'
 import { MarshalledPool as V4MarshalledPool, PoolMarshaller as V4PoolMarshaller } from './v4/pool-marshaller'
@@ -11,29 +11,29 @@ import { Pair } from '@uniswap/v2-sdk'
 
 export interface MarshalledV2Route {
   protocol: Protocol
-  input: MarshalledToken
-  output: MarshalledToken
+  input: MarshalledCurrency
+  output: MarshalledCurrency
   pairs: MarshalledPair[]
 }
 
 export interface MarshalledV3Route {
   protocol: Protocol
-  input: MarshalledToken
-  output: MarshalledToken
+  input: MarshalledCurrency
+  output: MarshalledCurrency
   pools: V3MarshalledPool[]
 }
 
 export interface MarshalledV4Route {
   protocol: Protocol
-  input: MarshalledToken
-  output: MarshalledToken
+  input: MarshalledCurrency
+  output: MarshalledCurrency
   pools: V4MarshalledPool[]
 }
 
 export interface MarshalledMixedRoute {
   protocol: Protocol
-  input: MarshalledToken
-  output: MarshalledToken
+  input: MarshalledCurrency
+  output: MarshalledCurrency
   pools: (V4MarshalledPool | V3MarshalledPool | MarshalledPair)[]
 }
 

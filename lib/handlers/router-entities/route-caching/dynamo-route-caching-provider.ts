@@ -140,8 +140,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
 
     const partitionKey = new PairTradeTypeChainId({
-      tokenIn: tokenIn.address,
-      tokenOut: tokenOut.address,
+      currencyIn: tokenIn.address,
+      currencyOut: tokenOut.address,
       tradeType,
       chainId,
     })
@@ -239,8 +239,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     const cachedRoutes = new CachedRoutes({
       routes: Array.from(routesMap.values()),
       chainId: first.chainId,
-      tokenIn: first.tokenIn,
-      tokenOut: first.tokenOut,
+      currencyIn: first.currencyIn,
+      currencyOut: first.currencyOut,
       protocolsCovered: first.protocolsCovered,
       blockNumber,
       tradeType: first.tradeType,
@@ -331,9 +331,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): void {
     const payload = {
       queryStringParameters: {
-        tokenInAddress: partitionKey.tokenIn,
+        tokenInAddress: partitionKey.currencyIn,
         tokenInChainId: partitionKey.chainId.toString(),
-        tokenOutAddress: partitionKey.tokenOut,
+        tokenOutAddress: partitionKey.currencyOut,
         tokenOutChainId: partitionKey.chainId.toString(),
         amount: amount.quotient.toString(),
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
@@ -384,8 +384,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const individualCachedRoutes = new CachedRoutes({
         routes: [route],
         chainId: cachedRoutes.chainId,
-        tokenIn: cachedRoutes.tokenIn,
-        tokenOut: cachedRoutes.tokenOut,
+        currencyIn: cachedRoutes.currencyIn,
+        currencyOut: cachedRoutes.currencyOut,
         protocolsCovered: cachedRoutes.protocolsCovered,
         blockNumber: cachedRoutes.blockNumber,
         tradeType: cachedRoutes.tradeType,

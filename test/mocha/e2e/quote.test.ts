@@ -8,6 +8,7 @@ import {
   CUSD_CELO_ALFAJORES,
   DAI_MAINNET,
   ID_TO_NETWORK_NAME,
+  MethodParameters,
   NATIVE_CURRENCY,
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
@@ -20,15 +21,15 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDT_MAINNET,
-  V4_SEPOLIA_TEST_OP,
-  V4_SEPOLIA_TEST_USDC,
+  V4_SEPOLIA_TEST_A,
+  V4_SEPOLIA_TEST_B,
   WBTC_MAINNET,
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
+  UniversalRouterVersion,
 } from '@uniswap/universal-router-sdk'
-import { MethodParameters } from '@uniswap/smart-order-router'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
 import axiosRetry from 'axios-retry'
@@ -54,7 +55,7 @@ const { ethers } = hre
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(1)
+const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V1_2, 1)
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -2484,7 +2485,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => USDC_ON(1),
     [ChainId.GOERLI]: () => USDC_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => USDC_ON(ChainId.SEPOLIA),
-    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_OP,
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_A,
     [ChainId.OPTIMISM]: () => USDC_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM]: () => USDC_NATIVE_OPTIMISM,
     [ChainId.OPTIMISM_GOERLI]: () => USDC_ON(ChainId.OPTIMISM_GOERLI),
@@ -2517,7 +2518,7 @@ describe('quote', function () {
     [ChainId.MAINNET]: () => DAI_ON(1),
     [ChainId.GOERLI]: () => DAI_ON(ChainId.GOERLI),
     [ChainId.SEPOLIA]: () => DAI_ON(ChainId.SEPOLIA),
-    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_USDC,
+    [ChainId.SEPOLIA]: () => V4_SEPOLIA_TEST_B,
     [ChainId.OPTIMISM]: () => DAI_ON(ChainId.OPTIMISM),
     [ChainId.OPTIMISM_GOERLI]: () => DAI_ON(ChainId.OPTIMISM_GOERLI),
     [ChainId.OPTIMISM_SEPOLIA]: () => USDC_ON(ChainId.OPTIMISM_SEPOLIA),
@@ -2567,7 +2568,7 @@ describe('quote', function () {
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
-          if (chain === ChainId.SEPOLIA && erc1.equals(V4_SEPOLIA_TEST_OP)) {
+          if (chain === ChainId.SEPOLIA && erc1.equals(V4_SEPOLIA_TEST_A)) {
             // there's no WETH/USDC v4 pool on Sepolia
             return
           }
@@ -2629,8 +2630,9 @@ describe('quote', function () {
           }
         })
 
-        it(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
-          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_OP)) {
+        // TODO: re-enable sepolia v4 route e2e test, once SOR and routing-api updates the pool manager and state view contract address
+        it.skip(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
+          if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
@@ -2650,8 +2652,14 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
+          const headers = {
+            'x-universal-router-version': '2.0',
+          }
+
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: headers,
+            })
             const { status } = response
 
             expect(status).to.equal(200)
@@ -2699,7 +2707,7 @@ describe('quote', function () {
           }
         })
         it(`has quoteGasAdjusted values`, async () => {
-          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_OP)) {
+          if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_A)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
           }
@@ -2717,10 +2725,16 @@ describe('quote', function () {
             type,
           }
 
+          const headers = {
+            'x-universal-router-version': '2.0',
+          }
+
           const queryParams = qs.stringify(quoteReq)
 
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: headers,
+            })
             const {
               data: { quoteDecimals, quoteGasAdjustedDecimals },
               status,

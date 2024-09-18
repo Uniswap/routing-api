@@ -9,8 +9,8 @@ describe('PairTradeTypeChainId', () => {
   describe('toString', () => {
     it('returns a stringified version of the object', () => {
       const pairTradeTypeChainId = new PairTradeTypeChainId({
-        tokenIn: WETH,
-        tokenOut: USDC,
+        currencyIn: WETH,
+        currencyOut: USDC,
         tradeType: TradeType.EXACT_INPUT,
         chainId: ChainId.MAINNET,
       })
@@ -22,8 +22,8 @@ describe('PairTradeTypeChainId', () => {
 
     it('token addresses are converted to lowercase', () => {
       const pairTradeTypeChainId = new PairTradeTypeChainId({
-        tokenIn: WETH.toUpperCase(),
-        tokenOut: USDC.toUpperCase(),
+        currencyIn: WETH.toUpperCase(),
+        currencyOut: USDC.toUpperCase(),
         tradeType: TradeType.EXACT_INPUT,
         chainId: ChainId.MAINNET,
       })
@@ -35,8 +35,8 @@ describe('PairTradeTypeChainId', () => {
 
     it('works with ExactOutput too', () => {
       const pairTradeTypeChainId = new PairTradeTypeChainId({
-        tokenIn: WETH.toUpperCase(),
-        tokenOut: USDC.toUpperCase(),
+        currencyIn: WETH.toUpperCase(),
+        currencyOut: USDC.toUpperCase(),
         tradeType: TradeType.EXACT_OUTPUT,
         chainId: ChainId.MAINNET,
       })
@@ -48,8 +48,8 @@ describe('PairTradeTypeChainId', () => {
 
     it('works with other chains', () => {
       const pairTradeTypeChainId = new PairTradeTypeChainId({
-        tokenIn: WETH.toUpperCase(),
-        tokenOut: USDC.toUpperCase(),
+        currencyIn: WETH.toUpperCase(),
+        currencyOut: USDC.toUpperCase(),
         tradeType: TradeType.EXACT_OUTPUT,
         chainId: ChainId.ARBITRUM_ONE,
       })
