@@ -92,8 +92,8 @@ describe('ProdConfig', () => {
 
   it('validates prod config', () => {
     for (const entry of PROD_CONFIG) {
-      expect(entry.providerUrls.length == entry.providerInitialWeights.length)
-      expect(entry.providerUrls.length == entry.providerNames.length)
+      expect(entry.providerUrls.length === entry.providerInitialWeights.length).equals(true);
+      expect(entry.providerUrls.length === entry.providerNames.length).equals(true);
     }
   })
 })

@@ -24,7 +24,7 @@
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [0.9, 0.1],
     "providerUrls": ["QUICKNODE_56", "UNIRPC_0"],
-    "providerNames": ["QUICKNODE"]
+    "providerNames": ["QUICKNODE", "UNIRPC"]
   },
   {
     "chainId": 10,
@@ -77,9 +77,9 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
-    "providerInitialWeights": [0.01, 0.99],
-    "providerUrls": ["QUICKNODE_1"],
-    "providerNames": ["QUICKNODE"]
+    "providerInitialWeights": [1, 0],
+    "providerUrls": ["QUICKNODE_1", "QUICKNODERETH_1"],
+    "providerNames": ["QUICKNODE", "QUICKNODERETH"]
   },
   {
     "chainId": 81457,
