@@ -45,6 +45,7 @@ const createNewSingleJsonRpcProviders = () => [
   new SingleJsonRpcProvider(
     { name: 'mainnet', chainId: ChainId.MAINNET },
     `url_0`,
+    undefined,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
     false,
@@ -53,6 +54,7 @@ const createNewSingleJsonRpcProviders = () => [
   new SingleJsonRpcProvider(
     { name: 'mainnet', chainId: ChainId.MAINNET },
     `url_1`,
+    undefined,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
     false,
@@ -61,6 +63,7 @@ const createNewSingleJsonRpcProviders = () => [
   new SingleJsonRpcProvider(
     { name: 'mainnet', chainId: ChainId.MAINNET },
     `url_2`,
+    undefined,
     log,
     SINGLE_PROVIDER_TEST_CONFIG,
     false,

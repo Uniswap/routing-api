@@ -234,6 +234,8 @@ export class RoutingAPIPipeline extends Stack {
       // ZkSync
       'QUICKNODE_324',
       'ALCHEMY_324',
+      // unirpc - serves all chains
+      'UNIRPC_0',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -408,6 +410,8 @@ const jsonRpcProviders = {
   // ZkSync
   QUICKNODE_324: process.env.QUICKNODE_324!,
   ALCHEMY_324: process.env.ALCHEMY_324!,
+  // unirpc - serves all chains
+  UNIRPC_0: process.env.UNIRPC_0!,
 }
 
 // Local dev stack

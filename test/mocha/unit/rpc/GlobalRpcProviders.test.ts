@@ -59,6 +59,7 @@ describe('GlobalRpcProviders', () => {
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [2, 1],
         providerUrls: ['INFURA_43114', 'QUICKNODE_43114'],
+        providerNames: ['INFURA', 'QUICKNODE'],
       },
     ]
 
@@ -116,6 +117,7 @@ describe('GlobalRpcProviders', () => {
         chainId: 10,
         useMultiProviderProb: 0.3,
         providerUrls: ['INFURA_10', 'QUICKNODE_10'],
+        providerNames: ['INFURA', 'QUICKNODE'],
       },
       {
         chainId: 43114,
@@ -123,6 +125,7 @@ describe('GlobalRpcProviders', () => {
         sessionAllowProviderFallbackWhenUnhealthy: true,
         providerInitialWeights: [2, 1],
         providerUrls: ['INFURA_43114', 'QUICKNODE_43114'],
+        providerNames: ['INFURA', 'QUICKNODE'],
       },
     ]
 
@@ -273,6 +276,7 @@ describe('GlobalRpcProviders', () => {
       ALCHEMY_1: 'key25',
       QUICKNODE_81457: 'host26,key26',
       INFURA_81457: 'key27',
+      UNIRPC_0: 'key28',
     }
 
     const randStub = sandbox.stub(Math, 'random')
