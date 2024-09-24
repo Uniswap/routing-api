@@ -5,7 +5,8 @@
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.1,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_42220"]
+    "providerUrls": ["QUICKNODE_42220"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 43114,
@@ -13,15 +14,17 @@
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.1,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_43114"]
+    "providerUrls": ["QUICKNODE_43114"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 56,
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.01,
-    "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_56"]
+    "providerInitialWeights": [0.9, 0.1],
+    "providerUrls": ["QUICKNODE_56", "UNIRPC_0"],
+    "providerNames": ["QUICKNODE", "UNIRPC"]
   },
   {
     "chainId": 10,
@@ -29,7 +32,8 @@
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_10"]
+    "providerUrls": ["QUICKNODE_10"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 11155111,
@@ -38,6 +42,7 @@
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [1],
     "providerUrls": ["ALCHEMY_11155111"],
+    "providerNames": ["ALCHEMY"],
     "enableDbSync": true
   },
   {
@@ -46,7 +51,8 @@
     "latencyEvaluationSampleProb": 0.25,
     "healthCheckSampleProb": 0.005,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_137"]
+    "providerUrls": ["QUICKNODE_137"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 42161,
@@ -54,7 +60,8 @@
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.002,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_42161"]
+    "providerUrls": ["QUICKNODE_42161"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 8453,
@@ -62,7 +69,8 @@
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.0005,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_8453"]
+    "providerUrls": ["QUICKNODE_8453"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 1,
@@ -70,7 +78,8 @@
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1, 0],
-    "providerUrls": ["QUICKNODE_1", "QUICKNODERETH_1"]
+    "providerUrls": ["QUICKNODE_1", "QUICKNODERETH_1"],
+    "providerNames": ["QUICKNODE", "QUICKNODERETH"]
   },
   {
     "chainId": 81457,
@@ -78,7 +87,8 @@
     "latencyEvaluationSampleProb": 0.001,
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_81457"]
+    "providerUrls": ["QUICKNODE_81457"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 7777777,
@@ -86,7 +96,8 @@
     "latencyEvaluationSampleProb": 0.001,
     "healthCheckSampleProb": 0.001,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_7777777"]
+    "providerUrls": ["QUICKNODE_7777777"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 324,
@@ -94,6 +105,7 @@
     "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_324"]
+    "providerUrls": ["QUICKNODE_324"],
+    "providerNames": ["QUICKNODE"]
   }
 ]

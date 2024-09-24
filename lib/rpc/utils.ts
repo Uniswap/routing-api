@@ -23,7 +23,13 @@ export function chainIdToNetworkName(networkId: ChainId): string {
   }
 }
 
-export function generateProviderUrl(key: string, value: string): string {
+export function generateProviderUrl(key: string, value: string, chainId: number): string {
+  if (key === 'UNIRPC_0') {
+    // UNIRPC_0 is a special case for the Uniswap RPC
+    // - env value will contain the generic unirpc endpoint - no trailing '/'
+    return `${value}/rpc/${chainId}`
+  }
+
   const tokens = value.split(',')
   switch (key) {
     // Infura

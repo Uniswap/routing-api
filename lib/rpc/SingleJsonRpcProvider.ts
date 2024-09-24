@@ -63,12 +63,19 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
   constructor(
     network: Network,
     url: string,
+    headers: Record<string, string | number> | undefined,
     log: Logger,
     config: SingleJsonRpcProviderConfig,
     enableDbSync: boolean,
     dbSyncSampleProb: number
   ) {
-    super(url, network)
+    super(
+      {
+        url: url,
+        headers: headers,
+      },
+      network
+    )
     this.url = url
     this.log = log
     this.providerName = deriveProviderName(url)

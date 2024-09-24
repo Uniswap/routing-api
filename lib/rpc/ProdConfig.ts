@@ -8,6 +8,7 @@ export interface ChainConfig {
   sessionAllowProviderFallbackWhenUnhealthy?: boolean
   providerInitialWeights?: number[]
   providerUrls?: string[]
+  providerNames?: string[]
   dbSyncSampleProb?: number
   latencyEvaluationSampleProb?: number
   healthCheckSampleProb?: number
@@ -23,6 +24,7 @@ export const ProdConfigJoi = Joi.array().items(
     sessionAllowProviderFallbackWhenUnhealthy: Joi.boolean().optional(),
     providerInitialWeights: Joi.array().items(Joi.number()).optional(),
     providerUrls: Joi.array().items(Joi.string()).optional(),
+    providerNames: Joi.array().items(Joi.string()).optional(),
     dbSyncSampleProb: Joi.number().min(0.0).max(1.0).optional().default(1.0),
     latencyEvaluationSampleProb: Joi.number().min(0.0).max(1.0).optional().default(1.0),
     healthCheckSampleProb: Joi.number().min(0.0).max(1.0).optional().default(1.0),

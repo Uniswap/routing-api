@@ -35,7 +35,7 @@ export class GlobalRpcProviders {
         if (process.env[urlEnvVar] === undefined) {
           throw new Error(`Environmental variable ${urlEnvVar} isn't defined!`)
         }
-        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
+        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!, chainConfig.chainId)
       }
     }
     return prodConfig
@@ -51,11 +51,22 @@ export class GlobalRpcProviders {
       const chainId = chainConfig.chainId as ChainId
       if (Math.random() < chainConfig.useMultiProviderProb) {
         let providers: SingleJsonRpcProvider[] = []
-        for (const providerUrl of chainConfig.providerUrls!) {
+
+        for (let i = 0; i < chainConfig.providerUrls!.length; i++) {
+          // For unirpc provider, pass the service id in the header.
+          const providerUrl = chainConfig.providerUrls![i]
+          const headers =
+            chainConfig.providerNames![i] === 'UNIRPC'
+              ? {
+                  'x-uni-service-id': 'routing_api',
+                }
+              : undefined
+
           providers.push(
             new SingleJsonRpcProvider(
               { name: chainIdToNetworkName(chainId), chainId },
               providerUrl,
+              headers,
               log,
               singleConfig,
               chainConfig.enableDbSync!,
