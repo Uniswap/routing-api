@@ -9,7 +9,7 @@ import {
   metric,
   MetricLoggerUnit,
   routeToString,
-  SupportedRoutes
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
