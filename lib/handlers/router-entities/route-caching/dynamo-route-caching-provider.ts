@@ -2,7 +2,6 @@ import {
   CachedRoute,
   CachedRoutes,
   CacheMode,
-  getAddress,
   ID_TO_NETWORK_NAME,
   IRouteCachingProvider,
   log,
@@ -12,7 +11,7 @@ import {
   SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Fraction, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
@@ -124,7 +123,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    *
    * @param chainId
    * @param amount
-   * @param quoteCurrency
+   * @param quoteToken
    * @param tradeType
    * @param _protocols
    * @protected
@@ -132,22 +131,17 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   protected async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    quoteCurrency: Currency,
+    quoteToken: Token,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
-    const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
-    // This is for backward compatibility with the existing cached routes, that doesn't include V4, i.e.. doesn't support native currency routing
-    // If we are changing to use native currency address that doesn't have V4, we will have a temporary period of cached routes miss
-    // because frontend can still send in native currency as tokenIn/tokenOut, and we are not caching the wrapped addresses.
-    const currencyInAddress = protocols.includes(Protocol.V4) ? getAddress(currencyIn) : currencyIn.wrapped.address
-    const currencyOutAddress = protocols.includes(Protocol.V4) ? getAddress(currencyOut) : currencyOut.wrapped.address
+    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
 
     const partitionKey = new PairTradeTypeChainId({
-      currencyIn: currencyInAddress,
-      currencyOut: currencyOutAddress,
+      currencyIn: tokenIn.address,
+      currencyOut: tokenOut.address,
       tradeType,
       chainId,
     })
@@ -449,14 +443,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    *
    * @param _chainId
    * @param _amount
-   * @param _quoteCurrency
+   * @param _quoteToken
    * @param _tradeType
    * @param _protocols
    */
   public async getCacheMode(
     _chainId: ChainId,
     _amount: CurrencyAmount<Currency>,
-    _quoteCurrency: Currency,
+    _quoteToken: Token,
     _tradeType: TradeType,
     _protocols: Protocol[]
   ): Promise<CacheMode> {
@@ -481,22 +475,22 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
-   * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteCurrency and amount.currency
+   * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
    *
    * @param amount
-   * @param quoteCurrency
+   * @param quoteToken
    * @param tradeType
    * @private
    */
-  private determineCurrencyInOut(
+  private determineTokenInOut(
     amount: CurrencyAmount<Currency>,
-    quoteCurrency: Currency,
+    quoteToken: Token,
     tradeType: TradeType
-  ): { currencyIn: Currency; currencyOut: Currency } {
+  ): { tokenIn: Token; tokenOut: Token } {
     if (tradeType == TradeType.EXACT_INPUT) {
-      return { currencyIn: amount.currency, currencyOut: quoteCurrency }
+      return { tokenIn: amount.currency.wrapped, tokenOut: quoteToken }
     } else {
-      return { currencyIn: quoteCurrency, currencyOut: amount.currency }
+      return { tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
     }
   }
 }
