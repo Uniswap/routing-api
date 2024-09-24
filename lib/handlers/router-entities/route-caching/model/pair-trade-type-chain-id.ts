@@ -37,8 +37,8 @@ export class PairTradeTypeChainId {
       ? getAddress(cachedRoutes.currencyIn)
       : cachedRoutes.currencyIn.wrapped.address
     const currencyOutAddress = cachedRoutes.protocolsCovered.includes(Protocol.V4)
-      ? getAddress(cachedRoutes.currencyIn)
-      : cachedRoutes.currencyIn.wrapped.address
+      ? getAddress(cachedRoutes.currencyOut)
+      : cachedRoutes.currencyOut.wrapped.address
 
     return new PairTradeTypeChainId({
       currencyIn: currencyInAddress,
