@@ -12,7 +12,7 @@ import {
   SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Fraction, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
@@ -449,14 +449,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    *
    * @param _chainId
    * @param _amount
-   * @param _quoteToken
+   * @param _quoteCurrency
    * @param _tradeType
    * @param _protocols
    */
   public async getCacheMode(
     _chainId: ChainId,
     _amount: CurrencyAmount<Currency>,
-    _quoteToken: Token,
+    _quoteCurrency: Currency,
     _tradeType: TradeType,
     _protocols: Protocol[]
   ): Promise<CacheMode> {
@@ -481,7 +481,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   }
 
   /**
-   * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
+   * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteCurrency and amount.currency
    *
    * @param amount
    * @param quoteCurrency
