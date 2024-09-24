@@ -1,6 +1,9 @@
 import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
