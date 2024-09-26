@@ -477,7 +477,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
-      portionAmount: outputPortionAmount, // TODO: name it back to portionAmount
+      portionAmount: outputPortionAmount, // TODO: name it back to portionAmount,
+      trade,
     } = swapRoute
 
     const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, requestSource)
@@ -682,6 +683,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionRecipient: outputPortionAmount && portionRecipient,
       portionAmount: outputPortionAmount?.quotient.toString(),
       portionAmountDecimals: outputPortionAmount?.toExact(),
+      priceImpact: trade?.priceImpact?.toFixed(),
     }
 
     this.logRouteMetrics(

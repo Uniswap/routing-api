@@ -89,6 +89,7 @@ export const QuoteResponseSchemaJoi = Joi.object().keys({
   portionRecipient: Joi.string().optional(),
   portionAmount: Joi.string().optional(),
   portionAmountDecimals: Joi.string().optional(),
+  priceImpact: Joi.string().optional(),
 })
 
 export type QuoteResponse = {
@@ -119,4 +120,5 @@ export type QuoteResponse = {
   portionRecipient?: string
   portionAmount?: string
   portionAmountDecimals?: string
+  priceImpact?: string
 }
