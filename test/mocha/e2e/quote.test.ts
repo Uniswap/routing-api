@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { AllowanceTransfer, PermitSingle } from '@uniswap/permit2-sdk'
-import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Percent, Rounding, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Ether, Fraction, Rounding, Token, WETH9 } from '@uniswap/sdk-core'
 import {
   CEUR_CELO,
   CEUR_CELO_ALFAJORES,
