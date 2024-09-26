@@ -356,13 +356,15 @@ describe('quote', function () {
 
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
             const {
-              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
               status,
             } = response
 
             expect(status).to.equal(200)
             expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
             expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+            expect(Number(priceImpact)).to.be.greaterThan(0)
 
             if (type == 'exactIn') {
               expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
