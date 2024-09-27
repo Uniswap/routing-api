@@ -15,6 +15,38 @@ export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = 
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
+    case ChainId.BLAST:
+      return {
+        v2PoolSelection: {
+          topN: 3,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 5,
+          topNSecondHop: 2,
+          topNWithEachBaseToken: 2,
+          topNWithBaseToken: 6,
+        },
+        v3PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 2,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 3,
+        },
+        v4PoolSelection: {
+          topN: 2,
+          topNDirectSwaps: 2,
+          topNTokenInOut: 2,
+          topNSecondHop: 1,
+          topNWithEachBaseToken: 3,
+          topNWithBaseToken: 3,
+        },
+        maxSwapsPerPath: 3,
+        minSplits: 1,
+        maxSplits: 3,
+        distributionPercent: 10,
+        forceCrossProtocol: false,
+      }
     case ChainId.BASE:
     case ChainId.OPTIMISM:
       return {
