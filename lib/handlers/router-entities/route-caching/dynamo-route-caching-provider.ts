@@ -1,14 +1,14 @@
 import {
   CachedRoute,
   CachedRoutes,
-  CacheMode,
+  CacheMode, getAddress,
   ID_TO_NETWORK_NAME,
   IRouteCachingProvider,
   log,
   metric,
   MetricLoggerUnit,
   routeToString,
-  SupportedRoutes,
+  SupportedRoutes
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
@@ -137,11 +137,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     currentBlockNumber: number,
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
-    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
+    const { currencyIn, currencyOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
 
     const partitionKey = new PairTradeTypeChainId({
-      currencyIn: tokenIn.address,
-      currencyOut: tokenOut.address,
+      currencyIn: getAddress(currencyIn),
+      currencyOut: getAddress(currencyOut),
       tradeType,
       chainId,
     })
@@ -486,11 +486,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     amount: CurrencyAmount<Currency>,
     quoteToken: Token,
     tradeType: TradeType
-  ): { tokenIn: Token; tokenOut: Token } {
+  ): { currencyIn: Currency; currencyOut: Currency } {
     if (tradeType == TradeType.EXACT_INPUT) {
-      return { tokenIn: amount.currency.wrapped, tokenOut: quoteToken }
+      return { currencyIn: amount.currency, currencyOut: quoteToken }
     } else {
-      return { tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
+      return { currencyIn: quoteToken, currencyOut: amount.currency }
     }
   }
 }

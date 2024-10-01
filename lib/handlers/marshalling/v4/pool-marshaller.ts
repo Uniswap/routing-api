@@ -19,10 +19,8 @@ export class PoolMarshaller {
   public static marshal(pool: Pool): MarshalledPool {
     return {
       protocol: Protocol.V4,
-      // TODO: ROUTE-217 - Support native currency routing in V4
-      // V4 we should not just wrap
-      token0: TokenMarshaller.marshal(pool.token0.wrapped),
-      token1: TokenMarshaller.marshal(pool.token1.wrapped),
+      token0: TokenMarshaller.marshal(pool.token0),
+      token1: TokenMarshaller.marshal(pool.token1),
       fee: pool.fee,
       tickSpacing: pool.tickSpacing,
       hooks: pool.hooks,

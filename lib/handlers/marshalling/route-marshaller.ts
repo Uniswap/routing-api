@@ -63,8 +63,8 @@ export class RouteMarshaller {
           // token.wrapped is wrong for V4
           // Probably need to use the token symbol for native, and still use address for non-native tokens
           // Check later CELO token, which is both native and ERC20, which one to use
-          input: TokenMarshaller.marshal(route.input.wrapped),
-          output: TokenMarshaller.marshal(route.output.wrapped),
+          input: TokenMarshaller.marshal(route.input),
+          output: TokenMarshaller.marshal(route.output),
           pools: route.pools.map((pool) => V4PoolMarshaller.marshal(pool)),
         }
       case Protocol.MIXED:

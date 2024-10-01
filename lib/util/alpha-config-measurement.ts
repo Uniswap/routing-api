@@ -43,9 +43,9 @@ export const measureDistributionPercentChangeImpact = (
 
   if (routesImpacted.length > 0) {
     log.warn(`Distribution percent change impacted the routes ${routesImpacted.join(',')},
-      for currency ${currencyIn.wrapped.symbol}
+      for currency ${currencyIn.symbol}
       amount ${amount.toExact()}
-      quote currency ${currencyOut.wrapped.symbol}
+      quote currency ${currencyOut.symbol}
       trade type ${tradeType}
       chain id ${chainId}`)
     metric.putMetric('BEST_SWAP_ROUTE_DISTRIBUTION_PERCENT_CHANGE_IMPACTED', 1, MetricLoggerUnit.Count)
