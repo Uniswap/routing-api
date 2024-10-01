@@ -20,6 +20,7 @@ import {
   USDC_NATIVE_BASE,
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
+  USDC_NATIVE_SEPOLIA,
   USDT_MAINNET,
   V4_SEPOLIA_TEST_A,
   V4_SEPOLIA_TEST_B,
@@ -2672,11 +2673,6 @@ describe('quote', function () {
 
         const native = NATIVE_CURRENCY[chain]
         it(`${native} -> erc20`, async () => {
-          if (chain === ChainId.SEPOLIA) {
-            // Sepolia doesn't have sufficient liquidity on DAI pools yet
-            return
-          }
-
           if (chain === ChainId.BLAST || chain === ChainId.ZORA || chain === ChainId.ZKSYNC) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI
@@ -2686,21 +2682,34 @@ describe('quote', function () {
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
           // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
-          const baseErc20 = chain == ChainId.BASE ? USDC_ON(ChainId.BASE) : erc2
+          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
+            ? chain !== ChainId.SEPOLIA
+              ? USDC_ON(chain)
+              : USDC_NATIVE_SEPOLIA
+            : erc2
+          const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: native,
             tokenInChainId: chain,
-            tokenOutAddress: baseErc20.address,
+            tokenOutAddress: tokenOut.address,
             tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), baseErc20, '1'),
+            amount: await getAmountFromToken(type, WNATIVE_ON(chain), tokenOut, amount),
             type,
             enableUniversalRouter: true,
+            protocols: chain === ChainId.SEPOLIA ? 'v4' : 'v2,v3,mixed',
+          }
+
+          const headers = {
+            'x-universal-router-version': '2.0',
           }
 
           const queryParams = qs.stringify(quoteReq)
+
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: headers,
+            })
             const { status } = response
 
             expect(status).to.equal(200, JSON.stringify(response.data))
