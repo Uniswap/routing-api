@@ -1,14 +1,15 @@
 import {
   CachedRoute,
   CachedRoutes,
-  CacheMode, getAddress,
+  CacheMode,
+  getAddress,
   ID_TO_NETWORK_NAME,
   IRouteCachingProvider,
   log,
   metric,
   MetricLoggerUnit,
   routeToString,
-  SupportedRoutes
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'

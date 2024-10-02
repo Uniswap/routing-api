@@ -1,5 +1,11 @@
 import { Currency, Token } from '@uniswap/sdk-core'
-import { ITokenListProvider, ITokenProvider, NATIVE_NAMES_BY_ID, nativeOnChain } from '@uniswap/smart-order-router'
+import {
+  getAddress,
+  ITokenListProvider,
+  ITokenProvider,
+  NATIVE_NAMES_BY_ID,
+  nativeOnChain,
+} from '@uniswap/smart-order-router'
 import Logger from 'bunyan'
 import { isAddress } from '../util/isAddress'
 
@@ -37,9 +43,9 @@ export class CurrencyLookup {
     const nativeToken = nativeOnChain(chainId)
     this.log.debug(
       {
-        tokenAddress: nativeToken.wrapped.address,
+        tokenAddress: getAddress(nativeToken),
       },
-      `Found native token ${tokenRaw} for chain ${chainId}: ${nativeToken.wrapped.address}}`
+      `Found native token ${tokenRaw} for chain ${chainId}: ${getAddress(nativeToken)}}`
     )
     return nativeToken
   }
@@ -57,7 +63,7 @@ export class CurrencyLookup {
     if (token) {
       this.log.debug(
         {
-          tokenAddress: token.wrapped.address,
+          tokenAddress: token.address,
         },
         `Found token ${tokenRaw} in token lists.`
       )

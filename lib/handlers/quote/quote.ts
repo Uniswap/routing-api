@@ -2,15 +2,17 @@ import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
-  AlphaRouterConfig, getAddress,
+  AlphaRouterConfig,
+  getAddress,
   ID_TO_NETWORK_NAME,
   IMetric,
   IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
-  SimulationStatus, sortsBefore,
+  SimulationStatus,
+  sortsBefore,
   SwapOptions,
-  SwapRoute
+  SwapRoute,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
@@ -312,12 +314,22 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    // We need bo wrap both tokens, because the comparison includes comparing native currency vs token.
-    if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_IN_OUT_SAME',
-        detail: `tokenIn and tokenOut must be different`,
+    if (protocols.includes(Protocol.V4)) {
+      // We need bo wrap both tokens, because the comparison includes comparing native currency vs token.
+      if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
+        return {
+          statusCode: 400,
+          errorCode: 'TOKEN_IN_OUT_SAME',
+          detail: `tokenIn and tokenOut must be different`,
+        }
+      }
+    } else {
+      if (currencyIn.equals(currencyOut)) {
+        return {
+          statusCode: 400,
+          errorCode: 'TOKEN_IN_OUT_SAME',
+          detail: `tokenIn and tokenOut must be different`,
+        }
       }
     }
 
@@ -356,8 +368,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const [token0Symbol, token0Address, token1Symbol, token1Address] = sortsBefore(currencyIn, currencyOut)
-      ? [currencyIn.symbol, getAddress(currencyIn), currencyOut.symbol, currencyOut.wrapped.address]
-      : [currencyOut.symbol, getAddress(currencyOut), currencyIn.symbol, currencyIn.wrapped.address]
+      ? [currencyIn.symbol, getAddress(currencyIn), currencyOut.symbol, getAddress(currencyOut)]
+      : [currencyOut.symbol, getAddress(currencyOut), currencyIn.symbol, getAddress(currencyOut)]
 
     const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble({
       chainId,
