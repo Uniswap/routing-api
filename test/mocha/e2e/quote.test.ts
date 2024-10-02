@@ -44,13 +44,14 @@ import _ from 'lodash'
 import qs from 'qs'
 import { SUPPORTED_CHAINS } from '../../../lib/handlers/injector-sor'
 import { QuoteQueryParams, TradeTypeParam } from '../../../lib/handlers/quote/schema/quote-schema'
-import { QuoteResponse } from '../../../lib/handlers/schema'
+import { QuoteResponse, V4PoolInRoute } from '../../../lib/handlers/schema'
 import { Permit2__factory } from '../../../lib/types/ext'
 import { resetAndFundAtBlock } from '../../utils/forkAndFund'
 import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndApprove'
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
+import { ZERO_ADDRESS } from '@uniswap/universal-router-sdk/dist/utils/constants'
 
 const { ethers } = hre
 
@@ -2725,7 +2726,13 @@ describe('quote', function () {
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: headers,
             })
-            const { status } = response
+            const { status, data } = response
+            expect(data.route).to.not.be.undefined
+            expect(data.route.length).to.be.greaterThanOrEqual(1)
+            expect(data.route[0].length).to.be.greaterThanOrEqual(1)
+            expect((data.route[0][0] as V4PoolInRoute).poolId).to.be.equals('0x8dce1bb28300d751b94c09c7ea8e86e483630e36cd6572f4d58e149e56931b56')
+            expect(data.route[0][0].tokenIn).to.be.equals(ZERO_ADDRESS)
+            expect(data.route[0][0].tokenOut).to.be.equals(tokenOut.address)
 
             expect(status).to.equal(200, JSON.stringify(response.data))
           } catch (err: any) {

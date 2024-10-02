@@ -15,7 +15,7 @@ export type SupportedPoolInRoute = V2PoolInRoute | V3PoolInRoute | V4PoolInRoute
 
 export type V4PoolInRoute = {
   type: 'v4-pool'
-  address: string
+  poolId: string
   tokenIn: TokenInRoute
   tokenOut: TokenInRoute
   sqrtRatioX96: string

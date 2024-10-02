@@ -143,6 +143,11 @@ export class SwapOptionsFactory {
     }
 
     if (permitSignature && permitNonce && permitExpiration && permitAmount && permitSigDeadline) {
+      // in case of v4 native input, we might not want to compose permit2 at all, because native currency cannot be issued permit2.
+      // however there's still a chance, for v4, a native input has a wrapped pool has best routing. in that case, we still need permit2.
+      // for now, SOR v4 routing cannot support native currency input with the wrapped pool routing, although v4-sdk can support that.
+      // so we just leave as is here. ud-sdk should be able to tell to not issue permit2 because it could go through the v4 native pool in the route object
+      // as part of routing-api response.
       const permit: PermitSingle = {
         details: {
           token: currencyIn.wrapped.address,

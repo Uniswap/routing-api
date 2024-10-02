@@ -324,6 +324,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
       }
     } else {
+      // we don't want to wrap for v4, because v4 supports native currency pool
       if (currencyIn.equals(currencyOut)) {
         return {
           statusCode: 400,
