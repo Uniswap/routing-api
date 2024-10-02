@@ -2733,6 +2733,8 @@ describe('quote', function () {
               expect(data.route.length).to.be.greaterThanOrEqual(1)
               expect(data.route[0].length).to.be.greaterThanOrEqual(1)
               expect((data.route[0][0] as V4PoolInRoute).poolId).to.be.equals('0x8dce1bb28300d751b94c09c7ea8e86e483630e36cd6572f4d58e149e56931b56')
+              // this is guaranteed to return token zero address only for a v4 pool.
+              // assertion here makes sense that universal-router-sdk picks up native currency pool
               expect(data.route[0][0].tokenIn).to.be.equals(ZERO_ADDRESS)
               expect(data.route[0][0].tokenOut).to.be.equals(tokenOut.address)
 
