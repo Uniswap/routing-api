@@ -25,12 +25,12 @@ import {
   V4_SEPOLIA_TEST_A,
   V4_SEPOLIA_TEST_B,
   WBTC_MAINNET,
-  WLD_WORLDCHAIN
+  WLD_WORLDCHAIN,
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
-  UniversalRouterVersion
+  UniversalRouterVersion,
 } from '@uniswap/universal-router-sdk'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
@@ -2732,7 +2732,9 @@ describe('quote', function () {
               expect(data.route).to.not.be.undefined
               expect(data.route.length).to.be.greaterThanOrEqual(1)
               expect(data.route[0].length).to.be.greaterThanOrEqual(1)
-              expect((data.route[0][0] as V4PoolInRoute).poolId).to.be.equals('0x8dce1bb28300d751b94c09c7ea8e86e483630e36cd6572f4d58e149e56931b56')
+              expect((data.route[0][0] as V4PoolInRoute).address).to.be.equals(
+                '0x8dce1bb28300d751b94c09c7ea8e86e483630e36cd6572f4d58e149e56931b56'
+              )
               // this is guaranteed to return token zero address only for a v4 pool.
               // assertion here makes sense that universal-router-sdk picks up native currency pool
               expect(data.route[0][0].tokenIn).to.be.equals(ZERO_ADDRESS)
