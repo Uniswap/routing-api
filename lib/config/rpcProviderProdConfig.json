@@ -107,5 +107,23 @@
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_324"],
     "providerNames": ["QUICKNODE"]
+  },
+  {
+    "chainId": 480,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0.01,
+    "healthCheckSampleProb": 0.01,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_480"],
+    "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 1301,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0.01,
+    "healthCheckSampleProb": 0.01,
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_1301"],
+    "providerNames": ["QUICKNODE"]
   }
 ]
