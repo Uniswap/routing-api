@@ -122,7 +122,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
       description: 'Routing Lambda',
       environment: {
-        VERSION: '26',
+        VERSION: '27',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
