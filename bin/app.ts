@@ -204,26 +204,22 @@ export class RoutingAPIPipeline extends Stack {
       // Avalanche
       // 'INFURA_43114',
       'QUICKNODE_43114',
-      'NIRVANA_43114',
       // BNB
       'QUICKNODE_56',
       // Base
       'QUICKNODE_8453',
       // 'INFURA_8453',
       'ALCHEMY_8453',
-      'NIRVANA_8453',
       // Sepolia
       // 'INFURA_11155111',
       'ALCHEMY_11155111',
       // Arbitrum
       // 'INFURA_42161',
       'QUICKNODE_42161',
-      'NIRVANA_42161',
       'ALCHEMY_42161',
       // Ethereum
       // 'INFURA_1',
       'QUICKNODE_1',
-      'NIRVANA_1',
       'ALCHEMY_1',
       'QUICKNODERETH_1',
       // Blast
@@ -234,6 +230,10 @@ export class RoutingAPIPipeline extends Stack {
       // ZkSync
       'QUICKNODE_324',
       'ALCHEMY_324',
+      // WorldChain,
+      'ALCHEMY_480',
+      // AstroChain Sepolia,
+      'QUICKNODE_1301',
       // unirpc - serves all chains
       'UNIRPC_0',
     ]
@@ -380,27 +380,23 @@ const jsonRpcProviders = {
   // Avalanche
   // INFURA_43114: process.env.INFURA_43114!,
   QUICKNODE_43114: process.env.QUICKNODE_43114!,
-  NIRVANA_43114: process.env.NIRVANA_43114!,
   // BNB
   QUICKNODE_56: process.env.QUICKNODE_56!,
   // Base
   QUICKNODE_8453: process.env.QUICKNODE_8453!,
   // INFURA_8453: process.env.INFURA_8453!,
   ALCHEMY_8453: process.env.ALCHEMY_8453!,
-  NIRVANA_8453: process.env.NIRVANA_8453!,
   // Sepolia
   // INFURA_11155111: process.env.INFURA_11155111!,
   ALCHEMY_11155111: process.env.ALCHEMY_11155111!,
   // Arbitrum
   // INFURA_42161: process.env.INFURA_42161!,
   QUICKNODE_42161: process.env.QUICKNODE_42161!,
-  NIRVANA_42161: process.env.NIRVANA_42161!,
   ALCHEMY_42161: process.env.ALCHEMY_42161!,
   // Ethereum
   // INFURA_1: process.env.INFURA_1!,
   QUICKNODE_1: process.env.QUICKNODE_1!,
   QUICKNODERETH_1: process.env.QUICKNODERETH_1!,
-  NIRVANA_1: process.env.NIRVANA_1!,
   ALCHEMY_1: process.env.ALCHEMY_1!,
   // Blast
   QUICKNODE_81457: process.env.QUICKNODE_81457!,
@@ -410,6 +406,10 @@ const jsonRpcProviders = {
   // ZkSync
   QUICKNODE_324: process.env.QUICKNODE_324!,
   ALCHEMY_324: process.env.ALCHEMY_324!,
+  // WorldChain,
+  ALCHEMY_480: process.env.ALCHEMY_480!,
+  // AstroChain Sepolia,
+  QUICKNODE_1301: process.env.QUICKNODE_1301!,
   // unirpc - serves all chains
   UNIRPC_0: process.env.UNIRPC_0!,
 }

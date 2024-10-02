@@ -18,6 +18,10 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'avalanchec'
     case ChainId.BASE:
       return 'base'
+    case ChainId.WORLDCHAIN:
+      return 'worldchain'
+    case ChainId.ASTROCHAIN_SEPOLIA:
+      return 'astrochain-sepolia'
     default:
       return 'ethereum'
   }
@@ -60,22 +64,6 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     case 'INFURA_81457': {
       return `https://blast-mainnet.infura.io/v3/${tokens[0]}`
     }
-    // Nirvana
-    case 'NIRVANA_43114': {
-      return `https://avax.nirvanalabs.xyz/${tokens[0]}/ext/bc/C/rpc?apikey=${tokens[1]}`
-    }
-    case 'NIRVANA_10': {
-      return `https://optimism.nirvanalabs.xyz/${tokens[0]}?apikey=${tokens[1]}`
-    }
-    case 'NIRVANA_8453': {
-      return `https://base.nirvanalabs.xyz/${tokens[0]}?apikey=${tokens[1]}`
-    }
-    case 'NIRVANA_42161': {
-      return `https://arb.nirvanalabs.xyz/${tokens[0]}?apikey=${tokens[1]}`
-    }
-    case 'NIRVANA_1': {
-      return `https://ethereum.nirvanalabs.xyz/${tokens[0]}?apikey=${tokens[1]}`
-    }
     // Quicknode
     case 'QUICKNODE_43114': {
       return `https://${tokens[0]}.avalanche-mainnet.quiknode.pro/${tokens[1]}/ext/bc/C/rpc/`
@@ -110,6 +98,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     case 'QUICKNODE_324': {
       return `https://${tokens[0]}.zksync-mainnet.quiknode.pro/${tokens[1]}`
     }
+    case 'QUICKNODE_1301': {
+      return `${tokens[0]}`
+    }
     // QuickNode RETH
     case 'QUICKNODERETH_1': {
       return `https://${tokens[0]}.quiknode.pro/${tokens[1]}`
@@ -135,6 +126,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     }
     case 'ALCHEMY_324': {
       return `https://zksync-mainnet.g.alchemy.com/v2/${tokens[0]}`
+    }
+    case 'ALCHEMY_480': {
+      return `https://worldchain-mainnet.g.alchemy.com/v2/${tokens[0]}`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)

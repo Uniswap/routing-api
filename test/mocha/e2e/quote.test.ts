@@ -25,6 +25,7 @@ import {
   V4_SEPOLIA_TEST_A,
   V4_SEPOLIA_TEST_B,
   WBTC_MAINNET,
+  WLD_WORLDCHAIN,
 } from '@uniswap/smart-order-router'
 import {
   PERMIT2_ADDRESS,
@@ -2515,6 +2516,8 @@ describe('quote', function () {
     [ChainId.ROOTSTOCK]: () => USDC_ON(ChainId.ROOTSTOCK),
     [ChainId.BLAST]: () => USDB_BLAST,
     [ChainId.ZKSYNC]: () => USDC_ON(ChainId.ZKSYNC),
+    [ChainId.WORLDCHAIN]: () => USDC_ON(ChainId.WORLDCHAIN),
+    [ChainId.ASTROCHAIN_SEPOLIA]: () => USDC_ON(ChainId.ASTROCHAIN_SEPOLIA),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
@@ -2543,6 +2546,8 @@ describe('quote', function () {
     [ChainId.ROOTSTOCK]: () => WNATIVE_ON(ChainId.ROOTSTOCK),
     [ChainId.BLAST]: () => WNATIVE_ON(ChainId.BLAST),
     [ChainId.ZKSYNC]: () => WNATIVE_ON(ChainId.ZKSYNC),
+    [ChainId.WORLDCHAIN]: () => WLD_WORLDCHAIN,
+    [ChainId.ASTROCHAIN_SEPOLIA]: () => WNATIVE_ON(ChainId.ASTROCHAIN_SEPOLIA),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -2556,7 +2561,8 @@ describe('quote', function () {
       // We will follow up supporting ZORA and ROOTSTOCK
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
-      c != ChainId.GOERLI
+      c != ChainId.GOERLI &&
+      c != ChainId.ASTROCHAIN_SEPOLIA
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
@@ -2577,7 +2583,12 @@ describe('quote', function () {
           }
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = chain === ChainId.BLAST ? (type === 'exactOut' ? '0.002' : '0.01') : '1'
+          const amount =
+            chain === ChainId.BLAST || chain === ChainId.WORLDCHAIN || chain === ChainId.ASTROCHAIN_SEPOLIA
+              ? type === 'exactOut'
+                ? '0.002'
+                : '0.01'
+              : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: wrappedNative.address,
@@ -2633,8 +2644,7 @@ describe('quote', function () {
           }
         })
 
-        // TODO: re-enable sepolia v4 route e2e test, once SOR and routing-api updates the pool manager and state view contract address
-        it.skip(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
+        it(`${erc1.symbol} -> ${erc2.symbol}`, async () => {
           if (chain === ChainId.SEPOLIA) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
             return
@@ -2673,7 +2683,12 @@ describe('quote', function () {
 
         const native = NATIVE_CURRENCY[chain]
         it(`${native} -> erc20`, async () => {
-          if (chain === ChainId.BLAST || chain === ChainId.ZORA || chain === ChainId.ZKSYNC) {
+          if (
+            chain === ChainId.BLAST ||
+            chain === ChainId.ZORA ||
+            chain === ChainId.ZKSYNC ||
+            chain === ChainId.ASTROCHAIN_SEPOLIA
+          ) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI
             // Zksync doesn't have liquid USDC/DAI pool yet
