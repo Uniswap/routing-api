@@ -24,6 +24,7 @@ import {
   USDT_MAINNET,
   V4_SEPOLIA_TEST_A,
   V4_SEPOLIA_TEST_B,
+  V4_SUPPORTED,
   WBTC_MAINNET,
   WLD_WORLDCHAIN,
 } from '@uniswap/smart-order-router'
@@ -3031,7 +3032,7 @@ describe('quote', function () {
             amount: await getAmountFromToken(type, WNATIVE_ON(chain), tokenOut, amount),
             type,
             enableUniversalRouter: true,
-            protocols: chain === ChainId.SEPOLIA ? 'v4' : 'v2,v3,mixed',
+            protocols: V4_SUPPORTED.includes(chain) ? 'v4' : 'v2,v3,mixed',
           }
 
           const headers = {
@@ -3072,7 +3073,7 @@ describe('quote', function () {
               })
             })
 
-            if (chain === ChainId.SEPOLIA) {
+            if (V4_SUPPORTED.includes(chain)) {
               expect(nativePoolFound).to.be.true
             }
 
