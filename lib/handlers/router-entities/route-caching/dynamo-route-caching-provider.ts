@@ -123,21 +123,21 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    *
    * @param chainId
    * @param amount
-   * @param quoteToken
+   * @param quoteCurrency
    * @param tradeType
-   * @param _protocols
+   * @param protocols
    * @protected
    */
   protected async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteCurrency: Currency,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
-    const { currencyIn, currencyOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
+    const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
 
     // for getting the cached routes, we dont know if the cached route will contains a v4 pool or not, so we try to see if the input protocols contain v4
     const includesV4Pool = protocols.includes(Protocol.V4)
@@ -482,19 +482,19 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
    *
    * @param amount
-   * @param quoteToken
+   * @param quoteCurrency
    * @param tradeType
    * @private
    */
-  private determineTokenInOut(
+  private determineCurrencyInOut(
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteCurrency: Currency,
     tradeType: TradeType
   ): { currencyIn: Currency; currencyOut: Currency } {
     if (tradeType == TradeType.EXACT_INPUT) {
-      return { currencyIn: amount.currency, currencyOut: quoteToken }
+      return { currencyIn: amount.currency, currencyOut: quoteCurrency }
     } else {
-      return { currencyIn: quoteToken, currencyOut: amount.currency }
+      return { currencyIn: quoteCurrency, currencyOut: amount.currency }
     }
   }
 }
