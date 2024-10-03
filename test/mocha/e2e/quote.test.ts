@@ -1654,17 +1654,17 @@ describe('quote', function () {
                 }
 
                 expect(methodParameters).to.not.be.undefined
-              })
 
-              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-              // if it's exactOut quote, we should always hit the cached routes.
-              // this is regardless of protocol version.
-              // the reason is because exact in quote always runs before exact out
-              // along with the native or wrapped native pool token address assertions previously
-              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-              // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.true
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.be.true
+              })
             }
 
             it(`erc20 -> eth`, async () => {
