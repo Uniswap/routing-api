@@ -314,23 +314,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    if (protocols.includes(Protocol.V4)) {
-      // We need bo wrap both tokens, because the comparison includes comparing native currency vs token.
-      if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
-        return {
-          statusCode: 400,
-          errorCode: 'TOKEN_IN_OUT_SAME',
-          detail: `tokenIn and tokenOut must be different`,
-        }
-      }
-    } else {
-      // we don't want to wrap for v4, because v4 supports native currency pool
-      if (currencyIn.equals(currencyOut)) {
-        return {
-          statusCode: 400,
-          errorCode: 'TOKEN_IN_OUT_SAME',
-          detail: `tokenIn and tokenOut must be different`,
-        }
+    if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
+      return {
+        statusCode: 400,
+        errorCode: 'TOKEN_IN_OUT_SAME',
+        detail: `tokenIn and tokenOut must be different`,
       }
     }
 

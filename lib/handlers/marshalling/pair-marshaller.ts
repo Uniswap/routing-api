@@ -19,8 +19,8 @@ export class PairMarshaller {
 
   public static unmarshal(marshalledPair: MarshalledPair): Pair {
     return new Pair(
-      CurrencyAmountMarshaller.unmarshal(marshalledPair.currencyAmountA),
-      CurrencyAmountMarshaller.unmarshal(marshalledPair.tokenAmountB)
+      CurrencyAmountMarshaller.unmarshal(marshalledPair.currencyAmountA).wrapped,
+      CurrencyAmountMarshaller.unmarshal(marshalledPair.tokenAmountB).wrapped
     )
   }
 }

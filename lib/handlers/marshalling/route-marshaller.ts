@@ -95,15 +95,15 @@ export class RouteMarshaller {
         const v2Route = marshalledRoute as MarshalledV2Route
         return new V2Route(
           v2Route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
-          TokenMarshaller.unmarshal(v2Route.input),
-          TokenMarshaller.unmarshal(v2Route.output)
+          TokenMarshaller.unmarshal(v2Route.input).wrapped,
+          TokenMarshaller.unmarshal(v2Route.output).wrapped
         )
       case Protocol.V3:
         const v3Route = marshalledRoute as MarshalledV3Route
         return new V3Route(
           v3Route.pools.map((marshalledPool) => V3PoolMarshaller.unmarshal(marshalledPool)),
-          TokenMarshaller.unmarshal(v3Route.input),
-          TokenMarshaller.unmarshal(v3Route.output)
+          TokenMarshaller.unmarshal(v3Route.input).wrapped,
+          TokenMarshaller.unmarshal(v3Route.output).wrapped
         )
       case Protocol.V4:
         const v4Route = marshalledRoute as MarshalledV4Route
