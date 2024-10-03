@@ -1,6 +1,7 @@
 import { Currency, Token } from '@uniswap/sdk-core'
 import { BigNumber } from 'ethers'
-import { getAddress } from '@uniswap/smart-order-router'
+import { getAddress, nativeOnChain } from '@uniswap/smart-order-router'
+import { isNativeCurrency } from '@uniswap/universal-router-sdk'
 
 export interface MarshalledCurrency {
   chainId: number
@@ -25,16 +26,18 @@ export class TokenMarshaller {
     }
   }
 
-  public static unmarshal(marshalledCurrency: MarshalledCurrency): Token {
-    return new Token(
-      marshalledCurrency.chainId,
-      marshalledCurrency.address,
-      marshalledCurrency.decimals,
-      marshalledCurrency.symbol,
-      marshalledCurrency.name,
-      true, // at this point we know it's valid token address
-      marshalledCurrency.buyFeeBps ? BigNumber.from(marshalledCurrency.buyFeeBps) : undefined,
-      marshalledCurrency.sellFeeBps ? BigNumber.from(marshalledCurrency.sellFeeBps) : undefined
-    )
+  public static unmarshal(marshalledCurrency: MarshalledCurrency): Currency {
+    return isNativeCurrency(marshalledCurrency.address)
+      ? nativeOnChain(marshalledCurrency.chainId)
+      : new Token(
+          marshalledCurrency.chainId,
+          marshalledCurrency.address,
+          marshalledCurrency.decimals,
+          marshalledCurrency.symbol,
+          marshalledCurrency.name,
+          true, // at this point we know it's valid token address
+          marshalledCurrency.buyFeeBps ? BigNumber.from(marshalledCurrency.buyFeeBps) : undefined,
+          marshalledCurrency.sellFeeBps ? BigNumber.from(marshalledCurrency.sellFeeBps) : undefined
+        )
   }
 }

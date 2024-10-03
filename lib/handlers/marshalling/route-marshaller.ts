@@ -59,12 +59,8 @@ export class RouteMarshaller {
       case Protocol.V4:
         return {
           protocol: Protocol.V4,
-          // TODO: ROUTE-217 - Support native currency routing in V4
-          // token.wrapped is wrong for V4
-          // Probably need to use the token symbol for native, and still use address for non-native tokens
-          // Check later CELO token, which is both native and ERC20, which one to use
-          input: TokenMarshaller.marshal(route.input.wrapped),
-          output: TokenMarshaller.marshal(route.output.wrapped),
+          input: TokenMarshaller.marshal(route.input),
+          output: TokenMarshaller.marshal(route.output),
           pools: route.pools.map((pool) => V4PoolMarshaller.marshal(pool)),
         }
       case Protocol.MIXED:
@@ -95,15 +91,15 @@ export class RouteMarshaller {
         const v2Route = marshalledRoute as MarshalledV2Route
         return new V2Route(
           v2Route.pairs.map((marshalledPair) => PairMarshaller.unmarshal(marshalledPair)),
-          TokenMarshaller.unmarshal(v2Route.input),
-          TokenMarshaller.unmarshal(v2Route.output)
+          TokenMarshaller.unmarshal(v2Route.input).wrapped,
+          TokenMarshaller.unmarshal(v2Route.output).wrapped
         )
       case Protocol.V3:
         const v3Route = marshalledRoute as MarshalledV3Route
         return new V3Route(
           v3Route.pools.map((marshalledPool) => V3PoolMarshaller.unmarshal(marshalledPool)),
-          TokenMarshaller.unmarshal(v3Route.input),
-          TokenMarshaller.unmarshal(v3Route.output)
+          TokenMarshaller.unmarshal(v3Route.input).wrapped,
+          TokenMarshaller.unmarshal(v3Route.output).wrapped
         )
       case Protocol.V4:
         const v4Route = marshalledRoute as MarshalledV4Route

@@ -123,25 +123,28 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    *
    * @param chainId
    * @param amount
-   * @param quoteToken
+   * @param quoteCurrency
    * @param tradeType
-   * @param _protocols
+   * @param protocols
    * @protected
    */
   protected async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteCurrency: Currency,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,
     optimistic: boolean
   ): Promise<CachedRoutes | undefined> {
-    const { tokenIn, tokenOut } = this.determineTokenInOut(amount, quoteToken, tradeType)
+    const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
+
+    // for getting the cached routes, we dont know if the cached route will contains a v4 pool or not, so we try to see if the input protocols contain v4
+    const includesV4Pool = protocols.includes(Protocol.V4)
 
     const partitionKey = new PairTradeTypeChainId({
-      currencyIn: tokenIn.address,
-      currencyOut: tokenOut.address,
+      currencyIn: PairTradeTypeChainId.deriveCurrencyAddress(includesV4Pool, currencyIn),
+      currencyOut: PairTradeTypeChainId.deriveCurrencyAddress(includesV4Pool, currencyOut),
       tradeType,
       chainId,
     })
@@ -164,6 +167,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const result = await this.ddbClient.query(queryParams).promise()
       if (result.Items && result.Items.length > 0) {
         metric.putMetric('RoutesDbPreFilterEntriesFound', result.Items.length, MetricLoggerUnit.Count)
+
         // At this point we might have gotten all the routes we have discovered in the last 24 hours for this pair
         // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
         const filteredItems = result.Items
@@ -314,7 +318,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
         metric.putMetric('CachingQuoteForRoutesDbRequestSent', 1, MetricLoggerUnit.Count)
-        this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.MIXED], amount)
+        this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED], amount)
         this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
         metric.putMetric('CachingQuoteForRoutesDbRequestNotNeeded', 1, MetricLoggerUnit.Count)
@@ -478,19 +482,19 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * Helper function to determine the tokenIn and tokenOut given the tradeType, quoteToken and amount.currency
    *
    * @param amount
-   * @param quoteToken
+   * @param quoteCurrency
    * @param tradeType
    * @private
    */
-  private determineTokenInOut(
+  private determineCurrencyInOut(
     amount: CurrencyAmount<Currency>,
-    quoteToken: Token,
+    quoteCurrency: Currency,
     tradeType: TradeType
-  ): { tokenIn: Token; tokenOut: Token } {
+  ): { currencyIn: Currency; currencyOut: Currency } {
     if (tradeType == TradeType.EXACT_INPUT) {
-      return { tokenIn: amount.currency.wrapped, tokenOut: quoteToken }
+      return { currencyIn: amount.currency, currencyOut: quoteCurrency }
     } else {
-      return { tokenIn: quoteToken, tokenOut: amount.currency.wrapped }
+      return { currencyIn: quoteCurrency, currencyOut: amount.currency }
     }
   }
 }

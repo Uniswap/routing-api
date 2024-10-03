@@ -3,12 +3,14 @@ import { Protocol } from '@uniswap/router-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
+  getAddress,
   ID_TO_NETWORK_NAME,
   IMetric,
   IRouter,
   MetricLoggerUnit,
   routeAmountsToString,
   SimulationStatus,
+  sortsBefore,
   SwapOptions,
   SwapRoute,
 } from '@uniswap/smart-order-router'
@@ -312,7 +314,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       }
     }
 
-    // We need bo wrap both tokens, because the comparison includes comparing native currency vs token.
     if (currencyIn.wrapped.equals(currencyOut.wrapped)) {
       return {
         statusCode: 400,
@@ -355,11 +356,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       tokenPairSymbolChain = `${tokenPairSymbol}/${chainId}`
     }
 
-    const [token0Symbol, token0Address, token1Symbol, token1Address] = currencyIn.wrapped.sortsBefore(
-      currencyOut.wrapped
-    )
-      ? [currencyIn.symbol, currencyIn.wrapped.address, currencyOut.symbol, currencyOut.wrapped.address]
-      : [currencyOut.symbol, currencyOut.wrapped.address, currencyIn.symbol, currencyIn.wrapped.address]
+    const [token0Symbol, token0Address, token1Symbol, token1Address] = sortsBefore(currencyIn, currencyOut)
+      ? [currencyIn.symbol, getAddress(currencyIn), currencyOut.symbol, getAddress(currencyOut)]
+      : [currencyOut.symbol, getAddress(currencyOut), currencyIn.symbol, getAddress(currencyOut)]
 
     const swapParams: SwapOptions | undefined = SwapOptionsFactory.assemble({
       chainId,
@@ -536,13 +535,13 @@ export class QuoteHandler extends APIGLambdaHandler<
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),
-              address: tokenIn.wrapped.address,
+              address: getAddress(tokenIn),
               symbol: tokenIn.symbol!,
             },
             tokenOut: {
               chainId: tokenOut.chainId,
               decimals: tokenOut.decimals.toString(),
-              address: tokenOut.wrapped.address,
+              address: getAddress(tokenOut),
               symbol: tokenOut.symbol!,
             },
             fee: nextPool.fee.toString(),
@@ -811,9 +810,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     routeString: string,
     swapRoute: SwapRoute
   ): void {
-    const tradingPair = `${currencyIn.wrapped.symbol}/${currencyOut.wrapped.symbol}`
-    const wildcardInPair = `${currencyIn.wrapped.symbol}/*`
-    const wildcardOutPair = `*/${currencyOut.wrapped.symbol}`
+    const tradingPair = `${currencyIn.symbol}/${currencyOut.symbol}`
+    const wildcardInPair = `${currencyIn.symbol}/*`
+    const wildcardOutPair = `*/${currencyOut.symbol}`
     const tradeTypeEnumValue = tradeType == 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
     const pairsTracked = PAIRS_TO_TRACK.get(chainId)?.get(tradeTypeEnumValue)
 

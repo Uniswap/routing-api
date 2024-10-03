@@ -28,8 +28,8 @@ export class PoolMarshaller {
 
   public static unmarshal(marshalledPool: MarshalledPool): Pool {
     return new Pool(
-      TokenMarshaller.unmarshal(marshalledPool.token0),
-      TokenMarshaller.unmarshal(marshalledPool.token1),
+      TokenMarshaller.unmarshal(marshalledPool.token0).wrapped,
+      TokenMarshaller.unmarshal(marshalledPool.token1).wrapped,
       marshalledPool.fee,
       marshalledPool.sqrtRatioX96,
       marshalledPool.liquidity,

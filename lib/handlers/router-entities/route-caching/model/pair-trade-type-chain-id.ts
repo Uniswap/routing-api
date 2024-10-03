@@ -1,4 +1,5 @@
-import { ChainId, TradeType } from '@uniswap/sdk-core'
+import { Protocol } from '@uniswap/router-sdk'
+import { ChainId, Currency, TradeType } from '@uniswap/sdk-core'
 import { CachedRoutes, getAddress } from '@uniswap/smart-order-router'
 
 interface PairTradeTypeChainIdArgs {
@@ -29,11 +30,17 @@ export class PairTradeTypeChainId {
   }
 
   public static fromCachedRoutes(cachedRoutes: CachedRoutes): PairTradeTypeChainId {
+    const includesV4Pool = cachedRoutes.routes.some((route) => route.protocol === Protocol.V4)
+
     return new PairTradeTypeChainId({
-      currencyIn: getAddress(cachedRoutes.currencyIn),
-      currencyOut: getAddress(cachedRoutes.currencyOut),
+      currencyIn: PairTradeTypeChainId.deriveCurrencyAddress(includesV4Pool, cachedRoutes.currencyIn),
+      currencyOut: PairTradeTypeChainId.deriveCurrencyAddress(includesV4Pool, cachedRoutes.currencyOut),
       tradeType: cachedRoutes.tradeType,
       chainId: cachedRoutes.chainId,
     })
+  }
+
+  public static deriveCurrencyAddress(includesV4Pool: boolean, currency: Currency): string {
+    return includesV4Pool ? getAddress(currency) : currency.wrapped.address
   }
 }
