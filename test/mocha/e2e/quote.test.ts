@@ -3019,11 +3019,13 @@ describe('quote', function () {
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
           // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
           const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
-            ? chain !== ChainId.SEPOLIA
+            ? /* chain !== ChainId.SEPOLIA
               ? USDC_ON(chain)
-              : USDC_NATIVE_SEPOLIA
+              :
+              */
+              USDC_NATIVE_SEPOLIA
             : erc2
-          const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '1'
+          const amount = /* chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : */ '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: native,
@@ -3058,7 +3060,7 @@ describe('quote', function () {
             data.route.forEach((pools) => {
               pools.forEach((pool) => {
                 if (
-                  chain === ChainId.SEPOLIA &&
+                  // chain === ChainId.SEPOLIA &&
                   pool.tokenIn.address === '0x0000000000000000000000000000000000000000'
                 ) {
                   nativeOrWrappedNativePoolFound = true
@@ -3066,7 +3068,7 @@ describe('quote', function () {
                 }
 
                 if (
-                  chain !== ChainId.SEPOLIA &&
+                  // chain !== ChainId.SEPOLIA &&
                   pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()
                 ) {
                   nativeOrWrappedNativePoolFound = true
