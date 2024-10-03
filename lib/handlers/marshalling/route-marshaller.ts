@@ -59,10 +59,6 @@ export class RouteMarshaller {
       case Protocol.V4:
         return {
           protocol: Protocol.V4,
-          // TODO: ROUTE-217 - Support native currency routing in V4
-          // token.wrapped is wrong for V4
-          // Probably need to use the token symbol for native, and still use address for non-native tokens
-          // Check later CELO token, which is both native and ERC20, which one to use
           input: TokenMarshaller.marshal(route.input),
           output: TokenMarshaller.marshal(route.output),
           pools: route.pools.map((pool) => V4PoolMarshaller.marshal(pool)),
