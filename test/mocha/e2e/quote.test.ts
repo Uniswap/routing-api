@@ -3007,7 +3007,8 @@ describe('quote', function () {
             chain === ChainId.BLAST ||
             chain === ChainId.ZORA ||
             chain === ChainId.ZKSYNC ||
-            chain === ChainId.ASTROCHAIN_SEPOLIA
+            chain === ChainId.ASTROCHAIN_SEPOLIA ||
+            chain === ChainId.SEPOLIA
           ) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI
