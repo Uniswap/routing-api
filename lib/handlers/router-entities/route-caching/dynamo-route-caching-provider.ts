@@ -164,11 +164,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         },
       }
 
-      log.error(`queryParams ${JSON.stringify(queryParams)}`)
-
       const result = await this.ddbClient.query(queryParams).promise()
       if (result.Items && result.Items.length > 0) {
         metric.putMetric('RoutesDbPreFilterEntriesFound', result.Items.length, MetricLoggerUnit.Count)
+
         // At this point we might have gotten all the routes we have discovered in the last 24 hours for this pair
         // We will sort the routes by blockNumber, and take the first `ROUTES_TO_TAKE_FROM_ROUTES_DB` routes
         const filteredItems = result.Items
