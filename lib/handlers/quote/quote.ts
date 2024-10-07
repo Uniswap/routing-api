@@ -272,7 +272,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`AppVersion.${appVersion}`, 1)
     }
 
-    const requestSource = requestSourceHeader ?? params.requestQueryParams.source ?? ''
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
       universalRouterVersion,
@@ -480,12 +479,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       trade,
     } = swapRoute
 
-    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId, requestSource)
+    const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId)
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
       preProcessedEstimatedGasUsedUSD,
-      chainId,
-      requestSource
+      chainId
     )
 
     if (simulationStatus == SimulationStatus.Failed) {
