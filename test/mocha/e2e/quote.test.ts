@@ -2850,8 +2850,7 @@ describe('quote', function () {
       // We will follow up supporting ZORA and ROOTSTOCK
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
-      c != ChainId.GOERLI &&
-      c != ChainId.ASTROCHAIN_SEPOLIA
+      c != ChainId.GOERLI
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
@@ -2960,7 +2959,8 @@ describe('quote', function () {
           }
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1'
+          const amount =
+            type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.ASTROCHAIN_SEPOLIA) ? '0.002' : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
@@ -3098,7 +3098,8 @@ describe('quote', function () {
           }
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
-          const amount = type === 'exactOut' && chain === ChainId.BLAST ? '0.002' : '1'
+          const amount =
+            type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.ASTROCHAIN_SEPOLIA) ? '0.002' : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
