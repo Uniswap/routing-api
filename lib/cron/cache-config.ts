@@ -9,7 +9,7 @@ import { ChainId } from '@uniswap/sdk-core'
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-sepolia-test/version/v0.0.21/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-sepolia-test/api`
     default:
       return undefined
   }
