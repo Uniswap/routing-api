@@ -114,8 +114,8 @@
     "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.01,
     "providerInitialWeights": [1],
-    "providerUrls": ["ALCHEMY_480"],
-    "providerNames": ["ALCHEMY"]
+    "providerUrls": ["QUICKNODE_480"],
+    "providerNames": ["QUICKNODE"]
   },
   {
     "chainId": 1301,
