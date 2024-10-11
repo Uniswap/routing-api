@@ -103,7 +103,7 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
       return `${tokens[0]}`
     }
     case 'QUICKNODE_480': {
-      return `https://${tokens[0]}.worldchain-mainnet.quiknode.pro/${tokens[0]}`
+      return `https://${tokens[0]}.worldchain-mainnet.quiknode.pro/${tokens[1]}`
     }
     // QuickNode RETH
     case 'QUICKNODERETH_1': {
