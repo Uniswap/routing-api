@@ -474,6 +474,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v4Supported = [ChainId.SEPOLIA]
 
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.BASE]
+
           return {
             chainId,
             dependencies: {
@@ -506,6 +508,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               tokenPropertiesProvider,
               v2Supported,
               v4Supported,
+              mixedSupported,
             },
           }
         })
