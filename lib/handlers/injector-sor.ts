@@ -356,15 +356,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                (optimisticCachedRoutes, useMixedRouteQuoter) => {
-                  const protocol = useMixedRouteQuoter ? Protocol.MIXED : Protocol.V3
+                (optimisticCachedRoutes, protocol) => {
                   return optimisticCachedRoutes
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
@@ -386,9 +388,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
                     ? mixedRouteContainsV4Pool
