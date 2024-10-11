@@ -9,9 +9,9 @@ import {
 } from '@uniswap/smart-order-router'
 import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
-import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/quote-provider-traffic-switch-configuration'
+import { QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../util/quote-provider-traffic-switch-configuration'
 import { BigNumber } from 'ethers'
-import { LIKELY_OUT_OF_GAS_THRESHOLD, NEW_QUOTER_DEPLOY_BLOCK } from '../../../../util/onChainQuoteProviderConfigs'
+import { LIKELY_OUT_OF_GAS_THRESHOLD, NEW_QUOTER_DEPLOY_BLOCK } from '../../../util/onChainQuoteProviderConfigs'
 import { Protocol } from '@uniswap/router-sdk'
 
 export type TrafficSwitchOnChainQuoteProviderProps = {

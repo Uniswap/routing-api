@@ -1,7 +1,7 @@
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { MetricLoggerUnit, RouteWithQuotes, USDC_MAINNET, WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router'
-import { TrafficSwitchOnChainQuoteProvider } from '../../../../../../lib/handlers/quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
+import { TrafficSwitchOnChainQuoteProvider } from '../../../../../../lib/handlers/quote/provider-migration/traffic-switch-on-chain-quote-provider'
 import { ChainId, CurrencyAmount } from '@uniswap/sdk-core'
 import { V3Route } from '@uniswap/smart-order-router/build/main/routers'
 import { USDC_WETH_LOW } from '../../../../../test-utils/mocked-data'
