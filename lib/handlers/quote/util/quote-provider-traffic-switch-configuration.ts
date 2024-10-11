@@ -10,13 +10,14 @@ export type QuoteProviderTrafficSwitchConfiguration = {
 
 export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
   chainId: ChainId,
-  protocol: Protocol // we only make special case for mixed, because v3 is already live, meanwhile v4 is not live yet
+  protocol: Protocol // only v3 and mixed on L1 is alive, once it needs to live switch 100%, otherwise, can have 0% switch
 ): QuoteProviderTrafficSwitchConfiguration => {
   switch (chainId) {
     // Mumbai was deprecated on April 13th. Do not sample at all
     case ChainId.POLYGON_MUMBAI:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0.0,
             samplingExactInPercentage: 0,
@@ -35,6 +36,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.SEPOLIA:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 100,
             samplingExactInPercentage: 0,
@@ -59,6 +61,13 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
             switchExactOutPercentage: 0,
             samplingExactOutPercentage: 1,
           } as QuoteProviderTrafficSwitchConfiguration
+        case Protocol.V4:
+          return {
+            switchExactInPercentage: 0,
+            samplingExactInPercentage: 0,
+            switchExactOutPercentage: 0,
+            samplingExactOutPercentage: 0,
+          } as QuoteProviderTrafficSwitchConfiguration
         default:
           return {
             switchExactInPercentage: 100,
@@ -69,6 +78,13 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
       }
     case ChainId.MAINNET:
       switch (protocol) {
+        case Protocol.V4:
+          return {
+            switchExactInPercentage: 0,
+            samplingExactInPercentage: 0,
+            switchExactOutPercentage: 0,
+            samplingExactOutPercentage: 0,
+          } as QuoteProviderTrafficSwitchConfiguration
         default:
           // Total RPM for 'QuoteTotalCallsToProvider' is around 20k-30k (across all chains), so 0.1% means 20-30 RPM shadow sampling
           return {
@@ -81,6 +97,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.ARBITRUM_ONE:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -99,6 +116,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.POLYGON:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -117,6 +135,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.OPTIMISM:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -135,6 +154,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.BLAST:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -153,6 +173,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.BNB:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -171,6 +192,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.CELO:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -189,6 +211,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.AVALANCHE:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
@@ -209,6 +232,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.ASTROCHAIN_SEPOLIA:
       switch (protocol) {
         case Protocol.MIXED:
+        case Protocol.V4:
           return {
             switchExactInPercentage: 0,
             samplingExactInPercentage: 0,
