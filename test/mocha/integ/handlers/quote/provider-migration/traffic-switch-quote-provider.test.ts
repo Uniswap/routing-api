@@ -9,6 +9,7 @@ import { getMockedOnChainQuoteProvider } from '../../../../../test-utils/mocked-
 import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
 import { AmountQuote } from '@uniswap/smart-order-router/build/main/providers/on-chain-quote-provider'
 import { BigNumber } from 'ethers'
+import { Protocol } from '@uniswap/router-sdk'
 
 describe('TrafficSwitchOnChainQuoteProvider', () => {
   const amountIns = [CurrencyAmount.fromRawAmount(WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET], '1000000000000000000')]
@@ -28,14 +29,18 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
   })
 
   it('switch exact in traffic and sample quotes', async () => {
-    spy.withArgs(`ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}`, 1, MetricLoggerUnit.None)
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_SAMPLING_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TARGET_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_SAMPLING_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
+      1,
+      MetricLoggerUnit.None
+    )
+    spy.withArgs(
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TARGET_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
@@ -45,8 +50,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -61,9 +66,13 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
   })
 
   it('does not switch exact in traffic and sample quotes', async () => {
-    spy.withArgs(`ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}`, 1, MetricLoggerUnit.None)
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
+      1,
+      MetricLoggerUnit.None
+    )
+    spy.withArgs(
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
@@ -73,8 +82,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -90,17 +99,17 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
   it('switch exact out traffic and sample quotes', async () => {
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_SAMPLING_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_SAMPLING_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TARGET_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TARGET_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
@@ -110,8 +119,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -127,12 +136,12 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
   it('does not switch exact out traffic and sample quotes', async () => {
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_TOTAL_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_CURRENT_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_OUT_TRAFFIC_CURRENT_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
@@ -142,8 +151,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -165,8 +174,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => false
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => false
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -189,8 +198,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SWITCH_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -213,8 +222,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => false
+        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => false
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -237,8 +246,8 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_: ChainId) => true
-        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SAMPLE_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
+        override readonly SHOULD_SWITCH_EXACT_OUT_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -255,12 +264,12 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
   it('sample exact in quotes and current quoter out of gas for the quote', async () => {
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     spy.withArgs(
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
@@ -288,7 +297,7 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
 
     const trafficSwitchProvider =
       new (class SwitchTrafficSwitchOnChainQuoteProvider extends TrafficSwitchOnChainQuoteProvider {
-        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_: ChainId) => true
+        override readonly SHOULD_SAMPLE_EXACT_IN_TRAFFIC = (_chainId: ChainId, _protocol: Protocol) => true
       })({
         currentQuoteProvider: currentQuoteProvider,
         targetQuoteProvider: targetQuoteProvider,
@@ -300,13 +309,13 @@ describe('TrafficSwitchOnChainQuoteProvider', () => {
     // We will check neither match nor mismatch metric was logged
     sinon.assert.neverCalledWith(
       spy,
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MATCH_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
     sinon.assert.neverCalledWith(
       spy,
-      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}`,
+      `ON_CHAIN_QUOTE_PROVIDER_EXACT_IN_TRAFFIC_CURRENT_AND_TARGET_QUOTES_MISMATCH_CHAIN_ID_${ChainId.MAINNET}_PROTOCOL_${Protocol.V3}`,
       1,
       MetricLoggerUnit.None
     )
