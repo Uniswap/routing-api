@@ -9,6 +9,7 @@ import {
   EIP1559GasPriceProvider,
   EthEstimateGasSimulator,
   FallbackTenderlySimulator,
+  getApplicableV4FeesTickspacingsHooks,
   IGasPriceProvider,
   IMetric,
   IOnChainQuoteProvider,
@@ -85,6 +86,10 @@ import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
 import { UniGraphQLProvider } from '../graphql/graphql-provider'
 import { TrafficSwitcherITokenFeeFetcher } from '../util/traffic-switch/traffic-switcher-i-token-fee-fetcher'
+import {
+  emptyV4FeeTickSpacingsHookAddresses,
+  EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES,
+} from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -478,6 +483,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
+          const v4PoolsParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
+            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
+          )
+
           return {
             chainId,
             dependencies: {
@@ -511,6 +520,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v2Supported,
               v4Supported,
               mixedSupported,
+              v4PoolsParams,
             },
           }
         })
