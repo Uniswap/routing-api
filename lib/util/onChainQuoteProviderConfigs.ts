@@ -54,8 +54,141 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
   },
 }
 
-export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
+export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { [chainId: number]: BatchParams } } = {
+  // V2 doesn't apply because v2 doesnt call onchain-quote provider at all
+  // we use Protocol enum type to remember for each new protocol version, we will add the protocol specific tuning
+  [Protocol.V2]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 1320,
+      gasLimitPerCall: 100_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 3000,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 1650,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 6240,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 2625,
+      gasLimitPerCall: 60_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.MAINNET]: {
+      multicallChunk: 1974,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.ZKSYNC]: {
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.WORLDCHAIN]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.ASTROCHAIN_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+  },
   [Protocol.V3]: {
+    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.BASE]: {
+      multicallChunk: 1320,
+      gasLimitPerCall: 100_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.ARBITRUM_ONE]: {
+      multicallChunk: 3000,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.OPTIMISM]: {
+      multicallChunk: 1650,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.CELO]: {
+      multicallChunk: 6240,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0,
+    },
+    [ChainId.BLAST]: {
+      multicallChunk: 1200,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.AVALANCHE]: {
+      multicallChunk: 2625,
+      gasLimitPerCall: 60_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.BNB]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.POLYGON]: {
+      multicallChunk: 1850,
+      gasLimitPerCall: 80_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.MAINNET]: {
+      multicallChunk: 1974,
+      gasLimitPerCall: 75_000,
+      quoteMinSuccessRate: 0.15,
+    },
+    [ChainId.ZKSYNC]: {
+      multicallChunk: 20,
+      gasLimitPerCall: 4_000_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.WORLDCHAIN]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.ASTROCHAIN_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+  },
+  // V4 can be the same as V4 to begin. likely v4 is more gas efficient because of pool singleton for swaps by accounting mechanism
+  [Protocol.V4]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
       multicallChunk: 1320,
@@ -182,133 +315,267 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [cha
   },
 }
 
-export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol: string]: { [chainId: number]: BatchParams } } = {
-  [Protocol.V3]: {
-    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
-    [ChainId.BASE]: {
-      multicallChunk: 660,
-      gasLimitPerCall: 200_000,
-      quoteMinSuccessRate: 0.1,
+export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { [chainId: number]: BatchParams } } =
+  {
+    // V2 doesn't apply because v2 doesnt call onchain-quote provider at all
+    // we use Protocol enum type to remember for each new protocol version, we will add the protocol specific tuning
+    [Protocol.V2]: {
+      ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.BASE]: {
+        multicallChunk: 660,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.ARBITRUM_ONE]: {
+        multicallChunk: 1125,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.OPTIMISM]: {
+        multicallChunk: 880,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.CELO]: {
+        multicallChunk: 3120,
+        gasLimitPerCall: 160_000,
+        quoteMinSuccessRate: 0,
+      },
+      [ChainId.BLAST]: {
+        multicallChunk: 1200,
+        gasLimitPerCall: 80_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.AVALANCHE]: {
+        multicallChunk: 420,
+        gasLimitPerCall: 375_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.BNB]: {
+        multicallChunk: 2961,
+        gasLimitPerCall: 50_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.POLYGON]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.MAINNET]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.ZKSYNC]: {
+        multicallChunk: 20,
+        gasLimitPerCall: 4_000_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.WORLDCHAIN]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.ASTROCHAIN_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
-    [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 1125,
-      gasLimitPerCall: 200_000,
-      quoteMinSuccessRate: 0.15,
+    [Protocol.V3]: {
+      ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.BASE]: {
+        multicallChunk: 660,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.ARBITRUM_ONE]: {
+        multicallChunk: 1125,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.OPTIMISM]: {
+        multicallChunk: 880,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.CELO]: {
+        multicallChunk: 3120,
+        gasLimitPerCall: 160_000,
+        quoteMinSuccessRate: 0,
+      },
+      [ChainId.BLAST]: {
+        multicallChunk: 1200,
+        gasLimitPerCall: 80_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.AVALANCHE]: {
+        multicallChunk: 420,
+        gasLimitPerCall: 375_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.BNB]: {
+        multicallChunk: 2961,
+        gasLimitPerCall: 50_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.POLYGON]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.MAINNET]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.ZKSYNC]: {
+        multicallChunk: 20,
+        gasLimitPerCall: 4_000_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.WORLDCHAIN]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.ASTROCHAIN_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
-    [ChainId.OPTIMISM]: {
-      multicallChunk: 880,
-      gasLimitPerCall: 150_000,
-      quoteMinSuccessRate: 0.1,
+    // V4 can be the same as V4 to begin. likely v4 is more gas efficient because of pool singleton for swaps by accounting mechanism
+    [Protocol.V4]: {
+      ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.BASE]: {
+        multicallChunk: 660,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.ARBITRUM_ONE]: {
+        multicallChunk: 1125,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.OPTIMISM]: {
+        multicallChunk: 880,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.CELO]: {
+        multicallChunk: 3120,
+        gasLimitPerCall: 160_000,
+        quoteMinSuccessRate: 0,
+      },
+      [ChainId.BLAST]: {
+        multicallChunk: 1200,
+        gasLimitPerCall: 80_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.AVALANCHE]: {
+        multicallChunk: 420,
+        gasLimitPerCall: 375_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.BNB]: {
+        multicallChunk: 2961,
+        gasLimitPerCall: 50_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.POLYGON]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.MAINNET]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.ZKSYNC]: {
+        multicallChunk: 20,
+        gasLimitPerCall: 4_000_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.WORLDCHAIN]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.ASTROCHAIN_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
-    [ChainId.CELO]: {
-      multicallChunk: 3120,
-      gasLimitPerCall: 160_000,
-      quoteMinSuccessRate: 0,
+    [Protocol.MIXED]: {
+      ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.BASE]: {
+        multicallChunk: 660,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.ARBITRUM_ONE]: {
+        multicallChunk: 1125,
+        gasLimitPerCall: 200_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.OPTIMISM]: {
+        multicallChunk: 880,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.CELO]: {
+        multicallChunk: 3120,
+        gasLimitPerCall: 160_000,
+        quoteMinSuccessRate: 0,
+      },
+      [ChainId.BLAST]: {
+        multicallChunk: 1200,
+        gasLimitPerCall: 80_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.AVALANCHE]: {
+        multicallChunk: 420,
+        gasLimitPerCall: 375_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.BNB]: {
+        multicallChunk: 2961,
+        gasLimitPerCall: 50_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.POLYGON]: {
+        multicallChunk: 987,
+        gasLimitPerCall: 150_000,
+        quoteMinSuccessRate: 0.15,
+      },
+      [ChainId.ZKSYNC]: {
+        multicallChunk: 20,
+        gasLimitPerCall: 4_000_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.WORLDCHAIN]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.ASTROCHAIN_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
-    [ChainId.BLAST]: {
-      multicallChunk: 1200,
-      gasLimitPerCall: 80_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    [ChainId.AVALANCHE]: {
-      multicallChunk: 420,
-      gasLimitPerCall: 375_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.BNB]: {
-      multicallChunk: 2961,
-      gasLimitPerCall: 50_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.POLYGON]: {
-      multicallChunk: 987,
-      gasLimitPerCall: 150_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.MAINNET]: {
-      multicallChunk: 987,
-      gasLimitPerCall: 150_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.ZKSYNC]: {
-      multicallChunk: 20,
-      gasLimitPerCall: 4_000_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
-    [ChainId.WORLDCHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
-    [ChainId.ASTROCHAIN_SEPOLIA]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
-      quoteMinSuccessRate: 0.1,
-    },
-  },
-  [Protocol.MIXED]: {
-    ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
-    [ChainId.BASE]: {
-      multicallChunk: 660,
-      gasLimitPerCall: 200_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 1125,
-      gasLimitPerCall: 200_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.OPTIMISM]: {
-      multicallChunk: 880,
-      gasLimitPerCall: 150_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    [ChainId.CELO]: {
-      multicallChunk: 3120,
-      gasLimitPerCall: 160_000,
-      quoteMinSuccessRate: 0,
-    },
-    [ChainId.BLAST]: {
-      multicallChunk: 1200,
-      gasLimitPerCall: 80_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    [ChainId.AVALANCHE]: {
-      multicallChunk: 420,
-      gasLimitPerCall: 375_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.BNB]: {
-      multicallChunk: 2961,
-      gasLimitPerCall: 50_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.POLYGON]: {
-      multicallChunk: 987,
-      gasLimitPerCall: 150_000,
-      quoteMinSuccessRate: 0.15,
-    },
-    [ChainId.ZKSYNC]: {
-      multicallChunk: 20,
-      gasLimitPerCall: 4_000_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    // TODO: once worldchain has view-quoter, optimize muilcallChunk and gasLimitPerCall
-    [ChainId.WORLDCHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
-      quoteMinSuccessRate: 0.1,
-    },
-    // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
-    [ChainId.ASTROCHAIN_SEPOLIA]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
-      quoteMinSuccessRate: 0.1,
-    },
-  },
-}
+  }
 
 export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
   ...constructSameGasErrorFailureOverridesMap(DEFAULT_GAS_ERROR_FAILURE_OVERRIDES),

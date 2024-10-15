@@ -69,7 +69,7 @@ import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/p
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
+import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/traffic-switch-on-chain-quote-provider'
 import {
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
@@ -356,15 +356,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                (optimisticCachedRoutes, useMixedRouteQuoter) => {
-                  const protocol = useMixedRouteQuoter ? Protocol.MIXED : Protocol.V3
+                (optimisticCachedRoutes, protocol) => {
                   return optimisticCachedRoutes
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
@@ -386,14 +388,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
                     ? mixedRouteContainsV4Pool
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
-                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ??
+                        // besides mainnet, only base has mixed quoter v1 deployed
+                        (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined)
                     : protocol === Protocol.V3
                     ? NEW_QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
@@ -469,6 +476,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v4Supported = [ChainId.SEPOLIA]
 
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
+
           return {
             chainId,
             dependencies: {
@@ -501,6 +510,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               tokenPropertiesProvider,
               v2Supported,
               v4Supported,
+              mixedSupported,
             },
           }
         })
