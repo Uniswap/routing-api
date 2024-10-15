@@ -398,7 +398,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                   useMixedRouteQuoter
                     ? mixedRouteContainsV4Pool
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
-                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ??
+                        // besides mainnet, only base has mixed quoter v1 deployed
+                        (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined)
                     : protocol === Protocol.V3
                     ? NEW_QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
@@ -474,7 +476,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v4Supported = [ChainId.SEPOLIA]
 
-          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.BASE]
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
           return {
             chainId,
