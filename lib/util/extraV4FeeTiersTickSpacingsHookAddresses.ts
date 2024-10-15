@@ -4,6 +4,13 @@ export const emptyV4FeeTickSpacingsHookAddresses: Array<[number, number, string]
   [number, number, string]
 >()
 
+// this is v4 launch readiness.
+// we can't really predict which fee tier + tick spacings v4 pools might get popular, until we launch
+// we will have to add in adhoc fashion in routing per chain.
+// we cannot search the entire fee tier + tick spacings for v4 pools,
+// because it would be too expensive to search all v4 pools on-chain
+// There are 10k fee tiers (0 - 100% with increment of 0.01%) and 32766 tick spacings (min 1, max 32767)
+// so roughly 32mil v4 pools without hooks
 export const EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES: { [chain in ChainId]: Array<[number, number, string]> } = {
   [ChainId.MAINNET]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.GOERLI]: emptyV4FeeTickSpacingsHookAddresses,
