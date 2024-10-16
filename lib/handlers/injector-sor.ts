@@ -9,6 +9,7 @@ import {
   EIP1559GasPriceProvider,
   EthEstimateGasSimulator,
   FallbackTenderlySimulator,
+  getApplicableV4FeesTickspacingsHooks,
   IGasPriceProvider,
   IMetric,
   IOnChainQuoteProvider,
@@ -69,7 +70,7 @@ import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/p
 import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/v3/traffic-switch-on-chain-quote-provider'
+import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/traffic-switch-on-chain-quote-provider'
 import {
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
@@ -85,6 +86,10 @@ import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
 import { UniGraphQLProvider } from '../graphql/graphql-provider'
 import { TrafficSwitcherITokenFeeFetcher } from '../util/traffic-switch/traffic-switcher-i-token-fee-fetcher'
+import {
+  emptyV4FeeTickSpacingsHookAddresses,
+  EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES,
+} from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -292,6 +297,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             underlyingV2PoolProvider,
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
+          const v4PoolsParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
+            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
+          )
 
           const [
             tokenListProvider,
@@ -307,7 +315,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               Protocol.V4,
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
-              v4PoolProvider
+              v4PoolProvider,
+              v4PoolsParams
             )) as V4AWSSubgraphProvider,
             (await this.instantiateSubgraphProvider(
               chainId,
@@ -356,15 +365,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 provider,
                 multicall2Provider,
                 RETRY_OPTIONS[chainId],
-                (optimisticCachedRoutes, useMixedRouteQuoter) => {
-                  const protocol = useMixedRouteQuoter ? Protocol.MIXED : Protocol.V3
+                (optimisticCachedRoutes, protocol) => {
                   return optimisticCachedRoutes
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 // We will only enable shadow sample mixed quoter on Base
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
@@ -386,14 +397,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                     ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                     : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId]
                 },
-                GAS_ERROR_FAILURE_OVERRIDES[chainId],
-                SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
-                BLOCK_NUMBER_CONFIGS[chainId],
+                // nice to have protocol level gas error failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level success rate failure overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId],
+                // nice to have protocol level block number configs overrides, this is in prep for v4 and mixed w/ v4
+                (_protocol) => BLOCK_NUMBER_CONFIGS[chainId],
                 (useMixedRouteQuoter: boolean, mixedRouteContainsV4Pool: boolean, protocol: Protocol) =>
                   useMixedRouteQuoter
                     ? mixedRouteContainsV4Pool
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
-                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
+                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ??
+                        // besides mainnet, only base has mixed quoter v1 deployed
+                        (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined)
                     : protocol === Protocol.V3
                     ? NEW_QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
@@ -469,6 +485,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v4Supported = [ChainId.SEPOLIA]
 
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
+
           return {
             chainId,
             dependencies: {
@@ -501,6 +519,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               tokenPropertiesProvider,
               v2Supported,
               v4Supported,
+              mixedSupported,
+              v4PoolsParams,
             },
           }
         })
@@ -525,7 +545,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     protocol: Protocol,
     poolCacheBucket: string,
     poolCacheKey: string,
-    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider
+    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider,
+    v4PoolsParams?: Array<[number, number, string]>
   ) {
     try {
       const chainProtocol = chainProtocols.find(
@@ -549,7 +570,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     } catch (err) {
       switch (protocol) {
         case Protocol.V4:
-          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider)
+          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
         case Protocol.V3:
           return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
         case Protocol.V2:
