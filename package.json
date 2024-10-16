@@ -87,7 +87,7 @@
     "@uniswap/router-sdk": "^1.14.0",
     "@uniswap/sdk-core": "^5.8.3",
     "@types/semver": "^7.5.8",
-    "@uniswap/smart-order-router": "4.6.2",
+    "@uniswap/smart-order-router": "4.7.1",
     "@uniswap/token-lists": "^1.0.0-beta.33",
     "@uniswap/universal-router-sdk": "^4.4.2",
     "@uniswap/v2-sdk": "^4.6.1",
