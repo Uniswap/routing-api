@@ -71,9 +71,8 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
-// TODO: ROUTE-225 - follow up on v4 subgraph pools filtering threshold
-const v4TrackedEthThreshold = 0 // Pools need at least 0 of trackedEth to be selected
-const v4UntrackedUsdThreshold = 0 // Pools need at least 0k USD (untracked) to be selected (for metrics only)
+const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
