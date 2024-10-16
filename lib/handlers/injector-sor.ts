@@ -297,6 +297,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             underlyingV2PoolProvider,
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
+          const v4PoolsParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
+            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
+          )
 
           const [
             tokenListProvider,
@@ -312,7 +315,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               Protocol.V4,
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
-              v4PoolProvider
+              v4PoolProvider,
+              v4PoolsParams
             )) as V4AWSSubgraphProvider,
             (await this.instantiateSubgraphProvider(
               chainId,
@@ -483,10 +487,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
-          const v4PoolsParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
-            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
-          )
-
           return {
             chainId,
             dependencies: {
@@ -545,7 +545,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     protocol: Protocol,
     poolCacheBucket: string,
     poolCacheKey: string,
-    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider
+    poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider,
+    v4PoolsParams?: Array<[number, number, string]>
   ) {
     try {
       const chainProtocol = chainProtocols.find(
@@ -569,7 +570,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     } catch (err) {
       switch (protocol) {
         case Protocol.V4:
-          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider)
+          return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
         case Protocol.V3:
           return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
         case Protocol.V2:

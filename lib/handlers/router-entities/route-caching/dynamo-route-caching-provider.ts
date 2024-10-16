@@ -475,7 +475,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     _blockNumber: number,
     _optimistic: boolean
   ): CachedRoutes | undefined {
-    return cachedRoutes
+    // if it's on sepolia, then we want to filter expired routes by blocks to live
+    // this is to unblock v4 routing tests on sepolia
+    if (cachedRoutes?.chainId === ChainId.SEPOLIA) {
+      return cachedRoutes?.notExpired(_blockNumber, _optimistic) ? cachedRoutes : undefined
+    } else {
+      // otherwise, we keep it here, but we need a better plan for how to fix filtering expired cached routes
+      return cachedRoutes
+    }
   }
 
   /**
