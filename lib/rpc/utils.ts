@@ -99,7 +99,11 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
       return `https://${tokens[0]}.zksync-mainnet.quiknode.pro/${tokens[1]}`
     }
     case 'QUICKNODE_1301': {
+      // URL contains unichain-sepolia.quiknode.pro, we had to not disclose prior to the unichain annouce
       return `${tokens[0]}`
+    }
+    case 'QUICKNODE_480': {
+      return `https://${tokens[0]}.worldchain-mainnet.quiknode.pro/${tokens[1]}`
     }
     // QuickNode RETH
     case 'QUICKNODERETH_1': {
@@ -126,9 +130,6 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     }
     case 'ALCHEMY_324': {
       return `https://zksync-mainnet.g.alchemy.com/v2/${tokens[0]}`
-    }
-    case 'ALCHEMY_480': {
-      return `https://worldchain-mainnet.g.alchemy.com/v2/${tokens[0]}`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
