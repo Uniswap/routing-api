@@ -90,6 +90,7 @@ import {
   emptyV4FeeTickSpacingsHookAddresses,
   EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES,
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
+import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -144,6 +145,10 @@ export type ContainerDependencies = {
   tokenValidatorProvider: TokenValidatorProvider
   tokenPropertiesProvider: ITokenPropertiesProvider
   v2Supported: ChainId[]
+  v4Supported?: ChainId[]
+  mixedSupported?: ChainId[]
+  v4PoolsParams?: Array<[number, number, string]>
+  cachedRoutesCacheInvalidationFixRolloutPercentage?: number
 }
 
 export interface ContainerInjected {
@@ -487,6 +492,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
+          const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
+
           return {
             chainId,
             dependencies: {
@@ -521,6 +528,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v4Supported,
               mixedSupported,
               v4PoolsParams,
+              newCachedRoutesRolloutPercent,
             },
           }
         })
