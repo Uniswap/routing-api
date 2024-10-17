@@ -137,7 +137,6 @@ export class QuoteHandlerInjector extends InjectorSOR<
           tokenPropertiesProvider,
           v2Supported,
           v4Supported,
-
         })
         break
     }
