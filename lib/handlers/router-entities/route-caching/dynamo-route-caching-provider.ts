@@ -16,6 +16,7 @@ import { Protocol } from '@uniswap/router-sdk'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { PromiseResult } from 'aws-sdk/lib/request'
+import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 
 interface ConstructorParams {
   /**
@@ -30,6 +31,10 @@ interface ConstructorParams {
    * The Lambda Function Name for the Lambda that will be invoked to fill the cache
    */
   cachingQuoteLambdaName: string
+  /**
+   * rolling out the new cached routes filtering expired routes with rollout percent
+   */
+  newCachedRoutesRolloutPercent?: number
 }
 
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
@@ -38,55 +43,24 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly routesTableName: string
   private readonly routesCachingRequestFlagTableName: string
   private readonly cachingQuoteLambdaName: string
+  private readonly newCachedRoutesRolloutPercent?: number
 
   private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Livemode
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
 
-  // heuristic is within 30 seconds we find a route.
-  // we know each chain block time
-  // divide those two
-  private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = (chainId: ChainId) => {
-    switch (chainId) {
-      // https://dune.com/queries/2138021
-      case ChainId.ARBITRUM_ONE:
-        return 100
-
-      // https://dune.com/queries/2009572
-      case ChainId.BASE:
-      case ChainId.OPTIMISM:
-        return 60
-
-      // https://snowtrace.io/chart/blocktime
-      case ChainId.AVALANCHE:
-        return 15
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.BNB:
-        return 10
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.POLYGON:
-        return 15
-
-      //  https://explorer.celo.org/mainnet/
-      case ChainId.CELO:
-        return 6
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.MAINNET:
-      default:
-        return 2
-    }
-  }
-  // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
   private readonly BLOCKS_DIFF_BETWEEN_CACHING_QUOTES: Map<ChainId, number> = new Map([[ChainId.MAINNET, 3]])
 
   private readonly DEFAULT_BLOCKS_DIFF_CACHING = 15
 
-  constructor({ routesTableName, routesCachingRequestFlagTableName, cachingQuoteLambdaName }: ConstructorParams) {
+  constructor({
+    routesTableName,
+    routesCachingRequestFlagTableName,
+    cachingQuoteLambdaName,
+    newCachedRoutesRolloutPercent,
+  }: ConstructorParams) {
     super()
     // Since this DDB Table is used for Cache, we will fail fast and limit the timeout.
     this.ddbClient = new DynamoDB.DocumentClient({
@@ -102,6 +76,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     this.routesTableName = routesTableName
     this.routesCachingRequestFlagTableName = routesCachingRequestFlagTableName
     this.cachingQuoteLambdaName = cachingQuoteLambdaName
+    this.newCachedRoutesRolloutPercent = newCachedRoutesRolloutPercent
   }
 
   /**
@@ -114,7 +89,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @protected
    */
   protected async _getBlocksToLive(cachedRoutes: CachedRoutes, _: CurrencyAmount<Currency>): Promise<number> {
-    return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB(cachedRoutes.chainId)
+    return DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB[cachedRoutes.chainId]
   }
 
   /**
@@ -477,11 +452,26 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): CachedRoutes | undefined {
     // if it's on sepolia, then we want to filter expired routes by blocks to live
     // this is to unblock v4 routing tests on sepolia
+    // if we have to hotfix for v4, we can add the below condition (but hoping we can fix properly before v4 launch)
+    // if (cachedRoutes?.chainId === ChainId.SEPOLIA || cachedRoutes?.routes.filter((route) => route.protocol === Protocol.V4) !== undefined)
     if (cachedRoutes?.chainId === ChainId.SEPOLIA) {
       return cachedRoutes?.notExpired(_blockNumber, _optimistic) ? cachedRoutes : undefined
     } else {
-      // otherwise, we keep it here, but we need a better plan for how to fix filtering expired cached routes
-      return cachedRoutes
+      const shouldEnableCachedRoutesCacheInvalidationFix =
+        Math.random() * 100 < (this.newCachedRoutesRolloutPercent ?? 0)
+
+      if (shouldEnableCachedRoutesCacheInvalidationFix) {
+        // if rolling out the fix, we just call SOR filter method, which is correct
+        // then eventially when every chain is at 100% with larger blocks to live, depending on which chain
+        // then we know we can get rid of protected override filterExpiredCachedRoutes in routing-api
+        metric.putMetric('CachedRoutesCacheInvalidationFixEnabled', 1, MetricLoggerUnit.Count)
+        return super.filterExpiredCachedRoutes(cachedRoutes, _blockNumber, _optimistic)
+      } else {
+        // if not rolling out the fix, we just disable the fix and return the cached routes
+        metric.putMetric('CachedRoutesCacheInvalidationFixDisabled', 1, MetricLoggerUnit.Count)
+        // otherwise, we keep it here, but we need a better plan for how to fix filtering expired cached routes
+        return cachedRoutes
+      }
     }
   }
 
