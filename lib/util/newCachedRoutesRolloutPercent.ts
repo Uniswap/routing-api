@@ -3,6 +3,7 @@ import { ChainId } from '@uniswap/sdk-core'
 // percent is between 0% - 100%, defined in SOR
 // testnets all go to 100% directly
 // production nets depending on revenue/quote traffic volume, if it's medium/high 1%, otherwise super low traffic (< 100 quotes per 5 minutes) 100%
+// so zora and blast go to 100% directly. rootstock is not supported by uniswap labs product or protocol layer, go to 100% directly.
 export const NEW_CACHED_ROUTES_ROLLOUT_PERCENT: { [chain in ChainId]: number } = {
   [ChainId.MAINNET]: 1,
   [ChainId.GOERLI]: 100,
