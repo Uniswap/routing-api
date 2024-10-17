@@ -142,7 +142,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v4Supported,
           mixedSupported,
           v4PoolsParams,
-          cachedRoutesCacheInvalidationFixRolloutPercentage
+          cachedRoutesCacheInvalidationFixRolloutPercentage,
         })
         break
     }
