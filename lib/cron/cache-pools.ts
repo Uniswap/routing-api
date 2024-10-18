@@ -5,7 +5,7 @@ import {
   V2SubgraphPool,
   V2SubgraphProvider,
   V3SubgraphPool,
-  V3SubgraphProvider,
+  V3SubgraphProvider, V4SubgraphPool
 } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
@@ -23,6 +23,7 @@ import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
+import { HOOKS_ADDRESSES_ALLOWLIST } from '../util/hooksAddressesAllowlist'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -212,6 +213,18 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
           pool.token0.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||
           pool.token1.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161'
+
+        if (shouldFilterOut) {
+          log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
+        }
+
+        return !shouldFilterOut
+      })
+    }
+
+    if (protocol === Protocol.V4) {
+      pools = (pools as Array<V4SubgraphPool>).filter((pool: V4SubgraphPool) => {
+        const shouldFilterOut = !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(pool.id.toLowerCase())
 
         if (shouldFilterOut) {
           log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
