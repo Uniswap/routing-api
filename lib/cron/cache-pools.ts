@@ -5,7 +5,8 @@ import {
   V2SubgraphPool,
   V2SubgraphProvider,
   V3SubgraphPool,
-  V3SubgraphProvider, V4SubgraphPool
+  V3SubgraphProvider,
+  V4SubgraphPool,
 } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
@@ -224,7 +225,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
     if (protocol === Protocol.V4) {
       pools = (pools as Array<V4SubgraphPool>).filter((pool: V4SubgraphPool) => {
-        const shouldFilterOut = !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(pool.id.toLowerCase())
+        const shouldFilterOut = !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(pool.hooks.toLowerCase())
 
         if (shouldFilterOut) {
           log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
