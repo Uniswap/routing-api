@@ -8,7 +8,7 @@ export const extraHooksAddressesOnSepolia = '0x000000000000000000000000000000000
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
   [ChainId.MAINNET]: [ADDRESS_ZERO],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
-  [ChainId.SEPOLIA]: [ADDRESS_ZERO],
+  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
