@@ -3,6 +3,7 @@ import {
   CachedRoutes,
   CacheMode,
   ID_TO_NETWORK_NAME,
+  INTENT,
   IRouteCachingProvider,
   log,
   metric,
@@ -306,7 +307,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         amount: amount.quotient.toString(),
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
         protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
-        intent: 'caching',
+        intent: INTENT.CACHING,
         requestSource: 'routing-api',
       },
     }
