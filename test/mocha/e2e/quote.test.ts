@@ -2850,7 +2850,11 @@ describe('quote', function () {
       // We will follow up supporting ZORA and ROOTSTOCK
       c != ChainId.ZORA_SEPOLIA &&
       c != ChainId.ROOTSTOCK &&
-      c != ChainId.GOERLI
+      c != ChainId.GOERLI &&
+      // we have to disable sepolia tests for now
+      // because they are testing V4_SEPOLIA_TEST_A -> V4_SEPOLIA_TEST_B
+      // which no longer exists on re-deployed v4 pool manager
+      c != ChainId.SEPOLIA
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
