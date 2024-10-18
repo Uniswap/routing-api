@@ -1,4 +1,5 @@
 import { ChainId } from '@uniswap/sdk-core'
+import { extraHooksAddressesOnSepolia } from './hooksAddressesAllowlist'
 
 export const emptyV4FeeTickSpacingsHookAddresses: Array<[number, number, string]> = new Array<
   [number, number, string]
@@ -18,9 +19,9 @@ export const EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES: { [chain in ChainId]: Ar
     // NOTE, we are only supporting hook routing in sepolia,
     // because those are the only liquid ETH/USDC pools with hardcoded hooks, that we LP'ed against sepolia v4 pool manager
     // we will not support any hook routing in initial v4 launch in any production networks
-    [500, 10, '0x0000000000000000000000000000000000000020'],
-    [1500, 30, '0x0000000000000000000000000000000000000020'],
-    [3000, 60, '0x0000000000000000000000000000000000000020'],
+    [500, 10, extraHooksAddressesOnSepolia],
+    [1500, 30, extraHooksAddressesOnSepolia],
+    [3000, 60, extraHooksAddressesOnSepolia],
   ],
   [ChainId.OPTIMISM]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.OPTIMISM_GOERLI]: emptyV4FeeTickSpacingsHookAddresses,
