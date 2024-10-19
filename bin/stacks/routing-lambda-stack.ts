@@ -9,6 +9,7 @@ import * as aws_lambda from 'aws-cdk-lib/aws-lambda'
 import * as aws_lambda_nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
+import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import { Construct } from 'constructs'
 import * as path from 'path'
 import { DynamoDBTableProps } from './routing-database-stack'
@@ -78,15 +79,64 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       value: JSON.stringify(jsonRpcProviders),
     })
 
+    const vpc = new ec2.Vpc(this, 'RoutingLambdaVPC', {
+      maxAzs: 2, // Number of availability zones
+      subnetConfiguration: [
+        {
+          name: 'PublicSubnet',
+          subnetType: ec2.SubnetType.PUBLIC, // Public subnet with internet access
+          cidrMask: 24, // IP range for public subnet
+        },
+        {
+          name: 'PrivateSubnet',
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS, // Private subnet with access to the internet via NAT Gateway
+          cidrMask: 24, // IP range for private subnet
+        },
+      ],
+    });
+    // const privateSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS });
+    const publicSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC });
+
+    // Attach necessary managed policies for VPC and logging access
+
+    const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, 'AccessUnirpcEndpoint', {
+      vpc,
+      service: new ec2.InterfaceVpcEndpointService(`com.amazonaws.vpce.us-east-2.vpce-svc-06229983619dbe38c`, 80),
+      subnets: publicSubnets,
+      privateDnsEnabled: false, // Enable private DNS for the endpoint
+    });
+
+    new cdk.CfnOutput(this, 'VpcEndpointId', {
+      value: vpcEndpoint.vpcEndpointId,
+    });
+
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
+        // Basic Lambda execution role
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        // General Lambda role
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaRole'),
+        // CloudWatch for logs and monitoring
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLambdaInsightsExecutionRolePolicy'),
+        // X-Ray for tracing
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
       ],
-    })
+    });
+    
+    // Add inline policy for EC2 permissions
+    lambdaRole.addToPolicy(new aws_iam.PolicyStatement({
+      actions: [
+        'ec2:CreateNetworkInterface',
+        'ec2:DescribeNetworkInterfaces',
+        'ec2:DeleteNetworkInterface',
+        'ec2:AssignPrivateIpAddresses',
+        'ec2:UnassignPrivateIpAddresses'
+      ],
+      resources: ['*'], // Adjust this to restrict to specific resources if needed
+    }));
+
+    
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
     poolCacheBucket3.grantRead(lambdaRole)
@@ -171,6 +221,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       runtime: aws_lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
+      vpc: vpc,
       // 11/8/23: URA currently calls the Routing API with a timeout of 10 seconds.
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
