@@ -73,7 +73,7 @@ export class SingleJsonRpcProvider extends StaticJsonRpcProvider {
       {
         url: url,
         headers: headers,
-        timeout: 8000 // 8 seconds (default is 120s)
+        timeout: 8000, // 8 seconds (default is 120s)
       },
       network
     )
