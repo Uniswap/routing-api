@@ -22,7 +22,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.01,
     "healthCheckSampleProb": 0.01,
-    "providerInitialWeights": [0.5, 0.5],
+    "providerInitialWeights": [0.3, 0.7],
     "providerUrls": ["QUICKNODE_56", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
   },
@@ -59,7 +59,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.1,
     "healthCheckSampleProb": 0.002,
-    "providerInitialWeights": [0.5, 0.5],
+    "providerInitialWeights": [0.3, 0.7],
     "providerUrls": ["QUICKNODE_42161", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
   },
@@ -68,7 +68,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0.05,
     "healthCheckSampleProb": 0.0005,
-    "providerInitialWeights": [0.8, 0.2],
+    "providerInitialWeights": [0.7, 0.3],
     "providerUrls": ["QUICKNODE_8453", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
   },
