@@ -184,6 +184,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         CACHED_ROUTES_TABLE_NAME,
         AWS_LAMBDA_FUNCTION_NAME,
         V2_PAIRS_CACHE_TABLE_NAME,
+        CACHING_ROUTING_LAMBDA_FUNCTION_NAME,
       } = process.env
 
       const dependenciesByChain: {
@@ -467,14 +468,26 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             tenderlySimulator,
             ethEstimateGasSimulator
           )
+          const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
           let routeCachingProvider: IRouteCachingProvider | undefined = undefined
-          if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
-            routeCachingProvider = new DynamoRouteCachingProvider({
-              routesTableName: ROUTES_TABLE_NAME!,
-              routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
-              cachingQuoteLambdaName: AWS_LAMBDA_FUNCTION_NAME!,
-            })
+
+          if (Math.random() * 100 < (newCachedRoutesRolloutPercent ?? 0)) {
+            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+              routeCachingProvider = new DynamoRouteCachingProvider({
+                routesTableName: ROUTES_TABLE_NAME!,
+                routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
+                cachingQuoteLambdaName: CACHING_ROUTING_LAMBDA_FUNCTION_NAME,
+              })
+            }
+          } else {
+            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+              routeCachingProvider = new DynamoRouteCachingProvider({
+                routesTableName: ROUTES_TABLE_NAME!,
+                routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
+                cachingQuoteLambdaName: AWS_LAMBDA_FUNCTION_NAME!,
+              })
+            }
           }
 
           const v2Supported = [
