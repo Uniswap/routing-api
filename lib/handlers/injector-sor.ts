@@ -473,7 +473,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           let routeCachingProvider: IRouteCachingProvider | undefined = undefined
 
           if (Math.random() * 100 < (newCachedRoutesRolloutPercent ?? 0)) {
-            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '' && CACHING_ROUTING_LAMBDA_FUNCTION_NAME) {
+            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
               routeCachingProvider = new DynamoRouteCachingProvider({
                 routesTableName: ROUTES_TABLE_NAME!,
                 routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
