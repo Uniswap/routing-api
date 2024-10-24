@@ -2,8 +2,8 @@
   {
     "chainId": 42220,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.1,
-    "healthCheckSampleProb": 0.1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_42220", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -11,8 +11,8 @@
   {
     "chainId": 43114,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.1,
-    "healthCheckSampleProb": 0.1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_43114", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -20,8 +20,8 @@
   {
     "chainId": 56,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0.3, 0.7],
     "providerUrls": ["QUICKNODE_56", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -29,8 +29,8 @@
   {
     "chainId": 10,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.1,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_10", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -38,8 +38,8 @@
   {
     "chainId": 11155111,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["ALCHEMY_11155111", "UNIRPC_0"],
     "providerNames": ["ALCHEMY", "UNIRPC"],
@@ -48,8 +48,8 @@
   {
     "chainId": 137,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.25,
-    "healthCheckSampleProb": 0.005,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_137", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -57,8 +57,8 @@
   {
     "chainId": 42161,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.1,
-    "healthCheckSampleProb": 0.002,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0.3, 0.7],
     "providerUrls": ["QUICKNODE_42161", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -66,8 +66,8 @@
   {
     "chainId": 8453,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.05,
-    "healthCheckSampleProb": 0.0005,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0.7, 0.3],
     "providerUrls": ["QUICKNODE_8453", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -75,8 +75,8 @@
   {
     "chainId": 1,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.05,
-    "healthCheckSampleProb": 0.001,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0.9, 0.1, 0],
     "providerUrls": ["QUICKNODE_1", "UNIRPC_0", "QUICKNODERETH_1"],
     "providerNames": ["QUICKNODE", "UNIRPC", "QUICKNODERETH"]
@@ -84,8 +84,8 @@
   {
     "chainId": 81457,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.001,
-    "healthCheckSampleProb": 0.001,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_81457", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -93,8 +93,8 @@
   {
     "chainId": 7777777,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.001,
-    "healthCheckSampleProb": 0.001,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_7777777", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -102,8 +102,8 @@
   {
     "chainId": 324,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_324", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
@@ -111,8 +111,8 @@
   {
     "chainId": 480,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_480"],
     "providerNames": ["QUICKNODE"]
@@ -120,8 +120,8 @@
   {
     "chainId": 1301,
     "useMultiProviderProb": 1,
-    "latencyEvaluationSampleProb": 0.01,
-    "healthCheckSampleProb": 0.01,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_1301"],
     "providerNames": ["QUICKNODE"]
