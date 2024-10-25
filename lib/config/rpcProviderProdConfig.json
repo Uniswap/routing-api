@@ -22,7 +22,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0,
     "healthCheckSampleProb": 0,
-    "providerInitialWeights": [0.3, 0.7],
+    "providerInitialWeights": [0, 1],
     "providerUrls": ["QUICKNODE_56", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
   },
