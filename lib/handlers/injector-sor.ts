@@ -147,7 +147,7 @@ export type ContainerDependencies = {
   v2Supported: ChainId[]
   v4Supported?: ChainId[]
   mixedSupported?: ChainId[]
-  v4PoolsParams?: Array<[number, number, string]>
+  v4PoolParams?: Array<[number, number, string]>
   cachedRoutesCacheInvalidationFixRolloutPercentage?: number
 }
 
@@ -302,7 +302,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             underlyingV2PoolProvider,
             new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
           )
-          const v4PoolsParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
+          const v4PoolParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
             EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
           )
 
@@ -321,7 +321,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
               v4PoolProvider,
-              v4PoolsParams
+              v4PoolParams
             )) as V4AWSSubgraphProvider,
             (await this.instantiateSubgraphProvider(
               chainId,
@@ -527,7 +527,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v2Supported,
               v4Supported,
               mixedSupported,
-              v4PoolsParams,
+              v4PoolParams,
               cachedRoutesCacheInvalidationFixRolloutPercentage,
             },
           }

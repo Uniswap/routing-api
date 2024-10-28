@@ -103,7 +103,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v2Supported,
       v4Supported,
       mixedSupported,
-      v4PoolsParams,
+      v4PoolParams,
       cachedRoutesCacheInvalidationFixRolloutPercentage,
     } = dependencies[chainIdEnum]!
 
@@ -141,7 +141,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           v2Supported,
           v4Supported,
           mixedSupported,
-          v4PoolsParams,
+          v4PoolParams,
           cachedRoutesCacheInvalidationFixRolloutPercentage,
         })
         break
