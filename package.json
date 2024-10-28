@@ -87,11 +87,7 @@
     "@uniswap/router-sdk": "^1.14.0",
     "@uniswap/sdk-core": "^5.8.5",
     "@types/semver": "^7.5.8",
-<<<<<<< HEAD
-    "@uniswap/smart-order-router": "4.7.3",
-=======
-    "@uniswap/smart-order-router": "/tmp/uniswap-smart-order-router-4.7.3.tgz",
->>>>>>> 9e2c6ab (fix: we roll out new cached routes fix with percent)
+    "@uniswap/smart-order-router": "4.7.5",
     "@uniswap/token-lists": "^1.0.0-beta.33",
     "@uniswap/universal-router-sdk": "^4.6.1",
     "@uniswap/v2-sdk": "^4.6.1",
