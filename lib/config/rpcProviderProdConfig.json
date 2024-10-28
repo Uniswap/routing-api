@@ -50,7 +50,7 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0,
     "healthCheckSampleProb": 0,
-    "providerInitialWeights": [0, 1],
+    "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_137", "UNIRPC_0"],
     "providerNames": ["QUICKNODE", "UNIRPC"]
   },
