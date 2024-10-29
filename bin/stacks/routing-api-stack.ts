@@ -438,8 +438,9 @@ export class RoutingAPIStack extends cdk.Stack {
         return
       }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
+      const invocationsThreshold = 50
       const metric = new MathExpression({
-        expression: '100*(response200/(invocations-response400))',
+        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 0)`,
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -481,8 +482,9 @@ export class RoutingAPIStack extends cdk.Stack {
         return
       }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
+      const invocationsThreshold = 50
       const metric = new MathExpression({
-        expression: '100*(response200/(invocations-response400))',
+        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 0)`,
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -529,8 +531,9 @@ export class RoutingAPIStack extends cdk.Stack {
           return
         }
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+        const invocationsThreshold = 50
         const metric = new MathExpression({
-          expression: '100*(response200/(invocations-response400))',
+          expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 0)`,
           usingMetrics: {
             invocations: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
