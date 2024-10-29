@@ -247,10 +247,9 @@ export type IntentSpecificConfig = {
 
 export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   caching: {
-    // When the intent is to create a cache entry, we will use cachedRoutes with Tapcompare to track accuracy
     intent: INTENT.CACHING,
     useCachedRoutes: true,
-    // overwriteCacheMode: CacheMode.Tapcompare,
+    overwriteCacheMode: CacheMode.Livemode,
     // This optimistic=false is *super* important to avoid an infinite loop of caching quotes calling themselves
     optimisticCachedRoutes: false,
   },
