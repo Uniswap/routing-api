@@ -3,6 +3,7 @@ import {
   CachedRoutes,
   CacheMode,
   ID_TO_NETWORK_NAME,
+  INTENT,
   IRouteCachingProvider,
   log,
   metric,
@@ -16,6 +17,7 @@ import { Protocol } from '@uniswap/router-sdk'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { PromiseResult } from 'aws-sdk/lib/request'
+import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 
 interface ConstructorParams {
   /**
@@ -43,43 +45,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
   private readonly ROUTES_DB_FLAG_TTL = 2 * 60 // 2 minutes
 
-  // heuristic is within 30 seconds we find a route.
-  // we know each chain block time
-  // divide those two
-  private readonly DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB = (chainId: ChainId) => {
-    switch (chainId) {
-      // https://dune.com/queries/2138021
-      case ChainId.ARBITRUM_ONE:
-        return 100
-
-      // https://dune.com/queries/2009572
-      case ChainId.BASE:
-      case ChainId.OPTIMISM:
-        return 60
-
-      // https://snowtrace.io/chart/blocktime
-      case ChainId.AVALANCHE:
-        return 15
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.BNB:
-        return 10
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.POLYGON:
-        return 15
-
-      //  https://explorer.celo.org/mainnet/
-      case ChainId.CELO:
-        return 6
-
-      // https://dune.com/KARTOD/blockchains-analysis
-      case ChainId.MAINNET:
-      default:
-        return 2
-    }
-  }
-  // For the Ratio we are approximating Phi (Golden Ratio) by creating a fraction with 2 consecutive Fibonacci numbers
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
   private readonly BLOCKS_DIFF_BETWEEN_CACHING_QUOTES: Map<ChainId, number> = new Map([[ChainId.MAINNET, 3]])
@@ -114,7 +79,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @protected
    */
   protected async _getBlocksToLive(cachedRoutes: CachedRoutes, _: CurrencyAmount<Currency>): Promise<number> {
-    return this.DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB(cachedRoutes.chainId)
+    return DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB[cachedRoutes.chainId]
   }
 
   /**
@@ -342,7 +307,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         amount: amount.quotient.toString(),
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
         protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
-        intent: 'caching',
+        intent: INTENT.CACHING,
         requestSource: 'routing-api',
       },
     }
@@ -475,14 +440,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     _blockNumber: number,
     _optimistic: boolean
   ): CachedRoutes | undefined {
-    // if it's on sepolia, then we want to filter expired routes by blocks to live
-    // this is to unblock v4 routing tests on sepolia
-    if (cachedRoutes?.chainId === ChainId.SEPOLIA) {
-      return cachedRoutes?.notExpired(_blockNumber, _optimistic) ? cachedRoutes : undefined
-    } else {
-      // otherwise, we keep it here, but we need a better plan for how to fix filtering expired cached routes
-      return cachedRoutes
-    }
+    // we can revert it back to never filter expired cached routes in read path
+    // we will use blocks-to-live in the write cached routes path
+    // also we can verify that cached routes cache invalidation bug error is gone in sepolia, as we removed hardcoding for sepolia
+    return cachedRoutes
   }
 
   /**

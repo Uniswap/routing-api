@@ -2,6 +2,7 @@ import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   CacheMode,
+  INTENT,
   LowerCaseStringArray,
   MapWithLowerCaseKey,
   ProtocolPoolSelection,
@@ -238,6 +239,7 @@ export const QUOTE_SPEED_CONFIG: { [key: string]: QuoteSpeedConfig } = {
 }
 
 export type IntentSpecificConfig = {
+  intent?: INTENT
   useCachedRoutes?: boolean
   overwriteCacheMode?: CacheMode
   optimisticCachedRoutes?: boolean
@@ -246,23 +248,27 @@ export type IntentSpecificConfig = {
 export const INTENT_SPECIFIC_CONFIG: { [key: string]: IntentSpecificConfig } = {
   caching: {
     // When the intent is to create a cache entry, we will use cachedRoutes with Tapcompare to track accuracy
+    intent: INTENT.CACHING,
     useCachedRoutes: true,
-    overwriteCacheMode: CacheMode.Tapcompare,
+    // overwriteCacheMode: CacheMode.Tapcompare,
     // This optimistic=false is *super* important to avoid an infinite loop of caching quotes calling themselves
     optimisticCachedRoutes: false,
   },
   quote: {
     // When the intent is to get a quote, we should use the cache and optimistic cached routes
+    intent: INTENT.QUOTE,
     useCachedRoutes: true,
     optimisticCachedRoutes: true,
   },
   swap: {
     // When the intent is to prepare the swap, we can use cache, but it should not be optimistic
+    intent: INTENT.SWAP,
     useCachedRoutes: true,
     optimisticCachedRoutes: false,
   },
   pricing: {
     // When the intent is to get pricing, we should use the cache and optimistic cached routes
+    intent: INTENT.PRICING,
     useCachedRoutes: true,
     optimisticCachedRoutes: true,
   },
