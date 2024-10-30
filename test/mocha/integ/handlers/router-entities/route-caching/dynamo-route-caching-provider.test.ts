@@ -151,7 +151,7 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
   blocksToLive: 5,
 })
 
-describe('DynamoRouteCachingProvider', () => {
+describe('DynamoRouteCachingProvider', async () => {
   setupTables(TEST_ROUTE_CACHING_TABLE, TEST_ROUTE_DB_TABLE)
   const dynamoRouteCache = new DynamoRouteCachingProvider({
     routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
