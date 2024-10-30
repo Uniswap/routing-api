@@ -158,7 +158,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
-          'InsightsLayer',
+          'CachingInsightsLayer',
           `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
@@ -223,7 +223,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
-          'CachingInsightsLayer',
+          'InsightsLayer',
           `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
@@ -231,7 +231,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       logRetention: RetentionDays.TWO_WEEKS,
     })
 
-    const cachingLambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
+    const cachingLambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'CachingRoutingAPI-LambdaErrorRate', {
       metric: new aws_cloudwatch.MathExpression({
         expression: 'errors / invocations',
         usingMetrics: {
@@ -248,7 +248,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       threshold: 0.05,
       evaluationPeriods: 3,
     })
-    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'CachingRoutingAPI-LambdaErrorRate', {
+    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
       metric: new aws_cloudwatch.MathExpression({
         expression: 'errors / invocations',
         usingMetrics: {
