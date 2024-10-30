@@ -472,22 +472,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           let routeCachingProvider: IRouteCachingProvider | undefined = undefined
 
-          if (Math.random() * 100 < (newCachedRoutesRolloutPercent ?? 0)) {
-            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
-              routeCachingProvider = new DynamoRouteCachingProvider({
-                routesTableName: ROUTES_TABLE_NAME!,
-                routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
-                cachingQuoteLambdaName: CACHING_ROUTING_LAMBDA_FUNCTION_NAME,
-              })
-            }
-          } else {
-            if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
-              routeCachingProvider = new DynamoRouteCachingProvider({
-                routesTableName: ROUTES_TABLE_NAME!,
-                routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
-                cachingQuoteLambdaName: AWS_LAMBDA_FUNCTION_NAME!,
-              })
-            }
+          // if the newCachedRoutesRolloutPercent is greater than the random number, use the new caching routing lambda function name,
+          // so that the caching intent quote handler will invoke the even to the newly created caching routing lambda
+          const cachingQuoteLambdaName =
+            Math.random() * 100 < (newCachedRoutesRolloutPercent ?? 0)
+              ? CACHING_ROUTING_LAMBDA_FUNCTION_NAME
+              : AWS_LAMBDA_FUNCTION_NAME!
+
+          if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+            routeCachingProvider = new DynamoRouteCachingProvider({
+              routesTableName: ROUTES_TABLE_NAME!,
+              routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
+              cachingQuoteLambdaName: cachingQuoteLambdaName,
+            })
           }
 
           const v2Supported = [
