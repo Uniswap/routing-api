@@ -320,6 +320,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       }
 
       log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
+      metric.putMetric(
+        `CachingQuoteForRoutesDbRequestSentToLambda${this.cachingQuoteLambdaName}`,
+        1,
+        MetricLoggerUnit.Count
+      )
 
       this.lambdaClient.invoke(params).promise()
     }
