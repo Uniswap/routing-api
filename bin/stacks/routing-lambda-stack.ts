@@ -19,9 +19,9 @@ import * as aws_route53_targets from 'aws-cdk-lib/aws-route53-targets'
 
 const vpcEndpointServiceMap: Record<string, string> = {
   dev: 'com.amazonaws.vpce.us-east-2.vpce-svc-0945550ad67320638',
-  'staging': '',
+  staging: '',
   prod: '',
-};
+}
 const privateHostedZoneName = 'unihq.org'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
@@ -87,9 +87,9 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     new CfnOutput(this, 'jsonRpcProviders', {
       value: JSON.stringify(jsonRpcProviders),
     })
-    const stage = process.env.STAGE || 'dev'; // Default to 'dev' if not set
+    const stage = process.env.STAGE || 'dev' // Default to 'dev' if not set
 
-    // TODO: Add if not dev , not create 
+    // TODO: Add if not dev , not create
     const vpc = new ec2.Vpc(this, `RoutingLambdaVPC-${stage}`, {
       maxAzs: 2, // Number of availability zones
       subnetConfiguration: [
@@ -105,33 +105,32 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         },
       ],
       natGateways: 1, // One NAT Gateway for private subnet internet access
-    });
+    })
 
-    const publicSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC });
+    const publicSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC })
     const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, `AccessUnirpcEndpoint-${stage}`, {
       vpc,
       service: new ec2.InterfaceVpcEndpointService(vpcEndpointServiceMap[stage], 443),
       subnets: publicSubnets,
       privateDnsEnabled: false, // Enable private DNS for the endpoint
-    });
-
+    })
 
     // Create a private hosted zone
     const hostedZone = new aws_route53.PrivateHostedZone(this, 'UniHQHostedZone', {
       zoneName: privateHostedZoneName,
       vpc,
-    });
-    
-    const recordName = `routing-${stage}.${privateHostedZoneName}`; // e.g. routing-dev.unihq.org
+    })
+
+    const recordName = `routing-${stage}.${privateHostedZoneName}` // e.g. routing-dev.unihq.org
     new aws_route53.ARecord(this, 'RoutingRecord', {
       zone: hostedZone,
       recordName: recordName,
       target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.InterfaceVpcEndpointTarget(vpcEndpoint)),
-    });
+    })
 
     new cdk.CfnOutput(this, 'VpcEndpointId', {
       value: vpcEndpoint.vpcEndpointId,
-    });
+    })
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -145,21 +144,22 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         // X-Ray for tracing
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
       ],
-    });
-    
-    // Add inline policy for EC2 permissions
-    lambdaRole.addToPolicy(new aws_iam.PolicyStatement({
-      actions: [
-        'ec2:CreateNetworkInterface',
-        'ec2:DescribeNetworkInterfaces',
-        'ec2:DeleteNetworkInterface',
-        'ec2:AssignPrivateIpAddresses',
-        'ec2:UnassignPrivateIpAddresses'
-      ],
-      resources: ['*'], // Adjust this to restrict to specific resources if needed
-    }));
+    })
 
-    
+    // Add inline policy for EC2 permissions
+    lambdaRole.addToPolicy(
+      new aws_iam.PolicyStatement({
+        actions: [
+          'ec2:CreateNetworkInterface',
+          'ec2:DescribeNetworkInterfaces',
+          'ec2:DeleteNetworkInterface',
+          'ec2:AssignPrivateIpAddresses',
+          'ec2:UnassignPrivateIpAddresses',
+        ],
+        resources: ['*'], // Adjust this to restrict to specific resources if needed
+      })
+    )
+
     poolCacheBucket.grantRead(lambdaRole)
     poolCacheBucket2.grantRead(lambdaRole)
     poolCacheBucket3.grantRead(lambdaRole)
@@ -245,7 +245,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
       vpc: vpc,
-      vpcSubnets:  { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       // 11/8/23: URA currently calls the Routing API with a timeout of 10 seconds.
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
