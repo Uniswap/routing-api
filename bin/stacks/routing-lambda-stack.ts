@@ -14,6 +14,15 @@ import { Construct } from 'constructs'
 import * as path from 'path'
 import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
+import * as aws_route53 from 'aws-cdk-lib/aws-route53'
+import * as aws_route53_targets from 'aws-cdk-lib/aws-route53-targets'
+
+const vpcEndpointServiceMap: Record<string, string> = {
+  dev: 'com.amazonaws.vpce.us-east-2.vpce-svc-0945550ad67320638',
+  'staging': '',
+  prod: '',
+};
+const privateHostedZoneName = 'unihq.org'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
   poolCacheBucket: aws_s3.Bucket
@@ -78,32 +87,46 @@ export class RoutingLambdaStack extends cdk.NestedStack {
     new CfnOutput(this, 'jsonRpcProviders', {
       value: JSON.stringify(jsonRpcProviders),
     })
+    const stage = process.env.STAGE || 'dev'; // Default to 'dev' if not set
 
-    const vpc = new ec2.Vpc(this, 'RoutingLambdaVPC', {
+    // TODO: Add if not dev , not create 
+    const vpc = new ec2.Vpc(this, `RoutingLambdaVPC-${stage}`, {
       maxAzs: 2, // Number of availability zones
       subnetConfiguration: [
         {
-          name: 'PublicSubnet',
+          name: `RoutingPublicSubnet-${stage}`,
           subnetType: ec2.SubnetType.PUBLIC, // Public subnet with internet access
           cidrMask: 24, // IP range for public subnet
         },
         {
-          name: 'PrivateSubnet',
+          name: `RoutingPrivateSubnet-${stage}`,
           subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS, // Private subnet with access to the internet via NAT Gateway
           cidrMask: 24, // IP range for private subnet
         },
       ],
+      natGateways: 1, // One NAT Gateway for private subnet internet access
     });
-    // const privateSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS });
+
     const publicSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC });
-
-    // Attach necessary managed policies for VPC and logging access
-
-    const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, 'AccessUnirpcEndpoint', {
+    const vpcEndpoint = new ec2.InterfaceVpcEndpoint(this, `AccessUnirpcEndpoint-${stage}`, {
       vpc,
-      service: new ec2.InterfaceVpcEndpointService(`com.amazonaws.vpce.us-east-2.vpce-svc-06229983619dbe38c`, 80),
+      service: new ec2.InterfaceVpcEndpointService(vpcEndpointServiceMap[stage], 443),
       subnets: publicSubnets,
       privateDnsEnabled: false, // Enable private DNS for the endpoint
+    });
+
+
+    // Create a private hosted zone
+    const hostedZone = new aws_route53.PrivateHostedZone(this, 'UniHQHostedZone', {
+      zoneName: privateHostedZoneName,
+      vpc,
+    });
+    
+    const recordName = `routing-${stage}.${privateHostedZoneName}`; // e.g. routing-dev.unihq.org
+    new aws_route53.ARecord(this, 'RoutingRecord', {
+      zone: hostedZone,
+      recordName: recordName,
+      target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.InterfaceVpcEndpointTarget(vpcEndpoint)),
     });
 
     new cdk.CfnOutput(this, 'VpcEndpointId', {
@@ -222,6 +245,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
       vpc: vpc,
+      vpcSubnets:  { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       // 11/8/23: URA currently calls the Routing API with a timeout of 10 seconds.
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
