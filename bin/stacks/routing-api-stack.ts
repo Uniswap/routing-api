@@ -438,8 +438,10 @@ export class RoutingAPIStack extends cdk.Stack {
         return
       }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
+      // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
+      const invocationsThreshold = 50
       const metric = new MathExpression({
-        expression: '100*(response200/(invocations-response400))',
+        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -481,8 +483,10 @@ export class RoutingAPIStack extends cdk.Stack {
         return
       }
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
+      // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
+      const invocationsThreshold = 50
       const metric = new MathExpression({
-        expression: '100*(response200/(invocations-response400))',
+        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
           invocations: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
@@ -529,8 +533,10 @@ export class RoutingAPIStack extends cdk.Stack {
           return
         }
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+        // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
+        const invocationsThreshold = 50
         const metric = new MathExpression({
-          expression: '100*(response200/(invocations-response400))',
+          expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
           usingMetrics: {
             invocations: new aws_cloudwatch.Metric({
               namespace: 'Uniswap',
