@@ -35,4 +35,9 @@ describe('simulation', () => {
     const status = simulationStatusTranslation(SimulationStatus.NotApproved, log)
     expect(status).toStrictEqual(RoutingApiSimulationStatus.NOT_APPROVED)
   })
+
+  it('returns system down for system down simulation status', () => {
+    const status = simulationStatusTranslation(SimulationStatus.SystemDown, log)
+    expect(status).toStrictEqual(RoutingApiSimulationStatus.SYSTEM_DOWN)
+  })
 })
