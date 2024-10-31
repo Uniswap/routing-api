@@ -385,6 +385,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             blockNumber: cachedRoutes.blockNumber,
             protocol: route.protocol.toString(),
             item: binaryCachedRoutes,
+            plainRoutes: jsonCachedRoutes,
             ttl: ttl,
           },
         },
