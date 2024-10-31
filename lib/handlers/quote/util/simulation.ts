@@ -8,6 +8,7 @@ export enum RoutingApiSimulationStatus {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   NOT_SUPPORTED = 'NOT_SUPPORTED',
   NOT_APPROVED = 'NOT_APPROVED',
+  SYSTEM_DOWN = 'SYSTEM_DOWN',
   UNKNOWN = '',
 }
 
@@ -28,6 +29,8 @@ export const simulationStatusTranslation = (
       return RoutingApiSimulationStatus.NOT_SUPPORTED
     case SimulationStatus.NotApproved:
       return RoutingApiSimulationStatus.NOT_APPROVED
+    case SimulationStatus.SystemDown:
+      return RoutingApiSimulationStatus.SYSTEM_DOWN
     default:
       log.error(`Unknown simulation status ${simulationStatus}`)
       return RoutingApiSimulationStatus.UNKNOWN
