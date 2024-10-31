@@ -2401,7 +2401,6 @@ describe('quote', function () {
           }
 
           const queryParams = qs.stringify(quoteReq)
-          console.log(queryParams)
 
           const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
 
