@@ -31,7 +31,7 @@ interface ConstructorParams {
   /**
    * The Lambda Function Name for the Lambda that will be invoked to fill the cache
    */
-  cachingQuoteLambdaName: string
+  cachingQuoteLambdaName?: string
 }
 
 export class DynamoRouteCachingProvider extends IRouteCachingProvider {
@@ -39,7 +39,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private readonly lambdaClient: Lambda
   private readonly routesTableName: string
   private readonly routesCachingRequestFlagTableName: string
-  private readonly cachingQuoteLambdaName: string
+  private readonly cachingQuoteLambdaName?: string
 
   private readonly DEFAULT_CACHEMODE_ROUTES_DB = CacheMode.Livemode
   private readonly ROUTES_DB_TTL = 24 * 60 * 60 // 24 hours
@@ -312,15 +312,22 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       },
     }
 
-    const params = {
-      FunctionName: this.cachingQuoteLambdaName,
-      InvocationType: 'Event',
-      Payload: JSON.stringify(payload),
+    if (this.cachingQuoteLambdaName) {
+      const params = {
+        FunctionName: this.cachingQuoteLambdaName,
+        InvocationType: 'Event',
+        Payload: JSON.stringify(payload),
+      }
+
+      log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
+      metric.putMetric(
+        `CachingQuoteForRoutesDbRequestSentToLambda${this.cachingQuoteLambdaName}`,
+        1,
+        MetricLoggerUnit.Count
+      )
+
+      this.lambdaClient.invoke(params).promise()
     }
-
-    log.info(`[DynamoRouteCachingProvider] Sending async caching request to lambda ${JSON.stringify(params)}`)
-
-    this.lambdaClient.invoke(params).promise()
   }
 
   private setRoutesDbCachingIntentFlag(
@@ -378,6 +385,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             blockNumber: cachedRoutes.blockNumber,
             protocol: route.protocol.toString(),
             item: binaryCachedRoutes,
+            plainRoutes: jsonCachedRoutes,
             ttl: ttl,
           },
         },

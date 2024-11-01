@@ -17,9 +17,13 @@ import {
   USDC_MAINNET,
   V3Route,
   nativeOnChain,
+  MetricLoggerUnit,
 } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
 import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
+import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/newCachedRoutesRolloutPercent'
+import sinon, { SinonSpy } from 'sinon'
+import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 
 chai.use(chaiAsPromised)
 
@@ -152,11 +156,61 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
 })
 
 describe('DynamoRouteCachingProvider', async () => {
+  let spy: SinonSpy
+
+  beforeEach(() => {
+    spy = sinon.spy(metric, 'putMetric')
+  })
+
+  afterEach(() => {
+    spy.restore()
+  })
+
   setupTables(TEST_ROUTE_CACHING_TABLE, TEST_ROUTE_DB_TABLE)
   const dynamoRouteCache = new DynamoRouteCachingProvider({
     routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
     routesCachingRequestFlagTableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
     cachingQuoteLambdaName: 'test',
+  })
+
+  it('Cached routes hits new cached routes lambda', async () => {
+    spy.withArgs('CachingQuoteForRoutesDbRequestSentToLambdanewcachinglambda', 1, MetricLoggerUnit.Count)
+
+    // testnet rolls out at 100%
+    const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[ChainId.SEPOLIA]
+
+    const dynamoRouteCache = new DynamoRouteCachingProvider({
+      routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
+      routesCachingRequestFlagTableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+      cachingQuoteLambdaName: Math.random() * 100 < (newCachedRoutesRolloutPercent ?? 0) ? 'newcachinglambda' : 'test',
+    })
+
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+    const cacheMode = await dynamoRouteCache.getCacheMode(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3, Protocol.V4]
+    )
+    expect(cacheMode).to.equal(CacheMode.Livemode)
+
+    const insertedIntoCache = await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
+    expect(insertedIntoCache).to.be.true
+
+    // Fetches route successfully from cache when it has been cached.
+    const route = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(route).to.not.be.undefined
+
+    sinon.assert.called(spy)
   })
 
   it('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
