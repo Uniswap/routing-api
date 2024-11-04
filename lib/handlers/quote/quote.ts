@@ -389,6 +389,14 @@ export class QuoteHandler extends APIGLambdaHandler<
       case 'exactIn':
         amount = CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(amountRaw))
 
+        if (!amount.greaterThan(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(0)))) {
+          return {
+            statusCode: 400,
+            errorCode: 'AMOUNT_INVALID',
+            detail: 'Amount must be greater than 0',
+          }
+        }
+
         log.info(
           {
             amountIn: amount.toExact(),
@@ -415,6 +423,14 @@ export class QuoteHandler extends APIGLambdaHandler<
         break
       case 'exactOut':
         amount = CurrencyAmount.fromRawAmount(currencyOut, JSBI.BigInt(amountRaw))
+
+        if (!amount.greaterThan(CurrencyAmount.fromRawAmount(currencyIn, JSBI.BigInt(0)))) {
+          return {
+            statusCode: 400,
+            errorCode: 'AMOUNT_INVALID',
+            detail: 'Amount must be greater than 0',
+          }
+        }
 
         log.info(
           {
