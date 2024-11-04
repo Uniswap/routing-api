@@ -2578,6 +2578,30 @@ describe('quote', function () {
           })
         })
 
+        it(`amount is zero`, async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'USDC',
+            tokenInChainId: 1,
+            tokenOutAddress: 'USDT',
+            tokenOutChainId: 1,
+            amount: '0',
+            type,
+            recipient: alice.address,
+            slippageTolerance: SLIPPAGE,
+            deadline: '360',
+            algorithm,
+            enableUniversalRouter: true,
+          }
+
+          await callAndExpectFail(quoteReq, {
+            status: 400,
+            data: {
+              detail: 'Amount must be greater than 0',
+              errorCode: 'AMOUNT_INVALID',
+            },
+          })
+        })
+
         it(`amount is decimal`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
