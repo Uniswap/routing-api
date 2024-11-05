@@ -167,14 +167,24 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): CachedRoutes {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
-      // If we got a response with more than 1 item, we extract the binary field from the response
-      const itemBinary = record.item
-      // Then we convert it into a Buffer
-      const cachedRoutesBuffer = Buffer.from(itemBinary)
-      // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
-      const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
-      // Finally we unmarshal that JSON into a `CachedRoutes` object
-      return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+      if (record.plainRoutes?.toString().trim() !== '') {
+        metric.putMetric(`RoutesDbEntryPlainTextRouteFound`, 1, MetricLoggerUnit.Count)
+
+        const cachedRoutesJson = JSON.parse(record.plainRoutes)
+        return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+      } else {
+        // Once this metric drops to zero, then we can stop writing binaryCachedRoutes into the item column
+        metric.putMetric(`RoutesDbEntrySerializedRouteFound`, 1, MetricLoggerUnit.Count)
+
+        // If we got a response with more than 1 item, we extract the binary field from the response
+        const itemBinary = record.item
+        // Then we convert it into a Buffer
+        const cachedRoutesBuffer = Buffer.from(itemBinary)
+        // We convert that buffer into string and parse as JSON (it was encoded as JSON when it was inserted into cache)
+        const cachedRoutesJson = JSON.parse(cachedRoutesBuffer.toString())
+        // Finally we unmarshal that JSON into a `CachedRoutes` object
+        return CachedRoutesMarshaller.unmarshal(cachedRoutesJson)
+      }
     })
 
     const routesMap: Map<string, CachedRoute<SupportedRoutes>> = new Map()
