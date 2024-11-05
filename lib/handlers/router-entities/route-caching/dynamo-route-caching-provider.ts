@@ -167,7 +167,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): CachedRoutes {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
-      if (record.plainRoutes?.toString().trim() !== '') {
+      if (record.plainRoutes && record.plainRoutes?.toString().trim() !== '') {
         metric.putMetric(`RoutesDbEntryPlainTextRouteFound`, 1, MetricLoggerUnit.Count)
 
         const cachedRoutesJson = JSON.parse(record.plainRoutes)

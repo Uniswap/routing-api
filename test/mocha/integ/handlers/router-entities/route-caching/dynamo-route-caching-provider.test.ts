@@ -175,6 +175,7 @@ describe('DynamoRouteCachingProvider', async () => {
 
   it('Cached routes hits new cached routes lambda', async () => {
     spy.withArgs('CachingQuoteForRoutesDbRequestSentToLambdanewcachinglambda', 1, MetricLoggerUnit.Count)
+    spy.withArgs('RoutesDbEntryPlainTextRouteFound', 1, MetricLoggerUnit.Count)
 
     // testnet rolls out at 100%
     const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[ChainId.SEPOLIA]
