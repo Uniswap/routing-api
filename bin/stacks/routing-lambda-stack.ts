@@ -19,8 +19,8 @@ import * as aws_route53_targets from 'aws-cdk-lib/aws-route53-targets'
 
 const vpcEndpointServiceMap: Record<string, string> = {
   dev: 'com.amazonaws.vpce.us-east-2.vpce-svc-0945550ad67320638',
-  staging: '',
-  prod: '',
+  staging: 'com.amazonaws.vpce.us-east-2.vpce-svc-00e58a4116063039d',
+  prod: 'com.amazonaws.vpce.us-east-2.vpce-svc-04784c683b22cfabb',
 }
 const privateHostedZoneName = 'unihq.org'
 
@@ -177,6 +177,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
     const cachingRoutingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'CachingRoutingLambda', {
       role: lambdaRole,
+      vpc: vpc,
       runtime: aws_lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
