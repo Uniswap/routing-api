@@ -2,7 +2,10 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import 'reflect-metadata'
 import { setupTables } from '../../../../dbSetup'
-import { DynamoRouteCachingProvider } from '../../../../../../lib/handlers/router-entities/route-caching'
+import {
+  DynamoRouteCachingProvider,
+  PairTradeTypeChainId,
+} from '../../../../../../lib/handlers/router-entities/route-caching'
 import { ADDRESS_ZERO, Protocol } from '@uniswap/router-sdk'
 import { ChainId, CurrencyAmount, Ether, TradeType } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
@@ -24,6 +27,7 @@ import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/newCachedRoutesRolloutPercent'
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
+import { DynamoDB } from 'aws-sdk'
 
 chai.use(chaiAsPromised)
 
@@ -175,6 +179,8 @@ describe('DynamoRouteCachingProvider', async () => {
 
   it('Cached routes hits new cached routes lambda', async () => {
     spy.withArgs('CachingQuoteForRoutesDbRequestSentToLambdanewcachinglambda', 1, MetricLoggerUnit.Count)
+    spy.withArgs('RoutesDbEntryPlainTextRouteFound', 1, MetricLoggerUnit.Count)
+    spy.withArgs('RoutesDbEntrySerializedRouteFound', 1, MetricLoggerUnit.Count)
 
     // testnet rolls out at 100%
     const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[ChainId.SEPOLIA]
@@ -209,6 +215,62 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_CACHED_ROUTES.blockNumber
     )
     expect(route).to.not.be.undefined
+
+    const queryParams = {
+      TableName: DynamoDBTableProps.RoutesDbTable.Name,
+      KeyConditionExpression: '#pk = :pk',
+      ExpressionAttributeNames: {
+        '#pk': 'pairTradeTypeChainId',
+      },
+      ExpressionAttributeValues: {
+        ':pk': PairTradeTypeChainId.fromCachedRoutes(TEST_CACHED_ROUTES).toString(),
+      },
+    }
+    const cachedRoutes = await new DynamoDB.DocumentClient({
+      maxRetries: 1,
+      retryDelayOptions: {
+        base: 20,
+      },
+      httpOptions: {
+        timeout: 100,
+      },
+    })
+      .query(queryParams)
+      .promise()
+
+    cachedRoutes.Items?.forEach(async (item) => {
+      expect(item).to.not.be.undefined
+      // We nullify the plainRoutes column and update the Item in-place in the table,
+      // so that we make sure when we get cached routes again, we will hit the serialized route path.
+      item.plainRoutes = undefined
+
+      const putRequest = {
+        TableName: DynamoDBTableProps.RoutesDbTable.Name,
+        Item: item,
+      }
+
+      await new DynamoDB.DocumentClient({
+        maxRetries: 1,
+        retryDelayOptions: {
+          base: 20,
+        },
+        httpOptions: {
+          timeout: 100,
+        },
+      })
+        .put(putRequest)
+        .promise()
+    })
+
+    const updatedRoute = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(updatedRoute).to.not.be.undefined
 
     sinon.assert.called(spy)
   })
