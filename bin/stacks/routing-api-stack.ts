@@ -327,15 +327,12 @@ export class RoutingAPIStack extends cdk.Stack {
       evaluationPeriods: 3,
     })
 
-    // Simulations can fail for valid reasons. For example, if the simulation reverts due
-    // to slippage checks (can happen with FOT tokens sometimes since our quoter does not
-    // account for the fees taken during transfer when we show the user the quote).
-    //
-    // For this reason we only alert on SEV3 to avoid unnecessary pages.
-    const simulationAlarmSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Simulation', {
-      alarmName: 'RoutingAPI-SEV3-Simulation',
+    // Tenderly sim system downtime is sev2, because it's swap blocking from trading-api.
+    // We have confidence that tenderly is down
+    const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
+      alarmName: 'RoutingAPI-SEV2-Simulation',
       metric: new MathExpression({
-        expression: '100*(simulationFailed/simulationRequested)',
+        expression: '100*(simulationSystemDown/simulationRequested)',
         period: Duration.minutes(30),
         usingMetrics: {
           simulationRequested: new aws_cloudwatch.Metric({
@@ -345,9 +342,9 @@ export class RoutingAPIStack extends cdk.Stack {
             unit: aws_cloudwatch.Unit.COUNT,
             statistic: 'sum',
           }),
-          simulationFailed: new aws_cloudwatch.Metric({
+          simulationSystemDown: new aws_cloudwatch.Metric({
             namespace: 'Uniswap',
-            metricName: `SimulationFailed`,
+            metricName: `SimulationSystemDown`,
             dimensionsMap: { Service: 'RoutingAPI' },
             unit: aws_cloudwatch.Unit.COUNT,
             statistic: 'sum',
@@ -357,6 +354,41 @@ export class RoutingAPIStack extends cdk.Stack {
       threshold: 20,
       evaluationPeriods: 3,
       treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
+    })
+    const simulationAlarmByChainSev2: cdk.aws_cloudwatch.Alarm[] = []
+    SUPPORTED_CHAINS.forEach((chainId) => {
+      if (CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
+
+      const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, `RoutingAPI-SEV2-SimulationChainId${chainId}`, {
+        alarmName: `RoutingAPI-SEV2-SimulationChainId${chainId}`,
+        metric: new MathExpression({
+          expression: `100*(simulationSystemDown/simulationRequested)`,
+          period: Duration.minutes(30),
+          usingMetrics: {
+            simulationRequested: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `Simulation Requested`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              statistic: 'sum',
+            }),
+            simulationSystemDown: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: `SimulationSystemDownChainId${chainId}`,
+              dimensionsMap: { Service: 'RoutingAPI' },
+              unit: aws_cloudwatch.Unit.COUNT,
+              statistic: 'sum',
+            }),
+          },
+        }),
+        threshold: 20,
+        evaluationPeriods: 3,
+        treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
+      })
+
+      simulationAlarmByChainSev2.push(simulationAlarmSev2)
     })
 
     // Create an alarm for when GraphQLTokenFeeFetcherFetchFeesFailure rate goes above 15%.
@@ -580,7 +612,7 @@ export class RoutingAPIStack extends cdk.Stack {
       apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      simulationAlarmSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      simulationAlarmSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       graphqlTokenFeeFetcherErrorRateSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
 
       percent4XXByChainAlarm.forEach((alarm) => {
@@ -593,6 +625,9 @@ export class RoutingAPIStack extends cdk.Stack {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       successRateByRequestSourceAndChainIdAlarm.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      simulationAlarmByChainSev2.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }
