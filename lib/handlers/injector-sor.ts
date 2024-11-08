@@ -91,6 +91,7 @@ import {
   EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES,
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
+import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -448,8 +449,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             undefined,
             // The timeout for the underlying axios call to Tenderly, measured in milliseconds.
             2.5 * 1000,
-            100,
-            [ChainId.MAINNET]
+            TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT[chainId],
+            [ChainId.MAINNET, ChainId.BASE]
           )
 
           const ethEstimateGasSimulator = new EthEstimateGasSimulator(
