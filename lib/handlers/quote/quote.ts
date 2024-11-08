@@ -512,6 +512,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric('SimulationNotApproved', 1, MetricLoggerUnit.Count)
     } else if (simulationStatus == SimulationStatus.NotSupported) {
       metric.putMetric('SimulationNotSupported', 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.SystemDown) {
+      metric.putMetric('SimulationSystemDown', 1, MetricLoggerUnit.Count)
+      metric.putMetric(`SimulationSystemDownChainId${chainId}`, 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<SupportedPoolInRoute[]> = []
