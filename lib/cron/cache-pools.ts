@@ -6,6 +6,7 @@ import {
   V2SubgraphProvider,
   V3SubgraphPool,
   V3SubgraphProvider,
+  V4SubgraphPool,
 } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
@@ -23,7 +24,7 @@ import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
-import { v4HooksPoolsFiltering } from '../../test/utils/v4HooksPoolsFiltering'
+import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -223,7 +224,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     }
 
     if (protocol === Protocol.V4) {
-      pools = v4HooksPoolsFiltering(chainId, pools)
+      pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
     }
 
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
