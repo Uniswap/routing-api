@@ -5,6 +5,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
 
 type V4PoolGroupingKey = string
+const TOP_GROUPED_V4_POOLS = 10
 
 function convertV4PoolToGroupingKey(pool: V4SubgraphPool): V4PoolGroupingKey {
   return pool.token0.id.concat(pool.token1.id).concat(pool.feeTier)
@@ -38,7 +39,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       v4Pools.push(pool)
 
-      if (v4Pools.size() > 10) {
+      if (v4Pools.size() > TOP_GROUPED_V4_POOLS) {
         v4Pools.dequeue()
       }
 
