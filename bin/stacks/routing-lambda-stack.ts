@@ -91,7 +91,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
     // TODO: Add if not dev , not create
     const vpc = new ec2.Vpc(this, `RoutingLambdaVPC-${stage}`, {
-      maxAzs: 2, // Number of availability zones
+      maxAzs: 4, // Number of availability zones
       subnetConfiguration: [
         {
           name: `RoutingPublicSubnet-${stage}`,
