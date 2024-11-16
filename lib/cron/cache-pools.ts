@@ -24,7 +24,7 @@ import { AWSMetricsLogger } from '../handlers/router-entities/aws-metrics-logger
 import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
-import { HOOKS_ADDRESSES_ALLOWLIST } from '../util/hooksAddressesAllowlist'
+import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -224,15 +224,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     }
 
     if (protocol === Protocol.V4) {
-      pools = (pools as Array<V4SubgraphPool>).filter((pool: V4SubgraphPool) => {
-        const shouldFilterOut = !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(pool.hooks.toLowerCase())
-
-        if (shouldFilterOut) {
-          log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
-        }
-
-        return !shouldFilterOut
-      })
+      pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
     }
 
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
