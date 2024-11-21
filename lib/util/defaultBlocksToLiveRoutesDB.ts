@@ -22,7 +22,8 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.BLAST]: 1800,
   [ChainId.WORLDCHAIN]: 1800,
   // (60 minutes) / (1 seconds) = 3600
-  [ChainId.ASTROCHAIN_SEPOLIA]: 3600,
+  [ChainId.UNICHAIN_SEPOLIA]: 3600,
+  [ChainId.UNICHAIN]: 3600,
   // (60 minutes) / (250 milliseconds) = 14400
   [ChainId.ARBITRUM_ONE]: 14400,
   [ChainId.ARBITRUM_GOERLI]: 14400,

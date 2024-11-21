@@ -26,5 +26,6 @@ export const TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT: { [chain in ChainId]: number
   [ChainId.BLAST]: 0,
   [ChainId.ZKSYNC]: 0,
   [ChainId.WORLDCHAIN]: 0,
-  [ChainId.ASTROCHAIN_SEPOLIA]: 0,
+  [ChainId.UNICHAIN]: 0,
+  [ChainId.UNICHAIN_SEPOLIA]: 0,
 }
