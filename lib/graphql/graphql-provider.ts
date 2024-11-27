@@ -59,8 +59,10 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
         return 'ZKSYNC'
       case ChainId.WORLDCHAIN:
         return 'WORLDCHAIN'
-      case ChainId.ASTROCHAIN_SEPOLIA:
-        return 'ASTROCHAIN'
+      case ChainId.UNICHAIN_SEPOLIA:
+        return 'UNICHAIN_SEPOLIA'
+      case ChainId.UNICHAIN:
+        return 'UNICHAIN'
       default:
         throw new Error(`UniGraphQLProvider._chainIdToGraphQLChainName unsupported ChainId: ${chainId}`)
     }

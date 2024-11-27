@@ -20,8 +20,10 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'base'
     case ChainId.WORLDCHAIN:
       return 'worldchain'
-    case ChainId.ASTROCHAIN_SEPOLIA:
-      return 'astrochain-sepolia'
+    case ChainId.UNICHAIN_SEPOLIA:
+      return 'unichain-sepolia'
+    case ChainId.UNICHAIN:
+      return 'unichain'
     default:
       return 'ethereum'
   }
@@ -101,6 +103,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     case 'QUICKNODE_1301': {
       // URL contains unichain-sepolia.quiknode.pro, we had to not disclose prior to the unichain annouce
       return `${tokens[0]}`
+    }
+    case 'QUICKNODE_130': {
+      return `https://${tokens[0]}.unichain-mainnet.quiknode.pro/${tokens[1]}`
     }
     case 'QUICKNODE_480': {
       return `https://${tokens[0]}.worldchain-mainnet.quiknode.pro/${tokens[1]}`
