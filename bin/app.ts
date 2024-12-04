@@ -342,7 +342,7 @@ export class RoutingAPIPipeline extends Stack {
         'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
         'npm install',
         'npm run build',
-        'npm run test:e2e',
+        'set NODE_OPTIONS=--max-old-space-size=4096 && npm run test:e2e',
       ],
     })
 
