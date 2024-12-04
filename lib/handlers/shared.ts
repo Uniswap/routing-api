@@ -76,8 +76,8 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
         },
         maxSwapsPerPath: 3,
         minSplits: 1,
-        maxSplits: 7,
-        distributionPercent: 20,
+        maxSplits: 4,
+        distributionPercent: 10,
         forceCrossProtocol: false,
       }
     case ChainId.OPTIMISM:
