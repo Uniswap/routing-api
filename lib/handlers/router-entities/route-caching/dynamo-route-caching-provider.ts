@@ -216,7 +216,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         MetricLoggerUnit.Count
       )
       // and total
-      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutesTotal_Opt_${optimistic}`, cachedRoutesArr.length, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `RoutesDbArrayWithMixedExpiredCachedRoutesTotal_Opt_${optimistic}`,
+        cachedRoutesArr.length,
+        MetricLoggerUnit.Count
+      )
       metric.putMetric(
         `RoutesDbArrayWithMixedExpiredCachedRoutesTotal_${ID_TO_NETWORK_NAME(chainId)}_Opt_${optimistic}`,
         cachedRoutesArr.length,
