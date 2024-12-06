@@ -191,6 +191,46 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     let blockNumber: number = 0
     let originalAmount: string = ''
 
+    // Log metrics how often we might be using expired cached routes when we shouldn't.
+    // Plan to fix this by filtering below, but for now we want to know how often this happens and where.
+    const numberOfExpiredCachedRoutes = cachedRoutesArr.filter(
+      (cachedRoutes) => !cachedRoutes.notExpired(currentBlockNumber, optimistic)
+    ).length
+    const numberOfNotExpiredCachedRoutes = cachedRoutesArr.length - numberOfExpiredCachedRoutes
+    if (numberOfExpiredCachedRoutes > 0 && numberOfNotExpiredCachedRoutes > 0) {
+      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutes`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `RoutesDbArrayWithMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}`,
+        1,
+        MetricLoggerUnit.Count
+      )
+      // log number of expired cached routes
+      metric.putMetric(
+        `RoutesDbArrayWithMixedExpiredCachedRoutesCount`,
+        numberOfExpiredCachedRoutes,
+        MetricLoggerUnit.Count
+      )
+      metric.putMetric(
+        `RoutesDbArrayWithMixedExpiredCachedRoutesCount_${ID_TO_NETWORK_NAME(chainId)}`,
+        numberOfExpiredCachedRoutes,
+        MetricLoggerUnit.Count
+      )
+      // and total
+      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutesTotal`, cachedRoutesArr.length, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `RoutesDbArrayWithMixedExpiredCachedRoutesTotal_${ID_TO_NETWORK_NAME(chainId)}`,
+        cachedRoutesArr.length,
+        MetricLoggerUnit.Count
+      )
+    } else {
+      metric.putMetric(`RoutesDbArrayWithoutMixedExpiredCachedRoutes`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(
+        `RoutesDbArrayWithoutMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}`,
+        1,
+        MetricLoggerUnit.Count
+      )
+    }
+
     cachedRoutesArr.forEach((cachedRoutes) => {
       metric.putMetric(`RoutesDbPerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
       cachedRoutes.routes.forEach((cachedRoute) => {
