@@ -198,34 +198,34 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     ).length
     const numberOfNotExpiredCachedRoutes = cachedRoutesArr.length - numberOfExpiredCachedRoutes
     if (numberOfExpiredCachedRoutes > 0 && numberOfNotExpiredCachedRoutes > 0) {
-      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutes`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutes_Opt_${optimistic}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(
-        `RoutesDbArrayWithMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}`,
+        `RoutesDbArrayWithMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}_Opt_${optimistic}`,
         1,
         MetricLoggerUnit.Count
       )
       // log number of expired cached routes
       metric.putMetric(
-        `RoutesDbArrayWithMixedExpiredCachedRoutesCount`,
+        `RoutesDbArrayWithMixedExpiredCachedRoutesCount_Opt_${optimistic}`,
         numberOfExpiredCachedRoutes,
         MetricLoggerUnit.Count
       )
       metric.putMetric(
-        `RoutesDbArrayWithMixedExpiredCachedRoutesCount_${ID_TO_NETWORK_NAME(chainId)}`,
+        `RoutesDbArrayWithMixedExpiredCachedRoutesCount_${ID_TO_NETWORK_NAME(chainId)}_Opt_${optimistic}`,
         numberOfExpiredCachedRoutes,
         MetricLoggerUnit.Count
       )
       // and total
-      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutesTotal`, cachedRoutesArr.length, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbArrayWithMixedExpiredCachedRoutesTotal_Opt_${optimistic}`, cachedRoutesArr.length, MetricLoggerUnit.Count)
       metric.putMetric(
-        `RoutesDbArrayWithMixedExpiredCachedRoutesTotal_${ID_TO_NETWORK_NAME(chainId)}`,
+        `RoutesDbArrayWithMixedExpiredCachedRoutesTotal_${ID_TO_NETWORK_NAME(chainId)}_Opt_${optimistic}`,
         cachedRoutesArr.length,
         MetricLoggerUnit.Count
       )
     } else {
-      metric.putMetric(`RoutesDbArrayWithoutMixedExpiredCachedRoutes`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`RoutesDbArrayWithoutMixedExpiredCachedRoutes_Opt_${optimistic}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(
-        `RoutesDbArrayWithoutMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}`,
+        `RoutesDbArrayWithoutMixedExpiredCachedRoutes_${ID_TO_NETWORK_NAME(chainId)}_Opt_${optimistic}`,
         1,
         MetricLoggerUnit.Count
       )
