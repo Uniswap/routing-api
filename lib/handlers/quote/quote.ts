@@ -515,6 +515,9 @@ export class QuoteHandler extends APIGLambdaHandler<
     } else if (simulationStatus == SimulationStatus.SystemDown) {
       metric.putMetric('SimulationSystemDown', 1, MetricLoggerUnit.Count)
       metric.putMetric(`SimulationSystemDownChainId${chainId}`, 1, MetricLoggerUnit.Count)
+    } else if (simulationStatus == SimulationStatus.SlippageTooLow) {
+      metric.putMetric('SlippageTooLow', 1, MetricLoggerUnit.Count)
+      metric.putMetric(`SlippageTooLowChainId${chainId}`, 1, MetricLoggerUnit.Count)
     }
 
     const routeResponse: Array<SupportedPoolInRoute[]> = []
