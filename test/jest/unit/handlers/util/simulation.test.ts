@@ -40,4 +40,9 @@ describe('simulation', () => {
     const status = simulationStatusTranslation(SimulationStatus.SystemDown, log)
     expect(status).toStrictEqual(RoutingApiSimulationStatus.SYSTEM_DOWN)
   })
+
+  it('returns slippage too low for slippage too low simulation status', () => {
+    const status = simulationStatusTranslation(SimulationStatus.SlippageTooLow, log)
+    expect(status).toStrictEqual(RoutingApiSimulationStatus.SLIPPAGE_TOO_LOW)
+  })
 })
