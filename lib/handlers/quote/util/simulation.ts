@@ -9,6 +9,7 @@ export enum RoutingApiSimulationStatus {
   NOT_SUPPORTED = 'NOT_SUPPORTED',
   NOT_APPROVED = 'NOT_APPROVED',
   SYSTEM_DOWN = 'SYSTEM_DOWN',
+  SLIPPAGE_TOO_LOW = 'SLIPPAGE_TOO_LOW',
   UNKNOWN = '',
 }
 
@@ -31,6 +32,8 @@ export const simulationStatusTranslation = (
       return RoutingApiSimulationStatus.NOT_APPROVED
     case SimulationStatus.SystemDown:
       return RoutingApiSimulationStatus.SYSTEM_DOWN
+    case SimulationStatus.SlippageTooLow:
+      return RoutingApiSimulationStatus.SLIPPAGE_TOO_LOW
     default:
       log.error(`Unknown simulation status ${simulationStatus}`)
       return RoutingApiSimulationStatus.UNKNOWN
