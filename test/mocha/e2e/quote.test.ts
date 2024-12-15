@@ -44,6 +44,7 @@ import _ from 'lodash'
 import qs from 'qs'
 import { SUPPORTED_CHAINS } from '../../../lib/handlers/injector-sor'
 import { QuoteQueryParams, TradeTypeParam } from '../../../lib/handlers/quote/schema/quote-schema'
+import { MAX_UINT256 } from '../../../lib/handlers/quote/schema/quote-schema'
 import { QuoteResponse } from '../../../lib/handlers/schema'
 import { Permit2__factory } from '../../../lib/types/ext'
 import { resetAndFundAtBlock } from '../../utils/forkAndFund'
@@ -170,8 +171,6 @@ const isTesterPKEnvironmentSet = (): boolean => {
   return isSet
 }
 
-const MAX_UINT160 = '0xffffffffffffffffffffffffffffffffffffffff'
-
 const TRADE_TYPES: TradeTypeParam[] = ['exactIn', 'exactOut']
 
 export const agEUR_MAINNET = new Token(
@@ -248,7 +247,7 @@ describe('quote', function () {
       const approveNarwhal = await permit2.approve(
         currencyIn.wrapped.address,
         UNIVERSAL_ROUTER_ADDRESS,
-        MAX_UINT160,
+        MAX_UINT256.toString(),
         100000000000000
       )
       await approveNarwhal.wait()
@@ -1169,7 +1168,10 @@ describe('quote', function () {
 
                 const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                  `${API}?${queryParams}`
+                )
+
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
@@ -1233,7 +1235,10 @@ describe('quote', function () {
 
                 const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                  `${API}?${queryParams}`
+                )
+
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
@@ -1460,7 +1465,7 @@ describe('quote', function () {
               })
             }
           }
-        })
+        }
 
         if (algorithm == 'alpha') {
           describe(`+ Simulate Swap + Execute Swap`, () => {
@@ -2012,7 +2017,6 @@ describe('quote', function () {
                   const amount = await getAmountFromToken(type, tokenIn.wrapped, tokenOut.wrapped, originalAmount)
 
                   // we need to simulate URA before and after merging https://github.com/Uniswap/unified-routing-api/pull/282 interim states
-                  // to ensure routing-api is backward compatible with URA
                   let portionBips = undefined
                   if (state === 'before' && type === 'exactIn') {
                     portionBips = FLAT_PORTION.bips
@@ -2187,6 +2191,7 @@ describe('quote', function () {
             })
           })
         }
+
         it(`erc20 -> erc20 no recipient/deadline/slippage`, async () => {
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: 'USDC',
@@ -2293,7 +2298,7 @@ describe('quote', function () {
 
           const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
           const {
-            data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
+            data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
             status,
           } = response
 
@@ -2341,7 +2346,7 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
           const {
             data: {
               quoteDecimals,
@@ -2448,7 +2453,7 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals },
             status,
@@ -2531,18 +2536,13 @@ describe('quote', function () {
             tokenInChainId: 1,
             tokenOutAddress: 'USDT',
             tokenOutChainId: 1,
-            amount: await getAmount(
-              1,
-              type,
-              'USDC',
-              'USDT',
-              '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
-            ),
+            amount: MAX_UINT256.toString() + '0',
             type,
             recipient: alice.address,
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+            enableUniversalRouter: true,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2572,7 +2572,8 @@ describe('quote', function () {
           await callAndExpectFail(quoteReq, {
             status: 400,
             data: {
-              detail: '"amount" with value "-10000000000" fails to match the required pattern: /^[0-9]+$/',
+              detail:
+                '"amount" with value "-10000000000" fails to match the required pattern: /^[0-9]+$/',
               errorCode: 'VALIDATION_ERROR',
             },
           })
@@ -2620,7 +2621,8 @@ describe('quote', function () {
           await callAndExpectFail(quoteReq, {
             status: 400,
             data: {
-              detail: '"amount" with value "1000000000.25" fails to match the required pattern: /^[0-9]+$/',
+              detail:
+                '"amount" with value "1000000000.25" fails to match the required pattern: /^[0-9]+$/',
               errorCode: 'VALIDATION_ERROR',
             },
           })
@@ -2638,6 +2640,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+            enableUniversalRouter: true,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2794,6 +2797,50 @@ describe('quote', function () {
             },
           })
         })
+
+        it('rejects amount larger than uint256', async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'USDC',
+            tokenInChainId: 1,
+            tokenOutAddress: 'USDT',
+            tokenOutChainId: 1,
+            amount: MAX_UINT256.toString() + '0',
+            type,
+            recipient: alice.address,
+            slippageTolerance: SLIPPAGE,
+            deadline: '360',
+            algorithm,
+            enableUniversalRouter: true,
+          }
+
+          await callAndExpectFail(quoteReq, {
+            status: 400,
+            data: {
+              detail: '"amount" exceeds maximum uint256 value',
+              errorCode: 'VALIDATION_ERROR',
+            },
+          })
+        })
+
+        it('accepts maximum uint256 value', async () => {
+          const quoteReq: QuoteQueryParams = {
+            tokenInAddress: 'USDC',
+            tokenInChainId: 1,
+            tokenOutAddress: 'USDT',
+            tokenOutChainId: 1,
+            amount: MAX_UINT256.toString(),
+            type,
+            recipient: alice.address,
+            slippageTolerance: SLIPPAGE,
+            deadline: '360',
+            algorithm,
+            enableUniversalRouter: true,
+          }
+
+          const queryParams = qs.stringify(quoteReq)
+          const response = await axios.get(`${API}?${queryParams}`)
+          expect(response.status).to.equal(200)
+        })
       })
     }
   }
@@ -2900,7 +2947,10 @@ describe('quote', function () {
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
-            chain === ChainId.BLAST || chain === ChainId.WORLDCHAIN || chain === ChainId.ASTROCHAIN_SEPOLIA
+            chain === ChainId.BLAST ||
+            chain === ChainId.ZORA ||
+            chain === ChainId.ZKSYNC ||
+            chain === ChainId.ASTROCHAIN_SEPOLIA
               ? type === 'exactOut'
                 ? '0.002'
                 : '0.01'
@@ -3000,88 +3050,29 @@ describe('quote', function () {
             type,
           }
 
-          const queryParams = qs.stringify(quoteReq)
-
           const headers = {
             'x-universal-router-version': '2.0',
           }
+
+          const queryParams = qs.stringify(quoteReq)
 
           try {
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: headers,
             })
-            const { status } = response
+            const {
+              data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+              status,
+            } = response
 
             expect(status).to.equal(200)
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          } catch (err: any) {
-            fail(JSON.stringify(err.response.data))
-          }
-        })
-
-        const native = NATIVE_CURRENCY[chain]
-        it(`${native} -> erc20`, async () => {
-          if (
-            chain === ChainId.BLAST ||
-            chain === ChainId.ZORA ||
-            chain === ChainId.ZKSYNC ||
-            chain === ChainId.ASTROCHAIN_SEPOLIA
-          ) {
-            // Blast doesn't have DAI or USDC yet
-            // Zora doesn't have DAI
-            // Zksync doesn't have liquid USDC/DAI pool yet
-            return
-          }
-
-          // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
-          // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
-          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
-            ? chain !== ChainId.SEPOLIA
-              ? USDC_ON(chain)
-              : USDC_NATIVE_SEPOLIA
-            : erc2
-          const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '1'
-
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: native,
-            tokenInChainId: chain,
-            tokenOutAddress: tokenOut.address,
-            tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), tokenOut, amount),
-            type,
-            enableUniversalRouter: true,
-            protocols: V4_SUPPORTED.includes(chain) ? 'v4' : 'v2,v3,mixed',
-          }
-
-          const headers = {
-            'x-universal-router-version': '2.0',
-          }
-
-          const queryParams = qs.stringify(quoteReq)
-
-          try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: headers,
-            })
-            const { status, data } = response
-
-            expect(status).to.equal(200, JSON.stringify(response.data))
 
             let nativeOrWrappedNativePoolFound = false
             let nativePoolFound = true
 
             // the v4 native pools or v3 wrapped native pools on sepolia can grow exponentially,
             // we just have to iterate through to make sure find it and assert the important data
-            data.route.forEach((pools) => {
+            response.data.route.forEach((pools) => {
               pools.forEach((pool) => {
                 if (
                   chain === ChainId.SEPOLIA &&
@@ -3114,7 +3105,7 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
-            expect(data.hitsCachedRoutes).to.be.true
+            expect(response.data.hitsCachedRoutes).to.be.true
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
@@ -3179,6 +3170,57 @@ describe('quote', function () {
       })
     }
   }
+
+  const native = NATIVE_CURRENCY[chain]
+  it(`${native} -> erc20`, async () => {
+    if (
+      chain === ChainId.BLAST ||
+      chain === ChainId.ZORA ||
+      chain === ChainId.ZKSYNC ||
+      chain === ChainId.ASTROCHAIN_SEPOLIA
+    ) {
+      return
+    }
+
+    const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
+      ? chain !== ChainId.SEPOLIA
+        ? USDC_ON(chain)
+        : USDC_NATIVE_SEPOLIA
+      : erc2
+    const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '1'
+
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: native,
+      tokenInChainId: chain,
+      tokenOutAddress: tokenOut.address,
+      tokenOutChainId: chain,
+      amount: await getAmountFromToken(type, WNATIVE_ON(chain), tokenOut, amount),
+      type,
+      enableUniversalRouter: true,
+      protocols: V4_SUPPORTED.includes(chain) ? 'v4' : 'v2,v3,mixed',
+    }
+
+    const queryParams = qs.stringify(quoteReq)
+
+    try {
+      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+      const { status } = response
+
+      expect(status).to.equal(200)
+
+      // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+      // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+      // if it's exactOut quote, we should always hit the cached routes.
+      // this is regardless of protocol version.
+      // the reason is because exact in quote always runs before exact out
+      // along with the native or wrapped native pool token address assertions previously
+      // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+      // and native for v4 pool routes
+      expect(response.data.hitsCachedRoutes).to.be.true
+    } catch (err: any) {
+      fail(JSON.stringify(err.response.data))
+    }
+  })
 })
 
 describe('alpha only quote', function () {
@@ -3187,4 +3229,61 @@ describe('alpha only quote', function () {
   for (const type of ['exactIn', 'exactOut']) {
     describe(`${type} 2xx`, () => {})
   }
+})
+
+describe('Amount validation', function () {
+  this.timeout(5000)
+
+  it('rejects negative amounts', async () => {
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: TEST_ERC20_1[ChainId.MAINNET]()!.address,
+      tokenInChainId: ChainId.MAINNET,
+      tokenOutAddress: TEST_ERC20_2[ChainId.MAINNET]()!.address,
+      tokenOutChainId: ChainId.MAINNET,
+      amount: '-100',
+      type: 'exactIn',
+    }
+
+    await callAndExpectFail(quoteReq, {
+      status: 400,
+      data: {
+        detail: '"amount" must contain only numeric characters',
+        errorCode: 'VALIDATION_ERROR',
+      },
+    })
+  })
+
+  it('rejects amount larger than uint256', async () => {
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: TEST_ERC20_1[ChainId.MAINNET]()!.address,
+      tokenInChainId: ChainId.MAINNET,
+      tokenOutAddress: TEST_ERC20_2[ChainId.MAINNET]()!.address,
+      tokenOutChainId: ChainId.MAINNET,
+      amount: MAX_UINT256.toString() + '0',
+      type: 'exactIn',
+    }
+
+    await callAndExpectFail(quoteReq, {
+      status: 400,
+      data: {
+        detail: '"amount" exceeds maximum uint256 value',
+        errorCode: 'VALIDATION_ERROR',
+      },
+    })
+  })
+
+  it('accepts maximum uint256 value', async () => {
+    const quoteReq: QuoteQueryParams = {
+      tokenInAddress: TEST_ERC20_1[ChainId.MAINNET]()!.address,
+      tokenInChainId: ChainId.MAINNET,
+      tokenOutAddress: TEST_ERC20_2[ChainId.MAINNET]()!.address,
+      tokenOutChainId: ChainId.MAINNET,
+      amount: MAX_UINT256.toString(),
+      type: 'exactIn',
+    }
+
+    const queryParams = qs.stringify(quoteReq)
+    const response = await axios.get(`${API}?${queryParams}`)
+    expect(response.status).to.equal(200)
+  })
 })
