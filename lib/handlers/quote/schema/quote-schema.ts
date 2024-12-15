@@ -21,12 +21,10 @@ const createBigIntExtension = (joi: any) => ({
       return helpers.error('amount.required');
     }
 
-    // Optimized numeric and length validation
     if (!new RegExp(`^[0-9]{1,${MAX_SAFE_AMOUNT_LENGTH}}$`).test(value)) {
       return helpers.error('amount.numeric');
     }
 
-    // BigInt validation
     try {
       const amountBN = BigInt(value);
       if (amountBN <= 0n) {
@@ -79,10 +77,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   slippageTolerance: Joi.number().min(0).max(20).precision(2).optional(),
   deadline: Joi.number().max(10800).optional(), // 180 mins, same as interface max
   algorithm: Joi.string().valid('alpha', 'legacy').optional(),
-  gasPriceWei: Joi.string()
-    .pattern(/^[0-9]+$/)
-    .max(30)
-    .optional(),
+  gasPriceWei: Joi.bigInt().optional(),
   minSplits: Joi.number().max(7).optional(),
   forceCrossProtocol: Joi.boolean().optional(),
   forceMixedRoutes: Joi.boolean().optional(),
@@ -93,24 +88,18 @@ export const QuoteQueryParamsJoi = Joi.object({
   permitExpiration: Joi.number().optional(),
   permitAmount: Joi.bigInt().optional(),
   permitSigDeadline: Joi.number().optional(),
-  // TODO: Remove once universal router is no longer behind a feature flag.
   enableUniversalRouter: Joi.boolean().optional().default(false),
   quoteSpeed: Joi.string().valid('fast', 'standard').optional().default('standard'),
   debugRoutingConfig: Joi.string().optional(),
   unicornSecret: Joi.string().optional(),
   intent: Joi.string().valid('quote', 'swap', 'caching', 'pricing').optional().default('quote'),
-  enableFeeOnTransferFeeFetching: Joi.boolean().optional().default(false),
-  portionBips: Joi.string()
-    .pattern(/^[0-9]+$/)
-    .max(5) // portionBips is a string type with the expectation of being parsable to integer between 0 and 10000
-    .optional(),
-  portionAmount: Joi.string()
-    .pattern(/^[0-9]+$/)
-    .optional(),
-  portionRecipient: Joi.string().alphanum().max(42).optional(),
-  source: Joi.string().max(20).optional(),
-  gasToken: Joi.string().alphanum().max(42).optional(),
-})
+  enableFeeOnTransferFeeFetching: Joi.boolean().optional(),
+  portionBips: Joi.number().optional(),
+  portionAmount: Joi.string().optional(),
+  portionRecipient: Joi.string().optional(),
+  source: Joi.string().optional(),
+  gasToken: Joi.string().optional(),
+});
 
 // Future work: this TradeTypeParam can be converted into an enum and used in the
 // schema above and in the route QuoteHandler.
