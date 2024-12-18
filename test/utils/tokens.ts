@@ -15,7 +15,7 @@ import {
   log,
   NodeJSCache,
   USDC_ARBITRUM,
-  USDC_ASTROCHAIN_SEPOLIA,
+  USDC_UNICHAIN_SEPOLIA,
   USDC_AVAX,
   USDC_BASE,
   USDC_BASE_GOERLI,
@@ -36,6 +36,7 @@ import {
   USDT_MAINNET,
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
+  USDC_UNICHAIN,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -142,8 +143,10 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDCE_ZKSYNC
     case ChainId.WORLDCHAIN:
       return USDC_WORLDCHAIN
-    case ChainId.ASTROCHAIN_SEPOLIA:
-      return USDC_ASTROCHAIN_SEPOLIA
+    case ChainId.UNICHAIN_SEPOLIA:
+      return USDC_UNICHAIN_SEPOLIA
+    case ChainId.UNICHAIN:
+      return USDC_UNICHAIN
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
