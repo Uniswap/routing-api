@@ -318,6 +318,8 @@ export class TokenFeeUtils {
     '0xa4bb712b4ea05e74a9590ec550bd922cd857afcb',
     '0xf2c5780e2dda407781c0c5eccc9320d5988ea0a6',
     '0xa00453052a36d43a99ac1ca145dfe4a952ca33b8',
+    '0x42fa14d6e4642b3789d8b0272534a41d415663a9',
+    '0x89b69f2d1adffa9a253d40840b6baa7fc903d697',
   ])
 
   static isDynamicFOT(address: string): boolean {
