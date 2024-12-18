@@ -164,7 +164,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
     protocols: Protocol[]
-  ): CachedRoutes {
+  ): CachedRoutes | undefined {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
       if (record.plainRoutes && record.plainRoutes?.toString().trim() !== '') {
@@ -235,26 +235,33 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       )
     }
 
-    cachedRoutesArr.forEach((cachedRoutes) => {
-      metric.putMetric(`RoutesDbPerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
-      cachedRoutes.routes.forEach((cachedRoute) => {
-        // we use the stringified route as identifier
-        const routeId = routeToString(cachedRoute.route)
-        // Using a map to remove duplicates, we will the different percents of different routes.
-        // We also filter by protocol, in case we are loading a route from a protocol that wasn't requested
-        if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol)) {
-          routesMap.set(routeId, cachedRoute)
+    cachedRoutesArr
+      .filter((cachedRoutes) => cachedRoutes.notExpired(currentBlockNumber, optimistic))
+      .forEach((cachedRoutes) => {
+        metric.putMetric(`RoutesDbPerBlockFound`, cachedRoutes.routes.length, MetricLoggerUnit.Count)
+        cachedRoutes.routes.forEach((cachedRoute) => {
+          // we use the stringified route as identifier
+          const routeId = routeToString(cachedRoute.route)
+          // Using a map to remove duplicates, we will the different percents of different routes.
+          // We also filter by protocol, in case we are loading a route from a protocol that wasn't requested
+          if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol)) {
+            routesMap.set(routeId, cachedRoute)
+          }
+        })
+        // Find the latest blockNumber
+        blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
+        // Keep track of all the originalAmounts
+        if (originalAmount === '') {
+          originalAmount = `${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
+        } else {
+          originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
         }
       })
-      // Find the latest blockNumber
-      blockNumber = Math.max(blockNumber, cachedRoutes.blockNumber)
-      // Keep track of all the originalAmounts
-      if (originalAmount === '') {
-        originalAmount = `${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
-      } else {
-        originalAmount = `${originalAmount}, ${cachedRoutes.originalAmount} | ${routesMap.size} | ${cachedRoutes.blockNumber}`
-      }
-    })
+
+    if (cachedRoutesArr.length === 0) {
+      metric.putMetric(`RoutesDbExpiredOnlyCachedRoutesFound`, 1, MetricLoggerUnit.Count)
+      return undefined
+    }
 
     const first = cachedRoutesArr[0]
 
