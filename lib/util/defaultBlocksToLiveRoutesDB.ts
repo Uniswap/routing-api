@@ -20,7 +20,9 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.BASE_GOERLI]: 1800,
   [ChainId.ZORA_SEPOLIA]: 1800,
   [ChainId.BLAST]: 1800,
-  [ChainId.WORLDCHAIN]: 1800,
+  // Note: Experiment with longer TTL
+  // (12 hours) / (2 seconds) = 21600
+  [ChainId.WORLDCHAIN]: 21600,
   // (60 minutes) / (1 seconds) = 3600
   [ChainId.ASTROCHAIN_SEPOLIA]: 3600,
   // (60 minutes) / (250 milliseconds) = 14400
