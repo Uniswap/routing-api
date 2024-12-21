@@ -31,5 +31,6 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BLAST]: [ADDRESS_ZERO],
   [ChainId.ZKSYNC]: [ADDRESS_ZERO],
   [ChainId.WORLDCHAIN]: [ADDRESS_ZERO],
-  [ChainId.ASTROCHAIN_SEPOLIA]: [ADDRESS_ZERO],
+  [ChainId.UNICHAIN]: [ADDRESS_ZERO],
+  [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
 }

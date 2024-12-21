@@ -181,7 +181,7 @@ export class RoutingAPIPipeline extends Stack {
     // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
-      if (chainId !== ChainId.WORLDCHAIN && chainId !== ChainId.ASTROCHAIN_SEPOLIA) {
+      if (chainId !== ChainId.WORLDCHAIN && chainId !== ChainId.UNICHAIN_SEPOLIA) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
         new CfnOutput(this, key, {
@@ -234,7 +234,9 @@ export class RoutingAPIPipeline extends Stack {
       'ALCHEMY_324',
       // WorldChain,
       'QUICKNODE_480',
-      // AstroChain Sepolia,
+      // Unichain
+      'QUICKNODE_130',
+      // Unichain Sepolia,
       'QUICKNODE_1301',
       // unirpc - serves all chains
       'UNIRPC_0',
@@ -410,7 +412,9 @@ const jsonRpcProviders = {
   ALCHEMY_324: process.env.ALCHEMY_324!,
   // WorldChain,
   QUICKNODE_480: process.env.QUICKNODE_480!,
-  // AstroChain Sepolia,
+  // Unichain
+  QUICKNODE_130: process.env.QUICKNODE_130!,
+  // Unichain Sepolia,
   QUICKNODE_1301: process.env.QUICKNODE_1301!,
   // unirpc - serves all chains
   UNIRPC_0: process.env.UNIRPC_0!,
