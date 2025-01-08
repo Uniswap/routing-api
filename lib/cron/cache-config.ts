@@ -37,7 +37,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-celo/api`
     case ChainId.WORLDCHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-worldchain/api`
-    case ChainId.ASTROCHAIN_SEPOLIA:
+    case ChainId.UNICHAIN_SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-astrochain-sepolia/api`
     default:
       return undefined
@@ -64,7 +64,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-base/api`
     case ChainId.WORLDCHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-worldchain/api`
-    case ChainId.ASTROCHAIN_SEPOLIA:
+    case ChainId.UNICHAIN_SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-astrochain-sepolia/api`
     default:
       return undefined

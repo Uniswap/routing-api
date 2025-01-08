@@ -82,7 +82,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
       }
     case ChainId.OPTIMISM:
     case ChainId.WORLDCHAIN:
-    case ChainId.ASTROCHAIN_SEPOLIA:
+    case ChainId.UNICHAIN_SEPOLIA:
       return {
         v2PoolSelection: {
           topN: 3,
