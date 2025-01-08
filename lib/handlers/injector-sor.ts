@@ -108,7 +108,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.ZORA,
   ChainId.ZKSYNC,
   ChainId.WORLDCHAIN,
-  ChainId.ASTROCHAIN_SEPOLIA,
+  ChainId.UNICHAIN_SEPOLIA,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -366,7 +366,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.ZORA:
             case ChainId.ZKSYNC:
             case ChainId.WORLDCHAIN:
-            case ChainId.ASTROCHAIN_SEPOLIA:
+            case ChainId.UNICHAIN_SEPOLIA:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,

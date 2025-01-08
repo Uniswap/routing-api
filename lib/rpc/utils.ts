@@ -20,8 +20,8 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'base'
     case ChainId.WORLDCHAIN:
       return 'worldchain'
-    case ChainId.ASTROCHAIN_SEPOLIA:
-      return 'astrochain-sepolia'
+    case ChainId.UNICHAIN_SEPOLIA:
+      return 'unichain-sepolia'
     default:
       return 'ethereum'
   }
