@@ -227,9 +227,9 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
             samplingExactOutPercentage: 0,
           } as QuoteProviderTrafficSwitchConfiguration
       }
-    // worldchain and astrochain sepolia don't have the view-only quoter yet, so we can shadow sample 0.1% of traffic
+    // worldchain and unichain sepolia don't have the view-only quoter yet, so we can shadow sample 0.1% of traffic
     case ChainId.WORLDCHAIN:
-    case ChainId.ASTROCHAIN_SEPOLIA:
+    case ChainId.UNICHAIN_SEPOLIA:
       switch (protocol) {
         case Protocol.MIXED:
         case Protocol.V4:

@@ -15,7 +15,7 @@ import {
   log,
   NodeJSCache,
   USDC_ARBITRUM,
-  USDC_ASTROCHAIN_SEPOLIA,
+  USDC_UNICHAIN_SEPOLIA,
   USDC_AVAX,
   USDC_BASE,
   USDC_BASE_GOERLI,
@@ -142,8 +142,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDCE_ZKSYNC
     case ChainId.WORLDCHAIN:
       return USDC_WORLDCHAIN
-    case ChainId.ASTROCHAIN_SEPOLIA:
-      return USDC_ASTROCHAIN_SEPOLIA
+    case ChainId.UNICHAIN_SEPOLIA:
+      return USDC_UNICHAIN_SEPOLIA
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
