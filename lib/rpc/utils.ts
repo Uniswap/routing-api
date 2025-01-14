@@ -22,6 +22,10 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'worldchain'
     case ChainId.UNICHAIN_SEPOLIA:
       return 'unichain-sepolia'
+    case ChainId.MONAD_TESTNET:
+      return 'monad-testnet'
+    case ChainId.BASE_SEPOLIA:
+      return 'base-sepolia'
     default:
       return 'ethereum'
   }
@@ -82,6 +86,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     }
     case 'QUICKNODE_8453': {
       return `https://${tokens[0]}.base-mainnet.quiknode.pro/${tokens[1]}`
+    }
+    case 'QUICKNODE_84532': {
+      return `https://${tokens[0]}.base-sepolia.quiknode.pro/${tokens[1]}`
     }
     case 'QUICKNODE_42161': {
       return `https://${tokens[0]}.arbitrum-mainnet.quiknode.pro/${tokens[1]}`

@@ -38,6 +38,7 @@ export const EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES: { [chain in ChainId]: Ar
   [ChainId.BNB]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.AVALANCHE]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.BASE_GOERLI]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.BASE_SEPOLIA]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.BASE]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.ZORA]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.ZORA_SEPOLIA]: emptyV4FeeTickSpacingsHookAddresses,

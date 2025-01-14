@@ -52,6 +52,16 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.MONAD_TESTNET]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
+  [ChainId.BASE_SEPOLIA]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { [chainId: number]: BatchParams } } = {
@@ -121,6 +131,17 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
     },
+    // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.BASE_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
   },
   [Protocol.V3]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
@@ -182,6 +203,17 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once astrochain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.BASE_SEPOLIA]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
@@ -252,6 +284,17 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
     },
+    // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.BASE_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
   },
   [Protocol.MIXED]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
@@ -308,6 +351,17 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN_SEPOLIA]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+    [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.BASE_SEPOLIA]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
@@ -383,6 +437,17 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.MONAD_TESTNET]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.BASE_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
     [Protocol.V3]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
@@ -444,6 +509,17 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once unichain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.UNICHAIN_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.MONAD_TESTNET]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.BASE_SEPOLIA]: {
         multicallChunk: 80,
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
@@ -514,6 +590,17 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.MONAD_TESTNET]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.BASE_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
     [Protocol.MIXED]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
@@ -574,6 +661,17 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
+      [ChainId.MONAD_TESTNET]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.BASE_SEPOLIA]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
     },
   }
 
@@ -611,6 +709,14 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
+  [ChainId.MONAD_TESTNET]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
+  [ChainId.BASE_SEPOLIA]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
 }
 
 export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides } = {
@@ -644,6 +750,14 @@ export const SUCCESS_RATE_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrid
     multicallChunk: 45,
   },
   [ChainId.UNICHAIN_SEPOLIA]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
+  [ChainId.MONAD_TESTNET]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
+  [ChainId.BASE_SEPOLIA]: {
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
@@ -699,6 +813,22 @@ export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
       rollbackBlockOffset: -20,
     },
   },
+  [ChainId.MONAD_TESTNET]: {
+    baseBlockOffset: -25,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -20,
+    },
+  },
+  [ChainId.BASE_SEPOLIA]: {
+    baseBlockOffset: -25,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -20,
+    },
+  },
 }
 
 // block -1 means it's never deployed
@@ -723,6 +853,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.AVALANCHE]: 44406304,
   [ChainId.BASE]: 13311537,
   [ChainId.BASE_GOERLI]: -1,
+  [ChainId.BASE_SEPOLIA]: -1,
   [ChainId.ZORA]: -1,
   [ChainId.ZORA_SEPOLIA]: -1,
   [ChainId.ROOTSTOCK]: -1,
@@ -755,6 +886,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.AVALANCHE]: 17540 * 2, // 17540 is the single tick.cross cost on avax. We multiply by 2 to be safe
   [ChainId.BASE]: 17540 * 2, // 17540 is the single tick.cross cost on base. We multiply by 2 to be safe
   [ChainId.BASE_GOERLI]: 0,
+  [ChainId.BASE_SEPOLIA]: 0,
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,
   [ChainId.ROOTSTOCK]: 0,

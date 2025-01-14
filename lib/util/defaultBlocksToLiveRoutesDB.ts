@@ -18,6 +18,7 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.BASE]: 1800,
   [ChainId.ZORA]: 1800,
   [ChainId.BASE_GOERLI]: 1800,
+  [ChainId.BASE_SEPOLIA]: 1800,
   [ChainId.ZORA_SEPOLIA]: 1800,
   [ChainId.BLAST]: 1800,
   // Note: Experiment with longer TTL
@@ -49,4 +50,5 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.ROOTSTOCK]: 148,
   // (60 minutes) / (1 seconds) = 3600
   [ChainId.ZKSYNC]: 3600,
+  [ChainId.MONAD_TESTNET]: 3600,
 }
