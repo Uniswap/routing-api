@@ -141,7 +141,7 @@
     "latencyEvaluationSampleProb": 0,
     "healthCheckSampleProb": 0,
     "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_84532"],
-    "providerNames": ["QUICKNODE"]
+    "providerUrls": ["UNIRPC_0"],
+    "providerNames": ["UNIRPC"]
   }
 ]
