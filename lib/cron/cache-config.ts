@@ -67,7 +67,6 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.UNICHAIN_SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-astrochain-sepolia/api`
     case ChainId.MONAD_TESTNET:
-      // TODO: is this correct?
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-monad-testnet/api`
     default:
       return undefined
@@ -334,6 +333,22 @@ export const chainProtocols = [
       v2SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
+  // TODO: enable when Monad testnet v2 subgraph is ready. Also verify v2SubgraphUrlOverride(ChainId.MONAD_TESTNET) address.
+  // {
+  //   protocol: Protocol.V2,
+  //   chainId: ChainId.MONAD_TESTNET,
+  //   timeout: 90000,
+  //   provider: new V2SubgraphProvider(
+  //     ChainId.MONAD_TESTNET,
+  //     3,
+  //     90000,
+  //     true,
+  //     1000,
+  //     v2TrackedEthThreshold,
+  //     v2UntrackedUsdThreshold,
+  //     v2SubgraphUrlOverride(ChainId.MONAD_TESTNET)
+  //   ),
+  // },
   {
     protocol: Protocol.V4,
     chainId: ChainId.SEPOLIA,
