@@ -181,7 +181,13 @@ export class RoutingAPIPipeline extends Stack {
     // Load RPC provider URLs from AWS secret
     let jsonRpcProviders = {} as { [chainId: string]: string }
     SUPPORTED_CHAINS.forEach((chainId: ChainId) => {
-      if (chainId !== ChainId.WORLDCHAIN && chainId !== ChainId.UNICHAIN_SEPOLIA) {
+      // Exclude newly introduced chains here. This section can be probably removed but needs to be tested.
+      if (
+        chainId !== ChainId.WORLDCHAIN &&
+        chainId !== ChainId.UNICHAIN_SEPOLIA &&
+        chainId !== ChainId.MONAD_TESTNET &&
+        chainId !== ChainId.BASE_SEPOLIA
+      ) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
         new CfnOutput(this, key, {
