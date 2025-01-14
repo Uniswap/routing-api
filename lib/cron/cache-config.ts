@@ -333,22 +333,21 @@ export const chainProtocols = [
       v2SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
-  // TODO: enable when Monad testnet v2 subgraph is ready. Also verify v2SubgraphUrlOverride(ChainId.MONAD_TESTNET) address.
-  // {
-  //   protocol: Protocol.V2,
-  //   chainId: ChainId.MONAD_TESTNET,
-  //   timeout: 90000,
-  //   provider: new V2SubgraphProvider(
-  //     ChainId.MONAD_TESTNET,
-  //     3,
-  //     90000,
-  //     true,
-  //     1000,
-  //     v2TrackedEthThreshold,
-  //     v2UntrackedUsdThreshold,
-  //     v2SubgraphUrlOverride(ChainId.MONAD_TESTNET)
-  //   ),
-  // },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.MONAD_TESTNET,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.MONAD_TESTNET,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.MONAD_TESTNET)
+    ),
+  },
   {
     protocol: Protocol.V4,
     chainId: ChainId.SEPOLIA,
