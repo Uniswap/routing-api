@@ -87,6 +87,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     case 'QUICKNODE_8453': {
       return `https://${tokens[0]}.base-mainnet.quiknode.pro/${tokens[1]}`
     }
+    case 'QUICKNODE_84532': {
+      return `https://${tokens[0]}.base-sepolia.quiknode.pro/${tokens[1]}`
+    }
     case 'QUICKNODE_42161': {
       return `https://${tokens[0]}.arbitrum-mainnet.quiknode.pro/${tokens[1]}`
     }
