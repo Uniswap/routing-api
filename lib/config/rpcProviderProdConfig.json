@@ -125,5 +125,23 @@
     "providerInitialWeights": [1],
     "providerUrls": ["QUICKNODE_1301"],
     "providerNames": ["QUICKNODE"]
+  },
+  {
+    "chainId": 10143,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["UNIRPC_0"],
+    "providerNames": ["UNIRPC"]
+  },
+  {
+    "chainId": 84532,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["QUICKNODE_84532"],
+    "providerNames": ["QUICKNODE"]
   }
 ]

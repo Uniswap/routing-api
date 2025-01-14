@@ -66,6 +66,9 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-worldchain/api`
     case ChainId.UNICHAIN_SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-astrochain-sepolia/api`
+    case ChainId.MONAD_TESTNET:
+      // TODO: is this correct?
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-monad-testnet/api`
     default:
       return undefined
   }

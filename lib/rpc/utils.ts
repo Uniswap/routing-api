@@ -22,6 +22,10 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'worldchain'
     case ChainId.UNICHAIN_SEPOLIA:
       return 'unichain-sepolia'
+    case ChainId.MONAD_TESTNET:
+      return 'monad-testnet'
+    case ChainId.BASE_SEPOLIA:
+      return 'base-sepolia'
     default:
       return 'ethereum'
   }

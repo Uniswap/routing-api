@@ -51,6 +51,8 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
         return 'BNB'
       case ChainId.BASE:
         return 'BASE'
+      case ChainId.BASE_SEPOLIA:
+        return 'BASE_SEPOLIA'
       case ChainId.BLAST:
         return 'BLAST'
       case ChainId.ZORA:
@@ -61,6 +63,8 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
         return 'WORLDCHAIN'
       case ChainId.UNICHAIN_SEPOLIA:
         return 'UNICHAIN_SEPOLIA'
+      case ChainId.MONAD_TESTNET:
+        return 'MONAD_TESTNET'
       default:
         throw new Error(`UniGraphQLProvider._chainIdToGraphQLChainName unsupported ChainId: ${chainId}`)
     }
