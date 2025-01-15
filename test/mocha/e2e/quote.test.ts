@@ -2886,7 +2886,9 @@ describe('quote', function () {
       // which no longer exists on re-deployed v4 pool manager
       c != ChainId.SEPOLIA &&
       c != ChainId.UNICHAIN &&
-      c != ChainId.MONAD_TESTNET
+      c != ChainId.MONAD_TESTNET &&
+      c != ChainId.UNICHAIN_SEPOLIA &&
+      c != ChainId.BASE_SEPOLIA
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
