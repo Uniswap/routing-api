@@ -24,6 +24,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BNB]: [ADDRESS_ZERO],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
+  [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [ADDRESS_ZERO],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],

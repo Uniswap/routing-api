@@ -22,6 +22,7 @@ import {
   USDC_BNB,
   USDC_GOERLI,
   USDC_MAINNET,
+  USDT_MONAD_TESTNET,
   USDC_OPTIMISM,
   USDC_OPTIMISM_GOERLI,
   USDC_POLYGON,
@@ -36,6 +37,7 @@ import {
   USDT_MAINNET,
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
+  USDC_BASE_SEPOLIA,
   USDC_UNICHAIN,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
@@ -106,6 +108,8 @@ export const USDT_ON = (chainId: ChainId): Token => {
       return USDT_ARBITRUM
     case ChainId.BNB:
       return USDT_BNB
+    case ChainId.MONAD_TESTNET:
+      return USDT_MONAD_TESTNET
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
@@ -145,6 +149,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_WORLDCHAIN
     case ChainId.UNICHAIN_SEPOLIA:
       return USDC_UNICHAIN_SEPOLIA
+    case ChainId.BASE_SEPOLIA:
+      return USDC_BASE_SEPOLIA
     case ChainId.UNICHAIN:
       return USDC_UNICHAIN
     default:

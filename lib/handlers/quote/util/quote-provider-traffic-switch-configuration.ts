@@ -230,6 +230,8 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     // worldchain and unichain sepolia don't have the view-only quoter yet, so we can shadow sample 0.1% of traffic
     case ChainId.WORLDCHAIN:
     case ChainId.UNICHAIN_SEPOLIA:
+    case ChainId.BASE_SEPOLIA:
+    case ChainId.MONAD_TESTNET:
     case ChainId.UNICHAIN:
       switch (protocol) {
         case Protocol.MIXED:
