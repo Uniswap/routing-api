@@ -2822,6 +2822,7 @@ describe('quote', function () {
     [ChainId.AVALANCHE]: () => USDC_ON(ChainId.AVALANCHE),
     [ChainId.AVALANCHE]: () => USDC_NATIVE_AVAX,
     [ChainId.BASE_GOERLI]: () => USDC_ON(ChainId.BASE_GOERLI),
+    [ChainId.BASE_SEPOLIA]: () => USDC_ON(ChainId.BASE_SEPOLIA),
     [ChainId.BASE]: () => USDC_ON(ChainId.BASE),
     [ChainId.BASE]: () => USDC_NATIVE_BASE,
     [ChainId.ZORA]: () => USDC_ON(ChainId.ZORA),
@@ -2855,6 +2856,7 @@ describe('quote', function () {
     [ChainId.BNB]: () => USDT_ON(ChainId.BNB),
     [ChainId.AVALANCHE]: () => DAI_ON(ChainId.AVALANCHE),
     [ChainId.BASE_GOERLI]: () => WNATIVE_ON(ChainId.BASE_GOERLI),
+    [ChainId.BASE_SEPOLIA]: () => WNATIVE_ON(ChainId.BASE_SEPOLIA),
     [ChainId.BASE]: () => WNATIVE_ON(ChainId.BASE),
     [ChainId.ZORA]: () => WNATIVE_ON(ChainId.ZORA),
     [ChainId.ZORA_SEPOLIA]: () => WNATIVE_ON(ChainId.ZORA_SEPOLIA),
@@ -2884,7 +2886,9 @@ describe('quote', function () {
       // which no longer exists on re-deployed v4 pool manager
       c != ChainId.SEPOLIA &&
       c != ChainId.UNICHAIN &&
-      c != ChainId.MONAD_TESTNET
+      c != ChainId.MONAD_TESTNET &&
+      c != ChainId.UNICHAIN_SEPOLIA &&
+      c != ChainId.BASE_SEPOLIA
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()

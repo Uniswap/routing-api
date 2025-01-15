@@ -19,6 +19,7 @@ export const TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT: { [chain in ChainId]: number
   [ChainId.BNB]: 0,
   [ChainId.AVALANCHE]: 100,
   [ChainId.BASE_GOERLI]: 0,
+  [ChainId.BASE_SEPOLIA]: 0,
   [ChainId.BASE]: 100,
   [ChainId.ZORA]: 0,
   [ChainId.ZORA_SEPOLIA]: 0,
