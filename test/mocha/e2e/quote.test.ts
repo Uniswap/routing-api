@@ -59,11 +59,12 @@ chai.use(chaiSubset)
 
 const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, 1)
 
-if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
-  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
+if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC || !process.env.UNICORN_SECRETS) {
+  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC and UNICORN_SECRETS env variables for integ tests. See README')
 }
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
+const unicornSecrets = `${!process.env.UNICORN_SECRETS}`
 
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '20'
@@ -361,6 +362,8 @@ describe('quote', function () {
   for (const algorithm of ['alpha']) {
     for (const type of TRADE_TYPES) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
+        const hitsCachedRoutes = true
+
         describe(`+ Execute Swap`, () => {
           for (const uraVersion of [UniversalRouterVersion.V1_2, UniversalRouterVersion.V2_0]) {
             it(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {

@@ -330,7 +330,7 @@ export class RoutingAPIPipeline extends Stack {
       projectName: `IntegTests-${routingAPIStage.stageName}`,
       input: sourceArtifact,
       envFromCfnOutputs: {
-        UNISWAP_ROUTING_API: routingAPIStage.url,
+        UNISWAP_ROUTING_API: routingAPIStage.url
       },
       buildEnvironment: {
         environmentVariables: {
@@ -342,12 +342,17 @@ export class RoutingAPIPipeline extends Stack {
             value: 'archive-node-rpc-url-default-kms',
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
           },
+          UNICORN_SECRETS: {
+            value: 'debug-config-unicornsecrets',
+            type: BuildEnvironmentVariableType.SECRETS_MANAGER,
+          }
         },
       },
       commands: [
         'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
         'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
         'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
+        'echo "UNICORN_SECRET=${UNICORN_SECRETS}" >> .env',
         'npm install',
         'npm run build',
         'set NODE_OPTIONS=--max-old-space-size=4096 && npm run test:e2e',
