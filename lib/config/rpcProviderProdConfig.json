@@ -122,8 +122,8 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0,
     "healthCheckSampleProb": 0,
-    "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_1301"],
+    "providerInitialWeights": [0, 1],
+    "providerUrls": ["QUICKNODE_1301", "ALCHEMY_1301"],
     "providerNames": ["QUICKNODE"]
   },
   {
