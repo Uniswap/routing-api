@@ -1313,8 +1313,6 @@ describe('quote', function () {
                         `${API}?${queryParams}`
                       )
 
-                      console.log(`response data: ${JSON.stringify(response.data)}`)
-
                       // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
                       // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
                       // if it's exactOut quote, we should always hit the cached routes.
