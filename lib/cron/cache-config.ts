@@ -10,6 +10,12 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-sepolia-test/api`
+    case ChainId.ARBITRUM_ONE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-arbitrum/api`
+    case ChainId.BASE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-base/api`
+    case ChainId.POLYGON:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-polygon/api`
     default:
       return undefined
   }
@@ -364,6 +370,48 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BASE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BASE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BASE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.POLYGON,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.POLYGON,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
 ]

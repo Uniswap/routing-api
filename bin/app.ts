@@ -245,6 +245,7 @@ export class RoutingAPIPipeline extends Stack {
       'QUICKNODE_130',
       // Unichain Sepolia,
       'QUICKNODE_1301',
+      'ALCHEMY_1301',
       // unirpc - serves all chains
       'UNIRPC_0',
     ]
@@ -423,6 +424,7 @@ const jsonRpcProviders = {
   QUICKNODE_130: process.env.QUICKNODE_130!,
   // Unichain Sepolia,
   QUICKNODE_1301: process.env.QUICKNODE_1301!,
+  ALCHEMY_1301: process.env.ALCHEMY_1301!,
   // unirpc - serves all chains
   UNIRPC_0: process.env.UNIRPC_0!,
 }
