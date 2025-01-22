@@ -10,6 +10,12 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-sepolia-test/api`
+    case ChainId.ARBITRUM_ONE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-arbitrum/api`
+    case ChainId.BASE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-base/api`
+    case ChainId.POLYGON:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-polygon/api`
     default:
       return undefined
   }
