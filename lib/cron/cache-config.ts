@@ -368,4 +368,46 @@ export const chainProtocols = [
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
   },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BASE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BASE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BASE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.POLYGON,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.POLYGON,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.POLYGON)
+    ),
+  },
 ]
