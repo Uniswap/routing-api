@@ -232,6 +232,7 @@ export const QUOTE_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION = (
     case ChainId.UNICHAIN_SEPOLIA:
     case ChainId.BASE_SEPOLIA:
     case ChainId.MONAD_TESTNET:
+    case ChainId.UNICHAIN:
       switch (protocol) {
         case Protocol.MIXED:
         case Protocol.V4:

@@ -38,6 +38,7 @@ import {
   USDT_OPTIMISM,
   WRAPPED_NATIVE_CURRENCY,
   USDC_BASE_SEPOLIA,
+  USDC_UNICHAIN,
 } from '@uniswap/smart-order-router'
 import { ethers } from 'ethers'
 import NodeCache from 'node-cache'
@@ -150,6 +151,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_UNICHAIN_SEPOLIA
     case ChainId.BASE_SEPOLIA:
       return USDC_BASE_SEPOLIA
+    case ChainId.UNICHAIN:
+      return USDC_UNICHAIN
     default:
       throw new Error(`Chain id: ${chainId} not supported`)
   }
