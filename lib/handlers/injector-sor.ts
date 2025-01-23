@@ -517,7 +517,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
           ]
 
-          const v4Supported = [ChainId.SEPOLIA]
+          const v4Supported = [
+            ChainId.SEPOLIA,
+            ChainId.ARBITRUM_ONE,
+            ChainId.BASE,
+            ChainId.POLYGON,
+            ChainId.BNB,
+            ChainId.OPTIMISM,
+            ChainId.AVALANCHE,
+            ChainId.WORLDCHAIN,
+          ]
 
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
