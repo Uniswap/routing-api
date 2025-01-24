@@ -16,6 +16,16 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-base/api`
     case ChainId.POLYGON:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-polygon/api`
+    case ChainId.WORLDCHAIN:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-worldchain/api`
+    case ChainId.ZORA:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-zora/api`
+    case ChainId.UNICHAIN:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-unichain/api`
+    case ChainId.BLAST:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-blast/api`
+    case ChainId.MAINNET:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-mainnet/api`
     default:
       return undefined
   }
@@ -412,6 +422,76 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.POLYGON)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.WORLDCHAIN,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.WORLDCHAIN,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.ZORA,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.ZORA,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.ZORA)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.UNICHAIN,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.UNICHAIN,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.UNICHAIN)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BLAST,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BLAST,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BLAST)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.MAINNET,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.MAINNET,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
 ]
