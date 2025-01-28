@@ -18,6 +18,7 @@ import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
+import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
 
 interface ConstructorParams {
   /**
@@ -354,9 +355,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): void {
     const payload = {
       queryStringParameters: {
-        tokenInAddress: partitionKey.currencyIn,
+        tokenInAddress: getSymbolOrAddress(partitionKey.currencyIn, partitionKey.chainId),
         tokenInChainId: partitionKey.chainId.toString(),
-        tokenOutAddress: partitionKey.currencyOut,
+        tokenOutAddress: getSymbolOrAddress(partitionKey.currencyOut, partitionKey.chainId),
         tokenOutChainId: partitionKey.chainId.toString(),
         amount: amount.quotient.toString(),
         type: partitionKey.tradeType === 0 ? 'exactIn' : 'exactOut',
