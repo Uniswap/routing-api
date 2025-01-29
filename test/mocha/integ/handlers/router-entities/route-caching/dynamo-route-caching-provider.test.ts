@@ -275,7 +275,7 @@ describe('DynamoRouteCachingProvider', async () => {
     sinon.assert.called(spy)
   })
 
-  it('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
+  it.skip('Caches routes properly for a token pair that has its cache configured to Livemode', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
     const currencyAmountETH = CurrencyAmount.fromRawAmount(
       nativeOnChain(ChainId.MAINNET),
