@@ -57,7 +57,7 @@ const { ethers } = hre
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V1_2, 1)
+const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, 1)
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -202,7 +202,7 @@ export function getTestAmount(currency: Currency): string {
 
 describe('quote', function () {
   // Help with test flakiness by retrying.
-  this.retries(3)
+  this.retries(1)
 
   this.timeout('500s')
 
@@ -283,7 +283,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(40000)
+    this.timeout(290000)
     ;[alice] = await ethers.getSigners()
 
     // Make a dummy call to the API to get a block number to fork from.
@@ -966,7 +966,11 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1014,7 +1018,11 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1055,7 +1063,11 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1104,7 +1116,11 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -3080,7 +3096,7 @@ describe('quote', function () {
 
       describe(`${ID_TO_NETWORK_NAME(chain)} ${type} 2xx`, function () {
         // Help with test flakiness by retrying.
-        this.retries(3)
+        this.retries(1)
         const wrappedNative = WNATIVE_ON(chain)
 
         it(`${wrappedNative.symbol} -> erc20`, async () => {
