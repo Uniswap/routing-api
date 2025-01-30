@@ -969,8 +969,8 @@ describe('quote', function () {
 
             const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0
-              }
+                'x-universal-router-version': UniversalRouterVersion.V2_0,
+              },
             })
             const { data, status } = response
 
@@ -996,7 +996,8 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be.true
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
+                .true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
@@ -1025,8 +1026,8 @@ describe('quote', function () {
 
             const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0
-              }
+                'x-universal-router-version': UniversalRouterVersion.V2_0,
+              },
             })
             const { data, status } = response
 
@@ -1074,8 +1075,8 @@ describe('quote', function () {
 
             const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0
-              }
+                'x-universal-router-version': UniversalRouterVersion.V2_0,
+              },
             })
             const { data, status } = response
 
@@ -1131,8 +1132,8 @@ describe('quote', function () {
 
             const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
               headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0
-              }
+                'x-universal-router-version': UniversalRouterVersion.V2_0,
+              },
             })
             const { data, status } = response
 
