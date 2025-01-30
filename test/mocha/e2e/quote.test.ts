@@ -68,6 +68,8 @@ const API = `${process.env.UNISWAP_ROUTING_API!}quote`
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '20'
 
+const ALL_PROTOCOLS = 'v2,v3,v4,mixed'
+
 const BULLET = new Token(
   ChainId.MAINNET,
   '0x8ef32a03784c8Fd63bBf027251b9620865bD54B6',
@@ -296,6 +298,7 @@ describe('quote', function () {
       tokenOutChainId: 1,
       amount: await getAmount(1, 'exactIn', 'USDC', 'USDT', '100'),
       type: 'exactIn',
+      protocols: ALL_PROTOCOLS,
     }
 
     const {
@@ -354,6 +357,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -416,6 +420,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -501,6 +506,7 @@ describe('quote', function () {
               permitSigDeadline: permit.sigDeadline.toString(),
               permitNonce: permit.details.nonce.toString(),
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -563,6 +569,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -618,6 +625,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -712,6 +720,7 @@ describe('quote', function () {
               permitSigDeadline: permit.sigDeadline.toString(),
               permitNonce: permit.details.nonce.toString(),
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -765,6 +774,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -817,6 +827,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: false,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -867,6 +878,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -915,6 +927,7 @@ describe('quote', function () {
               deadline: '360',
               algorithm,
               enableUniversalRouter: true,
+              protocols: ALL_PROTOCOLS,
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -1009,7 +1022,7 @@ describe('quote', function () {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
 
-            expect(response.data.hitsCachedRoutes).to.be.true
+            expect(response.data.hitsCachedRoutes).to.be.false
           })
 
           it(`eth -> usdc v4 include (v2,v3,v4)`, async () => {
@@ -1024,7 +1037,7 @@ describe('quote', function () {
               slippageTolerance: LARGE_SLIPPAGE,
               deadline: '360',
               algorithm,
-              protocols: 'v2,v3,v4',
+              protocols: ALL_PROTOCOLS,
               enableUniversalRouter: true,
             }
 
@@ -1125,7 +1138,7 @@ describe('quote', function () {
               )
             }
 
-            expect(response.data.hitsCachedRoutes).to.be.true
+            expect(response.data.hitsCachedRoutes).to.be.false
           })
 
           it(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
@@ -1140,7 +1153,7 @@ describe('quote', function () {
               slippageTolerance: LARGE_SLIPPAGE,
               deadline: '360',
               algorithm,
-              protocols: 'v2,v3,v4',
+              protocols: ALL_PROTOCOLS,
               enableUniversalRouter: true,
             }
 
@@ -1243,7 +1256,7 @@ describe('quote', function () {
               // along with the native or wrapped native pool token address assertions previously
               // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
               // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.true
+              expect(response.data.hitsCachedRoutes).to.be.false
             })
 
             it(`erc20 -> erc20 v2 only`, async () => {
@@ -1310,7 +1323,7 @@ describe('quote', function () {
               // along with the native or wrapped native pool token address assertions previously
               // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
               // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.true
+              expect(response.data.hitsCachedRoutes).to.be.false
             })
 
             it(`erc20 -> erc20 forceCrossProtocol`, async () => {
@@ -1327,6 +1340,7 @@ describe('quote', function () {
                 algorithm: 'alpha',
                 forceCrossProtocol: true,
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -1709,6 +1723,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -1770,6 +1785,7 @@ describe('quote', function () {
                 deadline: '360',
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -1862,6 +1878,7 @@ describe('quote', function () {
                   permitSigDeadline: permit.sigDeadline.toString(),
                   permitNonce: permit.details.nonce.toString(),
                   enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
                 }
 
                 const queryParams = qs.stringify(quoteReq)
@@ -1912,6 +1929,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -1969,6 +1987,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -2044,6 +2063,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0x0716a17FBAeE714f1E6aB0f9d59edbC5f09815C0',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -2097,6 +2117,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0x00000000219ab540356cBB839Cbe05303d7705Fa',
                 enableUniversalRouter: false,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -2147,6 +2168,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -2196,6 +2218,7 @@ describe('quote', function () {
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
                 enableUniversalRouter: true,
+                protocols: ALL_PROTOCOLS,
               }
 
               const queryParams = qs.stringify(quoteReq)
@@ -2428,6 +2451,7 @@ describe('quote', function () {
             type,
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2473,6 +2497,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
           const queryParams = qs.stringify(quoteReq)
 
@@ -2518,6 +2543,7 @@ describe('quote', function () {
             algorithm,
             gasPriceWei: '60000000000',
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2568,6 +2594,7 @@ describe('quote', function () {
             gasPriceWei: '60000000000',
             enableUniversalRouter: true,
             gasToken: USDC_MAINNET.address,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2629,6 +2656,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2675,6 +2703,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -2745,6 +2774,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2774,6 +2804,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2798,6 +2829,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2822,6 +2854,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2846,6 +2879,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2869,6 +2903,7 @@ describe('quote', function () {
             slippageTolerance: SLIPPAGE,
             deadline: '360',
             algorithm,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2893,6 +2928,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2917,6 +2953,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -2941,6 +2978,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
           await callAndExpectFail(quoteReq, {
             status: 400,
@@ -2964,6 +3002,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
           await callAndExpectFail(quoteReq, {
             status: 400,
@@ -2987,6 +3026,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           await callAndExpectFail(quoteReq, {
@@ -3012,6 +3052,7 @@ describe('quote', function () {
             deadline: '360',
             algorithm,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const chains = SUPPORTED_CHAINS.values()
@@ -3155,6 +3196,7 @@ describe('quote', function () {
             amount: await getAmountFromToken(type, wrappedNative, erc1, amount),
             type,
             enableUniversalRouter: true,
+            protocols: ALL_PROTOCOLS,
           }
 
           const queryParams = qs.stringify(quoteReq)
@@ -3215,7 +3257,7 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
+            expect(response.data.hitsCachedRoutes).to.be.false
           } catch (err: any) {
             fail(JSON.stringify(err))
           }
@@ -3237,7 +3279,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
-            protocols: 'v2,v3,v4,mixed',
+            protocols: ALL_PROTOCOLS,
             type,
           }
 
@@ -3356,7 +3398,11 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
-            expect(data.hitsCachedRoutes).to.be.true
+            if (V4_SUPPORTED.includes(chain)) {
+              expect(data.hitsCachedRoutes).to.be.false
+            } else {
+              expect(data.hitsCachedRoutes).to.be.true
+            }
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
@@ -3377,7 +3423,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
-            protocols: 'v2,v3,v4,mixed',
+            protocols: ALL_PROTOCOLS,
             type,
           }
 
