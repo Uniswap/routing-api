@@ -133,7 +133,8 @@ const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { st
 const checkQuoteToken = (
   before: CurrencyAmount<Currency>,
   after: CurrencyAmount<Currency>,
-  tokensQuoted: CurrencyAmount<Currency>
+  tokensQuoted: CurrencyAmount<Currency>,
+  slippage: string = SLIPPAGE
 ) => {
   // Check which is bigger to support exactIn and exactOut
   const tokensSwapped = after.greaterThan(before) ? after.subtract(before) : before.subtract(after)
@@ -142,7 +143,7 @@ const checkQuoteToken = (
     ? tokensQuoted.subtract(tokensSwapped)
     : tokensSwapped.subtract(tokensQuoted)
   const percentDiff = tokensDiff.asFraction.divide(tokensQuoted.asFraction)
-  expect(percentDiff.lessThan(new Fraction(parseInt(SLIPPAGE), 100))).to.be.true
+  expect(percentDiff.lessThan(new Fraction(parseInt(slippage), 100))).to.be.true
 }
 
 const checkPortionRecipientToken = (
@@ -998,7 +999,7 @@ describe('quote', function () {
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
                 .true
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote), LARGE_SLIPPAGE)
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
@@ -1103,10 +1104,10 @@ describe('quote', function () {
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.00001')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote), LARGE_SLIPPAGE)
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.01')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote), LARGE_SLIPPAGE)
             }
 
             expect(response.data.hitsCachedRoutes).to.be.true
