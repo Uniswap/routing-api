@@ -221,7 +221,8 @@ describe('quote', function () {
     currencyOut: Currency,
     permit?: boolean,
     chainId = ChainId.MAINNET,
-    portion?: Portion
+    portion?: Portion,
+    universalRouterAddress: string = UNIVERSAL_ROUTER_ADDRESS
   ): Promise<{
     tokenInAfter: CurrencyAmount<Currency>
     tokenInBefore: CurrencyAmount<Currency>
@@ -247,7 +248,7 @@ describe('quote', function () {
     if (!permit) {
       const approveNarwhal = await permit2.approve(
         currencyIn.wrapped.address,
-        UNIVERSAL_ROUTER_ADDRESS,
+        universalRouterAddress,
         MAX_UINT160,
         100000000000000
       )
@@ -945,6 +946,218 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
+            expect(response.data.hitsCachedRoutes).to.be.true
+          })
+
+          it(`eth -> usdc v4 only protocol`, async () => {
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: 'ETH',
+              tokenInChainId: 1,
+              tokenOutAddress: 'USDC',
+              tokenOutChainId: 1,
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              algorithm,
+              protocols: 'v4',
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
+            const { data, status } = response
+
+            expect(status).to.equal(200)
+            expect(data.methodParameters).to.not.be.undefined
+            expect(data.route).to.not.be.undefined
+
+            // Verify only v4 pools are used
+            for (const r of data.route) {
+              for (const pool of r) {
+                expect(pool.type).to.equal('v4-pool')
+              }
+            }
+
+            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+              data.methodParameters!,
+              Ether.onChain(1),
+              USDC_MAINNET,
+              undefined,
+              undefined,
+              undefined,
+              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+            )
+
+            if (type == 'exactIn') {
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be.true
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+            } else {
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
+            }
+
+            expect(response.data.hitsCachedRoutes).to.be.true
+          })
+
+          it(`eth -> usdc v4 include (v2,v3,v4)`, async () => {
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: 'ETH',
+              tokenInChainId: 1,
+              tokenOutAddress: 'USDC',
+              tokenOutChainId: 1,
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '1' : '1000'),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              algorithm,
+              protocols: 'v2,v3,v4',
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
+            const { data, status } = response
+
+            expect(status).to.equal(200)
+            expect(data.methodParameters).to.not.be.undefined
+            expect(data.route).to.not.be.undefined
+
+            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+              data.methodParameters!,
+              Ether.onChain(1),
+              USDC_MAINNET,
+              undefined,
+              undefined,
+              undefined,
+              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+            )
+
+            if (type == 'exactIn') {
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('1', Ether.onChain(1)))).to.be.true
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+            } else {
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
+            }
+
+            expect(response.data.hitsCachedRoutes).to.be.true
+          })
+
+          it(`weth -> usdc v4 only protocol`, async () => {
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: 'WETH',
+              tokenInChainId: 1,
+              tokenOutAddress: 'USDC',
+              tokenOutChainId: 1,
+              amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.01'),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              algorithm,
+              protocols: 'v4',
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
+            const { data, status } = response
+
+            expect(status).to.equal(200)
+            expect(data.methodParameters).to.not.be.undefined
+            expect(data.route).to.not.be.undefined
+
+            // Verify only v4 pools are used
+            for (const r of data.route) {
+              for (const pool of r) {
+                expect(pool.type).to.equal('v4-pool')
+              }
+            }
+
+            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+              data.methodParameters!,
+              WETH9[1]!,
+              USDC_MAINNET,
+              undefined,
+              undefined,
+              undefined,
+              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+            )
+
+            if (type == 'exactIn') {
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.00001')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+            } else {
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.01')
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+            }
+
+            expect(response.data.hitsCachedRoutes).to.be.true
+          })
+
+          it(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: 'WETH',
+              tokenInChainId: 1,
+              tokenOutAddress: 'USDC',
+              tokenOutChainId: 1,
+              amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '1' : '1000'),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              algorithm,
+              protocols: 'v2,v3,v4',
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: {
+                'x-universal-router-version': UniversalRouterVersion.V2_0
+              }
+            })
+            const { data, status } = response
+
+            expect(status).to.equal(200)
+            expect(data.methodParameters).to.not.be.undefined
+            expect(data.route).to.not.be.undefined
+
+            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+              data.methodParameters!,
+              WETH9[1]!,
+              USDC_MAINNET,
+              undefined,
+              undefined,
+              undefined,
+              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+            )
+
+            if (type == 'exactIn') {
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1')
+              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+            } else {
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
+              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+            }
+
             expect(response.data.hitsCachedRoutes).to.be.true
           })
 
