@@ -290,7 +290,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
     // Caching requests are not `optimistic`, we need to be careful of not removing this flag
     // This condition is protecting us against firing another caching request from inside a caching request
-    if (optimistic) {
+    // Note: We skip async cache request if only a single protocol is provided. We do this as our cache is optimized for global protocols search.
+    if (optimistic && protocols.length != 1) {
       // We send an async caching quote
       // we do not await on this function, it's a fire and forget
       this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)

@@ -362,4 +362,70 @@ describe('DynamoRouteCachingProvider', async () => {
     )
     expect(route).to.not.be.undefined
   })
+
+  it('does not send caching quote when only one protocol is provided', async () => {
+    const dynamoRouteCache = new DynamoRouteCachingProvider({
+      routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
+      routesCachingRequestFlagTableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+      cachingQuoteLambdaName: 'test',
+    })
+
+    // Create spy on maybeSendCachingQuoteForRoutesDb
+    const maybeSendCachingQuoteSpy = sinon.spy(dynamoRouteCache, 'maybeSendCachingQuoteForRoutesDb' as any)
+
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+    // First, set up some cached routes
+    await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
+
+    // Get cached route with only one protocol
+    await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3], // Only one protocol
+      TEST_CACHED_ROUTES.blockNumber,
+      true // optimistic = true to potentially trigger caching
+    )
+
+    // Verify maybeSendCachingQuoteForRoutesDb was not called
+    expect(maybeSendCachingQuoteSpy.called).to.be.false
+
+    // Clean up
+    maybeSendCachingQuoteSpy.restore()
+  })
+
+  it('sends caching quote when multiple protocols are provided', async () => {
+    const dynamoRouteCache = new DynamoRouteCachingProvider({
+      routesTableName: DynamoDBTableProps.RoutesDbTable.Name,
+      routesCachingRequestFlagTableName: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
+      cachingQuoteLambdaName: 'test',
+    })
+
+    // Create spy on maybeSendCachingQuoteForRoutesDb
+    const maybeSendCachingQuoteSpy = sinon.spy(dynamoRouteCache, 'maybeSendCachingQuoteForRoutesDb' as any)
+
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+    // First, set up some cached routes
+    await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
+
+    // Get cached route with multiple protocols
+    await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3, Protocol.V4], // Multiple protocols
+      TEST_CACHED_ROUTES.blockNumber,
+      true // optimistic = true to potentially trigger caching
+    )
+
+    // Verify maybeSendCachingQuoteForRoutesDb was called
+    expect(maybeSendCachingQuoteSpy.called).to.be.true
+
+    // Clean up
+    maybeSendCachingQuoteSpy.restore()
+  })
 })
