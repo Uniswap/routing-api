@@ -999,7 +999,12 @@ describe('quote', function () {
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
                 .true
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote), LARGE_SLIPPAGE)
+              checkQuoteToken(
+                tokenOutBefore,
+                tokenOutAfter,
+                CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
+                LARGE_SLIPPAGE
+              )
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
@@ -1104,10 +1109,20 @@ describe('quote', function () {
 
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.00001')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote), LARGE_SLIPPAGE)
+              checkQuoteToken(
+                tokenOutBefore,
+                tokenOutAfter,
+                CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
+                LARGE_SLIPPAGE
+              )
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.01')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote), LARGE_SLIPPAGE)
+              checkQuoteToken(
+                tokenInBefore,
+                tokenInAfter,
+                CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote),
+                LARGE_SLIPPAGE
+              )
             }
 
             expect(response.data.hitsCachedRoutes).to.be.true
