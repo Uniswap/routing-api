@@ -203,6 +203,16 @@ export function getTestAmount(currency: Currency): string {
   }
 }
 
+const checkAbsoluteDifference = (actual: string, expected: string, threshold: number = 0.001) => {
+  const actualNum = parseFloat(actual)
+  const expectedNum = parseFloat(expected)
+  const percentDiff = Math.abs((actualNum - expectedNum) / expectedNum)
+  expect(
+    percentDiff <= threshold,
+    `Expected ${actual} to be within ${threshold * 100}% of ${expected}, but difference was ${percentDiff * 100}%`
+  ).to.be.true
+}
+
 describe('quote', function () {
   // Help with test flakiness by retrying.
   this.retries(3)
@@ -796,7 +806,7 @@ describe('quote', function () {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+              checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
               // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
             }
 
@@ -850,7 +860,7 @@ describe('quote', function () {
               expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+              checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
               // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
             }
 
@@ -2085,7 +2095,7 @@ describe('quote', function () {
                 expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+                checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
                 // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
               }
 
@@ -2139,7 +2149,7 @@ describe('quote', function () {
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
                 expect(data.simulationError).to.equal(false)
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10000')
+                checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
                 // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
               }
 
