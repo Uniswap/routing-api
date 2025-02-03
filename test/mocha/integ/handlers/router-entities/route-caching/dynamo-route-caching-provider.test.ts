@@ -445,7 +445,7 @@ describe('DynamoRouteCachingProvider', async () => {
         currencyAmount,
         USDC_MAINNET,
         TradeType.EXACT_INPUT,
-        [Protocol.V2, Protocol.V3, Protocol.MIXED], // Requesting both V2 and V3, and MIXED
+        [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED], // Requesting both V2 and V3, and MIXED
         TEST_CACHED_MIXED_ROUTES.blockNumber,
         true // optimistic
       )
