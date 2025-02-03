@@ -13,23 +13,22 @@ import { encodeSqrtRatioX96, FeeAmount, Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import {
-  CacheMode,
   CachedRoute,
   CachedRoutes,
+  CacheMode,
+  MetricLoggerUnit,
+  nativeOnChain,
   UNI_MAINNET,
   USDC_MAINNET,
   V3Route,
-  nativeOnChain,
-  MetricLoggerUnit,
 } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
-import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
+import { MixedRoute, V4Route } from '@uniswap/smart-order-router/build/main/routers'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/newCachedRoutesRolloutPercent'
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { DynamoDB } from 'aws-sdk'
 import { Pair } from '@uniswap/v2-sdk'
-import { MixedRoute } from '@uniswap/smart-order-router/build/main/routers'
 
 chai.use(chaiAsPromised)
 
@@ -394,7 +393,7 @@ describe('DynamoRouteCachingProvider', async () => {
       }
     })
 
-    it('should not return mixed V2+V3 route if only V3+MIXED are requested', async () => {
+    it('should not return mixed V2+V3 route if only V3+V4+MIXED are requested', async () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
 
       const route = await dynamoRouteCache.getCachedRoute(
@@ -402,7 +401,7 @@ describe('DynamoRouteCachingProvider', async () => {
         currencyAmount,
         USDC_MAINNET,
         TradeType.EXACT_INPUT,
-        [Protocol.V3, Protocol.MIXED], // Requesting V3+MIXED, but route needs V2 as well
+        [Protocol.V3, Protocol.V4, Protocol.MIXED], // Requesting V3+V4+MIXED, but route needs V2 as well
         TEST_CACHED_MIXED_ROUTES.blockNumber,
         true // optimistic
       )
@@ -416,7 +415,7 @@ describe('DynamoRouteCachingProvider', async () => {
       expect(route?.currencyOut.equals(USDC_MAINNET)).to.be.true
     })
 
-    it('should not return mixed V2+V3 route if only V2+MIXED are requested', async () => {
+    it('should not return mixed V2+V3 route if only V2+V4+MIXED are requested', async () => {
       const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
 
       const route = await dynamoRouteCache.getCachedRoute(
@@ -424,7 +423,7 @@ describe('DynamoRouteCachingProvider', async () => {
         currencyAmount,
         USDC_MAINNET,
         TradeType.EXACT_INPUT,
-        [Protocol.V2, Protocol.MIXED], // Requesting V2+MIXED, but route needs V3 as well
+        [Protocol.V2, Protocol.V4, Protocol.MIXED], // Requesting V2+V4+MIXED, but route needs V3 as well
         TEST_CACHED_MIXED_ROUTES.blockNumber,
         true // optimistic
       )
