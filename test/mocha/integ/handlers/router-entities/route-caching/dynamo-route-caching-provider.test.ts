@@ -28,6 +28,8 @@ import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/ne
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { DynamoDB } from 'aws-sdk'
+import { Pair } from '@uniswap/v2-sdk'
+import { MixedRoute } from '@uniswap/smart-order-router/build/main/routers'
 
 chai.use(chaiAsPromised)
 
@@ -153,6 +155,26 @@ const TEST_UNCACHED_ROUTES = new CachedRoutes({
   currencyIn: UNI_MAINNET,
   currencyOut: USDC_MAINNET,
   protocolsCovered: [TEST_UNCACHED_ROUTE.protocol],
+  blockNumber: 0,
+  tradeType: TradeType.EXACT_INPUT,
+  originalAmount: '1',
+  blocksToLive: 5,
+})
+
+const TEST_WETH_USDC_V2_PAIR = new Pair(
+  CurrencyAmount.fromRawAmount(WETH, '100'),
+  CurrencyAmount.fromRawAmount(USDC_MAINNET, '100')
+)
+
+const TEST_MIXED_ROUTE = new MixedRoute([TEST_WETH_USDC_V2_PAIR, TEST_WETH_USDC_POOL], WETH, USDC_MAINNET)
+
+const TEST_CACHED_MIXED_ROUTE = new CachedRoute({ route: TEST_MIXED_ROUTE, percent: 100 })
+const TEST_CACHED_MIXED_ROUTES = new CachedRoutes({
+  routes: [TEST_CACHED_MIXED_ROUTE],
+  chainId: TEST_CACHED_MIXED_ROUTE.route.chainId,
+  currencyIn: WETH,
+  currencyOut: USDC_MAINNET,
+  protocolsCovered: [Protocol.MIXED],
   blockNumber: 0,
   tradeType: TradeType.EXACT_INPUT,
   originalAmount: '1',
@@ -361,5 +383,83 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_CACHED_ROUTES.blockNumber
     )
     expect(route).to.not.be.undefined
+  })
+
+  describe('Mixed Route Protocol Filtering', () => {
+    beforeEach(async () => {
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+      const success = await dynamoRouteCache.setCachedRoute(TEST_CACHED_MIXED_ROUTES, currencyAmount)
+      if (!success) {
+        throw new Error('Failed to set cached route')
+      }
+    })
+
+    it('should not return mixed V2+V3 route if only V3+MIXED are requested', async () => {
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+      const route = await dynamoRouteCache.getCachedRoute(
+        ChainId.MAINNET,
+        currencyAmount,
+        USDC_MAINNET,
+        TradeType.EXACT_INPUT,
+        [Protocol.V3, Protocol.MIXED], // Requesting V3+MIXED, but route needs V2 as well
+        TEST_CACHED_MIXED_ROUTES.blockNumber,
+        true // optimistic
+      )
+
+      // Route should exist but have no routes since we didn't request V2 protocol
+      expect(route).to.not.be.undefined
+      expect(route?.routes.length).to.equal(0)
+      // Verify the metadata is preserved
+      expect(route?.chainId).to.equal(ChainId.MAINNET)
+      expect(route?.currencyIn.equals(WETH)).to.be.true
+      expect(route?.currencyOut.equals(USDC_MAINNET)).to.be.true
+    })
+
+    it('should not return mixed V2+V3 route if only V2+MIXED are requested', async () => {
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+      const route = await dynamoRouteCache.getCachedRoute(
+        ChainId.MAINNET,
+        currencyAmount,
+        USDC_MAINNET,
+        TradeType.EXACT_INPUT,
+        [Protocol.V2, Protocol.MIXED], // Requesting V2+MIXED, but route needs V3 as well
+        TEST_CACHED_MIXED_ROUTES.blockNumber,
+        true // optimistic
+      )
+
+      // Route should exist but have no routes since we didn't request V3 protocol
+      expect(route).to.not.be.undefined
+      expect(route?.routes.length).to.equal(0)
+      // Verify the metadata is preserved
+      expect(route?.chainId).to.equal(ChainId.MAINNET)
+      expect(route?.currencyIn.equals(WETH)).to.be.true
+      expect(route?.currencyOut.equals(USDC_MAINNET)).to.be.true
+    })
+
+    it('should return mixed route if all required protocols are requested', async () => {
+      const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+
+      const route = await dynamoRouteCache.getCachedRoute(
+        ChainId.MAINNET,
+        currencyAmount,
+        USDC_MAINNET,
+        TradeType.EXACT_INPUT,
+        [Protocol.V2, Protocol.V3, Protocol.MIXED], // Requesting both V2 and V3, and MIXED
+        TEST_CACHED_MIXED_ROUTES.blockNumber,
+        true // optimistic
+      )
+
+      // Route should be returned since we requested all required protocols
+      expect(route).to.not.be.undefined
+      expect(route?.routes.length).to.equal(1)
+      expect(route?.routes[0].protocol).to.equal(Protocol.MIXED)
+
+      // Verify the route contains both V2 and V3 pools
+      const mixedRoute = route?.routes[0] as CachedRoute<MixedRoute>
+      expect(mixedRoute.route.pools.some((pool) => pool instanceof Pair)).to.be.true
+      expect(mixedRoute.route.pools.some((pool) => pool instanceof V3Pool)).to.be.true
+    })
   })
 })

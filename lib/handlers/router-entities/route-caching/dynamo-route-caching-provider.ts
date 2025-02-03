@@ -19,6 +19,10 @@ import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshall
 import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
+import { MixedRoute } from '@uniswap/smart-order-router/build/main/routers'
+import { Pair } from '@uniswap/v2-sdk'
+import { Pool as V3Pool } from '@uniswap/v3-sdk'
+import { Pool as V4Pool } from '@uniswap/v4-sdk'
 
 interface ConstructorParams {
   /**
@@ -244,7 +248,35 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // Using a map to remove duplicates, we will the different percents of different routes.
         // We also filter by protocol, in case we are loading a route from a protocol that wasn't requested
         if (!routesMap.has(routeId) && protocols.includes(cachedRoute.protocol)) {
-          routesMap.set(routeId, cachedRoute)
+          if (cachedRoute.protocol === Protocol.MIXED) {
+            try {
+              // If the protocol is MIXED, we need to cast to MixedRoute and also check if all included pools are in the requested protocols
+              const mixedRoute = cachedRoute as CachedRoute<MixedRoute>
+              if (
+                mixedRoute.route?.pools?.every((pool) => {
+                  if (pool instanceof Pair) {
+                    return protocols.includes(Protocol.V2)
+                  } else if (pool instanceof V3Pool) {
+                    return protocols.includes(Protocol.V3)
+                  } else if (pool instanceof V4Pool) {
+                    return protocols.includes(Protocol.V4)
+                  }
+                  // Unknown pool type - should never happen
+                  metric.putMetric('RoutesDbUnknownPoolType', 1, MetricLoggerUnit.Count)
+                  return false
+                })
+              ) {
+                routesMap.set(routeId, cachedRoute)
+              }
+            } catch (error) {
+              metric.putMetric('RoutesDbMixedRouteParseError', 1, MetricLoggerUnit.Count)
+              log.error({ error, cachedRoute }, '[DynamoRouteCachingProvider] Error parsing mixed route')
+              // Continue processing other routes
+            }
+          } else {
+            // We already checked that the protocol is in the requested protocols
+            routesMap.set(routeId, cachedRoute)
+          }
         }
       })
       // Find the latest blockNumber
