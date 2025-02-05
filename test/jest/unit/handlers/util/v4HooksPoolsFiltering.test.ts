@@ -1,8 +1,32 @@
 import { describe, expect } from '@jest/globals'
 import { v4HooksPoolsFiltering } from '../../../../../lib/util/v4HooksPoolsFiltering'
 import { V4SubgraphPool } from '@uniswap/smart-order-router'
+import { ChainId } from '@uniswap/sdk-core'
 
 describe('v4HooksPoolsFiltering', () => {
+  it('flaunch hooks included', () => {
+    const flaunchHookAddress = '0x51Bba15255406Cfe7099a42183302640ba7dAFDC'
+    const v4Pools: Array<V4SubgraphPool> = [
+      {
+        id: '0',
+        feeTier: '0',
+        tickSpacing: '0',
+        hooks: flaunchHookAddress,
+        liquidity: '0',
+        token0: {
+          id: '0',
+        },
+        token1: {
+          id: '0',
+        },
+        tvlETH: 0,
+        tvlUSD: 0,
+      },
+    ]
+
+    expect(v4HooksPoolsFiltering(ChainId.BASE, v4Pools)).toEqual(v4Pools)
+  })
+
   it('before swap hooks pool is filtered out', () => {
     const beforeSwapHookAddress = '0x0000000000000000000000000000000000000080'
     const v4Pools: Array<V4SubgraphPool> = [
