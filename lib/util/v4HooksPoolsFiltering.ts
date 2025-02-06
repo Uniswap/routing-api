@@ -1,4 +1,4 @@
-import { V4SubgraphPool } from '@uniswap/smart-order-router'
+import { log, V4SubgraphPool } from '@uniswap/smart-order-router'
 import { Hook } from '@uniswap/v4-sdk'
 import { HOOKS_ADDRESSES_ALLOWLIST } from './hooksAddressesAllowlist'
 import { ChainId } from '@uniswap/sdk-core'
@@ -37,9 +37,21 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         v4PoolsByTokenPairsAndFees[convertV4PoolToGroupingKey(pool)] ??
         new PriorityQueue<V4SubgraphPool>(V4SubgraphPoolComparator)
 
+      let additionalAllowedPool = 0
+
+      if (
+        pool.id.toLowerCase() === '0x14287e3268eb628fcebd2d8f0730b01703109e112a7a41426a556d10211d2086'.toLowerCase() &&
+        chainId === ChainId.BASE
+      ) {
+        pool.tvlETH = 1000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
+        pool.tvlUSD = 5500000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
+        log.debug(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       v4Pools.push(pool)
 
-      if (v4Pools.size() > TOP_GROUPED_V4_POOLS) {
+      if (v4Pools.size() > TOP_GROUPED_V4_POOLS + additionalAllowedPool) {
         v4Pools.dequeue()
       }
 
