@@ -13,7 +13,6 @@ import {
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
   USDB_BLAST,
-  USDC_BASE,
   USDC_BNB,
   USDC_MAINNET,
   USDC_NATIVE_ARBITRUM,
@@ -3418,53 +3417,6 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
-
-        it(`USDC -> mockA only through mixed`, async () => {
-          if (chain !== ChainId.BASE) {
-            // Only Base has mockA
-            return
-          }
-
-          if (type !== 'exactIn') {
-            // mixed route only supports exact in
-            return
-          }
-
-          const tokenOut = new Token(ChainId.BASE, '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988', 18, 'MOCKA')
-          const amount = type === 'exactIn' ? '0.00000000000001' : '0.000001'
-
-          const quoteReq: QuoteQueryParams = {
-            tokenInAddress: USDC_BASE.address,
-            tokenInChainId: chain,
-            tokenOutAddress: tokenOut.address,
-            tokenOutChainId: chain,
-            amount: await getAmountFromToken(type, WNATIVE_ON(chain), tokenOut, amount),
-            type,
-            enableUniversalRouter: true,
-            forceMixedRoutes: true,
-            protocols: 'mixed',
-          }
-
-          const headers = {
-            'x-universal-router-version': '2.0',
-          }
-
-          const queryParams = qs.stringify(quoteReq)
-
-          try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: headers,
-            })
-            const { status, data } = response
-
-            expect(status).to.equal(200, JSON.stringify(response.data))
-            expect(data.route.filter((pools) => pools.filter((pool) => pool.type === 'v3-pool'))).to.not.be.undefined
-            expect(data.route.filter((pools) => pools.filter((pool) => pool.type === 'v4-pool'))).to.not.be.undefined
-          } catch (err: any) {
-            fail(JSON.stringify(err.response.data))
-          }
-        })
-
         it(`has quoteGasAdjusted values`, async () => {
           if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_A)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet

@@ -13,7 +13,6 @@ import {
   sortsBefore,
   SwapOptions,
   SwapRoute,
-  V4_ETH_WETH_FAKE_POOL,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
@@ -544,13 +543,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
 
         if (nextPool instanceof V4Pool) {
-          // We want to filter the fake v4 pool here,
-          // because in SOR, we intentionally retain the fake pool, when it returns the valid routes
-          // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
-          if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
-            continue
-          }
-
           curRoute.push({
             type: 'v4-pool',
             address: v4PoolProvider.getPoolId(
