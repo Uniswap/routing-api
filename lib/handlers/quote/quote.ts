@@ -45,7 +45,7 @@ import {
   protocolVersionsToBeExcludedFromMixed,
   URVersionsToProtocolVersions,
 } from '../../util/supportedProtocolVersions'
-import { V4_ETH_WETH_FAKE_POOL } from '@uniswap/smart-order-router/build/main/util/pool'
+import { V4_ETH_WETH_FAKE_POOL } from '@uniswap/smart-order-router/src/main/util/pool'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
