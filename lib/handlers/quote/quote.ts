@@ -13,6 +13,7 @@ import {
   sortsBefore,
   SwapOptions,
   SwapRoute,
+  V4_ETH_WETH_FAKE_POOL,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
@@ -45,7 +46,6 @@ import {
   protocolVersionsToBeExcludedFromMixed,
   URVersionsToProtocolVersions,
 } from '../../util/supportedProtocolVersions'
-import { V4_ETH_WETH_FAKE_POOL } from '@uniswap/smart-order-router/src/main/util/pool'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
