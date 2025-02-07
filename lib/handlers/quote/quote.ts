@@ -548,7 +548,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           // because in SOR, we intentionally retain the fake pool, when it returns the valid routes
           // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
           if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
-            continue;
+            continue
           }
 
           curRoute.push({
