@@ -440,7 +440,7 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.UNICHAIN)
-    )
+    ),
   },
   // V4
   {
