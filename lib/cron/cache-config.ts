@@ -231,7 +231,20 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
-
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.UNICHAIN,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.UNICHAIN,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.UNICHAIN)
+    ),
+  },
   // V2.
   {
     protocol: Protocol.V2,
@@ -368,6 +381,22 @@ export const chainProtocols = [
       v2SubgraphUrlOverride(ChainId.MONAD_TESTNET)
     ),
   },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.UNICHAIN,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.UNICHAIN,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.UNICHAIN)
+    )
+  },
+  // V4
   {
     protocol: Protocol.V4,
     chainId: ChainId.SEPOLIA,
