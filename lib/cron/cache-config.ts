@@ -57,6 +57,8 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-astrochain-sepolia/api`
     case ChainId.UNICHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-unichain-mainnet/api`
+    case ChainId.ZORA:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-zora/api`
     default:
       return undefined
   }
@@ -245,6 +247,35 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.WORLDCHAIN,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.WORLDCHAIN,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.WORLDCHAIN)
+    ),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.ZORA,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.ZORA,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.ZORA)
+    ),
+  },
+
   // V2.
   {
     protocol: Protocol.V2,
@@ -364,6 +395,21 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.BLAST)
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.WORLDCHAIN,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.WORLDCHAIN,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
   {
