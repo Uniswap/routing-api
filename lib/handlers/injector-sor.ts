@@ -45,7 +45,7 @@ import {
   V2PoolProvider,
   V2QuoteProvider,
   V3PoolProvider,
-  V4PoolProvider
+  V4PoolProvider,
 } from '@uniswap/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
@@ -56,7 +56,7 @@ import { BaseRInj, Injector } from './handler'
 import {
   V2AWSSubgraphProvider,
   V3AWSSubgraphProvider,
-  V4AWSSubgraphProvider
+  V4AWSSubgraphProvider,
 } from './router-entities/aws-subgraph-provider'
 import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
@@ -77,7 +77,7 @@ import {
   NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   RETRY_OPTIONS,
-  SUCCESS_RATE_FAILURE_OVERRIDES
+  SUCCESS_RATE_FAILURE_OVERRIDES,
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
@@ -88,7 +88,7 @@ import { UniGraphQLProvider } from '../graphql/graphql-provider'
 import { TrafficSwitcherITokenFeeFetcher } from '../util/traffic-switch/traffic-switcher-i-token-fee-fetcher'
 import {
   emptyV4FeeTickSpacingsHookAddresses,
-  EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES
+  EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES,
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
