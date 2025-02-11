@@ -3167,7 +3167,6 @@ describe('quote', function () {
       // because they are testing V4_SEPOLIA_TEST_A -> V4_SEPOLIA_TEST_B
       // which no longer exists on re-deployed v4 pool manager
       c != ChainId.SEPOLIA &&
-      c != ChainId.UNICHAIN &&
       c != ChainId.MONAD_TESTNET &&
       c != ChainId.UNICHAIN_SEPOLIA &&
       c != ChainId.BASE_SEPOLIA
