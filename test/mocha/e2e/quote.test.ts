@@ -1060,7 +1060,8 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDC',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.1' : '100'),
+              // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
               type,
               recipient: alice.address,
               slippageTolerance: LARGE_SLIPPAGE,
@@ -1086,10 +1087,11 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.1', Ether.onChain(1)))).to.be.true
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
+                .true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
 
             expect(response.data.hitsCachedRoutes).to.be.true
@@ -1498,7 +1500,7 @@ describe('quote', function () {
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
                   headers: {
                     ...HEADERS_2_0,
-                    'x-request-source': 'e2e-test'
+                    'x-request-source': 'e2e-test',
                   },
                 })
                 const {
