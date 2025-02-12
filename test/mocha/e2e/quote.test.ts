@@ -1496,7 +1496,10 @@ describe('quote', function () {
                 const queryParams = qs.stringify(quoteReq)
 
                 const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                  headers: HEADERS_2_0,
+                  headers: {
+                    ...HEADERS_2_0,
+                    'x-request-source': 'e2e-test',
+                  },
                 })
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
