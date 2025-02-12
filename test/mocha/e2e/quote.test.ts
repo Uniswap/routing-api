@@ -57,7 +57,7 @@ const { ethers } = hre
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 
-const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V1_2, 1)
+const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, 1)
 
 if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
   throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
@@ -69,6 +69,14 @@ const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '20'
 
 const ALL_PROTOCOLS = 'v2,v3,v4,mixed'
+
+const HEADERS_1_2 = {
+  'x-universal-router-version': '1.2',
+}
+
+const HEADERS_2_0 = {
+  'x-universal-router-version': '2.0',
+}
 
 const BULLET = new Token(
   ChainId.MAINNET,
@@ -125,7 +133,7 @@ axiosRetry(axios, {
 const callAndExpectFail = async (quoteReq: Partial<QuoteQueryParams>, resp: { status: number; data: any }) => {
   const queryParams = qs.stringify(quoteReq)
   try {
-    await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+    await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
     fail()
   } catch (err: any) {
     expect(err.response).to.containSubset(resp)
@@ -313,7 +321,7 @@ describe('quote', function () {
 
     const {
       data: { blockNumber },
-    } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`)
+    } = await axios.get<QuoteResponse>(`${API}?${qs.stringify(quoteReq)}`, { headers: HEADERS_2_0 })
 
     block = parseInt(blockNumber) - 10
 
@@ -354,69 +362,84 @@ describe('quote', function () {
     for (const type of TRADE_TYPES) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ Execute Swap`, () => {
-          it(`erc20 -> erc20`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDT',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
+          for (const uraVersion of [UniversalRouterVersion.V1_2, UniversalRouterVersion.V2_0]) {
+            it(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {
+              let protocols = ALL_PROTOCOLS
+              let headers = HEADERS_2_0
+              if (uraVersion === UniversalRouterVersion.V1_2) {
+                protocols = ALL_PROTOCOLS
+                headers = HEADERS_1_2
+              }
 
-            const queryParams = qs.stringify(quoteReq)
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'USDC',
+                tokenInChainId: 1,
+                tokenOutAddress: 'USDT',
+                tokenOutChainId: 1,
+                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm,
+                enableUniversalRouter: true,
+                protocols: protocols,
+              }
 
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
-            const {
-              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
-              status,
-            } = response
+              const queryParams = qs.stringify(quoteReq)
 
-            expect(status).to.equal(200)
-            expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-            expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: headers,
+              })
+              const {
+                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
+                status,
+              } = response
 
-            expect(Number(priceImpact)).to.be.greaterThan(0)
+              expect(status).to.equal(200)
+              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
 
-            if (type == 'exactIn') {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-            } else {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-            }
+              expect(Number(priceImpact)).to.be.greaterThan(0)
 
-            expect(methodParameters).to.not.be.undefined
-            expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS)
+              if (type == 'exactIn') {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+              } else {
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+              }
 
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters!,
-              USDC_MAINNET,
-              USDT_MAINNET
-            )
+              expect(methodParameters).to.not.be.undefined
+              expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET))
 
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-            }
+              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                methodParameters!,
+                USDC_MAINNET,
+                USDT_MAINNET,
+                undefined,
+                ChainId.MAINNET,
+                undefined,
+                UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET)
+              )
 
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
+              if (type == 'exactIn') {
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+              } else {
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+              }
+
+              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+              // if it's exactOut quote, we should always hit the cached routes.
+              // this is regardless of protocol version.
+              // the reason is because exact in quote always runs before exact out
+              // along with the native or wrapped native pool token address assertions previously
+              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+              // and native for v4 pool routes
+              expect(response.data.hitsCachedRoutes).to.be.true
+            })
+          }
 
           it(`erc20 -> erc20 swaprouter02`, async () => {
             const quoteReq: QuoteQueryParams = {
@@ -435,7 +458,9 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: HEADERS_2_0,
+            })
             const {
               data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
               status,
@@ -521,7 +546,9 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: HEADERS_2_0,
+            })
             const {
               data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
               status,
@@ -584,7 +611,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const {
               data: { quote, methodParameters },
               status,
@@ -640,7 +667,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -735,7 +762,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -789,7 +816,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -842,7 +869,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -893,7 +920,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -942,7 +969,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -991,11 +1018,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0,
-              },
-            })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1012,11 +1035,7 @@ describe('quote', function () {
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               data.methodParameters!,
               Ether.onChain(1),
-              USDC_MAINNET,
-              undefined,
-              undefined,
-              undefined,
-              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+              USDC_MAINNET
             )
 
             if (type == 'exactIn') {
@@ -1053,11 +1072,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0,
-              },
-            })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1067,11 +1082,7 @@ describe('quote', function () {
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               data.methodParameters!,
               Ether.onChain(1),
-              USDC_MAINNET,
-              undefined,
-              undefined,
-              undefined,
-              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+              USDC_MAINNET
             )
 
             if (type == 'exactIn') {
@@ -1102,11 +1113,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0,
-              },
-            })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1123,11 +1130,7 @@ describe('quote', function () {
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               data.methodParameters!,
               WETH9[1]!,
-              USDC_MAINNET,
-              undefined,
-              undefined,
-              undefined,
-              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+              USDC_MAINNET
             )
 
             if (type == 'exactIn') {
@@ -1169,11 +1172,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: {
-                'x-universal-router-version': UniversalRouterVersion.V2_0,
-              },
-            })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1183,11 +1182,7 @@ describe('quote', function () {
             const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
               data.methodParameters!,
               WETH9[1]!,
-              USDC_MAINNET,
-              undefined,
-              undefined,
-              undefined,
-              UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, ChainId.MAINNET)
+              USDC_MAINNET
             )
 
             if (type == 'exactIn') {
@@ -1220,7 +1215,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_2_0,
+              })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
@@ -1287,7 +1284,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_2_0,
+              })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
@@ -1355,7 +1354,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_2_0,
+              })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
                 status,
@@ -1423,7 +1424,9 @@ describe('quote', function () {
 
                 const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: HEADERS_2_0,
+                })
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
@@ -1487,7 +1490,9 @@ describe('quote', function () {
 
                 const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: HEADERS_2_0,
+                })
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                   status,
@@ -1564,7 +1569,8 @@ describe('quote', function () {
                       const queryParams = qs.stringify(quoteReq)
 
                       const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
-                        `${API}?${queryParams}`
+                        `${API}?${queryParams}`,
+                        { headers: HEADERS_2_0 }
                       )
 
                       // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
@@ -1738,7 +1744,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_2_0,
+              })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
                 status,
@@ -1800,7 +1808,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_2_0,
+              })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
                 status,
@@ -1893,7 +1903,9 @@ describe('quote', function () {
 
                 const queryParams = qs.stringify(quoteReq)
 
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: HEADERS_2_0,
+                })
                 const {
                   data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
                   status,
@@ -1944,7 +1956,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const {
                 data: { quote, methodParameters, simulationError },
                 status,
@@ -2002,7 +2014,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const { data, status } = response
 
               expect(status).to.equal(200)
@@ -2078,7 +2090,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.simulationError).to.equal(false)
@@ -2132,7 +2144,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.methodParameters).to.not.be.undefined
@@ -2183,7 +2195,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.simulationError).to.equal(false)
@@ -2233,7 +2245,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.simulationError).to.equal(false)
@@ -2315,7 +2327,10 @@ describe('quote', function () {
 
                   const queryParams = qs.stringify(quoteReq)
 
-                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    { headers: HEADERS_2_0 }
+                  )
                   const { data, status } = response
                   expect(status).to.equal(200)
                   expect(data.simulationError).to.equal(false)
@@ -2466,7 +2481,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
             status,
@@ -2511,7 +2528,9 @@ describe('quote', function () {
           }
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
             status,
@@ -2558,7 +2577,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, gasPriceWei },
             status,
@@ -2609,7 +2630,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
           const {
             data: {
               quoteDecimals,
@@ -2671,7 +2694,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
 
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals },
@@ -2718,7 +2743,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+            headers: HEADERS_2_0,
+          })
           const {
             data: { quoteDecimals, quoteGasAdjustedDecimals },
             status,
@@ -3211,7 +3238,9 @@ describe('quote', function () {
           const queryParams = qs.stringify(quoteReq)
 
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: HEADERS_2_0,
+            })
             const { status } = response
 
             expect(status).to.equal(200)
@@ -3253,7 +3282,9 @@ describe('quote', function () {
           const queryParams = qs.stringify(quoteReq)
 
           try {
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`)
+            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+              headers: HEADERS_2_0,
+            })
             const { status } = response
 
             expect(status).to.equal(200)
@@ -3294,13 +3325,9 @@ describe('quote', function () {
 
           const queryParams = qs.stringify(quoteReq)
 
-          const headers = {
-            'x-universal-router-version': '2.0',
-          }
-
           try {
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: headers,
+              headers: HEADERS_2_0,
             })
             const { status } = response
 
@@ -3355,15 +3382,11 @@ describe('quote', function () {
             protocols: V4_SUPPORTED.includes(chain) ? 'v4' : 'v2,v3,mixed',
           }
 
-          const headers = {
-            'x-universal-router-version': '2.0',
-          }
-
           const queryParams = qs.stringify(quoteReq)
 
           try {
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: headers,
+              headers: HEADERS_2_0,
             })
             const { status, data } = response
 
@@ -3436,15 +3459,11 @@ describe('quote', function () {
             type,
           }
 
-          const headers = {
-            'x-universal-router-version': '2.0',
-          }
-
           const queryParams = qs.stringify(quoteReq)
 
           try {
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: headers,
+              headers: HEADERS_2_0,
             })
             const {
               data: { quoteDecimals, quoteGasAdjustedDecimals },
