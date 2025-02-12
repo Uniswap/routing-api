@@ -533,7 +533,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MAINNET,
           ]
 
-          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.UNICHAIN]
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.UNICHAIN, ChainId.BASE]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
