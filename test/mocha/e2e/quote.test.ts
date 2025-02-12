@@ -453,7 +453,7 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
-              protocols: "v2,v3,mixed",
+              protocols: 'v2,v3,mixed',
             }
 
             const queryParams = qs.stringify(quoteReq)
@@ -1451,6 +1451,31 @@ describe('quote', function () {
                 expect(!routeString.includes('[V2 + V3]'))
               })
 
+              it(`erc20 -> erc20 only mixed is not allowed`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  protocols: 'mixed',
+                  enableUniversalRouter: true,
+                }
+
+                await callAndExpectFail(quoteReq, {
+                  status: 400,
+                  data: {
+                    detail: 'Mixed protocol cannot be specified explicitly',
+                    errorCode: 'INVALID_PROTOCOL',
+                  },
+                })
+              })
+
               it(`erc20 -> erc20 forceMixedRoutes true for v2,v3`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
@@ -1887,7 +1912,7 @@ describe('quote', function () {
                 deadline: '360',
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
-                protocols: "v2,v3,mixed",
+                protocols: 'v2,v3,mixed',
               }
 
               const queryParams = qs.stringify(quoteReq)
