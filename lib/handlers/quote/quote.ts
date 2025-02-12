@@ -45,6 +45,7 @@ import {
   protocolVersionsToBeExcludedFromMixed,
   URVersionsToProtocolVersions,
 } from '../../util/supportedProtocolVersions'
+import { enableMixedRouteEthWeth } from '../../util/enableMixedRouteEthWeth'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -263,6 +264,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       params.event.headers?.['x-universal-router-version']
     )
     const excludedProtocolsFromMixed = protocolVersionsToBeExcludedFromMixed(universalRouterVersion)
+    const shouldEnableMixedRouteEthWeth = enableMixedRouteEthWeth(requestSourceHeader)
 
     if (requestSourceHeader) {
       metric.putMetric(`RequestSource.${requestSourceHeader}`, 1)
@@ -341,6 +343,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
       ...(gasToken ? { gasToken } : {}),
       ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
+      shouldEnableMixedRouteEthWeth: shouldEnableMixedRouteEthWeth,
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)

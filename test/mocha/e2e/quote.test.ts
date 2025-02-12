@@ -1471,6 +1471,84 @@ describe('quote', function () {
                 })
               })
 
+              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base with request source', async () => {
+                if (type != 'exactIn') {
+                  // mixed route only works for exactIn
+                  return
+                }
+
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                  tokenInChainId: 8453,
+                  tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
+                  tokenOutChainId: 8453,
+                  amount: '1000000',
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  forceMixedRoutes: true,
+                  protocols: 'mixed',
+                  enableUniversalRouter: true,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: {
+                    ...HEADERS_2_0,
+                    'x-request-source': 'e2e-test'
+                  },
+                })
+                const {
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                expect(methodParameters).to.not.be.undefined
+
+                /// since we only get the routeString back, we can check if there's V3 + V2
+                expect(routeString.includes('[V2 + V3 + V4]'))
+              })
+
+              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
+                if (type != 'exactIn') {
+                  // mixed route only works for exactIn
+                  return
+                }
+
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                  tokenInChainId: 8453,
+                  tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
+                  tokenOutChainId: 8453,
+                  amount: '1000000',
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  forceMixedRoutes: true,
+                  protocols: 'mixed',
+                  enableUniversalRouter: true,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                try {
+                  await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                    headers: HEADERS_2_0,
+                  })
+                } catch (err) {
+                  if (err instanceof Error) {
+                    expect(err.message).to.contains('404')
+                  }
+                }
+              })
+
               it.skip(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
