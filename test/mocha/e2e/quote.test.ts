@@ -1087,7 +1087,8 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.001', Ether.onChain(1)))).to.be.true
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.001', Ether.onChain(1)))).to.be
+                .true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             } else {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
