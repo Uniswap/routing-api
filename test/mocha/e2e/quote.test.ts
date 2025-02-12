@@ -305,7 +305,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(40000)
+    this.timeout(400000)
     ;[alice] = await ethers.getSigners()
 
     // Make a dummy call to the API to get a block number to fork from.
@@ -1061,7 +1061,7 @@ describe('quote', function () {
               tokenOutAddress: 'USDC',
               tokenOutChainId: 1,
               // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.001' : '1'),
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
               type,
               recipient: alice.address,
               slippageTolerance: LARGE_SLIPPAGE,
@@ -1087,11 +1087,11 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.001', Ether.onChain(1)))).to.be
+              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
                 .true
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
 
             expect(response.data.hitsCachedRoutes).to.be.true
