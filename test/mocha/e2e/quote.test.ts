@@ -1060,7 +1060,8 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'USDC',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.1' : '100'),
+              // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.001' : '1'),
               type,
               recipient: alice.address,
               slippageTolerance: LARGE_SLIPPAGE,
