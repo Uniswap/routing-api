@@ -869,7 +869,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_1_2 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -2253,7 +2253,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_1_2 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.methodParameters).to.not.be.undefined
