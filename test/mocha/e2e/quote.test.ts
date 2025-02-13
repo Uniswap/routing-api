@@ -453,13 +453,13 @@ describe('quote', function () {
               slippageTolerance: SLIPPAGE,
               deadline: '360',
               algorithm,
-              protocols: ALL_PROTOCOLS,
+              protocols: 'v2,v3,mixed',
             }
 
             const queryParams = qs.stringify(quoteReq)
 
             const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: HEADERS_2_0,
+              headers: HEADERS_1_2,
             })
             const {
               data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
@@ -869,7 +869,7 @@ describe('quote', function () {
 
             const queryParams = qs.stringify(quoteReq)
 
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_1_2 })
             const { data, status } = response
 
             expect(status).to.equal(200)
@@ -1376,10 +1376,14 @@ describe('quote', function () {
 
               expect(methodParameters).to.not.be.undefined
 
+              let hasV4Pool = false
               let hasV3Pool = false
               let hasV2Pool = false
               for (const r of route) {
                 for (const pool of r) {
+                  if (pool.type == 'v4-pool') {
+                    hasV4Pool = true
+                  }
                   if (pool.type == 'v3-pool') {
                     hasV3Pool = true
                   }
@@ -1389,7 +1393,7 @@ describe('quote', function () {
                 }
               }
 
-              expect(hasV3Pool && hasV2Pool).to.be.true
+              expect((hasV3Pool && hasV2Pool) || (hasV4Pool && hasV2Pool) || (hasV4Pool && hasV3Pool)).to.be.true
 
               const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
                 response.data.methodParameters!,
@@ -1447,6 +1451,31 @@ describe('quote', function () {
                 expect(!routeString.includes('[V2 + V3]'))
               })
 
+              it(`erc20 -> erc20 only mixed is not allowed`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'BOND',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'APE',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm: 'alpha',
+                  protocols: 'mixed',
+                  enableUniversalRouter: true,
+                }
+
+                await callAndExpectFail(quoteReq, {
+                  status: 400,
+                  data: {
+                    detail: 'Mixed protocol cannot be specified explicitly',
+                    errorCode: 'INVALID_PROTOCOL',
+                  },
+                })
+              })
+
               it(`erc20 -> erc20 forceMixedRoutes true for v2,v3`, async () => {
                 const quoteReq: QuoteQueryParams = {
                   tokenInAddress: 'BOND',
@@ -1491,7 +1520,7 @@ describe('quote', function () {
                   deadline: '360',
                   algorithm: 'alpha',
                   forceMixedRoutes: true,
-                  protocols: 'mixed',
+                  protocols: 'v3,v4,mixed',
                   enableUniversalRouter: true,
                 }
 
@@ -1534,7 +1563,7 @@ describe('quote', function () {
                   deadline: '360',
                   algorithm: 'alpha',
                   forceMixedRoutes: true,
-                  protocols: 'mixed',
+                  protocols: ALL_PROTOCOLS,
                   enableUniversalRouter: true,
                 }
 
@@ -1630,7 +1659,7 @@ describe('quote', function () {
                         tokenOutChainId: tokenOut.chainId,
                         amount: amount,
                         type: type,
-                        protocols: 'v2,v3,mixed',
+                        protocols: ALL_PROTOCOLS,
                         // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
                         enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
                         recipient: alice.address,
@@ -1883,13 +1912,13 @@ describe('quote', function () {
                 deadline: '360',
                 algorithm,
                 simulateFromAddress: '0xf584f8728b874a6a5c7a8d4d387c9aae9172d621',
-                protocols: ALL_PROTOCOLS,
+                protocols: 'v2,v3,mixed',
               }
 
               const queryParams = qs.stringify(quoteReq)
 
               const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                headers: HEADERS_2_0,
+                headers: HEADERS_1_2,
               })
               const {
                 data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, simulationError },
@@ -2224,7 +2253,7 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+              const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_1_2 })
               const { data, status } = response
               expect(status).to.equal(200)
               expect(data.methodParameters).to.not.be.undefined
@@ -2393,7 +2422,7 @@ describe('quote', function () {
                     tokenOutChainId: tokenOut.chainId,
                     amount: amount,
                     type: type,
-                    protocols: 'v2,v3,mixed',
+                    protocols: ALL_PROTOCOLS,
                     recipient: alice.address,
                     slippageTolerance: SLIPPAGE,
                     deadline: '360',

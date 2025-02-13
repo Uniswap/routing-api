@@ -287,6 +287,12 @@ export class QuoteHandler extends APIGLambdaHandler<
         errorCode: 'INVALID_PROTOCOL',
         detail: `Invalid protocol specified. Supported protocols: ${JSON.stringify(Object.values(Protocol))}`,
       }
+    } else if (protocols.length === 1 && protocols[0] === Protocol.MIXED) {
+      return {
+        statusCode: 400,
+        errorCode: 'INVALID_PROTOCOL',
+        detail: `Mixed protocol cannot be specified explicitly`,
+      }
     }
 
     // Parse user provided token address/symbol to Currency object.
