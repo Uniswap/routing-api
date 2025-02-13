@@ -1520,7 +1520,7 @@ describe('quote', function () {
                   deadline: '360',
                   algorithm: 'alpha',
                   forceMixedRoutes: true,
-                  protocols: ALL_PROTOCOLS,
+                  protocols: 'v3,v4,mixed',
                   enableUniversalRouter: true,
                 }
 
