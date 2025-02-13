@@ -59,12 +59,14 @@ chai.use(chaiSubset)
 
 const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, 1)
 
-if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC || !process.env.UNICORN_SECRETS) {
-  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC and UNICORN_SECRETS env variables for integ tests. See README')
+if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC || !process.env.UNICORN_SECRET) {
+  throw new Error(
+    'Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC and UNICORN_SECRET env variables for integ tests. See README'
+  )
 }
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
-const unicornSecrets = `${!process.env.UNICORN_SECRETS}`
+const unicornSecret = `${process.env.UNICORN_SECRET}`
 
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '20'
@@ -362,1404 +364,1141 @@ describe('quote', function () {
   for (const algorithm of ['alpha']) {
     for (const type of TRADE_TYPES) {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
-        const hitsCachedRoutes = true
-
-        describe(`+ Execute Swap`, () => {
-          for (const uraVersion of [UniversalRouterVersion.V1_2, UniversalRouterVersion.V2_0]) {
-            it(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {
-              let protocols = ALL_PROTOCOLS
-              let headers = HEADERS_2_0
-              if (uraVersion === UniversalRouterVersion.V1_2) {
-                protocols = ALL_PROTOCOLS
-                headers = HEADERS_1_2
-              }
-
-              const quoteReq: QuoteQueryParams = {
-                tokenInAddress: 'USDC',
-                tokenInChainId: 1,
-                tokenOutAddress: 'USDT',
-                tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-                type,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm,
-                enableUniversalRouter: true,
-                protocols: protocols,
-              }
-
-              const queryParams = qs.stringify(quoteReq)
-
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                headers: headers,
-              })
-              const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
-                status,
-              } = response
-
-              expect(status).to.equal(200)
-              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-
-              expect(Number(priceImpact)).to.be.greaterThan(0)
-
-              if (type == 'exactIn') {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-              } else {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-              }
-
-              expect(methodParameters).to.not.be.undefined
-              expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET))
-
-              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                methodParameters!,
-                USDC_MAINNET,
-                USDT_MAINNET,
-                undefined,
-                ChainId.MAINNET,
-                undefined,
-                UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET)
-              )
-
-              if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-              } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-              }
-
-              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-              // if it's exactOut quote, we should always hit the cached routes.
-              // this is regardless of protocol version.
-              // the reason is because exact in quote always runs before exact out
-              // along with the native or wrapped native pool token address assertions previously
-              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-              // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.true
-            })
-          }
-
-          it(`erc20 -> erc20 swaprouter02`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDT',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              protocols: 'v2,v3,mixed',
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: HEADERS_1_2,
-            })
-            const {
-              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
-              status,
-            } = response
-
-            expect(status).to.equal(200)
-            expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-            expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-
-            if (type == 'exactIn') {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-            } else {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-            }
-
-            expect(methodParameters).to.not.be.undefined
-            expect(methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters!,
-              USDC_MAINNET,
-              USDT_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`erc20 -> erc20 with permit`, async () => {
-            const amount = await getAmount(1, type, 'USDC', 'USDT', '10')
-
-            const nonce = nextPermitNonce()
-
-            const permit: PermitSingle = {
-              details: {
-                token: USDC_MAINNET.address,
-                amount: '15000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
-                expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
-                nonce,
-              },
-              spender: UNIVERSAL_ROUTER_ADDRESS,
-              sigDeadline: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
-            }
-
-            const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, 1)
-
-            const signature = await alice._signTypedData(domain, types, values)
-
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDT',
-              tokenOutChainId: 1,
-              amount,
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              permitSignature: signature,
-              permitAmount: permit.details.amount.toString(),
-              permitExpiration: permit.details.expiration.toString(),
-              permitSigDeadline: permit.sigDeadline.toString(),
-              permitNonce: permit.details.nonce.toString(),
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-              headers: HEADERS_2_0,
-            })
-            const {
-              data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
-              status,
-            } = response
-
-            expect(status).to.equal(200)
-            expect(parseFloat(quoteDecimals)).to.be.greaterThan(9)
-            expect(parseFloat(quoteDecimals)).to.be.lessThan(11)
-
-            if (type == 'exactIn') {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-            } else {
-              expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-            }
-
-            expect(methodParameters).to.not.be.undefined
-            expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS)
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters!,
-              USDC_MAINNET,
-              USDT_MAINNET,
-              true
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('10')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`erc20 -> eth`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'ETH',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const {
-              data: { quote, methodParameters },
-              status,
-            } = response
-
-            expect(status).to.equal(200)
-            expect(methodParameters).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              methodParameters!,
-              USDC_MAINNET,
-              Ether.onChain(1)
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
-            } else {
-              // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`erc20 -> eth large trade`, async () => {
-            // Trade of this size almost always results in splits.
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'ETH',
-              tokenOutChainId: 1,
-              amount:
-                type == 'exactIn'
-                  ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
-                  : await getAmount(1, type, 'USDC', 'ETH', '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-
-            expect(data.route).to.not.be.undefined
-
-            const amountInEdgesTotal = _(data.route)
-              .flatMap((route) => route[0]!)
-              .filter((pool) => !!pool.amountIn)
-              .map((pool) => BigNumber.from(pool.amountIn))
-              .reduce((cur, total) => total.add(cur), BigNumber.from(0))
-            const amountIn = BigNumber.from(data.quote)
-            expect(amountIn.eq(amountInEdgesTotal))
-
-            const amountOutEdgesTotal = _(data.route)
-              .flatMap((route) => route[0]!)
-              .filter((pool) => !!pool.amountOut)
-              .map((pool) => BigNumber.from(pool.amountOut))
-              .reduce((cur, total) => total.add(cur), BigNumber.from(0))
-            const amountOut = BigNumber.from(data.quote)
-            expect(amountOut.eq(amountOutEdgesTotal))
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              USDC_MAINNET,
-              Ether.onChain(1)
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
-            } else {
-              // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`erc20 -> eth large trade with permit`, async () => {
-            const nonce = nextPermitNonce()
-
-            const amount =
-              type == 'exactIn'
-                ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
-                : await getAmount(1, type, 'USDC', 'ETH', '100')
-
-            const permit: PermitSingle = {
-              details: {
-                token: USDC_MAINNET.address,
-                amount: '1500000000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
-                expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
-                nonce,
-              },
-              spender: UNIVERSAL_ROUTER_ADDRESS,
-              sigDeadline: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
-            }
-
-            const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, 1)
-
-            const signature = await alice._signTypedData(domain, types, values)
-
-            // Trade of this size almost always results in splits.
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'ETH',
-              tokenOutChainId: 1,
-              amount,
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              permitSignature: signature,
-              permitAmount: permit.details.amount.toString(),
-              permitExpiration: permit.details.expiration.toString(),
-              permitSigDeadline: permit.sigDeadline.toString(),
-              permitNonce: permit.details.nonce.toString(),
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.route).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              USDC_MAINNET,
-              Ether.onChain(1),
-              true
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote))
-            } else {
-              // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`eth -> erc20`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'UNI',
-              tokenOutChainId: 1,
-              amount:
-                type == 'exactIn'
-                  ? await getAmount(1, type, 'ETH', 'UNI', '10')
-                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              Ether.onChain(1),
-              UNI_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              // We've swapped 10 ETH + gas costs
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
-            } else {
-              checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
-              // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`eth -> erc20 swaprouter02`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'UNI',
-              tokenOutChainId: 1,
-              amount:
-                type == 'exactIn'
-                  ? await getAmount(1, type, 'ETH', 'UNI', '10')
-                  : await getAmount(1, type, 'ETH', 'UNI', '10000'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: false,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_1_2 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              Ether.onChain(1),
-              UNI_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              // We've swapped 10 ETH + gas costs
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be.true
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
-            } else {
-              checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
-              // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`weth -> erc20`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'WETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'DAI',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              WETH9[1]!,
-              DAI_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`erc20 -> weth`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'USDC',
-              tokenInChainId: 1,
-              tokenOutAddress: 'WETH',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              enableUniversalRouter: true,
-              protocols: ALL_PROTOCOLS,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              USDC_MAINNET,
-              WETH9[1]!
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-            }
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`eth -> usdc v4 only protocol`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDC',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              protocols: 'v4',
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.route).to.not.be.undefined
-
-            // Verify only v4 pools are used
-            for (const r of data.route) {
-              for (const pool of r) {
-                expect(pool.type).to.equal('v4-pool')
-              }
-            }
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              Ether.onChain(1),
-              USDC_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
-                .true
-              checkQuoteToken(
-                tokenOutBefore,
-                tokenOutAfter,
-                CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
-                LARGE_SLIPPAGE
-              )
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
-            }
-
-            expect(response.data.hitsCachedRoutes).to.be.false
-          })
-
-          it(`eth -> usdc v4 include (v2,v3,v4)`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDC',
-              tokenOutChainId: 1,
-              // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              protocols: ALL_PROTOCOLS,
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.route).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              Ether.onChain(1),
-              USDC_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to.be
-                .true
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
-            }
-
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`weth -> usdc v4 only protocol`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'WETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDC',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.01'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              protocols: 'v4',
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.route).to.not.be.undefined
-
-            // Verify only v4 pools are used
-            for (const r of data.route) {
-              for (const pool of r) {
-                expect(pool.type).to.equal('v4-pool')
-              }
-            }
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              WETH9[1]!,
-              USDC_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.00001')
-              checkQuoteToken(
-                tokenOutBefore,
-                tokenOutAfter,
-                CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
-                LARGE_SLIPPAGE
-              )
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.01')
-              checkQuoteToken(
-                tokenInBefore,
-                tokenInAfter,
-                CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote),
-                LARGE_SLIPPAGE
-              )
-            }
-
-            expect(response.data.hitsCachedRoutes).to.be.false
-          })
-
-          it(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: 'WETH',
-              tokenInChainId: 1,
-              tokenOutAddress: 'USDC',
-              tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '0.1' : '100'),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              algorithm,
-              protocols: ALL_PROTOCOLS,
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-            const { data, status } = response
-
-            expect(status).to.equal(200)
-            expect(data.methodParameters).to.not.be.undefined
-            expect(data.route).to.not.be.undefined
-
-            const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-              data.methodParameters!,
-              WETH9[1]!,
-              USDC_MAINNET
-            )
-
-            if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.1')
-              checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-            } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-              checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
-            }
-
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          if (algorithm == 'alpha') {
-            it(`erc20 -> erc20 v3 only`, async () => {
-              const quoteReq: QuoteQueryParams = {
-                tokenInAddress: 'USDC',
-                tokenInChainId: 1,
-                tokenOutAddress: 'USDT',
-                tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-                type,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm: 'alpha',
-                protocols: 'v3',
-                enableUniversalRouter: true,
-              }
-
-              const queryParams = qs.stringify(quoteReq)
-
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                headers: HEADERS_2_0,
-              })
-              const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
-                status,
-              } = response
-
-              expect(status).to.equal(200)
-              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-
-              if (type == 'exactIn') {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-              } else {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-              }
-
-              expect(methodParameters).to.not.be.undefined
-
-              for (const r of route) {
-                for (const pool of r) {
-                  expect(pool.type).to.equal('v3-pool')
-                }
-              }
-
-              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters!,
-                USDC_MAINNET,
-                USDT_MAINNET!
-              )
-
-              if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-              } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-              }
-
-              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-              // if it's exactOut quote, we should always hit the cached routes.
-              // this is regardless of protocol version.
-              // the reason is because exact in quote always runs before exact out
-              // along with the native or wrapped native pool token address assertions previously
-              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-              // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.false
-            })
-
-            it(`erc20 -> erc20 v2 only`, async () => {
-              const quoteReq: QuoteQueryParams = {
-                tokenInAddress: 'USDC',
-                tokenInChainId: 1,
-                tokenOutAddress: 'USDT',
-                tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-                type,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm: 'alpha',
-                protocols: 'v2',
-                enableUniversalRouter: true,
-              }
-
-              const queryParams = qs.stringify(quoteReq)
-
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                headers: HEADERS_2_0,
-              })
-              const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
-                status,
-              } = response
-
-              expect(status).to.equal(200)
-              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-
-              if (type == 'exactIn') {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-              } else {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-              }
-
-              expect(methodParameters).to.not.be.undefined
-
-              for (const r of route) {
-                for (const pool of r) {
-                  expect(pool.type).to.equal('v2-pool')
-                }
-              }
-
-              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters!,
-                USDC_MAINNET,
-                USDT_MAINNET!
-              )
-
-              if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-              } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-              }
-
-              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-              // if it's exactOut quote, we should always hit the cached routes.
-              // this is regardless of protocol version.
-              // the reason is because exact in quote always runs before exact out
-              // along with the native or wrapped native pool token address assertions previously
-              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-              // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.false
-            })
-
-            it(`erc20 -> erc20 forceCrossProtocol`, async () => {
-              const quoteReq: QuoteQueryParams = {
-                tokenInAddress: 'USDC',
-                tokenInChainId: 1,
-                tokenOutAddress: 'USDT',
-                tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
-                type,
-                recipient: alice.address,
-                slippageTolerance: SLIPPAGE,
-                deadline: '360',
-                algorithm: 'alpha',
-                forceCrossProtocol: true,
-                enableUniversalRouter: true,
-                protocols: ALL_PROTOCOLS,
-              }
-
-              const queryParams = qs.stringify(quoteReq)
-
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                headers: HEADERS_2_0,
-              })
-              const {
-                data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
-                status,
-              } = response
-
-              expect(status).to.equal(200)
-              expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
-              expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
-
-              if (type == 'exactIn') {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-              } else {
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-              }
-
-              expect(methodParameters).to.not.be.undefined
-
-              let hasV4Pool = false
-              let hasV3Pool = false
-              let hasV2Pool = false
-              for (const r of route) {
-                for (const pool of r) {
-                  if (pool.type == 'v4-pool') {
-                    hasV4Pool = true
+        const hitsCachedRoutes = [true, false]
+
+        hitsCachedRoutes.forEach((hitsCachedRoutes) => {
+          describe(`should hit cached routes ${hitsCachedRoutes}`, () => {
+            const useCachedRoutes = { useCachedRoutes: hitsCachedRoutes }
+
+            describe(`+ Execute Swap`, () => {
+              for (const uraVersion of [UniversalRouterVersion.V1_2, UniversalRouterVersion.V2_0]) {
+                it(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {
+                  let protocols = ALL_PROTOCOLS
+                  let headers = HEADERS_2_0
+                  if (uraVersion === UniversalRouterVersion.V1_2) {
+                    protocols = ALL_PROTOCOLS
+                    headers = HEADERS_1_2
                   }
-                  if (pool.type == 'v3-pool') {
-                    hasV3Pool = true
+
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: 'USDC',
+                    tokenInChainId: 1,
+                    tokenOutAddress: 'USDT',
+                    tokenOutChainId: 1,
+                    amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                    type,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm,
+                    enableUniversalRouter: true,
+                    protocols: protocols,
+                    debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                    unicornSecret: unicornSecret,
                   }
-                  if (pool.type == 'v2-pool') {
-                    hasV2Pool = true
+
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    {
+                      headers: headers,
+                    }
+                  )
+                  const {
+                    data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
+                    status,
+                  } = response
+
+                  expect(status).to.equal(200)
+                  expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                  expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                  expect(Number(priceImpact)).to.be.greaterThan(0)
+
+                  if (type == 'exactIn') {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                  } else {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
                   }
-                }
-              }
 
-              expect((hasV3Pool && hasV2Pool) || (hasV4Pool && hasV2Pool) || (hasV4Pool && hasV3Pool)).to.be.true
+                  expect(methodParameters).to.not.be.undefined
+                  expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET))
 
-              const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                response.data.methodParameters!,
-                USDC_MAINNET,
-                USDT_MAINNET!
-              )
-
-              if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
-                checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
-              } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
-                checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-              }
-            })
-
-            /// Tests for routes likely to result in MixedRoutes being returned
-            if (type === 'exactIn') {
-              it.skip(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: 'BOND',
-                  tokenInChainId: 1,
-                  tokenOutAddress: 'APE',
-                  tokenOutChainId: 1,
-                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  protocols: 'v2,v3',
-                  enableUniversalRouter: true,
-                }
-
-                const queryParams = qs.stringify(quoteReq)
-
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                  headers: HEADERS_2_0,
-                })
-                const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
-                  status,
-                } = response
-
-                expect(status).to.equal(200)
-
-                if (type == 'exactIn') {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-                } else {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-                }
-
-                expect(methodParameters).to.not.be.undefined
-
-                expect(!routeString.includes('[V2 + V3]'))
-              })
-
-              it(`erc20 -> erc20 only mixed is not allowed`, async () => {
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: 'BOND',
-                  tokenInChainId: 1,
-                  tokenOutAddress: 'APE',
-                  tokenOutChainId: 1,
-                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  protocols: 'mixed',
-                  enableUniversalRouter: true,
-                }
-
-                await callAndExpectFail(quoteReq, {
-                  status: 400,
-                  data: {
-                    detail: 'Mixed protocol cannot be specified explicitly',
-                    errorCode: 'INVALID_PROTOCOL',
-                  },
-                })
-              })
-
-              it(`erc20 -> erc20 forceMixedRoutes true for v2,v3`, async () => {
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: 'BOND',
-                  tokenInChainId: 1,
-                  tokenOutAddress: 'APE',
-                  tokenOutChainId: 1,
-                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  forceMixedRoutes: true,
-                  protocols: 'v2,v3',
-                  enableUniversalRouter: true,
-                }
-
-                await callAndExpectFail(quoteReq, {
-                  status: 404,
-                  data: {
-                    detail: 'No route found',
-                    errorCode: 'NO_ROUTE',
-                  },
-                })
-              })
-
-              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base with request source', async () => {
-                if (type != 'exactIn') {
-                  // mixed route only works for exactIn
-                  return
-                }
-
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-                  tokenInChainId: 8453,
-                  tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
-                  tokenOutChainId: 8453,
-                  amount: '1000000',
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  forceMixedRoutes: true,
-                  protocols: 'v3,v4,mixed',
-                  enableUniversalRouter: true,
-                }
-
-                const queryParams = qs.stringify(quoteReq)
-
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                  headers: {
-                    ...HEADERS_2_0,
-                    'x-request-source': 'e2e-test',
-                  },
-                })
-                const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
-                  status,
-                } = response
-
-                expect(status).to.equal(200)
-                expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-                expect(methodParameters).to.not.be.undefined
-
-                /// since we only get the routeString back, we can check if there's V3 + V2
-                expect(routeString.includes('[V2 + V3 + V4]'))
-                expect(route.length).to.equal(1)
-                expect(route[0].length).to.equal(2)
-                expect(route[0][0].type).to.equal('v3-pool')
-                expect(route[0][0].tokenIn.address).to.equal('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')
-                expect(route[0][0].tokenOut.address).to.equal(WETH9[ChainId.BASE].address)
-                expect(route[0][1].type).to.equal('v4-pool')
-                expect(route[0][1].tokenIn.address).to.equal('0x0000000000000000000000000000000000000000')
-                expect(route[0][1].tokenOut.address).to.equal('0x878784F7eBF6e57d17C81D82DDF53F117a5E2988')
-              })
-
-              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
-                if (type != 'exactIn') {
-                  // mixed route only works for exactIn
-                  return
-                }
-
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-                  tokenInChainId: 8453,
-                  tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
-                  tokenOutChainId: 8453,
-                  amount: '1000000',
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  forceMixedRoutes: true,
-                  protocols: ALL_PROTOCOLS,
-                  enableUniversalRouter: true,
-                }
-
-                const queryParams = qs.stringify(quoteReq)
-
-                try {
-                  await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                    headers: HEADERS_2_0,
-                  })
-                } catch (err) {
-                  if (err instanceof Error) {
-                    expect(err.message).to.contains('404')
-                  }
-                }
-              })
-
-              it.skip(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
-                const quoteReq: QuoteQueryParams = {
-                  tokenInAddress: 'BOND',
-                  tokenInChainId: 1,
-                  tokenOutAddress: 'APE',
-                  tokenOutChainId: 1,
-                  amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
-                  type,
-                  recipient: alice.address,
-                  slippageTolerance: SLIPPAGE,
-                  deadline: '360',
-                  algorithm: 'alpha',
-                  forceMixedRoutes: true,
-                  protocols: 'v2,v3,mixed',
-                  enableUniversalRouter: true,
-                }
-
-                const queryParams = qs.stringify(quoteReq)
-
-                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
-                  headers: HEADERS_2_0,
-                })
-                const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
-                  status,
-                } = response
-
-                expect(status).to.equal(200)
-
-                if (type == 'exactIn') {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
-                } else {
-                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
-                }
-
-                expect(methodParameters).to.not.be.undefined
-
-                /// since we only get the routeString back, we can check if there's V3 + V2
-                expect(routeString.includes('[V2 + V3]'))
-              })
-            }
-
-            // FOT swap only works for exact in
-            if (type === 'exactIn') {
-              const tokenInAndTokenOut = [
-                [BULLET, WETH9[ChainId.MAINNET]!],
-                [WETH9[ChainId.MAINNET]!, BULLET],
-                // TODO: re-enable - DFNDR FOT test is flaky right now, disabling to unblock pipeline
-                // [WETH9[ChainId.MAINNET]!, DFNDR],
-              ]
-
-              tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
-                // If this test fails sporadically, dev needs to investigate further
-                // There could be genuine regressions in the form of race condition, due to complex layers of caching
-                // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
-                it(`fee-on-transfer ${tokenIn.symbol} -> ${tokenOut.symbol}`, async () => {
-                  const enableFeeOnTransferFeeFetching = [true, false, undefined]
-                  // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
-                  const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '2924'
-                  const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
-
-                  // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
-                  const responses = await Promise.all(
-                    enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
-                      if (enableFeeOnTransferFeeFetching) {
-                        // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
-                        // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
-                        await new Promise((f) => setTimeout(f, 1000))
-                      }
-                      const simulateFromAddress = tokenIn.equals(WETH9[ChainId.MAINNET]!)
-                        ? '0x6B44ba0a126a2A1a8aa6cD1AdeeD002e141Bcd44'
-                        : '0x171d311eAcd2206d21Cb462d661C33F0eddadC03'
-                      const quoteReq: QuoteQueryParams = {
-                        tokenInAddress: tokenIn.address,
-                        tokenInChainId: tokenIn.chainId,
-                        tokenOutAddress: tokenOut.address,
-                        tokenOutChainId: tokenOut.chainId,
-                        amount: amount,
-                        type: type,
-                        protocols: ALL_PROTOCOLS,
-                        // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
-                        enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
-                        recipient: alice.address,
-                        // we have to use large slippage for FOT swap, because routing-api always forks at the latest block,
-                        // and the FOT swap can have large slippage, despite SOR already subtracted FOT tax
-                        slippageTolerance: LARGE_SLIPPAGE,
-                        deadline: '360',
-                        algorithm,
-                        enableUniversalRouter: true,
-                        // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
-                        simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
-                        portionBips: FLAT_PORTION.bips,
-                        portionRecipient: FLAT_PORTION.recipient,
-                      }
-
-                      const queryParams = qs.stringify(quoteReq)
-
-                      const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
-                        `${API}?${queryParams}`,
-                        { headers: HEADERS_2_0 }
-                      )
-
-                      // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-                      // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-                      // if it's exactOut quote, we should always hit the cached routes.
-                      // this is regardless of protocol version.
-                      // the reason is because exact in quote always runs before exact out
-                      // along with the native or wrapped native pool token address assertions previously
-                      // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-                      // and native for v4 pool routes
-                      expect(response.data.hitsCachedRoutes).to.be.true
-
-                      return { enableFeeOnTransferFeeFetching, ...response }
-                    })
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    methodParameters!,
+                    USDC_MAINNET,
+                    USDT_MAINNET,
+                    undefined,
+                    ChainId.MAINNET,
+                    undefined,
+                    UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET)
                   )
 
-                  const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
-                  expect(quoteWithFlagOn).not.to.be.undefined
+                  if (type == 'exactIn') {
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                  } else {
+                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                  }
 
-                  // TODO: flaky assertions, re-enable after fixing (probably real prod issue due to flaky GQL data)
-                  // // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
-                  // if (!tokenOut?.equals(WETH9[ChainId.MAINNET])) {
-                  //   expect(quoteWithFlagOn!.data.portionAmount).to.be.undefined
-                  //   expect(quoteWithFlagOn!.data.portionBips).to.be.undefined
-                  //   expect(quoteWithFlagOn!.data.portionRecipient).to.be.undefined
-                  // } else {
-                  //   expect(quoteWithFlagOn!.data.portionAmount).to.be.not.undefined
-                  //   expect(quoteWithFlagOn!.data.portionBips).to.be.not.undefined
-                  //   expect(quoteWithFlagOn!.data.portionRecipient).to.be.not.undefined
-                  // }
+                  // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                  // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                  // if it's exactOut quote, we should always hit the cached routes.
+                  // this is regardless of protocol version.
+                  // the reason is because exact in quote always runs before exact out
+                  // along with the native or wrapped native pool token address assertions previously
+                  // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                  // and native for v4 pool routes
+                  expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+                })
+              }
 
-                  responses
-                    .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
-                    .forEach((r) => {
-                      if (type === 'exactIn') {
-                        const quote = CurrencyAmount.fromRawAmount(tokenOut, r.data.quote)
-                        const quoteWithFlagon = CurrencyAmount.fromRawAmount(tokenOut, quoteWithFlagOn!.data.quote)
+              it(`erc20 -> erc20 swaprouter02`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDT',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
 
-                        // quote without fot flag must be greater than the quote with fot flag
-                        // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
-                        expect(quote.greaterThan(quoteWithFlagon)).to.be.true
+                const queryParams = qs.stringify(quoteReq)
 
-                        // below is additional assertion to ensure the quote without fot tax vs quote with tax should be very roughly equal to the fot sell/buy tax rate
-                        const tokensDiff = quote.subtract(quoteWithFlagon)
-                        const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
-                        if (tokenIn?.equals(BULLET)) {
-                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
-                            new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000).toFixed(3)
-                          )
-                        } else if (tokenOut?.equals(BULLET)) {
-                          expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
-                            new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(3)
-                          )
-                        }
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: HEADERS_2_0,
+                })
+                const {
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+                expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+                expect(methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  methodParameters!,
+                  USDC_MAINNET,
+                  USDT_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`erc20 -> erc20 with permit`, async () => {
+                const amount = await getAmount(1, type, 'USDC', 'USDT', '10')
+
+                const nonce = nextPermitNonce()
+
+                const permit: PermitSingle = {
+                  details: {
+                    token: USDC_MAINNET.address,
+                    amount: '15000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
+                    expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
+                    nonce,
+                  },
+                  spender: UNIVERSAL_ROUTER_ADDRESS,
+                  sigDeadline: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
+                }
+
+                const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, 1)
+
+                const signature = await alice._signTypedData(domain, types, values)
+
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDT',
+                  tokenOutChainId: 1,
+                  amount,
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  permitSignature: signature,
+                  permitAmount: permit.details.amount.toString(),
+                  permitExpiration: permit.details.expiration.toString(),
+                  permitSigDeadline: permit.sigDeadline.toString(),
+                  permitNonce: permit.details.nonce.toString(),
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                  headers: HEADERS_2_0,
+                })
+                const {
+                  data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+                expect(parseFloat(quoteDecimals)).to.be.greaterThan(9)
+                expect(parseFloat(quoteDecimals)).to.be.lessThan(11)
+
+                if (type == 'exactIn') {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                } else {
+                  expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                }
+
+                expect(methodParameters).to.not.be.undefined
+                expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS)
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  methodParameters!,
+                  USDC_MAINNET,
+                  USDT_MAINNET,
+                  true
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('10')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('10')
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`erc20 -> eth`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'ETH',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const {
+                  data: { quote, methodParameters },
+                  status,
+                } = response
+
+                expect(status).to.equal(200)
+                expect(methodParameters).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  methodParameters!,
+                  USDC_MAINNET,
+                  Ether.onChain(1)
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
+                } else {
+                  // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`erc20 -> eth large trade`, async () => {
+                // Trade of this size almost always results in splits.
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'ETH',
+                  tokenOutChainId: 1,
+                  amount:
+                    type == 'exactIn'
+                      ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
+                      : await getAmount(1, type, 'USDC', 'ETH', '100'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+
+                expect(data.route).to.not.be.undefined
+
+                const amountInEdgesTotal = _(data.route)
+                  .flatMap((route) => route[0]!)
+                  .filter((pool) => !!pool.amountIn)
+                  .map((pool) => BigNumber.from(pool.amountIn))
+                  .reduce((cur, total) => total.add(cur), BigNumber.from(0))
+                const amountIn = BigNumber.from(data.quote)
+                expect(amountIn.eq(amountInEdgesTotal))
+
+                const amountOutEdgesTotal = _(data.route)
+                  .flatMap((route) => route[0]!)
+                  .filter((pool) => !!pool.amountOut)
+                  .map((pool) => BigNumber.from(pool.amountOut))
+                  .reduce((cur, total) => total.add(cur), BigNumber.from(0))
+                const amountOut = BigNumber.from(data.quote)
+                expect(amountOut.eq(amountOutEdgesTotal))
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  USDC_MAINNET,
+                  Ether.onChain(1)
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+                  checkQuoteToken(
+                    tokenOutBefore,
+                    tokenOutAfter,
+                    CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote)
+                  )
+                } else {
+                  // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`erc20 -> eth large trade with permit`, async () => {
+                const nonce = nextPermitNonce()
+
+                const amount =
+                  type == 'exactIn'
+                    ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
+                    : await getAmount(1, type, 'USDC', 'ETH', '100')
+
+                const permit: PermitSingle = {
+                  details: {
+                    token: USDC_MAINNET.address,
+                    amount: '1500000000000', // For exact out we don't know the exact amount needed to permit, so just specify a large amount.
+                    expiration: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
+                    nonce,
+                  },
+                  spender: UNIVERSAL_ROUTER_ADDRESS,
+                  sigDeadline: Math.floor(new Date().getTime() / 1000 + 10000000).toString(),
+                }
+
+                const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, 1)
+
+                const signature = await alice._signTypedData(domain, types, values)
+
+                // Trade of this size almost always results in splits.
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'ETH',
+                  tokenOutChainId: 1,
+                  amount,
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  permitSignature: signature,
+                  permitAmount: permit.details.amount.toString(),
+                  permitExpiration: permit.details.expiration.toString(),
+                  permitSigDeadline: permit.sigDeadline.toString(),
+                  permitNonce: permit.details.nonce.toString(),
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.route).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  USDC_MAINNET,
+                  Ether.onChain(1),
+                  true
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
+                  checkQuoteToken(
+                    tokenOutBefore,
+                    tokenOutAfter,
+                    CurrencyAmount.fromRawAmount(Ether.onChain(1), data.quote)
+                  )
+                } else {
+                  // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`eth -> erc20`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'ETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'UNI',
+                  tokenOutChainId: 1,
+                  amount:
+                    type == 'exactIn'
+                      ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                      : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  Ether.onChain(1),
+                  UNI_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  // We've swapped 10 ETH + gas costs
+                  expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be
+                    .true
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+                } else {
+                  checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
+                  // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`eth -> erc20 swaprouter02`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'ETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'UNI',
+                  tokenOutChainId: 1,
+                  amount:
+                    type == 'exactIn'
+                      ? await getAmount(1, type, 'ETH', 'UNI', '10')
+                      : await getAmount(1, type, 'ETH', 'UNI', '10000'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: type == 'exactOut' ? LARGE_SLIPPAGE : SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: false,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.methodParameters?.to).to.equal(SWAP_ROUTER_02_ADDRESSES(ChainId.MAINNET))
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  Ether.onChain(1),
+                  UNI_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  // We've swapped 10 ETH + gas costs
+                  expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('10', Ether.onChain(1)))).to.be
+                    .true
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(UNI_MAINNET, data.quote))
+                } else {
+                  checkAbsoluteDifference(tokenOutAfter.subtract(tokenOutBefore).toExact(), '10000', 0.0001)
+                  // Can't easily check slippage for ETH due to gas costs effecting ETH balance.
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`weth -> erc20`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'WETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'DAI',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  WETH9[1]!,
+                  DAI_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`erc20 -> weth`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'USDC',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'WETH',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  enableUniversalRouter: true,
+                  protocols: ALL_PROTOCOLS,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  USDC_MAINNET,
+                  WETH9[1]!
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+                }
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`eth -> usdc v4 only protocol`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'ETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDC',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  protocols: 'v4',
+                  enableUniversalRouter: true,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.route).to.not.be.undefined
+
+                // Verify only v4 pools are used
+                for (const r of data.route) {
+                  for (const pool of r) {
+                    expect(pool.type).to.equal('v4-pool')
+                  }
+                }
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  Ether.onChain(1),
+                  USDC_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to
+                    .be.true
+                  checkQuoteToken(
+                    tokenOutBefore,
+                    tokenOutAfter,
+                    CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
+                    LARGE_SLIPPAGE
+                  )
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
+                }
+
+                expect(response.data.hitsCachedRoutes).to.be.false
+              })
+
+              it(`eth -> usdc v4 include (v2,v3,v4)`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'ETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDC',
+                  tokenOutChainId: 1,
+                  // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
+                  amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  protocols: ALL_PROTOCOLS,
+                  enableUniversalRouter: true,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.route).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  Ether.onChain(1),
+                  USDC_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).greaterThan(parseAmount('0.00001', Ether.onChain(1)))).to
+                    .be.true
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
+                }
+
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              it(`weth -> usdc v4 only protocol`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'WETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDC',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.01'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  protocols: 'v4',
+                  enableUniversalRouter: true,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.route).to.not.be.undefined
+
+                // Verify only v4 pools are used
+                for (const r of data.route) {
+                  for (const pool of r) {
+                    expect(pool.type).to.equal('v4-pool')
+                  }
+                }
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  WETH9[1]!,
+                  USDC_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.00001')
+                  checkQuoteToken(
+                    tokenOutBefore,
+                    tokenOutAfter,
+                    CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote),
+                    LARGE_SLIPPAGE
+                  )
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.01')
+                  checkQuoteToken(
+                    tokenInBefore,
+                    tokenInAfter,
+                    CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote),
+                    LARGE_SLIPPAGE
+                  )
+                }
+
+                expect(response.data.hitsCachedRoutes).to.be.false
+              })
+
+              it(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
+                const quoteReq: QuoteQueryParams = {
+                  tokenInAddress: 'WETH',
+                  tokenInChainId: 1,
+                  tokenOutAddress: 'USDC',
+                  tokenOutChainId: 1,
+                  amount: await getAmount(1, type, 'WETH', 'USDC', type == 'exactIn' ? '0.1' : '100'),
+                  type,
+                  recipient: alice.address,
+                  slippageTolerance: LARGE_SLIPPAGE,
+                  deadline: '360',
+                  algorithm,
+                  protocols: ALL_PROTOCOLS,
+                  enableUniversalRouter: true,
+                  debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                  unicornSecret: unicornSecret,
+                }
+
+                const queryParams = qs.stringify(quoteReq)
+
+                const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+                const { data, status } = response
+
+                expect(status).to.equal(200)
+                expect(data.methodParameters).to.not.be.undefined
+                expect(data.route).to.not.be.undefined
+
+                const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                  data.methodParameters!,
+                  WETH9[1]!,
+                  USDC_MAINNET
+                )
+
+                if (type == 'exactIn') {
+                  expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('0.1')
+                  checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
+                } else {
+                  expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                  checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
+                }
+
+                expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+              })
+
+              if (algorithm == 'alpha') {
+                it(`erc20 -> erc20 v3 only`, async () => {
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: 'USDC',
+                    tokenInChainId: 1,
+                    tokenOutAddress: 'USDT',
+                    tokenOutChainId: 1,
+                    amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                    type,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm: 'alpha',
+                    protocols: 'v3',
+                    enableUniversalRouter: true,
+                    debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                    unicornSecret: unicornSecret,
+                  }
+
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    {
+                      headers: HEADERS_2_0,
+                    }
+                  )
+                  const {
+                    data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                    status,
+                  } = response
+
+                  expect(status).to.equal(200)
+                  expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                  expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                  if (type == 'exactIn') {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                  } else {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                  }
+
+                  expect(methodParameters).to.not.be.undefined
+
+                  for (const r of route) {
+                    for (const pool of r) {
+                      expect(pool.type).to.equal('v3-pool')
+                    }
+                  }
+
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    response.data.methodParameters!,
+                    USDC_MAINNET,
+                    USDT_MAINNET!
+                  )
+
+                  if (type == 'exactIn') {
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                  } else {
+                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                  }
+
+                  // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                  // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                  // if it's exactOut quote, we should always hit the cached routes.
+                  // this is regardless of protocol version.
+                  // the reason is because exact in quote always runs before exact out
+                  // along with the native or wrapped native pool token address assertions previously
+                  // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                  // and native for v4 pool routes
+                  expect(response.data.hitsCachedRoutes).to.be.false
+                })
+
+                it(`erc20 -> erc20 v2 only`, async () => {
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: 'USDC',
+                    tokenInChainId: 1,
+                    tokenOutAddress: 'USDT',
+                    tokenOutChainId: 1,
+                    amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                    type,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm: 'alpha',
+                    protocols: 'v2',
+                    enableUniversalRouter: true,
+                    debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                    unicornSecret: unicornSecret,
+                  }
+
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    {
+                      headers: HEADERS_2_0,
+                    }
+                  )
+                  const {
+                    data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                    status,
+                  } = response
+
+                  expect(status).to.equal(200)
+                  expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                  expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                  if (type == 'exactIn') {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                  } else {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                  }
+
+                  expect(methodParameters).to.not.be.undefined
+
+                  for (const r of route) {
+                    for (const pool of r) {
+                      expect(pool.type).to.equal('v2-pool')
+                    }
+                  }
+
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    response.data.methodParameters!,
+                    USDC_MAINNET,
+                    USDT_MAINNET!
+                  )
+
+                  if (type == 'exactIn') {
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                  } else {
+                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                  }
+
+                  // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                  // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                  // if it's exactOut quote, we should always hit the cached routes.
+                  // this is regardless of protocol version.
+                  // the reason is because exact in quote always runs before exact out
+                  // along with the native or wrapped native pool token address assertions previously
+                  // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                  // and native for v4 pool routes
+                  expect(response.data.hitsCachedRoutes).to.be.false
+                })
+
+                it(`erc20 -> erc20 forceCrossProtocol`, async () => {
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: 'USDC',
+                    tokenInChainId: 1,
+                    tokenOutAddress: 'USDT',
+                    tokenOutChainId: 1,
+                    amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                    type,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm: 'alpha',
+                    forceCrossProtocol: true,
+                    enableUniversalRouter: true,
+                    protocols: ALL_PROTOCOLS,
+                    debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                    unicornSecret: unicornSecret,
+                  }
+
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    {
+                      headers: HEADERS_2_0,
+                    }
+                  )
+                  const {
+                    data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route },
+                    status,
+                  } = response
+
+                  expect(status).to.equal(200)
+                  expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                  expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                  if (type == 'exactIn') {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                  } else {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                  }
+
+                  expect(methodParameters).to.not.be.undefined
+
+                  let hasV3Pool = false
+                  let hasV2Pool = false
+                  for (const r of route) {
+                    for (const pool of r) {
+                      if (pool.type == 'v3-pool') {
+                        hasV3Pool = true
                       }
-                    })
+                      if (pool.type == 'v2-pool') {
+                        hasV2Pool = true
+                      }
+                    }
+                  }
 
-                  for (const response of responses) {
+                  expect(hasV3Pool && hasV2Pool).to.be.true
+
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    response.data.methodParameters!,
+                    USDC_MAINNET,
+                    USDT_MAINNET!
+                  )
+
+                  if (type == 'exactIn') {
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                  } else {
+                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                  }
+                })
+
+                /// Tests for routes likely to result in MixedRoutes being returned
+                if (type === 'exactIn') {
+                  it.skip(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
+                    const quoteReq: QuoteQueryParams = {
+                      tokenInAddress: 'BOND',
+                      tokenInChainId: 1,
+                      tokenOutAddress: 'APE',
+                      tokenOutChainId: 1,
+                      amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                      type,
+                      recipient: alice.address,
+                      slippageTolerance: SLIPPAGE,
+                      deadline: '360',
+                      algorithm: 'alpha',
+                      protocols: 'v2,v3',
+                      enableUniversalRouter: true,
+                    }
+
+                    const queryParams = qs.stringify(quoteReq)
+
+                    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                      `${API}?${queryParams}`,
+                      {
+                        headers: HEADERS_2_0,
+                      }
+                    )
                     const {
-                      enableFeeOnTransferFeeFetching,
-                      data: {
-                        quote,
-                        quoteDecimals,
-                        quoteGasAdjustedDecimals,
-                        methodParameters,
-                        route,
-                        simulationStatus,
-                        simulationError,
-                      },
+                      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
                       status,
                     } = response
 
@@ -1771,76 +1510,389 @@ describe('quote', function () {
                       expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
                     }
 
-                    let hasV3Pool = false
-                    let hasV2Pool = false
-                    for (const r of route) {
-                      for (const pool of r) {
-                        if (pool.type == 'v3-pool') {
-                          hasV3Pool = true
-                        }
-                        if (pool.type == 'v2-pool') {
-                          hasV2Pool = true
-                          if (enableFeeOnTransferFeeFetching) {
-                            if (pool.tokenIn.address === BULLET.address) {
-                              expect(pool.tokenIn.sellFeeBps).to.be.not.undefined
-                              expect(pool.tokenIn.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                              expect(pool.tokenIn.buyFeeBps).to.be.not.undefined
-                              expect(pool.tokenIn.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                            }
-                            if (pool.tokenOut.address === BULLET.address) {
-                              expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
-                              expect(pool.tokenOut.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                              expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
-                              expect(pool.tokenOut.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                            }
-                            if (pool.reserve0.token.address === BULLET.address) {
-                              expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
-                              expect(pool.reserve0.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                              expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
-                              expect(pool.reserve0.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                            }
-                            if (pool.reserve1.token.address === BULLET.address) {
-                              expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
-                              expect(pool.reserve1.token.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
-                              expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
-                              expect(pool.reserve1.token.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
-                            }
-                          } else {
-                            expect(pool.tokenOut.sellFeeBps).to.be.undefined
-                            expect(pool.tokenOut.buyFeeBps).to.be.undefined
-                            expect(pool.reserve0.token.sellFeeBps).to.be.undefined
-                            expect(pool.reserve0.token.buyFeeBps).to.be.undefined
-                            expect(pool.reserve1.token.sellFeeBps).to.be.undefined
-                            expect(pool.reserve1.token.buyFeeBps).to.be.undefined
-                          }
-                        }
+                    expect(methodParameters).to.not.be.undefined
+
+                    expect(!routeString.includes('[V2 + V3]'))
+                  })
+
+                  it(`erc20 -> erc20 forceMixedRoutes true for v2,v3`, async () => {
+                    const quoteReq: QuoteQueryParams = {
+                      tokenInAddress: 'BOND',
+                      tokenInChainId: 1,
+                      tokenOutAddress: 'APE',
+                      tokenOutChainId: 1,
+                      amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                      type,
+                      recipient: alice.address,
+                      slippageTolerance: SLIPPAGE,
+                      deadline: '360',
+                      algorithm: 'alpha',
+                      forceMixedRoutes: true,
+                      protocols: 'v2,v3',
+                      enableUniversalRouter: true,
+                    }
+
+                    await callAndExpectFail(quoteReq, {
+                      status: 404,
+                      data: {
+                        detail: 'No route found',
+                        errorCode: 'NO_ROUTE',
+                      },
+                    })
+                  })
+
+                  it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base with request source', async () => {
+                    if (type != 'exactIn') {
+                      // mixed route only works for exactIn
+                      return
+                    }
+
+                    const quoteReq: QuoteQueryParams = {
+                      tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                      tokenInChainId: 8453,
+                      tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
+                      tokenOutChainId: 8453,
+                      amount: '1000000',
+                      type,
+                      recipient: alice.address,
+                      slippageTolerance: SLIPPAGE,
+                      deadline: '360',
+                      algorithm: 'alpha',
+                      forceMixedRoutes: true,
+                      protocols: 'mixed',
+                      enableUniversalRouter: true,
+                    }
+
+                    const queryParams = qs.stringify(quoteReq)
+
+                    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                      `${API}?${queryParams}`,
+                      {
+                        headers: {
+                          ...HEADERS_2_0,
+                          'x-request-source': 'e2e-test',
+                        },
+                      }
+                    )
+                    const {
+                      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                      status,
+                    } = response
+
+                    expect(status).to.equal(200)
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                    expect(methodParameters).to.not.be.undefined
+
+                    /// since we only get the routeString back, we can check if there's V3 + V2
+                    expect(routeString.includes('[V2 + V3 + V4]'))
+                  })
+
+                  it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
+                    if (type != 'exactIn') {
+                      // mixed route only works for exactIn
+                      return
+                    }
+
+                    const quoteReq: QuoteQueryParams = {
+                      tokenInAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                      tokenInChainId: 8453,
+                      tokenOutAddress: '0x878784f7ebf6e57d17c81d82ddf53f117a5e2988',
+                      tokenOutChainId: 8453,
+                      amount: '1000000',
+                      type,
+                      recipient: alice.address,
+                      slippageTolerance: SLIPPAGE,
+                      deadline: '360',
+                      algorithm: 'alpha',
+                      forceMixedRoutes: true,
+                      protocols: 'mixed',
+                      enableUniversalRouter: true,
+                    }
+
+                    const queryParams = qs.stringify(quoteReq)
+
+                    try {
+                      await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                        headers: HEADERS_2_0,
+                      })
+                    } catch (err) {
+                      if (err instanceof Error) {
+                        expect(err.message).to.contains('404')
                       }
                     }
+                  })
 
-                    expect(!hasV3Pool && hasV2Pool).to.be.true
+                  it.skip(`erc20 -> erc20 forceMixedRoutes true for all protocols specified`, async () => {
+                    const quoteReq: QuoteQueryParams = {
+                      tokenInAddress: 'BOND',
+                      tokenInChainId: 1,
+                      tokenOutAddress: 'APE',
+                      tokenOutChainId: 1,
+                      amount: await getAmount(1, type, 'BOND', 'APE', '10000'),
+                      type,
+                      recipient: alice.address,
+                      slippageTolerance: SLIPPAGE,
+                      deadline: '360',
+                      algorithm: 'alpha',
+                      forceMixedRoutes: true,
+                      protocols: 'v2,v3,mixed',
+                      enableUniversalRouter: true,
+                    }
 
-                    if (enableFeeOnTransferFeeFetching) {
-                      expect(simulationStatus).to.equal('SUCCESS')
-                      expect(simulationError).to.equal(false)
-                      expect(methodParameters).to.not.be.undefined
+                    const queryParams = qs.stringify(quoteReq)
 
-                      // We don't have a bullet proof way to assert the fot-involved quote is post tax
-                      // so the best way is to execute the swap on hardhat mainnet fork,
-                      // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
-                      const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
-                        response.data.methodParameters!,
-                        tokenIn,
-                        tokenOut
+                    const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                      `${API}?${queryParams}`,
+                      {
+                        headers: HEADERS_2_0,
+                      }
+                    )
+                    const {
+                      data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                      status,
+                    } = response
+
+                    expect(status).to.equal(200)
+
+                    if (type == 'exactIn') {
+                      expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                    } else {
+                      expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                    }
+
+                    expect(methodParameters).to.not.be.undefined
+
+                    /// since we only get the routeString back, we can check if there's V3 + V2
+                    expect(routeString.includes('[V2 + V3]'))
+                  })
+                }
+
+                // FOT swap only works for exact in
+                if (type === 'exactIn') {
+                  const tokenInAndTokenOut = [
+                    [BULLET, WETH9[ChainId.MAINNET]!],
+                    [WETH9[ChainId.MAINNET]!, BULLET],
+                    // TODO: re-enable - DFNDR FOT test is flaky right now, disabling to unblock pipeline
+                    // [WETH9[ChainId.MAINNET]!, DFNDR],
+                  ]
+
+                  tokenInAndTokenOut.forEach(([tokenIn, tokenOut]) => {
+                    // If this test fails sporadically, dev needs to investigate further
+                    // There could be genuine regressions in the form of race condition, due to complex layers of caching
+                    // See https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864 as an example race condition
+                    it(`fee-on-transfer ${tokenIn.symbol} -> ${tokenOut.symbol}`, async () => {
+                      const enableFeeOnTransferFeeFetching = [true, false, undefined]
+                      // we want to swap the tokenIn/tokenOut order so that we can test both sellFeeBps and buyFeeBps for exactIn vs exactOut
+                      const originalAmount = tokenIn.equals(WETH9[ChainId.MAINNET]!) ? '10' : '2924'
+                      const amount = await getAmountFromToken(type, tokenIn, tokenOut, originalAmount)
+
+                      // Parallelize the FOT quote requests, because we notice there might be tricky race condition that could cause quote to not include FOT tax
+                      const responses = await Promise.all(
+                        enableFeeOnTransferFeeFetching.map(async (enableFeeOnTransferFeeFetching) => {
+                          if (enableFeeOnTransferFeeFetching) {
+                            // if it's FOT flag enabled request, we delay it so that it's more likely to repro the race condition in
+                            // https://github.com/Uniswap/smart-order-router/pull/415#issue-1914604864
+                            await new Promise((f) => setTimeout(f, 1000))
+                          }
+                          const simulateFromAddress = tokenIn.equals(WETH9[ChainId.MAINNET]!)
+                            ? '0x6B44ba0a126a2A1a8aa6cD1AdeeD002e141Bcd44'
+                            : '0x171d311eAcd2206d21Cb462d661C33F0eddadC03'
+                          const quoteReq: QuoteQueryParams = {
+                            tokenInAddress: tokenIn.address,
+                            tokenInChainId: tokenIn.chainId,
+                            tokenOutAddress: tokenOut.address,
+                            tokenOutChainId: tokenOut.chainId,
+                            amount: amount,
+                            type: type,
+                            protocols: 'v2,v3,mixed',
+                            // TODO: ROUTE-86 remove enableFeeOnTransferFeeFetching once we are ready to enable this by default
+                            enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
+                            recipient: alice.address,
+                            // we have to use large slippage for FOT swap, because routing-api always forks at the latest block,
+                            // and the FOT swap can have large slippage, despite SOR already subtracted FOT tax
+                            slippageTolerance: LARGE_SLIPPAGE,
+                            deadline: '360',
+                            algorithm,
+                            enableUniversalRouter: true,
+                            // if fee-on-transfer flag is not enabled, most likely the simulation will fail due to quote not subtracting the tax
+                            simulateFromAddress: enableFeeOnTransferFeeFetching ? simulateFromAddress : undefined,
+                            portionBips: FLAT_PORTION.bips,
+                            portionRecipient: FLAT_PORTION.recipient,
+                            debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                            unicornSecret: unicornSecret,
+                          }
+
+                          const queryParams = qs.stringify(quoteReq)
+
+                          const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                            `${API}?${queryParams}`,
+                            { headers: HEADERS_2_0 }
+                          )
+
+                          // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                          // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                          // if it's exactOut quote, we should always hit the cached routes.
+                          // this is regardless of protocol version.
+                          // the reason is because exact in quote always runs before exact out
+                          // along with the native or wrapped native pool token address assertions previously
+                          // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                          // and native for v4 pool routes
+                          expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+
+                          return { enableFeeOnTransferFeeFetching, ...response }
+                        })
                       )
 
-                      expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
-                      checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
-                    }
-                  }
-                })
-              })
-            }
-          }
+                      const quoteWithFlagOn = responses.find((r) => r.enableFeeOnTransferFeeFetching === true)
+                      expect(quoteWithFlagOn).not.to.be.undefined
+
+                      // TODO: flaky assertions, re-enable after fixing (probably real prod issue due to flaky GQL data)
+                      // // in case of FOT token that should not take a portion/fee, we assert that all portion fields are undefined
+                      // if (!tokenOut?.equals(WETH9[ChainId.MAINNET])) {
+                      //   expect(quoteWithFlagOn!.data.portionAmount).to.be.undefined
+                      //   expect(quoteWithFlagOn!.data.portionBips).to.be.undefined
+                      //   expect(quoteWithFlagOn!.data.portionRecipient).to.be.undefined
+                      // } else {
+                      //   expect(quoteWithFlagOn!.data.portionAmount).to.be.not.undefined
+                      //   expect(quoteWithFlagOn!.data.portionBips).to.be.not.undefined
+                      //   expect(quoteWithFlagOn!.data.portionRecipient).to.be.not.undefined
+                      // }
+
+                      responses
+                        .filter((r) => r.enableFeeOnTransferFeeFetching !== true)
+                        .forEach((r) => {
+                          if (type === 'exactIn') {
+                            const quote = CurrencyAmount.fromRawAmount(tokenOut, r.data.quote)
+                            const quoteWithFlagon = CurrencyAmount.fromRawAmount(tokenOut, quoteWithFlagOn!.data.quote)
+
+                            // quote without fot flag must be greater than the quote with fot flag
+                            // this is to catch https://github.com/Uniswap/smart-order-router/pull/421
+                            expect(quote.greaterThan(quoteWithFlagon)).to.be.true
+
+                            // below is additional assertion to ensure the quote without fot tax vs quote with tax should be very roughly equal to the fot sell/buy tax rate
+                            const tokensDiff = quote.subtract(quoteWithFlagon)
+                            const percentDiff = tokensDiff.asFraction.divide(quote.asFraction)
+                            if (tokenIn?.equals(BULLET)) {
+                              expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                                new Fraction(BigNumber.from(BULLET_WHT_TAX.sellFeeBps ?? 0).toString(), 10_000).toFixed(
+                                  3
+                                )
+                              )
+                            } else if (tokenOut?.equals(BULLET)) {
+                              expect(percentDiff.toFixed(3, undefined, Rounding.ROUND_HALF_UP)).equal(
+                                new Fraction(BigNumber.from(BULLET_WHT_TAX.buyFeeBps ?? 0).toString(), 10_000).toFixed(
+                                  3
+                                )
+                              )
+                            }
+                          }
+                        })
+
+                      for (const response of responses) {
+                        const {
+                          enableFeeOnTransferFeeFetching,
+                          data: {
+                            quote,
+                            quoteDecimals,
+                            quoteGasAdjustedDecimals,
+                            methodParameters,
+                            route,
+                            simulationStatus,
+                            simulationError,
+                          },
+                          status,
+                        } = response
+
+                        expect(status).to.equal(200)
+
+                        if (type == 'exactIn') {
+                          expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                        } else {
+                          expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(
+                            parseFloat(quoteDecimals)
+                          )
+                        }
+
+                        let hasV3Pool = false
+                        let hasV2Pool = false
+                        for (const r of route) {
+                          for (const pool of r) {
+                            if (pool.type == 'v3-pool') {
+                              hasV3Pool = true
+                            }
+                            if (pool.type == 'v2-pool') {
+                              hasV2Pool = true
+                              if (enableFeeOnTransferFeeFetching) {
+                                if (pool.tokenIn.address === BULLET.address) {
+                                  expect(pool.tokenIn.sellFeeBps).to.be.not.undefined
+                                  expect(pool.tokenIn.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                                  expect(pool.tokenIn.buyFeeBps).to.be.not.undefined
+                                  expect(pool.tokenIn.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                                }
+                                if (pool.tokenOut.address === BULLET.address) {
+                                  expect(pool.tokenOut.sellFeeBps).to.be.not.undefined
+                                  expect(pool.tokenOut.sellFeeBps).to.be.equals(BULLET_WHT_TAX.sellFeeBps?.toString())
+                                  expect(pool.tokenOut.buyFeeBps).to.be.not.undefined
+                                  expect(pool.tokenOut.buyFeeBps).to.be.equals(BULLET_WHT_TAX.buyFeeBps?.toString())
+                                }
+                                if (pool.reserve0.token.address === BULLET.address) {
+                                  expect(pool.reserve0.token.sellFeeBps).to.be.not.undefined
+                                  expect(pool.reserve0.token.sellFeeBps).to.be.equals(
+                                    BULLET_WHT_TAX.sellFeeBps?.toString()
+                                  )
+                                  expect(pool.reserve0.token.buyFeeBps).to.be.not.undefined
+                                  expect(pool.reserve0.token.buyFeeBps).to.be.equals(
+                                    BULLET_WHT_TAX.buyFeeBps?.toString()
+                                  )
+                                }
+                                if (pool.reserve1.token.address === BULLET.address) {
+                                  expect(pool.reserve1.token.sellFeeBps).to.be.not.undefined
+                                  expect(pool.reserve1.token.sellFeeBps).to.be.equals(
+                                    BULLET_WHT_TAX.sellFeeBps?.toString()
+                                  )
+                                  expect(pool.reserve1.token.buyFeeBps).to.be.not.undefined
+                                  expect(pool.reserve1.token.buyFeeBps).to.be.equals(
+                                    BULLET_WHT_TAX.buyFeeBps?.toString()
+                                  )
+                                }
+                              } else {
+                                expect(pool.tokenOut.sellFeeBps).to.be.undefined
+                                expect(pool.tokenOut.buyFeeBps).to.be.undefined
+                                expect(pool.reserve0.token.sellFeeBps).to.be.undefined
+                                expect(pool.reserve0.token.buyFeeBps).to.be.undefined
+                                expect(pool.reserve1.token.sellFeeBps).to.be.undefined
+                                expect(pool.reserve1.token.buyFeeBps).to.be.undefined
+                              }
+                            }
+                          }
+                        }
+
+                        expect(!hasV3Pool && hasV2Pool).to.be.true
+
+                        if (enableFeeOnTransferFeeFetching) {
+                          expect(simulationStatus).to.equal('SUCCESS')
+                          expect(simulationError).to.equal(false)
+                          expect(methodParameters).to.not.be.undefined
+
+                          // We don't have a bullet proof way to assert the fot-involved quote is post tax
+                          // so the best way is to execute the swap on hardhat mainnet fork,
+                          // and make sure the executed quote doesn't differ from callstatic simulated quote by over slippage tolerance
+                          const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                            response.data.methodParameters!,
+                            tokenIn,
+                            tokenOut
+                          )
+
+                          expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal(originalAmount)
+                          checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(tokenOut, quote))
+                        }
+                      }
+                    })
+                  })
+                }
+              }
+            })
+          })
         })
 
         if (algorithm == 'alpha') {

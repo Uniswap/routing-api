@@ -330,7 +330,7 @@ export class RoutingAPIPipeline extends Stack {
       projectName: `IntegTests-${routingAPIStage.stageName}`,
       input: sourceArtifact,
       envFromCfnOutputs: {
-        UNISWAP_ROUTING_API: routingAPIStage.url
+        UNISWAP_ROUTING_API: routingAPIStage.url,
       },
       buildEnvironment: {
         environmentVariables: {
@@ -345,7 +345,7 @@ export class RoutingAPIPipeline extends Stack {
           UNICORN_SECRETS: {
             value: 'debug-config-unicornsecrets',
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
-          }
+          },
         },
       },
       commands: [
