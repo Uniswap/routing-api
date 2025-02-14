@@ -1547,7 +1547,7 @@ describe('quote', function () {
                 expect(route[0].length).to.equal(2)
                 expect(route[0][0].type).to.equal('v3-pool')
                 expect(route[0][0].tokenIn.address).to.equal('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')
-                expect(route[0][0].tokenOut.address).to.equal(WETH9[ChainId.BASE])
+                expect(route[0][0].tokenOut.address).to.equal(WETH9[ChainId.BASE].address)
                 expect(route[0][1].type).to.equal('v4-pool')
                 expect(route[0][1].tokenIn.address).to.equal('0x0000000000000000000000000000000000000000')
                 expect(route[0][1].tokenOut.address).to.equal('0x878784F7eBF6e57d17C81D82DDF53F117a5E2988')
