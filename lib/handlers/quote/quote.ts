@@ -12,7 +12,8 @@ import {
   SimulationStatus,
   sortsBefore,
   SwapOptions,
-  SwapRoute, V4_ETH_WETH_FAKE_POOL
+  SwapRoute,
+  V4_ETH_WETH_FAKE_POOL,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
