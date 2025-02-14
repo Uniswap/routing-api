@@ -6,6 +6,6 @@ export function enableMixedRouteEthWeth(requestSourceHeader?: string): boolean {
     // TODO: enable once web, mobile, extension releases the FE bug fix for mixed route (https://uniswapteam.slack.com/archives/C07AD3507SQ/p1739296535359709?thread_ts=1739224900.129809&cid=C07AD3507SQ)
     // TODO: for mobile, we need to ensure backward compatibility with the old version, using app version (https://uniswapteam.slack.com/archives/C07AD3507SQ/p1739309767819639?thread_ts=1739224900.129809&cid=C07AD3507SQ)
     default:
-      return false
+      return true
   }
 }

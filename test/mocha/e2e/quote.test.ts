@@ -12,7 +12,7 @@ import {
   NATIVE_CURRENCY,
   parseAmount,
   SWAP_ROUTER_02_ADDRESSES,
-  USDB_BLAST,
+  USDB_BLAST, USDC_BASE,
   USDC_BNB,
   USDC_MAINNET,
   USDC_NATIVE_ARBITRUM,
@@ -26,7 +26,7 @@ import {
   V4_SEPOLIA_TEST_B,
   V4_SUPPORTED,
   WBTC_MAINNET,
-  WLD_WORLDCHAIN,
+  WLD_WORLDCHAIN
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
@@ -1061,7 +1061,7 @@ describe('quote', function () {
               tokenOutAddress: 'USDC',
               tokenOutChainId: 1,
               // Reducing amount as v4 ETH/USDC pool with very low liquidity might be selected, and liquidity changes often
-              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.00001' : '0.1'),
+              amount: await getAmount(1, type, 'ETH', 'USDC', type == 'exactIn' ? '0.001' : '0.1'),
               type,
               recipient: alice.address,
               slippageTolerance: LARGE_SLIPPAGE,
@@ -1533,7 +1533,7 @@ describe('quote', function () {
                   },
                 })
                 const {
-                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, routeString },
+                  data: { quoteDecimals, quoteGasAdjustedDecimals, methodParameters, route, routeString },
                   status,
                 } = response
 
@@ -1543,6 +1543,14 @@ describe('quote', function () {
 
                 /// since we only get the routeString back, we can check if there's V3 + V2
                 expect(routeString.includes('[V2 + V3 + V4]'))
+                expect(route.length).to.equal(1)
+                expect(route[0].length).to.equal(2)
+                expect(route[0][0].type).to.equal('v3-pool')
+                expect(route[0][0].tokenIn.address).to.equal('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')
+                expect(route[0][0].tokenOut.address).to.equal(WETH9[ChainId.BASE])
+                expect(route[0][1].type).to.equal('v4-pool')
+                expect(route[0][1].tokenIn.address).to.equal('0x0000000000000000000000000000000000000000')
+                expect(route[0][1].tokenOut.address).to.equal('0x878784F7eBF6e57d17C81D82DDF53F117a5E2988')
               })
 
               it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
