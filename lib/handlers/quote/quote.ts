@@ -342,8 +342,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(forceMixedRoutes ? { forceMixedRoutes } : {}),
       protocols,
       ...(quoteSpeed ? QUOTE_SPEED_CONFIG[quoteSpeed] : {}),
-      ...parsedDebugRoutingConfig,
       ...(intent ? INTENT_SPECIFIC_CONFIG[intent] : {}),
+      ...parsedDebugRoutingConfig,
       // Only when enableFeeOnTransferFeeFetching is explicitly set to true, then we
       // override usedCachedRoutes to false. This is to ensure that we don't use
       // accidentally override usedCachedRoutes in the normal path.

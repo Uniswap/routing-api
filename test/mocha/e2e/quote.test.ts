@@ -59,11 +59,14 @@ chai.use(chaiSubset)
 
 const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(UniversalRouterVersion.V2_0, 1)
 
-if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC) {
-  throw new Error('Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC env variables for integ tests. See README')
+if (!process.env.UNISWAP_ROUTING_API || !process.env.ARCHIVE_NODE_RPC || !process.env.UNICORN_SECRET) {
+  throw new Error(
+    'Must set UNISWAP_ROUTING_API and ARCHIVE_NODE_RPC and UNICORN_SECRET env variables for integ tests. See README'
+  )
 }
 
 const API = `${process.env.UNISWAP_ROUTING_API!}quote`
+const unicornSecret = `${process.env.UNICORN_SECRET}`
 
 const SLIPPAGE = '5'
 const LARGE_SLIPPAGE = '20'
@@ -363,7 +366,87 @@ describe('quote', function () {
       describe(`${ID_TO_NETWORK_NAME(1)} ${algorithm} ${type} 2xx`, () => {
         describe(`+ Execute Swap`, () => {
           for (const uraVersion of [UniversalRouterVersion.V1_2, UniversalRouterVersion.V2_0]) {
-            it(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {
+            describe(`erc20 -> erc20 (uraVersion:${uraVersion})`, async () => {
+              const hitsCachedRoutes = [true, false]
+              hitsCachedRoutes.forEach((hitsCachedRoutes) => {
+                it(`should hit cached routes ${hitsCachedRoutes}`, async () => {
+                  const useCachedRoutes = { useCachedRoutes: hitsCachedRoutes }
+
+                  const quoteReq: QuoteQueryParams = {
+                    tokenInAddress: 'USDC',
+                    tokenInChainId: 1,
+                    tokenOutAddress: 'USDT',
+                    tokenOutChainId: 1,
+                    amount: await getAmount(1, type, 'USDC', 'USDT', '100'),
+                    type,
+                    recipient: alice.address,
+                    slippageTolerance: SLIPPAGE,
+                    deadline: '360',
+                    algorithm,
+                    enableUniversalRouter: true,
+                    protocols: protocols,
+                    debugRoutingConfig: JSON.stringify(useCachedRoutes),
+                    unicornSecret: unicornSecret,
+                  }
+
+                  const queryParams = qs.stringify(quoteReq)
+
+                  const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                    `${API}?${queryParams}`,
+                    {
+                      headers: headers,
+                    }
+                  )
+                  const {
+                    data: { quote, quoteDecimals, quoteGasAdjustedDecimals, methodParameters, priceImpact },
+                    status,
+                  } = response
+
+                  expect(status).to.equal(200)
+                  expect(parseFloat(quoteDecimals)).to.be.greaterThan(90)
+                  expect(parseFloat(quoteDecimals)).to.be.lessThan(110)
+
+                  expect(Number(priceImpact)).to.be.greaterThan(0)
+
+                  if (type == 'exactIn') {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.lessThanOrEqual(parseFloat(quoteDecimals))
+                  } else {
+                    expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
+                  }
+
+                  expect(methodParameters).to.not.be.undefined
+                  expect(methodParameters?.to).to.equal(UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET))
+
+                  const { tokenInBefore, tokenInAfter, tokenOutBefore, tokenOutAfter } = await executeSwap(
+                    methodParameters!,
+                    USDC_MAINNET,
+                    USDT_MAINNET,
+                    undefined,
+                    ChainId.MAINNET,
+                    undefined,
+                    UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(uraVersion, ChainId.MAINNET)
+                  )
+
+                  if (type == 'exactIn') {
+                    expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                    checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(USDT_MAINNET, quote))
+                  } else {
+                    expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                    checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
+                  }
+
+                  // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                  // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                  // if it's exactOut quote, we should always hit the cached routes.
+                  // this is regardless of protocol version.
+                  // the reason is because exact in quote always runs before exact out
+                  // along with the native or wrapped native pool token address assertions previously
+                  // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                  // and native for v4 pool routes
+                  expect(response.data.hitsCachedRoutes).to.equal(hitsCachedRoutes)
+                })
+              })
+
               let protocols = ALL_PROTOCOLS
               let headers = HEADERS_2_0
               if (uraVersion === UniversalRouterVersion.V1_2) {
