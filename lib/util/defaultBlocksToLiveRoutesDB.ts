@@ -26,7 +26,9 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.WORLDCHAIN]: 21600,
   // (60 minutes) / (1 seconds) = 3600
   [ChainId.UNICHAIN_SEPOLIA]: 3600,
-  [ChainId.UNICHAIN]: 3600,
+  // For Unichain, due to low volume and low liquidity pools that change often, let's have a shorter TTL
+  // - start with 30 mins: (30 minutes) / (1 seconds) = 1800
+  [ChainId.UNICHAIN]: 1800,
   [ChainId.MONAD_TESTNET]: 3600,
   // (60 minutes) / (250 milliseconds) = 14400
   [ChainId.ARBITRUM_ONE]: 14400,
