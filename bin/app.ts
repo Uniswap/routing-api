@@ -279,7 +279,8 @@ export class RoutingAPIPipeline extends Stack {
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
 
-    this.addIntegTests(code, betaUsEast2Stage, betaUsEast2AppStage)
+    const unicornSecret = unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString()
+    this.addIntegTests(code, betaUsEast2Stage, betaUsEast2AppStage, unicornSecret)
 
     // Prod us-east-2
     const prodUsEast2Stage = new RoutingAPIStage(this, 'prod-us-east-2', {
@@ -307,7 +308,7 @@ export class RoutingAPIPipeline extends Stack {
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
 
-    this.addIntegTests(code, prodUsEast2Stage, prodUsEast2AppStage)
+    this.addIntegTests(code, prodUsEast2Stage, prodUsEast2AppStage, unicornSecret)
 
     const slackChannel = chatbot.SlackChannelConfiguration.fromSlackChannelConfigurationArn(
       this,
@@ -324,7 +325,8 @@ export class RoutingAPIPipeline extends Stack {
   private addIntegTests(
     sourceArtifact: cdk.pipelines.CodePipelineSource,
     routingAPIStage: RoutingAPIStage,
-    applicationStage: cdk.pipelines.StageDeployment
+    applicationStage: cdk.pipelines.StageDeployment,
+    unicornSecret: string
   ) {
     const testAction = new CodeBuildStep(`IntegTests-${routingAPIStage.stageName}`, {
       projectName: `IntegTests-${routingAPIStage.stageName}`,
@@ -342,17 +344,13 @@ export class RoutingAPIPipeline extends Stack {
             value: 'archive-node-rpc-url-default-kms',
             type: BuildEnvironmentVariableType.SECRETS_MANAGER,
           },
-          UNICORN_SECRETS: {
-            value: 'debug-config-unicornsecrets',
-            type: BuildEnvironmentVariableType.SECRETS_MANAGER,
-          },
         },
       },
       commands: [
         'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm ci',
         'echo "UNISWAP_ROUTING_API=${UNISWAP_ROUTING_API}" > .env',
         'echo "ARCHIVE_NODE_RPC=${ARCHIVE_NODE_RPC}" >> .env',
-        'echo "UNICORN_SECRET=${UNICORN_SECRETS}" >> .env',
+        `echo "UNICORN_SECRET=${unicornSecret}" >> .env`,
         'npm install',
         'npm run build',
         'set NODE_OPTIONS=--max-old-space-size=4096 && npm run test:e2e',
