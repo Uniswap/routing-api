@@ -539,7 +539,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.GOERLI,
             ChainId.BASE,
             ChainId.UNICHAIN,
-            ChainId.BASE,
             ChainId.ARBITRUM_ONE,
             ChainId.POLYGON,
             ChainId.OPTIMISM,
