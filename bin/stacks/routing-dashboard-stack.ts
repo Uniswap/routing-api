@@ -105,12 +105,14 @@ export class RoutingDashboardStack extends cdk.NestedStack {
         width: 24,
         type: 'metric',
         properties: {
-          metrics: chains.map((chainId) => [
-            {
-              expression: `FILL(mreqc${chainId}, 0)`,
-              label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}`,
-              id: `e1c${chainId}`,
-            },
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `FILL(mreqc${chainId}, 0)`,
+                label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e1c${chainId}`,
+              },
+            ],
             [
               NAMESPACE,
               `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
