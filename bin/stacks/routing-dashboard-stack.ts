@@ -105,12 +105,21 @@ export class RoutingDashboardStack extends cdk.NestedStack {
         width: 24,
         type: 'metric',
         properties: {
-          metrics: chains.map((chainId) => [
-            NAMESPACE,
-            `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
-            'Service',
-            'RoutingAPI',
-            { id: `mreqc${chainId}`, label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}` },
+          metrics: _.flatMap(chains, (chainId) => [
+            [
+              {
+                expression: `FILL(mreqc${chainId}, 0)`,
+                label: `Requests on ${ID_TO_NETWORK_NAME(chainId)}`,
+                id: `e1c${chainId}`,
+              },
+            ],
+            [
+              NAMESPACE,
+              `GET_QUOTE_REQUESTED_CHAINID: ${chainId}`,
+              'Service',
+              'RoutingAPI',
+              { id: `mreqc${chainId}`, visible: false },
+            ],
           ]),
           view: 'timeSeries',
           stacked: false,
@@ -399,7 +408,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               {
-                expression: `(m200c${chainId} / (mreqc${chainId} - m400c${chainId})) * 100`,
+                expression: `IF(FILL(mreqc${chainId}, 0) == 0, 0, 
+                  (m200c${chainId} / (mreqc${chainId} - m400c${chainId})) * 100)`,
                 label: `Success Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
                 id: `e1c${chainId}`,
               },
@@ -449,7 +459,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               {
-                expression: `(m200c${chainId} / mreqc${chainId}) * 100`,
+                expression: `IF(FILL(mreqc${chainId}, 0) == 0, 0, 
+                  (m200c${chainId} / mreqc${chainId}) * 100)`,
                 label: `Success Rate (w. 4XX) on ${ID_TO_NETWORK_NAME(chainId)}`,
                 id: `e1c${chainId}`,
               },
@@ -492,7 +503,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               {
-                expression: `(m500c${chainId} / mreqc${chainId}) * 100`,
+                expression: `IF(FILL(mreqc${chainId}, 0) == 0, 0, 
+                  (m500c${chainId} / mreqc${chainId}) * 100)`,
                 label: `5XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
                 id: `e1c${chainId}`,
               },
@@ -535,7 +547,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
           metrics: _.flatMap(chains, (chainId) => [
             [
               {
-                expression: `(m400c${chainId} / mreqc${chainId}) * 100`,
+                expression: `IF(FILL(mreqc${chainId}, 0) == 0, 0, 
+                  (m400c${chainId} / mreqc${chainId}) * 100)`,
                 label: `4XX Error Rate on ${ID_TO_NETWORK_NAME(chainId)}`,
                 id: `e2c${chainId}`,
               },
