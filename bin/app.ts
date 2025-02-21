@@ -353,7 +353,7 @@ export class RoutingAPIPipeline extends Stack {
         `echo "UNICORN_SECRET=${unicornSecret}" >> .env`,
         'npm install',
         'npm run build',
-        'set NODE_OPTIONS=--max-old-space-size=4096 && npm run test:e2e',
+        'set NODE_OPTIONS=--max-old-space-size=8192 && npm run test:e2e',
       ],
     })
 
