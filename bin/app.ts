@@ -38,7 +38,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
-      decentralizedNetworkApiKey?: string
+      alchemyQueryKey2?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
@@ -61,7 +61,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
-      decentralizedNetworkApiKey,
+      alchemyQueryKey2,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     } = props
@@ -83,7 +83,7 @@ export class RoutingAPIStage extends Stage {
       tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
-      decentralizedNetworkApiKey,
+      alchemyQueryKey2,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     })
@@ -176,6 +176,11 @@ export class RoutingAPIPipeline extends Stack {
 
     const routingApiNewSecrets = sm.Secret.fromSecretAttributes(this, 'RoutingApiNewSecrets', {
       secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:RoutingApiNewSecrets-7EijpM',
+    })
+
+    // ALchemy subgraphs are split between two accounts, hence the two keys alchemy-query-key and alchemy-query-key-2
+    const alchemySubgraphSecret = sm.Secret.fromSecretAttributes(this, 'RoutingAlchemySubgraphSecret', {
+      secretCompleteArn: 'arn:aws:secretsmanager:us-east-2:644039819003:secret:RoutingAlchemySubgraphSecret-QKtgMX',
     })
 
     // Load RPC provider URLs from AWS secret
@@ -271,8 +276,8 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       tenderlyNodeApiKey: tenderlyCreds.secretValueFromJson('tenderly-node-api-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
-      decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
+      alchemyQueryKey: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key').toString(),
+      alchemyQueryKey2: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key-2').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
     })
@@ -300,8 +305,8 @@ export class RoutingAPIPipeline extends Stack {
       tenderlyAccessKey: tenderlyCreds.secretValueFromJson('tenderly-access-key').toString(),
       tenderlyNodeApiKey: tenderlyCreds.secretValueFromJson('tenderly-node-api-key').toString(),
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
-      alchemyQueryKey: routingApiNewSecrets.secretValueFromJson('alchemy-query-key').toString(),
-      decentralizedNetworkApiKey: routingApiNewSecrets.secretValueFromJson('decentralized-network-api-key').toString(),
+      alchemyQueryKey: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key').toString(),
+      alchemyQueryKey2: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key-2').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
     })
@@ -448,6 +453,8 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   unicornSecret: process.env.UNICORN_SECRET!,
   uniGraphQLEndpoint: process.env.GQL_URL!,
   uniGraphQLHeaderOrigin: process.env.GQL_H_ORGN!,
+  alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
+  alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
