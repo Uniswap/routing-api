@@ -48,7 +48,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyNodeApiKey: string
       unicornSecret: string
       alchemyQueryKey?: string
-      decentralizedNetworkApiKey?: string
+      alchemyQueryKey2?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
@@ -73,7 +73,7 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyNodeApiKey,
       unicornSecret,
       alchemyQueryKey,
-      decentralizedNetworkApiKey,
+      alchemyQueryKey2,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     } = props
@@ -95,7 +95,7 @@ export class RoutingAPIStack extends cdk.Stack {
       pinata_secret,
       hosted_zone,
       alchemyQueryKey,
-      decentralizedNetworkApiKey,
+      alchemyQueryKey2,
     })
 
     const {

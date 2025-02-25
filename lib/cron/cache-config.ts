@@ -23,7 +23,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.UNICHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-unichain-mainnet/api`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-blast/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-blast/api`
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v4-mainnet/api`
     default:
@@ -46,7 +46,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.BNB:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-bsc-ii/api`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-blast/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-blast/api`
     case ChainId.BASE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v3-base/api`
     case ChainId.CELO:
