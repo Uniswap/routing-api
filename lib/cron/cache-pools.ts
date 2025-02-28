@@ -224,6 +224,55 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     }
 
     if (protocol === Protocol.V4) {
+      const manuallyIncludedV4Pools: V4SubgraphPool[] = [
+        {
+          id: "0xe9eeab9794c33dff3dd8d0951cbe2d36619294af5a3a329f38f91f54be0b6d34",
+          feeTier: "10000",
+          tickSpacing: "200",
+          hooks: "0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000",
+          liquidity: "274563705100803912362733",
+          token0: {
+            id: "0x112cf1cc540eadf234158c0e4044c3b5f2a33e5e",
+          },
+          token1: {
+            id: "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+          },
+          tvlETH: 25.33120577965346308313185954009482,
+          tvlUSD: 56627.5525783346590219799350683533,
+        } as V4SubgraphPool,
+        {
+          id: "0x6bac01f0a8fb96eeb56e37506f210628714561113c748d43c6de50dc339edfe9",
+          feeTier: "10000",
+          tickSpacing: "200",
+          hooks: "0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000",
+          liquidity: "621568112474979678301274",
+          token0: {
+            id: "0x125490489a27d541e39813c08d260debac071bb7",
+          },
+          token1: {
+            id: "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+          },
+          tvlETH: 142.7576163222032969740638595951846,
+          tvlUSD: 316322.6881520965844428159264274397,
+        } as V4SubgraphPool,
+        {
+          id: "0x31781e65a4bd9ff0161e660f7930beee16026f819cd4d0bc7e17f6c78c29fc27",
+          feeTier: "10000",
+          tickSpacing: "200",
+          hooks: "0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000",
+          liquidity: "482843960670027606548690",
+          token0: {
+            id: "0x15148da22518e40e0d2fabf5d5e6a22269ebcb30",
+          },
+          token1: {
+            id: "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+          },
+          tvlETH: 44.1795925485023741879813651641809,
+          tvlUSD: 95050.95363442908526427214106054717,
+        } as V4SubgraphPool,
+      ]
+      manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
+
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
     }
 
