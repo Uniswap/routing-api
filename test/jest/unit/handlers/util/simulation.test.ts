@@ -45,4 +45,9 @@ describe('simulation', () => {
     const status = simulationStatusTranslation(SimulationStatus.SlippageTooLow, log)
     expect(status).toStrictEqual(RoutingApiSimulationStatus.SLIPPAGE_TOO_LOW)
   })
+
+  it('returns transfer from failed for transfer from failed simulation status', () => {
+    const status = simulationStatusTranslation(SimulationStatus.TransferFromFailed, log)
+    expect(status).toStrictEqual(RoutingApiSimulationStatus.TRANSFER_FROM_FAILED)
+  })
 })
