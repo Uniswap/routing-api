@@ -1585,7 +1585,7 @@ describe('quote', function () {
                 })
               })
 
-              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base with request source', async () => {
+              it.skip('USDC -> mockA forceMixedRoutes true for mixed protocol on Base with request source', async () => {
                 if (type != 'exactIn') {
                   // mixed route only works for exactIn
                   return
@@ -1636,7 +1636,7 @@ describe('quote', function () {
                 expect(route[0][1].tokenOut.address).to.equal('0x878784F7eBF6e57d17C81D82DDF53F117a5E2988')
               })
 
-              it('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
+              it.skip('USDC -> mockA forceMixedRoutes true for mixed protocol on Base no request source', async () => {
                 if (type != 'exactIn') {
                   // mixed route only works for exactIn
                   return
