@@ -212,7 +212,7 @@ export const chainProtocols = [
     provider: new V3SubgraphProvider(
       ChainId.BASE,
       3,
-      90000,
+      360000, // base has more pools than other chains, so we need to increase the timeout
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
@@ -268,7 +268,7 @@ export const chainProtocols = [
     provider: new V3SubgraphProvider(
       ChainId.ZORA,
       3,
-      90000,
+      360000, // zora has more pools than other chains, so we need to increase the timeout
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
