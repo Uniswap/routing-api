@@ -3510,7 +3510,7 @@ describe('quote', function () {
           }
 
           // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
-          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS;
+          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
@@ -3651,7 +3651,7 @@ describe('quote', function () {
           }
 
           // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
-          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS;
+          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
