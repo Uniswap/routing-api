@@ -2,13 +2,15 @@ import { ChainId } from '@uniswap/sdk-core'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51Bba15255406Cfe7099a42183302640ba7dAFDC'
+export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
+export const BUNNI_HOOKS_ADDRESS_1_ON_L1 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
+export const BUNNI_HOOKS_ADDRESS_2_ON_L1 = '0x00001f3b9712708127b1fcad61cb892535951888'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
-  [ChainId.MAINNET]: [ADDRESS_ZERO],
+  [ChainId.MAINNET]: [ADDRESS_ZERO, BUNNI_HOOKS_ADDRESS_1_ON_L1, BUNNI_HOOKS_ADDRESS_2_ON_L1],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO],
