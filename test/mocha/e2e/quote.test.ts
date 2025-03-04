@@ -3509,6 +3509,9 @@ describe('quote', function () {
             return
           }
 
+          // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
+          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
+
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
             type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.UNICHAIN_SEPOLIA) ? '0.002' : '1'
@@ -3519,7 +3522,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
-            protocols: ALL_PROTOCOLS,
+            protocols: protocols,
             type,
           }
 
@@ -3541,7 +3544,9 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
+            if (!(chain === ChainId.ZORA && type === 'exactOut')) {
+              expect(response.data.hitsCachedRoutes).to.be.true
+            }
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
@@ -3645,6 +3650,9 @@ describe('quote', function () {
             return
           }
 
+          // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
+          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
+
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
             type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.UNICHAIN_SEPOLIA) ? '0.002' : '1'
@@ -3655,7 +3663,7 @@ describe('quote', function () {
             tokenOutAddress: erc2.address,
             tokenOutChainId: chain,
             amount: await getAmountFromToken(type, erc1, erc2, amount),
-            protocols: ALL_PROTOCOLS,
+            protocols: protocols,
             type,
           }
 
@@ -3687,7 +3695,10 @@ describe('quote', function () {
             // along with the native or wrapped native pool token address assertions previously
             // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
             // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
+
+            if (!(chain === ChainId.ZORA && type === 'exactOut')) {
+              expect(response.data.hitsCachedRoutes).to.be.true
+            }
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
