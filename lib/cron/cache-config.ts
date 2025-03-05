@@ -30,7 +30,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-mainnet/api`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-sonesium-mainnet/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-soneium-mainnet/api`
     default:
       return undefined
   }
@@ -65,7 +65,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.ZORA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-sonesium-mainnet/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
     default:
       return undefined
   }
@@ -98,7 +98,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.UNICHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-sonesium-mainnet/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
     default:
       return undefined
   }
