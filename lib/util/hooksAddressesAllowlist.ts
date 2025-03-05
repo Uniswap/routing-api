@@ -1,6 +1,7 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
+// all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
 export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
