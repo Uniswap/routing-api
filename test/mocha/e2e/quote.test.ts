@@ -21,12 +21,13 @@ import {
   USDC_NATIVE_OPTIMISM,
   USDC_NATIVE_POLYGON,
   USDC_NATIVE_SEPOLIA,
+  USDC_SONEIUM,
   USDT_MAINNET,
   V4_SEPOLIA_TEST_A,
   V4_SEPOLIA_TEST_B,
   V4_SUPPORTED,
   WBTC_MAINNET,
-  WLD_WORLDCHAIN,
+  WLD_WORLDCHAIN
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
@@ -124,6 +125,7 @@ const V2_SUPPORTED_PAIRS = [
   [WETH9[ChainId.BASE], USDC_NATIVE_BASE],
   [WRAPPED_NATIVE_CURRENCY[ChainId.BNB], USDC_BNB],
   [WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE], USDC_NATIVE_AVAX],
+  [WRAPPED_NATIVE_CURRENCY[ChainId.SONEIUM], USDC_SONEIUM]
 ]
 
 const axios = axiosStatic.create()
@@ -3343,6 +3345,7 @@ describe('quote', function () {
     [ChainId.UNICHAIN_SEPOLIA]: () => USDC_ON(ChainId.UNICHAIN_SEPOLIA),
     [ChainId.UNICHAIN]: () => USDC_ON(ChainId.UNICHAIN),
     [ChainId.MONAD_TESTNET]: () => USDC_ON(ChainId.MONAD_TESTNET),
+    [ChainId.SONEIUM]: () => USDC_ON(ChainId.SONEIUM),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
@@ -3376,6 +3379,7 @@ describe('quote', function () {
     [ChainId.UNICHAIN_SEPOLIA]: () => WNATIVE_ON(ChainId.UNICHAIN_SEPOLIA),
     [ChainId.UNICHAIN]: () => WNATIVE_ON(ChainId.UNICHAIN),
     [ChainId.MONAD_TESTNET]: () => WNATIVE_ON(ChainId.MONAD_TESTNET),
+    [ChainId.SONEIUM]: () => WNATIVE_ON(ChainId.SONEIUM),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -3564,7 +3568,8 @@ describe('quote', function () {
             chain === ChainId.ZORA ||
             chain === ChainId.ZKSYNC ||
             chain === ChainId.UNICHAIN_SEPOLIA ||
-            chain === ChainId.UNICHAIN
+            chain === ChainId.UNICHAIN ||
+            chain === ChainId.SONEIUM
           ) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI

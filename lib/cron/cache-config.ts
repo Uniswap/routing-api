@@ -29,6 +29,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-blast/api`
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-mainnet/api`
+    case ChainId.SONEIUM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-sonesium-mainnet/api`
     default:
       return undefined
   }
@@ -62,6 +64,8 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-unichain-mainnet/api`
     case ChainId.ZORA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
+    case ChainId.SONEIUM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-sonesium-mainnet/api`
     default:
       return undefined
   }
@@ -93,6 +97,8 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-monad-testnet/api`
     case ChainId.UNICHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
+    case ChainId.SONEIUM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-sonesium-mainnet/api`
     default:
       return undefined
   }
@@ -278,7 +284,20 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.ZORA)
     ),
   },
-
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.SONEIUM,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.SONEIUM,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.SONEIUM)
+    ),
+  },
   // V2.
   {
     protocol: Protocol.V2,
@@ -445,6 +464,21 @@ export const chainProtocols = [
       v2SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.SONEIUM,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.SONEIUM,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.SONEIUM)
+    ),
+  },
   // V4
   {
     protocol: Protocol.V4,
@@ -570,6 +604,20 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.SONEIUM,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.SONEIUM,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
 ]

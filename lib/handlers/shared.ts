@@ -86,6 +86,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
     case ChainId.MONAD_TESTNET:
     case ChainId.BASE_SEPOLIA:
     case ChainId.UNICHAIN:
+    case ChainId.SONEIUM:
       return {
         v2PoolSelection: {
           topN: 3,

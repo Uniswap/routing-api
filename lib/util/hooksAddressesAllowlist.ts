@@ -64,4 +64,5 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.UNICHAIN]: [ADDRESS_ZERO],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
+  [ChainId.SONEIUM]: [ADDRESS_ZERO],
 }
