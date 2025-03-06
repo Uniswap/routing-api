@@ -39,6 +39,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       let additionalAllowedPool = 0
 
+      // ETH/flETH
       if (
         pool.id.toLowerCase() === '0x14287e3268eb628fcebd2d8f0730b01703109e112a7a41426a556d10211d2086'.toLowerCase() &&
         chainId === ChainId.BASE
@@ -46,6 +47,85 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         pool.tvlETH = 1000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
         pool.tvlUSD = 5500000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
         log.debug(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // USDT/USDC
+      if (
+        pool.id.toLowerCase() === '0xfcb95f2277ef9524fb6a2e2c38209a7a3b955c34c933d2cdb570c1e9240fc475'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 400 // (https://bunni.xyz/explore/pools/mainnet/0xfcb95f2277ef9524fb6a2e2c38209a7a3b955c34c933d2cdb570c1e9240fc475)
+        pool.tvlUSD = 800000 // (https://bunni.xyz/explore/pools/mainnet/0xfcb95f2277ef9524fb6a2e2c38209a7a3b955c34c933d2cdb570c1e9240fc475)
+        additionalAllowedPool += 1
+      }
+
+      // USR/USDC
+      if (
+        pool.id.toLowerCase() === '0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 1500 // (https://bunni.xyz/explore/pools/mainnet/0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615)
+        pool.tvlUSD = 3000000 // (https://bunni.xyz/explore/pools/mainnet/0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615)
+        additionalAllowedPool += 1
+      }
+
+      // Flagship ETH-USDC 1.1
+      if (
+        pool.id.toLowerCase() === '0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f'.toLowerCase() &&
+        chainId === ChainId.BASE
+      ) {
+        pool.tvlETH = 210 // (https://bunni.xyz/explore/pools/ethereum/0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f)
+        pool.tvlUSD = 420000 // (https://bunni.xyz/explore/pools/ethereum/0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f)
+        additionalAllowedPool += 1
+      }
+
+      // USDC-USDT 1.0
+      if (
+        pool.id.toLowerCase() === '0x52820f86a8b193cbb46184b990085535e5956003b0005569649125cc070d14d0'.toLowerCase() &&
+        chainId === ChainId.ARBITRUM_ONE
+      ) {
+        pool.tvlETH = 210 // (https://bunni.xyz/explore/pools/arbitrum/0x52820f86a8b193cbb46184b990085535e5956003b0005569649125cc070d14d0)
+        pool.tvlUSD = 70000 // (https://bunni.xyz/explore/pools/arbitrum/0x52820f86a8b193cbb46184b990085535e5956003b0005569649125cc070d14d0)
+        additionalAllowedPool += 1
+      }
+
+      // WETH-USDC 1.0
+      if (
+        pool.id.toLowerCase() === '0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f'.toLowerCase() &&
+        chainId === ChainId.BASE
+      ) {
+        pool.tvlETH = 1.5 // (https://bunni.xyz/explore/pools/base/0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f)
+        pool.tvlUSD = 3000 // (https://bunni.xyz/explore/pools/base/0x278ade56e33a097c673da54989ab41bc66d79d8362c38e7c7f2ae76a1d4e4e9f)
+        additionalAllowedPool += 1
+      }
+
+      // ETH-wstETH 1.0
+      if (
+        pool.id.toLowerCase() === '0xccc788002cf655b20e41330bd9af113fd7df7cdebe68367574ea28cab1d59768'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 400 // (https://bunni.xyz/explore/pools/mainnet/0xccc788002cf655b20e41330bd9af113fd7df7cdebe68367574ea28cab1d59768)
+        pool.tvlUSD = 800000 // (https://bunni.xyz/explore/pools/mainnet/0xccc788002cf655b20e41330bd9af113fd7df7cdebe68367574ea28cab1d59768)
+        additionalAllowedPool += 1
+      }
+
+      // ETH-wstETH 1.0
+      if (
+        pool.id.toLowerCase() === '0xcf3e20a072e6c74916da3e57086fa0f781ff54de4f060194e19aabf4dd94f55c'.toLowerCase() &&
+        chainId === ChainId.ARBITRUM_ONE
+      ) {
+        pool.tvlETH = 300 // (https://bunni.xyz/explore/pools/arbitrum/0xcf3e20a072e6c74916da3e57086fa0f781ff54de4f060194e19aabf4dd94f55c)
+        pool.tvlUSD = 600000 // (https://bunni.xyz/explore/pools/arbitrum/0xcf3e20a072e6c74916da3e57086fa0f781ff54de4f060194e19aabf4dd94f55c)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0x18851334c1315b5c92d577e50f3190e599ab6f7460b7859add5473f922c3bf54'.toLowerCase() &&
+        chainId === ChainId.BASE
+      ) {
+        pool.tvlETH = 222 // (https://bunni.xyz/explore/pools/base/0x18851334c1315b5c92d577e50f3190e599ab6f7460b7859add5473f922c3bf54)
+        pool.tvlUSD = 666666 // (https://bunni.xyz/explore/pools/base/0x18851334c1315b5c92d577e50f3190e599ab6f7460b7859add5473f922c3bf54)
         additionalAllowedPool += 1
       }
 
