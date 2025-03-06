@@ -192,7 +192,8 @@ export class RoutingAPIPipeline extends Stack {
         chainId !== ChainId.UNICHAIN_SEPOLIA &&
         chainId !== ChainId.MONAD_TESTNET &&
         chainId !== ChainId.BASE_SEPOLIA &&
-        chainId !== ChainId.UNICHAIN
+        chainId !== ChainId.UNICHAIN &&
+        chainId !== ChainId.SONEIUM
       ) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
