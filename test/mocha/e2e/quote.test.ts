@@ -3584,7 +3584,7 @@ describe('quote', function () {
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
           // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
-          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
+          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA, ChainId.AVALANCHE].includes(chain)
             ? chain !== ChainId.SEPOLIA
               ? USDC_ON(chain)
               : USDC_NATIVE_SEPOLIA
@@ -3619,18 +3619,12 @@ describe('quote', function () {
             // we just have to iterate through to make sure find it and assert the important data
             data.route.forEach((pools) => {
               pools.forEach((pool) => {
-                if (
-                  chain === ChainId.SEPOLIA &&
-                  pool.tokenIn.address === '0x0000000000000000000000000000000000000000'
-                ) {
+                if (pool.tokenIn.address === '0x0000000000000000000000000000000000000000') {
                   nativeOrWrappedNativePoolFound = true
                   nativePoolFound = true
                 }
 
-                if (
-                  chain !== ChainId.SEPOLIA &&
-                  pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()
-                ) {
+                if (pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()) {
                   nativeOrWrappedNativePoolFound = true
                 }
               })
@@ -3656,6 +3650,7 @@ describe('quote', function () {
               expect(data.hitsCachedRoutes).to.be.true
             }
           } catch (err: any) {
+            console.log(err) // log to see which assertion in the try block failed
             fail(JSON.stringify(err.response.data))
           }
         })
