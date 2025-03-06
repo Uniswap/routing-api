@@ -3574,8 +3574,7 @@ describe('quote', function () {
             chain === ChainId.ZKSYNC ||
             chain === ChainId.UNICHAIN_SEPOLIA ||
             chain === ChainId.UNICHAIN ||
-            chain === ChainId.SONEIUM ||
-            chain === ChainId.AVALANCHE
+            chain === ChainId.SONEIUM
           ) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI
@@ -3585,7 +3584,7 @@ describe('quote', function () {
 
           // TODO ROUTE-64: Remove this once smart-order-router supports ETH native currency on BASE
           // see https://uniswapteam.slack.com/archives/C021SU4PMR7/p1691593679108459?thread_ts=1691532336.742419&cid=C021SU4PMR7
-          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA].includes(chain)
+          const tokenOut = [ChainId.BASE, ChainId.SEPOLIA, ChainId.AVALANCHE].includes(chain)
             ? chain !== ChainId.SEPOLIA
               ? USDC_ON(chain)
               : USDC_NATIVE_SEPOLIA
