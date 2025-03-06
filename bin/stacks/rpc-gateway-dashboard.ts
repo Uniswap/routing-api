@@ -66,33 +66,6 @@ function getProviderDbHealthStateChangeForChain(chainId: ChainId) {
   return metrics
 }
 
-function getProviderHealthStateChangeForChain(chainId: ChainId) {
-  const metrics = []
-  for (const providerName of getProviderNameForChain(chainId)) {
-    metrics.push([
-      'Uniswap',
-      `RPC_GATEWAY_${chainId}_${providerName}_becomes_UNHEALTHY`,
-      'Service',
-      'RoutingAPI',
-      {
-        id: `provider_into_unhealthy_${chainId}_${providerName}`,
-        label: `${providerName} into UNHEALTHY ${ID_TO_NETWORK_NAME(chainId)}`,
-      },
-    ])
-    metrics.push([
-      'Uniswap',
-      `RPC_GATEWAY_${chainId}_${providerName}_becomes_HEALTHY`,
-      'Service',
-      'RoutingAPI',
-      {
-        id: `provider_into_healthy_${chainId}_${providerName}`,
-        label: `${providerName} into HEALTHY ${ID_TO_NETWORK_NAME(chainId)}`,
-      },
-    ])
-  }
-  return metrics
-}
-
 function getLatencyMetricsForChain(chainId: ChainId) {
   const metrics = []
   for (const providerName of getProviderNameForChain(chainId)) {
@@ -594,27 +567,6 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
             left: {
               showUnits: false,
               label: 'DB health state changes',
-            },
-          },
-        },
-      },
-      {
-        height: 8,
-        width: 24,
-        type: 'metric',
-        properties: {
-          metrics: getProviderHealthStateChangeForChain(chainId),
-          view: 'timeSeries',
-          stacked: false,
-          region,
-          stat: 'Maximum',
-          period: 300,
-          title: `Provider health state for ${ID_TO_NETWORK_NAME(chainId)}`,
-          setPeriodToTimeRange: true,
-          yAxis: {
-            left: {
-              showUnits: false,
-              label: 'Health state changes',
             },
           },
         },
