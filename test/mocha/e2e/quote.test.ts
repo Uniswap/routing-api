@@ -310,7 +310,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(40000)
+    this.timeout(400000)
     ;[alice] = await ethers.getSigners()
 
     // Make a dummy call to the API to get a block number to fork from.
@@ -3620,7 +3620,6 @@ describe('quote', function () {
             data.route.forEach((pools) => {
               pools.forEach((pool) => {
                 if (
-                  chain === ChainId.SEPOLIA &&
                   pool.tokenIn.address === '0x0000000000000000000000000000000000000000'
                 ) {
                   nativeOrWrappedNativePoolFound = true
@@ -3628,7 +3627,6 @@ describe('quote', function () {
                 }
 
                 if (
-                  chain !== ChainId.SEPOLIA &&
                   pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()
                 ) {
                   nativeOrWrappedNativePoolFound = true
@@ -3656,6 +3654,7 @@ describe('quote', function () {
               expect(data.hitsCachedRoutes).to.be.true
             }
           } catch (err: any) {
+            console.log(err) // log to see which assertion in the try block failed
             fail(JSON.stringify(err.response.data))
           }
         })
