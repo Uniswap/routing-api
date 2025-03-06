@@ -3574,7 +3574,8 @@ describe('quote', function () {
             chain === ChainId.ZKSYNC ||
             chain === ChainId.UNICHAIN_SEPOLIA ||
             chain === ChainId.UNICHAIN ||
-            chain === ChainId.SONEIUM
+            chain === ChainId.SONEIUM ||
+            chain === ChainId.AVALANCHE
           ) {
             // Blast doesn't have DAI or USDC yet
             // Zora doesn't have DAI
