@@ -68,5 +68,12 @@
     "providerInitialWeights": [1, 0],
     "providerUrls": ["QUICKNODE_81457", "INFURA_81457"],
     "providerNames": ["QUICKNODE", "INFURA"]
+  },
+  {
+    "chainId": 1868,
+    "useMultiProviderProb": 1,
+    "providerInitialWeights": [1],
+    "providerUrls": ["UNIRPC_0"],
+    "providerNames": ["UNIRPC"]
   }
 ]

@@ -112,6 +112,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MONAD_TESTNET,
   ChainId.BASE_SEPOLIA,
   ChainId.UNICHAIN,
+  ChainId.SONEIUM,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -373,6 +374,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.MONAD_TESTNET:
             case ChainId.BASE_SEPOLIA:
             case ChainId.UNICHAIN:
+            case ChainId.SONEIUM:
+            default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
                 provider,
@@ -466,6 +469,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ChainId.BLAST,
               ChainId.WORLDCHAIN,
               ChainId.UNICHAIN,
+              ChainId.SONEIUM,
             ]
           )
 
@@ -516,6 +520,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.WORLDCHAIN,
             ChainId.MONAD_TESTNET,
             ChainId.UNICHAIN,
+            ChainId.SONEIUM,
           ]
 
           const v4Supported = [
@@ -531,6 +536,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.BLAST,
             ChainId.MAINNET,
+            ChainId.SONEIUM,
           ]
 
           const mixedSupported = [
@@ -546,6 +552,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BNB,
             ChainId.WORLDCHAIN,
             ChainId.ZORA,
+            ChainId.SONEIUM,
           ]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]

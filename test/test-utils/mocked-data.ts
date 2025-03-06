@@ -1,16 +1,16 @@
 import { encodeSqrtRatioX96, Pool } from '@uniswap/v3-sdk'
 import { FeeAmount } from '../utils/ticks'
+import { V3PoolAccessor } from '@uniswap/smart-order-router/build/main/providers/v3/pool-provider'
+import _ from 'lodash'
+import { ChainId, Currency, Ether, WETH9 } from '@uniswap/sdk-core'
+import { DAI_ON, USDC_ON, USDT_ON } from '../utils/tokens'
 import {
   DAI_MAINNET as DAI,
   USDC_MAINNET as USDC,
   USDT_MAINNET as USDT,
   WRAPPED_NATIVE_CURRENCY,
-} from '@uniswap/smart-order-router/build/main/index'
-import { V3PoolAccessor } from '@uniswap/smart-order-router/build/main/providers/v3/pool-provider'
-import _ from 'lodash'
-import { ChainId, Currency, Ether, WETH9 } from '@uniswap/sdk-core'
-import { DAI_ON, USDC_ON, USDT_ON } from '../utils/tokens'
-import { WBTC_MAINNET } from '@uniswap/smart-order-router'
+  WBTC_MAINNET,
+} from '@uniswap/smart-order-router'
 
 export const USDC_DAI_LOW = new Pool(USDC, DAI, FeeAmount.LOW, encodeSqrtRatioX96(1, 1), 10, 0)
 export const USDC_DAI_MEDIUM = new Pool(USDC, DAI, FeeAmount.MEDIUM, encodeSqrtRatioX96(1, 1), 8, 0)

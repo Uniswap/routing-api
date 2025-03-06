@@ -28,6 +28,8 @@ export function chainIdToNetworkName(networkId: ChainId): string {
       return 'base-sepolia'
     case ChainId.UNICHAIN:
       return 'unichain'
+    case ChainId.SONEIUM:
+      return 'soneium'
     default:
       return 'ethereum'
   }
