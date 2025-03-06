@@ -3619,16 +3619,12 @@ describe('quote', function () {
             // we just have to iterate through to make sure find it and assert the important data
             data.route.forEach((pools) => {
               pools.forEach((pool) => {
-                if (
-                  pool.tokenIn.address === '0x0000000000000000000000000000000000000000'
-                ) {
+                if (pool.tokenIn.address === '0x0000000000000000000000000000000000000000') {
                   nativeOrWrappedNativePoolFound = true
                   nativePoolFound = true
                 }
 
-                if (
-                  pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()
-                ) {
+                if (pool.tokenIn.address.toLowerCase() === WNATIVE_ON(chain).address.toLowerCase()) {
                   nativeOrWrappedNativePoolFound = true
                 }
               })
