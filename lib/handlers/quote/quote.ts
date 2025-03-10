@@ -237,6 +237,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         portionAmount,
         portionRecipient,
         gasToken,
+        routeId,
       },
       requestInjected: {
         router,
@@ -351,6 +352,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(gasToken ? { gasToken } : {}),
       ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
       shouldEnableMixedRouteEthWeth: shouldEnableMixedRouteEthWeth,
+      ...(routeId ? { routeId } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
