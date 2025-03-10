@@ -339,7 +339,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
         metric.putMetric('CachingQuoteForRoutesDbRequestSent', 1, MetricLoggerUnit.Count)
-        this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED], amount, routeId)
+        this.sendAsyncCachingRequest(
+          partitionKey,
+          [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED],
+          amount,
+          routeId
+        )
         this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
         metric.putMetric('CachingQuoteForRoutesDbRequestNotNeeded', 1, MetricLoggerUnit.Count)
