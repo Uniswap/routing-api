@@ -113,5 +113,5 @@ export type QuoteQueryParams = {
   source?: string
   gasToken?: string
   quotedId?: string
-  cachedRoutesRouteIds?: number
+  cachedRoutesRouteIds?: string
 }

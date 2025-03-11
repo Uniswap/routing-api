@@ -294,7 +294,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (optimistic) {
       // We send an async caching quote
       // we do not await on this function, it's a fire and forget
-      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber, cachedRoutes.routes.map((route) => route.routeId))
+      this.maybeSendCachingQuoteForRoutesDb(
+        partitionKey,
+        amount,
+        currentBlockNumber,
+        cachedRoutes.routes.map((route) => route.routeId)
+      )
     }
 
     return cachedRoutes
