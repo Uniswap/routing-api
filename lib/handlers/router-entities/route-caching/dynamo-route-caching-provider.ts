@@ -19,6 +19,7 @@ import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshall
 import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
+import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
 
 interface ConstructorParams {
   /**
@@ -293,7 +294,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (optimistic) {
       // We send an async caching quote
       // we do not await on this function, it's a fire and forget
-      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber, first.routes[0].routeId)
+      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber, cachedRoutes.routes.map((route) => route.routeId))
     }
 
     return cachedRoutes
@@ -303,7 +304,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
     currentBlockNumber: number,
-    routeId: number
+    cachedRoutesRouteIds: number[]
   ): Promise<void> {
     try {
       const queryParams = {
@@ -343,7 +344,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           partitionKey,
           [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED],
           amount,
-          routeId
+          cachedRoutesRouteIds
         )
         this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
@@ -358,7 +359,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     protocols: Protocol[],
     amount: CurrencyAmount<Currency>,
-    routeId: number
+    cachedRoutesRouteIds: number[]
   ): void {
     const payload = {
       queryStringParameters: {
@@ -371,7 +372,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
         intent: INTENT.CACHING,
         requestSource: 'routing-api',
-        routeId: routeId,
+        cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
       },
     }
 
