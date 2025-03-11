@@ -352,7 +352,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(gasToken ? { gasToken } : {}),
       ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
       shouldEnableMixedRouteEthWeth: shouldEnableMixedRouteEthWeth,
-      ...(cachedRoutesRouteIds ? { cachedRoutesRouteIds: cachedRoutesRouteIds } : {}),
+      ...(cachedRoutesRouteIds ? { cachedRoutesRouteIds } : {}),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
