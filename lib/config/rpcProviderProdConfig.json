@@ -113,9 +113,9 @@
     "useMultiProviderProb": 1,
     "latencyEvaluationSampleProb": 0,
     "healthCheckSampleProb": 0,
-    "providerInitialWeights": [1],
-    "providerUrls": ["QUICKNODE_480"],
-    "providerNames": ["QUICKNODE"]
+    "providerInitialWeights": [0, 1],
+    "providerUrls": ["QUICKNODE_480", "UNIRPC_0"],
+    "providerNames": ["QUICKNODE", "UNIRPC"]
   },
   {
     "chainId": 1301,
