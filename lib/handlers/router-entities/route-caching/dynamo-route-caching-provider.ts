@@ -19,6 +19,7 @@ import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshall
 import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
+import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
 
 interface ConstructorParams {
   /**
@@ -293,7 +294,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     if (optimistic) {
       // We send an async caching quote
       // we do not await on this function, it's a fire and forget
-      this.maybeSendCachingQuoteForRoutesDb(partitionKey, amount, currentBlockNumber)
+      this.maybeSendCachingQuoteForRoutesDb(
+        partitionKey,
+        amount,
+        currentBlockNumber,
+        cachedRoutes.routes.map((route) => route.routeId)
+      )
     }
 
     return cachedRoutes
@@ -302,7 +308,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private async maybeSendCachingQuoteForRoutesDb(
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
-    currentBlockNumber: number
+    currentBlockNumber: number,
+    cachedRoutesRouteIds: number[]
   ): Promise<void> {
     try {
       const queryParams = {
@@ -338,7 +345,12 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       // if no Item is found it means we need to send a caching request
       if (shouldSendCachingRequest) {
         metric.putMetric('CachingQuoteForRoutesDbRequestSent', 1, MetricLoggerUnit.Count)
-        this.sendAsyncCachingRequest(partitionKey, [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED], amount)
+        this.sendAsyncCachingRequest(
+          partitionKey,
+          [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED],
+          amount,
+          cachedRoutesRouteIds
+        )
         this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
         metric.putMetric('CachingQuoteForRoutesDbRequestNotNeeded', 1, MetricLoggerUnit.Count)
@@ -351,7 +363,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   private sendAsyncCachingRequest(
     partitionKey: PairTradeTypeChainId,
     protocols: Protocol[],
-    amount: CurrencyAmount<Currency>
+    amount: CurrencyAmount<Currency>,
+    cachedRoutesRouteIds: number[]
   ): void {
     const payload = {
       queryStringParameters: {
@@ -364,6 +377,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         protocols: protocols.map((protocol) => protocol.toLowerCase()).join(','),
         intent: INTENT.CACHING,
         requestSource: 'routing-api',
+        cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
       },
     }
 
