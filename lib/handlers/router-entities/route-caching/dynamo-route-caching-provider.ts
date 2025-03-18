@@ -369,7 +369,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
   ): void {
     const payload = {
       headers: {
-        'x-universal-router-version': protocols.includes(Protocol.V4) ? UniversalRouterVersion.V2_0 : UniversalRouterVersion.V1_2,
+        'x-universal-router-version': protocols.includes(Protocol.V4)
+          ? UniversalRouterVersion.V2_0
+          : UniversalRouterVersion.V1_2,
       },
       queryStringParameters: {
         tokenInAddress: getSymbolOrAddress(partitionKey.currencyIn, partitionKey.chainId),
