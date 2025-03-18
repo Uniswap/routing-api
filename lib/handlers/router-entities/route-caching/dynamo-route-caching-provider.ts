@@ -20,6 +20,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
 import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
+import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 
 interface ConstructorParams {
   /**
@@ -367,6 +368,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     cachedRoutesRouteIds: number[]
   ): void {
     const payload = {
+      headers: {
+        'x-universal-router-version': protocols.includes(Protocol.V4) ? UniversalRouterVersion.V2_0 : UniversalRouterVersion.V1_2,
+      },
       queryStringParameters: {
         tokenInAddress: getSymbolOrAddress(partitionKey.currencyIn, partitionKey.chainId),
         tokenInChainId: partitionKey.chainId.toString(),
