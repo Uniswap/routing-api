@@ -310,7 +310,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(400000)
+    this.timeout(40000)
     ;[alice] = await ethers.getSigners()
 
     // Make a dummy call to the API to get a block number to fork from.
