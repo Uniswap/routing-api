@@ -14,6 +14,8 @@ export const BUNNI_HOOKS_ADDRESS_V1_1_1_ON_BASE = '0x0000fe59823933ac763611a69c8
 export const BUNNI_HOOKS_ADDRESS_v1_0_ON_ARBITRUM = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
 export const BUNNI_HOOKS_ADDRESS_V1_1_ON_ARBITRUM = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
 export const BUNNI_HOOKS_ADDRESS_V1_1_1_ON_ARBITRUM = '0x0000fe59823933ac763611a69c88f91d45f81888'
+export const GRADUATION_HOOKS_ADDRESS_ON_BASE = '0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000'
+export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621AFCa515Bf58631D4733fbA7B72Aae4'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -54,6 +56,8 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_0_ON_BASE,
     BUNNI_HOOKS_ADDRESS_V1_1_ON_ARBITRUM,
     BUNNI_HOOKS_ADDRESS_V1_1_1_ON_BASE,
+    GRADUATION_HOOKS_ADDRESS_ON_BASE,
+    COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
