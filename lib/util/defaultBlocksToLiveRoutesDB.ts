@@ -7,6 +7,10 @@ import { ChainId } from '@uniswap/sdk-core'
 // changing to this way with ChainId enum as key indexing, so that we wont forgot to add new chain tuned blocks-to-live
 // those are only gonna be enabled with DynamoRouteCachingProvider.newCachedRoutesRolloutPercent anyway
 export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = {
+  // (60 minutes) / (5 seconds) = 720
+  [ChainId.HAVEN1]: 720,
+  [ChainId.HAVEN1_TESTNET]: 720,
+  [ChainId.HAVEN1_DEVNET]: 720,
   // (60 minutes) / (12 seconds)= 300
   [ChainId.MAINNET]: 300,
   [ChainId.GOERLI]: 300,

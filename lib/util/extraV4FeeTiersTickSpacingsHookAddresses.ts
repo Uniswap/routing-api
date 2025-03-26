@@ -50,4 +50,7 @@ export const EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES: { [chain in ChainId]: Ar
   [ChainId.UNICHAIN]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.MONAD_TESTNET]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.SONEIUM]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.HAVEN1]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.HAVEN1_TESTNET]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.HAVEN1_DEVNET]: emptyV4FeeTickSpacingsHookAddresses,
 }
