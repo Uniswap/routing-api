@@ -21,6 +21,7 @@ import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToL
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
 import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
 import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { computeProtocolsInvolvedIfMixed } from '../../../util/computeProtocolsInvolvedIfMixed'
 
 interface ConstructorParams {
   /**
@@ -451,6 +452,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
       const binaryCachedRoutes = Buffer.from(jsonCachedRoutes)
 
       const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
+      const protocolsInvolved = computeProtocolsInvolvedIfMixed(route)
 
       return {
         PutRequest: {
@@ -461,6 +463,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             protocol: route.protocol.toString(),
             item: binaryCachedRoutes,
             plainRoutes: jsonCachedRoutes,
+            protocolsInvolved: protocolsInvolved,
             ttl: ttl,
           },
         },
