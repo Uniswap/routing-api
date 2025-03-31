@@ -37,7 +37,7 @@ describe('computeProtocolsInvolvedIfMixed', () => {
       route: new MixedRoute([TEST_WETH_USDC_POOL, TEST_UNI_USDC_V4_POOL], WETH, UNI_MAINNET),
       percent: 100,
     })
-    expect(computeProtocolsInvolvedIfMixed(cachedRoute)).toEqual([Protocol.V3, Protocol.V4])
+    expect(computeProtocolsInvolvedIfMixed(cachedRoute)).toEqual(new Set([Protocol.V3, Protocol.V4]))
   })
 
   it('v3 route', () => {
@@ -45,6 +45,6 @@ describe('computeProtocolsInvolvedIfMixed', () => {
       route: new V3Route([TEST_WETH_USDC_POOL], WETH, USDC_MAINNET),
       percent: 100,
     })
-    expect(computeProtocolsInvolvedIfMixed(cachedRoute)).toEqual([])
+    expect(computeProtocolsInvolvedIfMixed(cachedRoute)).toEqual(new Set())
   })
 })
