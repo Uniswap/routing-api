@@ -30,7 +30,7 @@ export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
   ChainId.ZORA,
   ChainId.BLAST,
   ChainId.ZKSYNC,
-  ChainId.SONEIUM
+  ChainId.SONEIUM,
 ])
 
 export class RoutingAPIStack extends cdk.Stack {
