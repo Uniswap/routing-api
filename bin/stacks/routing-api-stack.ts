@@ -1,7 +1,7 @@
 import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
-import { ChainId } from '@uniswap/sdk-core'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
+import { ChainId } from '@uniswap/sdk-core'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -23,6 +23,18 @@ import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
+
+// For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity.
+export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
+  ChainId.CELO,
+  ChainId.ZORA,
+  ChainId.BLAST,
+  ChainId.ZKSYNC,
+  ChainId.SONEIUM,
+])
+
+// For low volume request sources, we'll increase the evaluation periods to reduce triggering sensitivity.
+export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set(['uniswap-extension'])
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -435,6 +447,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume is high enough over default period (5m) for 4xx errors (no route).
       const invocationsThreshold = 500
+      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
       const metric = new MathExpression({
         expression: `IF(invocations > ${invocationsThreshold}, 100*(response400/invocations), 0)`,
         usingMetrics: {
@@ -458,7 +471,7 @@ export class RoutingAPIStack extends cdk.Stack {
         alarmName,
         metric,
         threshold: 80,
-        evaluationPeriods: 2,
+        evaluationPeriods: evaluationPeriods,
       })
       percent4XXByChainAlarm.push(alarm)
     })
@@ -472,6 +485,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
       const invocationsThreshold = 50
+      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
       const metric = new MathExpression({
         expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
@@ -503,7 +517,7 @@ export class RoutingAPIStack extends cdk.Stack {
         metric,
         comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
         threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-        evaluationPeriods: 2,
+        evaluationPeriods: evaluationPeriods,
       })
       successRateByChainAlarm.push(alarm)
     })
@@ -517,6 +531,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
       // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
       const invocationsThreshold = 50
+      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
       const metric = new MathExpression({
         expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
@@ -548,7 +563,7 @@ export class RoutingAPIStack extends cdk.Stack {
         metric,
         comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
         threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-        evaluationPeriods: 2,
+        evaluationPeriods: evaluationPeriods,
       })
       successRateByRequestSourceAlarm.push(alarm)
     })
@@ -567,6 +582,8 @@ export class RoutingAPIStack extends cdk.Stack {
         const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
         const invocationsThreshold = 50
+        const evaluationPeriods =
+          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
         const metric = new MathExpression({
           expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
           usingMetrics: {
@@ -598,7 +615,7 @@ export class RoutingAPIStack extends cdk.Stack {
           metric,
           comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
           threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-          evaluationPeriods: 2,
+          evaluationPeriods: evaluationPeriods,
         })
         successRateByRequestSourceAndChainIdAlarm.push(alarm)
       })
