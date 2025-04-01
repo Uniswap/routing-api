@@ -24,7 +24,7 @@ import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
 
-// For low volume chains, we'll increase the evaluation period from 4 to 2 to reduce triggering sensitivity.
+// For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity.
 export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
   ChainId.CELO,
   ChainId.ZORA,
