@@ -21,6 +21,7 @@ import {
   V3Route,
   nativeOnChain,
   MetricLoggerUnit,
+  MixedRoute,
 } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
 import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
@@ -98,6 +99,17 @@ const TEST_WETH_USDC_POOL = new V3Pool(
   /* tickCurrent */ -69633
 )
 
+const TEST_UNI_USDC_V4_POOL = new V4Pool(
+  USDC_MAINNET,
+  UNI_MAINNET,
+  FeeAmount.LOW,
+  10,
+  ADDRESS_ZERO,
+  encodeSqrtRatioX96(1, 1),
+  500,
+  0
+)
+
 const TEST_UNI_USDC_POOL = new V3Pool(
   UNI_MAINNET,
   USDC_MAINNET,
@@ -140,6 +152,21 @@ const TEST_CACHED_V4_ROUTES = new CachedRoutes({
   currencyIn: nativeOnChain(ChainId.MAINNET),
   currencyOut: USDC_MAINNET,
   protocolsCovered: [TEST_CACHED_V4_ROUTE.protocol],
+  blockNumber: 0,
+  tradeType: TradeType.EXACT_INPUT,
+  originalAmount: '1',
+  blocksToLive: 5,
+})
+const TEST_CACHED_MIXED_ROUTE = new CachedRoute({
+  route: new MixedRoute([TEST_WETH_USDC_POOL, TEST_UNI_USDC_V4_POOL], WETH, UNI_MAINNET),
+  percent: 100,
+})
+const TEST_CACHED_MIXED_ROUTES = new CachedRoutes({
+  routes: [TEST_CACHED_MIXED_ROUTE],
+  chainId: ChainId.MAINNET,
+  currencyIn: WETH,
+  currencyOut: UNI_MAINNET,
+  protocolsCovered: [Protocol.MIXED],
   blockNumber: 0,
   tradeType: TradeType.EXACT_INPUT,
   originalAmount: '1',
@@ -361,5 +388,58 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_CACHED_ROUTES.blockNumber
     )
     expect(route).to.not.be.undefined
+  })
+
+  it('Mixed cached routes persists protocolsInvolved', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+    const currencyAmountETH = CurrencyAmount.fromRawAmount(
+      nativeOnChain(ChainId.MAINNET),
+      JSBI.BigInt(1 * 10 ** nativeOnChain(ChainId.MAINNET).decimals)
+    )
+
+    const cacheMode = await dynamoRouteCache.getCacheMode(
+      ChainId.MAINNET,
+      currencyAmount,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.MIXED]
+    )
+    expect(cacheMode).to.equal(CacheMode.Livemode)
+
+    const insertedIntoCacheMixed = await dynamoRouteCache.setCachedRoute(TEST_CACHED_MIXED_ROUTES, currencyAmountETH)
+    expect(insertedIntoCacheMixed).to.be.true
+
+    const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(
+      TEST_CACHED_MIXED_ROUTES,
+      currencyAmount
+    )
+    expect(cacheModeFromCachedRoutes).to.equal(CacheMode.Livemode)
+
+    const cacheModeFromCachedMixedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(
+      TEST_CACHED_MIXED_ROUTES,
+      currencyAmount
+    )
+    expect(cacheModeFromCachedMixedRoutes).to.equal(CacheMode.Livemode)
+
+    // Fetches route successfully from cache when it has been cached.
+    const route = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.MIXED],
+      TEST_CACHED_MIXED_ROUTES.blockNumber
+    )
+    expect(route).to.not.be.undefined
+
+    const mixedRoutes = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmountETH,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.MIXED],
+      TEST_CACHED_MIXED_ROUTES.blockNumber
+    )
+    expect(mixedRoutes).to.not.be.undefined
   })
 })
