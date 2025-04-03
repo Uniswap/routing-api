@@ -463,7 +463,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             protocol: route.protocol.toString(),
             item: binaryCachedRoutes,
             plainRoutes: jsonCachedRoutes,
-            protocolsInvolved: JSON.stringify(protocolsInvolved),
+            protocolsInvolved: Array.from(protocolsInvolved).join(','),
             ttl: ttl,
           },
         },
