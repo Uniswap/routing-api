@@ -32,14 +32,11 @@ export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
   ChainId.ZKSYNC,
   ChainId.SONEIUM,
   ChainId.AVALANCHE,
-  ChainId.WORLDCHAIN
+  ChainId.WORLDCHAIN,
 ])
 
 // For low volume request sources, we'll increase the evaluation periods to reduce triggering sensitivity.
-export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set([
-  'uniswap-extension',
-  'uniswap-android'
-])
+export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set(['uniswap-extension', 'uniswap-android'])
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
