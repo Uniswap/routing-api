@@ -24,7 +24,7 @@ export function computeProtocolsInvolvedIfMixed(route: CachedRoute<SupportedRout
 
         // default is Protocol.V4
         return Protocol.V4
-      })
+      }).sort((a, b) => a.toString().localeCompare(b.toString()))
     )
   } else {
     return new Set()
