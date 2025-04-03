@@ -34,7 +34,7 @@ const TEST_UNI_USDC_V4_POOL = new V4Pool(
 describe('computeProtocolsInvolvedIfMixed', () => {
   it('mixed route', () => {
     const cachedRoute = new CachedRoute({
-      route: new MixedRoute([TEST_WETH_USDC_POOL, TEST_UNI_USDC_V4_POOL], WETH, UNI_MAINNET),
+      route: new MixedRoute([TEST_UNI_USDC_V4_POOL, TEST_WETH_USDC_POOL], UNI_MAINNET, WETH),
       percent: 100,
     })
     expect(computeProtocolsInvolvedIfMixed(cachedRoute)).toEqual(new Set([Protocol.V3, Protocol.V4]))
