@@ -9,7 +9,7 @@ import {
   metric,
   MetricLoggerUnit,
   routeToString,
-  SupportedRoutes
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
@@ -143,11 +143,14 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           // Older routes might not have the protocol field, so we keep them if they don't have it
           .filter((record) => !record.protocol || protocols.includes(record.protocol))
           // Older routes might not have the protocolsInvolved field, so we keep them if they don't have it
-          .filter((record) => !record.protocolsInvolved
-            // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
-            || !protocols.includes(Protocol.MIXED)
-            // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains at least one of the requested protocols
-            || protocols.includes(record.protocolsInvolved.split(',')))
+          .filter(
+            (record) =>
+              !record.protocolsInvolved ||
+              // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
+              !protocols.includes(Protocol.MIXED) ||
+              // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains at least one of the requested protocols
+              protocols.includes(record.protocolsInvolved.split(','))
+          )
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
