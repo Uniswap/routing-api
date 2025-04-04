@@ -147,7 +147,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
             || !protocols.includes(Protocol.MIXED)
             // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains at least one of the requested protocols
-            || protocols.includes(record.protocolsInvolved))
+            || protocols.includes(record.protocolsInvolved.split(',')))
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
