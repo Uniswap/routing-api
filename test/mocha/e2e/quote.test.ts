@@ -1495,6 +1495,47 @@ describe('quote', function () {
               }
             })
 
+            it(`erc20 -> erc20 cached routes should not return mixed route`, async() => {
+              if (type !== 'exactIn') {
+                return
+              }
+
+              const quoteReq: QuoteQueryParams = {
+                tokenInAddress: 'ETH',
+                tokenInChainId: 1,
+                tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+                tokenOutChainId: 1,
+                amount: '1000000000000000000',
+                type,
+                recipient: alice.address,
+                slippageTolerance: SLIPPAGE,
+                deadline: '360',
+                algorithm: 'alpha',
+                protocols: 'v2,v3',
+                enableUniversalRouter: true,
+                enableDebug: true,
+              }
+
+              const queryParams = qs.stringify(quoteReq)
+
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
+                `${API}?${queryParams}`,
+                { headers: HEADERS_2_0 }
+              )
+
+              const {
+                data: { route },
+                status,
+              } = response
+
+              expect(status).to.equal(200)
+
+              // Verify no mixed routes returned when using cached routes
+              for (const r of route) {
+                expect(r.every(pool => pool.type === 'v3-pool' || pool.type === 'v2-pool')).to.equal(true)
+              }
+            })
+
             /// Tests for routes likely to result in MixedRoutes being returned
             if (type === 'exactIn') {
               it.skip(`erc20 -> erc20 forceMixedRoutes not specified for v2,v3 does not return mixed route even when it is better`, async () => {
