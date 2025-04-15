@@ -165,6 +165,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         if (protocols.includes(Protocol.MIXED)) {
           filteredItems.forEach((record) => {
             if (
+              record.protocolsInvolved &&
               !(record.protocolsInvolved as String)
                 .split(',')
                 .every((protocol) => protocols.includes(protocol as Protocol))
