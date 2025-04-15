@@ -96,6 +96,9 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @param quoteCurrency
    * @param tradeType
    * @param protocols
+   * @param currentBlockNumber
+   * @param optimistic
+   * @param alphaRouterConfig
    * @protected
    */
   protected override async _getCachedRoute(
