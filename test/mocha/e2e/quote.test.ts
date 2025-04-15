@@ -1497,7 +1497,7 @@ describe('quote', function () {
 
             // Test that repros https://uniswapteam.slack.com/archives/C08JM8SKMV2/p1742424330903569?thread_ts=1742424322.824189&cid=C08JM8SKMV2
             // Where quote request contains v2,v3
-            it(`erc20 -> erc20 cached routes should not return mixed route`, async() => {
+            it(`erc20 -> erc20 cached routes should not return mixed route`, async () => {
               if (type !== 'exactIn') {
                 return
               }
@@ -1520,10 +1520,9 @@ describe('quote', function () {
 
               const queryParams = qs.stringify(quoteReq)
 
-              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(
-                `${API}?${queryParams}`,
-                { headers: HEADERS_1_2 }
-              )
+              const response: AxiosResponse<QuoteResponse> = await axios.get<QuoteResponse>(`${API}?${queryParams}`, {
+                headers: HEADERS_1_2,
+              })
 
               const {
                 data: { route },
@@ -1534,8 +1533,8 @@ describe('quote', function () {
 
               // Verify no mixed routes returned when using cached routes
               for (const r of route) {
-                expect(r.every(pool => pool.type === 'v3-pool' || pool.type === 'v2-pool')).to.equal(true)
-                expect(r.every(pool => pool.type !== 'v4-pool')).to.equal(true)
+                expect(r.every((pool) => pool.type === 'v3-pool' || pool.type === 'v2-pool')).to.equal(true)
+                expect(r.every((pool) => pool.type !== 'v4-pool')).to.equal(true)
               }
             })
 

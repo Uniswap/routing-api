@@ -13,15 +13,15 @@ import { encodeSqrtRatioX96, FeeAmount, Pool as V3Pool } from '@uniswap/v3-sdk'
 import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import { WNATIVE_ON } from '../../../../../utils/tokens'
 import {
-  CacheMode,
   CachedRoute,
   CachedRoutes,
+  CacheMode,
+  MetricLoggerUnit,
+  MixedRoute,
+  nativeOnChain,
   UNI_MAINNET,
   USDC_MAINNET,
   V3Route,
-  nativeOnChain,
-  MetricLoggerUnit,
-  MixedRoute,
 } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
 import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
@@ -29,6 +29,7 @@ import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/ne
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { DynamoDB } from 'aws-sdk'
+import { DEFAULT_ROUTING_CONFIG_BY_CHAIN } from '../../../../../../lib/handlers/shared'
 
 chai.use(chaiAsPromised)
 
@@ -392,11 +393,6 @@ describe('DynamoRouteCachingProvider', async () => {
 
   it('Mixed cached routes persists protocolsInvolved', async () => {
     const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
-    const currencyAmountETH = CurrencyAmount.fromRawAmount(
-      nativeOnChain(ChainId.MAINNET),
-      JSBI.BigInt(1 * 10 ** nativeOnChain(ChainId.MAINNET).decimals)
-    )
-
     const cacheMode = await dynamoRouteCache.getCacheMode(
       ChainId.MAINNET,
       currencyAmount,
@@ -406,7 +402,7 @@ describe('DynamoRouteCachingProvider', async () => {
     )
     expect(cacheMode).to.equal(CacheMode.Livemode)
 
-    const insertedIntoCacheMixed = await dynamoRouteCache.setCachedRoute(TEST_CACHED_MIXED_ROUTES, currencyAmountETH)
+    const insertedIntoCacheMixed = await dynamoRouteCache.setCachedRoute(TEST_CACHED_MIXED_ROUTES, currencyAmount)
     expect(insertedIntoCacheMixed).to.be.true
 
     const cacheModeFromCachedRoutes = await dynamoRouteCache.getCacheModeFromCachedRoutes(
@@ -427,19 +423,78 @@ describe('DynamoRouteCachingProvider', async () => {
       currencyAmount,
       UNI_MAINNET,
       TradeType.EXACT_INPUT,
-      [Protocol.MIXED],
-      TEST_CACHED_MIXED_ROUTES.blockNumber
+      [Protocol.MIXED, Protocol.V3, Protocol.V4],
+      TEST_CACHED_MIXED_ROUTES.blockNumber,
+      false,
+      {
+        ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(ChainId.MAINNET),
+        enableMixedRouteWithUR1_2Percent: 100,
+      }
     )
     expect(route).to.not.be.undefined
 
     const mixedRoutes = await dynamoRouteCache.getCachedRoute(
       ChainId.MAINNET,
-      currencyAmountETH,
+      currencyAmount,
       UNI_MAINNET,
       TradeType.EXACT_INPUT,
-      [Protocol.MIXED],
-      TEST_CACHED_MIXED_ROUTES.blockNumber
+      // we fetch mixed route with the exact protocols version match (v3 + v4), expect to retrieve mixed route
+      [Protocol.MIXED, Protocol.V3, Protocol.V4],
+      TEST_CACHED_MIXED_ROUTES.blockNumber,
+      false,
+      {
+        ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(ChainId.MAINNET),
+        enableMixedRouteWithUR1_2Percent: 100,
+      }
     )
     expect(mixedRoutes).to.not.be.undefined
+
+    const mixedRouteWithExtraV2 = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      // we fetch mixed route with extra v2, expect to retrieve mixed route
+      [Protocol.MIXED, Protocol.V2, Protocol.V3, Protocol.V4],
+      TEST_CACHED_MIXED_ROUTES.blockNumber,
+      false,
+      {
+        ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(ChainId.MAINNET),
+        enableMixedRouteWithUR1_2Percent: 100,
+      }
+    )
+    expect(mixedRouteWithExtraV2).to.not.be.undefined
+
+    const nonExistV3OnlyMixedRoutes = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      // we fetch mixed route with only v3 missing v4, expect to retrieve nothing
+      [Protocol.MIXED, Protocol.V3],
+      TEST_CACHED_MIXED_ROUTES.blockNumber,
+      false,
+      {
+        ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(ChainId.MAINNET),
+        enableMixedRouteWithUR1_2Percent: 100,
+      }
+    )
+    expect(nonExistV3OnlyMixedRoutes).to.be.undefined
+
+    const nonExistV4OnlyMixedRoutes = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      UNI_MAINNET,
+      TradeType.EXACT_INPUT,
+      // we fetch mixed route with only v4 missing v3, expect to retrieve nothing
+      [Protocol.MIXED, Protocol.V4],
+      TEST_CACHED_MIXED_ROUTES.blockNumber,
+      false,
+      {
+        ...DEFAULT_ROUTING_CONFIG_BY_CHAIN(ChainId.MAINNET),
+        enableMixedRouteWithUR1_2Percent: 100,
+      }
+    )
+    expect(nonExistV4OnlyMixedRoutes).to.be.undefined
   })
 })

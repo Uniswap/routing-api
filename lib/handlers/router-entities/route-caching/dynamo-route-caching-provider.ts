@@ -1,4 +1,5 @@
 import {
+  AlphaRouterConfig,
   CachedRoute,
   CachedRoutes,
   CacheMode,
@@ -97,14 +98,15 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @param protocols
    * @protected
    */
-  protected async _getCachedRoute(
+  protected override async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     quoteCurrency: Currency,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,
-    optimistic: boolean
+    optimistic: boolean,
+    alphaRouterConfig?: AlphaRouterConfig
   ): Promise<CachedRoutes | undefined> {
     const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
 
@@ -143,16 +145,20 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           // Older routes might not have the protocol field, so we keep them if they don't have it
           .filter((record) => !record.protocol || protocols.includes(record.protocol))
           // Older routes might not have the protocolsInvolved field, so we keep them if they don't have it
-          .filter(
-            (record) =>
+          .filter((record) => {
+            return (
               !record.protocolsInvolved ||
-              // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
               !protocols.includes(Protocol.MIXED) ||
-              // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains all the requested protocols
-              (record.protocolsInvolved as String)
-                .split(',')
-                .every((protocol) => (Object.values(protocols) as string[]).includes(protocol))
-          )
+              // We want to roll out the mixed route with UR v1_2 with percent control,
+              // along with the cached routes so that we can test the performance of the mixed route with UR v1_2ss
+              ((alphaRouterConfig?.enableMixedRouteWithUR1_2Percent ?? 0) >= Math.random() * 100 &&
+                // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
+                // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains all the requested protocols
+                (record.protocolsInvolved as String)
+                  .split(',')
+                  .every((protocol) => protocols.includes(protocol as Protocol)))
+            )
+          })
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
