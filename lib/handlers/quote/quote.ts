@@ -353,6 +353,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
       shouldEnableMixedRouteEthWeth: shouldEnableMixedRouteEthWeth,
       ...(cachedRoutesRouteIds ? { cachedRoutesRouteIds } : {}),
+      enableMixedRouteWithUR1_2Percent: 1, // enable mixed route with UR v1.2 fix at 1%, to see whether we see quote endpoint perf improvement.
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)

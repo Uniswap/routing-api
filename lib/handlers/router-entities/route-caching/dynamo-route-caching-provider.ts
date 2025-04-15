@@ -162,6 +162,23 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
+        if (protocols.includes(Protocol.MIXED)) {
+          filteredItems.forEach((record) => {
+            if (
+              !(record.protocolsInvolved as String)
+                .split(',')
+                .every((protocol) => protocols.includes(protocol as Protocol))
+            ) {
+              metric.putMetric(
+                'RoutesDbFilteredEntriesMixedRoutesContainNonMatchingProtocols',
+                1,
+                MetricLoggerUnit.Count
+              )
+              log.error(`Cached Route entry ${JSON.stringify(record)} contains non matching protocols ${protocols}`)
+            }
+          })
+        }
+
         result.Items = filteredItems
 
         return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, protocols)
