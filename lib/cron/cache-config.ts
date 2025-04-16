@@ -622,4 +622,18 @@ export const chainProtocols = [
       v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BNB)
+    ),
+  }
 ]
