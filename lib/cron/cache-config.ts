@@ -635,5 +635,5 @@ export const chainProtocols = [
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
     ),
-  }
+  },
 ]
