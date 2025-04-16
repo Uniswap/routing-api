@@ -1,4 +1,5 @@
 import {
+  AlphaRouterConfig,
   CachedRoute,
   CachedRoutes,
   CacheMode,
@@ -95,16 +96,20 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @param quoteCurrency
    * @param tradeType
    * @param protocols
+   * @param currentBlockNumber
+   * @param optimistic
+   * @param alphaRouterConfig
    * @protected
    */
-  protected async _getCachedRoute(
+  protected override async _getCachedRoute(
     chainId: ChainId,
     amount: CurrencyAmount<Currency>,
     quoteCurrency: Currency,
     tradeType: TradeType,
     protocols: Protocol[],
     currentBlockNumber: number,
-    optimistic: boolean
+    optimistic: boolean,
+    alphaRouterConfig?: AlphaRouterConfig
   ): Promise<CachedRoutes | undefined> {
     const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
 
@@ -142,8 +147,45 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         const filteredItems = result.Items
           // Older routes might not have the protocol field, so we keep them if they don't have it
           .filter((record) => !record.protocol || protocols.includes(record.protocol))
+          // Older routes might not have the protocolsInvolved field, so we keep them if they don't have it
+          .filter((record) => {
+            return (
+              !record.protocolsInvolved ||
+              !protocols.includes(Protocol.MIXED) ||
+              // if UR header is v2.0, then it does not make sense to have mixed route filter by protocols
+              // only when UR header is v1.2, we explicitly delete the V4 from protocols in
+              // https://github.com/Uniswap/smart-order-router/blob/main/src/routers/alpha-router/alpha-router.ts#L1461
+              alphaRouterConfig?.universalRouterVersion === UniversalRouterVersion.V2_0 ||
+              // We want to roll out the mixed route with UR v1_2 with percent control,
+              // along with the cached routes so that we can test the performance of the mixed route with UR v1_2ss
+              (alphaRouterConfig?.enableMixedRouteWithUR1_2 &&
+                // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
+                // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains all the requested protocols
+                (record.protocolsInvolved as String)
+                  .split(',')
+                  .every((protocol) => protocols.includes(protocol as Protocol)))
+            )
+          })
           .sort((a, b) => b.blockNumber - a.blockNumber)
           .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
+
+        if (protocols.includes(Protocol.MIXED)) {
+          filteredItems.forEach((record) => {
+            if (
+              record.protocolsInvolved &&
+              !(record.protocolsInvolved as String)
+                .split(',')
+                .every((protocol) => protocols.includes(protocol as Protocol))
+            ) {
+              metric.putMetric(
+                'RoutesDbFilteredEntriesMixedRoutesContainNonMatchingProtocols',
+                1,
+                MetricLoggerUnit.Count
+              )
+              log.error(`Cached Route entry ${JSON.stringify(record)} contains non matching protocols ${protocols}`)
+            }
+          })
+        }
 
         result.Items = filteredItems
 
