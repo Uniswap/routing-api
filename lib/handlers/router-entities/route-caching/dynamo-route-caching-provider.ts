@@ -152,9 +152,13 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             return (
               !record.protocolsInvolved ||
               !protocols.includes(Protocol.MIXED) ||
+              // if UR header is v2.0, then it does not make sense to have mixed route filter by protocols
+              // only when UR header is v1.2, we explicitly delete the V4 from protocols in
+              // https://github.com/Uniswap/smart-order-router/blob/main/src/routers/alpha-router/alpha-router.ts#L1461
+              alphaRouterConfig?.universalRouterVersion === UniversalRouterVersion.V2_0 ||
               // We want to roll out the mixed route with UR v1_2 with percent control,
               // along with the cached routes so that we can test the performance of the mixed route with UR v1_2ss
-              ((alphaRouterConfig?.enableMixedRouteWithUR1_2Percent ?? 0) >= Math.random() * 100 &&
+              (alphaRouterConfig?.enableMixedRouteWithUR1_2 &&
                 // requested protocols do not involve MIXED, so there is no need to filter by protocolsInvolved
                 // we know MIXED is getting requested, in this case, we need to ensure that protocolsInvolved contains all the requested protocols
                 (record.protocolsInvolved as String)
