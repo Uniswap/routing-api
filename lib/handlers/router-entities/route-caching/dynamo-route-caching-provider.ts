@@ -189,7 +189,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
         result.Items = filteredItems
 
-        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, protocols, alphaRouterConfig)
+        return this.parseCachedRoutes(
+          result,
+          chainId,
+          currentBlockNumber,
+          optimistic,
+          partitionKey,
+          amount,
+          protocols,
+          alphaRouterConfig
+        )
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -432,7 +441,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         intent: INTENT.CACHING,
         requestSource: 'routing-api',
         cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
-        enableDebug: alphaRouterConfig?.enableDebug
+        enableDebug: alphaRouterConfig?.enableDebug,
       },
     }
 
