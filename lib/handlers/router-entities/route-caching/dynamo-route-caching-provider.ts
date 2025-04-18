@@ -189,7 +189,16 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
         result.Items = filteredItems
 
-        return this.parseCachedRoutes(result, chainId, currentBlockNumber, optimistic, partitionKey, amount, protocols)
+        return this.parseCachedRoutes(
+          result,
+          chainId,
+          currentBlockNumber,
+          optimistic,
+          partitionKey,
+          amount,
+          protocols,
+          alphaRouterConfig
+        )
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
@@ -209,7 +218,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     optimistic: boolean,
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
-    protocols: Protocol[]
+    protocols: Protocol[],
+    alphaRouterConfig?: AlphaRouterConfig
   ): CachedRoutes {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
@@ -342,7 +352,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         partitionKey,
         amount,
         currentBlockNumber,
-        cachedRoutes.routes.map((route) => route.routeId)
+        cachedRoutes.routes.map((route) => route.routeId),
+        alphaRouterConfig
       )
     }
 
@@ -353,7 +364,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
     currentBlockNumber: number,
-    cachedRoutesRouteIds: number[]
+    cachedRoutesRouteIds: number[],
+    alphaRouterConfig?: AlphaRouterConfig
   ): Promise<void> {
     try {
       const queryParams = {
@@ -393,7 +405,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           partitionKey,
           [Protocol.V2, Protocol.V3, Protocol.V4, Protocol.MIXED],
           amount,
-          cachedRoutesRouteIds
+          cachedRoutesRouteIds,
+          alphaRouterConfig
         )
         this.setRoutesDbCachingIntentFlag(partitionKey, amount, currentBlockNumber)
       } else {
@@ -408,7 +421,8 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     protocols: Protocol[],
     amount: CurrencyAmount<Currency>,
-    cachedRoutesRouteIds: number[]
+    cachedRoutesRouteIds: number[],
+    alphaRouterConfig?: AlphaRouterConfig
   ): void {
     const payload = {
       headers: {
@@ -427,6 +441,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         intent: INTENT.CACHING,
         requestSource: 'routing-api',
         cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
+        enableDebug: alphaRouterConfig?.enableDebug,
       },
     }
 
