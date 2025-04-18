@@ -52,6 +52,5 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.ROOTSTOCK]: 37,
   // (15 minutes) / (1 seconds) = 900
   [ChainId.ZKSYNC]: 900,
-  [ChainId.MONAD_TESTNET]: 900,
   [ChainId.SONEIUM]: 900,
 }
