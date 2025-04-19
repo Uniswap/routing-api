@@ -766,6 +766,8 @@ export class QuoteHandler extends APIGLambdaHandler<
     if (requestedProtocols) {
       let protocols: Protocol[] = []
 
+      // TODO: route-459 - make sure we understand the root cause and revert this tech-debt
+      //       we are only doing this because we don't know why cached routes don't refresh in case of all protocols
       if (
         chainId === ChainId.UNICHAIN &&
         ((currencyIn.wrapped.address.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5' &&
