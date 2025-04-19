@@ -279,8 +279,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     const protocols = QuoteHandler.protocolsFromRequest(
       chainId,
-      currencyIn,
-      currencyOut,
+      tokenInAddress,
+      tokenOutAddress,
       universalRouterVersion,
       protocolsStr,
       forceCrossProtocol
@@ -755,8 +755,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
   static protocolsFromRequest(
     chainId: ChainId,
-    currencyIn: Currency,
-    currencyOut: Currency,
+    tokenInAddress: string,
+    tokenOutAddress: string,
     universalRouterVersion: UniversalRouterVersion,
     requestedProtocols?: string[] | string,
     forceCrossProtocol?: boolean
@@ -770,10 +770,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       //       we are only doing this because we don't know why cached routes don't refresh in case of all protocols
       if (
         chainId === ChainId.UNICHAIN &&
-        ((currencyIn.wrapped.address.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5' &&
-          currencyOut.wrapped.address.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6') ||
-          (currencyIn.wrapped.address.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6' &&
-            currencyOut.wrapped.address.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5'))
+        ((tokenInAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5' &&
+          tokenOutAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6') ||
+          (tokenInAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6' &&
+            tokenOutAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5'))
       ) {
         return [Protocol.V4]
       }
