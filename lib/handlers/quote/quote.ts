@@ -239,6 +239,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         gasToken,
         cachedRoutesRouteIds,
         enableDebug,
+        hooksOptions,
       },
       requestInjected: {
         router,
@@ -358,6 +359,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       ...(cachedRoutesRouteIds ? { cachedRoutesRouteIds } : {}),
       enableMixedRouteWithUR1_2: 100 >= Math.random() * 100, // enable mixed route with UR v1.2 fix at 50%, to see whether we see quote endpoint perf improvement.
       enableDebug: enableDebug,
+      hooksOptions: hooksOptions,
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)

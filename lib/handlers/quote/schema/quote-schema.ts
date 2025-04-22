@@ -1,5 +1,6 @@
 import BaseJoi from '@hapi/joi'
 import { SUPPORTED_CHAINS } from '../../injector-sor'
+import { HooksOptions } from '@uniswap/smart-order-router'
 
 const Joi = BaseJoi.extend((joi) => ({
   base: joi.array(),
@@ -116,4 +117,5 @@ export type QuoteQueryParams = {
   quotedId?: string
   cachedRoutesRouteIds?: string
   enableDebug?: boolean
+  hooksOptions?: HooksOptions
 }
