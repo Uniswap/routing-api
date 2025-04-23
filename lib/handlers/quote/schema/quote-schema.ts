@@ -75,6 +75,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   gasToken: Joi.string().alphanum().max(42).optional(),
   cachedRoutesRouteIds: Joi.string().optional(),
   enableDebug: Joi.boolean().optional().default(false),
+  hooksOptions: Joi.string().valid('NO_HOOKS', 'HOOKS_ONLY', 'HOOKS_INCLUSIVE').optional(),
 })
 
 // Future work: this TradeTypeParam can be converted into an enum and used in the
