@@ -3,9 +3,11 @@ import { ChainId } from '@uniswap/sdk-core'
 import { GraphQLClient, IGraphQLClient } from './graphql-client'
 import {
   GRAPHQL_QUERY_MULTIPLE_TOKEN_INFO_BY_CONTRACTS,
+  GRAPHQL_QUERY_MULTIPLE_TOKEN_PRICE_BY_CONTRACTS,
   GRAPHQL_QUERY_TOKEN_INFO_BY_ADDRESS_CHAIN,
+  GRAPHQL_QUERY_TOKEN_PRICE_BY_ADDRESS_CHAIN,
 } from './graphql-queries'
-import { TokenInfoResponse, TokensInfoResponse } from './graphql-schemas'
+import { TokenInfoResponse, TokensInfoResponse, TokenPriceResponse, TokensPriceResponse } from './graphql-schemas'
 
 /* Interface for accessing Uniswap GraphQL API */
 export interface IUniGraphQLProvider {
@@ -13,6 +15,10 @@ export interface IUniGraphQLProvider {
   getTokenInfo(chainId: ChainId, address: string): Promise<TokenInfoResponse>
   /* Fetch token info for multiple tokens given a chain and addresses */
   getTokensInfo(chainId: ChainId, addresses: string[]): Promise<TokensInfoResponse>
+  /* Fetch token price for multiple tokens given a chain and addresses */
+  getTokensPrice(chainId: ChainId, addresses: string[]): Promise<TokensPriceResponse>
+  /* Fetch token price for a single token given a chain and address */
+  getTokenPrice(chainId: ChainId, address: string): Promise<TokenPriceResponse>
   // Add more methods here as needed.
   // - more details: https://github.com/Uniswap/data-api-graphql/blob/main/graphql/schema.graphql
 }
@@ -88,5 +94,21 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
     }))
     const variables = { contracts: contracts }
     return this.client.fetchData<TokensInfoResponse>(query, variables)
+  }
+
+  async getTokenPrice(chainId: ChainId, address: string): Promise<TokenPriceResponse> {
+    const query = GRAPHQL_QUERY_TOKEN_PRICE_BY_ADDRESS_CHAIN
+    const variables = { chain: this._chainIdToGraphQLChainName(chainId), address: address }
+    return this.client.fetchData<TokenPriceResponse>(query, variables)
+  }
+
+  async getTokensPrice(chainId: ChainId, addresses: string[]): Promise<TokensPriceResponse> {
+    const query = GRAPHQL_QUERY_MULTIPLE_TOKEN_PRICE_BY_CONTRACTS
+    const contracts = addresses.map((address) => ({
+      chain: this._chainIdToGraphQLChainName(chainId),
+      address: address,
+    }))
+    const variables = { contracts: contracts }
+    return this.client.fetchData<TokensPriceResponse>(query, variables)
   }
 }

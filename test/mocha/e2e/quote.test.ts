@@ -28,6 +28,7 @@ import {
   V4_SUPPORTED,
   WBTC_MAINNET,
   WLD_WORLDCHAIN,
+  LARGE_SWAP_USD_THRESHOLD,
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
@@ -1136,6 +1137,68 @@ describe('quote', function () {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
 
+            expect(response.data.hitsCachedRoutes).to.be.false
+          })
+
+          it(`eth usdc hitsCachedRoutes is true when amount < ${LARGE_SWAP_USD_THRESHOLD} threshold`, async () => {
+            const amount = Math.floor(LARGE_SWAP_USD_THRESHOLD / 1.5)
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: type === 'exactIn' ? 'USDC' : 'ETH',
+              tokenInChainId: 1,
+              tokenOutAddress: type === 'exactIn' ? 'ETH' : 'USDC',
+              tokenOutChainId: 1,
+              // $5k worth of tokens
+              amount: await getAmount(
+                1,
+                type,
+                type === 'exactIn' ? 'USDC' : 'ETH',
+                type === 'exactIn' ? 'ETH' : 'USDC',
+                amount.toString()
+              ),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              protocols: ALL_PROTOCOLS,
+              algorithm,
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+
+            expect(response.status).to.equal(200)
+            expect(response.data.hitsCachedRoutes).to.be.true
+          })
+
+          it(`eth usdc hitsCachedRoutes is false when amount >= ${LARGE_SWAP_USD_THRESHOLD} threshold`, async () => {
+            const amount = Math.floor(LARGE_SWAP_USD_THRESHOLD * 1.5)
+            const quoteReq: QuoteQueryParams = {
+              tokenInAddress: type === 'exactIn' ? 'USDC' : 'ETH',
+              tokenInChainId: 1,
+              tokenOutAddress: type === 'exactIn' ? 'ETH' : 'USDC',
+              tokenOutChainId: 1,
+              // $15k worth of tokens
+              amount: await getAmount(
+                1,
+                type,
+                type === 'exactIn' ? 'USDC' : 'ETH',
+                type === 'exactIn' ? 'ETH' : 'USDC',
+                amount.toString()
+              ),
+              type,
+              recipient: alice.address,
+              slippageTolerance: LARGE_SLIPPAGE,
+              deadline: '360',
+              protocols: ALL_PROTOCOLS,
+              algorithm,
+              enableUniversalRouter: true,
+            }
+
+            const queryParams = qs.stringify(quoteReq)
+            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
+
+            expect(response.status).to.equal(200)
             expect(response.data.hitsCachedRoutes).to.be.false
           })
 
