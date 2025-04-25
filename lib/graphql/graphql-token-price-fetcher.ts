@@ -9,7 +9,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
 import { log, MetricLoggerUnit } from '@uniswap/smart-order-router'
 
-// Implementation of the ITokenFeeFetcher interface to give access to Uniswap GraphQL API token price data.
+// Implementation of the ITokenPriceFetcher interface to give access to Uniswap GraphQL API token price data.
 export class GraphQLTokenPriceFetcher implements ITokenPriceFetcher {
   private readonly graphQLProvider: IUniGraphQLProvider
   private readonly chainId: ChainId
