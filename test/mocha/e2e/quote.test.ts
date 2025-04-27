@@ -28,7 +28,6 @@ import {
   V4_SUPPORTED,
   WBTC_MAINNET,
   WLD_WORLDCHAIN,
-  LARGE_SWAP_USD_THRESHOLD,
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
@@ -53,6 +52,7 @@ import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndAppro
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
+import { LARGE_SWAP_USD_THRESHOLD } from '../../../lib/handlers/shared'
 
 const { ethers } = hre
 

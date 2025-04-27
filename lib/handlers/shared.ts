@@ -384,3 +384,6 @@ export function computePortionAmount(currencyOut: CurrencyAmount<Currency>, port
 
 export const DEFAULT_DEADLINE = 600 // 10 minutes
 export const UNISWAP_DOT_ETH_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'
+
+// Used in order to skip cached routes if input amount is larger than this amount.
+export const LARGE_SWAP_USD_THRESHOLD = 100_000
