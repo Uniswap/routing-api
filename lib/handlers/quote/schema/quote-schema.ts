@@ -76,6 +76,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   cachedRoutesRouteIds: Joi.string().optional(),
   enableDebug: Joi.boolean().optional().default(false),
   hooksOptions: Joi.string().valid('NO_HOOKS', 'HOOKS_ONLY', 'HOOKS_INCLUSIVE').optional(),
+  requestId: Joi.string().optional(),
 })
 
 // Future work: this TradeTypeParam can be converted into an enum and used in the
@@ -119,4 +120,5 @@ export type QuoteQueryParams = {
   cachedRoutesRouteIds?: string
   enableDebug?: boolean
   hooksOptions?: HooksOptions
+  requestId?: string
 }
