@@ -400,7 +400,7 @@ export const chainProtocols = [
       5,
       900000,
       true,
-      1000,
+      5000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.BASE)
