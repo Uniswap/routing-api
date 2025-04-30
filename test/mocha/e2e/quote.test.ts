@@ -27,11 +27,11 @@ import {
   V4_SEPOLIA_TEST_B,
   V4_SUPPORTED,
   WBTC_MAINNET,
-  WLD_WORLDCHAIN,
+  WLD_WORLDCHAIN
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
-  UniversalRouterVersion,
+  UniversalRouterVersion
 } from '@uniswap/universal-router-sdk'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
@@ -237,9 +237,8 @@ describe('quote', function () {
   let block: number
   let curNonce: number = 0
   let nextPermitNonce: () => string = () => {
-    const nonce = curNonce.toString()
-    curNonce = curNonce + 1
-    return nonce
+    // We now revert hardfork state after each test, so we can use same nonce
+    return curNonce.toString()
   }
   let snapshotId: string
 
