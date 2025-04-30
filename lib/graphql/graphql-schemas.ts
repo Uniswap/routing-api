@@ -26,3 +26,25 @@ export interface TokenInfo {
     sellReverted?: boolean
   }
 }
+
+export interface TokenPriceResponse {
+  token: TokenPrice
+}
+
+export interface TokensPriceResponse {
+  tokens: TokenPrice[]
+}
+
+export interface TokenPrice {
+  name: string
+  chain: string
+  address: string
+  decimals: number
+  symbol: string
+  standard: string
+  market: {
+    price: {
+      value: number
+    }
+  }
+}
