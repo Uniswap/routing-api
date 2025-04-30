@@ -52,7 +52,6 @@ import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndAppro
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
-import { LARGE_SWAP_USD_THRESHOLD } from '../../../lib/handlers/shared'
 
 const { ethers } = hre
 
@@ -237,10 +236,10 @@ describe('quote', function () {
   let block: number
   let curNonce: number = 0
   let nextPermitNonce: () => string = () => {
-    // We now revert hardfork state after each test, so we can use same nonce
-    return curNonce.toString()
+    const nonce = curNonce.toString()
+    curNonce = curNonce + 1
+    return nonce
   }
-  let snapshotId: string
 
   const executeSwap = async (
     methodParameters: MethodParameters,
@@ -362,22 +361,6 @@ describe('quote', function () {
     expect(!aliceUNIBalance.lessThan(parseAmount('1000', UNI_MAINNET))).to.be.true
     const aliceBULLETBalance = await getBalance(alice, BULLET)
     expect(!aliceBULLETBalance.lessThan(parseAmount('735871', BULLET))).to.be.true
-  })
-
-  beforeEach(async function () {
-    // Take a new snapshot before each test
-    snapshotId = (await hre.network.provider.request({
-      method: 'evm_snapshot',
-      params: [],
-    })) as string
-  })
-
-  afterEach(async function () {
-    // Revert to the snapshot taken before this test
-    await hre.network.provider.request({
-      method: 'evm_revert',
-      params: [snapshotId],
-    })
   })
 
   for (const algorithm of ['alpha']) {
@@ -701,7 +684,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'ETH',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '20000' : '10'),
+              amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -729,7 +712,7 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('20000')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
             } else {
               // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
@@ -807,8 +790,15 @@ describe('quote', function () {
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
 
-            // This is now considered a large swap, so we expect it to skip cache (>= LARGE_SWAP_USD_THRESHOLD)
-            expect(response.data.hitsCachedRoutes).to.be.false
+            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+            // if it's exactOut quote, we should always hit the cached routes.
+            // this is regardless of protocol version.
+            // the reason is because exact in quote always runs before exact out
+            // along with the native or wrapped native pool token address assertions previously
+            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+            // and native for v4 pool routes
+            expect(response.data.hitsCachedRoutes).to.be.true
           })
 
           it(`erc20 -> eth large trade with permit`, async () => {
@@ -879,8 +869,15 @@ describe('quote', function () {
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
 
-            // This is now considered a large swap, so we expect it to skip cache (>= LARGE_SWAP_USD_THRESHOLD)
-            expect(response.data.hitsCachedRoutes).to.be.false
+            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+            // if it's exactOut quote, we should always hit the cached routes.
+            // this is regardless of protocol version.
+            // the reason is because exact in quote always runs before exact out
+            // along with the native or wrapped native pool token address assertions previously
+            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+            // and native for v4 pool routes
+            expect(response.data.hitsCachedRoutes).to.be.true
           })
 
           it(`eth -> erc20`, async () => {
@@ -996,7 +993,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'DAI',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'WETH', 'DAI', type === 'exactIn' ? '1' : '1000'),
+              amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -1021,10 +1018,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
             }
 
@@ -1045,7 +1042,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'WETH',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'WETH', type === 'exactIn' ? '1000' : '1'),
+              amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -1070,10 +1067,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
 
@@ -1139,68 +1136,6 @@ describe('quote', function () {
               expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('0.1')
             }
 
-            expect(response.data.hitsCachedRoutes).to.be.false
-          })
-
-          it(`eth usdc hitsCachedRoutes is true when amount < ${LARGE_SWAP_USD_THRESHOLD} threshold`, async () => {
-            const amount = Math.floor(LARGE_SWAP_USD_THRESHOLD / 1.5)
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: type === 'exactIn' ? 'USDC' : 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: type === 'exactIn' ? 'ETH' : 'USDC',
-              tokenOutChainId: 1,
-              // $5k worth of tokens
-              amount: await getAmount(
-                1,
-                type,
-                type === 'exactIn' ? 'USDC' : 'ETH',
-                type === 'exactIn' ? 'ETH' : 'USDC',
-                amount.toString()
-              ),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              protocols: ALL_PROTOCOLS,
-              algorithm,
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-
-            expect(response.status).to.equal(200)
-            expect(response.data.hitsCachedRoutes).to.be.true
-          })
-
-          it(`eth usdc hitsCachedRoutes is false when amount >= ${LARGE_SWAP_USD_THRESHOLD} threshold`, async () => {
-            const amount = Math.floor(LARGE_SWAP_USD_THRESHOLD * 1.5)
-            const quoteReq: QuoteQueryParams = {
-              tokenInAddress: type === 'exactIn' ? 'USDC' : 'ETH',
-              tokenInChainId: 1,
-              tokenOutAddress: type === 'exactIn' ? 'ETH' : 'USDC',
-              tokenOutChainId: 1,
-              // $15k worth of tokens
-              amount: await getAmount(
-                1,
-                type,
-                type === 'exactIn' ? 'USDC' : 'ETH',
-                type === 'exactIn' ? 'ETH' : 'USDC',
-                amount.toString()
-              ),
-              type,
-              recipient: alice.address,
-              slippageTolerance: LARGE_SLIPPAGE,
-              deadline: '360',
-              protocols: ALL_PROTOCOLS,
-              algorithm,
-              enableUniversalRouter: true,
-            }
-
-            const queryParams = qs.stringify(quoteReq)
-            const response = await axios.get<QuoteResponse>(`${API}?${queryParams}`, { headers: HEADERS_2_0 })
-
-            expect(response.status).to.equal(200)
             expect(response.data.hitsCachedRoutes).to.be.false
           })
 
@@ -2253,7 +2188,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'ETH',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '10000' : '10'),
+                amount: await getAmount(1, type, 'USDC', 'ETH', type == 'exactIn' ? '1000000' : '10'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -2283,7 +2218,7 @@ describe('quote', function () {
               )
 
               if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('10000')
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
               } else {
                 // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
@@ -2367,8 +2302,15 @@ describe('quote', function () {
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
               }
 
-              // This is now considered a large swap, so we expect it to skip cache (>= LARGE_SWAP_USD_THRESHOLD)
-              expect(response.data.hitsCachedRoutes).to.be.false
+              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+              // if it's exactOut quote, we should always hit the cached routes.
+              // this is regardless of protocol version.
+              // the reason is because exact in quote always runs before exact out
+              // along with the native or wrapped native pool token address assertions previously
+              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+              // and native for v4 pool routes
+              expect(response.data.hitsCachedRoutes).to.be.true
             })
 
             it(`eth -> erc20`, async () => {
@@ -2485,7 +2427,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'DAI',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'WETH', 'DAI', type === 'exactIn' ? '1' : '1000'),
+                amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -2511,10 +2453,10 @@ describe('quote', function () {
               )
 
               if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1')
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
               }
 
@@ -2535,7 +2477,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'WETH',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'WETH', type === 'exactIn' ? '1000' : '1'),
+                amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -2561,10 +2503,10 @@ describe('quote', function () {
               )
 
               if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000')
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
               }
 

@@ -26,7 +26,6 @@ import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
   FEE_ON_TRANSFER_SPECIFIC_CONFIG,
   INTENT_SPECIFIC_CONFIG,
-  LARGE_SWAP_USD_THRESHOLD,
   QUOTE_SPEED_CONFIG,
 } from '../shared'
 import { QuoteQueryParams, QuoteQueryParamsJoi, TradeTypeParam } from './schema/quote-schema'
@@ -361,7 +360,6 @@ export class QuoteHandler extends APIGLambdaHandler<
       enableMixedRouteWithUR1_2: 100 >= Math.random() * 100, // enable mixed route with UR v1.2 fix at 50%, to see whether we see quote endpoint perf improvement.
       enableDebug: enableDebug,
       hooksOptions: hooksOptions,
-      largeSwapUsdThreshold: LARGE_SWAP_USD_THRESHOLD,
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
