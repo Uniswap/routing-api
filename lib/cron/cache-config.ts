@@ -223,7 +223,7 @@ export const chainProtocols = [
     provider: new V3SubgraphProvider(
       ChainId.BASE,
       3,
-      360000, // base has more pools than other chains, so we need to increase the timeout
+      900000, // base has more pools than other chains, so we need to increase the timeout
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
@@ -400,7 +400,7 @@ export const chainProtocols = [
       5,
       900000,
       true,
-      1000,
+      5000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.BASE)
