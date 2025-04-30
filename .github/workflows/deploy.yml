@@ -39,7 +39,16 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+    
+      - name: Bootstrap CDK 
+        run: |
+            cdk bootstrap aws://$ACCOUNT_ID/$AWS_REGION
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION:  ${{ env.AWS_REGION }}
+            ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          
       - name: Deploy CDK stack
         run: |
           cdk deploy RoutingAPIStack --require-approval never
