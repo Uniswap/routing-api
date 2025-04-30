@@ -27,11 +27,11 @@ import {
   V4_SEPOLIA_TEST_B,
   V4_SUPPORTED,
   WBTC_MAINNET,
-  WLD_WORLDCHAIN
+  WLD_WORLDCHAIN,
 } from '@uniswap/smart-order-router'
 import {
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN,
-  UniversalRouterVersion
+  UniversalRouterVersion,
 } from '@uniswap/universal-router-sdk'
 import { fail } from 'assert'
 import axiosStatic, { AxiosResponse } from 'axios'
