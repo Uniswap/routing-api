@@ -715,20 +715,23 @@ describe('quote', function () {
             if (type == 'exactIn') {
               expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000000')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(Ether.onChain(1), quote))
+
+              // This is now considered a large swap, so we expect it to skip cache (>= LARGE_SWAP_USD_THRESHOLD)
+              expect(response.data.hitsCachedRoutes).to.be.false
             } else {
               // Hard to test ETH balance due to gas costs for approval and swap. Just check tokenIn changes
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, quote))
-            }
 
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            expect(response.data.hitsCachedRoutes).to.be.true
+              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+              // if it's exactOut quote, we should always hit the cached routes.
+              // this is regardless of protocol version.
+              // the reason is because exact in quote always runs before exact out
+              // along with the native or wrapped native pool token address assertions previously
+              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+              // and native for v4 pool routes
+              expect(response.data.hitsCachedRoutes).to.be.true
+            }
           })
 
           it(`erc20 -> eth large trade`, async () => {
@@ -2558,20 +2561,23 @@ describe('quote', function () {
               if (type == 'exactIn') {
                 expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
+
+                // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
+                // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
+                // if it's exactOut quote, we should always hit the cached routes.
+                // this is regardless of protocol version.
+                // the reason is because exact in quote always runs before exact out
+                // along with the native or wrapped native pool token address assertions previously
+                // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
+                // and native for v4 pool routes
+                expect(response.data.hitsCachedRoutes).to.be.true
               } else {
                 expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
-              }
 
-              // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-              // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-              // if it's exactOut quote, we should always hit the cached routes.
-              // this is regardless of protocol version.
-              // the reason is because exact in quote always runs before exact out
-              // along with the native or wrapped native pool token address assertions previously
-              // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-              // and native for v4 pool routes
-              expect(response.data.hitsCachedRoutes).to.be.true
+                // This is now considered a large swap, so we expect it to skip cache (>= LARGE_SWAP_USD_THRESHOLD)
+                expect(response.data.hitsCachedRoutes).to.be.false
+              }
             })
 
             const uraRefactorInterimState = ['before', 'after']
