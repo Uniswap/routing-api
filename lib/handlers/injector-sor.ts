@@ -38,7 +38,6 @@ import {
   StaticV3SubgraphProvider,
   StaticV4SubgraphProvider,
   TenderlySimulator,
-  TokenPriceProvider,
   TokenPropertiesProvider,
   TokenProvider,
   TokenValidatorProvider,
@@ -93,7 +92,6 @@ import {
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
-import { GraphQLTokenPriceFetcher } from '../graphql/graphql-token-price-fetcher'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -156,7 +154,6 @@ export type ContainerDependencies = {
   mixedSupported?: ChainId[]
   v4PoolParams?: Array<[number, number, string]>
   cachedRoutesCacheInvalidationFixRolloutPercentage?: number
-  tokenPriceProvider: TokenPriceProvider
 }
 
 export interface ContainerInjected {
@@ -294,12 +291,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               pctShadowSampling: 0.005,
             },
           })
-          const graphQLTokenPriceFetcher = new GraphQLTokenPriceFetcher(new UniGraphQLProvider(), chainId)
-          const tokenPriceProvider = new TokenPriceProvider(
-            chainId,
-            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-            graphQLTokenPriceFetcher
-          )
 
           const tokenValidatorProvider = new TokenValidatorProvider(
             chainId,
@@ -587,7 +578,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               mixedSupported,
               v4PoolParams,
               cachedRoutesCacheInvalidationFixRolloutPercentage,
-              tokenPriceProvider,
             },
           }
         })
