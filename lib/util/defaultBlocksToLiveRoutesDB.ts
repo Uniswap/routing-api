@@ -15,7 +15,7 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.OPTIMISM]: 30,
   [ChainId.OPTIMISM_GOERLI]: 30,
   [ChainId.OPTIMISM_SEPOLIA]: 30,
-  [ChainId.BASE]: 30,
+  [ChainId.BASE]: 900,
   [ChainId.ZORA]: 30,
   [ChainId.BASE_GOERLI]: 30,
   [ChainId.BASE_SEPOLIA]: 30,
