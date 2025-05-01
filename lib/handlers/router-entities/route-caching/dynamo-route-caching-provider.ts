@@ -52,7 +52,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   private readonly ROUTES_DB_BUCKET_RATIO: Fraction = new Fraction(514229, 317811)
   private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB = 8
-  private readonly ROUTES_TO_TAKE_FROM_ROUTES_DB_LOW = 6
   private readonly BLOCKS_DIFF_BETWEEN_CACHING_QUOTES: Map<ChainId, number> = new Map([[ChainId.MAINNET, 3]])
 
   private readonly DEFAULT_BLOCKS_DIFF_CACHING = 15
@@ -168,10 +167,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
             )
           })
           .sort((a, b) => b.blockNumber - a.blockNumber)
-          .slice(
-            0,
-            chainId === ChainId.BASE ? this.ROUTES_TO_TAKE_FROM_ROUTES_DB_LOW : this.ROUTES_TO_TAKE_FROM_ROUTES_DB
-          )
+          .slice(0, this.ROUTES_TO_TAKE_FROM_ROUTES_DB)
 
         if (protocols.includes(Protocol.MIXED)) {
           filteredItems.forEach((record) => {
