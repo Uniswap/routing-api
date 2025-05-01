@@ -109,7 +109,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       handler: 'quoteHandler',
       // 04/18/2025: async routing lambda can have much longer timeout
       timeout: cdk.Duration.seconds(18),
-      memorySize: 2560,
+      memorySize: 5120,
       deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
@@ -173,7 +173,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
       timeout: cdk.Duration.seconds(9),
-      memorySize: 2560,
+      memorySize: 5120,
       deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
