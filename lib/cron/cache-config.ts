@@ -107,9 +107,11 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
 }
 
 const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+const v4BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
 const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
+export const v3BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
 export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
@@ -226,7 +228,7 @@ export const chainProtocols = [
       3,
       900000, // base has more pools than other chains, so we need to increase the timeout
       true,
-      v3TrackedEthThreshold,
+      v3BaseTrackedEthThreshold,
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.BASE)
     ),
@@ -520,7 +522,7 @@ export const chainProtocols = [
       3,
       90000,
       true,
-      v4TrackedEthThreshold,
+      v4BaseTrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE)
     ),
