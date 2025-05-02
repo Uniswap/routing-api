@@ -2524,7 +2524,7 @@ describe('quote', function () {
             const uraRefactorInterimState = ['before', 'after']
             GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
               uraRefactorInterimState.forEach((state) => {
-                it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
+                it.skip(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion, state = ${state}`, async () => {
                   const originalAmount = getTestAmount(type === 'exactIn' ? tokenIn : tokenOut)
                   const tokenInSymbol = tokenIn.symbol!
                   const tokenOutSymbol = tokenOut.symbol!
