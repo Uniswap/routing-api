@@ -35,7 +35,7 @@ export function chainIdToNetworkName(networkId: ChainId): string {
   }
 }
 
-export function generateProviderUrl(key: string, value: string, chainId: number): string {
+export function generateProviderUrl(key: string, value: string): string {
   switch (key) {
   
     // Alchemy
