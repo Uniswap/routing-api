@@ -95,26 +95,8 @@ import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpoi
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
-  ChainId.OPTIMISM,
-  ChainId.ARBITRUM_ONE,
-  ChainId.POLYGON,
-  ChainId.SEPOLIA,
-  ChainId.CELO,
-  ChainId.CELO_ALFAJORES,
-  ChainId.BNB,
-  ChainId.AVALANCHE,
-  ChainId.BASE,
-  ChainId.BLAST,
-  ChainId.ZORA,
-  ChainId.ZKSYNC,
-  ChainId.WORLDCHAIN,
-  ChainId.UNICHAIN_SEPOLIA,
-  ChainId.MONAD_TESTNET,
-  ChainId.BASE_SEPOLIA,
-  ChainId.UNICHAIN,
-  ChainId.SONEIUM,
 ]
-const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
@@ -356,25 +338,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           // 200*725k < 150m
           let quoteProvider: IOnChainQuoteProvider | undefined = undefined
           switch (chainId) {
-            case ChainId.SEPOLIA:
-            case ChainId.POLYGON_MUMBAI:
             case ChainId.MAINNET:
-            case ChainId.POLYGON:
-            case ChainId.BASE:
-            case ChainId.ARBITRUM_ONE:
-            case ChainId.OPTIMISM:
-            case ChainId.BNB:
-            case ChainId.CELO:
-            case ChainId.AVALANCHE:
-            case ChainId.BLAST:
-            case ChainId.ZORA:
-            case ChainId.ZKSYNC:
-            case ChainId.WORLDCHAIN:
-            case ChainId.UNICHAIN_SEPOLIA:
-            case ChainId.MONAD_TESTNET:
-            case ChainId.BASE_SEPOLIA:
-            case ChainId.UNICHAIN:
-            case ChainId.SONEIUM:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -510,36 +474,13 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           const v2Supported = [
             ChainId.MAINNET,
-            ChainId.ARBITRUM_ONE,
-            ChainId.OPTIMISM,
-            ChainId.POLYGON,
-            ChainId.BASE,
-            ChainId.BNB,
-            ChainId.AVALANCHE,
-            ChainId.BLAST,
-            ChainId.WORLDCHAIN,
-            ChainId.MONAD_TESTNET,
-            ChainId.UNICHAIN,
-            ChainId.SONEIUM,
           ]
 
           const v4Supported = [
-            ChainId.SEPOLIA,
-            ChainId.ARBITRUM_ONE,
-            ChainId.BASE,
-            ChainId.POLYGON,
-            ChainId.BNB,
-            ChainId.OPTIMISM,
-            ChainId.AVALANCHE,
-            ChainId.WORLDCHAIN,
-            ChainId.ZORA,
-            ChainId.UNICHAIN,
-            ChainId.BLAST,
             ChainId.MAINNET,
-            ChainId.SONEIUM,
           ]
 
-          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
+          const mixedSupported = [ChainId.MAINNET]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 

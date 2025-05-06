@@ -506,12 +506,12 @@ export class QuoteHandler extends APIGLambdaHandler<
       estimatedGasUsedUSD: preProcessedEstimatedGasUsedUSD,
       estimatedGasUsedGasToken,
       gasPriceWei,
-      methodParameters,
       blockNumber,
       simulationStatus,
       hitsCachedRoute,
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount,
       trade,
+      methodParameters
     } = swapRoute
 
     const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId)
@@ -704,7 +704,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     const routeString = routeAmountsToString(route)
 
     const result: QuoteResponse = {
-      methodParameters,
+      methodParameters: methodParameters,
       blockNumber: blockNumber.toString(),
       amount: amount.quotient.toString(),
       amountDecimals: amount.toExact(),
