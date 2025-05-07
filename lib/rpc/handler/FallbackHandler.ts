@@ -81,7 +81,9 @@ export class FallbackHandler {
     }
   }
 
-  private async processAlarm(alarmEvent: AlarmEvent): Promise<{
+  private async processAlarm(
+    alarmEvent: AlarmEvent
+  ): Promise<{
     oldHealthiness: ProviderHealthiness
     newHealthiness: ProviderHealthiness
   } | null> {
@@ -109,7 +111,9 @@ export class FallbackHandler {
     }
   }
 
-  private async updateDbItemForAlarmEvent(alarmEvent: AlarmEvent): Promise<{
+  private async updateDbItemForAlarmEvent(
+    alarmEvent: AlarmEvent
+  ): Promise<{
     oldHealthiness: ProviderHealthiness
     newHealthiness: ProviderHealthiness
   }> {
@@ -143,7 +147,9 @@ export class FallbackHandler {
     }
   }
 
-  private async updateDbItemForOkEvent(alarmEvent: AlarmEvent): Promise<{
+  private async updateDbItemForOkEvent(
+    alarmEvent: AlarmEvent
+  ): Promise<{
     oldHealthiness: ProviderHealthiness
     newHealthiness: ProviderHealthiness
   }> {

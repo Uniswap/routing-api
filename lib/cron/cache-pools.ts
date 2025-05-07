@@ -41,9 +41,8 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   const chainId: ChainId = parseInt(process.env.chainId!)
   const protocol = process.env.protocol! as Protocol
   // Don't retry for V2 as it will timeout and throw 500
-  const provider = chainProtocols.find(
-    (element) => element.protocol == protocol && element.chainId == chainId
-  )!.provider
+  const provider = chainProtocols.find((element) => element.protocol == protocol && element.chainId == chainId)!
+    .provider
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
