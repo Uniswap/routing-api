@@ -213,7 +213,9 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         const shouldFilterOut =
           // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
           pool.token0.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||
-          pool.token1.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161'
+          pool.token1.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||
+          // filter out v3 pool with rebase token that breaks routing
+          pool.id.toLowerCase() === '0x0f681f10ab1aa1cde04232a199fe3c6f2652a80c'
 
         if (shouldFilterOut) {
           log.info(`Filtering out pool ${pool.id} from ${protocol} on ${chainId}`)
