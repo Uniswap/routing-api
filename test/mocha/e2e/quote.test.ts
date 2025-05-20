@@ -312,7 +312,7 @@ describe('quote', function () {
 
   before(async function () {
     this.timeout(40000)
-    alice = getFirstNonDelegatedSigner(await ethers.getSigners())
+    alice = await getFirstNonDelegatedSigner(await ethers.getSigners())
 
     // Make a dummy call to the API to get a block number to fork from.
     const quoteReq: QuoteQueryParams = {
