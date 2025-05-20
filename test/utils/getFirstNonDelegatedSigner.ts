@@ -8,13 +8,13 @@ const l1RpcProvider = new StaticJsonRpcProvider(process.env.ARCHIVE_NODE_RPC, 1)
 // we are hoping that under test mnemonic from hardhat,
 // there are still test wallets that are not delegated, out of all 20 test wallets
 export const getFirstNonDelegatedSigner = async (signers: SignerWithAddress[]): Promise<SignerWithAddress> => {
-  let firstNonDelegatedSigner: SignerWithAddress | undefined;
-  
+  let firstNonDelegatedSigner: SignerWithAddress | undefined
+
   for (const signer of signers) {
     const code = await l1RpcProvider.getCode(signer.address)
     if (getCurrentDelegationAddress(code) === null) {
-      firstNonDelegatedSigner = signer;
-      break;
+      firstNonDelegatedSigner = signer
+      break
     }
   }
 

@@ -70,7 +70,9 @@ export const resetAndFundAtBlock = async (
       } catch (err) {
         if (i == WHALES.length - 1) {
           throw new Error(
-            `Could not fund ${amount} ${currency.symbol} from any whales ${whale}. Original error ${JSON.stringify(err)} ${i}`
+            `Could not fund ${amount} ${currency.symbol} from any whales ${whale}. Original error ${JSON.stringify(
+              err
+            )} ${i}`
           )
         }
       }
