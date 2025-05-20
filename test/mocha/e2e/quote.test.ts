@@ -52,6 +52,7 @@ import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndAppro
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
+import { getFirstNonDelegatedSigner } from '../../utils/getFirstNonDelegatedSigner'
 
 const { ethers } = hre
 
@@ -311,7 +312,7 @@ describe('quote', function () {
 
   before(async function () {
     this.timeout(40000)
-    ;[alice] = await ethers.getSigners()
+    alice = await getFirstNonDelegatedSigner(await ethers.getSigners())
 
     // Make a dummy call to the API to get a block number to fork from.
     const quoteReq: QuoteQueryParams = {
