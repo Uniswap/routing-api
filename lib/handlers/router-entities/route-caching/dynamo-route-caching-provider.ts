@@ -10,7 +10,7 @@ import {
   metric,
   MetricLoggerUnit,
   routeToString,
-  SupportedRoutes, SwapOptions
+  SupportedRoutes,
 } from '@uniswap/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
@@ -23,7 +23,6 @@ import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
 import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
 import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 import { computeProtocolsInvolvedIfMixed } from '../../../util/computeProtocolsInvolvedIfMixed'
-import { SwapRouterConfig } from '@uniswap/universal-router-sdk/dist/swapRouter'
 
 interface ConstructorParams {
   /**
@@ -110,8 +109,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     protocols: Protocol[],
     currentBlockNumber: number,
     optimistic: boolean,
-    alphaRouterConfig?: AlphaRouterConfig,
-    swapConfig?: SwapRouterConfig
+    alphaRouterConfig?: AlphaRouterConfig
   ): Promise<CachedRoutes | undefined> {
     const { currencyIn, currencyOut } = this.determineCurrencyInOut(amount, quoteCurrency, tradeType)
 
@@ -199,8 +197,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           partitionKey,
           amount,
           protocols,
-          alphaRouterConfig,
-          swapConfig
+          alphaRouterConfig
         )
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
@@ -222,8 +219,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     partitionKey: PairTradeTypeChainId,
     amount: CurrencyAmount<Currency>,
     protocols: Protocol[],
-    alphaRouterConfig?: AlphaRouterConfig,
-    swapConfig?: SwapRouterConfig
+    alphaRouterConfig?: AlphaRouterConfig
   ): CachedRoutes {
     metric.putMetric(`RoutesDbEntriesFound`, result.Items!.length, MetricLoggerUnit.Count)
     const cachedRoutesArr: CachedRoutes[] = result.Items!.map((record) => {
@@ -426,8 +422,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
     protocols: Protocol[],
     amount: CurrencyAmount<Currency>,
     cachedRoutesRouteIds: number[],
-    alphaRouterConfig?: AlphaRouterConfig,
-    swapConfig?: SwapOptions
+    alphaRouterConfig?: AlphaRouterConfig
   ): void {
     const payload = {
       headers: {
@@ -447,7 +442,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         requestSource: 'routing-api',
         cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
         enableDebug: alphaRouterConfig?.enableDebug,
-        simulateFromAddress: swapConfig?.simulate?.fromAddress,
       },
     }
 
