@@ -1,6 +1,6 @@
 {
   "name": "@uniswap/routing-api",
-  "version": "0.1.0",
+  "version": "4.21.15",
   "bin": {
     "app": "./dist/bin/app.js"
   },
