@@ -95,6 +95,7 @@ import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpoi
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
+  ChainId.ARBITRUM_ONE
 ]
 const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
 

@@ -7,7 +7,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.SEPOLIA:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-sepolia-test/api`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-arbitrum/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/arbitrum-v4/api`
     case ChainId.BASE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-base/api`
     case ChainId.POLYGON:
@@ -35,7 +35,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/ethereum-v3/api`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v3-arbitrum-ii/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/arbitrum-v4/api`
     case ChainId.POLYGON:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v3-polygon/api`
     case ChainId.OPTIMISM:
@@ -70,7 +70,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/ethereum-v2/api`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v2-arbitrum/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/arbitrum-v2/api`
     case ChainId.POLYGON:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v2-polygon/api`
     case ChainId.OPTIMISM:

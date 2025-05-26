@@ -374,6 +374,8 @@ const app = new cdk.App()
 const jsonRpcProviders = {
   WEB3_RPC_1: process.env.WEB3_RPC_1!,
   ALCHEMY_1: process.env.ALCHEMY_1!,
+  WEB3_RPC_42161: process.env.WEB3_RPC_42161!,
+  ALCHEMY_42161: process.env.ALCHEMY_42161!,
   ALCHEMY_QUERY_KEY: process.env.ALCHEMY_QUERY_KEY!,
 }
 
