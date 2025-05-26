@@ -7,5 +7,14 @@
     "providerInitialWeights": [1],
     "providerUrls": ["ALCHEMY_1"],
     "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 42161,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_42161"],
+    "providerNames": ["ALCHEMY"]
   }
 ]
