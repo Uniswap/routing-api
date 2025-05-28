@@ -39,6 +39,28 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       let additionalAllowedPool = 0
 
+      // RENZO
+      if (
+        pool.id.toLowerCase() === '0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a'.toLowerCase() &&
+        chainId === ChainId.UNICHAIN
+      ) {
+        pool.tvlETH = 0 // https://app.uniswap.org/explore/pools/arbitrum/
+        pool.tvlUSD = 0 // https://app.uniswap.org/explore/pools/arbitrum/
+        log.debug(`Setting tvl for RENZO pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // AEGIS
+      else if (
+        pool.id.toLowerCase() === '0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91'.toLowerCase() &&
+        chainId === ChainId.UNICHAIN
+      ) {
+        pool.tvlETH = 0 // https://app.uniswap.org/explore/pools/arbitrum/
+        pool.tvlUSD = 0 // https://app.uniswap.org/explore/pools/arbitrum/
+        log.debug(`Setting tvl for AEGIS pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // ETH/flETH
       if (
         pool.id.toLowerCase() === '0x14287e3268eb628fcebd2d8f0730b01703109e112a7a41426a556d10211d2086'.toLowerCase() &&
