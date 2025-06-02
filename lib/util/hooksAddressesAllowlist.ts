@@ -21,8 +21,8 @@ export const MEV_TAX_TEST_IN_PROD_ON_UNICHAIN = '0xb9a17e66db950e00822c2b833d6bb
 
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
-// example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
-export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x54362ADC22F1A9AB8F18ED05A9D225D5DE884CEC945E5E1508B667048914964F
+export const AEGIS_ON_UNICHAIN = '0x0625f7a6eb8a1b1f3c9600ef560e6e782a5cd0cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
