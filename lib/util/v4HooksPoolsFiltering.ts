@@ -129,6 +129,24 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
+      if (
+        pool.id.toLowerCase() === '0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 2292 // (https://bunni.xyz/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433)
+        pool.tvlUSD = 6190000 // (https://bunni.xyz/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 73.45 // (https://bunni.xyz/explore/pools/mainnet/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5)
+        pool.tvlUSD = 397080 // (https://bunni.xyz/explore/pools/mainnet/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5)
+        additionalAllowedPool += 1
+      }
+
       v4Pools.push(pool)
 
       if (v4Pools.size() > TOP_GROUPED_V4_POOLS + additionalAllowedPool) {
