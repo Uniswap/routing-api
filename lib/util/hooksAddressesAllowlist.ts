@@ -24,6 +24,8 @@ export const MEV_TAX_TEST_IN_PROD_ON_UNICHAIN = '0xb9a17e66db950e00822c2b833d6bb
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
 export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
+// exmaple pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
+export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -76,7 +78,13 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.ZKSYNC]: [ADDRESS_ZERO],
   [ChainId.WORLDCHAIN]: [ADDRESS_ZERO],
   [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.UNICHAIN]: [ADDRESS_ZERO, MEV_TAX_TEST_IN_PROD_ON_UNICHAIN, RENZO_ON_UNICHAIN, AEGIS_ON_UNICHAIN],
+  [ChainId.UNICHAIN]: [
+    ADDRESS_ZERO,
+    MEV_TAX_TEST_IN_PROD_ON_UNICHAIN,
+    RENZO_ON_UNICHAIN,
+    AEGIS_ON_UNICHAIN,
+    UPDATED_AEGIS_ON_UNICHAIN,
+  ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
 }
