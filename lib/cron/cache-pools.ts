@@ -278,7 +278,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           feeTier: '1',
           tickSpacing: '60',
           hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
-          liquidity: '0',
+          liquidity: '173747248900',
           token0: {
             id: '0x0000000000000000000000000000000000000000',
           },
