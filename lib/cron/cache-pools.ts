@@ -272,22 +272,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           tvlETH: 44.1795925485023741879813651641809,
           tvlUSD: 95050.95363442908526427214106054717,
         } as V4SubgraphPool,
-        // https://bunni.xyz/explore/pools/ethereum/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5
-        {
-          id: '0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5',
-          feeTier: '1',
-          tickSpacing: '60',
-          hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
-          liquidity: '173747248900',
-          token0: {
-            id: '0x0000000000000000000000000000000000000000',
-          },
-          token1: {
-            id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
-          },
-          tvlETH: 73.23,
-          tvlUSD: 416830,
-        } as V4SubgraphPool,
       ]
 
       if (chainId === ChainId.MAINNET) {
