@@ -3636,7 +3636,7 @@ describe('quote', function () {
               ? USDC_ON(chain)
               : USDC_NATIVE_SEPOLIA
             : erc2
-          const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '1'
+          const amount = chain === ChainId.SEPOLIA ? (type === 'exactIn' ? '0.00000000000001' : '0.000001') : '0.1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: native,
