@@ -213,6 +213,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           HOSTED_ZONE: hosted_zone!,
           STAGE: stage,
           REDEPLOY: '1',
+          ALCHEMY_QUERY_KEY_2: alchemyQueryKey2!,
         },
       })
 
@@ -246,6 +247,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           PINATA_API_SECRET: pinata_secret!,
           STAGE: stage,
           REDEPLOY: '1',
+          ALCHEMY_QUERY_KEY_2: alchemyQueryKey2!,
         },
       })
 
