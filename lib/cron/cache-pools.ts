@@ -290,6 +290,25 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool,
       ]
 
+      if (chainId === ChainId.MAINNET) {
+        // https://bunni.xyz/explore/pools/ethereum/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5
+        manuallyIncludedV4Pools.push({
+          id: '0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5',
+          feeTier: '1',
+          tickSpacing: '60',
+          hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
+          },
+          tvlETH: 73.23,
+          tvlUSD: 416830,
+        } as V4SubgraphPool)
+      }
+
       if (chainId === ChainId.UNICHAIN) {
         // https://bunni.xyz/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
         manuallyIncludedV4Pools.push({
