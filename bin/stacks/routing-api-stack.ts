@@ -519,7 +519,7 @@ export class RoutingAPIStack extends cdk.Stack {
         metric,
         comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
         threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-        evaluationPeriods: evaluationPeriods,
+        evaluationPeriods: evaluationPeriodsMin,
       })
       successRateByChainAlarm.push(alarm)
     })
