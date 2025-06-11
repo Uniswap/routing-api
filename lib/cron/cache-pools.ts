@@ -289,6 +289,26 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           tvlUSD: 416830,
         } as V4SubgraphPool,
       ]
+
+      if (chainId === ChainId.UNICHAIN) {
+        // https://bunni.xyz/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
+        manuallyIncludedV4Pools.push({
+          id: '0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x005af73a245d8171a0550ffae2631f12cc211888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x078d782b760474a361dda0af3839290b0ef57ad6',
+          },
+          token1: {
+            id: '0x9151434b16b9763660705744891fa906f660ecc5',
+          },
+          tvlETH: 5371.42857143,
+          tvlUSD: 15040000,
+        } as V4SubgraphPool)
+      }
+
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
