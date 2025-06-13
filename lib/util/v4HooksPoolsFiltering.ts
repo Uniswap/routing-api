@@ -50,6 +50,61 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
+      // MAINNET WETH/ETH
+      if (
+        pool.id.toLowerCase() === '0xf6f2314ac16a878e2bf8ef01ef0a3487e714d397d87f702b9a08603eb3252e92'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 57736 // https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
+        pool.tvlUSD = 104153666 // https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
+        log.debug(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // OPTIMISM ETH/WETH
+      else if (
+        pool.id.toLowerCase() === '0xbf3d38951e485c811bb1fc7025fcd1ef60c15fda4c4163458facb9bedfe26f83'.toLowerCase() &&
+        chainId === ChainId.OPTIMISM
+      ) {
+        pool.tvlETH = 826 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
+        pool.tvlUSD = 1482475 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
+        log.debug(`Setting tvl for OPTIMISM ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // BASE ETH/WETH
+      else if (
+        pool.id.toLowerCase() === '0xbb2aefc6c55a0464b944c0478869527ba1a537f05f90a1bb82e1196c6e9403e2'.toLowerCase() &&
+        chainId === ChainId.BASE
+      ) {
+        pool.tvlETH = 6992 // https://app.uniswap.org/explore/pools/base/0xd0b53D9277642d899DF5C87A3966A349A798F224
+        pool.tvlUSD = 12580000 // https://app.uniswap.org/explore/pools/base/0xd0b53D9277642d899DF5C87A3966A349A798F224
+        log.debug(`Setting tvl for BASE ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // UNICHAIN ETH/WETH
+      else if (
+        pool.id.toLowerCase() === '0xba246b8420b5aeb13e586cd7cbd32279fa7584d7f4cbc9bd356a6bb6200d16a6'.toLowerCase() &&
+        chainId === ChainId.UNICHAIN
+      ) {
+        pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        log.debug(`Setting tvl for UNICHAIN ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // ARBITRUM ETH/WETH
+      else if (
+        pool.id.toLowerCase() === '0xc1c777843809a8e77a398fd79ecddcefbdad6a5676003ae2eedf3a33a56589e9'.toLowerCase() &&
+        chainId === ChainId.ARBITRUM_ONE
+      ) {
+        pool.tvlETH = 23183 // https://app.uniswap.org/explore/pools/arbitrum/0xC6962004f452bE9203591991D15f6b388e09E8D0
+        pool.tvlUSD = 41820637 // https://app.uniswap.org/explore/pools/arbitrum/0xC6962004f452bE9203591991D15f6b388e09E8D0
+        log.debug(`Setting tvl for ARBITRUM ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // USDT/USDC
       if (
         pool.id.toLowerCase() === '0xfcb95f2277ef9524fb6a2e2c38209a7a3b955c34c933d2cdb570c1e9240fc475'.toLowerCase() &&
