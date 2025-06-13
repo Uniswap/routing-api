@@ -60,6 +60,17 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
+      // MAINNET WSTETH/STETH
+      if (
+        pool.id.toLowerCase() === '0xa9dede2d033cefac744ff7b0cf8c82bbe9cf144c5897f874697a82164c4469d4'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 57736 // same as MAINNET WETH/ETH https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
+        pool.tvlUSD = 104153666 // same as MAINNET WETH/ETH https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
+        log.debug(`Setting tvl for MAINNET WSTETH/STETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // USR/USDC
       if (
         pool.id.toLowerCase() === '0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615'.toLowerCase() &&
