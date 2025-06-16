@@ -57,7 +57,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       ) {
         pool.tvlETH = 57736 // https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
         pool.tvlUSD = 104153666 // https://app.uniswap.org/explore/pools/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
-        log.debug(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
+        log.debug(`Setting tvl for MAINNET WETH/ETH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
