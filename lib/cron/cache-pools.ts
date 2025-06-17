@@ -44,6 +44,12 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   const provider = chainProtocols.find(
     (element) => element.protocol == protocol && element.chainId == chainId
   )!.provider
+  const eulerPoolsProvider = chainProtocols.find(
+    (element) => element.protocol == protocol && element.chainId == chainId
+  )!.eulerHooksPoolProvider
+  const eulerHooksProvider = chainProtocols.find(
+    (element) => element.protocol == protocol && element.chainId == chainId
+  )!.eulerHooksProvider
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
@@ -274,6 +280,18 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool,
       ]
 
+      const zeroTvlPools = await eulerPoolsProvider?.getPools()
+      const eulerHooks = await eulerHooksProvider?.getHooks()
+
+      if (eulerHooks && zeroTvlPools) {
+        const eulerPools = zeroTvlPools.filter((eulerPool) =>
+          eulerHooks.map((eulerHook) => eulerHook.id).includes(eulerPool.hooks)
+        )
+        eulerPools.forEach((eulerPool) => {
+          manuallyIncludedV4Pools.push(eulerPool)
+        })
+      }
+
       if (chainId === ChainId.MAINNET) {
         // https://bunni.xyz/explore/pools/ethereum/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5
         manuallyIncludedV4Pools.push({
@@ -349,9 +367,9 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       }
 
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
-
-      pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
     }
+
+    pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
 
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
   } catch (err) {
