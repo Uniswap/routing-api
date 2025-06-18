@@ -398,6 +398,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           tvlETH: 23183,
           tvlUSD: 41820637,
         } as V4SubgraphPool)
+      }
 
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
