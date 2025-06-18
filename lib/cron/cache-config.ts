@@ -629,6 +629,20 @@ export const chainProtocols = [
   },
   {
     protocol: Protocol.V4,
+    chainId: ChainId.OPTIMISM,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.OPTIMISM,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.OPTIMISM)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
     chainId: ChainId.BNB,
     timeout: 90000,
     provider: new V4SubgraphProvider(
