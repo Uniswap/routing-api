@@ -310,6 +310,23 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           tvlETH: 5371.42857143,
           tvlUSD: 15040000,
         } as V4SubgraphPool)
+
+        // UNICHAIN ETH/WETH: https://uniscan.xyz/tx/0x935979a7e4a1e3ea92b180009c46242b89a787fb4f2f5799bd53c675d5e0f9fd#eventlog
+        manuallyIncludedV4Pools.push({
+          id: '0xba246b8420b5aeb13e586cd7cbd32279fa7584d7f4cbc9bd356a6bb6200d16a6',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x730b109bad65152c67ecc94eb8b0968603dba888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0x4200000000000000000000000000000000000006',
+          },
+          tvlETH: 33482,
+          tvlUSD: 60342168,
+        } as V4SubgraphPool)
       }
 
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
