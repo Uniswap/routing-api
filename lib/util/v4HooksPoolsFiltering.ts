@@ -49,7 +49,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         log.debug(`Setting tvl for OPTIMISM ETH/WETH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
-      
+
       // UNICHAIN ETH/WETH
       if (
         pool.id.toLowerCase() === '0xba246b8420b5aeb13e586cd7cbd32279fa7584d7f4cbc9bd356a6bb6200d16a6'.toLowerCase() &&
