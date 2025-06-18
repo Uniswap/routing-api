@@ -312,6 +312,25 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool)
       }
 
+      if (chainId === ChainId.OPTIMISM) {
+        // OPTIMISM ETH/WETH: https://optimistic.etherscan.io/tx/0x5f81f2aa19a50a76a94a30d3d2a9540cb3cd8597c94499a50330e4b6acbef5c1#eventlog
+        manuallyIncludedV4Pools.push({
+          id: '0xbf3d38951e485c811bb1fc7025fcd1ef60c15fda4c4163458facb9bedfe26f83',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x480dafdb4d6092ef3217595b75784ec54b52e888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0x4200000000000000000000000000000000000006',
+          },
+          tvlETH: 826,
+          tvlUSD: 1482475,
+        } as V4SubgraphPool)
+      }
+
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)

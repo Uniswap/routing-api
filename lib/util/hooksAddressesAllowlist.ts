@@ -20,6 +20,8 @@ export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621AFCa515Bf586
 export const BTC_ACC_ON_BASE = '0x704268ac7043aeef50f47b6a03ae68ccf808e044'
 export const MEV_TAX_TEST_IN_PROD_ON_UNICHAIN = '0xb9a17e66db950e00822c2b833d6bb304c9b86080'
 
+export const WETH_HOOKS_ADDRESS_ON_OP_MAINNET = '0x480dafdb4d6092ef3217595b75784ec54b52e888'
+
 // example pool: https://app.uniswap.org/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
 export const BUNNI_ON_UNICHAIN = '0x005aF73a245d8171A0550ffAe2631f12cc211888'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
@@ -40,7 +42,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
-  [ChainId.OPTIMISM]: [ADDRESS_ZERO],
+  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
   [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_ONE]: [
