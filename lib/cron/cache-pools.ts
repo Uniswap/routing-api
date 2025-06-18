@@ -377,6 +377,25 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool)
       }
 
+      if (chainId === ChainId.BASE) {
+        // BASE ETH/WETH: https://basescan.org/tx/0x221b6521ee4a19a25a424ecfb36b58b0b68fce7cda106bf4551d1424b0867bcc#eventlog
+        manuallyIncludedV4Pools.push({
+          id: '0xbb2aefc6c55a0464b944c0478869527ba1a537f05f90a1bb82e1196c6e9403e2',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0xb08211d57032dd10b1974d4b876851a7f7596888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0x4200000000000000000000000000000000000006',
+          },
+          tvlETH: 6992,
+          tvlUSD: 12580000,
+        } as V4SubgraphPool)
+      }
+
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
