@@ -381,6 +381,24 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool)
       }
 
+      if (chainId === ChainId.ARBITRUM_ONE) {
+        // ARBITRUM ETH/WETH: https://arbiscan.io/tx/0x0b393d141a3770292ae8508626a4443307403b0b958b7d0eff70fca2fb85c106#eventlog
+        manuallyIncludedV4Pools.push({
+          id: '0xc1c777843809a8e77a398fd79ecddcefbdad6a5676003ae2eedf3a33a56589e9',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x2a4adf825bd96598487dbb6b2d8d882a4eb86888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+          },
+          tvlETH: 23183,
+          tvlUSD: 41820637,
+        } as V4SubgraphPool)
+
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)

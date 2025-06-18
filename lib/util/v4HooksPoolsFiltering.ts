@@ -73,6 +73,17 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
+      // ARBITRUM ETH/WETH
+      if (
+        pool.id.toLowerCase() === '0xc1c777843809a8e77a398fd79ecddcefbdad6a5676003ae2eedf3a33a56589e9'.toLowerCase() &&
+        chainId === ChainId.ARBITRUM_ONE
+      ) {
+        pool.tvlETH = 23183 // https://app.uniswap.org/explore/pools/arbitrum/0xC6962004f452bE9203591991D15f6b388e09E8D0
+        pool.tvlUSD = 41820637 // https://app.uniswap.org/explore/pools/arbitrum/0xC6962004f452bE9203591991D15f6b388e09E8D0
+        log.debug(`Setting tvl for ARBITRUM ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // ETH/flETH
       if (
         pool.id.toLowerCase() === '0x14287e3268eb628fcebd2d8f0730b01703109e112a7a41426a556d10211d2086'.toLowerCase() &&
