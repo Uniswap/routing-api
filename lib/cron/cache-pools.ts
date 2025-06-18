@@ -291,6 +291,23 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           tvlETH: 73.23,
           tvlUSD: 416830,
         } as V4SubgraphPool)
+
+        // MAINNET ETH/WETH: https://etherscan.io/tx/0x0db1d052ce2b8913a78abe91451f2b384a021f531c13d5cc719dd38d5d4cb6c0#eventlog
+        manuallyIncludedV4Pools.push({
+          id: '0xf6f2314ac16a878e2bf8ef01ef0a3487e714d397d87f702b9a08603eb3252e92',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x57991106cb7aa27e2771beda0d6522f68524a888',
+          liquidity: '173747248900',
+          token0: {
+            id: '0x0000000000000000000000000000000000000000',
+          },
+          token1: {
+            id: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+          },
+          tvlETH: 57736,
+          tvlUSD: 104153666,
+        } as V4SubgraphPool)
       }
 
       if (chainId === ChainId.UNICHAIN) {
