@@ -1,7 +1,7 @@
 import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
-import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/build/main/providers/v4/euler-swap-hooks-subgraph-provider'
+import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
