@@ -279,12 +279,14 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
       const eulerHooks = await eulerHooksProvider?.getHooks()
       if (eulerHooks) {
+        metric.putMetric('eulerHooks.length', eulerHooks.length)
+
         eulerHooks.forEach(async (eulerHook) => {
           const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
           log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
           if (pool) {
-            manuallyIncludedV4Pools.push(pool)
+            manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
           }
         })
       }
