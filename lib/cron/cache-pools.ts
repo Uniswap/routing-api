@@ -291,7 +291,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           if (pool) {
             manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
           }
-        });
+        }));
       }
 
       if (chainId === ChainId.MAINNET) {
