@@ -126,7 +126,6 @@ export interface ChainProtocol {
   chainId: ChainId
   timeout: number
   provider: V2SubgraphProvider | V3SubgraphProvider | V4SubgraphProvider
-  eulerHooksPoolProvider?: V4SubgraphProvider
   eulerHooksProvider?: EulerSwapHooksSubgraphProvider
 }
 
@@ -594,15 +593,6 @@ export const chainProtocols = [
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
-    eulerHooksPoolProvider: new V4SubgraphProvider(
-      ChainId.UNICHAIN,
-      3,
-      90000,
-      true,
-      0, // has to be zero because euler hooked pools use JIT liquidity
-      0, // has to be zero because euler hooked pools use JIT liquidity
-      v4SubgraphUrlOverride(ChainId.UNICHAIN)
-    ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
       ChainId.UNICHAIN,
       3,
@@ -636,15 +626,6 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.MAINNET)
-    ),
-    eulerHooksPoolProvider: new V4SubgraphProvider(
-      ChainId.MAINNET,
-      3,
-      90000,
-      true,
-      0, // has to be zero because euler hooked pools use JIT liquidity
-      0, // has to be zero because euler hooked pools use JIT liquidity
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(

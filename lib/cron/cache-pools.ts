@@ -44,9 +44,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   const provider = chainProtocols.find(
     (element) => element.protocol == protocol && element.chainId == chainId
   )!.provider
-  const eulerPoolsProvider = chainProtocols.find(
-    (element) => element.protocol == protocol && element.chainId == chainId
-  )!.eulerHooksPoolProvider
   const eulerHooksProvider = chainProtocols.find(
     (element) => element.protocol == protocol && element.chainId == chainId
   )!.eulerHooksProvider
@@ -280,15 +277,15 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool,
       ]
 
-      const zeroTvlPools = await eulerPoolsProvider?.getPools()
       const eulerHooks = await eulerHooksProvider?.getHooks()
+      if (eulerHooks) {
+        eulerHooks.forEach(async (eulerHook) => {
+          const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
+          log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
-      if (eulerHooks && zeroTvlPools) {
-        const eulerPools = zeroTvlPools.filter((eulerPool) =>
-          eulerHooks.map((eulerHook) => eulerHook.id).includes(eulerPool.hooks)
-        )
-        eulerPools.forEach((eulerPool) => {
-          manuallyIncludedV4Pools.push(eulerPool)
+          if (pool) {
+            manuallyIncludedV4Pools.push(pool)
+          }
         })
       }
 
