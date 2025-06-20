@@ -33,6 +33,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-mainnet/api`
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-soneium-mainnet/api`
+    case ChainId.OPTIMISM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-optimism/api`
     default:
       return undefined
   }
@@ -623,6 +625,20 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SONEIUM)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.OPTIMISM,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.OPTIMISM,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
   },
   {
