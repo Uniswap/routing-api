@@ -281,14 +281,17 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       if (eulerHooks) {
         metric.putMetric('eulerHooks.length', eulerHooks.length)
 
-        eulerHooks.forEach(async (eulerHook) => {
+        const eulerPools = await Promise.all(eulerHooks.map(async (eulerHook) => {
           const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
           log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
+          return pool;
+        }));
 
+        eulerPools.forEach((pool => {
           if (pool) {
             manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
           }
-        })
+        });
       }
 
       if (chainId === ChainId.MAINNET) {
