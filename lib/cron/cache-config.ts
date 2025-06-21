@@ -1,7 +1,6 @@
 import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
-import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
@@ -120,14 +119,6 @@ const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked)
 export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
 export const v2BaseTrackedEthThreshold = 0.1 // Pairs on Base need at least 0.1 of trackedEth to be selected
 const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
-
-export interface ChainProtocol {
-  protocol: Protocol
-  chainId: ChainId
-  timeout: number
-  provider: V2SubgraphProvider | V3SubgraphProvider | V4SubgraphProvider
-  eulerHooksProvider?: EulerSwapHooksSubgraphProvider
-}
 
 export const chainProtocols = [
   // V3.
@@ -593,13 +584,6 @@ export const chainProtocols = [
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
-    eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
-      ChainId.UNICHAIN,
-      3,
-      90000,
-      true,
-      v4SubgraphUrlOverride(ChainId.UNICHAIN)
-    ),
   },
   {
     protocol: Protocol.V4,
@@ -626,13 +610,6 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.MAINNET)
-    ),
-    eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
-      ChainId.MAINNET,
-      3,
-      90000,
-      true,
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
