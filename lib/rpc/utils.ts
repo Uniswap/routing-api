@@ -110,7 +110,7 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
       return `https://${tokens[0]}.zksync-mainnet.quiknode.pro/${tokens[1]}`
     }
     case 'QUICKNODE_1301': {
-      // URL contains unichain-sepolia.quiknode.pro, we had to not disclose prior to the unichain annouce
+      // URL contains unichain-sepolia.quiknode.pro, we had to not disclose prior to the unichain announce
       return `${tokens[0]}`
     }
     case 'QUICKNODE_130': {
