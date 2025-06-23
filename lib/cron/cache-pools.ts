@@ -274,6 +274,30 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool,
       ]
 
+      const eulerHooks = await eulerHooksProvider?.getHooks()
+      if (eulerHooks) {
+        metric.putMetric('eulerHooks.length', eulerHooks.length)
+
+        const eulerPools = await Promise.all(
+          eulerHooks.map(async (eulerHook) => {
+            const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
+            log.info(`eulerHooks pool ${JSON.stringify(pool)}`);
+
+            // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
+            (pool as V4SubgraphPool).tvlUSD = 1000;
+            (pool as V4SubgraphPool).tvlETH = 5500000;
+
+            return pool
+          })
+        )
+
+        eulerPools.forEach((pool) => {
+          if (pool) {
+            manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
+          }
+        })
+      }
+
       if (chainId === ChainId.MAINNET) {
         // https://bunni.xyz/explore/pools/ethereum/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5
         manuallyIncludedV4Pools.push({
