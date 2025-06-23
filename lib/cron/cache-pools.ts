@@ -284,11 +284,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         const eulerPools = await Promise.all(
           eulerHooks.map(async (eulerHook) => {
             const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
-            log.info(`eulerHooks pool ${JSON.stringify(pool)}`);
+            log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
             // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
-            (pool as V4SubgraphPool).tvlUSD = 1000;
-            (pool as V4SubgraphPool).tvlETH = 5500000;
+            ;(pool as V4SubgraphPool).tvlUSD = 1000
+            ;(pool as V4SubgraphPool).tvlETH = 5500000
 
             return pool
           })
