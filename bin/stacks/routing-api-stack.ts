@@ -639,15 +639,15 @@ export class RoutingAPIStack extends cdk.Stack {
     const subgraphAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
     SUBGRAPH_ALERT_CHAIN_PROTOCOL.forEach(([chainId, protocol]) => {
       const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.getPools.latency`
-      const alarmName = `RoutingAPI-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
+      const alarmName = `CachePools-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
 
       // Create a metric that represents the count of samples in the last 1 day
       const metric = new aws_cloudwatch.Metric({
         namespace: 'Uniswap',
         metricName: metricName,
-        dimensionsMap: { Service: 'RoutingAPI' },
-        unit: aws_cloudwatch.Unit.COUNT,
-        statistic: 'sum',
+        dimensionsMap: { Service: 'CachePools' },
+        unit: aws_cloudwatch.Unit.NONE,
+        statistic: 'SampleCount',
         period: Duration.days(1), // 1 day period
       })
 
