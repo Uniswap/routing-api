@@ -20,9 +20,21 @@ import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
 import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
+import { Protocol } from '@uniswap/router-sdk'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
+
+// The following chain/protocol combos are used to alert on subgraph data issues.
+// For now only alert on Base/Mainnet for validation.
+export const SUBGRAPH_ALERT_CHAIN_PROTOCOL: [ChainId, Protocol][] = [
+  [ChainId.MAINNET, Protocol.V4],
+  [ChainId.MAINNET, Protocol.V3],
+  [ChainId.MAINNET, Protocol.V2],
+  [ChainId.BASE, Protocol.V4],
+  [ChainId.BASE, Protocol.V3],
+  [ChainId.BASE, Protocol.V2],
+]
 
 // For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity.
 export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
@@ -623,6 +635,34 @@ export class RoutingAPIStack extends cdk.Stack {
       })
     })
 
+    // Alarms for subgraph metrics that trigger when no samples are received in the last 1 day
+    const subgraphAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
+    SUBGRAPH_ALERT_CHAIN_PROTOCOL.forEach(([chainId, protocol]) => {
+      const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.getPools.latency`
+      const alarmName = `RoutingAPI-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
+
+      // Create a metric that represents the count of samples in the last 1 day
+      const metric = new aws_cloudwatch.Metric({
+        namespace: 'Uniswap',
+        metricName: metricName,
+        dimensionsMap: { Service: 'RoutingAPI' },
+        unit: aws_cloudwatch.Unit.COUNT,
+        statistic: 'sum',
+        period: Duration.days(1), // 1 day period
+      })
+
+      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        alarmName,
+        metric,
+        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+        threshold: 0, // Trigger when no samples (count = 0)
+        evaluationPeriods: 1, // Only need 1 evaluation period since we're checking 1 day
+        treatMissingData: aws_cloudwatch.TreatMissingData.BREACHING, // Missing data should trigger the alarm
+      })
+
+      subgraphAlertAlarms.push(alarm)
+    })
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -647,6 +687,9 @@ export class RoutingAPIStack extends cdk.Stack {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       simulationAlarmByChainSev2.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      subgraphAlertAlarms.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }
