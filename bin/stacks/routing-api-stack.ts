@@ -20,21 +20,10 @@ import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
 import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
-import { Protocol } from '@uniswap/router-sdk'
+import { chainProtocols } from '../../lib/cron/cache-config'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
-
-// The following chain/protocol combos are used to alert on subgraph data issues.
-// For now only alert on Base/Mainnet for validation.
-export const SUBGRAPH_ALERT_CHAIN_PROTOCOL: [ChainId, Protocol][] = [
-  [ChainId.MAINNET, Protocol.V4],
-  [ChainId.MAINNET, Protocol.V3],
-  [ChainId.MAINNET, Protocol.V2],
-  [ChainId.BASE, Protocol.V4],
-  [ChainId.BASE, Protocol.V3],
-  [ChainId.BASE, Protocol.V2],
-]
 
 // For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity.
 export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
@@ -637,7 +626,9 @@ export class RoutingAPIStack extends cdk.Stack {
 
     // Alarms for subgraph metrics that trigger when no samples are received in the last 1 day
     const subgraphAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
-    SUBGRAPH_ALERT_CHAIN_PROTOCOL.forEach(([chainId, protocol]) => {
+
+    for (let i = 0; i < chainProtocols.length; i++) {
+      const { protocol, chainId } = chainProtocols[i]
       const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.getPools.latency`
       const alarmName = `CachePools-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
 
@@ -661,7 +652,7 @@ export class RoutingAPIStack extends cdk.Stack {
       })
 
       subgraphAlertAlarms.push(alarm)
-    })
+    }
 
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
