@@ -45,8 +45,8 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     (element) => element.protocol == protocol && element.chainId == chainId
   )!.provider
   const eulerHooksProvider = chainProtocols.find(
-    (element) => element.protocol === Protocol.V4 && element.chainId === chainId
-  )!.eulerHooksProvider
+    (element) => element.protocol == protocol && element.chainId == chainId
+  )?.eulerHooksProvider
   const log: Logger = bunyan.createLogger({
     name: 'RoutingLambda',
     serializers: bunyan.stdSerializers,
@@ -277,28 +277,30 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool,
       ]
 
-      const eulerHooks = await eulerHooksProvider?.getHooks()
-      if (eulerHooks) {
-        metric.putMetric('eulerHooks.length', eulerHooks.length)
+      if (eulerHooksProvider) {
+        const eulerHooks = await eulerHooksProvider?.getHooks()
+        if (eulerHooks) {
+          metric.putMetric('eulerHooks.length', eulerHooks.length)
 
-        const eulerPools = await Promise.all(
-          eulerHooks.map(async (eulerHook) => {
-            const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
-            log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
+          const eulerPools = await Promise.all(
+            eulerHooks.map(async (eulerHook) => {
+              const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
+              log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
-            // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
-            ;(pool as V4SubgraphPool).tvlUSD = 1000
-            ;(pool as V4SubgraphPool).tvlETH = 5500000
+              // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
+              ;(pool as V4SubgraphPool).tvlUSD = 1000
+              ;(pool as V4SubgraphPool).tvlETH = 5500000
 
-            return pool
+              return pool
+            })
+          )
+
+          eulerPools.forEach((pool) => {
+            if (pool) {
+              manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
+            }
           })
-        )
-
-        eulerPools.forEach((pool) => {
-          if (pool) {
-            manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
-          }
-        })
+        }
       }
 
       if (chainId === ChainId.MAINNET) {
