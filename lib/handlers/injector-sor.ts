@@ -154,6 +154,7 @@ export type ContainerDependencies = {
   mixedSupported?: ChainId[]
   v4PoolParams?: Array<[number, number, string]>
   cachedRoutesCacheInvalidationFixRolloutPercentage?: number
+  deleteCacheEnabledChains?: ChainId[]
 }
 
 export interface ContainerInjected {
@@ -539,6 +540,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.SONEIUM,
           ]
 
+          // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
+          const deleteCacheEnabledChains = [ChainId.OPTIMISM]
+
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
@@ -578,6 +582,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               mixedSupported,
               v4PoolParams,
               cachedRoutesCacheInvalidationFixRolloutPercentage,
+              deleteCacheEnabledChains,
             },
           }
         })
