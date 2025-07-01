@@ -358,6 +358,48 @@ describe('DynamoRouteCachingProvider', async () => {
       TEST_CACHED_V4_ROUTES.blockNumber
     )
     expect(v4route).to.not.be.undefined
+
+    // Delete cached routes
+    const deleted = await dynamoRouteCache.deleteCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(deleted).to.be.true
+
+    const deletedV4 = await dynamoRouteCache.deleteCachedRoute(
+      ChainId.MAINNET,
+      currencyAmountETH,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V4],
+      TEST_CACHED_V4_ROUTES.blockNumber
+    )
+    expect(deletedV4).to.be.true
+
+    // Fetches nothing from the cache after delete
+    const routeAfterDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(routeAfterDelete).to.be.undefined
+
+    const v4routeAfterDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmountETH,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V4],
+      TEST_CACHED_V4_ROUTES.blockNumber
+    )
+    expect(v4routeAfterDelete).to.be.undefined
   })
 
   it('Still uses RoutesDB Table for the default configuration', async () => {
