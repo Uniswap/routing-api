@@ -574,6 +574,11 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @returns
    */
   protected async _deleteCachedRoute(cachedRoutes: CachedRoutes): Promise<boolean> {
+    if (cachedRoutes.routes.length === 0) {
+      log.warn(`[DynamoRouteCachingProvider] No routes to delete for ${cachedRoutes.toString()}`)
+      return false
+    }
+
     const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
     const deleteRequests = cachedRoutes.routes.map((route) => ({
       DeleteRequest: {
