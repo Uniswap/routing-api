@@ -106,6 +106,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       mixedSupported,
       v4PoolParams,
       cachedRoutesCacheInvalidationFixRolloutPercentage,
+      deleteCacheEnabledChains,
     } = dependencies[chainIdEnum]!
 
     let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
@@ -144,6 +145,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
           mixedSupported,
           v4PoolParams,
           cachedRoutesCacheInvalidationFixRolloutPercentage,
+          deleteCacheEnabledChains,
         })
         break
     }

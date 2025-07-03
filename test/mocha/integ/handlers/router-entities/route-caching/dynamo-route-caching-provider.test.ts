@@ -532,4 +532,70 @@ describe('DynamoRouteCachingProvider', async () => {
     )
     expect(nonExistV4OnlyMixedRoutesUR2_0).not.to.be.undefined
   })
+
+  it('Deletes cached routes', async () => {
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(1 * 10 ** WETH.decimals))
+    const currencyAmountETH = CurrencyAmount.fromRawAmount(
+      nativeOnChain(ChainId.MAINNET),
+      JSBI.BigInt(1 * 10 ** nativeOnChain(ChainId.MAINNET).decimals)
+    )
+
+    // Insert V3 routes into cache
+    const insertedIntoCacheV3 = await dynamoRouteCache.setCachedRoute(TEST_CACHED_ROUTES, currencyAmount)
+    expect(insertedIntoCacheV3).to.be.true
+
+    // Insert V4 routes into cache
+    const insertedIntoCacheV4 = await dynamoRouteCache.setCachedRoute(TEST_CACHED_V4_ROUTES, currencyAmountETH)
+    expect(insertedIntoCacheV4).to.be.true
+
+    // Verify routes exist in cache before deletion
+    const v3RouteBeforeDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(v3RouteBeforeDelete).to.not.be.undefined
+
+    const v4RouteBeforeDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmountETH,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V4],
+      TEST_CACHED_V4_ROUTES.blockNumber
+    )
+    expect(v4RouteBeforeDelete).to.not.be.undefined
+
+    // Delete V3 routes
+    const deletedV3 = await dynamoRouteCache.deleteCachedRoute(TEST_CACHED_ROUTES)
+    expect(deletedV3).to.be.true
+
+    // Delete V4 routes
+    const deletedV4 = await dynamoRouteCache.deleteCachedRoute(TEST_CACHED_V4_ROUTES)
+    expect(deletedV4).to.be.true
+
+    // Verify routes no longer exist in cache after deletion
+    const v3RouteAfterDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmount,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V3],
+      TEST_CACHED_ROUTES.blockNumber
+    )
+    expect(v3RouteAfterDelete).to.be.undefined
+
+    const v4RouteAfterDelete = await dynamoRouteCache.getCachedRoute(
+      ChainId.MAINNET,
+      currencyAmountETH,
+      USDC_MAINNET,
+      TradeType.EXACT_INPUT,
+      [Protocol.V4],
+      TEST_CACHED_V4_ROUTES.blockNumber
+    )
+    expect(v4RouteAfterDelete).to.be.undefined
+  })
 })

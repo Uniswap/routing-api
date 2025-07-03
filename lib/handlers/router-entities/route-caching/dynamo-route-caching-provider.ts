@@ -561,6 +561,73 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
 
   /**
    * Implementation of the abstract method defined in `IRouteCachingProvider`
+   * Deletes the cached routes for the given chainId, amount, quoteCurrency, tradeType, protocols, blockNumber
+   *
+   * @param chainId
+   * @param amount
+   * @param quoteCurrency
+   * @param tradeType
+   * @param protocols
+   * @param blockNumber
+   * @param alphaRouterConfig
+   * @param swapOptions
+   * @returns
+   */
+  protected async _deleteCachedRoute(cachedRoutes: CachedRoutes): Promise<boolean> {
+    if (cachedRoutes.routes.length === 0) {
+      log.warn(`[DynamoRouteCachingProvider] No routes to delete for ${cachedRoutes.toString()}`)
+      return false
+    }
+
+    const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
+    const deleteRequests = cachedRoutes.routes.map((route) => ({
+      DeleteRequest: {
+        Key: {
+          pairTradeTypeChainId: partitionKey.toString(),
+          routeId: route.routeId,
+        },
+      },
+    }))
+
+    if (deleteRequests.length === 0) {
+      log.warn(`[DynamoRouteCachingProvider] No routes to delete for ${partitionKey.toString()}`)
+      return false
+    }
+
+    try {
+      // DynamoDB batchWrite supports max 25 items per call
+      const BATCH_SIZE = 25
+      for (let i = 0; i < deleteRequests.length; i += BATCH_SIZE) {
+        const batch = deleteRequests.slice(i, i + BATCH_SIZE)
+        const params = {
+          RequestItems: {
+            [this.routesTableName]: batch,
+          },
+        }
+        const response = await this.ddbClient.batchWrite(params).promise()
+
+        if (response.UnprocessedItems && Object.keys(response.UnprocessedItems).length > 0) {
+          log.warn(
+            `[DynamoRouteCachingProvider] Unprocessed items during delete for ${partitionKey.toString()}`,
+            response.UnprocessedItems
+          )
+          // Optionally retry unprocessed items here
+        }
+      }
+
+      log.info(`[DynamoRouteCachingProvider] Deleted ${deleteRequests.length} route(s) for ${partitionKey.toString()}`)
+      return true
+    } catch (error) {
+      log.error(
+        { error, partitionKey: partitionKey.toString() },
+        `[DynamoRouteCachingProvider] Failed to delete cached routes`
+      )
+      return false
+    }
+  }
+
+  /**
+   * Implementation of the abstract method defined in `IRouteCachingProvider`
    * Obtains the CacheMode from the CachingStrategy, if not found, then return Darkmode.
    *
    * @param _chainId
