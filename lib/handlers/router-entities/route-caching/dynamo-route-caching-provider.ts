@@ -573,80 +573,50 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
    * @param swapOptions
    * @returns
    */
-  protected async _deleteCachedRoute(
-    chainId: ChainId,
-    amount: CurrencyAmount<Currency>,
-    quoteCurrency: Currency,
-    tradeType: TradeType,
-    protocols: Protocol[],
-    blockNumber: number,
-    alphaRouterConfig?: AlphaRouterConfig,
-    swapOptions?: SwapOptions
-  ): Promise<boolean> {
-    try {
-      // Reuse the cached route retrieval logic
-      const cachedRoutes = await this._getCachedRoute(
-        chainId,
-        amount,
-        quoteCurrency,
-        tradeType,
-        protocols,
-        blockNumber, // currentBlockNumber
-        false, // optimistic = false to avoid sending async cache refreshes
-        alphaRouterConfig,
-        swapOptions
-      )
-
-      if (!cachedRoutes || cachedRoutes.routes.length === 0) {
-        log.warn(`[DynamoRouteCachingProvider] No cached routes found to delete for chainId ${chainId}`)
-        return false
-      }
-
-      const routesToDelete = cachedRoutes.routes
-
-      if (routesToDelete.length === 0) {
-        log.warn(`[DynamoRouteCachingProvider] No matching cached routes to delete for block ${blockNumber}`)
-        return false
-      }
-
-      const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
-
-      const deleteRequests = routesToDelete.map((route) => ({
-        DeleteRequest: {
-          Key: {
-            pairTradeTypeChainId: partitionKey.toString(),
-            routeId: route.routeId,
-          },
+  protected async _deleteCachedRoute(cachedRoutes: CachedRoutes): Promise<boolean> {
+    const partitionKey = PairTradeTypeChainId.fromCachedRoutes(cachedRoutes)
+    const deleteRequests = cachedRoutes.routes.map((route) => ({
+      DeleteRequest: {
+        Key: {
+          pairTradeTypeChainId: partitionKey.toString(),
+          routeId: route.routeId,
         },
-      }))
+      },
+    }))
 
-      // Batch write with batching (max 25 per call) - limit from AWS DynamoDB
+    if (deleteRequests.length === 0) {
+      log.warn(`[DynamoRouteCachingProvider] No routes to delete for ${partitionKey.toString()}`)
+      return false
+    }
+
+    try {
+      // DynamoDB batchWrite supports max 25 items per call
       const BATCH_SIZE = 25
       for (let i = 0; i < deleteRequests.length; i += BATCH_SIZE) {
         const batch = deleteRequests.slice(i, i + BATCH_SIZE)
-        const batchParams = {
+        const params = {
           RequestItems: {
             [this.routesTableName]: batch,
           },
         }
-        const response = await this.ddbClient.batchWrite(batchParams).promise()
+        const response = await this.ddbClient.batchWrite(params).promise()
+
         if (response.UnprocessedItems && Object.keys(response.UnprocessedItems).length > 0) {
           log.warn(
-            `[DynamoRouteCachingProvider] Unprocessed items encountered during delete`,
+            `[DynamoRouteCachingProvider] Unprocessed items during delete for ${partitionKey.toString()}`,
             response.UnprocessedItems
           )
-          // optional: retry here
+          // Optionally retry unprocessed items here
         }
       }
 
-      log.info(
-        `[DynamoRouteCachingProvider] Successfully deleted ${
-          routesToDelete.length
-        } cached route(s) for ${partitionKey.toString()}`
-      )
+      log.info(`[DynamoRouteCachingProvider] Deleted ${deleteRequests.length} route(s) for ${partitionKey.toString()}`)
       return true
     } catch (error) {
-      log.error({ error }, `[DynamoRouteCachingProvider] Error while deleting cached route`)
+      log.error(
+        { error, partitionKey: partitionKey.toString() },
+        `[DynamoRouteCachingProvider] Failed to delete cached routes`
+      )
       return false
     }
   }

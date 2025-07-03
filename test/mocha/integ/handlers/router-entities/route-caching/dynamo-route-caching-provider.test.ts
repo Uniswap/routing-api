@@ -570,25 +570,11 @@ describe('DynamoRouteCachingProvider', async () => {
     expect(v4RouteBeforeDelete).to.not.be.undefined
 
     // Delete V3 routes
-    const deletedV3 = await dynamoRouteCache.deleteCachedRoute(
-      ChainId.MAINNET,
-      currencyAmount,
-      USDC_MAINNET,
-      TradeType.EXACT_INPUT,
-      [Protocol.V3],
-      TEST_CACHED_ROUTES.blockNumber
-    )
+    const deletedV3 = await dynamoRouteCache.deleteCachedRoute(TEST_CACHED_ROUTES)
     expect(deletedV3).to.be.true
 
     // Delete V4 routes
-    const deletedV4 = await dynamoRouteCache.deleteCachedRoute(
-      ChainId.MAINNET,
-      currencyAmountETH,
-      USDC_MAINNET,
-      TradeType.EXACT_INPUT,
-      [Protocol.V4],
-      TEST_CACHED_V4_ROUTES.blockNumber
-    )
+    const deletedV4 = await dynamoRouteCache.deleteCachedRoute(TEST_CACHED_V4_ROUTES)
     expect(deletedV4).to.be.true
 
     // Verify routes no longer exist in cache after deletion
