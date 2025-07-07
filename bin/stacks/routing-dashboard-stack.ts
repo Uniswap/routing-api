@@ -26,14 +26,13 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
   routingLambdaName: string
   poolCacheLambdaNameArray: string[]
-  ipfsPoolCacheLambdaName?: string
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray } = props
     const region = cdk.Stack.of(this).region
 
     const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
@@ -896,27 +895,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
                 region: region,
                 title: 'Routing Lambda Provisioned Concurrency',
                 stat: 'Maximum',
-              },
-            },
-            {
-              type: 'metric',
-              width: 24,
-              height: 9,
-              properties: {
-                view: 'timeSeries',
-                stacked: false,
-                metrics: [
-                  ...poolCacheLambdaMetrics,
-                  ...(ipfsPoolCacheLambdaName
-                    ? [
-                        ['AWS/Lambda', 'Errors', 'FunctionName', ipfsPoolCacheLambdaName],
-                        ['.', 'Invocations', '.', '.'],
-                      ]
-                    : []),
-                ],
-                region: region,
-                title: 'Pool Cache Lambda Error/Invocations',
-                stat: 'Sum',
               },
             },
             {

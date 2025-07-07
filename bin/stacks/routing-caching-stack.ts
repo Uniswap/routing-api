@@ -36,8 +36,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheKey: string
   public readonly poolCacheGzipKey: string
   public readonly tokenListCacheBucket: aws_s3.Bucket
-  public readonly ipfsPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
-  public readonly ipfsCleanPoolCachingLambda: aws_lambda_nodejs.NodejsFunction
   public readonly poolCacheLambdaNameArray: string[] = []
   public readonly alchemyQueryKey: string | undefined = undefined
   public readonly alchemyQueryKey2: string | undefined = undefined
@@ -79,7 +77,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.poolCacheKey = PoolCachingFilePrefixes.PlainText
     this.poolCacheGzipKey = PoolCachingFilePrefixes.GzipText
 
-    const { stage, route53Arn, pinata_key, pinata_secret, hosted_zone } = props
+    const { stage, route53Arn } = props
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {
       assumedBy: new aws_iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -183,93 +181,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
         lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       }
       this.poolCacheLambdaNameArray.push(lambda.functionName)
-    }
-
-    if (stage == STAGE.BETA || stage == STAGE.PROD) {
-      this.ipfsPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'IpfsPoolCacheLambda', {
-        role: lambdaRole,
-        runtime: aws_lambda.Runtime.NODEJS_18_X,
-        entry: path.join(__dirname, '../../lib/cron/cache-pools-ipfs.ts'),
-        handler: 'handler',
-        timeout: Duration.seconds(900),
-        memorySize: 1024,
-        bundling: {
-          minify: true,
-          sourceMap: true,
-        },
-        description: 'IPFS Pool Cache Lambda',
-        layers: [
-          aws_lambda.LayerVersion.fromLayerVersionArn(
-            this,
-            'InsightsLayerPoolsIPFS',
-            `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
-          ),
-        ],
-        tracing: aws_lambda.Tracing.ACTIVE,
-        environment: {
-          PINATA_API_KEY: pinata_key!,
-          PINATA_API_SECRET: pinata_secret!,
-          ROLE_ARN: route53Arn!,
-          HOSTED_ZONE: hosted_zone!,
-          STAGE: stage,
-          REDEPLOY: '1',
-          ALCHEMY_QUERY_KEY_2: alchemyQueryKey2!,
-        },
-      })
-
-      new aws_events.Rule(this, 'ScheduleIpfsPoolCache', {
-        schedule: aws_events.Schedule.rate(Duration.minutes(15)),
-        targets: [new aws_events_targets.LambdaFunction(this.ipfsPoolCachingLambda)],
-      })
-
-      this.ipfsCleanPoolCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'CleanIpfsPoolCacheLambda', {
-        role: lambdaRole,
-        runtime: aws_lambda.Runtime.NODEJS_18_X,
-        entry: path.join(__dirname, '../../lib/cron/clean-pools-ipfs.ts'),
-        handler: 'handler',
-        timeout: Duration.seconds(900),
-        memorySize: 512,
-        bundling: {
-          minify: true,
-          sourceMap: true,
-        },
-        description: 'Clean IPFS Pool Cache Lambda',
-        layers: [
-          aws_lambda.LayerVersion.fromLayerVersionArn(
-            this,
-            'InsightsLayerPoolsCleanIPFS',
-            `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
-          ),
-        ],
-        tracing: aws_lambda.Tracing.ACTIVE,
-        environment: {
-          PINATA_API_KEY: pinata_key!,
-          PINATA_API_SECRET: pinata_secret!,
-          STAGE: stage,
-          REDEPLOY: '1',
-          ALCHEMY_QUERY_KEY_2: alchemyQueryKey2!,
-        },
-      })
-
-      new aws_events.Rule(this, 'ScheduleCleanIpfsPoolCache', {
-        schedule: aws_events.Schedule.rate(Duration.minutes(30)),
-        targets: [new aws_events_targets.LambdaFunction(this.ipfsCleanPoolCachingLambda)],
-      })
-    }
-
-    if (chatBotTopic) {
-      if (stage == 'beta' || stage == 'prod') {
-        const lambdaIpfsAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToIPFSLambdaError', {
-          metric: this.ipfsPoolCachingLambda.metricErrors({
-            period: Duration.minutes(60),
-            statistic: 'sum',
-          }),
-          threshold: 13,
-          evaluationPeriods: 1,
-        })
-
-        lambdaIpfsAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      }
     }
 
     this.tokenListCacheBucket = new aws_s3.Bucket(this, 'TokenListCacheBucket')
