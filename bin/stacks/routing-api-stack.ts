@@ -101,7 +101,6 @@ export class RoutingAPIStack extends cdk.Stack {
       poolCacheGzipKey,
       poolCacheLambdaNameArray,
       tokenListCacheBucket,
-      ipfsPoolCachingLambda,
     } = new RoutingCachingStack(this, 'RoutingCachingStack', {
       chatbotSNSArn,
       stage,
@@ -261,7 +260,6 @@ export class RoutingAPIStack extends cdk.Stack {
       apiName: api.restApiName,
       routingLambdaName: routingLambda.functionName,
       poolCacheLambdaNameArray,
-      ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
     })
 
     new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack')
