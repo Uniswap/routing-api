@@ -631,13 +631,14 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `CachePools-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
 
       // Create a metric that represents the count of samples in the last 1 day
+      // Use a shorter period (1 hour) with more evaluation periods for more responsive detection
       const metric = new aws_cloudwatch.Metric({
         namespace: 'Uniswap',
         metricName: metricName,
         dimensionsMap: { Service: 'CachePools' },
         unit: aws_cloudwatch.Unit.NONE,
         statistic: 'SampleCount',
-        period: Duration.days(1), // 1 day period
+        period: Duration.hours(1), // 1 hour period for more responsive detection
       })
 
       const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
@@ -645,7 +646,7 @@ export class RoutingAPIStack extends cdk.Stack {
         metric,
         comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
         threshold: 0, // Trigger when no samples (count = 0)
-        evaluationPeriods: 1, // Only need 1 evaluation period since we're checking 1 day
+        evaluationPeriods: 24, // Check 24 consecutive 1-hour periods (1 day total)
         treatMissingData: aws_cloudwatch.TreatMissingData.BREACHING, // Missing data should trigger the alarm
       })
 
