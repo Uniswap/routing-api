@@ -343,6 +343,7 @@ export class RoutingAPIPipeline extends Stack {
         UNISWAP_ROUTING_API: routingAPIStage.url,
       },
       buildEnvironment: {
+        computeType: cdk.aws_codebuild.ComputeType.LARGE,
         environmentVariables: {
           NPM_TOKEN: {
             value: 'npm-private-repo-access-token',
