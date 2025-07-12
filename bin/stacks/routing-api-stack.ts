@@ -448,7 +448,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume is high enough over default period (5m) for 4xx errors (no route).
       const invocationsThreshold = 500
-      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
+      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 10 : 2
       const metric = new MathExpression({
         expression: `IF(invocations > ${invocationsThreshold}, 100*(response400/invocations), 0)`,
         usingMetrics: {
@@ -532,7 +532,7 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
       // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
       const invocationsThreshold = 50
-      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
+      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 10 : 2
       const metric = new MathExpression({
         expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
@@ -580,11 +580,12 @@ export class RoutingAPIStack extends cdk.Stack {
         if (CHAINS_NOT_MONITORED.includes(chainId)) {
           return
         }
-        const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
+        const alarmName =
+          `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
         // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
         const invocationsThreshold = 50
         const evaluationPeriods =
-          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
+          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 10 : 2
         const metric = new MathExpression({
           expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
           usingMetrics: {
