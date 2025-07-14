@@ -39,6 +39,10 @@ export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
 // For low volume request sources, we'll increase the evaluation periods to reduce triggering sensitivity.
 export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set(['uniswap-extension', 'uniswap-android', 'uniswap-ios'])
 
+// For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity (5 mins periods).
+export const LOW_VOLUME_EVALUATION_PERIODS = 10
+export const HIGH_VOLUME_EVALUATION_PERIODS = 2
+
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
 
@@ -448,7 +452,9 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume is high enough over default period (5m) for 4xx errors (no route).
       const invocationsThreshold = 500
-      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
+      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId)
+        ? LOW_VOLUME_EVALUATION_PERIODS
+        : HIGH_VOLUME_EVALUATION_PERIODS
       const metric = new MathExpression({
         expression: `IF(invocations > ${invocationsThreshold}, 100*(response400/invocations), 0)`,
         usingMetrics: {
@@ -486,7 +492,9 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
       // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
       const invocationsThreshold = 50
-      const evaluationPeriodsMin = LOW_VOLUME_CHAINS.has(chainId) ? 10 : 2
+      const evaluationPeriodsMin = LOW_VOLUME_CHAINS.has(chainId)
+        ? LOW_VOLUME_EVALUATION_PERIODS
+        : HIGH_VOLUME_EVALUATION_PERIODS
       const metric = new MathExpression({
         expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
@@ -532,7 +540,9 @@ export class RoutingAPIStack extends cdk.Stack {
       const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
       // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
       const invocationsThreshold = 50
-      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
+      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource)
+        ? LOW_VOLUME_EVALUATION_PERIODS
+        : HIGH_VOLUME_EVALUATION_PERIODS
       const metric = new MathExpression({
         expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
         usingMetrics: {
@@ -584,7 +594,9 @@ export class RoutingAPIStack extends cdk.Stack {
         // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
         const invocationsThreshold = 50
         const evaluationPeriods =
-          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
+          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource)
+            ? LOW_VOLUME_EVALUATION_PERIODS
+            : HIGH_VOLUME_EVALUATION_PERIODS
         const metric = new MathExpression({
           expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
           usingMetrics: {
