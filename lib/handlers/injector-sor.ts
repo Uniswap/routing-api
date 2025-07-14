@@ -542,7 +542,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
           const deleteCacheEnabledChains = [ChainId.OPTIMISM]
-          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.OPTIMISM]
+          const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
