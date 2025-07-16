@@ -46,7 +46,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       ) {
         pool.tvlETH = 826 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
         pool.tvlUSD = 1482475 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
-        log.debug(`Setting tvl for OPTIMISM ETH/WETH pool ${JSON.stringify(pool)}`)
+        log.info(`Setting tvl for OPTIMISM ETH/WETH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
@@ -57,7 +57,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       ) {
         pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
         pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
-        log.debug(`Setting tvl for UNICHAIN ETH/WETH pool ${JSON.stringify(pool)}`)
+        log.info(`Setting tvl for UNICHAIN ETH/WETH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
@@ -68,7 +68,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       ) {
         pool.tvlETH = 6992 // https://app.uniswap.org/explore/pools/base/0xd0b53D9277642d899DF5C87A3966A349A798F224
         pool.tvlUSD = 12580000 // https://app.uniswap.org/explore/pools/base/0xd0b53D9277642d899DF5C87A3966A349A798F224
-        log.debug(`Setting tvl for BASE ETH/WETH pool ${JSON.stringify(pool)}`)
+        log.info(`Setting tvl for BASE ETH/WETH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
@@ -79,7 +79,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       ) {
         pool.tvlETH = 1000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
         pool.tvlUSD = 5500000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
-        log.debug(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
+        log.info(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
