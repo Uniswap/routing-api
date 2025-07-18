@@ -173,10 +173,43 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       if (
         pool.id.toLowerCase() === '0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5'.toLowerCase() &&
-        chainId === ChainId.UNICHAIN
+        chainId === ChainId.MAINNET
       ) {
         pool.tvlETH = 73.45 // (https://bunni.xyz/explore/pools/mainnet/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5)
         pool.tvlUSD = 397080 // (https://bunni.xyz/explore/pools/mainnet/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5)
+        additionalAllowedPool += 1
+      }
+
+      // BUNNI UNICHAIN ETH/weETH
+      if (
+        pool.id.toLowerCase() === '0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857'.toLowerCase() &&
+        chainId === ChainId.UNICHAIN
+      ) {
+        pool.tvlETH = 1.13 // (https://bunni.xyz/explore/pools/unichain/0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857)
+        pool.tvlUSD = 4100 // (https://bunni.xyz/explore/pools/unichain/0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857)
+        log.info(`Setting tvl for Bunni Unichain ETH/weETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // BUNNI BNB WETH/DOT
+      if (
+        pool.id.toLowerCase() === '0x48323603dde908bfbd512c4c723e28ea9c7ee7f5558f7bcc9cafa798c039b9bd'.toLowerCase() &&
+        chainId === ChainId.BNB
+      ) {
+        pool.tvlETH = 0.7 // (https://bunni.xyz/explore/pools/bsc/0x48323603dde908bfbd512c4c723e28ea9c7ee7f5558f7bcc9cafa798c039b9bd)
+        pool.tvlUSD = 2540 // (https://bunni.xyz/explore/pools/bsc/0x48323603dde908bfbd512c4c723e28ea9c7ee7f5558f7bcc9cafa798c039b9bd)
+        log.info(`Setting tvl for Bunni BNB WETH/DOT pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // BUNNI ARBITRUM USND/USDC
+      if (
+        pool.id.toLowerCase() === '0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537'.toLowerCase() &&
+        chainId === ChainId.ARBITRUM_ONE
+      ) {
+        pool.tvlETH = 198.83 // (https://bunni.xyz/explore/pools/arbitrum/0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537)
+        pool.tvlUSD = 716420 // (https://bunni.xyz/explore/pools/arbitrum/0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537)
+        log.info(`Setting tvl for Bunni Arbitrum USND/USDC pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
