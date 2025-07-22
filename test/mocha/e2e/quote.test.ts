@@ -3581,7 +3581,10 @@ describe('quote', function () {
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
-            type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.UNICHAIN_SEPOLIA) ? '0.002' : '1'
+            type === 'exactOut' &&
+            (chain === ChainId.BLAST || chain === ChainId.ZKSYNC || chain === ChainId.UNICHAIN_SEPOLIA)
+              ? '0.002'
+              : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
@@ -3620,6 +3623,7 @@ describe('quote', function () {
         })
 
         const native = NATIVE_CURRENCY[chain]
+
         it(`${native} -> erc20`, async () => {
           if (
             chain === ChainId.BLAST ||
@@ -3707,6 +3711,7 @@ describe('quote', function () {
             fail(JSON.stringify(err.response.data))
           }
         })
+
         it(`has quoteGasAdjusted values`, async () => {
           if (chain === ChainId.SEPOLIA && !erc1.equals(V4_SEPOLIA_TEST_A)) {
             // Sepolia doesn't have sufficient liquidity on DAI pools yet
@@ -3728,7 +3733,10 @@ describe('quote', function () {
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
-            type === 'exactOut' && (chain === ChainId.BLAST || chain === ChainId.UNICHAIN_SEPOLIA) ? '0.002' : '1'
+            type === 'exactOut' &&
+            (chain === ChainId.BLAST || chain === ChainId.ZKSYNC || chain === ChainId.UNICHAIN_SEPOLIA)
+              ? '0.002'
+              : '1'
 
           const quoteReq: QuoteQueryParams = {
             tokenInAddress: erc1.address,
