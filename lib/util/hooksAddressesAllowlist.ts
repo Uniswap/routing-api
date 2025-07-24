@@ -26,7 +26,6 @@ export const GRADUATION_HOOKS_ADDRESS_ON_BASE = '0xc5a48b447f01e9ce3ede71e4c1c20
 export const TWAMM_HOOKS_ADDRESS_ON_BASE = '0xed1698C29928a6C44CddB0c75aB0E5D47eB72A80'
 export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621AFCa515Bf58631D4733fbA7B72Aae4'
 export const BTC_ACC_ON_BASE = '0x704268ac7043aeef50f47b6a03ae68ccf808e044'
-export const MEV_TAX_TEST_IN_PROD_ON_UNICHAIN = '0xb9a17e66db950e00822c2b833d6bb304c9b86080'
 
 // https://linear.app/uniswap/issue/ROUTE-580/allowlist-slippagefeehook-on-arbitrum
 // example pool: 0x582387e095a7fbcba58222b6f9f56cc3e6177d766d10dd0d96a70dab70f66be9
