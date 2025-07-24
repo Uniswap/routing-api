@@ -123,6 +123,20 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      5,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
   
   // V2.
   {
@@ -140,6 +154,21 @@ export const chainProtocols = [
       v2SubgraphUrlOverride(ChainId.MAINNET)
     ), // 1000 is the largest page size supported by thegraph
   },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
   
   // V4
  
@@ -155,6 +184,20 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
 ]
