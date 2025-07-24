@@ -25,6 +25,7 @@ import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
+import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -303,43 +304,27 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         }
       }
 
-      if (chainId === ChainId.MAINNET) {
-        // https://bunni.xyz/explore/pools/ethereum/0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5
-        manuallyIncludedV4Pools.push({
-          id: '0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5',
-          feeTier: '1',
-          tickSpacing: '60',
-          hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
-          liquidity: '173747248900',
-          token0: {
-            id: '0x0000000000000000000000000000000000000000',
-          },
-          token1: {
-            id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
-          },
-          tvlETH: 73.23,
-          tvlUSD: 416830,
-        } as V4SubgraphPool)
+      for (const bunniPool of BUNNI_POOLS_CONFIG) {
+        if (bunniPool.chainId === chainId) {
+          manuallyIncludedV4Pools.push({
+            id: bunniPool.id,
+            feeTier: bunniPool.feeTier,
+            tickSpacing: bunniPool.tickSpacing,
+            hooks: bunniPool.hooks,
+            liquidity: bunniPool.liquidity,
+            token0: {
+              id: bunniPool.token0.id,
+            },
+            token1: {
+              id: bunniPool.token1.id,
+            },
+            tvlETH: bunniPool.tvlETH,
+            tvlUSD: bunniPool.tvlUSD,
+          } as V4SubgraphPool);
+        }
       }
 
       if (chainId === ChainId.UNICHAIN) {
-        // https://bunni.xyz/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
-        manuallyIncludedV4Pools.push({
-          id: '0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433',
-          feeTier: '0',
-          tickSpacing: '1',
-          hooks: '0x005af73a245d8171a0550ffae2631f12cc211888',
-          liquidity: '173747248900',
-          token0: {
-            id: '0x078d782b760474a361dda0af3839290b0ef57ad6',
-          },
-          token1: {
-            id: '0x9151434b16b9763660705744891fa906f660ecc5',
-          },
-          tvlETH: 5371.42857143,
-          tvlUSD: 15040000,
-        } as V4SubgraphPool)
-
         // UNICHAIN ETH/WETH: https://uniscan.xyz/tx/0x935979a7e4a1e3ea92b180009c46242b89a787fb4f2f5799bd53c675d5e0f9fd#eventlog
         manuallyIncludedV4Pools.push({
           id: '0xba246b8420b5aeb13e586cd7cbd32279fa7584d7f4cbc9bd356a6bb6200d16a6',
