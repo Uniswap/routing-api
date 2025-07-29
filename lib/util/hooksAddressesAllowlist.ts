@@ -44,6 +44,9 @@ export const WETH_HOOKS_ADDRESS_ON_OP_MAINNET = '0x480dafdb4d6092ef3217595b75784
 export const WETH_HOOKS_ADDRESS_ON_UNICHAIN = '0x730b109bad65152c67ecc94eb8b0968603dba888'
 export const WETH_HOOKS_ADDRESS_ON_BASE = '0xb08211d57032dd10b1974d4b876851a7f7596888'
 
+// WstETH
+export const WSTETH_HOOKS_ADDRESS_ON_MAINNET = '0xa88aacf73df2bccfabcfd1e7b597185cac9f2888'
+
 // example pool: https://app.uniswap.org/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
 export const BUNNI_ON_UNICHAIN = '0x005aF73a245d8171A0550ffAe2631f12cc211888'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
@@ -66,6 +69,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_0_ON_L1,
     BUNNI_HOOKS_ADDRESS_V1_1_ON_L1,
     BUNNI_HOOKS_ADDRESS_V1_1_1_ON_L1,
+    WSTETH_HOOKS_ADDRESS_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
