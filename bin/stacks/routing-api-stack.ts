@@ -43,6 +43,11 @@ export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set(['uniswap-extensi
 export const LOW_VOLUME_EVALUATION_PERIODS = 10
 export const HIGH_VOLUME_EVALUATION_PERIODS = 2
 
+// Pool count anomaly detection configuration
+export const POOL_COUNT_DEVIATION_ALERT_THRESHOLD = 0.05 // 5% deviation threshold
+export const POOL_COUNT_EVALUATION_WINDOW_HOURS = 3 // 3-hour evaluation window for baseline compared to last 1 hour
+export const POOL_COUNT_MINIMUM_VALUE_FOR_ANOMALY_DETECTION = 500 // Minimum value for pool count to trigger anomaly detection
+
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
 
@@ -665,6 +670,76 @@ export class RoutingAPIStack extends cdk.Stack {
       subgraphAlertAlarms.push(alarm)
     }
 
+    // Anomaly alerts for pool count metrics per protocol and chain
+    const poolCountAnomalyAlarms: cdk.aws_cloudwatch.Alarm[] = []
+
+    // Define the pool count metrics we want to monitor
+    const poolCountMetrics = [
+      { protocol: 'V3', metricSuffix: 'getPools.filter.length' },
+      { protocol: 'V4', metricSuffix: 'getPools.filter.length' },
+      { protocol: 'V2', metricSuffix: 'getPools.untracked.length' },
+    ]
+
+    // Create anomaly alarms for each supported chain and protocol
+    SUPPORTED_CHAINS.forEach((chainId) => {
+      if (CHAINS_NOT_MONITORED.includes(chainId)) {
+        return
+      }
+
+      poolCountMetrics.forEach(({ protocol, metricSuffix }) => {
+        const metricName = `${protocol}SubgraphProvider.chain_${chainId}.${metricSuffix}`
+        const alarmName = `PoolCountAnomaly-SEV3-${protocol}-ChainId${chainId}-${metricSuffix.replace(
+          /[^a-zA-Z0-9]/g,
+          '_'
+        )}`
+
+        // Create the base metric for pool count
+        const poolCountMetric = new aws_cloudwatch.Metric({
+          namespace: 'Uniswap',
+          metricName: metricName,
+          dimensionsMap: { Service: 'CachePools' },
+          unit: aws_cloudwatch.Unit.NONE,
+          statistic: 'Average',
+          period: Duration.hours(1), // 1 hour aggregation period
+        })
+
+        // Create anomaly detection using statistical comparison
+        // Compare current value to configurable-hour average and check for configurable deviation threshold
+        const upperThreshold = 1 + POOL_COUNT_DEVIATION_ALERT_THRESHOLD
+        const lowerThreshold = 1 - POOL_COUNT_DEVIATION_ALERT_THRESHOLD
+        const anomalyExpression = new MathExpression({
+          expression: `IF(poolCount > ${POOL_COUNT_MINIMUM_VALUE_FOR_ANOMALY_DETECTION}, IF(poolCount > (avgBaseline * ${upperThreshold}) OR poolCount < (avgBaseline * ${lowerThreshold}), 1, 0), 0)`,
+          period: Duration.hours(POOL_COUNT_EVALUATION_WINDOW_HOURS), // Configurable evaluation window
+          usingMetrics: {
+            poolCount: poolCountMetric,
+            avgBaseline: new aws_cloudwatch.Metric({
+              namespace: 'Uniswap',
+              metricName: metricName,
+              dimensionsMap: { Service: 'CachePools' },
+              unit: aws_cloudwatch.Unit.NONE,
+              statistic: 'Average',
+              period: Duration.hours(POOL_COUNT_EVALUATION_WINDOW_HOURS), // Configurable baseline period
+            }),
+          },
+        })
+
+        // Create the alarm that triggers when there's an anomaly and pool count > 1000
+        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+          alarmName,
+          metric: anomalyExpression,
+          comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+          threshold: 0, // Trigger when the anomaly expression returns 1 (anomaly detected)
+          evaluationPeriods: 1, // Trigger immediately when anomaly is detected
+          treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING,
+          alarmDescription: `Anomaly detected in ${protocol} pool count for chain ${chainId} when count > 1000. Deviation threshold: ${(
+            POOL_COUNT_DEVIATION_ALERT_THRESHOLD * 100
+          ).toFixed(0)}% over ${POOL_COUNT_EVALUATION_WINDOW_HOURS}-hour window.`,
+        })
+
+        poolCountAnomalyAlarms.push(alarm)
+      })
+    })
+
     if (chatbotSNSArn) {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
       apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -692,6 +767,9 @@ export class RoutingAPIStack extends cdk.Stack {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       subgraphAlertAlarms.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      poolCountAnomalyAlarms.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
     }
