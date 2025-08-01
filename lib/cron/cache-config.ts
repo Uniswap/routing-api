@@ -19,7 +19,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.UNICHAIN:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-unichain-mainnet/api`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/bsc-v4/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-bsc/api`
     case ChainId.BLAST:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-blast/api`
     case ChainId.MAINNET:
@@ -43,7 +43,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.AVALANCHE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v3-avalanche/api`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/bsc-v3/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v3-bsc-ii/api`
     case ChainId.BLAST:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v3-blast/api`
     case ChainId.BASE:
@@ -78,7 +78,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.AVALANCHE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v2-avalanche/api`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/bsc-v2/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v2-bsc/api`
     case ChainId.BLAST:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v2-blast/api`
     case ChainId.BASE:
@@ -109,55 +109,95 @@ const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (
 
 export const chainProtocols = [
   // V3.
- 
-    {
+  {
     protocol: Protocol.V3,
-    chainId: ChainId.BNB,
+    chainId: ChainId.MAINNET,
     timeout: 90000,
     provider: new V3SubgraphProvider(
-      ChainId.BNB,
+      ChainId.MAINNET,
       3,
       90000,
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.BNB)
+      v3SubgraphUrlOverride(ChainId.MAINNET)
+    ),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      5,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   
   // V2.
- 
   {
     protocol: Protocol.V2,
-    chainId: ChainId.BNB,
+    chainId: ChainId.MAINNET,
+    timeout: 840000,
+    provider: new V2SubgraphProvider(
+      ChainId.MAINNET,
+      5,
+      900000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.MAINNET)
+    ), // 1000 is the largest page size supported by thegraph
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.ARBITRUM_ONE,
     timeout: 90000,
     provider: new V2SubgraphProvider(
-      ChainId.BNB,
+      ChainId.ARBITRUM_ONE,
       3,
       90000,
       true,
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.BNB)
+      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   
   // V4
  
- 
   {
     protocol: Protocol.V4,
-    chainId: ChainId.BNB,
+    chainId: ChainId.MAINNET,
     timeout: 90000,
     provider: new V4SubgraphProvider(
-      ChainId.BNB,
+      ChainId.MAINNET,
       3,
       90000,
       true,
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.BNB)
+      v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
-  }
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.ARBITRUM_ONE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.ARBITRUM_ONE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
 ]
