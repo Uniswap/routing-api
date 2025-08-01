@@ -110,4 +110,54 @@ const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (
 export const chainProtocols = [
   // V3.
  
+    {
+    protocol: Protocol.V3,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.BNB)
+    ),
+  },
+  
+  // V2.
+ 
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.BNB)
+    ),
+  },
+  
+  // V4
+ 
+ 
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BNB)
+    ),
+  }
 ]
