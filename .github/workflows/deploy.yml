@@ -51,7 +51,7 @@ jobs:
           
       - name: Deploy CDK stack
         run: |
-          cdk deploy RoutingAPIStack --require-approval never
+          cdk deploy RoutingAPIStack --require-approval never --force
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
