@@ -48,6 +48,8 @@ export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf
 export const ZORA_CREATOR_HOOK_ON_BASE = '0xd61A675F8a0c67A73DC3B54FB7318B4D91409040'
 // example pool: https://app.uniswap.org/explore/pools/base/0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06
 export const ZORA_POST_HOOK_ON_BASE = '0x9ea932730A7787000042e34390B8E435dD839040'
+// example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
+export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77Bb2a8F1ab2A384918A4c090Cd8Ae82Dc5078E0'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -103,6 +105,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     WETH_HOOKS_ADDRESS_ON_BASE,
     ZORA_CREATOR_HOOK_ON_BASE,
     ZORA_POST_HOOK_ON_BASE,
+    DOPPLER_HOOKS_ADDRESS_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
