@@ -9,7 +9,8 @@ import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
 // the second account while v2 is on the first
 // process.env.ALCHEMY_QUERY_KEY = ''
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
-// process.env.baseV4SubgraphId = ''
+// process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
+// process.env.GRAPH_BEARER_TOKEN = ''
 
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
@@ -18,7 +19,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.ARBITRUM_ONE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-arbitrum/api`
     case ChainId.BASE:
-      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.baseV4SubgraphId}`
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_BASE_V4_SUBGRAPH_ID}`
     case ChainId.POLYGON:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-polygon/api`
     case ChainId.WORLDCHAIN:
@@ -537,7 +538,7 @@ export const chainProtocols = [
       v4BaseTrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE),
-      process.env.bearerToken
+      process.env.GRAPH_BEARER_TOKEN!
     ),
   },
   {
