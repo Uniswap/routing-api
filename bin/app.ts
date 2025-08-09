@@ -41,8 +41,6 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey2?: string
       alchemyBearerToken?: string
       alchemyBaseV4SubgraphId?: string
-      graphBaseV4SubgraphId?: string
-      graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
@@ -322,6 +320,10 @@ export class RoutingAPIPipeline extends Stack {
       unicornSecret: unicornSecrets.secretValueFromJson('debug-config-unicorn-key').toString(),
       alchemyQueryKey: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key').toString(),
       alchemyQueryKey2: alchemySubgraphSecret.secretValueFromJson('alchemy-query-key-2').toString(),
+      // bearer token and base subgraph id are not from alchemy subgraph, but from the graph
+      // below secret namings are wrong, but we take it as is
+      alchemyBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
+      alchemyBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
     })
