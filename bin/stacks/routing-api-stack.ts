@@ -100,6 +100,8 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
+      graphBaseV4SubgraphId,
+      graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     } = props
@@ -121,6 +123,8 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
       alchemyQueryKey,
       alchemyQueryKey2,
+      graphBaseV4SubgraphId,
+      graphBearerToken,
     })
 
     const {

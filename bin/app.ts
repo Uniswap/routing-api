@@ -473,6 +473,8 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   uniGraphQLHeaderOrigin: process.env.GQL_H_ORGN!,
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
+  graphBaseV4SubgraphId: process.env.GRAPH_BASE_V4_SUBGRAPH_ID!,
+  graphBearerToken: process.env.GRAPH_BEARER_TOKEN!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
