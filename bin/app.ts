@@ -39,8 +39,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret: string
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
-      alchemyBearerToken?: string
-      alchemyBaseV4SubgraphId?: string
+      graphBaseV4SubgraphId?: string
+      graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
