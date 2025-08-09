@@ -73,6 +73,8 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret: string
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
+      graphBaseV4SubgraphId?: string
+      graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }

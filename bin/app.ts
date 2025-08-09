@@ -41,6 +41,8 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey2?: string
       alchemyBearerToken?: string
       alchemyBaseV4SubgraphId?: string
+      graphBaseV4SubgraphId?: string
+      graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
@@ -64,6 +66,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
+      graphBaseV4SubgraphId,
+      graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     } = props
@@ -86,6 +90,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
+      graphBaseV4SubgraphId,
+      graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     })
