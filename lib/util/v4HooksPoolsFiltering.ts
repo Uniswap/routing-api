@@ -111,11 +111,12 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
     topTvlPools.push(...pq.toArray())
   })
 
+  // Create Sets for O(1) lookups in order to compute 'allowlistedHooksPools'
+  const topTvlPoolIds = new Set(topTvlPools.map((pool) => pool.id.toLowerCase()))
+  const allowlistedHooksAddresses = new Set(HOOKS_ADDRESSES_ALLOWLIST[chainId].map((hook) => hook.toLowerCase()))
+
   const allowlistedHooksPools = pools.filter((pool: V4SubgraphPool) => {
-    return (
-      HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(pool.hooks.toLowerCase()) &&
-      !topTvlPools.find((topPool: V4SubgraphPool) => topPool.id.toLowerCase() === pool.id.toLowerCase())
-    )
+    return allowlistedHooksAddresses.has(pool.hooks.toLowerCase()) && !topTvlPoolIds.has(pool.id.toLowerCase())
   })
 
   return topTvlPools.concat(allowlistedHooksPools)
