@@ -14,10 +14,14 @@ function convertV4PoolToGroupingKey(pool: V4SubgraphPool): V4PoolGroupingKey {
 }
 
 function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
-  const tokenA: Currency = pool.token0.id === ADDRESS_ZERO ? nativeOnChain(chainId) :
-    new Token(chainId, pool.token0.id, pool.token0.decimals, pool.token0.symbol, pool.token0.name)
-  const tokenB: Currency = pool.token1.id === ADDRESS_ZERO ? nativeOnChain(chainId) :
-    new Token(chainId, pool.token1.id, pool.token1.decimals, pool.token1.symbol, pool.token1.name)
+  const tokenA: Currency =
+    pool.token0.id === ADDRESS_ZERO
+      ? nativeOnChain(chainId)
+      : new Token(chainId, pool.token0.id, pool.token0.decimals, pool.token0.symbol, pool.token0.name)
+  const tokenB: Currency =
+    pool.token1.id === ADDRESS_ZERO
+      ? nativeOnChain(chainId)
+      : new Token(chainId, pool.token1.id, pool.token1.decimals, pool.token1.symbol, pool.token1.name)
 
   return (
     !Hook.hasSwapPermissions(pool.hooks) &&
