@@ -159,7 +159,7 @@ describe('v4HooksPoolsFiltering', () => {
         tvlUSD: 0,
       },
       {
-        id: '1',
+        id: '0xed57ea6c3322a14a7891120371ff22b5c3f8ce812cf0d740658128c9ba313a16',
         feeTier: dynamicFee,
         tickSpacing: '1',
         hooks: '0x0000000000000000000000000000000000000020',
@@ -231,7 +231,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after initialize hooks pool is not filtered out', () => {
@@ -281,7 +281,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before add liquidity hooks pool is not filtered out', () => {
@@ -331,7 +331,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after add liquidity hooks pool is not filtered out', () => {
@@ -381,7 +381,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before remove liquidity hooks pool is not filtered out', () => {
@@ -431,7 +431,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after remove liquidity hooks pool is not filtered out', () => {
@@ -481,7 +481,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before donate hooks pool is not filtered out', () => {
@@ -531,7 +531,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after donate hooks pool is not filtered out', () => {
@@ -581,7 +581,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before swap returns delta hooks pool is not filtered out', () => {
@@ -631,7 +631,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after swap returns delta hooks pool is not filtered out', () => {
@@ -681,7 +681,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after add liquidity returns delta hooks pool is not filtered out', () => {
@@ -731,7 +731,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after remove liquidity returns delta hooks pool is not filtered out', () => {
@@ -781,7 +781,7 @@ describe('v4HooksPoolsFiltering', () => {
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('11 hooks pool to retain 10 pools', () => {

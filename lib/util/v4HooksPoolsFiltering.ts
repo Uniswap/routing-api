@@ -30,7 +30,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
     // Dynamic fee is at 0x800000 or 838.8608% fee tier.
     // Since pool manager doesn;t check the fee at 100% max during pool initialization (https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol#L128)
     // it's more defensive programming to ensure the fee tier is less than or equal to 100%
-    isPoolFeeDynamic(tokenA, tokenB, pool)
+    !isPoolFeeDynamic(tokenA, tokenB, pool)
   )
 }
 
