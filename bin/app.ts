@@ -376,6 +376,14 @@ const jsonRpcProviders = {
   ALCHEMY_1: process.env.ALCHEMY_1!,
   WEB3_RPC_42161: process.env.WEB3_RPC_42161!,
   ALCHEMY_42161: process.env.ALCHEMY_42161!,
+  WEB3_RPC_8453: process.env.WEB3_RPC_8453!,
+  ALCHEMY_8453: process.env.ALCHEMY_8453!,
+  WEB3_RPC_43114: process.env.WEB3_RPC_43114!,
+  ALCHEMY_43114: process.env.ALCHEMY_43114!,
+  WEB3_RPC_56: process.env.WEB3_RPC_56!,
+  ALCHEMY_56: process.env.ALCHEMY_56!,
+  WEB3_RPC_10: process.env.WEB3_RPC_10!,
+  ALCHEMY_10: process.env.ALCHEMY_10!,
   ALCHEMY_QUERY_KEY: process.env.ALCHEMY_QUERY_KEY!,
 }
 

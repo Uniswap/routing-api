@@ -95,7 +95,12 @@ import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpoi
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
-  ChainId.ARBITRUM_ONE
+  ChainId.ARBITRUM_ONE,
+  ChainId.OPTIMISM,
+  ChainId.BASE,
+  ChainId.BNB,
+  ChainId.OPTIMISM,
+  ChainId.AVALANCHE
 ]
 const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
 
@@ -340,6 +345,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           let quoteProvider: IOnChainQuoteProvider | undefined = undefined
           switch (chainId) {
             case ChainId.MAINNET:
+            case ChainId.ARBITRUM_ONE:
+            case ChainId.OPTIMISM:
+            case ChainId.AVALANCHE:
+            case ChainId.BNB:
+            case ChainId.BASE:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,

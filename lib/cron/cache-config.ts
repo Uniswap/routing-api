@@ -5,27 +5,31 @@ import { ChainId } from '@uniswap/sdk-core'
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-sepolia-test/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/sepolia-v4/api`
     case ChainId.ARBITRUM_ONE:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/arbitrum-v4/api`
     case ChainId.BASE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-base/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/base-v4/api`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-polygon/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/polygon-v4/api`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-worldchain/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/worldchain-v4/api`
     case ChainId.ZORA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-zora/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/zora-v4/api`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-unichain-mainnet/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/unichain-v4/api`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-bsc/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/bsc-v4/api`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-blast/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/blast-v4/api`
     case ChainId.MAINNET:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/ethereum-v4/api`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/uniswap-v4-soneium-mainnet/api`
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/soneium-v4/api`
+    case ChainId.AVALANCHE:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/avalanche-v4/api`
+    case ChainId.OPTIMISM:
+      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/bransfer/optimism-v4/api`
     default:
       return undefined
   }
@@ -109,66 +113,10 @@ const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (
 
 export const chainProtocols = [
   // V3.
-  {
-    protocol: Protocol.V3,
-    chainId: ChainId.MAINNET,
-    timeout: 90000,
-    provider: new V3SubgraphProvider(
-      ChainId.MAINNET,
-      3,
-      90000,
-      true,
-      v3TrackedEthThreshold,
-      v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.MAINNET)
-    ),
-  },
-  {
-    protocol: Protocol.V3,
-    chainId: ChainId.ARBITRUM_ONE,
-    timeout: 90000,
-    provider: new V3SubgraphProvider(
-      ChainId.ARBITRUM_ONE,
-      5,
-      90000,
-      true,
-      v3TrackedEthThreshold,
-      v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
-    ),
-  },
+  
   
   // V2.
-  {
-    protocol: Protocol.V2,
-    chainId: ChainId.MAINNET,
-    timeout: 840000,
-    provider: new V2SubgraphProvider(
-      ChainId.MAINNET,
-      5,
-      900000,
-      true,
-      1000,
-      v2TrackedEthThreshold,
-      v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.MAINNET)
-    ), // 1000 is the largest page size supported by thegraph
-  },
-  {
-    protocol: Protocol.V2,
-    chainId: ChainId.ARBITRUM_ONE,
-    timeout: 90000,
-    provider: new V2SubgraphProvider(
-      ChainId.ARBITRUM_ONE,
-      3,
-      90000,
-      true,
-      1000,
-      v2TrackedEthThreshold,
-      v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
-    ),
-  },
+ 
   
   // V4
  
@@ -198,6 +146,62 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BASE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BASE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BASE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.BNB,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.BNB,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.BNB)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.OPTIMISM,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.OPTIMISM,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.OPTIMISM)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.AVALANCHE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.AVALANCHE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
 ]

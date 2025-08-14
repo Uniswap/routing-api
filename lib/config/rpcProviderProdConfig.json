@@ -16,5 +16,41 @@
     "providerInitialWeights": [1],
     "providerUrls": ["ALCHEMY_42161"],
     "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 8453,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_8453"],
+    "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 56,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_56"],
+    "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 10,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_10"],
+    "providerNames": ["ALCHEMY"]
+  },
+  {
+    "chainId": 43114,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_43114"],
+    "providerNames": ["ALCHEMY"]
   }
 ]

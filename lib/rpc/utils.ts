@@ -40,13 +40,13 @@ export function generateProviderUrl(key: string, value: string): string {
   
     // Alchemy
     case 'ALCHEMY_10': {
-      return `https://opt-mainnet-fast.g.alchemy.com/v2/${value}`
+      return `https://opt-mainnet.g.alchemy.com/v2/${value}`
     }
     case 'ALCHEMY_137': {
-      return `https://polygon-mainnet-fast.g.alchemy.com/v2/${value}`
+      return `https://polygon-mainnet.g.alchemy.com/v2/${value}`
     }
     case 'ALCHEMY_8453': {
-      return `https://base-mainnet-fast.g.alchemy.com/v2/${value}`
+      return `https://base-mainnet.g.alchemy.com/v2/${value}`
     }
     case 'ALCHEMY_11155111': {
       return `https://eth-sepolia.g.alchemy.com/v2/${value}`
@@ -57,11 +57,11 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'ALCHEMY_1': {
       return `https://eth-mainnet.g.alchemy.com/v2/${value}`
     }
-    case 'ALCHEMY_324': {
-      return `https://zksync-mainnet.g.alchemy.com/v2/${value}`
+    case 'ALCHEMY_56': {
+      return `https://bnb-mainnet.g.alchemy.com/v2/${value}`
     }
-    case 'ALCHEMY_1301': {
-      return `https://unichain-sepolia.g.alchemy.com/v2/${value}`
+    case 'ALCHEMY_43114': {
+      return `https://avax-mainnet.g.alchemy.com/v2/${value}`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
