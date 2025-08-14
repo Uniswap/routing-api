@@ -17,6 +17,7 @@ import * as path from 'path'
 import { chainProtocols } from '../../lib/cron/cache-config'
 import { STAGE } from '../../lib/util/stage'
 import { PoolCachingFilePrefixes } from '../../lib/util/poolCachingFilePrefixes'
+import { ChainId } from '@uniswap/sdk-core'
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string
@@ -123,7 +124,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
           handler: 'handler',
           timeout: Duration.seconds(900),
-          memorySize: 2560,
+          memorySize: chainId === ChainId.BASE ? 5120 : 2560,
           bundling: {
             minify: true,
             sourceMap: true,
