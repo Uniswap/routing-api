@@ -24,13 +24,15 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
       : new Token(chainId, pool.token1.id, parseInt(pool.token1.decimals), pool.token1.symbol, pool.token1.name)
 
   return (
-    !Hook.hasSwapPermissions(pool.hooks) &&
+    // if hook address is ADDRESS_ZERO, it means the pool is not a hooks pool
+    pool.hooks === ADDRESS_ZERO ||
+    (!Hook.hasSwapPermissions(pool.hooks) &&
     // If the fee tier is smaller than or equal to 100%, it means the pool is not dynamic fee pool.
     // Swap fee in total can be 100% (https://github.com/Uniswap/v4-core/blob/b619b6718e31aa5b4fa0286520c455ceb950276d/src/libraries/SwapMath.sol#L12)
     // Dynamic fee is at 0x800000 or 838.8608% fee tier.
     // Since pool manager doesn;t check the fee at 100% max during pool initialization (https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol#L128)
     // it's more defensive programming to ensure the fee tier is less than or equal to 100%
-    !isPoolFeeDynamic(tokenA, tokenB, pool)
+    !isPoolFeeDynamic(tokenA, tokenB, pool))
   )
 }
 
