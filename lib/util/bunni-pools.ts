@@ -1,7 +1,13 @@
 import { ChainId } from '@uniswap/sdk-core'
+import { V4SubgraphPool } from '@uniswap/smart-order-router'
+
+export type BunniPool = V4SubgraphPool & {
+  chainId: ChainId
+  comment: string
+}
 
 // Bunni pools
-export const BUNNI_POOLS_CONFIG = [
+export const BUNNI_POOLS_CONFIG: BunniPool[] = [
   // Bunni USDC-USDT Unichain
   {
     id: '0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433',
@@ -14,10 +20,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x005af73a245d8171a0550ffae2631f12cc211888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USDC',
       id: '0x078d782b760474a361dda0af3839290b0ef57ad6',
+      name: 'USDC',
+      decimals: '6',
     },
     token1: {
+      symbol: 'USD₮0',
       id: '0x9151434b16b9763660705744891fa906f660ecc5',
+      name: 'USD₮0',
+      decimals: '6',
     },
   },
   // Bunni USDC-USDT Mainnet
@@ -32,10 +44,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USDC',
       id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      name: 'USD Coin',
+      decimals: '6',
     },
     token1: {
+      symbol: 'USDT',
       id: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      name: 'Tether USD',
+      decimals: '6',
     },
   },
   // Bunni ETH-weETH Unichain
@@ -50,10 +68,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'weETH',
       id: '0x7dcc39b4d1c53cb31e1abc0e358b43987fef80f7',
+      name: 'Wrapped eETH',
+      decimals: '18',
     },
   },
   // USR-USDC Mainnet
@@ -68,10 +92,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USR',
       id: '0x66a1e37c9b0eaddca17d3662d6c05f4decf3e110',
+      name: 'Resolv USD',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
   // USND-USDC Arbitrum
@@ -86,10 +116,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0000eb22c45bdb564f985ace0b4d05a64fa71888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USND',
       id: '0x4ecf61a6c2fab8a047ceb3b3b263b401763e9d49',
+      name: 'US Nerite Dollar',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0xaf88d065e77c8cc2239327c5edb3a432268e5831',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
   // ETH-BUNNI #1 Mainnet
@@ -104,10 +140,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'BUNNI',
       id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
+      name: 'Bunni',
+      decimals: '18',
     },
   },
   // USDC-USDT #1 Unichain
@@ -122,10 +164,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0000fe59823933ac763611a69c88f91d45f81888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USDC',
       id: '0x078d782b760474a361dda0af3839290b0ef57ad6',
+      name: 'USDC',
+      decimals: '6',
     },
     token1: {
+      symbol: 'USDT',
       id: '0x588ce4f028d8e7b53b687865d6a67b3a54c75518',
+      name: 'Tether USD',
+      decimals: '6',
     },
   },
   // USDT-USDf #55 Mainnet
@@ -140,10 +188,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0000fe59823933ac763611a69c88f91d45f81888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USDT',
       id: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      name: 'Tether USD',
+      decimals: '6',
     },
     token1: {
+      symbol: 'USDf',
       id: '0xfa2b947eec368f42195f24f36d2af29f7c24cec2',
+      name: 'Falcon USD',
+      decimals: '18',
     },
   },
   // ETH-MET #83 Mainnet
@@ -158,10 +212,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'MET',
       id: '0x2ebd53d035150f328bd754d6dc66b99b0edb89aa',
+      name: 'MET',
+      decimals: '18',
     },
   },
   // Bunni USD0-USD0++ Mainnet
@@ -176,10 +236,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'USD0++',
       id: '0x35d8949372d46b7a3d5a56006ae77b215fc69bc0',
+      name: 'USD0 Liquid Bond',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USD0',
       id: '0x73a15fed60bf67631dc6cd7bc5b6e8da8190acf5',
+      name: 'Usual USD',
+      decimals: '18',
     },
   },
   // ETH-USDC #289 Base
@@ -194,10 +260,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      name: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      symbol: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      name: 'USDC',
       id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+      symbol: 'USD Coin',
+      decimals: '6',
     },
   },
   // hwHLP-USDT #95 Mainnet
@@ -212,10 +284,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'hwHLP',
       id: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+      name: 'hwHLP',
+      decimals: '6',
     },
     token1: {
+      symbol: 'USDT',
       id: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      name: 'Tether USD',
+      decimals: '6',
     },
   },
   // ETH-PRL #80 Mainnet
@@ -230,10 +308,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'PRL',
       id: '0x6c0aeceedc55c9d55d8b99216a670d85330941c3',
+      name: 'Parallel Governance Token',
+      decimals: '18',
     },
   },
   // ETH-USDC #293 Base
@@ -248,10 +332,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
   // ETH-BUNNI #26 Base
@@ -266,10 +356,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'BUNNI',
       id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
+      name: 'Bunni',
+      decimals: '18',
     },
   },
   // ETH-USDC #62 Unichain
@@ -284,10 +380,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0x078d782b760474a361dda0af3839290b0ef57ad6',
+      name: 'USDC',
+      decimals: '6',
     },
   },
   // ETH-BUNNI #12 Arbitrum
@@ -302,10 +404,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0010d0d5db05933fa0d9f7038d365e1541a41888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'BUNNI',
       id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
+      name: 'Bunni',
+      decimals: '18',
     },
   },
   // BUNNI-USDC #33 Mainnet
@@ -320,10 +428,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x0000fe59823933ac763611a69c88f91d45f81888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'BUNNI',
       id: '0x000000c396558ffbab5ea628f39658bdf61345b3',
+      name: 'Bunni',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
   // ETH-USDC #272 Base
@@ -338,10 +452,16 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
   // ETH-USDC #294 Base
@@ -356,12 +476,19 @@ export const BUNNI_POOLS_CONFIG = [
     hooks: '0x000052423c1db6b7ff8641b85a7eefc7b2791888',
     liquidity: '173747248900',
     token0: {
+      symbol: 'ETH',
       id: '0x0000000000000000000000000000000000000000',
+      name: 'Ethereum',
+      decimals: '18',
     },
     token1: {
+      symbol: 'USDC',
       id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+      name: 'USD Coin',
+      decimals: '6',
     },
   },
+  /* TODO: add back those bunni pool later, once we fix the dyanmic fee hook cached routes as well as cross liquidity for zora tokens
   // ETH-USDC #237 Base
   {
     id: '0x471931205b39f65dcf1c063761c098f7b29237af4059533e246a3545929156ed',
@@ -1046,4 +1173,5 @@ export const BUNNI_POOLS_CONFIG = [
       id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
     },
   }
+   */
 ]
