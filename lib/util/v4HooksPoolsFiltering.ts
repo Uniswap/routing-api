@@ -27,16 +27,16 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
     // if hook address is ADDRESS_ZERO, it means the pool is not a hooks pool
     pool.hooks === ADDRESS_ZERO ||
     (!Hook.hasSwapPermissions(pool.hooks) &&
-    // If the fee tier is smaller than or equal to 100%, it means the pool is not dynamic fee pool.
-    // Swap fee in total can be 100% (https://github.com/Uniswap/v4-core/blob/b619b6718e31aa5b4fa0286520c455ceb950276d/src/libraries/SwapMath.sol#L12)
-    // Dynamic fee is at 0x800000 or 838.8608% fee tier.
-    // Since pool manager doesn;t check the fee at 100% max during pool initialization (https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol#L128)
-    // it's more defensive programming to ensure the fee tier is less than or equal to 100%
-    Number(pool.feeTier) <= 1000000 &&
-    // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
-    // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
-    // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
-    !isPoolFeeDynamic(tokenA, tokenB, pool))
+      // If the fee tier is smaller than or equal to 100%, it means the pool is not dynamic fee pool.
+      // Swap fee in total can be 100% (https://github.com/Uniswap/v4-core/blob/b619b6718e31aa5b4fa0286520c455ceb950276d/src/libraries/SwapMath.sol#L12)
+      // Dynamic fee is at 0x800000 or 838.8608% fee tier.
+      // Since pool manager doesn;t check the fee at 100% max during pool initialization (https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol#L128)
+      // it's more defensive programming to ensure the fee tier is less than or equal to 100%
+      Number(pool.feeTier) <= 1000000 &&
+      // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
+      // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
+      // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
+      !isPoolFeeDynamic(tokenA, tokenB, pool))
   )
 }
 
