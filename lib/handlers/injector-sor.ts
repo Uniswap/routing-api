@@ -541,7 +541,38 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
-          const deleteCacheEnabledChains = [ChainId.OPTIMISM, ChainId.UNICHAIN]
+          const deleteCacheEnabledChains = [
+            // ChainId.MAINNET,
+            ChainId.GOERLI,
+            ChainId.SEPOLIA,
+            ChainId.OPTIMISM,
+            ChainId.OPTIMISM_GOERLI,
+            ChainId.OPTIMISM_SEPOLIA,
+            // ChainId.ARBITRUM_ONE,
+            ChainId.ARBITRUM_GOERLI,
+            ChainId.ARBITRUM_SEPOLIA,
+            // ChainId.POLYGON,
+            ChainId.POLYGON_MUMBAI,
+            ChainId.CELO,
+            ChainId.CELO_ALFAJORES,
+            ChainId.GNOSIS,
+            ChainId.MOONBEAM,
+            // ChainId.BNB,
+            ChainId.AVALANCHE,
+            ChainId.BASE_GOERLI,
+            ChainId.BASE_SEPOLIA,
+            // ChainId.BASE,
+            ChainId.ZORA,
+            ChainId.ZORA_SEPOLIA,
+            ChainId.ROOTSTOCK,
+            ChainId.BLAST,
+            ChainId.ZKSYNC,
+            ChainId.WORLDCHAIN,
+            ChainId.UNICHAIN_SEPOLIA,
+            ChainId.UNICHAIN,
+            ChainId.MONAD_TESTNET,
+            ChainId.SONEIUM,
+          ]
           const mixedSupported = [ChainId.MAINNET, ChainId.SEPOLIA, ChainId.GOERLI, ChainId.OPTIMISM, ChainId.BASE]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
