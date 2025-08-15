@@ -133,6 +133,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           layers: [lambdaLayerVersion],
           tracing: aws_lambda.Tracing.ACTIVE,
           environment: {
+            VERSION: '1',
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_3: this.poolCacheBucket3.bucketName,
             POOL_CACHE_GZIP_KEY: this.poolCacheGzipKey,
