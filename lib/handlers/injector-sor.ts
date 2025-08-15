@@ -99,7 +99,6 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISM,
   ChainId.BASE,
   ChainId.BNB,
-  ChainId.OPTIMISM,
   ChainId.AVALANCHE
 ]
 const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
