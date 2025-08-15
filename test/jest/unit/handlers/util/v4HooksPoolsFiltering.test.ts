@@ -14,10 +14,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: flaunchHookAddress,
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -37,10 +43,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -52,10 +64,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeSwapHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
@@ -75,10 +93,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -90,10 +114,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterSwapHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
@@ -114,25 +144,37 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
       },
       {
-        id: '1',
+        id: '0xed57ea6c3322a14a7891120371ff22b5c3f8ce812cf0d740658128c9ba313a16',
         feeTier: dynamicFee,
         tickSpacing: '1',
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
@@ -152,10 +194,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -167,17 +215,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeInitializeHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after initialize hooks pool is not filtered out', () => {
@@ -190,10 +244,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -205,17 +265,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterInitializeHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before add liquidity hooks pool is not filtered out', () => {
@@ -228,10 +294,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -243,17 +315,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeAddLiquidityHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after add liquidity hooks pool is not filtered out', () => {
@@ -266,10 +344,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -281,17 +365,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterAddLiquidityHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before remove liquidity hooks pool is not filtered out', () => {
@@ -304,10 +394,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -319,17 +415,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeRemoveLiquidityHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after remove liquidity hooks pool is not filtered out', () => {
@@ -342,10 +444,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -357,17 +465,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterRemoveLiquidityHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before donate hooks pool is not filtered out', () => {
@@ -380,10 +494,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -395,17 +515,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeDonateHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after donate hooks pool is not filtered out', () => {
@@ -418,10 +544,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -433,17 +565,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterDonateHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('before swap returns delta hooks pool is not filtered out', () => {
@@ -456,10 +594,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -471,17 +615,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: beforeSwapReturnsDeltaHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after swap returns delta hooks pool is not filtered out', () => {
@@ -494,10 +644,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -509,17 +665,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterSwapReturnsDeltaHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after add liquidity returns delta hooks pool is not filtered out', () => {
@@ -532,10 +694,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -547,17 +715,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterAddLiquidityReturnsDeltaHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('after remove liquidity returns delta hooks pool is not filtered out', () => {
@@ -570,10 +744,16 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: '0x0000000000000000000000000000000000000020',
         liquidity: '0',
         token0: {
-          id: '0',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '0',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 0,
         tvlUSD: 0,
@@ -585,17 +765,23 @@ describe('v4HooksPoolsFiltering', () => {
         hooks: afterRemoveLiquidityReturnsDeltaHookAddress,
         liquidity: '1',
         token0: {
-          id: '1',
+          symbol: 'USDC',
+          id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+          name: 'USD Coin',
+          decimals: '6',
         },
         token1: {
-          id: '1',
+          symbol: 'ETH',
+          id: '0x0000000000000000000000000000000000000000',
+          name: 'Ether',
+          decimals: '18',
         },
         tvlETH: 1,
         tvlUSD: 1,
       },
     ]
 
-    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[1], v4Pools[0]])
+    expect(v4HooksPoolsFiltering(1, v4Pools)).toEqual([v4Pools[0], v4Pools[1]])
   })
 
   it('11 hooks pool to retain 10 pools', () => {
@@ -607,10 +793,16 @@ describe('v4HooksPoolsFiltering', () => {
       hooks: afterRemoveLiquidityReturnsDeltaHookAddress,
       liquidity: i,
       token0: {
-        id: 'USDC',
+        symbol: 'USDC',
+        id: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+        name: 'USD Coin',
+        decimals: '6',
       },
       token1: {
-        id: 'ETH',
+        symbol: 'ETH',
+        id: '0x0000000000000000000000000000000000000000',
+        name: 'Ether',
+        decimals: '18',
       },
       tvlETH: Number(i),
       tvlUSD: Number(i),
