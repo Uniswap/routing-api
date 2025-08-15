@@ -177,7 +177,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         '0xfe2aa6db37531042bc4fdcad1fea3f6616a5bd54',
       ].map((address) => address.toLowerCase())
 
-      pools = (pools as Array<V2SubgraphPool>).filter((pool: V2SubgraphPool) => {
+  pools = ((pools as unknown) as Array<V2SubgraphPool>).filter((pool: V2SubgraphPool) => {
         const shouldFilterOut = filterOutPoolAddresses.includes(pool.id.toLowerCase())
 
         if (shouldFilterOut) {
@@ -209,7 +209,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       })
       filteredPools.forEach((pool) => pools.push(pool))
 
-      pools = (pools as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
+  pools = ((pools as unknown) as Array<V3SubgraphPool>).filter((pool: V3SubgraphPool) => {
         const shouldFilterOut =
           // filter out AMPL-token pools from v3 subgraph, since they are not supported on v3
           pool.token0.id.toLowerCase() === '0xd46ba6d942050d489dbd938a2c909a5d5039a161' ||

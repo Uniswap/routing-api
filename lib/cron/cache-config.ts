@@ -1,5 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
-import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
+import { V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
@@ -106,10 +106,10 @@ const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to 
 const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
-const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
+// const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
 
 export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
-const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
+// const v2UntrackedUsdThreshold = Number.MAX_VALUE // Pairs need at least 1K USD (untracked) to be selected (for metrics only)
 
 export const chainProtocols = [
   // V3.
