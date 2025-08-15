@@ -452,6 +452,7 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         cachedRoutesRouteIds: serializeRouteIds(cachedRoutesRouteIds),
         enableDebug: alphaRouterConfig?.enableDebug,
         swapOptions: swapOptions?.simulate?.fromAddress,
+        enableUniversalRouter: true,
       },
     }
 
