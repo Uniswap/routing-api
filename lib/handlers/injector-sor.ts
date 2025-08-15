@@ -589,9 +589,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
           ]
-          const mixedCrossLiquidityV3AgainstV4Supported = [
-            ChainId.BASE
-          ]
+          const mixedCrossLiquidityV3AgainstV4Supported = [ChainId.BASE]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
