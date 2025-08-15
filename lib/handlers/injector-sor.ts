@@ -152,6 +152,7 @@ export type ContainerDependencies = {
   v2Supported: ChainId[]
   v4Supported?: ChainId[]
   mixedSupported?: ChainId[]
+  mixedCrossLiquidityV3AgainstV4Supported?: ChainId[]
   v4PoolParams?: Array<[number, number, string]>
   cachedRoutesCacheInvalidationFixRolloutPercentage?: number
   deleteCacheEnabledChains?: ChainId[]
@@ -588,6 +589,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
           ]
+          const mixedCrossLiquidityV3AgainstV4Supported = [ChainId.BASE]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
@@ -624,6 +626,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               v2Supported,
               v4Supported,
               mixedSupported,
+              mixedCrossLiquidityV3AgainstV4Supported,
               v4PoolParams,
               cachedRoutesCacheInvalidationFixRolloutPercentage,
               deleteCacheEnabledChains,
