@@ -108,7 +108,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/handlers/index.ts'),
       handler: 'quoteHandler',
       // 04/18/2025: async routing lambda can have much longer timeout
-      timeout: cdk.Duration.seconds(18),
+      timeout: cdk.Duration.seconds(30),
       memorySize: 5120,
       deadLetterQueueEnabled: true,
       bundling: {
