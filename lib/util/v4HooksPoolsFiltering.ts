@@ -40,7 +40,9 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         !isPoolFeeDynamic(tokenA, tokenB, pool))
     )
   } catch (e) {
-    log.error(`Error creating tokens for pool ${pool.id} on chain ${chainId}: ${e}`)
+    log.error(
+      `Error creating tokens for pool ${pool.id} on chain ${chainId} with token0 decimals ${pool.token0.decimals} token1 decimals ${pool.token1.decimals}: ${e}`
+    )
 
     // hardcode to 18 decimals since we cannot parse and pass the token invariant checks
     const tokenA: Currency =
