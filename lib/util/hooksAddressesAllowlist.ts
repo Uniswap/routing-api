@@ -6,21 +6,21 @@ export const extraHooksAddressesOnSepolia = '0x000000000000000000000000000000000
 export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
 
-export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0D5dB05933Fa0D9F7038D365E1541a41888'
-export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000DA5dCD7eC49d6Ca5554f7b1ca1CE33Fa1888'
-export const BUNNI_HOOKS_ADDRESS_v1_1_1 = '0x0000fE59823933AC763611a69c88F91d45F81888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN = '0x005aF73a245d8171A0550ffAe2631f12cc211888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1 = '0x000052423c1dB6B7ff8641b85A7eEfc7B2791888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM = '0x0000EB22c45bDB564F985acE0B4d05a64fa71888'
+export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
+export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
+export const BUNNI_HOOKS_ADDRESS_v1_1_1 = '0x0000fe59823933ac763611a69c88f91d45f81888'
+export const BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
+export const BUNNI_HOOKS_ADDRESS_v1_2_1 = '0x000052423c1db6b7ff8641b85a7eefc7b2791888'
+export const BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM = '0x0000eb22c45bdb564f985ace0b4d05a64fa71888'
 
 export const GRADUATION_HOOKS_ADDRESS_ON_BASE = '0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000'
-export const TWAMM_HOOKS_ADDRESS_ON_BASE = '0xed1698C29928a6C44CddB0c75aB0E5D47eB72A80'
-export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621AFCa515Bf58631D4733fbA7B72Aae4'
+export const TWAMM_HOOKS_ADDRESS_ON_BASE = '0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80'
+export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621afca515bf58631d4733fba7b72aae4'
 export const BTC_ACC_ON_BASE = '0x704268ac7043aeef50f47b6a03ae68ccf808e044'
 
 // https://linear.app/uniswap/issue/ROUTE-580/allowlist-slippagefeehook-on-arbitrum
 // example pool: 0x582387e095a7fbcba58222b6f9f56cc3e6177d766d10dd0d96a70dab70f66be9
-export const SLIPPAGE_FEE_HOOK_ON_ARBITRUM = '0xc4Bf39a096a1b610dd6186935F3Ad99c66239080'
+export const SLIPPAGE_FEE_HOOK_ON_ARBITRUM = '0xc4bf39a096a1b610dd6186935f3ad99c66239080'
 
 // https://linear.app/uniswap/issue/ROUTE-555/allowlist-clanker-hook
 export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE = '0x34a45c6b61876d739400bd71228cbcbd4f53e8cc'
@@ -38,7 +38,7 @@ export const WETH_HOOKS_ADDRESS_ON_BASE = '0xb08211d57032dd10b1974d4b876851a7f75
 export const WETH_HOOKS_ADDRESS_ON_ARBITRUM = '0x2a4adf825bd96598487dbb6b2d8d882a4eb86888'
 
 // example pool: https://app.uniswap.org/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
-export const BUNNI_ON_UNICHAIN = '0x005aF73a245d8171A0550ffAe2631f12cc211888'
+export const BUNNI_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
@@ -47,11 +47,11 @@ export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
 export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0
-export const ZORA_CREATOR_HOOK_ON_BASE = '0xd61A675F8a0c67A73DC3B54FB7318B4D91409040'
+export const ZORA_CREATOR_HOOK_ON_BASE = '0xd61a675f8a0c67a73dc3b54fb7318b4d91409040'
 // example pool: https://app.uniswap.org/explore/pools/base/0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06
-export const ZORA_POST_HOOK_ON_BASE = '0x9ea932730A7787000042e34390B8E435dD839040'
+export const ZORA_POST_HOOK_ON_BASE = '0x9ea932730a7787000042e34390b8e435dd839040'
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
-export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77Bb2a8F1ab2A384918A4c090Cd8Ae82Dc5078E0'
+export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
