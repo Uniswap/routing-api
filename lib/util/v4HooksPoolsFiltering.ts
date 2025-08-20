@@ -1,6 +1,6 @@
 import { isPoolFeeDynamic, log, nativeOnChain, V4SubgraphPool } from '@uniswap/smart-order-router'
 import { Hook } from '@uniswap/v4-sdk'
-import { HOOKS_ADDRESSES_ALLOWLIST } from './hooksAddressesAllowlist'
+import { HOOKS_ADDRESSES_ALLOWLIST, ZORA_CREATOR_HOOK_ON_BASE, ZORA_POST_HOOK_ON_BASE } from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
 import { BUNNI_POOLS_CONFIG } from './bunni-pools'
@@ -156,7 +156,19 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
-      v4Pools.push(pool)
+      let shouldNotAddV4Pool = false
+
+      const isZoraPool =
+        (pool.hooks === ZORA_CREATOR_HOOK_ON_BASE || pool.hooks === ZORA_POST_HOOK_ON_BASE) && chainId === ChainId.BASE
+      if (isZoraPool) {
+        if (pool.tvlETH <= 0.001) {
+          shouldNotAddV4Pool = true
+        }
+      }
+
+      if (!shouldNotAddV4Pool) {
+        v4Pools.push(pool)
+      }
 
       if (v4Pools.size() > TOP_GROUPED_V4_POOLS + additionalAllowedPool) {
         v4Pools.dequeue()
