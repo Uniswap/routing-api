@@ -541,7 +541,8 @@ export const chainProtocols = [
       v4BaseTrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.BASE)
+      v4SubgraphUrlOverride(ChainId.BASE),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   {
