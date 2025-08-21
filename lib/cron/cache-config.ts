@@ -115,10 +115,12 @@ const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to 
 const v4BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
 const v4BaseZoraTrackedEthThreshold = 0.001 // Pools on Zora need at least 0.1 of trackedEth to be selected
 const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
+const v4LiquidityThreshold = Number.MAX_VALUE
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 export const v3BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
 const v3UntrackedUsdThreshold = 25000 // Pools need at least 25K USD (untracked) to be selected (for metrics only)
+const v3LiquidityThreshold = Number.MAX_VALUE
 
 export const v2TrackedEthThreshold = 0.025 // Pairs need at least 0.025 of trackedEth to be selected
 export const v2BaseTrackedEthThreshold = 0.1 // Pairs on Base need at least 0.1 of trackedEth to be selected
@@ -145,6 +147,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
@@ -159,6 +162,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
@@ -173,6 +177,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
@@ -188,6 +193,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
   },
@@ -202,6 +208,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.CELO)
     ),
   },
@@ -216,6 +223,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.BNB)
     ),
   },
@@ -230,6 +238,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
@@ -244,6 +253,7 @@ export const chainProtocols = [
       true,
       v3BaseTrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.BASE)
     ),
   },
@@ -258,6 +268,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
@@ -272,6 +283,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
@@ -286,6 +298,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
@@ -300,6 +313,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.ZORA)
     ),
   },
@@ -314,6 +328,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
+      v3LiquidityThreshold,
       v3SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
@@ -511,6 +526,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
   },
@@ -526,6 +542,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
@@ -541,6 +558,7 @@ export const chainProtocols = [
       v4BaseTrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.BASE)
     ),
   },
@@ -556,6 +574,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
@@ -571,6 +590,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
@@ -586,6 +606,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.ZORA)
     ),
   },
@@ -601,6 +622,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
@@ -623,6 +645,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
@@ -638,6 +661,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
@@ -660,6 +684,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
@@ -690,6 +715,7 @@ export const chainProtocols = [
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
       v4UntrackedUsdThreshold,
+      v4LiquidityThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
     ),
   },
