@@ -53,6 +53,14 @@ export const ZORA_POST_HOOK_ON_BASE = '0x9ea932730a7787000042e34390b8e435dd83904
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
 export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
 
+// LimitOrderHook addresses: https://linear.app/uniswap/issue/ROUTE-625
+// example pool: https://app.uniswap.org/explore/pools/arbitrum/0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98
+export const LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM = '0xd73339564ac99f3e09b0ebc80603ff8b796500c0'
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x2289791ab3c4a90c741427c52ea9411ba13bf8184c0b7bae4fea26262f400357
+export const LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN = '0x2016c0e4f8bb1d6fea777dc791be919e2eda40c0'
+// example pool: https://app.uniswap.org/explore/pools/base/0xdfb2536ba09a004b32db0a1a15f73676b5e356d831c4ea1e843cd9433b080ab6
+export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -78,6 +86,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
     WETH_HOOKS_ADDRESS_ON_ARBITRUM,
+    LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM,
   ],
   [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
@@ -109,6 +118,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_CREATOR_HOOK_ON_BASE,
     ZORA_POST_HOOK_ON_BASE,
     DOPPLER_HOOKS_ADDRESS_ON_BASE,
+    LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
@@ -129,6 +139,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_1_1,
     BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN,
     BUNNI_HOOKS_ADDRESS_v1_2_1,
+    LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
