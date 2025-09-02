@@ -61,6 +61,9 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN = '0x2016c0e4f8bb1d6fea777dc7
 // example pool: https://app.uniswap.org/explore/pools/base/0xdfb2536ba09a004b32db0a1a15f73676b5e356d831c4ea1e843cd9433b080ab6
 export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0'
 
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
+export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -140,6 +143,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN,
     BUNNI_HOOKS_ADDRESS_v1_2_1,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
+    PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
