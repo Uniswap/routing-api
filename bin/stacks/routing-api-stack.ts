@@ -676,6 +676,36 @@ export class RoutingAPIStack extends cdk.Stack {
       subgraphAlertAlarms.push(alarm)
     }
 
+    // Alarms for compressed pool cache size that trigger when size exceeds 35MB
+    const compressedSizeAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
+
+    for (let i = 0; i < chainProtocols.length; i++) {
+      const { protocol, chainId } = chainProtocols[i]
+      const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.compressed_size_mb`
+      const alarmName = `CachePools-SEV3-CompressedSizeExceeded-${chainId}-${protocol}`
+
+      const metric = new aws_cloudwatch.Metric({
+        namespace: 'Uniswap',
+        metricName: metricName,
+        dimensionsMap: { Service: 'CachePools' },
+        unit: aws_cloudwatch.Unit.NONE,
+        statistic: 'Average',
+        period: Duration.hours(1), // 1 hour period
+      })
+
+      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
+        alarmName,
+        metric,
+        comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+        threshold: 35, // Trigger when compressed size exceeds 35MB
+        evaluationPeriods: 1, // Trigger immediately when threshold is exceeded
+        treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING,
+        alarmDescription: `Compressed pool cache size for ${protocol} on chain ${chainId} exceeds 35MB threshold.`,
+      })
+
+      compressedSizeAlertAlarms.push(alarm)
+    }
+
     // Anomaly alerts for pool count metrics per protocol and chain
     const poolCountAnomalyAlarms: cdk.aws_cloudwatch.Alarm[] = []
 
@@ -773,6 +803,9 @@ export class RoutingAPIStack extends cdk.Stack {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       subgraphAlertAlarms.forEach((alarm) => {
+        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
+      })
+      compressedSizeAlertAlarms.forEach((alarm) => {
         alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
       })
       poolCountAnomalyAlarms.forEach((alarm) => {

@@ -462,6 +462,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
   const serializedPools = JSON.stringify(pools)
   const compressedPools = zlib.deflateSync(serializedPools)
+
+  // Calculate sizes in MB
+  const serializedSizeMB = (Buffer.byteLength(serializedPools, 'utf8') / (1024 * 1024)).toFixed(2)
+  const compressedSizeMB = (Buffer.byteLength(compressedPools) / (1024 * 1024)).toFixed(2)
+
   const result = await s3
     .putObject({
       Bucket: process.env.POOL_CACHE_BUCKET_3!,
@@ -478,9 +483,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   metric.putMetric(`${metricPrefix}.latency`, Date.now() - beforeAll)
 
   log.info(
-    `compression ratio for ${chainId} ${protocol} pool file is ${serializedPools.length}:${compressedPools.length}`
+    `compression ratio for ${chainId} ${protocol} pool file is ${serializedPools.length}:${compressedPools.length} (${serializedSizeMB}MB -> ${compressedSizeMB}MB)`
   )
   metric.putMetric(`${metricPrefix}.compression_ratio`, serializedPools.length / compressedPools.length)
+  metric.putMetric(`${metricPrefix}.compressed_size_mb`, parseFloat(compressedSizeMB))
+  metric.putMetric(`${metricPrefix}.serialized_size_mb`, parseFloat(serializedSizeMB))
 })
 
 module.exports = { handler }
