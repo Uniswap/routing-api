@@ -24,7 +24,7 @@ import {
   V3Route,
 } from '@uniswap/smart-order-router'
 import { DynamoDBTableProps } from '../../../../../../bin/stacks/routing-database-stack'
-import { V4Route } from '@uniswap/smart-order-router/build/main/routers'
+import { V4Route } from '@uniswap/smart-order-router/build/main/routers/index'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../../../../../../lib/util/newCachedRoutesRolloutPercent'
 import sinon, { SinonSpy } from 'sinon'
 import { metric } from '@uniswap/smart-order-router/build/main/util/metric'

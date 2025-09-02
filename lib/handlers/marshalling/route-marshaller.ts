@@ -1,4 +1,4 @@
-import { MixedRoute, V2Route, V3Route, V4Route } from '@uniswap/smart-order-router/build/main/routers'
+import { MixedRoute, V2Route, V3Route, V4Route } from '@uniswap/smart-order-router/build/main/routers/index'
 import { Protocol } from '@uniswap/router-sdk'
 import { MarshalledCurrency, TokenMarshaller } from './token-marshaller'
 import { MarshalledPair, PairMarshaller } from './pair-marshaller'
