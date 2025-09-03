@@ -2,6 +2,23 @@
 
 This repository contains routing API for the Uniswap V3 protocol.
 
+> **Migration Note**: This API has been migrated from AWS Lambda to a Node.js HTTP server with simplified network configuration. Supports 6 core EVM networks (Ethereum, Optimism, Polygon, Arbitrum, Base, Sepolia) using Alchemy RPC providers exclusively. See [MIGRATION.md](MIGRATION.md) for technical details.
+
+## Quick Start
+
+```bash
+npm install
+cp .env.example .env  # Configure your Alchemy API keys
+npm run build  
+npm run start  # Server runs on http://localhost:3000
+```
+
+**Endpoint**: `POST http://localhost:3000/v1/quote` (Trading API compatible)
+
+---
+
+## Legacy AWS Documentation
+
 It deploys an API to AWS that uses @uniswap/smart-order-router to search for the most efficient way to swap token A for token B.
 
 ## Development

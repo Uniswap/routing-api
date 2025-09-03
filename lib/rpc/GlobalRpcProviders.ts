@@ -35,7 +35,7 @@ export class GlobalRpcProviders {
         if (process.env[urlEnvVar] === undefined) {
           throw new Error(`Environmental variable ${urlEnvVar} isn't defined!`)
         }
-        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!, chainConfig.chainId)
+        chainConfig.providerUrls[i] = generateProviderUrl(urlEnvVar, process.env[urlEnvVar]!)
       }
     }
     return prodConfig

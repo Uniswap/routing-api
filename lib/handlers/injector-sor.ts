@@ -58,12 +58,12 @@ import {
   V3AWSSubgraphProvider,
   V4AWSSubgraphProvider,
 } from './router-entities/aws-subgraph-provider'
-import { AWSTokenListProvider } from './router-entities/aws-token-list-provider'
 import { DynamoRouteCachingProvider } from './router-entities/route-caching/dynamo-route-caching-provider'
 import { DynamoDBCachingV3PoolProvider } from './pools/pool-caching/v3/dynamo-caching-pool-provider'
 import { TrafficSwitchV3PoolProvider } from './pools/provider-migration/v3/traffic-switch-v3-pool-provider'
 import { DefaultEVMClient } from './evm/EVMClient'
 import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
+import { createLocalTokenListProvider } from './router-entities/local-token-list-provider'
 import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
 import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
@@ -98,23 +98,9 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISM,
   ChainId.ARBITRUM_ONE,
   ChainId.POLYGON,
-  ChainId.SEPOLIA,
-  ChainId.CELO,
-  ChainId.CELO_ALFAJORES,
-  ChainId.BNB,
-  ChainId.AVALANCHE,
   ChainId.BASE,
-  ChainId.BLAST,
-  ChainId.ZORA,
-  ChainId.ZKSYNC,
-  ChainId.WORLDCHAIN,
-  ChainId.UNICHAIN_SEPOLIA,
-  ChainId.MONAD_TESTNET,
-  ChainId.BASE_SEPOLIA,
-  ChainId.UNICHAIN,
-  ChainId.SONEIUM,
+  ChainId.SEPOLIA,
 ]
-const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId
@@ -185,7 +171,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       const {
         POOL_CACHE_BUCKET_3,
         POOL_CACHE_GZIP_KEY,
-        TOKEN_LIST_CACHE_BUCKET,
         ROUTES_TABLE_NAME,
         ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME,
         CACHED_ROUTES_TABLE_NAME,
@@ -321,7 +306,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v3SubgraphProvider,
             v2SubgraphProvider,
           ] = await Promise.all([
-            AWSTokenListProvider.fromTokenListS3Bucket(chainId, TOKEN_LIST_CACHE_BUCKET!, DEFAULT_TOKEN_LIST),
+            createLocalTokenListProvider(chainId),
             CachingTokenListProvider.fromTokenList(chainId, UNSUPPORTED_TOKEN_LIST as TokenList, blockedTokenCache),
             (await this.instantiateSubgraphProvider(
               chainId,
