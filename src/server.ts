@@ -38,7 +38,7 @@ async function bootstrap() {
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));
   app.get('/readyz', (_req, res) => res.status(200).send('ready'));
 
-  const port = Number(process.env.PORT ?? 8080);
+  const port = Number(process.env.PORT ?? 3000);
   const server = app.listen(port, () => {
     console.log(`routing-api listening on :${port}`);
   });

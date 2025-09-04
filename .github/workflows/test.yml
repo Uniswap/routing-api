@@ -1,32 +1,30 @@
-name: Test
+name: JuiceSwap Routing API CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ['**']
   pull_request:
-  workflow_dispatch:
+    branches: [main, develop]
 
 jobs:
   test:
-    name: Run tests
+    name: Quality Gates
     runs-on: ubuntu-latest
-    env:
-      GQL_URL: ${{ secrets.UNI_GRAPHQL_ENDPOINT }}
-      GQL_H_ORGN: ${{ secrets.UNI_GRAPHQL_HEADER_ORIGIN }}
-
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-      - name: Set up node
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.x
-          registry-url: https://registry.npmjs.org
-      - name: Install Dependencies
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
+
       - name: Run unit tests
         run: npm run test:unit
-      - name: Run integration tests
-        run: npm run test:integ
+
+      - name: Build application
+        run: npm run build

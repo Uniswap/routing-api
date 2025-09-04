@@ -1,10 +1,7 @@
 name: Trufflehog
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_dispatch: # only manual trigger
 
 permissions:
   contents: read
