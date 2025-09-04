@@ -52,6 +52,6 @@
     "providerInitialWeights": [1],
     "providerUrls": ["ALCHEMY_11155111"],
     "providerNames": ["ALCHEMY"],
-    "enableDbSync": true
+    "enableDbSync": false
   }
 ]
