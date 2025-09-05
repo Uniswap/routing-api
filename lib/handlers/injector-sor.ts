@@ -651,13 +651,17 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         throw new Error(`Chain protocol not found for chain ${chainId} and protocol ${protocol}`)
       }
 
+      if (!poolCacheBucket || !poolCacheKey) {
+        throw new Error(`S3 configuration missing - falling back to static providers`)
+      }
+
       switch (protocol) {
         case Protocol.V4:
-          return await V4AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+          return await V4AWSSubgraphProvider.EagerBuild(poolCacheBucket, poolCacheKey, chainId)
         case Protocol.V3:
-          return await V3AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+          return await V3AWSSubgraphProvider.EagerBuild(poolCacheBucket, poolCacheKey, chainId)
         case Protocol.V2:
-          return await V2AWSSubgraphProvider.EagerBuild(poolCacheBucket!, poolCacheKey!, chainId)
+          return await V2AWSSubgraphProvider.EagerBuild(poolCacheBucket, poolCacheKey, chainId)
         default:
           throw new Error(`Unsupported protocol ${protocol} for chain ${chainId} to instantiate subgraph provider`)
       }

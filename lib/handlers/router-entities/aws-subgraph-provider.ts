@@ -37,6 +37,11 @@ export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3Subgra
       return cachedPools
     }
 
+    if (!this.bucket || !this.baseKey) {
+      log.info(`S3 not configured for protocol ${this.protocol}, returning empty pools array`)
+      return []
+    }
+
     log.info(
       { bucket: this.bucket, key: this.baseKey },
       `Subgraph pools local cache miss for protocol ${this.protocol}. Getting subgraph pools from S3`
@@ -113,7 +118,9 @@ export class V4AWSSubgraphProvider extends AWSSubgraphProvider<V4SubgraphPool> i
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
-    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V4)
+    if (bucket && baseKey) {
+      await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V4)
+    }
 
     return new V4AWSSubgraphProvider(chainId, bucket, baseKey)
   }
@@ -125,7 +132,9 @@ export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> i
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
-    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
+    if (bucket && baseKey) {
+      await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
+    }
 
     return new V3AWSSubgraphProvider(chainId, bucket, baseKey)
   }
@@ -137,7 +146,9 @@ export class V2AWSSubgraphProvider extends AWSSubgraphProvider<V2SubgraphPool> i
   }
 
   public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V2AWSSubgraphProvider> {
-    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
+    if (bucket && baseKey) {
+      await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
+    }
 
     return new V2AWSSubgraphProvider(chainId, bucket, baseKey)
   }
