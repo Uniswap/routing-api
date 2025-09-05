@@ -8,7 +8,7 @@ on:
 env:
   DOCKER_TAGS: dfxswiss/juiceswap-api:beta
   AZURE_RESOURCE_GROUP: rg-dfx-api-dev
-  AZURE_CONTAINER_APP: ca-jsw-api-dev
+  AZURE_CONTAINER_APP: ca-dfx-jsw-dev
   DEPLOY_INFO: ${{ github.ref_name }}-${{ github.sha }}
 
 jobs:
