@@ -13,7 +13,7 @@ npm run build
 npm run start  # Server runs on http://localhost:3000
 ```
 
-**Endpoint**: `POST http://localhost:3000/v1/quote` (Trading API compatible)
+**Endpoint**: `POST http://localhost:3000/quote` (Trading API compatible)
 
 ---
 
