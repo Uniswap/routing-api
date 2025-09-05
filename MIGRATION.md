@@ -86,7 +86,7 @@ async function bootstrap() {
   app.set('trust proxy', true);
   app.use(express.json({ limit: '1mb' }));
 
-  app.get('/quote', lambdaToExpress(quoteHandler));
+  app.post('/quote', lambdaToExpress(quoteHandler));
 
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));
   app.get('/readyz', (_req, res) => res.status(200).send('ready'));

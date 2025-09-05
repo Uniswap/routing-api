@@ -31,7 +31,7 @@ async function bootstrap() {
   });
 
   // Route mapping - handlers remain completely unchanged
-  app.post('/quote', lambdaToExpress(quoteHandler));
+  app.post('/v1/quote', lambdaToExpress(quoteHandler));
 
   // Health endpoints
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));
