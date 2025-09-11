@@ -436,6 +436,31 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         } as V4SubgraphPool)
       }
 
+      if (chainId === ChainId.MAINNET) {
+        // Mainnet ETH/WETH: https://app.uniswap.org/explore/pools/ethereum/0xf6f2314ac16a878e2bf8ef01ef0a3487e714d397d87f702b9a08603eb3252e92
+        manuallyIncludedV4Pools.push({
+          id: '0xf6f2314ac16a878e2bf8ef01ef0a3487e714d397d87f702b9a08603eb3252e92',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x57991106cb7aa27e2771beda0d6522f68524a888',
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'ETH',
+            id: '0x0000000000000000000000000000000000000000',
+            name: 'ETH',
+            decimals: '18',
+          },
+          token1: {
+            symbol: 'WETH',
+            id: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            name: 'WETH',
+            decimals: '18',
+          },
+          tvlETH: 44000.1795925485023741879813651641809,
+          tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool)
+      }
+
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
