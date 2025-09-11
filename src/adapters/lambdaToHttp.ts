@@ -77,6 +77,7 @@ export function lambdaToExpress(
       if (result.statusCode === 200 && responseBody) {
         try {
           const routingApiResponse = JSON.parse(responseBody)
+          if(req.body.swapper) routingApiResponse.swapper = req.body.swapper
           // Wrap in URA format expected by frontend
           const uraResponse = {
             routing: 'CLASSIC',
