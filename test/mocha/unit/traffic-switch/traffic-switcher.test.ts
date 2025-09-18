@@ -1,7 +1,7 @@
 import sinon, { SinonSpy } from 'sinon'
-import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
+import { metric } from '@juiceswapxyz/smart-order-router/build/main/util/metric'
 import { expect } from 'chai'
-import { MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { MetricLoggerUnit } from '@juiceswapxyz/smart-order-router'
 import { TrafficSwitcher } from '../../../../lib/util/traffic-switch/traffic-switcher'
 
 interface ISimpleTester {

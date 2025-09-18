@@ -1,7 +1,7 @@
-import { IV3PoolProvider, log, metric, MetricLoggerUnit, V3PoolAccessor } from '@uniswap/smart-order-router'
-import { Token } from '@uniswap/sdk-core'
-import { FeeAmount, Pool } from '@uniswap/v3-sdk'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { IV3PoolProvider, log, metric, MetricLoggerUnit, V3PoolAccessor } from '@juiceswapxyz/smart-order-router'
+import { Token } from '@juiceswapxyz/sdk-core'
+import { FeeAmount, Pool } from '@juiceswapxyz/v3-sdk'
+import { ProviderConfig } from '@juiceswapxyz/smart-order-router/build/main/providers/provider'
 import { POOL_PROVIDER_TRAFFIC_SWITCH_CONFIGURATION } from '../../util/pool-provider-traffic-switch-configuration'
 import JSBI from 'jsbi'
 

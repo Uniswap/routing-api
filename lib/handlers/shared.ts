@@ -1,4 +1,4 @@
-import { ChainId, Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent } from '@juiceswapxyz/sdk-core'
 import {
   AlphaRouterConfig,
   CacheMode,
@@ -6,9 +6,9 @@ import {
   LowerCaseStringArray,
   MapWithLowerCaseKey,
   ProtocolPoolSelection,
-} from '@uniswap/smart-order-router'
-import { FeeOptions } from '@uniswap/v3-sdk'
-import { FlatFeeOptions } from '@uniswap/universal-router-sdk'
+} from '@juiceswapxyz/smart-order-router'
+import { FeeOptions } from '@juiceswapxyz/v3-sdk'
+import { FlatFeeOptions } from '@juiceswapxyz/universal-router-sdk'
 
 export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = {
   [ChainId.MAINNET]: 30,

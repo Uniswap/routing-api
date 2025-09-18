@@ -1,5 +1,5 @@
 import { PairTradeTypeChainId } from '../../../../../../../lib/handlers/router-entities/route-caching'
-import { ChainId, TradeType } from '@uniswap/sdk-core'
+import { ChainId, TradeType } from '@juiceswapxyz/sdk-core'
 import { describe, it, expect } from '@jest/globals'
 
 describe('PairTradeTypeChainId', () => {

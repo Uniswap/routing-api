@@ -1,14 +1,14 @@
 import sinon from 'sinon'
-import { ChainId, Token, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Token, WETH9 } from '@juiceswapxyz/sdk-core'
 import { expect } from 'chai'
 import dotenv from 'dotenv'
 import { GraphQLTokenFeeFetcher } from '../../../../lib/graphql/graphql-token-fee-fetcher'
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { ID_TO_PROVIDER, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { ID_TO_PROVIDER, MetricLoggerUnit } from '@juiceswapxyz/smart-order-router'
 import { BigNumber } from 'ethers'
-import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { OnChainTokenFeeFetcher } from '@juiceswapxyz/smart-order-router/build/main/providers/token-fee-fetcher'
 import { UniGraphQLProvider } from '../../../../lib/graphql/graphql-provider'
-import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
+import { metric } from '@juiceswapxyz/smart-order-router/build/main/util/metric'
 
 dotenv.config()
 

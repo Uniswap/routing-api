@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import { CHAIN_TO_GAS_LIMIT_MAP } from './gasLimit'
-import { TENDERLY_NOT_SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
+import { TENDERLY_NOT_SUPPORTED_CHAINS } from '@juiceswapxyz/smart-order-router'
 
 export function adhocCorrectGasUsed(estimatedGasUsed: BigNumber, chainId: ChainId): BigNumber {
   const shouldCorrectGas = TENDERLY_NOT_SUPPORTED_CHAINS.includes(chainId)

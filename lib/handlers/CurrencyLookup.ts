@@ -1,11 +1,11 @@
-import { Currency, Token } from '@uniswap/sdk-core'
+import { Currency, Token } from '@juiceswapxyz/sdk-core'
 import {
   getAddress,
   ITokenListProvider,
   ITokenProvider,
   NATIVE_NAMES_BY_ID,
   nativeOnChain,
-} from '@uniswap/smart-order-router'
+} from '@juiceswapxyz/smart-order-router'
 import Logger from 'bunyan'
 import { isAddress } from '../util/isAddress'
 

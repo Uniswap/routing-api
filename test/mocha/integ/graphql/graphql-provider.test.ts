@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import { expect } from 'chai'
 import { UniGraphQLProvider } from '../../../../lib/graphql/graphql-provider'
 import dotenv from 'dotenv'

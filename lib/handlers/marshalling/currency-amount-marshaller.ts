@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount } from '@juiceswapxyz/sdk-core'
 import { MarshalledCurrency, TokenMarshaller } from './token-marshaller'
 
 export interface MarshalledCurrencyAmount {

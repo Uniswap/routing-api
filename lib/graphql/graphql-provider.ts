@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 import { GraphQLClient, IGraphQLClient } from './graphql-client'
 import {

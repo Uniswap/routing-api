@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { AlphaRouter } from '@uniswap/smart-order-router'
-import { SwapOptionsSwapRouter02, SwapType } from '@uniswap/smart-order-router'
-import { CurrencyAmount, TradeType, Token, Percent, ChainId } from '@uniswap/sdk-core'
+import { AlphaRouter } from '@juiceswapxyz/smart-order-router'
+import { SwapOptionsSwapRouter02, SwapType } from '@juiceswapxyz/smart-order-router'
+import { CurrencyAmount, TradeType, Token, Percent, ChainId } from '@juiceswapxyz/sdk-core'
 import { ethers } from 'ethers'
 import JSBI from 'jsbi'
 import { GlobalRpcProviders } from '../../lib/rpc/GlobalRpcProviders'
@@ -105,10 +105,20 @@ export async function handleSwap(req: Request, res: Response): Promise<void> {
     }: SwapRequest = req.body
 
     // Validate required fields
-    if (!tokenInAddress || !tokenOutAddress || !amount || !type || !recipient || !slippageTolerance || tokenInDecimals === undefined || tokenOutDecimals === undefined) {
+    const missingFields = []
+    if (!tokenInAddress) missingFields.push('tokenInAddress')
+    if (!tokenOutAddress) missingFields.push('tokenOutAddress')
+    if (!amount) missingFields.push('amount')
+    if (!type) missingFields.push('type')
+    if (!recipient) missingFields.push('recipient')
+    if (!slippageTolerance) missingFields.push('slippageTolerance')
+    if (tokenInDecimals === undefined) missingFields.push('tokenInDecimals')
+    if (tokenOutDecimals === undefined) missingFields.push('tokenOutDecimals')
+
+    if (missingFields.length > 0) {
       res.status(400).json({
         error: "Missing required fields",
-        detail: "tokenInAddress, tokenOutAddress, tokenInDecimals, tokenOutDecimals, amount, type, recipient, and slippageTolerance are required"
+        detail: `The following fields are required but missing: ${missingFields.join(', ')}`
       })
       return
     }

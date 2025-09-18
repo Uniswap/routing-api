@@ -1,5 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Token } from '@juiceswapxyz/sdk-core'
 import { constants } from 'ethers'
 import { Erc20 } from '../../lib/types/ext/Erc20'
 import { Erc20__factory } from '../../lib/types/ext/factories/Erc20__factory'

@@ -1,4 +1,4 @@
-import { CachedRoute, SupportedRoutes } from '@uniswap/smart-order-router'
+import { CachedRoute, SupportedRoutes } from '@juiceswapxyz/smart-order-router'
 import { MarshalledRoute, RouteMarshaller } from './route-marshaller'
 
 export interface MarshalledCachedRoute {

@@ -1,5 +1,5 @@
 import { ProtocolsBucketBlockNumber } from '../../../../../../../lib/handlers/router-entities/route-caching/model/protocols-bucket-block-number'
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 import { describe, it, expect } from '@jest/globals'
 
 describe('ProtocolsBucketBlockNumber', () => {

@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { GlobalRpcProviders } from '../../lib/rpc/GlobalRpcProviders'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import Logger from 'bunyan'
 
 enum SwapStatus {

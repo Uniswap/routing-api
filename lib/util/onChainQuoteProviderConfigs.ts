@@ -9,11 +9,11 @@ import {
   DEFAULT_GAS_ERROR_FAILURE_OVERRIDES,
   DEFAULT_RETRY_OPTIONS,
   DEFAULT_SUCCESS_RATE_FAILURE_OVERRIDES,
-} from '@uniswap/smart-order-router/build/main/util/onchainQuoteProviderConfigs'
-import { CHAIN_TO_ADDRESSES_MAP, ChainId } from '@uniswap/sdk-core'
+} from '@juiceswapxyz/smart-order-router/build/main/util/onchainQuoteProviderConfigs'
+import { CHAIN_TO_ADDRESSES_MAP, ChainId } from '@juiceswapxyz/sdk-core'
 import AsyncRetry from 'async-retry'
-import { AddressMap, BatchParams, BlockNumberConfig, FailureOverrides } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/router-sdk'
+import { AddressMap, BatchParams, BlockNumberConfig, FailureOverrides } from '@juiceswapxyz/smart-order-router'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 
 export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined } = {
   ...constructSameRetryOptionsMap(DEFAULT_RETRY_OPTIONS),
@@ -1002,6 +1002,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.UNICHAIN]: -1,
   [ChainId.MONAD_TESTNET]: -1,
   [ChainId.SONEIUM]: -1,
+  [ChainId.CITREA_TESTNET]: -1,
 }
 
 // 0 threshold means it's not deployed yet
@@ -1036,6 +1037,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.UNICHAIN]: 0,
   [ChainId.MONAD_TESTNET]: 0,
   [ChainId.SONEIUM]: 0,
+  [ChainId.CITREA_TESTNET]: 0,
 }
 
 // TODO: Move this new addresses to SOR

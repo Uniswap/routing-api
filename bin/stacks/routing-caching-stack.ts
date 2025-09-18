@@ -1,4 +1,4 @@
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -17,7 +17,7 @@ import * as path from 'path'
 import { chainProtocols } from '../../lib/cron/cache-config'
 import { STAGE } from '../../lib/util/stage'
 import { PoolCachingFilePrefixes } from '../../lib/util/poolCachingFilePrefixes'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   stage: string

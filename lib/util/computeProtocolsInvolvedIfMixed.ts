@@ -1,8 +1,8 @@
-import { CachedRoute, log, SupportedRoutes } from '@uniswap/smart-order-router'
-import { Protocol } from '@uniswap/router-sdk'
-import { Pair } from '@uniswap/v2-sdk'
-import { Pool as V3Pool } from '@uniswap/v3-sdk'
-import { Pool as V4Pool } from '@uniswap/v4-sdk'
+import { CachedRoute, log, SupportedRoutes } from '@juiceswapxyz/smart-order-router'
+import { Protocol } from '@juiceswapxyz/router-sdk'
+import { Pair } from '@juiceswapxyz/v2-sdk'
+import { Pool as V3Pool } from '@juiceswapxyz/v3-sdk'
+import { Pool as V4Pool } from '@juiceswapxyz/v4-sdk'
 
 export function computeProtocolsInvolvedIfMixed(route: CachedRoute<SupportedRoutes>): Set<Protocol> {
   if (route.route.protocol === Protocol.MIXED) {

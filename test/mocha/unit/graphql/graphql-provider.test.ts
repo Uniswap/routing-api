@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import { IUniGraphQLProvider, UniGraphQLProvider } from '../../../../lib/graphql/graphql-provider'
 import sinon from 'sinon'
 import { TokensInfoResponse } from '../../../../lib/graphql/graphql-schemas'

@@ -1,12 +1,12 @@
-import { ITokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { ITokenFeeFetcher } from '@juiceswapxyz/smart-order-router/build/main/providers/token-fee-fetcher'
 import { IUniGraphQLProvider } from './graphql-provider'
-import { TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { TokenFeeMap } from '@juiceswapxyz/smart-order-router/build/main/providers/token-fee-fetcher'
+import { ProviderConfig } from '@juiceswapxyz/smart-order-router/build/main/providers/provider'
 import { TokensInfoResponse } from './graphql-schemas'
 import { BigNumber } from 'ethers'
-import { ChainId } from '@uniswap/sdk-core'
-import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
-import { log, MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { metric } from '@juiceswapxyz/smart-order-router/build/main/util/metric'
+import { log, MetricLoggerUnit } from '@juiceswapxyz/smart-order-router'
 import { TokenFeeUtils } from './token-fee-utils'
 
 /* Implementation of the ITokenFeeFetcher interface to give access to Uniswap GraphQL API token fee data.

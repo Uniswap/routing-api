@@ -1,7 +1,7 @@
-import { Protocol } from '@uniswap/router-sdk'
-import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
-import { ChainId } from '@uniswap/sdk-core'
-import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
+import { Protocol } from '@juiceswapxyz/router-sdk'
+import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@juiceswapxyz/smart-order-router'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { EulerSwapHooksSubgraphProvider } from '@juiceswapxyz/smart-order-router/'
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
@@ -508,6 +508,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
@@ -522,6 +523,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
@@ -536,6 +538,7 @@ export const chainProtocols = [
       90000,
       true,
       v4BaseTrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE)
     ),
@@ -550,6 +553,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
@@ -564,6 +568,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
@@ -578,6 +583,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ZORA)
     ),
@@ -592,6 +598,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
@@ -613,6 +620,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BLAST)
     ),
@@ -627,6 +635,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
@@ -648,6 +657,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
@@ -662,6 +672,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
@@ -676,6 +687,7 @@ export const chainProtocols = [
       90000,
       true,
       v4TrackedEthThreshold,
+      undefined,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
     ),

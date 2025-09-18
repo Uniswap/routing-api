@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 export const TESTNETS = [
   ChainId.ARBITRUM_GOERLI,

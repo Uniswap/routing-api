@@ -1,5 +1,5 @@
-import { CacheMode } from '@uniswap/smart-order-router'
-import { ChainId, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { CacheMode } from '@juiceswapxyz/smart-order-router'
+import { ChainId, CurrencyAmount, Token, TradeType } from '@juiceswapxyz/sdk-core'
 import {
   CachedRoutesBucket,
   CachedRoutesStrategy,

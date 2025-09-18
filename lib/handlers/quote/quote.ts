@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { Protocol } from '@juiceswapxyz/router-sdk'
+import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@juiceswapxyz/sdk-core'
 import {
   AlphaRouterConfig,
   getAddress,
@@ -14,9 +14,9 @@ import {
   SwapOptions,
   SwapRoute,
   V4_ETH_WETH_FAKE_POOL,
-} from '@uniswap/smart-order-router'
-import { Pool as V3Pool } from '@uniswap/v3-sdk'
-import { Pool as V4Pool } from '@uniswap/v4-sdk'
+} from '@juiceswapxyz/smart-order-router'
+import { Pool as V3Pool } from '@juiceswapxyz/v3-sdk'
+import { Pool as V4Pool } from '@juiceswapxyz/v4-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -39,8 +39,8 @@ import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
-import { Pair } from '@uniswap/v2-sdk'
-import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { Pair } from '@juiceswapxyz/v2-sdk'
+import { UniversalRouterVersion } from '@juiceswapxyz/universal-router-sdk'
 import {
   convertStringRouterVersionToEnum,
   protocolVersionsToBeExcludedFromMixed,

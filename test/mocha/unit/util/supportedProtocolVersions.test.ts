@@ -1,9 +1,9 @@
-import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { UniversalRouterVersion } from '@juiceswapxyz/universal-router-sdk'
 import {
   convertStringRouterVersionToEnum,
   protocolVersionsToBeExcludedFromMixed,
 } from '../../../../lib/util/supportedProtocolVersions'
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 import { expect } from 'chai'
 
 describe('supported protocol versions', () => {

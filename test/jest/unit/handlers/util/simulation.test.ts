@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { log, SimulationStatus } from '@uniswap/smart-order-router'
+import { log, SimulationStatus } from '@juiceswapxyz/smart-order-router'
 import {
   RoutingApiSimulationStatus,
   simulationStatusTranslation,

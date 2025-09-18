@@ -11,18 +11,18 @@ import {
   MetricLoggerUnit,
   routeToString,
   SupportedRoutes,
-} from '@uniswap/smart-order-router'
+} from '@juiceswapxyz/smart-order-router'
 import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
-import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
-import { Protocol } from '@uniswap/router-sdk'
-import { SwapOptions } from '@uniswap/smart-order-router'
+import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@juiceswapxyz/sdk-core'
+import { Protocol } from '@juiceswapxyz/router-sdk'
+import { SwapOptions } from '@juiceswapxyz/smart-order-router'
 import { PairTradeTypeChainId } from './model/pair-trade-type-chain-id'
 import { CachedRoutesMarshaller } from '../../marshalling/cached-routes-marshaller'
 import { PromiseResult } from 'aws-sdk/lib/request'
 import { DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB } from '../../../util/defaultBlocksToLiveRoutesDB'
 import { getSymbolOrAddress } from '../../../util/getSymbolOrAddress'
-import { serializeRouteIds } from '@uniswap/smart-order-router/build/main/util/serializeRouteIds'
-import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { serializeRouteIds } from '@juiceswapxyz/smart-order-router/build/main/util/serializeRouteIds'
+import { UniversalRouterVersion } from '@juiceswapxyz/universal-router-sdk'
 import { computeProtocolsInvolvedIfMixed } from '../../../util/computeProtocolsInvolvedIfMixed'
 
 interface ConstructorParams {

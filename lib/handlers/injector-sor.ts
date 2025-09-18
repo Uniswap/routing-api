@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@uniswap/sdk-core'
+import { ChainId, Token } from '@juiceswapxyz/sdk-core'
 import {
   CachingGasStationProvider,
   CachingTokenListProvider,
@@ -46,7 +46,7 @@ import {
   V2QuoteProvider,
   V3PoolProvider,
   V4PoolProvider,
-} from '@uniswap/smart-order-router'
+} from '@juiceswapxyz/smart-order-router'
 import { TokenList } from '@uniswap/token-lists'
 import { default as bunyan, default as Logger } from 'bunyan'
 import _ from 'lodash'
@@ -66,8 +66,8 @@ import { InstrumentedEVMProvider } from './evm/provider/InstrumentedEVMProvider'
 import { createLocalTokenListProvider } from './router-entities/local-token-list-provider'
 import { deriveProviderName } from './evm/provider/ProviderName'
 import { V2DynamoCache } from './pools/pool-caching/v2/v2-dynamo-cache'
-import { OnChainTokenFeeFetcher } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
-import { PortionProvider } from '@uniswap/smart-order-router/build/main/providers/portion-provider'
+import { OnChainTokenFeeFetcher } from '@juiceswapxyz/smart-order-router/build/main/providers/token-fee-fetcher'
+import { PortionProvider } from '@juiceswapxyz/smart-order-router/build/main/providers/portion-provider'
 import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/traffic-switch-on-chain-quote-provider'
@@ -81,7 +81,7 @@ import {
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
-import { Protocol } from '@uniswap/router-sdk'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
 import { UniGraphQLProvider } from '../graphql/graphql-provider'

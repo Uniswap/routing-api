@@ -4,8 +4,8 @@ import {
   USDC_MAINNET,
   V3PoolProvider,
   WRAPPED_NATIVE_CURRENCY,
-} from '@uniswap/smart-order-router'
-import { Pool } from '@uniswap/v3-sdk'
+} from '@juiceswapxyz/smart-order-router'
+import { Pool } from '@juiceswapxyz/v3-sdk'
 import {
   buildMockV3PoolAccessor,
   DAI_USDT_LOW,
@@ -15,9 +15,9 @@ import {
   WETH9_USDT_LOW,
 } from './mocked-data'
 import sinon from 'sinon'
-import { V3Route } from '@uniswap/smart-order-router/build/main/routers'
-import { ChainId, CurrencyAmount } from '@uniswap/sdk-core'
-import { AmountQuote } from '@uniswap/smart-order-router/build/main/providers/on-chain-quote-provider'
+import { V3Route } from '@juiceswapxyz/smart-order-router/build/main/routers'
+import { ChainId, CurrencyAmount } from '@juiceswapxyz/sdk-core'
+import { AmountQuote } from '@juiceswapxyz/smart-order-router/build/main/providers/on-chain-quote-provider'
 import { BigNumber } from 'ethers'
 
 export function getMockedV3PoolProvider(

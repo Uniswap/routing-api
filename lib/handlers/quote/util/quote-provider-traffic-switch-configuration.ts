@@ -1,5 +1,5 @@
-import { ChainId } from '@uniswap/sdk-core'
-import { Protocol } from '@uniswap/router-sdk'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { Protocol } from '@juiceswapxyz/router-sdk'
 
 export type QuoteProviderTrafficSwitchConfiguration = {
   switchExactInPercentage: number

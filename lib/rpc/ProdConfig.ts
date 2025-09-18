@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import PROD_CONFIG from '../config/rpcProviderProdConfig.json'
 
 export interface ChainConfig {

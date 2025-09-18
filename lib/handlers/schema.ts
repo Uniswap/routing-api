@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { MethodParameters } from '@uniswap/smart-order-router'
+import { MethodParameters } from '@juiceswapxyz/smart-order-router'
 import { RoutingApiSimulationStatus } from './quote/util/simulation'
 
 export type TokenInRoute = {

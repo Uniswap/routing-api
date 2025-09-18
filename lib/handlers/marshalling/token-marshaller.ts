@@ -1,7 +1,7 @@
-import { Currency, Token } from '@uniswap/sdk-core'
+import { Currency, Token } from '@juiceswapxyz/sdk-core'
 import { BigNumber } from 'ethers'
-import { getAddress, nativeOnChain } from '@uniswap/smart-order-router'
-import { isNativeCurrency } from '@uniswap/universal-router-sdk'
+import { getAddress, nativeOnChain } from '@juiceswapxyz/smart-order-router'
+import { isNativeCurrency } from '@juiceswapxyz/universal-router-sdk'
 
 export interface MarshalledCurrency {
   chainId: number

@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 // percent is between 0% - 100%, defined in SOR
 // testnets all go to 100% directly
@@ -35,4 +35,5 @@ export const NEW_CACHED_ROUTES_ROLLOUT_PERCENT: { [chain in ChainId]: number } =
   [ChainId.MONAD_TESTNET]: 100,
   [ChainId.BASE_SEPOLIA]: 100,
   [ChainId.SONEIUM]: 100,
+  [ChainId.CITREA_TESTNET]: 100,
 }

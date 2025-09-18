@@ -1,4 +1,4 @@
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 // This is not being used in production today anyway, due to below filterExpiredCachedRoutes method not really filtering on the blocks-to-live
 // heuristic is initially within 30 seconds we find a route. (but we are changing to every 1 min now)
@@ -53,4 +53,5 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   // (1 minute) / (1 seconds) = 60
   [ChainId.ZKSYNC]: 60,
   [ChainId.SONEIUM]: 60,
+  [ChainId.CITREA_TESTNET]: 60,
 }

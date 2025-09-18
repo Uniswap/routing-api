@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { TokenMarshaller } from '../../../../../../../lib/handlers/router-entities/route-caching'
-import { ChainId } from '@uniswap/sdk-core'
-import { nativeOnChain, WETH9 } from '@uniswap/smart-order-router'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { nativeOnChain, WETH9 } from '@juiceswapxyz/smart-order-router'
 
 describe('TokenMarshaller', () => {
   it('returns native currency', () => {

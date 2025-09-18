@@ -1,5 +1,5 @@
-import { ChainId, TradeType } from '@uniswap/sdk-core'
-import { ID_TO_NETWORK_NAME } from '@uniswap/smart-order-router'
+import { ChainId, TradeType } from '@juiceswapxyz/sdk-core'
+import { ID_TO_NETWORK_NAME } from '@juiceswapxyz/smart-order-router'
 import _ from 'lodash'
 import { PAIRS_TO_TRACK } from '../handlers/quote/util/pairs-to-track'
 import { Widget } from './core/model/widget'

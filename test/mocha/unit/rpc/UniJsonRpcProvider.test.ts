@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai'
 
 import { UniJsonRpcProvider } from '../../../../lib/rpc/UniJsonRpcProvider'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import Sinon, { SinonSandbox } from 'sinon'
 import {
   ProviderSpecialWeight,

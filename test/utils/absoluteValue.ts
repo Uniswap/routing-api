@@ -1,4 +1,4 @@
-import { Fraction } from '@uniswap/sdk-core'
+import { Fraction } from '@juiceswapxyz/sdk-core'
 import JSBI from 'jsbi'
 
 export function absoluteValue(fraction: Fraction): Fraction {

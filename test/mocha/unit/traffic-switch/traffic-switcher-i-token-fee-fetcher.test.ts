@@ -1,12 +1,12 @@
 import sinon, { SinonSpy } from 'sinon'
-import { metric } from '@uniswap/smart-order-router/build/main/util/metric'
-import { ProviderConfig } from '@uniswap/smart-order-router/build/main/providers/provider'
+import { metric } from '@juiceswapxyz/smart-order-router/build/main/util/metric'
+import { ProviderConfig } from '@juiceswapxyz/smart-order-router/build/main/providers/provider'
 import { TrafficSwitcherITokenFeeFetcher } from '../../../../lib/util/traffic-switch/traffic-switcher-i-token-fee-fetcher'
 import { GraphQLTokenFeeFetcher } from '../../../../lib/graphql/graphql-token-fee-fetcher'
-import { OnChainTokenFeeFetcher, TokenFeeMap } from '@uniswap/smart-order-router/build/main/providers/token-fee-fetcher'
+import { OnChainTokenFeeFetcher, TokenFeeMap } from '@juiceswapxyz/smart-order-router/build/main/providers/token-fee-fetcher'
 import { BigNumber } from 'ethers'
 import { expect } from 'chai'
-import { MetricLoggerUnit } from '@uniswap/smart-order-router'
+import { MetricLoggerUnit } from '@juiceswapxyz/smart-order-router'
 import { TrafficSwitcher } from '../../../../lib/util/traffic-switch/traffic-switcher'
 
 describe('TrafficSwitcherITokenFeeFetcher', () => {

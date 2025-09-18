@@ -1,6 +1,6 @@
 import { getSymbolOrAddress } from '../../../../lib/util/getSymbolOrAddress'
-import { ADDRESS_ZERO } from '@uniswap/router-sdk'
-import { ChainId } from '@uniswap/sdk-core'
+import { ADDRESS_ZERO } from '@juiceswapxyz/router-sdk'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import { expect } from 'chai'
 
 describe('get symbol or address', () => {

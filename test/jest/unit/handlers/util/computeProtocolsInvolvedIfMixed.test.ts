@@ -1,14 +1,14 @@
 import expect from 'expect'
 import { computeProtocolsInvolvedIfMixed } from '../../../../../lib/util/computeProtocolsInvolvedIfMixed'
-import { CachedRoute, UNI_MAINNET, USDC_MAINNET } from '@uniswap/smart-order-router'
-import { MixedRoute } from '@uniswap/smart-order-router'
-import { Pool as V3Pool } from '@uniswap/v3-sdk'
-import { encodeSqrtRatioX96, FeeAmount } from '@uniswap/v3-sdk'
-import { Pool as V4Pool } from '@uniswap/v4-sdk'
-import { ADDRESS_ZERO, Protocol } from '@uniswap/router-sdk'
+import { CachedRoute, UNI_MAINNET, USDC_MAINNET } from '@juiceswapxyz/smart-order-router'
+import { MixedRoute } from '@juiceswapxyz/smart-order-router'
+import { Pool as V3Pool } from '@juiceswapxyz/v3-sdk'
+import { encodeSqrtRatioX96, FeeAmount } from '@juiceswapxyz/v3-sdk'
+import { Pool as V4Pool } from '@juiceswapxyz/v4-sdk'
+import { ADDRESS_ZERO, Protocol } from '@juiceswapxyz/router-sdk'
 import { WNATIVE_ON } from '../../../../utils/tokens'
-import { ChainId } from '@uniswap/sdk-core'
-import { V3Route } from '@uniswap/smart-order-router'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { V3Route } from '@juiceswapxyz/smart-order-router'
 
 const WETH = WNATIVE_ON(ChainId.MAINNET)
 const TEST_WETH_USDC_POOL = new V3Pool(

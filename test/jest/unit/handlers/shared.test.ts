@@ -8,9 +8,9 @@ import {
   populateFeeOptions,
 } from '../../../../lib/handlers/shared'
 import { getAmount } from '../../../utils/tokens'
-import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
-import { DAI_MAINNET, SwapOptions, SwapType } from '@uniswap/smart-order-router'
-import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { CurrencyAmount, Percent } from '@juiceswapxyz/sdk-core'
+import { DAI_MAINNET, SwapOptions, SwapType } from '@juiceswapxyz/smart-order-router'
+import { UniversalRouterVersion } from '@juiceswapxyz/universal-router-sdk'
 
 describe('shared', () => {
   it('parsePortionPercent', () => {

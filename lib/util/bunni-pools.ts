@@ -1,5 +1,5 @@
-import { ChainId } from '@uniswap/sdk-core'
-import { V4SubgraphPool } from '@uniswap/smart-order-router'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { V4SubgraphPool } from '@juiceswapxyz/smart-order-router'
 
 export type BunniPool = V4SubgraphPool & {
   chainId: ChainId

@@ -1,5 +1,5 @@
-import { ChainId } from '@uniswap/sdk-core'
-import { ADDRESS_ZERO } from '@uniswap/router-sdk'
+import { ChainId } from '@juiceswapxyz/sdk-core'
+import { ADDRESS_ZERO } from '@juiceswapxyz/router-sdk'
 
 // all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
@@ -132,4 +132,5 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
+  [ChainId.CITREA_TESTNET]: [ADDRESS_ZERO],
 }

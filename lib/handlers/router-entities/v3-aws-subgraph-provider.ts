@@ -1,6 +1,6 @@
-import { IV3SubgraphProvider, log, V3SubgraphPool, V3SubgraphProvider } from '@uniswap/smart-order-router'
+import { IV3SubgraphProvider, log, V3SubgraphPool, V3SubgraphProvider } from '@juiceswapxyz/smart-order-router'
 import { S3 } from 'aws-sdk'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 import _ from 'lodash'
 import NodeCache from 'node-cache'
 

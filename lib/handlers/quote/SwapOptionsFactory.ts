@@ -1,10 +1,10 @@
-import { ChainId, Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import { SwapOptions, SwapOptionsSwapRouter02, SwapOptionsUniversalRouter, SwapType } from '@uniswap/smart-order-router'
+import { ChainId, Currency, CurrencyAmount } from '@juiceswapxyz/sdk-core'
+import { SwapOptions, SwapOptionsSwapRouter02, SwapOptionsUniversalRouter, SwapType } from '@juiceswapxyz/smart-order-router'
 import JSBI from 'jsbi'
 import { TradeTypeParam } from './schema/quote-schema'
 import { computePortionAmount, parseDeadline, parseSlippageTolerance, populateFeeOptions } from '../shared'
 import { PermitSingle } from '@uniswap/permit2-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@juiceswapxyz/universal-router-sdk'
 import { utils } from 'ethers'
 
 export type SwapOptionsUniversalRouterInput = {

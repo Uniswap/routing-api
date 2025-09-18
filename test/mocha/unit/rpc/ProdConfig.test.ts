@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { getRpcGatewayEnabledChains, ProdConfig, ProdConfigJoi } from '../../../../lib/rpc/ProdConfig'
 import TEST_PROD_CONFIG from './rpcProviderTestProdConfig.json'
 import PROD_CONFIG from '../../../../lib/config/rpcProviderProdConfig.json'
-import { ChainId } from '@uniswap/sdk-core'
+import { ChainId } from '@juiceswapxyz/sdk-core'
 
 describe('ProdConfig', () => {
   it('test generate json string from ProdConfig', () => {
