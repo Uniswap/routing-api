@@ -74,6 +74,7 @@ import { TrafficSwitchOnChainQuoteProvider } from './quote/provider-migration/tr
 import {
   BLOCK_NUMBER_CONFIGS,
   GAS_ERROR_FAILURE_OVERRIDES,
+  LOCAL_QUOTER_V2_ADDRESSES,
   NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS,
   RETRY_OPTIONS,
@@ -100,6 +101,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.POLYGON,
   ChainId.BASE,
   ChainId.SEPOLIA,
+  ChainId.CITREA_TESTNET,
 ]
 
 export interface RequestInjected<Router> extends BaseRInj {
@@ -386,7 +388,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
                       : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
                     : protocol === Protocol.V3
-                    ? QUOTER_V2_ADDRESSES[chainId]
+                    ? LOCAL_QUOTER_V2_ADDRESSES[chainId] || QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId]
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
@@ -414,7 +416,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                         // besides mainnet, only base has mixed quoter v1 deployed
                         (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined)
                     : protocol === Protocol.V3
-                    ? NEW_QUOTER_V2_ADDRESSES[chainId]
+                    ? LOCAL_QUOTER_V2_ADDRESSES[chainId] || NEW_QUOTER_V2_ADDRESSES[chainId]
                     : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean, optimisticCachedRoutes: boolean) =>
                   useMixedRouteQuoter

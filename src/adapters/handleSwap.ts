@@ -15,6 +15,7 @@ const V3_SWAP_ROUTER_ADDRESSES = {
   137: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", // Polygon
   42161: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", // Arbitrum
   8453: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", // Base
+  5115: "0x610c98EAD0df13EA906854b6041122e8A8D14413", // Citrea
 }
 
 // Gas configuration - will be fetched dynamically

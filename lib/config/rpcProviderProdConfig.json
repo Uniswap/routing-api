@@ -53,5 +53,15 @@
     "providerUrls": ["ALCHEMY_11155111"],
     "providerNames": ["ALCHEMY"],
     "enableDbSync": false
+  },
+  {
+    "chainId": 5115,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["ALCHEMY_5115"],
+    "providerNames": ["ALCHEMY"],
+    "enableDbSync": false
   }
 ]

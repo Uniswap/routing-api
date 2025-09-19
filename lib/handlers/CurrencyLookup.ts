@@ -52,6 +52,13 @@ export class CurrencyLookup {
 
   checkTokenLists = async (tokenRaw: string): Promise<Token | undefined> => {
     let token: Token | undefined = undefined
+    
+    // Check if tokenListProvider is available
+    if (!this.tokenListProvider) {
+      this.log.debug(`TokenListProvider not available for token lookup: ${tokenRaw}`)
+      return undefined
+    }
+    
     if (isAddress(tokenRaw)) {
       token = await this.tokenListProvider.getTokenByAddress(tokenRaw)
     }
@@ -74,6 +81,12 @@ export class CurrencyLookup {
 
   checkOnChain = async (tokenRaw: string): Promise<Token | undefined> => {
     this.log.debug(`Getting input token ${tokenRaw} from chain`)
+
+    // Check if tokenProvider is available
+    if (!this.tokenProvider) {
+      this.log.debug(`TokenProvider not available for on-chain token lookup: ${tokenRaw}`)
+      return undefined
+    }
 
     // The ITokenListProvider interface expects a list of addresses to lookup tokens.
     // If this isn't an address, we can't do the lookup.

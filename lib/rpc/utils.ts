@@ -41,6 +41,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'ALCHEMY_11155111': {
       return `https://eth-sepolia-fast.g.alchemy.com/v2/${tokens[0]}`
     }
+    case 'ALCHEMY_5115': {
+      return `https://rpc.testnet.citrea.xyz`
+    }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
 }
