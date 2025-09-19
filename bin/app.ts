@@ -449,7 +449,7 @@ const jsonRpcProviders = {
   ALCHEMY_1301: process.env.ALCHEMY_1301!,
   // unirpc - serves all chains
   UNIRPC_0: process.env.UNIRPC_0!,
-  ALCHEMY_5115: 'none',
+  ALCHEMY_5115: process.env.ALCHEMY_5115! ?? 'na',
 }
 
 // Local dev stack

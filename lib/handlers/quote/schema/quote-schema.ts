@@ -23,11 +23,11 @@ const Joi = BaseJoi.extend((joi) => ({
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
   tokenInChainId: Joi.number()
-    .valid(...SUPPORTED_CHAINS.values())
+    .valid(...SUPPORTED_CHAINS)
     .required(),
   tokenOutAddress: Joi.string().alphanum().max(42).required(),
   tokenOutChainId: Joi.number()
-    .valid(...SUPPORTED_CHAINS.values())
+    .valid(...SUPPORTED_CHAINS)
     .required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
