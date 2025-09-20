@@ -1,19 +1,19 @@
 import type { APIGatewayProxyEvent, Context, APIGatewayProxyResult } from 'aws-lambda'
 import type { Request, Response } from 'express'
 import { randomUUID } from 'crypto'
+import { WETH9 } from '@juiceswapxyz/sdk-core'
+import { ADDRESS_ZERO } from '@juiceswapxyz/v3-sdk'
 
 function transformTradingApiRequest(body: any, query: any): any {
   let queryParams = { ...query }
 
   if (body) {
-    // Convert zero address (ETH) to WETH contract address
-    const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-    const SUPPORTED_PROTOCOLS = ['v2', 'v3', 'v4', 'mixed']
+    const SUPPORTED_PROTOCOLS = ['v3']
     const tokenIn = body.tokenIn || body.tokenInAddress
     const tokenOut = body.tokenOut || body.tokenOutAddress
 
-    queryParams.tokenInAddress = tokenIn === '0x0000000000000000000000000000000000000000' ? WETH_ADDRESS : tokenIn
-    queryParams.tokenOutAddress = tokenOut === '0x0000000000000000000000000000000000000000' ? WETH_ADDRESS : tokenOut
+    queryParams.tokenInAddress = tokenIn ===  ADDRESS_ZERO? WETH9[body.tokenInChainId].address : tokenIn
+    queryParams.tokenOutAddress = tokenOut === ADDRESS_ZERO ? WETH9[body.tokenOutChainId].address : tokenOut
     queryParams.tokenInChainId = body.tokenInChainId
     queryParams.tokenOutChainId = body.tokenOutChainId
     queryParams.amount = body.amount
