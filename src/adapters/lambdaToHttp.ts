@@ -101,19 +101,23 @@ function generateWrapUnwrapResponse(body: any, isWrap: boolean): any {
   return {
     routing: isWrap ? 'WRAP' : 'UNWRAP',
     quote: {
+      input: {
+        token: isWrap ? cBTCToken : WcBTCToken,
+        amount: amount
+      },
+      output: {
+        token: isWrap ? WcBTCToken : cBTCToken,
+        amount: amount // 1:1 conversion
+      },
+      chainId: 5115,
+      tradeType: body.type === 'EXACT_OUTPUT' ? 'EXACT_OUTPUT' : 'EXACT_INPUT',
       methodParameters: {
         calldata: calldata,
         value: isWrap ? '0x' + BigInt(amount).toString(16) : '0x0',
         to: CITREA_WRAPPED_TOKEN.address
       },
-      quote: amount, // 1:1 conversion
-      quoteGasAdjusted: amount,
-      gasUseEstimateQuote: '50000',
       gasUseEstimate: '50000',
-      gasPriceWei: '1000000000',
-      blockNumber: '1000000',
-      route: [[fakePool]], // Include fake pool so frontend can parse output amount
-      routeString: isWrap ? 'cBTC -> WcBTC' : 'WcBTC -> cBTC',
+      gasPrice: '1000000000',
       swapper: recipient
     },
     allQuotes: []
