@@ -66,6 +66,38 @@ function generateWrapUnwrapResponse(body: any, isWrap: boolean): any {
     ? methodId // deposit() has no parameters
     : methodId + amount.toString(16).padStart(64, '0') // withdraw(amount)
 
+  // Create fake tokens for the route
+  const cBTCToken = {
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    chainId: 5115,
+    symbol: 'cBTC',
+    decimals: 18,
+    name: 'Citrea BTC'
+  }
+
+  const WcBTCToken = {
+    address: CITREA_WRAPPED_TOKEN.address,
+    chainId: 5115,
+    symbol: 'WcBTC',
+    decimals: 18,
+    name: 'Wrapped Citrea BTC'
+  }
+
+  // Create a fake pool that the frontend can parse
+  // This mimics a V3 pool structure with proper amountIn/amountOut
+  const fakePool = {
+    type: 'v3-pool',
+    address: CITREA_WRAPPED_TOKEN.address,
+    amountIn: amount,
+    amountOut: amount, // 1:1 conversion
+    fee: '0',
+    sqrtRatioX96: '79228162514264337593543950336', // 1:1 price
+    liquidity: '1000000000000000000',
+    tickCurrent: '0',
+    tokenIn: isWrap ? cBTCToken : WcBTCToken,
+    tokenOut: isWrap ? WcBTCToken : cBTCToken
+  }
+
   return {
     routing: isWrap ? 'WRAP' : 'UNWRAP',
     quote: {
@@ -80,7 +112,7 @@ function generateWrapUnwrapResponse(body: any, isWrap: boolean): any {
       gasUseEstimate: '50000',
       gasPriceWei: '1000000000',
       blockNumber: '1000000',
-      route: [[]],
+      route: [[fakePool]], // Include fake pool so frontend can parse output amount
       routeString: isWrap ? 'cBTC -> WcBTC' : 'WcBTC -> cBTC',
       swapper: recipient
     },
