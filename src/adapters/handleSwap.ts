@@ -1,11 +1,12 @@
 import { Request, Response } from "express"
 import { AlphaRouter } from '@juiceswapxyz/smart-order-router'
 import { SwapOptionsSwapRouter02, SwapType } from '@juiceswapxyz/smart-order-router'
-import { CurrencyAmount, TradeType, Token, Percent, ChainId } from '@juiceswapxyz/sdk-core'
+import { CurrencyAmount, TradeType, Token, Percent, ChainId, Currency } from '@juiceswapxyz/sdk-core'
 import { ethers } from 'ethers'
 import JSBI from 'jsbi'
 import { GlobalRpcProviders } from '../../lib/rpc/GlobalRpcProviders'
 import Logger from 'bunyan'
+import { nativeOnChain } from '@juiceswapxyz/smart-order-router'
 
 // V3 Swap Router addresses for different chains
 const V3_SWAP_ROUTER_ADDRESSES = {
@@ -21,6 +22,22 @@ const V3_SWAP_ROUTER_ADDRESSES = {
 // Gas configuration - will be fetched dynamically
 const DEFAULT_MAX_FEE_PER_GAS = "0x1dcd6500" // 500 gwei fallback
 const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = "0x3b9aca00" // 1 gwei fallback
+
+const NATIVE_CURRENCY_ADDRESS = "0x0000000000000000000000000000000000000000"
+const ALTERNATIVE_NATIVE_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+
+function isNativeCurrency(address: string): boolean {
+  return address.toLowerCase() === NATIVE_CURRENCY_ADDRESS.toLowerCase() || 
+         address.toLowerCase() === ALTERNATIVE_NATIVE_ADDRESS.toLowerCase()
+}
+
+// Helper function to create currency (native or token)
+function createCurrency(address: string, chainId: number, decimals: number): Currency {
+  if (isNativeCurrency(address)) {
+    return nativeOnChain(chainId as ChainId)
+  }
+  return new Token(chainId, address, decimals)
+}
 
 interface SwapRequest {
   tokenInAddress: string
@@ -177,20 +194,16 @@ export async function handleSwap(req: Request, res: Response): Promise<void> {
       provider = new ethers.providers.StaticJsonRpcProvider(url)
     }
 
-    // Create router as per Uniswap documentation
     const router = new AlphaRouter({
       chainId: chainId as ChainId,
       provider,
     })
 
-    // Get current gas prices from the network
     const gasPrices = await getGasPrices(provider)
 
-    // Create token objects
-    const tokenIn = new Token(tokenInChainId, tokenInAddress, tokenInDecimals) // Default to 18 decimals, should be fetched from chain
-    const tokenOut = new Token(tokenOutChainId, tokenOutAddress, tokenOutDecimals) // Default to 6 decimals, should be fetched from chain
+    const currencyIn = createCurrency(tokenInAddress, tokenInChainId, tokenInDecimals)
+    const currencyOut = createCurrency(tokenOutAddress, tokenOutChainId, tokenOutDecimals)
 
-    // Create swap options as per Uniswap documentation
     const options: SwapOptionsSwapRouter02 = {
       recipient: recipient,
       slippageTolerance: new Percent(Math.round(parseFloat(slippageTolerance) * 100), 10_000),
@@ -200,13 +213,13 @@ export async function handleSwap(req: Request, res: Response): Promise<void> {
 
     // Create currency amount and trade type
     const rawTokenAmount = JSBI.BigInt(amount)
-    const currencyAmount = CurrencyAmount.fromRawAmount(tokenIn, rawTokenAmount)
+    const currencyAmount = CurrencyAmount.fromRawAmount(currencyIn, rawTokenAmount)
     const tradeType = type === 'exactIn' ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
 
     // Get route using Uniswap SDK
     const route = await router.route(
       currencyAmount,
-      tokenOut,
+      currencyOut,
       tradeType,
       options
     )
