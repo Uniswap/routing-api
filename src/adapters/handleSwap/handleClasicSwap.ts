@@ -2,11 +2,9 @@ import { Request, Response } from "express"
 import { AlphaRouter } from '@juiceswapxyz/smart-order-router'
 import { SwapOptionsSwapRouter02, SwapType } from '@juiceswapxyz/smart-order-router'
 import { CurrencyAmount, TradeType, Token, Percent, ChainId, Currency } from '@juiceswapxyz/sdk-core'
-import { ethers } from 'ethers'
 import JSBI from 'jsbi'
-import { GlobalRpcProviders } from '../../lib/rpc/GlobalRpcProviders'
-import Logger from 'bunyan'
 import { nativeOnChain } from '@juiceswapxyz/smart-order-router'
+import { getGasPrices, getGlobalRpcProvider } from "../../services/globalRcpProvider"
 
 // V3 Swap Router addresses for different chains
 const V3_SWAP_ROUTER_ADDRESSES = {
@@ -18,10 +16,6 @@ const V3_SWAP_ROUTER_ADDRESSES = {
   8453: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", // Base
   5115: "0x610c98EAD0df13EA906854b6041122e8A8D14413", // Citrea
 }
-
-// Gas configuration - will be fetched dynamically
-const DEFAULT_MAX_FEE_PER_GAS = "0x1dcd6500" // 500 gwei fallback
-const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = "0x3b9aca00" // 1 gwei fallback
 
 const NATIVE_CURRENCY_ADDRESS = "0x0000000000000000000000000000000000000000"
 const ALTERNATIVE_NATIVE_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
@@ -64,47 +58,7 @@ interface SwapResponse {
   maxPriorityFeePerGas: string
 }
 
-// Function to get current gas prices from the network
-async function getGasPrices(provider: ethers.providers.JsonRpcProvider): Promise<{
-  maxFeePerGas: string
-  maxPriorityFeePerGas: string
-}> {
-  try {
-    // Get current gas price
-    const gasPrice = await provider.getGasPrice()
-    
-    // Get fee history to estimate priority fee
-    const feeHistory = await provider.getFeeData()
-    
-    let maxFeePerGas: string
-    let maxPriorityFeePerGas: string
-    
-    if (feeHistory.maxFeePerGas && feeHistory.maxPriorityFeePerGas) {
-      // Use EIP-1559 gas prices if available
-      maxFeePerGas = feeHistory.maxFeePerGas.toHexString()
-      maxPriorityFeePerGas = feeHistory.maxPriorityFeePerGas.toHexString()
-    } else {
-      // Fallback to legacy gas price with buffer
-      const gasPriceWithBuffer = gasPrice.mul(120).div(100) // 20% buffer
-      maxFeePerGas = gasPriceWithBuffer.toHexString()
-      maxPriorityFeePerGas = gasPrice.mul(10).div(100).toHexString() // 10% of gas price as priority fee
-    }
-    
-    return {
-      maxFeePerGas,
-      maxPriorityFeePerGas
-    }
-  } catch (error) {
-    console.warn("Failed to fetch gas prices, using defaults:", error)
-    return {
-      maxFeePerGas: DEFAULT_MAX_FEE_PER_GAS,
-      maxPriorityFeePerGas: DEFAULT_MAX_PRIORITY_FEE_PER_GAS
-    }
-  }
-}
-
-
-export async function handleSwap(req: Request, res: Response): Promise<void> {
+export async function handleClassicSwap(req: Request, res: Response): Promise<void> {
   try {
     const { 
       tokenInAddress, 
@@ -168,30 +122,14 @@ export async function handleSwap(req: Request, res: Response): Promise<void> {
       return
     }
 
-    // Create logger
-    const log = Logger.createLogger({
-      name: 'SwapHandler',
-      serializers: Logger.stdSerializers,
-      level: Logger.INFO,
-    })
+    const provider = getGlobalRpcProvider(chainId)
 
-    // Get provider using the same system as the existing codebase
-    let provider: ethers.providers.StaticJsonRpcProvider
-    
-    if (GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId as ChainId)) {
-      // Use RPC gateway (preferred method)
-      provider = GlobalRpcProviders.getGlobalUniRpcProviders(log).get(chainId as ChainId)!
-    } else {
-      // Fallback to direct RPC URL
-      const url = process.env[`WEB3_RPC_${chainId}`]
-      if (!url) {
-        res.status(400).json({
-          error: "RPC provider not configured",
-          detail: `No RPC provider found for chain ID ${chainId}`
-        })
-        return
-      }
-      provider = new ethers.providers.StaticJsonRpcProvider(url)
+    if (!provider) {
+      res.status(400).json({
+        error: "RPC provider not configured",
+        detail: `No RPC provider found for chain ID ${chainId}`
+      })
+      return
     }
 
     const router = new AlphaRouter({

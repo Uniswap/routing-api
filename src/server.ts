@@ -1,11 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
-import { lambdaToExpress } from './adapters/lambdaToHttp';
 import { handleSwap } from './adapters/handleSwap';
 import { handleSwaps } from './adapters/handleSwaps';
+import { handleQuote } from './adapters/handleQuote';
 
-// Import existing handlers WITHOUT changing them
-const { quoteHandler } = require('../lib/handlers');
 
 async function bootstrap() {
   const app = express();
@@ -33,7 +31,7 @@ async function bootstrap() {
   });
 
   // Route mapping - handlers remain completely unchanged
-  app.post('/v1/quote', lambdaToExpress(quoteHandler));
+  app.post('/v1/quote', handleQuote);
 
   app.post('/v1/swap', handleSwap);
 
