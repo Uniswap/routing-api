@@ -176,8 +176,22 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       let shouldNotAddV4Pool = false
 
       const isZoraPool =
-        pool.hooks.toLowerCase().includes('ZORA_CREATOR') ||
-        (pool.hooks.toLowerCase().includes('ZORA_POST') && chainId === ChainId.BASE)
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_1 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_2 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v2_2 ||
+        pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v2_2_1 ||
+        ((pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_0_0_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_0_0_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1) &&
+          chainId === ChainId.BASE)
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
           shouldNotAddV4Pool = true
