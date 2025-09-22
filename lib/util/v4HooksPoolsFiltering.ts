@@ -159,8 +159,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       let shouldNotAddV4Pool = false
 
       const isZoraPool =
-        (pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE ||
-          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE) &&
+        pool.hooks.toLowerCase().includes('ZORA_CREATOR') || pool.hooks.toLowerCase().includes('ZORA_POST') &&
         chainId === ChainId.BASE
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
