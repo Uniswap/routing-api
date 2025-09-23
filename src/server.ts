@@ -3,6 +3,8 @@ import express from 'express';
 import { handleSwap } from './adapters/handleSwap';
 import { handleSwaps } from './adapters/handleSwaps';
 import { handleQuote } from './adapters/handleQuote';
+import { handleLpApprove } from './adapters/handleLpApprove';
+import { handleLpCreate } from './adapters/handleLpCreate';
 
 
 async function bootstrap() {
@@ -36,6 +38,10 @@ async function bootstrap() {
   app.post('/v1/swap', handleSwap);
 
   app.get('/v1/swaps', handleSwaps);
+
+  app.post('/v1/lp/approve', handleLpApprove);
+
+  app.post('/v1/lp/create', handleLpCreate);
 
   // Health endpoints
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));

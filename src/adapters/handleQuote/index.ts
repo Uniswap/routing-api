@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { handleQuoteRequest } from "../../../lib/handlers";
 import { QuoteRequestBody } from "./types";
 import { handleWrappedQuote } from "./wrapppedQuote";
-import { getTokenAddress } from "../../utils/getTokenAddress";
+import { getTokenAddress } from "../../utils/erc20";
 
 export async function handleQuote(req: Request, res: Response): Promise<void> {
     const quoteParams: QuoteRequestBody = req.body;
