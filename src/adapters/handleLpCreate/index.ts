@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { LpCreateResponseBody, LpCreateRequestBody } from "./types"
-import { getGlobalRpcProvider } from "../../services/globalRcpProvider"
+import { getGasPrices, getGlobalRpcProvider } from "../../services/globalRcpProvider"
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from "@juiceswapxyz/sdk-core"
 import {
   NonfungiblePositionManager,
@@ -211,7 +211,8 @@ export async function handleLpCreate(req: Request, res: Response): Promise<void>
     const totalValueHex = totalValueBN.toHexString()
     const feeData = await provider.getFeeData()
 
-    let gasEstimate = ethers.BigNumber.from("300000")
+
+    let gasEstimate = isNewPool ? ethers.BigNumber.from("5500000") : ethers.BigNumber.from("600000")
     try {
       gasEstimate = await provider.estimateGas({
         to: positionManagerAddress,
@@ -223,11 +224,18 @@ export async function handleLpCreate(req: Request, res: Response): Promise<void>
       console.warn("Gas estimation failed, using fallback")
     }
 
+    let gasPrice
+    try {
+      gasPrice = await getGasPrices(provider)
+    } catch (e) {
+      console.warn("Gas price estimation failed, using fallback")
+    }
+
     const gasLimit = gasEstimate.mul(110).div(100)
-    
+
     const baseFee = feeData.lastBaseFeePerGas || ethers.utils.parseUnits("0.00000136", "gwei")
-    const maxPriorityFeePerGas = ethers.utils.parseUnits("1", "gwei")
-    const maxFeePerGas = baseFee.mul(105).div(100).add(maxPriorityFeePerGas)
+    const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas ?? ethers.utils.parseUnits("1", "gwei")
+    const maxFeePerGas = gasPrice?.maxFeePerGas ?? baseFee.mul(105).div(100).add(maxPriorityFeePerGas)
 
     const gasFee = gasLimit.mul(maxFeePerGas)
 
@@ -240,7 +248,7 @@ export async function handleLpCreate(req: Request, res: Response): Promise<void>
         value: totalValueHex,
         maxFeePerGas: maxFeePerGas.toString(),
         maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
-        gasLimit: gasLimit.toString(),
+        gasLimit: gasLimit.toHexString(),
         chainId,
       },
       dependentAmount: independentIsToken0 ? amount1.quotient.toString() : amount0.quotient.toString(),
