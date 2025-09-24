@@ -10,3 +10,4 @@ dist
 lib/types
 cache
 .idea
+.claude/settings.local.json
