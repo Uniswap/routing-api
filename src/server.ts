@@ -15,10 +15,16 @@ async function bootstrap() {
   app.use(express.json({ limit: '1mb' }));
 
   const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3001').split(',').map(origin => origin.trim());
-  
+
   app.use((req, res, next) => {
     const requestOrigin = req.headers.origin;
-    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+
+    // Check if origin is from juiceswap.com domain
+    const isJuiceSwapDomain = requestOrigin && /^https?:\/\/([\w-]+\.)?juiceswap\.com(:\d+)?$/.test(requestOrigin);
+
+    if (isJuiceSwapDomain) {
+      res.header('Access-Control-Allow-Origin', requestOrigin);
+    } else if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
       res.header('Access-Control-Allow-Origin', requestOrigin);
     } else if (!requestOrigin) {
       res.header('Access-Control-Allow-Origin', allowedOrigins[0]);
