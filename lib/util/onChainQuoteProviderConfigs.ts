@@ -72,6 +72,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.CITREA_TESTNET]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
 }
 
 export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { [chainId: number]: BatchParams } } = {

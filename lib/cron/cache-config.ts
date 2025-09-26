@@ -73,6 +73,9 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
+    case ChainId.CITREA_TESTNET:
+      // No subgraph available for Citrea yet - will use static provider
+      return undefined
     default:
       return undefined
   }
@@ -106,6 +109,9 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
+    case ChainId.CITREA_TESTNET:
+      // No V2 support for Citrea yet
+      return undefined
     default:
       return undefined
   }
