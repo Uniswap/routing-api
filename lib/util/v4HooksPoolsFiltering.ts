@@ -144,6 +144,17 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
+      // stETH/wstETH
+      if (
+        pool.id.toLowerCase() === '0x62ef4c78f484594bae004aa6932f0f0a5cca898fe736576f3deb8a5a3942bed8'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 8346090.336 // https://lido.fi/
+        pool.tvlUSD = 33384361344 // https://lido.fi/
+        log.info(`Setting tvl for stETH/wstETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // Check if this pool is in our Bunni pools configuration
       const bunniPool = BUNNI_POOLS_CONFIG.find(
         (config) => config.id.toLowerCase() === pool.id.toLowerCase() && config.chainId === chainId

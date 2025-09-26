@@ -26,6 +26,7 @@ import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
+import { WSTETH_HOOKS_ADDRESS_ON_MAINNET } from '../util/hooksAddressesAllowlist'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -454,6 +455,28 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
             symbol: 'WETH',
             id: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             name: 'WETH',
+            decimals: '18',
+          },
+          tvlETH: 44000.1795925485023741879813651641809,
+          tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool),
+        // Mainnet WETH/wstETH: https://app.uniswap.org/explore/pools/ethereum/0x62ef4c78f484594bae004aa6932f0f0a5cca898fe736576f3deb8a5a3942bed8
+        manuallyIncludedV4Pools.push({
+          id: '0x62ef4c78f484594bae004aa6932f0f0a5cca898fe736576f3deb8a5a3942bed8',
+          feeTier: '0',
+          tickSpacing: '60',
+          hooks: WSTETH_HOOKS_ADDRESS_ON_MAINNET,
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'wstETH',
+            id: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            name: 'Wrapped liquid staked Ether 2.0',
+            decimals: '18',
+          },
+          token1: {
+            symbol: 'stETH',
+            id: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+            name: 'Liquid staked Ether 2.0',
             decimals: '18',
           },
           tvlETH: 44000.1795925485023741879813651641809,
