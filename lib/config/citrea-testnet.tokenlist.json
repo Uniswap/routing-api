@@ -1,0 +1,74 @@
+{
+  "name": "Citrea Testnet Token List",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "address": "0x14ADf6B87096Ef750a956756BA191fc6BE94e473",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "TaprootFreakCoin",
+      "symbol": "TFC",
+      "logoURI": ""
+    },
+    {
+      "address": "0x2fFC18aC99D367b70dd922771dF8c2074af4aCE0",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "cUSD",
+      "symbol": "cUSD",
+      "logoURI": ""
+    },
+    {
+      "address": "0x302670d7830684C14fB8bb9B20f5D8F874e65cA4",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "KucingDully",
+      "symbol": "KCDU",
+      "logoURI": ""
+    },
+    {
+      "address": "0x36c16eaC6B0Ba6c50f494914ff015fCa95B7835F",
+      "chainId": 5115,
+      "decimals": 6,
+      "name": "USDC",
+      "symbol": "USDC",
+      "logoURI": ""
+    },
+    {
+      "address": "0x4370e27F7d91D9341bFf232d7Ee8bdfE3a9933a0",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "Wrapped cBTC",
+      "symbol": "WCBTC",
+      "logoURI": ""
+    },
+    {
+      "address": "0x6434B863529F585633A1A71a9bfe9bbd7119Dd25",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "MyToken",
+      "symbol": "MTK",
+      "logoURI": ""
+    },
+    {
+      "address": "0x8025aAfab9881D9E9163e1956c3bfb8D3606bb55",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "CITREAN",
+      "symbol": "CTR",
+      "logoURI": ""
+    },
+    {
+      "address": "0x9B28B690550522608890C3C7e63c0b4A7eBab9AA",
+      "chainId": 5115,
+      "decimals": 18,
+      "name": "Nectra USD",
+      "symbol": "NUSD",
+      "logoURI": ""
+    }
+  ]
+}
