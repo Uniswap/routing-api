@@ -93,7 +93,6 @@ import {
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
-import { CitreaStaticV3SubgraphProvider } from './router-entities/citrea-static-v3-subgraph-provider'
 
 export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.MAINNET,
@@ -673,10 +672,6 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         case Protocol.V4:
           return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
         case Protocol.V3:
-          // Use custom Citrea provider with hardcoded pools for Citrea
-          if (chainId === ChainId.CITREA_TESTNET) {
-            return new CitreaStaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
-          }
           return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
         case Protocol.V2:
           return new StaticV2SubgraphProvider(chainId)
