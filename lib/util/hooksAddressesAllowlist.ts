@@ -4,6 +4,9 @@ import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 // all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
 export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
+export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1 = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
+export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2 = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
+export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3 = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
 
 export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
@@ -122,6 +125,9 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BASE]: [
     ADDRESS_ZERO,
     FLAUNCH_HOOKS_ADDRESS_ON_BASE,
+    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1,
+    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2,
+    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3,
     ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE,
     BUNNI_HOOKS_ADDRESS_v1_0,
     BUNNI_HOOKS_ADDRESS_v1_1,
