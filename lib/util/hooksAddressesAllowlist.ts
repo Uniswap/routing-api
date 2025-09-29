@@ -83,7 +83,7 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
-// example pool: https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x9c193659e9c8e7a801eaadfd3d61cca35239955fcc04e996a770d28805d21d4d
 export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x12b504160222D66c38d916d9FbA11B613c51E888'
 export const RING_FEW_UNI_HOOK_ON_MAINNET = '0xCF1E7189264a84D7454077dC713c3d11400de888'
 export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x948922B055187c7366E71B876aB1242EBBAeA888'
