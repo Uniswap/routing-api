@@ -71,6 +71,7 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     let result: Response<QuoteResponse> | ErrorResponse
     const useRpcGateway = GlobalRpcProviders.getGlobalUniRpcProviders(log).has(chainId)
+    const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
 
     try {
       if (useRpcGateway) {
@@ -85,13 +86,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 200:
         case 202:
           metric.putMetric(`GET_QUOTE_200_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(`GET_QUOTE_200_REQUEST_SOURCE: ${requestSourceHeader}`, 1, MetricLoggerUnit.Count)
           metric.putMetric(
-            `GET_QUOTE_200_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
-            1,
-            MetricLoggerUnit.Count
-          )
-          metric.putMetric(
-            `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSourceHeader} ${chainId}`,
             1,
             MetricLoggerUnit.Count
           )
@@ -102,13 +99,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         case 408:
         case 409:
           metric.putMetric(`GET_QUOTE_400_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
+          metric.putMetric(`GET_QUOTE_400_REQUEST_SOURCE: ${requestSourceHeader}`, 1, MetricLoggerUnit.Count)
           metric.putMetric(
-            `GET_QUOTE_400_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
-            1,
-            MetricLoggerUnit.Count
-          )
-          metric.putMetric(
-            `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSourceHeader} ${chainId}`,
             1,
             MetricLoggerUnit.Count
           )
@@ -128,13 +121,9 @@ export class QuoteHandler extends APIGLambdaHandler<
           if (useRpcGateway) {
             metric.putMetric(`RPC_GATEWAY_GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
           }
+          metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${requestSourceHeader}`, 1, MetricLoggerUnit.Count)
           metric.putMetric(
-            `GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`,
-            1,
-            MetricLoggerUnit.Count
-          )
-          metric.putMetric(
-            `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+            `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${requestSourceHeader} ${chainId}`,
             1,
             MetricLoggerUnit.Count
           )
@@ -155,9 +144,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       if (useRpcGateway) {
         metric.putMetric(`RPC_GATEWAY_GET_QUOTE_500_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       }
-      metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_500_REQUEST_SOURCE: ${requestSourceHeader}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(
-        `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+        `GET_QUOTE_500_REQUEST_SOURCE_AND_CHAINID: ${requestSourceHeader} ${chainId}`,
         1,
         MetricLoggerUnit.Count
       )
@@ -167,13 +156,13 @@ export class QuoteHandler extends APIGLambdaHandler<
       throw err
     } finally {
       // This metric is logged after calling the internal handler to correlate with the status metrics
-      metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${params.requestQueryParams.source}`, 1, MetricLoggerUnit.Count)
+      metric.putMetric(`GET_QUOTE_REQUEST_SOURCE: ${requestSourceHeader}`, 1, MetricLoggerUnit.Count)
       metric.putMetric(`GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       if (useRpcGateway) {
         metric.putMetric(`RPC_GATEWAY_GET_QUOTE_REQUESTED_CHAINID: ${chainId}`, 1, MetricLoggerUnit.Count)
       }
       metric.putMetric(
-        `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${params.requestQueryParams.source} ${chainId}`,
+        `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSourceHeader} ${chainId}`,
         1,
         MetricLoggerUnit.Count
       )
