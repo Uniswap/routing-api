@@ -14,7 +14,14 @@ async function bootstrap() {
   app.set('trust proxy', true);
   app.use(express.json({ limit: '1mb' }));
 
-  const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3001').split(',').map(origin => origin.trim());
+  const knownOrigins = [
+    'https://bapp.juiceswap.com/',
+    'https://dev.bapp.juiceswap.com/',
+    'http://localhost:3000',
+  ];
+
+  const envOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [];
+  const allowedOrigins = [...new Set([...knownOrigins, ...envOrigins])];
 
   app.use((req, res, next) => {
     const requestOrigin = req.headers.origin;
