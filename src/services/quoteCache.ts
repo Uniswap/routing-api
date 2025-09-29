@@ -35,7 +35,7 @@ export class QuoteCache {
   };
 
   // Configuration
-  private readonly DEFAULT_TTL = 30_000; // 30 seconds for production
+  private readonly DEFAULT_TTL = 300_000; // 300 seconds for production
   private readonly CITREA_TTL = 60_000; // 60 seconds for Citrea (less volatile)
   private readonly MAX_CACHE_SIZE = 1000;
   private readonly CLEANUP_INTERVAL = 60_000; // Run cleanup every minute
