@@ -1,0 +1,52 @@
+# From https://github.com/hemilabs/uniswap-routing-api/blob/1a9c58fbf82830b608cd59f0529134c3de52c886/api/serverless.yml
+service: ethrex-routing-api
+
+useDotenv: true
+
+custom:
+  esbuild:
+    packagePath: '../package.json'
+    watch:
+      pattern: ['./api/**/*.ts', '../lib/**/*.ts']
+  serverless-offline:
+    httpPort: 4000
+
+functions:
+  get-quote:
+    events:
+      - http:
+          method: post
+          path: /v2/quote
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-request-source
+            allowCredentials: false
+    handler: ./index.post
+    timeout: 30
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+provider:
+  environment:
+    WEB3_RPC_65536999: ${env:WEB3_RPC_65536999, ''}
+  name: aws
+  region: ${opt:region,env:AWS_REGION,'eu-central-1'}
+  runtime: nodejs16.x
+  stage: ${opt:stage,env:STAGE,'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+          Resource: '*'

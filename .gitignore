@@ -10,3 +10,7 @@ dist
 lib/types
 cache
 .idea
+api/.esbuild
+api/.serverless
+api/.esbuild
+!api/.env

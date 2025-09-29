@@ -19,7 +19,8 @@
     "cdk": "cdk",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"./**/*.ts\" --write",
-    "fix:lint": "eslint lib --ext .ts --fix"
+    "fix:lint": "eslint lib --ext .ts --fix",
+    "sls:dev": "cd api && sls offline start"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
@@ -61,6 +62,9 @@
     "prettier": "^2.1.1",
     "prettier-plugin-organize-imports": "^2.1.0",
     "reflect-metadata": "^0.1.13",
+    "serverless": "3.38.0",
+    "serverless-esbuild": "1.52.1",
+    "serverless-offline": "13.3.3",
     "sinon": "^12.0.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^8.10.2",
@@ -85,10 +89,10 @@
     "@uniswap/default-token-list": "^11.13.0",
     "@uniswap/permit2-sdk": "^1.2.0",
     "@uniswap/router-sdk": "^1.9.0",
-    "@uniswap/sdk-core": "^4.2.0",
-    "@uniswap/smart-order-router": "3.26.1",
+    "@uniswap/sdk-core": "file:../sdk-core",
+    "@uniswap/smart-order-router": "file:../smart-order-router",
     "@uniswap/token-lists": "^1.0.0-beta.33",
-    "@uniswap/universal-router-sdk": "^1.8.1",
+    "@uniswap/universal-router-sdk": "file:../universal-router-sdk",
     "@uniswap/v2-sdk": "^4.3.0",
     "@uniswap/v3-periphery": "^1.4.4",
     "@uniswap/v3-sdk": "^3.11.0",
@@ -116,7 +120,8 @@
     "stats-lite": "^2.2.0",
     "ts-mocha": "^8.0.0",
     "upgrade": "^1.1.0",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "jsbi": "^3.2.0"
   },
   "prettier": {
     "printWidth": 120,

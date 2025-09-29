@@ -1,0 +1,30 @@
+{
+    "name": "Ethrex Token List",
+    "timestamp": "2025-09-27T21:58:55.374Z",
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+    },
+    "tokens": [
+        {
+            "address": "0xeC7ed8038B76DbcB8F78b189EFf9D7C7373A45BE",
+            "chainId": 65536999,
+            "decimals": 18,
+            "extensions": {
+                "l1LogoURI": "https://etherscan.io/token/images/weth_28.png"
+            },
+            "logoURI": "https://etherscan.io/token/images/weth_28.png",
+            "name": "Wrapped Ether",
+            "symbol": "WETH"
+        },
+        {
+            "address": "0xB66dd10F098f62141A536e92f6e8f7f9633893E2",
+            "chainId": 65536999,
+            "decimals": 18,
+            "logoURI": "https://etherscan.io/images/main/empty-token.png",
+            "name": "Test token",
+            "symbol": "TEST"
+        }
+    ]
+}

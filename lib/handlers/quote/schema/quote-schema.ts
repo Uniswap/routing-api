@@ -112,3 +112,54 @@ export type QuoteQueryParams = {
   source?: string
   gasToken?: string
 }
+// Adaptation of https://github.com/hemilabs/uniswap-routing-api/blob/1a9c58fbf82830b608cd59f0529134c3de52c886/lib/handlers/quote/schema/quote-schema.ts
+export type EthrexQuoteBodyParams = {
+  amount: string
+  configs: {
+    enableFeeOnTransferFeeFetching?: boolean
+    enableUniversalRouter?: boolean
+    protocols: string[]
+    recipient: string
+    routingType?: string
+  }[]
+  intent: string
+  sendPortionEnabled?: boolean
+  slippageTolerance?: string
+  tokenIn: string
+  tokenInChainId: number
+  tokenOut: string
+  tokenOutChainId: number
+  type: 'EXACT_INPUT' | 'EXACT_OUTPUT'
+} & Pick<QuoteQueryParams, 'algorithm' | 'gasPriceWei' | 'gasToken' | 'quoteSpeed'>
+
+export const EthrexQuoteQueryParamsJoi = Joi.object({
+  amount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(77)
+    .required(),
+  configs: Joi.array()
+    .items(
+      Joi.object({
+        enableFeeOnTransferFeeFetching: Joi.boolean().optional(),
+        enableUniversalRouter: Joi.boolean().optional(),
+        // Frontend sends multiple unsupported protocols, but we just support V3
+        // which is enforced in our api.
+        protocols: Joi.array().items(Joi.string()).required(),
+        recipient: Joi.string().alphanum().max(42).optional(),
+        routingType: Joi.string().optional(),
+      })
+    )
+    .required(),
+  intent: Joi.string().valid('caching', 'quote', 'swap', 'pricing'),
+  sendPortionEnabled: Joi.boolean().optional(),
+  slippageTolerance: Joi.number().min(0).max(20),
+  tokenIn: Joi.string().alphanum().max(42).required(),
+  tokenInChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
+  tokenOut: Joi.string().alphanum().max(42).required(),
+  tokenOutChainId: Joi.number()
+    .valid(...SUPPORTED_CHAINS.values())
+    .required(),
+  type: Joi.string().valid('EXACT_INPUT', 'EXACT_OUTPUT').required(),
+})

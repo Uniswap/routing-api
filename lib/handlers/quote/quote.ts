@@ -102,8 +102,7 @@ export class QuoteHandler extends APIGLambdaHandler<
               errorCode: result?.errorCode,
               detail: result?.detail,
             },
-            `Quote 4XX Error [${result?.statusCode}] on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${
-              result?.errorCode
+            `Quote 4XX Error [${result?.statusCode}] on ${ID_TO_NETWORK_NAME(chainId)} with errorCode '${result?.errorCode
             }': ${result?.detail}`
           )
           break
@@ -162,6 +161,7 @@ export class QuoteHandler extends APIGLambdaHandler<
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>,
     handleRequestStartTime: number
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
+
     const {
       requestQueryParams: {
         tokenInAddress,
@@ -368,8 +368,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             intent,
             gasToken,
           },
-          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${
-            currencyOut.symbol
+          `Exact In Swap: Give ${amount.toExact()} ${amount.currency.symbol}, Want: ${currencyOut.symbol
           }. Chain: ${chainId}`
         )
 
@@ -394,8 +393,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             swapParams,
             gasToken,
           },
-          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${
-            currencyIn.symbol
+          `Exact Out Swap: Want ${amount.toExact()} ${amount.currency.symbol} Give: ${currencyIn.symbol
           }. Chain: ${chainId}`
         )
 
@@ -474,98 +472,125 @@ export class QuoteHandler extends APIGLambdaHandler<
           edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
         }
 
-        if (nextPool instanceof Pool) {
-          curRoute.push({
-            type: 'v3-pool',
-            address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: tokenIn.address,
-              symbol: tokenIn.symbol!,
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: tokenOut.address,
-              symbol: tokenOut.symbol!,
-            },
-            fee: nextPool.fee.toString(),
-            liquidity: nextPool.liquidity.toString(),
-            sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
-            tickCurrent: nextPool.tickCurrent.toString(),
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
-        } else {
-          const reserve0 = nextPool.reserve0
-          const reserve1 = nextPool.reserve1
+        curRoute.push({
+          type: 'v3-pool',
+          address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
+          tokenIn: {
+            chainId: tokenIn.chainId,
+            decimals: tokenIn.decimals.toString(),
+            address: tokenIn.address,
+            symbol: tokenIn.symbol!,
+          },
+          tokenOut: {
+            chainId: tokenOut.chainId,
+            decimals: tokenOut.decimals.toString(),
+            address: tokenOut.address,
+            symbol: tokenOut.symbol!,
+          },
+          fee: nextPool.fee.toString(),
+          liquidity: nextPool.liquidity.toString(),
+          sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
+          tickCurrent: nextPool.tickCurrent.toString(),
+          amountIn: edgeAmountIn,
+          amountOut: edgeAmountOut,
+        })
+        // This code was commented because `nextPool instanceof Pool` was not working, it was incorrectly branching to the else when it was actually a Pool
+        // if (nextPool instanceof Pool) {
+        //   console.log("is instance of pool")
+        //   curRoute.push({
+        //     type: 'v3-pool',
+        //     address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
+        //     tokenIn: {
+        //       chainId: tokenIn.chainId,
+        //       decimals: tokenIn.decimals.toString(),
+        //       address: tokenIn.address,
+        //       symbol: tokenIn.symbol!,
+        //     },
+        //     tokenOut: {
+        //       chainId: tokenOut.chainId,
+        //       decimals: tokenOut.decimals.toString(),
+        //       address: tokenOut.address,
+        //       symbol: tokenOut.symbol!,
+        //     },
+        //     fee: nextPool.fee.toString(),
+        //     liquidity: nextPool.liquidity.toString(),
+        //     sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
+        //     tickCurrent: nextPool.tickCurrent.toString(),
+        //     amountIn: edgeAmountIn,
+        //     amountOut: edgeAmountOut,
+        //   })
+        // } else {
+        //   console.log("else")
+        //   const reserve0 = nextPool.reserve0
+        //   const reserve1 = nextPool.reserve1
+        //   console.log(reserve0)
+        //   console.log(reserve1)
 
-          curRoute.push({
-            type: 'v2-pool',
-            address: v2PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1).poolAddress,
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: tokenIn.address,
-              symbol: tokenIn.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: tokenOut.address,
-              symbol: tokenOut.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            reserve0: {
-              token: {
-                chainId: reserve0.currency.wrapped.chainId,
-                decimals: reserve0.currency.wrapped.decimals.toString(),
-                address: reserve0.currency.wrapped.address,
-                symbol: reserve0.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve0.quotient.toString(),
-            },
-            reserve1: {
-              token: {
-                chainId: reserve1.currency.wrapped.chainId,
-                decimals: reserve1.currency.wrapped.decimals.toString(),
-                address: reserve1.currency.wrapped.address,
-                symbol: reserve1.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve1.quotient.toString(),
-            },
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
-        }
+        //   curRoute.push({
+        //     type: 'v2-pool',
+        //     address: v2PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1).poolAddress,
+        //     tokenIn: {
+        //       chainId: tokenIn.chainId,
+        //       decimals: tokenIn.decimals.toString(),
+        //       address: tokenIn.address,
+        //       symbol: tokenIn.symbol!,
+        //       buyFeeBps: this.deriveBuyFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
+        //       sellFeeBps: this.deriveSellFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
+        //     },
+        //     tokenOut: {
+        //       chainId: tokenOut.chainId,
+        //       decimals: tokenOut.decimals.toString(),
+        //       address: tokenOut.address,
+        //       symbol: tokenOut.symbol!,
+        //       buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
+        //       sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
+        //     },
+        //     reserve0: {
+        //       token: {
+        //         chainId: reserve0.currency.wrapped.chainId,
+        //         decimals: reserve0.currency.wrapped.decimals.toString(),
+        //         address: reserve0.currency.wrapped.address,
+        //         symbol: reserve0.currency.wrapped.symbol!,
+        //         buyFeeBps: this.deriveBuyFeeBps(
+        //           reserve0.currency.wrapped,
+        //           reserve0,
+        //           undefined,
+        //           enableFeeOnTransferFeeFetching
+        //         ),
+        //         sellFeeBps: this.deriveSellFeeBps(
+        //           reserve0.currency.wrapped,
+        //           reserve0,
+        //           undefined,
+        //           enableFeeOnTransferFeeFetching
+        //         ),
+        //       },
+        //       quotient: reserve0.quotient.toString(),
+        //     },
+        //     reserve1: {
+        //       token: {
+        //         chainId: reserve1.currency.wrapped.chainId,
+        //         decimals: reserve1.currency.wrapped.decimals.toString(),
+        //         address: reserve1.currency.wrapped.address,
+        //         symbol: reserve1.currency.wrapped.symbol!,
+        //         buyFeeBps: this.deriveBuyFeeBps(
+        //           reserve1.currency.wrapped,
+        //           undefined,
+        //           reserve1,
+        //           enableFeeOnTransferFeeFetching
+        //         ),
+        //         sellFeeBps: this.deriveSellFeeBps(
+        //           reserve1.currency.wrapped,
+        //           undefined,
+        //           reserve1,
+        //           enableFeeOnTransferFeeFetching
+        //         ),
+        //       },
+        //       quotient: reserve1.quotient.toString(),
+        //     },
+        //     amountIn: edgeAmountIn,
+        //     amountOut: edgeAmountOut,
+        //   })
+        // }
       }
 
       routeResponse.push(curRoute)
@@ -696,8 +721,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       const metricPair = pairsTracked?.includes(tradingPair)
         ? tradingPair
         : pairsTracked?.includes(wildcardInPair)
-        ? wildcardInPair
-        : wildcardOutPair
+          ? wildcardInPair
+          : wildcardOutPair
 
       metric.putMetric(
         `GET_QUOTE_AMOUNT_${metricPair}_${tradeType.toUpperCase()}_CHAIN_${chainId}`,
