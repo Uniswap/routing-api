@@ -5,6 +5,7 @@ import { handleSwaps } from './adapters/handleSwaps';
 import { handleQuote } from './adapters/handleQuote';
 import { handleLpApprove } from './adapters/handleLpApprove';
 import { handleLpCreate } from './adapters/handleLpCreate';
+import { quoteLimiter, generalLimiter } from './middleware/rateLimiter';
 
 
 async function bootstrap() {
@@ -46,15 +47,17 @@ async function bootstrap() {
   });
 
   // Route mapping - handlers remain completely unchanged
-  app.post('/v1/quote', handleQuote);
+  // Quote endpoint gets strict rate limiting (10-60 req/min based on wallet)
+  app.post('/v1/quote', quoteLimiter, handleQuote);
 
-  app.post('/v1/swap', handleSwap);
+  // Other endpoints get more lenient rate limiting (100 req/min)
+  app.post('/v1/swap', generalLimiter, handleSwap);
 
   app.get('/v1/swaps', handleSwaps);
 
-  app.post('/v1/lp/approve', handleLpApprove);
+  app.post('/v1/lp/approve', generalLimiter, handleLpApprove);
 
-  app.post('/v1/lp/create', handleLpCreate);
+  app.post('/v1/lp/create', generalLimiter, handleLpCreate);
 
   // Health endpoints
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));
