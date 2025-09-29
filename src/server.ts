@@ -62,11 +62,38 @@ async function bootstrap() {
 
   // Version endpoint
   app.get('/version', (_req, res) => {
-    const packageJson = require('../package.json');
-    res.json({
-      version: packageJson.version,
-      name: packageJson.name
-    });
+    const path = require('path');
+    const fs = require('fs');
+
+    try {
+      // In dev: __dirname = /path/to/src -> need ../package.json
+      // In prod: __dirname = /path/to/dist/src -> need ../../package.json
+      // Try both paths
+      let packageJsonPath = path.join(__dirname, '..', 'package.json');
+
+      if (!fs.existsSync(packageJsonPath)) {
+        packageJsonPath = path.join(__dirname, '..', '..', 'package.json');
+      }
+
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
+      // Try to get git commit hash
+      let gitCommit = 'unknown';
+      try {
+        const { execSync } = require('child_process');
+        gitCommit = execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+      } catch (e) {
+        // Git not available or not a git repo
+      }
+
+      res.json({
+        version: packageJson.version,
+        name: packageJson.name,
+        commit: gitCommit
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Could not read version info' });
+    }
   });
 
   const port = Number(process.env.PORT ?? 3000);
