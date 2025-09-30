@@ -24,11 +24,11 @@ function getClientIp(req: Request): string {
 
 /**
  * Rate limiter for quote endpoint
- * IP-based rate limiting: 30 requests/minute per IP
+ * IP-based rate limiting: 30 requests/10 minutes per IP
  */
 export const quoteLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute window
-  max: 30, // 30 requests per minute per IP
+  windowMs: 10 * 60 * 1000, // 10 minute window
+  max: 30, // 30 requests per 10 minutes per IP
 
   // Use custom key generator to properly extract IP
   keyGenerator: getClientIp,
@@ -46,8 +46,8 @@ export const quoteLimiter = rateLimit({
     res.status(429).json({
       error: 'Too many requests',
       message: 'You have exceeded the rate limit. Please try again later.',
-      retryAfter: 60,
-      hint: 'Rate limit: 30 requests/minute per IP'
+      retryAfter: 600,
+      hint: 'Rate limit: 30 requests per 10 minutes per IP'
     });
   },
 
