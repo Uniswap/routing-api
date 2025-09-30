@@ -6,6 +6,7 @@ import { handleQuote } from './adapters/handleQuote';
 import { handleLpApprove } from './adapters/handleLpApprove';
 import { handleLpCreate } from './adapters/handleLpCreate';
 import { quoteLimiter, generalLimiter } from './middleware/rateLimiter';
+import { getApolloMiddleware } from './adapters/handleGraphQL';
 
 
 async function bootstrap() {
@@ -58,6 +59,9 @@ async function bootstrap() {
   app.post('/v1/lp/approve', generalLimiter, handleLpApprove);
 
   app.post('/v1/lp/create', generalLimiter, handleLpCreate);
+
+  // GraphQL endpoint
+  app.use('/v1/graphql', await getApolloMiddleware());
 
   // Health endpoints
   app.get('/healthz', (_req, res) => res.status(200).send('ok'));
