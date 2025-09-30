@@ -5,6 +5,7 @@ import { handleSwaps } from './adapters/handleSwaps';
 import { handleQuote } from './adapters/handleQuote';
 import { handleLpApprove } from './adapters/handleLpApprove';
 import { handleLpCreate } from './adapters/handleLpCreate';
+import { handleSwappableTokens } from './adapters/handleSwappableTokens';
 import { quoteLimiter, generalLimiter } from './middleware/rateLimiter';
 import { getApolloMiddleware } from './adapters/handleGraphQL';
 
@@ -59,6 +60,9 @@ async function bootstrap() {
   app.post('/v1/lp/approve', generalLimiter, handleLpApprove);
 
   app.post('/v1/lp/create', generalLimiter, handleLpCreate);
+
+  // Swappable tokens endpoint
+  app.get('/v1/swappable_tokens', handleSwappableTokens);
 
   // GraphQL endpoint
   app.use('/v1/graphql', await getApolloMiddleware());
