@@ -26,11 +26,16 @@ import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
+import { EulerSwap } from '../types/ext/EulerSwap'
+import { EulerSwap__factory } from '../types/ext/factories/EulerSwap__factory'
+import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
 // so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
 dotenv.config()
+
+const EULER_SWAP_ADDRESS = '0x786956C1Eb57C47052d1676ac5084fA08d8068A8'
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
@@ -55,6 +60,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     requestId: event.id,
   })
   setGlobalLogger(log)
+
+  const contract: EulerSwap = EulerSwap__factory.connect(
+    EULER_SWAP_ADDRESS,
+    GlobalRpcProviders.getGlobalUniRpcProviders(log).get(ChainId.MAINNET)!
+  )
 
   const s3 = new S3()
 
@@ -304,11 +314,15 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           const eulerPools = await Promise.all(
             eulerHooks.map(async (eulerHook) => {
               const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
-              log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
-              // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
-              ;(pool as V4SubgraphPool).tvlUSD = 1000
-              ;(pool as V4SubgraphPool).tvlETH = 5500000
+              if (!pool) {
+                return null
+              }
+
+              // Get the TVL from the EulerSwap contract
+              const limits = await contract.getLimits(pool.token0.id, pool.token1.id)
+              ;(pool as V4SubgraphPool).tvlUSD = limits[0].toNumber()
+              ;(pool as V4SubgraphPool).tvlETH = limits[1].toNumber()
 
               return pool
             })
