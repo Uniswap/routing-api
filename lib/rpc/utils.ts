@@ -42,7 +42,7 @@ export function generateProviderUrl(key: string, value: string): string {
       return `https://eth-sepolia-fast.g.alchemy.com/v2/${tokens[0]}`
     }
     case 'ALCHEMY_5115': {
-      return `https://rpc.testnet.citrea.xyz`
+      return `http://vm-dfx-node-prd.westeurope.cloudapp.azure.com:8085`
     }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
