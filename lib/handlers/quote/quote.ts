@@ -353,6 +353,10 @@ export class QuoteHandler extends APIGLambdaHandler<
       // override usedCachedRoutes to false. This is to ensure that we don't use
       // accidentally override usedCachedRoutes in the normal path.
       ...(enableFeeOnTransferFeeFetching ? FEE_ON_TRANSFER_SPECIFIC_CONFIG(enableFeeOnTransferFeeFetching) : {}),
+      // Citrea Testnet: Disable optimistic cached routes to avoid RPC gas limit errors
+      // The RPC node has a 10M gas limit per eth_call, and optimistic cached routes
+      // can trigger multicalls with 40+ quotes that exceed this limit
+      ...(chainId === ChainId.CITREA_TESTNET ? { optimisticCachedRoutes: false } : {}),
       ...(gasToken ? { gasToken } : {}),
       ...(excludedProtocolsFromMixed ? { excludedProtocolsFromMixed } : {}),
       shouldEnableMixedRouteEthWeth: shouldEnableMixedRouteEthWeth,
