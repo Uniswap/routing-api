@@ -316,6 +316,7 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
               const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
 
               if (!pool) {
+                log.info(`No pool found for euler hook ${eulerHook.hook}`)
                 return null
               }
 
