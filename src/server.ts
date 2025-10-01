@@ -21,6 +21,8 @@ async function bootstrap() {
     'https://bapp.juiceswap.com/',
     'https://dev.bapp.juiceswap.com/',
     'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
   ];
 
   const envOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [];
