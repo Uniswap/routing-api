@@ -16,6 +16,38 @@ export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = 
 
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
+    case ChainId.CITREA_TESTNET:
+      return {
+        v2PoolSelection: {
+          topN: 1,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 1,
+          topNSecondHop: 0,
+          topNWithEachBaseToken: 1,
+          topNWithBaseToken: 1,
+        },
+        v3PoolSelection: {
+          topN: 1,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 1,
+          topNSecondHop: 0,
+          topNWithEachBaseToken: 1,
+          topNWithBaseToken: 1,
+        },
+        v4PoolSelection: {
+          topN: 1,
+          topNDirectSwaps: 1,
+          topNTokenInOut: 1,
+          topNSecondHop: 0,
+          topNWithEachBaseToken: 1,
+          topNWithBaseToken: 1,
+        },
+        maxSwapsPerPath: 1,
+        minSplits: 1,
+        maxSplits: 1,
+        distributionPercent: 100,
+        forceCrossProtocol: false,
+      }
     case ChainId.BLAST:
       return {
         v2PoolSelection: {
