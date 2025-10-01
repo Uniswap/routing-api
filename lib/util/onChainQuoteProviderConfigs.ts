@@ -404,6 +404,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       gasLimitPerCall: 80_000,
       quoteMinSuccessRate: 0.15,
     },
+    [ChainId.CITREA_TESTNET]: {
+      multicallChunk: 1,
+      gasLimitPerCall: 1_500_000,
+      quoteMinSuccessRate: 0.1,
+    },
     [ChainId.ZKSYNC]: {
       multicallChunk: 20,
       gasLimitPerCall: 4_000_000,

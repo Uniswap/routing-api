@@ -13,7 +13,7 @@ export const BNB_UPPER_SWAP_GAS_LIMIT = BigNumber.from(200000)
 // https://github.com/Uniswap/smart-order-router/blob/c77d04d334cc1c6694bd74d88287cc5b6e3a7425/src/util/onchainQuoteProviderConfigs.ts#L83 divide by 10
 export const ZORA_UPPER_SWAP_GAS_LIMIT = BigNumber.from(200000)
 export const MONAD_UPPER_SWAP_GAS_LIMIT = BigNumber.from(400000)
-export const CITREA_UPPER_SWAP_GAS_LIMIT = BigNumber.from(1500000)
+export const CITREA_UPPER_SWAP_GAS_LIMIT = BigNumber.from(3000000)
 
 export const CHAIN_TO_GAS_LIMIT_MAP: { [chainId: number]: BigNumber } = {
   [ChainId.ZKSYNC]: ZKSYNC_UPPER_SWAP_GAS_LIMIT,
