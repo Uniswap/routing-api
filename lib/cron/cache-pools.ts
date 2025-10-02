@@ -35,6 +35,29 @@ import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 // so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
 dotenv.config()
 
+function getEthToUsdRate(pools: V4SubgraphPool[]): number {
+  const top3TvlPools = pools
+    .slice()
+    .sort((a, b) => b.tvlUSD - a.tvlUSD)
+    .slice(0, 3)
+  const averageRate = top3TvlPools.reduce((acc, pool) => acc + pool.tvlUSD / pool.tvlETH, 0) / top3TvlPools.length
+  return averageRate
+}
+
+function isUsdEquivalent(symbol: string | undefined): boolean {
+  if (!symbol) {
+    return false
+  }
+  return ['USDC', 'USDT', 'USDe'].includes(symbol)
+}
+
+function isEthEquivalent(symbol: string | undefined): boolean {
+  if (!symbol) {
+    return false
+  }
+  return ['WETH', 'WSTETH', 'ETH'].includes(symbol)
+}
+
 const EULER_SWAP_ADDRESS = '0x786956C1Eb57C47052d1676ac5084fA08d8068A8'
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
@@ -307,6 +330,9 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       ]
 
       if (eulerHooksProvider) {
+        const ethToUsdRate = getEthToUsdRate(pools as V4SubgraphPool[])
+        log.info(`Eth to USD rate: ${ethToUsdRate}`)
+
         const eulerHooks = await eulerHooksProvider?.getHooks()
         if (eulerHooks) {
           metric.putMetric('eulerHooks.length', eulerHooks.length)
@@ -320,10 +346,40 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
                 return null
               }
 
+              log.info(`Pool: ${JSON.stringify(pool)}`)
               // Get the TVL from the EulerSwap contract
               const limits = await contract.getLimits(pool.token0.id, pool.token1.id)
-              ;(pool as V4SubgraphPool).tvlUSD = limits[0].toNumber()
-              ;(pool as V4SubgraphPool).tvlETH = limits[1].toNumber()
+              log.info(`Limits: ${JSON.stringify(limits)}`)
+
+              const token0Symbol = pool.token0.symbol
+              const token1Symbol = pool.token1.symbol
+              if (isUsdEquivalent(token0Symbol)) {
+                pool.tvlUSD = limits[0].toNumber()
+                pool.tvlETH = limits[0].toNumber() / ethToUsdRate
+              } else if (isUsdEquivalent(token1Symbol)) {
+                pool.tvlUSD = limits[1].toNumber()
+                pool.tvlETH = limits[1].toNumber() / ethToUsdRate
+              } else if (isEthEquivalent(token0Symbol)) {
+                pool.tvlETH = limits[0].toNumber()
+                pool.tvlUSD = limits[0].toNumber() * ethToUsdRate
+              } else if (isEthEquivalent(token1Symbol)) {
+                pool.tvlETH = limits[1].toNumber()
+                pool.tvlUSD = limits[1].toNumber() * ethToUsdRate
+              } else {
+                log.info(
+                  `Unknown token symbol: pool ${pool.id} with token0 symbol ${token0Symbol} and token1 symbol ${token1Symbol} is not usd or eth equivalent`
+                )
+                log.info(`Setting TVL to 1000 USD and 5500000 ETH`)
+              }
+
+              if ((pool.tvlUSD === 0 && pool.tvlETH === 0) || !pool.tvlUSD || !pool.tvlETH) {
+                log.info(`Pool ${pool.id} has 0 TVL`)
+                // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
+                ;(pool as V4SubgraphPool).tvlUSD = 1000
+                ;(pool as V4SubgraphPool).tvlETH = 5500000
+              }
+
+              log.info(`Pool TVL USD: ${pool.tvlUSD}, Pool TVL ETH: ${pool.tvlETH}`)
 
               return pool
             })
