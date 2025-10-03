@@ -55,7 +55,7 @@ function isEthEquivalent(symbol: string | undefined): boolean {
   if (!symbol) {
     return false
   }
-  return ['WETH', 'WSTETH', 'ETH'].includes(symbol)
+  return ['WETH', 'stETH', 'ETH'].includes(symbol)
 }
 
 const EULER_SWAP_ADDRESS = '0x786956C1Eb57C47052d1676ac5084fA08d8068A8'
