@@ -84,6 +84,15 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x9c193659e9c8e7a801eaadfd3d61cca35239955fcc04e996a770d28805d21d4d
+export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x12b504160222D66c38d916d9FbA11B613c51E888'
+export const RING_FEW_UNI_HOOK_ON_MAINNET = '0xCF1E7189264a84D7454077dC713c3d11400de888'
+export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x948922B055187c7366E71B876aB1242EBBAeA888'
+export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0x28416B4c065e877E7c0BfF17ab1f67C6527D6888'
+export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x1989CdAb2779ed83c0C81A5799FF6aF2e03c6888'
+export const RING_FEW_USDT_HOOK_ON_MAINNET = '0x9590a832d08545AaD4F2A148f3eEFA6EDe1C2888'
+export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x90828f70070d84Ac5CDE145b27Ca75FDa6D02888'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -94,6 +103,13 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_1_1,
     BUNNI_HOOKS_ADDRESS_v1_2_1,
     WETH_HOOKS_ADDRESS_ON_MAINNET,
+    RING_FEW_ETH_HOOK_ON_MAINNET,
+    RING_FEW_UNI_HOOK_ON_MAINNET,
+    RING_FEW_WBTC_HOOK_ON_MAINNET,
+    RING_FEW_CBBTC_HOOK_ON_MAINNET,
+    RING_FEW_USDC_HOOK_ON_MAINNET,
+    RING_FEW_USDT_HOOK_ON_MAINNET,
+    RING_FEW_DAI_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
