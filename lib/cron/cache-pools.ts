@@ -58,8 +58,6 @@ function isEthEquivalent(symbol: string | undefined): boolean {
   return ['WETH', 'stETH', 'ETH'].includes(symbol)
 }
 
-const EULER_SWAP_ADDRESS = '0x786956C1Eb57C47052d1676ac5084fA08d8068A8'
-
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
   metrics.setNamespace('Uniswap')
@@ -83,11 +81,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
     requestId: event.id,
   })
   setGlobalLogger(log)
-
-  const contract: EulerSwap = EulerSwap__factory.connect(
-    EULER_SWAP_ADDRESS,
-    GlobalRpcProviders.getGlobalUniRpcProviders(log).get(ChainId.MAINNET)!
-  )
 
   const s3 = new S3()
 
@@ -345,6 +338,11 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
                 log.info(`No pool found for euler hook ${eulerHook.hook}`)
                 return null
               }
+
+              const contract: EulerSwap = EulerSwap__factory.connect(
+                pool.hooks,
+                GlobalRpcProviders.getGlobalUniRpcProviders(log).get(ChainId.MAINNET)!
+              )
 
               log.info(`Pool: ${JSON.stringify(pool)}`)
               // Get the TVL from the EulerSwap contract
