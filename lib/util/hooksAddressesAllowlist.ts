@@ -192,18 +192,22 @@ function buildHookPoolsList(): V4PoolData[] {
               tickSpacing: pool.tickSpacing,
               hooks: hook.address.toLowerCase(),
               liquidity: pool.liquidity,
-              token0: pool.token0 ? {
-                symbol: pool.token0.symbol,
-                id: pool.token0.id,
-                name: pool.token0.name,
-                decimals: pool.token0.decimals,
-              } : undefined,
-              token1: pool.token1 ? {
-                symbol: pool.token1.symbol,
-                id: pool.token1.id,
-                name: pool.token1.name,
-                decimals: pool.token1.decimals,
-              } : undefined,
+              token0: pool.token0
+                ? {
+                    symbol: pool.token0.symbol,
+                    id: pool.token0.id,
+                    name: pool.token0.name,
+                    decimals: pool.token0.decimals,
+                  }
+                : undefined,
+              token1: pool.token1
+                ? {
+                    symbol: pool.token1.symbol,
+                    id: pool.token1.id,
+                    name: pool.token1.name,
+                    decimals: pool.token1.decimals,
+                  }
+                : undefined,
               tvlETH: pool.tvlETH,
               tvlUSD: pool.tvlUSD,
             })

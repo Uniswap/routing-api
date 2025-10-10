@@ -231,15 +231,16 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
     if (protocol === Protocol.V4) {
       // Add all pools which are included in HookLists and have all required V4SubgraphPool fields
-      const manuallyIncludedV4Pools: V4SubgraphPool[] = HOOK_POOLS_DATA.filter((poolData) =>
-        poolData.feeTier &&
-        poolData.tickSpacing &&
-        poolData.hooks &&
-        poolData.liquidity &&
-        poolData.token0 &&
-        poolData.token1 &&
-        poolData.tvlETH !== undefined &&
-        poolData.tvlUSD !== undefined
+      const manuallyIncludedV4Pools: V4SubgraphPool[] = HOOK_POOLS_DATA.filter(
+        (poolData) =>
+          poolData.feeTier &&
+          poolData.tickSpacing &&
+          poolData.hooks &&
+          poolData.liquidity &&
+          poolData.token0 &&
+          poolData.token1 &&
+          poolData.tvlETH !== undefined &&
+          poolData.tvlUSD !== undefined
       ) as V4SubgraphPool[]
 
       if (eulerHooksProvider) {
