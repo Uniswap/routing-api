@@ -1,189 +1,169 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
+import fs from 'fs'
+import path from 'path'
 
-// all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
-export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1 = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2 = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3 = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
-export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
-
-export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
-export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
-export const BUNNI_HOOKS_ADDRESS_v1_1_1 = '0x0000fe59823933ac763611a69c88f91d45f81888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1 = '0x000052423c1db6b7ff8641b85a7eefc7b2791888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM = '0x0000eb22c45bdb564f985ace0b4d05a64fa71888'
-
-export const GRADUATION_HOOKS_ADDRESS_ON_BASE = '0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000'
-export const TWAMM_HOOKS_ADDRESS_ON_BASE = '0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80'
-export const COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE = '0x5cd525c621afca515bf58631d4733fba7b72aae4'
-export const BTC_ACC_ON_BASE = '0x704268ac7043aeef50f47b6a03ae68ccf808e044'
-
-// https://linear.app/uniswap/issue/ROUTE-580/allowlist-slippagefeehook-on-arbitrum
-// example pool: 0x582387e095a7fbcba58222b6f9f56cc3e6177d766d10dd0d96a70dab70f66be9
-export const SLIPPAGE_FEE_HOOK_ON_ARBITRUM = '0xc4bf39a096a1b610dd6186935f3ad99c66239080'
-
-// https://linear.app/uniswap/issue/ROUTE-555/allowlist-clanker-hook
-export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE = '0x34a45c6b61876d739400bd71228cbcbd4f53e8cc'
-export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE = '0xdd5eeaff7bd481ad55db083062b13a3cdf0a68cc'
-export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2 = '0xd60d6b218116cfd801e28f78d011a203d2b068cc'
-export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2 = '0xb429d62f8f3bffb98cdb9569533ea23bf0ba28cc'
-// https://linear.app/uniswap/issue/ROUTE-591/allowlist-additional-clanker-hooks
-export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM = '0xfd213be7883db36e1049dc42f5bd6a0ec66b68cc'
-export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM = '0xf7ac669593d2d9d01026fa5b756dd5b4f7aaa8cc'
-export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN = '0x9b37a43422d7bbd4c8b231be11e50ad1ace828cc'
-export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN = '0xbc6e5abda425309c2534bc2bc92562f5419ce8cc'
-
-export const WETH_HOOKS_ADDRESS_ON_OP_MAINNET = '0x480dafdb4d6092ef3217595b75784ec54b52e888'
-export const WETH_HOOKS_ADDRESS_ON_UNICHAIN = '0x730b109bad65152c67ecc94eb8b0968603dba888'
-export const WETH_HOOKS_ADDRESS_ON_BASE = '0xb08211d57032dd10b1974d4b876851a7f7596888'
-export const WETH_HOOKS_ADDRESS_ON_MAINNET = '0x57991106cb7aa27e2771beda0d6522f68524a888'
-
-export const WETH_HOOKS_ADDRESS_ON_ARBITRUM = '0x2a4adf825bd96598487dbb6b2d8d882a4eb86888'
-
-// example pool: https://app.uniswap.org/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
-export const BUNNI_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
-// example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
-export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
-// example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
-export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
-// exmaple pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
-export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
-
-// example pool: https://app.uniswap.org/explore/pools/base/0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0
-export const ZORA_CREATOR_HOOK_ON_BASE_v1 = '0xfbce3d80c659c765bc6c55e29e87d839c7609040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1 = '0x854f820475b229b7805a386f758cfb285023d040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_1 = '0x9301690be9ac901de52c5ebff883862bbfc99040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1 = '0x5e5d19d22c85a4aef7c1fdf25fb22a5a38f71040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_2 = '0xd61a675f8a0c67a73dc3b54fb7318b4d91409040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v2_2 = '0x8218fa8d7922e22aed3556a09d5a715f16ad5040'
-export const ZORA_CREATOR_HOOK_ON_BASE_v2_2_1 = '0x1258e5f3c71ca9dce95ce734ba5759532e46d040'
-// example pool: https://app.uniswap.org/explore/pools/base/0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06
-export const ZORA_POST_HOOK_ON_BASE_v1 = '0xa1ebdd5ca6470bbd67114331387f2dda7bfad040'
-export const ZORA_POST_HOOK_ON_BASE_v1_0_0_1 = '0xb030fd8c2f8576f8ab05cfbbe659285e7d7a1040'
-export const ZORA_POST_HOOK_ON_BASE_v1_0_0_2 = '0xe61bdf0c9e665f02df20fede6dcef379cb751040'
-export const ZORA_POST_HOOK_ON_BASE_v1_1_1 = '0x81542dc43aff247eff4a0ecefc286a2973ae1040'
-export const ZORA_POST_HOOK_ON_BASE_v1_1_1_1 = '0x5bf219b3cc11e3f6dd8dc8fc89d7d1deb0431040'
-export const ZORA_POST_HOOK_ON_BASE_v1_1_2 = '0x9ea932730a7787000042e34390b8e435dd839040'
-export const ZORA_POST_HOOK_ON_BASE_v2_2 = '0xff74be9d3596ea7a33bb4983dd7906fb34135040'
-export const ZORA_POST_HOOK_ON_BASE_v2_2_1 = '0x2b15a16b3ef024005ba899bb51764fcd58cf9040'
-
-// example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
-export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
-
-// LimitOrderHook addresses: https://linear.app/uniswap/issue/ROUTE-625
-// example pool: https://app.uniswap.org/explore/pools/arbitrum/0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98
-export const LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM = '0xd73339564ac99f3e09b0ebc80603ff8b796500c0'
-// example pool: https://app.uniswap.org/explore/pools/unichain/0x2289791ab3c4a90c741427c52ea9411ba13bf8184c0b7bae4fea26262f400357
-export const LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN = '0x2016c0e4f8bb1d6fea777dc791be919e2eda40c0'
-// example pool: https://app.uniswap.org/explore/pools/base/0xdfb2536ba09a004b32db0a1a15f73676b5e356d831c4ea1e843cd9433b080ab6
-export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0'
-
-// example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
-export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
-
-// we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
-// this is the ultimate safeguard in the routing subgraph pool cron job.
-export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
-  [ChainId.MAINNET]: [
-    ADDRESS_ZERO,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
-    WETH_HOOKS_ADDRESS_ON_MAINNET,
-  ],
-  [ChainId.GOERLI]: [ADDRESS_ZERO],
-  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
-  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
-  [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
-  [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.ARBITRUM_ONE]: [
-    ADDRESS_ZERO,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM,
-    SLIPPAGE_FEE_HOOK_ON_ARBITRUM,
-    CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
-    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
-    WETH_HOOKS_ADDRESS_ON_ARBITRUM,
-    LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM,
-  ],
-  [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
-  [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.POLYGON]: [ADDRESS_ZERO],
-  [ChainId.POLYGON_MUMBAI]: [ADDRESS_ZERO],
-  [ChainId.CELO]: [ADDRESS_ZERO],
-  [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
-  [ChainId.GNOSIS]: [ADDRESS_ZERO],
-  [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO, BUNNI_HOOKS_ADDRESS_v1_1_1, BUNNI_HOOKS_ADDRESS_v1_2_1],
-  [ChainId.AVALANCHE]: [ADDRESS_ZERO],
-  [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
-  [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.BASE]: [
-    ADDRESS_ZERO,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3,
-    ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
-    GRADUATION_HOOKS_ADDRESS_ON_BASE,
-    TWAMM_HOOKS_ADDRESS_ON_BASE,
-    COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE,
-    BTC_ACC_ON_BASE,
-    CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
-    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
-    CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
-    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
-    WETH_HOOKS_ADDRESS_ON_BASE,
-    DOPPLER_HOOKS_ADDRESS_ON_BASE,
-    LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE,
-    ZORA_CREATOR_HOOK_ON_BASE_v1,
-    ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
-    ZORA_CREATOR_HOOK_ON_BASE_v1_1_1,
-    ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1,
-    ZORA_CREATOR_HOOK_ON_BASE_v1_1_2,
-    ZORA_CREATOR_HOOK_ON_BASE_v2_2,
-    ZORA_CREATOR_HOOK_ON_BASE_v2_2_1,
-    ZORA_POST_HOOK_ON_BASE_v1,
-    ZORA_POST_HOOK_ON_BASE_v1_0_0_1,
-    ZORA_POST_HOOK_ON_BASE_v1_0_0_2,
-    ZORA_POST_HOOK_ON_BASE_v1_1_1,
-    ZORA_POST_HOOK_ON_BASE_v1_1_1_1,
-    ZORA_POST_HOOK_ON_BASE_v1_1_2,
-    ZORA_POST_HOOK_ON_BASE_v2_2,
-    ZORA_POST_HOOK_ON_BASE_v2_2_1,
-  ],
-  [ChainId.ZORA]: [ADDRESS_ZERO],
-  [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.ROOTSTOCK]: [ADDRESS_ZERO],
-  [ChainId.BLAST]: [ADDRESS_ZERO],
-  [ChainId.ZKSYNC]: [ADDRESS_ZERO],
-  [ChainId.WORLDCHAIN]: [ADDRESS_ZERO],
-  [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.UNICHAIN]: [
-    ADDRESS_ZERO,
-    BUNNI_ON_UNICHAIN,
-    RENZO_ON_UNICHAIN,
-    AEGIS_ON_UNICHAIN,
-    UPDATED_AEGIS_ON_UNICHAIN,
-    WETH_HOOKS_ADDRESS_ON_UNICHAIN,
-    CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
-    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
-    LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
-    PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
-  ],
-  [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
-  [ChainId.SONEIUM]: [ADDRESS_ZERO],
+//Expected format of HookList JSON files
+interface PoolEntry {
+  id: string
+  tvlUSD: number | null
+  tvlETH: number | null
 }
+
+interface HookEntry {
+  address: string
+  name: string
+  description: string
+  audit: string
+  version: {
+    major: number
+    minor: number
+    patch: number
+  }
+  hookStatsAddress: string | null
+  pools: PoolEntry[]
+}
+
+interface HookFile {
+  name: string
+  timestamp: string
+  version: {
+    major: number
+    minor: number
+    patch: number
+  }
+  keywords: string[]
+  description: string
+  logoURI: string
+  chains: {
+    [chainId: string]: HookEntry[]
+  }
+}
+
+// A minimized hook metadata object which allows us to carry more useful details into other functions.
+interface HookMetadata {
+  address: string
+  name: string
+  keywords: string[]
+}
+
+function loadAllHookFiles(): HookFile[] {
+  const hooksDir = path.resolve(process.cwd(), 'lib', 'util', 'hooks', 'prod')
+  const hookFiles: HookFile[] = []
+
+  try {
+    const files = fs.readdirSync(hooksDir).filter(file => file.endsWith('.json'))
+    
+    for (const file of files) {
+      try {
+        const filePath = path.join(hooksDir, file)
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        const hookFile: HookFile = JSON.parse(fileContent)
+        hookFiles.push(hookFile)
+      } catch (error) {
+        console.warn(`Failed to load hook file ${file}:`, error)
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to read hooks directory ${hooksDir}:`, error)
+  }
+
+  return hookFiles
+}
+
+// Create a list of hook metadata for each chain
+function buildHooksAllowlist(): { [chain in ChainId]: Array<HookMetadata> } {
+  // Create ADDRESS_ZERO as a HookMetadata object
+  const addressZeroMetadata: HookMetadata = {
+    address: ADDRESS_ZERO,
+    name: 'No Hook (Regular Pool)',
+    keywords: []
+  }
+
+  const allowlist: { [chain in ChainId]: Array<HookMetadata> } = {
+    [ChainId.MAINNET]: [addressZeroMetadata],
+    [ChainId.GOERLI]: [addressZeroMetadata],
+    [ChainId.SEPOLIA]: [addressZeroMetadata],
+    [ChainId.OPTIMISM]: [addressZeroMetadata],
+    [ChainId.OPTIMISM_GOERLI]: [addressZeroMetadata],
+    [ChainId.OPTIMISM_SEPOLIA]: [addressZeroMetadata],
+    [ChainId.ARBITRUM_ONE]: [addressZeroMetadata],
+    [ChainId.ARBITRUM_GOERLI]: [addressZeroMetadata],
+    [ChainId.ARBITRUM_SEPOLIA]: [addressZeroMetadata],
+    [ChainId.POLYGON]: [addressZeroMetadata],
+    [ChainId.POLYGON_MUMBAI]: [addressZeroMetadata],
+    [ChainId.CELO]: [addressZeroMetadata],
+    [ChainId.CELO_ALFAJORES]: [addressZeroMetadata],
+    [ChainId.GNOSIS]: [addressZeroMetadata],
+    [ChainId.MOONBEAM]: [addressZeroMetadata],
+    [ChainId.BNB]: [addressZeroMetadata],
+    [ChainId.AVALANCHE]: [addressZeroMetadata],
+    [ChainId.BASE_GOERLI]: [addressZeroMetadata],
+    [ChainId.BASE_SEPOLIA]: [addressZeroMetadata],
+    [ChainId.BASE]: [addressZeroMetadata],
+    [ChainId.ZORA]: [addressZeroMetadata],
+    [ChainId.ZORA_SEPOLIA]: [addressZeroMetadata],
+    [ChainId.ROOTSTOCK]: [addressZeroMetadata],
+    [ChainId.BLAST]: [addressZeroMetadata],
+    [ChainId.ZKSYNC]: [addressZeroMetadata],
+    [ChainId.WORLDCHAIN]: [addressZeroMetadata],
+    [ChainId.UNICHAIN_SEPOLIA]: [addressZeroMetadata],
+    [ChainId.UNICHAIN]: [addressZeroMetadata],
+    [ChainId.MONAD_TESTNET]: [addressZeroMetadata],
+    [ChainId.SONEIUM]: [addressZeroMetadata],
+  }
+
+  const hookFiles = loadAllHookFiles()
+
+  for (const hookFile of hookFiles) {
+    for (const [chainIdString, hooks] of Object.entries(hookFile.chains)) {
+      const chainId = parseInt(chainIdString) as ChainId
+      
+      if (allowlist[chainId]) {
+        for (const hook of hooks) {
+          const hookAddress = hook.address.toLowerCase()
+          
+          // Check if this hook address is already in the allowlist
+          const existingHook = allowlist[chainId].find(item => item.address === hookAddress)
+          
+          if (!existingHook) {
+            allowlist[chainId].push({
+              address: hookAddress,
+              name: hook.name,
+              keywords: hookFile.keywords || []
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return allowlist
+}
+
+// Create a list of pools for each hook address
+function buildHookPoolsList(): PoolEntry[] {
+  const pools: PoolEntry[] = []
+
+  const hookFiles = loadAllHookFiles()
+
+  for (const hookFile of hookFiles) {
+    for (const [, hooks] of Object.entries(hookFile.chains)) {
+      for (const hook of hooks) {
+        if (hook.pools && hook.pools.length > 0) {
+          for (const pool of hook.pools) {
+            pools.push({
+              ...pool,
+              id: pool.id.toLowerCase(),
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return pools
+}
+
+export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<HookMetadata> } = buildHooksAllowlist()
+export const HOOK_POOLS_DATA: PoolEntry[] = buildHookPoolsList()

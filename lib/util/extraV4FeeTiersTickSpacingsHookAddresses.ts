@@ -1,5 +1,6 @@
 import { ChainId } from '@uniswap/sdk-core'
-import { extraHooksAddressesOnSepolia } from './hooksAddressesAllowlist'
+
+const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
 
 export const emptyV4FeeTickSpacingsHookAddresses: Array<[number, number, string]> = new Array<
   [number, number, string]
