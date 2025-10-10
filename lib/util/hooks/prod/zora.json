@@ -1,0 +1,235 @@
+{
+  "name": "Zora Hooklist",
+  "timestamp": "2025-10-09T18:42:00+00:00",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["Zora"],
+  "description": "Zora Creator and Post hooks for NFT creation and social interactions on Base",
+  "logoURI": "https://zora.co/assets/favicon/apple-touch-icon.png",
+  "chains": {
+    "8453": [
+      {
+        "address": "0xfbce3d80c659c765bc6c55e29e87d839c7609040",
+        "name": "Zora Creator Hook on Base",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x854f820475b229b7805a386f758cfb285023d040",
+        "name": "Zora Creator Hook on Base - v1.0.0",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x9301690be9ac901de52c5ebff883862bbfc99040",
+        "name": "Zora Creator Hook on Base - v1.1.1",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x5e5d19d22c85a4aef7c1fdf25fb22a5a38f71040",
+        "name": "Zora Creator Hook on Base - v1.1.1",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xd61a675f8a0c67a73dc3b54fb7318b4d91409040",
+        "name": "Zora Creator Hook on Base - v1.1.2",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 2
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xd1c0665cb7cc9168b64f9d13099b5e72b26d18bbf984fe66df4c34326f50fec2",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x8218fa8d7922e22aed3556a09d5a715f16ad5040",
+        "name": "Zora Creator Hook on Base - v2.2",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 2,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x8da3f098fae427a9aa3647f3e81798c61897f3bf67d100a270c00198b1771a4c",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x1258e5f3c71ca9dce95ce734ba5759532e46d040",
+        "name": "Zora Creator Hook on Base - v2.2.1",
+        "description": "Zora Creator Hook for NFT creation and minting functionality",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 2,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0xa1ebdd5ca6470bbd67114331387f2dda7bfad040",
+        "name": "Zora Post Hook on Base",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": null,
+        "pools": []
+      },
+      {
+        "address": "0xb030fd8c2f8576f8ab05cfbbe659285e7d7a1040",
+        "name": "Zora Post Hook on Base - v1.0.0",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0xe61bdf0c9e665f02df20fede6dcef379cb751040",
+        "name": "Zora Post Hook on Base - v1.0.0",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x81542dc43aff247eff4a0ecefc286a2973ae1040",
+        "name": "Zora Post Hook on Base - v1.1.1",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x5bf219b3cc11e3f6dd8dc8fc89d7d1deb0431040",
+        "name": "Zora Post Hook on Base - v1.1.1",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x9ea932730a7787000042e34390b8e435dd839040",
+        "name": "Zora Post Hook on Base - v1.1.2",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 2
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xff74be9d3596ea7a33bb4983dd7906fb34135040",
+        "name": "Zora Post Hook on Base - v2.2",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 2,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x2b15a16b3ef024005ba899bb51764fcd58cf9040",
+        "name": "Zora Post Hook on Base - v2.2.1",
+        "description": "Zora Post Hook for social interactions and content posting",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 2,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      }
+    ]
+  }
+}
