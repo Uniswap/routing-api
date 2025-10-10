@@ -26,12 +26,42 @@
           {
             "id": "0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615",
             "tvlUSD": 1553028,
-            "tvlETH": 338.4
+            "tvlETH": 338.4,
+            "feeTier": "0",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USR",
+              "id": "0x66a1e37c9b0eaddca17d3662d6c05f4decf3e110",
+              "name": "Resolv USD",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           },
           {
             "id": "0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5",
             "tvlUSD": 729657,
-            "tvlETH": 158.99
+            "tvlETH": 158.99,
+            "feeTier": "1",
+            "tickSpacing": "60",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "BUNNI",
+              "id": "0x000000c396558ffbab5ea628f39658bdf61345b3",
+              "name": "Bunni",
+              "decimals": "18"
+            }
           }
         ]
       },
@@ -63,12 +93,42 @@
           {
             "id": "0x68306351b1155f7329bc4428657aa73b8a32e87e916f897b7dcb1328f2ec60a3",
             "tvlUSD": 3548170,
-            "tvlETH": 773.13
+            "tvlETH": 773.13,
+            "feeTier": "0",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USDT",
+              "id": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD",
+              "decimals": "6"
+            },
+            "token1": {
+              "symbol": "USDf",
+              "id": "0xfa2b947eec368f42195f24f36d2af29f7c24cec2",
+              "name": "Falcon USD",
+              "decimals": "18"
+            }
           },
           {
             "id": "0x00ef227c44fdb9dead9e5249abacfd8236ff375e84f6578e4c64743643a90447",
             "tvlUSD": 18205,
-            "tvlETH": 3.97
+            "tvlETH": 3.97,
+            "feeTier": "0",
+            "tickSpacing": "60",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "BUNNI",
+              "id": "0x000000c396558ffbab5ea628f39658bdf61345b3",
+              "name": "Bunni",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           }
         ]
       },
@@ -87,27 +147,102 @@
           {
             "id": "0xd9f673912e1da331c9e56c5f0dbc7273c0eb684617939a375ec5e227c62d6707",
             "tvlUSD": 23777373,
-            "tvlETH": 5181
+            "tvlETH": 5181,
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USDC",
+              "id": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              "name": "USD Coin",
+              "decimals": "6"
+            },
+            "token1": {
+              "symbol": "USDT",
+              "id": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD",
+              "decimals": "6"
+            }
           },
           {
             "id": "0xa27d94eb334faeb7e65b2b861d4ea4dc3ddce9bdea10bff37fac9f9f095d2148",
             "tvlUSD": 169447,
-            "tvlETH": 36.92
+            "tvlETH": 36.92,
+            "feeTier": "0",
+            "tickSpacing": "100",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "MET",
+              "id": "0x2ebd53d035150f328bd754d6dc66b99b0edb89aa",
+              "name": "MET",
+              "decimals": "18"
+            }
           },
           {
             "id": "0x54ff1fd1d62f3bc6224082ecfdb3190a34e8428611b058ade19ce6c083cb608b",
             "tvlUSD": 101866,
-            "tvlETH": 22.2
+            "tvlETH": 22.2,
+            "feeTier": "0",
+            "tickSpacing": "5",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USD0++",
+              "id": "0x35d8949372d46b7a3d5a56006ae77b215fc69bc0",
+              "name": "USD0 Liquid Bond",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USD0",
+              "id": "0x73a15fed60bf67631dc6cd7bc5b6e8da8190acf5",
+              "name": "Usual USD",
+              "decimals": "18"
+            }
           },
           {
             "id": "0x896895226e2cde763d53496363ef5af1d6d60f0df7960d658c1d0c6251db6c66",
             "tvlUSD": 252320,
-            "tvlETH": 54.98
+            "tvlETH": 54.98,
+            "feeTier": "0",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "hwHLP",
+              "id": "0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1",
+              "name": "hwHLP",
+              "decimals": "6"
+            },
+            "token1": {
+              "symbol": "USDT",
+              "id": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "name": "Tether USD",
+              "decimals": "6"
+            }
           },
           {
             "id": "0xbc472c63afae4d891699e56a0e1ce6b4c7b71a1830494c214a739de06c49384f",
             "tvlUSD": 52137,
-            "tvlETH": 11.36
+            "tvlETH": 11.36,
+            "feeTier": "2",
+            "tickSpacing": "100",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "PRL",
+              "id": "0x6c0aeceedc55c9d55d8b99216a670d85330941c3",
+              "name": "Parallel Governance Token",
+              "decimals": "18"
+            }
           }
         ]
       }
@@ -128,7 +263,22 @@
           {
             "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
             "tvlUSD": 30061,
-            "tvlETH": 6.55
+            "tvlETH": 6.55,
+            "feeTier": "0",
+            "tickSpacing": "60",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "BUNNI",
+              "id": "0x000000c396558ffbab5ea628f39658bdf61345b3",
+              "name": "Bunni",
+              "decimals": "18"
+            }
           }
         ]
       },
@@ -173,7 +323,22 @@
           {
             "id": "0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537",
             "tvlUSD": 208654,
-            "tvlETH": 45.46
+            "tvlETH": 45.46,
+            "feeTier": "0",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USND",
+              "id": "0x4ecf61a6c2fab8a047ceb3b3b263b401763e9d49",
+              "name": "US Nerite Dollar",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           }
         ]
       }
@@ -194,7 +359,22 @@
           {
             "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
             "tvlUSD": 32813,
-            "tvlETH": 7.15
+            "tvlETH": 7.15,
+            "feeTier": "0",
+            "tickSpacing": "60",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "BUNNI",
+              "id": "0x000000c396558ffbab5ea628f39658bdf61345b3",
+              "name": "Bunni",
+              "decimals": "18"
+            }
           }
         ]
       },
@@ -239,22 +419,82 @@
           {
             "id": "0xbb10cb59b736ab186d8a17d8459bf93503cf820f701884e0154c429057bd7227",
             "tvlUSD": 0,
-            "tvlETH": 0
+            "tvlETH": 0,
+            "feeTier": "0",
+            "tickSpacing": "5",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           },
           {
             "id": "0x6dbb5d653f8e11f406adf38091138546f70bc352ccf1115983520d1fe4284449",
             "tvlUSD": 0,
-            "tvlETH": 0
+            "tvlETH": 0,
+            "feeTier": "1",
+            "tickSpacing": "5",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           },
           {
             "id": "0x153695fdc96c0a3152b166ed2183c61268bb94e81aa21f1fde4304e277c49755",
             "tvlUSD": 16816,
-            "tvlETH": 3.66
+            "tvlETH": 3.66,
+            "feeTier": "1",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           },
           {
             "id": "0xdea704e5d90cec9defc31ce88a1d06033fd7a02297fd5852ac103027e30134cb",
             "tvlUSD": 22654,
-            "tvlETH": 4.94
+            "tvlETH": 4.94,
+            "feeTier": "2",
+            "tickSpacing": "5",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+              "name": "USD Coin",
+              "decimals": "6"
+            }
           }
         ]
       }
@@ -303,7 +543,22 @@
           {
             "id": "0x38eeae8c6d1c205eff7c18ca631c9c65afa357e83fa130ec215aff81741d2408",
             "tvlUSD": 30,
-            "tvlETH": 0.01
+            "tvlETH": 0.01,
+            "feeTier": "0",
+            "tickSpacing": "10",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USDC",
+              "id": "0x078d782b760474a361dda0af3839290b0ef57ad6",
+              "name": "USDC",
+              "decimals": "6"
+            },
+            "token1": {
+              "symbol": "USDT",
+              "id": "0x588ce4f028d8e7b53b687865d6a67b3a54c75518",
+              "name": "Tether USD",
+              "decimals": "6"
+            }
           }
         ]
       },
@@ -322,7 +577,22 @@
           {
             "id": "0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433",
             "tvlUSD": 28813605,
-            "tvlETH": 6278.38
+            "tvlETH": 6278.38,
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "USDC",
+              "id": "0x078d782b760474a361dda0af3839290b0ef57ad6",
+              "name": "USDC",
+              "decimals": "6"
+            },
+            "token1": {
+              "symbol": "USD₮0",
+              "id": "0x9151434b16b9763660705744891fa906f660ecc5",
+              "name": "USD₮0",
+              "decimals": "6"
+            }
           }
         ]
       },
@@ -341,12 +611,42 @@
           {
             "id": "0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857",
             "tvlUSD": 13395486,
-            "tvlETH": 2918.83
+            "tvlETH": 2918.83,
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "weETH",
+              "id": "0x7dcc39b4d1c53cb31e1abc0e358b43987fef80f7",
+              "name": "Wrapped eETH",
+              "decimals": "18"
+            }
           },
           {
             "id": "0x39bd03115d5482eefbf43b1f3f3c48188f32bcb09b43fd4722f4c86d399e282a",
             "tvlUSD": 106,
-            "tvlETH": 0.02
+            "tvlETH": 0.02,
+            "feeTier": "0",
+            "tickSpacing": "5",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "USDC",
+              "id": "0x078d782b760474a361dda0af3839290b0ef57ad6",
+              "name": "USDC",
+              "decimals": "6"
+            }
           }
         ]
       }

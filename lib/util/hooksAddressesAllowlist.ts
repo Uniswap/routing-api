@@ -4,10 +4,22 @@ import fs from 'fs'
 import path from 'path'
 
 //Expected format of HookList JSON files
+interface TokenEntry {
+  symbol: string
+  id: string
+  name: string
+  decimals: string
+}
+
 interface PoolEntry {
   id: string
-  tvlUSD: number | null
-  tvlETH: number | null
+  tvlUSD?: number
+  tvlETH?: number
+  feeTier?: string
+  tickSpacing?: string
+  liquidity?: string
+  token0?: TokenEntry
+  token1?: TokenEntry
 }
 
 interface HookEntry {
@@ -40,7 +52,29 @@ interface HookFile {
   }
 }
 
-// A minimized hook metadata object which allows us to carry more useful details into other functions.
+// A V4SubgraphPool-compatible interface for pools
+interface V4PoolData {
+  id: string
+  feeTier?: string
+  tickSpacing?: string
+  hooks?: string
+  liquidity?: string
+  token0?: {
+    symbol: string
+    id: string
+    name: string
+    decimals: string
+  }
+  token1?: {
+    symbol: string
+    id: string
+    name: string
+    decimals: string
+  }
+  tvlETH?: number
+  tvlUSD?: number
+}
+
 interface HookMetadata {
   address: string
   name: string
@@ -141,9 +175,9 @@ function buildHooksAllowlist(): { [chain in ChainId]: Array<HookMetadata> } {
   return allowlist
 }
 
-// Create a list of pools for each hook address
-function buildHookPoolsList(): PoolEntry[] {
-  const pools: PoolEntry[] = []
+// Create a list of pools for each hook address in V4SubgraphPool format
+function buildHookPoolsList(): V4PoolData[] {
+  const pools: V4PoolData[] = []
 
   const hookFiles = loadAllHookFiles()
 
@@ -153,8 +187,25 @@ function buildHookPoolsList(): PoolEntry[] {
         if (hook.pools && hook.pools.length > 0) {
           for (const pool of hook.pools) {
             pools.push({
-              ...pool,
               id: pool.id.toLowerCase(),
+              feeTier: pool.feeTier,
+              tickSpacing: pool.tickSpacing,
+              hooks: hook.address.toLowerCase(),
+              liquidity: pool.liquidity,
+              token0: pool.token0 ? {
+                symbol: pool.token0.symbol,
+                id: pool.token0.id,
+                name: pool.token0.name,
+                decimals: pool.token0.decimals,
+              } : undefined,
+              token1: pool.token1 ? {
+                symbol: pool.token1.symbol,
+                id: pool.token1.id,
+                name: pool.token1.name,
+                decimals: pool.token1.decimals,
+              } : undefined,
+              tvlETH: pool.tvlETH,
+              tvlUSD: pool.tvlUSD,
             })
           }
         }
@@ -166,4 +217,4 @@ function buildHookPoolsList(): PoolEntry[] {
 }
 
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<HookMetadata> } = buildHooksAllowlist()
-export const HOOK_POOLS_DATA: PoolEntry[] = buildHookPoolsList()
+export const HOOK_POOLS_DATA: V4PoolData[] = buildHookPoolsList()

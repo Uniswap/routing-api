@@ -94,9 +94,9 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       if (
         hookPoolData &&
-        hookPoolData.tvlUSD &&
+        hookPoolData.tvlUSD !== undefined &&
         hookPoolData.tvlUSD > 0 &&
-        hookPoolData.tvlETH &&
+        hookPoolData.tvlETH !== undefined &&
         hookPoolData.tvlETH > 0
       ) {
         pool.tvlETH = hookPoolData.tvlETH

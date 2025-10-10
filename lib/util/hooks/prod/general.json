@@ -62,7 +62,68 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xe9eeab9794c33dff3dd8d0951cbe2d36619294af5a3a329f38f91f54be0b6d34",
+            "feeTier": "10000",
+            "tickSpacing": "200",
+            "liquidity": "274563705100803912362733",
+            "token0": {
+              "symbol": "fid:385955",
+              "id": "0x112cf1cc540eadf234158c0e4044c3b5f2a33e5e",
+              "name": "degenfans",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "MOXIE",
+              "id": "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+              "name": "Moxie",
+              "decimals": "18"
+            },
+            "tvlETH": 25.33120577965346308313185954009482,
+            "tvlUSD": 56627.5525783346590219799350683533
+          },
+          {
+            "id": "0x6bac01f0a8fb96eeb56e37506f210628714561113c748d43c6de50dc339edfe9",
+            "feeTier": "10000",
+            "tickSpacing": "200",
+            "liquidity": "621568112474979678301274",
+            "token0": {
+              "symbol": "base-economy",
+              "id": "0x125490489a27d541e39813c08d260debac071bb7",
+              "name": "Base Economy",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "MOXIE",
+              "id": "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+              "name": "Moxie",
+              "decimals": "18"
+            },
+            "tvlETH": 142.7576163222032969740638595951846,
+            "tvlUSD": 316322.6881520965844428159264274397
+          },
+          {
+            "id": "0x31781e65a4bd9ff0161e660f7930beee16026f819cd4d0bc7e17f6c78c29fc27",
+            "feeTier": "10000",
+            "tickSpacing": "200",
+            "liquidity": "482843960670027606548690",
+            "token0": {
+              "symbol": "fid:444067",
+              "id": "0x15148da22518e40e0d2fabf5d5e6a22269ebcb30",
+              "name": "macster",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "MOXIE",
+              "id": "0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527",
+              "name": "Moxie",
+              "decimals": "18"
+            },
+            "tvlETH": 44.1795925485023741879813651641809,
+            "tvlUSD": 95050.95363442908526427214106054717
+          }
+        ]
       },
       {
         "address": "0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80",

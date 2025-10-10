@@ -22,7 +22,28 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xf6f2314ac16a878e2bf8ef01ef0a3487e714d397d87f702b9a08603eb3252e92",
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "482843960670027606548690",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "ETH",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "WETH",
+              "id": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+              "name": "WETH",
+              "decimals": "18"
+            },
+            "tvlETH": 44000.1795925485023741879813651641809,
+            "tvlUSD": 95050000.95363442908526427214106054717
+          }
+        ]
       }
     ],
     "10": [
@@ -37,7 +58,28 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xbf3d38951e485c811bb1fc7025fcd1ef60c15fda4c4163458facb9bedfe26f83",
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "WETH",
+              "id": "0x4200000000000000000000000000000000000006",
+              "name": "Wrapped Ether",
+              "decimals": "18"
+            },
+            "tvlETH": 826,
+            "tvlUSD": 1482475
+          }
+        ]
       }
     ],
     "42161": [
@@ -52,7 +94,28 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xc1c777843809a8e77a398fd79ecddcefbdad6a5676003ae2eedf3a33a56589e9",
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "WETH",
+              "id": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+              "name": "Wrapped Ether",
+              "decimals": "18"
+            },
+            "tvlETH": 23183,
+            "tvlUSD": 41820637
+          }
+        ]
       }
     ],
     "8453": [
@@ -67,7 +130,28 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xbb2aefc6c55a0464b944c0478869527ba1a537f05f90a1bb82e1196c6e9403e2",
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "WETH",
+              "id": "0x4200000000000000000000000000000000000006",
+              "name": "Wrapped Ether",
+              "decimals": "18"
+            },
+            "tvlETH": 6992,
+            "tvlUSD": 12580000
+          }
+        ]
       }
     ],
     "130": [
@@ -82,7 +166,28 @@
           "patch": 0
         },
         "hookStatsAddress": "",
-        "pools": []
+        "pools": [
+          {
+            "id": "0xba246b8420b5aeb13e586cd7cbd32279fa7584d7f4cbc9bd356a6bb6200d16a6",
+            "feeTier": "0",
+            "tickSpacing": "1",
+            "liquidity": "173747248900",
+            "token0": {
+              "symbol": "ETH",
+              "id": "0x0000000000000000000000000000000000000000",
+              "name": "Ethereum",
+              "decimals": "18"
+            },
+            "token1": {
+              "symbol": "WETH",
+              "id": "0x4200000000000000000000000000000000000006",
+              "name": "Wrapped Ether",
+              "decimals": "18"
+            },
+            "tvlETH": 33482,
+            "tvlUSD": 60342168
+          }
+        ]
       }
     ],
     "11155111": [
