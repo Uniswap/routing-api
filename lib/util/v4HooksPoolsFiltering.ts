@@ -90,11 +90,15 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       // Check if this pool is in our approved hook pools list and has override TVL
       // If there is a non-zero override TVL, set the TVL of the pool to ensure it is considered by the routing algorithm
-      const hookPoolData = HOOK_POOLS_DATA.find(
-        (poolData) => poolData.id.toLowerCase() === pool.id.toLowerCase()
-      )
+      const hookPoolData = HOOK_POOLS_DATA.find((poolData) => poolData.id.toLowerCase() === pool.id.toLowerCase())
 
-      if (hookPoolData && hookPoolData.tvlUSD && hookPoolData.tvlUSD > 0 && hookPoolData.tvlETH && hookPoolData.tvlETH > 0) {
+      if (
+        hookPoolData &&
+        hookPoolData.tvlUSD &&
+        hookPoolData.tvlUSD > 0 &&
+        hookPoolData.tvlETH &&
+        hookPoolData.tvlETH > 0
+      ) {
         pool.tvlETH = hookPoolData.tvlETH
         pool.tvlUSD = hookPoolData.tvlUSD
         log.info(`Setting TVL for pool ${pool.id}: $${hookPoolData.tvlUSD}, ${hookPoolData.tvlETH} ETH`)
@@ -104,13 +108,12 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       let shouldNotAddV4Pool = false
 
       // Check if this is a Zora pool by looking for "Zora" keyword in the allowlist
-      const hookMetadata = HOOKS_ADDRESSES_ALLOWLIST[chainId].find(item => 
-        item.address === pool.hooks.toLowerCase()
-      )
-      
-      const isZoraPool = chainId === ChainId.BASE && 
-        hookMetadata && 
-        hookMetadata.keywords.some(keyword => keyword.toLowerCase().includes('zora'))
+      const hookMetadata = HOOKS_ADDRESSES_ALLOWLIST[chainId].find((item) => item.address === pool.hooks.toLowerCase())
+
+      const isZoraPool =
+        chainId === ChainId.BASE &&
+        hookMetadata &&
+        hookMetadata.keywords.some((keyword) => keyword.toLowerCase().includes('zora'))
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
           shouldNotAddV4Pool = true

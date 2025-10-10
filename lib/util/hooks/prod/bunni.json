@@ -1,357 +1,355 @@
 {
-    "name": "Bunni Hooklist",
-    "timestamp": "2025-10-09T16:33:00+00:00",
-    "version": {
-      "major": 1,
-      "minor": 0,
-      "patch": 0
-    },
-    "keywords": [
-      "Bunni"
+  "name": "Bunni Hooklist",
+  "timestamp": "2025-10-09T16:33:00+00:00",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["Bunni"],
+  "description": "Bunni hooks for multi-purpose liquidity management including dynamic fees, rehypothecation, liquidity density functions, and autonomous rebalancing",
+  "logoURI": "https://bunni.pro/assets/img/favicon-32x32.png",
+  "chains": {
+    "1": [
+      {
+        "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
+        "name": "Bunni Hook v1.0 on Mainnet",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615",
+            "tvlUSD": 1553028,
+            "tvlETH": 338.4
+          },
+          {
+            "id": "0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5",
+            "tvlUSD": 729657,
+            "tvlETH": 158.99
+          }
+        ]
+      },
+      {
+        "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
+        "name": "Bunni Hook v1.1 on Mainnet",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+        "name": "Bunni Hook v1.1.1 on Mainnet",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x68306351b1155f7329bc4428657aa73b8a32e87e916f897b7dcb1328f2ec60a3",
+            "tvlUSD": 3548170,
+            "tvlETH": 773.13
+          },
+          {
+            "id": "0x00ef227c44fdb9dead9e5249abacfd8236ff375e84f6578e4c64743643a90447",
+            "tvlUSD": 18205,
+            "tvlETH": 3.97
+          }
+        ]
+      },
+      {
+        "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
+        "name": "Bunni Hook v1.2.1 on Mainnet",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xd9f673912e1da331c9e56c5f0dbc7273c0eb684617939a375ec5e227c62d6707",
+            "tvlUSD": 23777373,
+            "tvlETH": 5181
+          },
+          {
+            "id": "0xa27d94eb334faeb7e65b2b861d4ea4dc3ddce9bdea10bff37fac9f9f095d2148",
+            "tvlUSD": 169447,
+            "tvlETH": 36.92
+          },
+          {
+            "id": "0x54ff1fd1d62f3bc6224082ecfdb3190a34e8428611b058ade19ce6c083cb608b",
+            "tvlUSD": 101866,
+            "tvlETH": 22.2
+          },
+          {
+            "id": "0x896895226e2cde763d53496363ef5af1d6d60f0df7960d658c1d0c6251db6c66",
+            "tvlUSD": 252320,
+            "tvlETH": 54.98
+          },
+          {
+            "id": "0xbc472c63afae4d891699e56a0e1ce6b4c7b71a1830494c214a739de06c49384f",
+            "tvlUSD": 52137,
+            "tvlETH": 11.36
+          }
+        ]
+      }
     ],
-    "description": "Bunni hooks for multi-purpose liquidity management including dynamic fees, rehypothecation, liquidity density functions, and autonomous rebalancing",
-    "logoURI": "https://bunni.pro/assets/img/favicon-32x32.png",
-    "chains": {
-      "1": [
-        {
-          "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
-          "name": "Bunni Hook v1.0 on Mainnet",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x77f73405a72f844e46d26a0bfd6f145c1a45ffcf6e4af5c86811405f29d2e615",
-              "tvlUSD": 1553028,
-              "tvlETH": 338.4
-            },
-            {
-              "id": "0x9148f00424c4b40a9ec4b03912f091138e9e91a60980550ed97ed7f9dc998cb5",
-              "tvlUSD": 729657,
-              "tvlETH": 158.99
-            }
-          ]
+    "42161": [
+      {
+        "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
+        "name": "Bunni Hook v1.0 on Arbitrum",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
-          "name": "Bunni Hook v1.1 on Mainnet",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
+            "tvlUSD": 30061,
+            "tvlETH": 6.55
+          }
+        ]
+      },
+      {
+        "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
+        "name": "Bunni Hook v1.1 on Arbitrum",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0
         },
-        {
-          "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
-          "name": "Bunni Hook v1.1.1 on Mainnet",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x68306351b1155f7329bc4428657aa73b8a32e87e916f897b7dcb1328f2ec60a3",
-              "tvlUSD": 3548170,
-              "tvlETH": 773.13
-            },
-            {
-              "id": "0x00ef227c44fdb9dead9e5249abacfd8236ff375e84f6578e4c64743643a90447",
-              "tvlUSD": 18205,
-              "tvlETH": 3.97
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+        "name": "Bunni Hook v1.1.1 on Arbitrum",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
         },
-        {
-          "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
-          "name": "Bunni Hook v1.2.1 on Mainnet",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xd9f673912e1da331c9e56c5f0dbc7273c0eb684617939a375ec5e227c62d6707",
-              "tvlUSD": 23777373,
-              "tvlETH": 5181
-            },
-            {
-              "id": "0xa27d94eb334faeb7e65b2b861d4ea4dc3ddce9bdea10bff37fac9f9f095d2148",
-              "tvlUSD": 169447,
-              "tvlETH": 36.92
-            },
-            {
-              "id": "0x54ff1fd1d62f3bc6224082ecfdb3190a34e8428611b058ade19ce6c083cb608b",
-              "tvlUSD": 101866,
-              "tvlETH": 22.2
-            },
-            {
-              "id": "0x896895226e2cde763d53496363ef5af1d6d60f0df7960d658c1d0c6251db6c66",
-              "tvlUSD": 252320,
-              "tvlETH": 54.98
-            },
-            {
-              "id": "0xbc472c63afae4d891699e56a0e1ce6b4c7b71a1830494c214a739de06c49384f",
-              "tvlUSD": 52137,
-              "tvlETH": 11.36
-            }
-          ]
-        }
-      ],
-      "42161": [
-        {
-          "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
-          "name": "Bunni Hook v1.0 on Arbitrum",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
-              "tvlUSD": 30061,
-              "tvlETH": 6.55
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x0000eb22c45bdb564f985ace0b4d05a64fa71888",
+        "name": "Bunni Hook v1.2.1 on Arbitrum",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 1
         },
-        {
-          "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
-          "name": "Bunni Hook v1.1 on Arbitrum",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537",
+            "tvlUSD": 208654,
+            "tvlETH": 45.46
+          }
+        ]
+      }
+    ],
+    "8453": [
+      {
+        "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
+        "name": "Bunni Hook v1.0 on Base",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
-          "name": "Bunni Hook v1.1.1 on Arbitrum",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
+            "tvlUSD": 32813,
+            "tvlETH": 7.15
+          }
+        ]
+      },
+      {
+        "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
+        "name": "Bunni Hook v1.1 on Base",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0
         },
-        {
-          "address": "0x0000eb22c45bdb564f985ace0b4d05a64fa71888",
-          "name": "Bunni Hook v1.2.1 on Arbitrum",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x75c55eda2c37c47eaf1db8b500171f72f23dc5b16404e904866a6ad1b3a3e537",
-              "tvlUSD": 208654,
-              "tvlETH": 45.46
-            }
-          ]
-        }
-      ],
-      "8453": [
-        {
-          "address": "0x0010d0d5db05933fa0d9f7038d365e1541a41888",
-          "name": "Bunni Hook v1.0 on Base",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xc3011ab27d607decdc04ab317585dececaa91de749be8b46accb36e066d8f420",
-              "tvlUSD": 32813,
-              "tvlETH": 7.15
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+        "name": "Bunni Hook v1.1.1 on Base",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
         },
-        {
-          "address": "0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888",
-          "name": "Bunni Hook v1.1 on Base",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
+        "name": "Bunni Hook v1.2.1 on Base",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 1
         },
-        {
-          "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
-          "name": "Bunni Hook v1.1.1 on Base",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 1
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xbb10cb59b736ab186d8a17d8459bf93503cf820f701884e0154c429057bd7227",
+            "tvlUSD": 0,
+            "tvlETH": 0
           },
-          "hookStatsAddress": "",
-          "pools": []
+          {
+            "id": "0x6dbb5d653f8e11f406adf38091138546f70bc352ccf1115983520d1fe4284449",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          },
+          {
+            "id": "0x153695fdc96c0a3152b166ed2183c61268bb94e81aa21f1fde4304e277c49755",
+            "tvlUSD": 16816,
+            "tvlETH": 3.66
+          },
+          {
+            "id": "0xdea704e5d90cec9defc31ce88a1d06033fd7a02297fd5852ac103027e30134cb",
+            "tvlUSD": 22654,
+            "tvlETH": 4.94
+          }
+        ]
+      }
+    ],
+    "56": [
+      {
+        "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+        "name": "Bunni Hook v1.1.1 on BNB",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
         },
-        {
-          "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
-          "name": "Bunni Hook v1.2.1 on Base",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xbb10cb59b736ab186d8a17d8459bf93503cf820f701884e0154c429057bd7227",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            },
-            {
-              "id": "0x6dbb5d653f8e11f406adf38091138546f70bc352ccf1115983520d1fe4284449",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            },
-            {
-              "id": "0x153695fdc96c0a3152b166ed2183c61268bb94e81aa21f1fde4304e277c49755",
-              "tvlUSD": 16816,
-              "tvlETH": 3.66
-            },
-            {
-              "id": "0xdea704e5d90cec9defc31ce88a1d06033fd7a02297fd5852ac103027e30134cb",
-              "tvlUSD": 22654,
-              "tvlETH": 4.94
-            }
-          ]
-        }
-      ],
-      "56": [
-        {
-          "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
-          "name": "Bunni Hook v1.1.1 on BNB",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
+        "name": "Bunni Hook v1.2.1 on BNB",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 1
         },
-        {
-          "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
-          "name": "Bunni Hook v1.2.1 on BNB",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": []
-        }
-      ],
-      "130": [
-        {
-          "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
-          "name": "Bunni Hook v1.1.1 on Unichain",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x38eeae8c6d1c205eff7c18ca631c9c65afa357e83fa130ec215aff81741d2408",
-              "tvlUSD": 30,
-              "tvlETH": 0.01
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": []
+      }
+    ],
+    "130": [
+      {
+        "address": "0x0000fe59823933ac763611a69c88f91d45f81888",
+        "name": "Bunni Hook v1.1.1 on Unichain",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 1
         },
-        {
-          "address": "0x005af73a245d8171a0550ffae2631f12cc211888",
-          "name": "Bunni Hook v1.2.0 on Unichain",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433",
-              "tvlUSD": 28813605,
-              "tvlETH": 6278.38
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x38eeae8c6d1c205eff7c18ca631c9c65afa357e83fa130ec215aff81741d2408",
+            "tvlUSD": 30,
+            "tvlETH": 0.01
+          }
+        ]
+      },
+      {
+        "address": "0x005af73a245d8171a0550ffae2631f12cc211888",
+        "name": "Bunni Hook v1.2.0 on Unichain",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 0
         },
-        {
-          "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
-          "name": "Bunni Hook v1.2.1 on Unichain",
-          "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 2,
-            "patch": 1
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433",
+            "tvlUSD": 28813605,
+            "tvlETH": 6278.38
+          }
+        ]
+      },
+      {
+        "address": "0x000052423c1db6b7ff8641b85a7eefc7b2791888",
+        "name": "Bunni Hook v1.2.1 on Unichain",
+        "description": "A multi purpose hook including dynamic fees, rehypothecation, liquidity density functions, autonomous rebalancing, and more",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 2,
+          "patch": 1
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857",
+            "tvlUSD": 13395486,
+            "tvlETH": 2918.83
           },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x6923777072439713c7b8ab34903e0ea96078d7148449bf54f420320d59ede857",
-              "tvlUSD": 13395486,
-              "tvlETH": 2918.83
-            },
-            {
-              "id": "0x39bd03115d5482eefbf43b1f3f3c48188f32bcb09b43fd4722f4c86d399e282a",
-              "tvlUSD": 106,
-              "tvlETH": 0.02
-            }
-          ]
-        }
-      ]
-    }
+          {
+            "id": "0x39bd03115d5482eefbf43b1f3f3c48188f32bcb09b43fd4722f4c86d399e282a",
+            "tvlUSD": 106,
+            "tvlETH": 0.02
+          }
+        ]
+      }
+    ]
   }
+}

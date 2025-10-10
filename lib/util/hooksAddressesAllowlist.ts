@@ -52,8 +52,8 @@ function loadAllHookFiles(): HookFile[] {
   const hookFiles: HookFile[] = []
 
   try {
-    const files = fs.readdirSync(hooksDir).filter(file => file.endsWith('.json'))
-    
+    const files = fs.readdirSync(hooksDir).filter((file) => file.endsWith('.json'))
+
     for (const file of files) {
       try {
         const filePath = path.join(hooksDir, file)
@@ -77,7 +77,7 @@ function buildHooksAllowlist(): { [chain in ChainId]: Array<HookMetadata> } {
   const addressZeroMetadata: HookMetadata = {
     address: ADDRESS_ZERO,
     name: 'No Hook (Regular Pool)',
-    keywords: []
+    keywords: [],
   }
 
   const allowlist: { [chain in ChainId]: Array<HookMetadata> } = {
@@ -118,19 +118,19 @@ function buildHooksAllowlist(): { [chain in ChainId]: Array<HookMetadata> } {
   for (const hookFile of hookFiles) {
     for (const [chainIdString, hooks] of Object.entries(hookFile.chains)) {
       const chainId = parseInt(chainIdString) as ChainId
-      
+
       if (allowlist[chainId]) {
         for (const hook of hooks) {
           const hookAddress = hook.address.toLowerCase()
-          
+
           // Check if this hook address is already in the allowlist
-          const existingHook = allowlist[chainId].find(item => item.address === hookAddress)
-          
+          const existingHook = allowlist[chainId].find((item) => item.address === hookAddress)
+
           if (!existingHook) {
             allowlist[chainId].push({
               address: hookAddress,
               name: hook.name,
-              keywords: hookFile.keywords || []
+              keywords: hookFile.keywords || [],
             })
           }
         }

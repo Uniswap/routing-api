@@ -1,174 +1,172 @@
 {
-    "name": "Clanker Hooklist",
-    "timestamp": "2025-10-08T22:28:00+00:00",
-    "version": {
-      "major": 1,
-      "minor": 0,
-      "patch": 0
-    },
-    "keywords": [
-      "Clanker"
-    ],
-    "description": "Clanker static and dynamic fee hooks for token launching",
-    "logoURI": "https://www.clanker.world/logo_circle.png",
-    "chains": {
-      "8453": [
-        {
-          "address": "0x34a45c6b61876d739400bd71228cbcbd4f53e8cc",
-          "name": "Clanker Dynamic Fee Hook on Base",
-          "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-          "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress":"",
-          "pools":[
-            {
-              "id":"0x15ddaf96b657ff1a7815670d4945164d71c7f0b3387124df662d99e5ce33dbde",
-              "tvlUSD":0,
-              "tvlETH":0
-            }
-          ]
+  "name": "Clanker Hooklist",
+  "timestamp": "2025-10-08T22:28:00+00:00",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["Clanker"],
+  "description": "Clanker static and dynamic fee hooks for token launching",
+  "logoURI": "https://www.clanker.world/logo_circle.png",
+  "chains": {
+    "8453": [
+      {
+        "address": "0x34a45c6b61876d739400bd71228cbcbd4f53e8cc",
+        "name": "Clanker Dynamic Fee Hook on Base",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-            "address": "0xdd5eeaff7bd481ad55db083062b13a3cdf0a68cc",
-            "name": "Clanker Static Fee Hook on Base",
-            "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-            "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-            "version": {
-              "major": 1,
-              "minor": 0,
-              "patch": 0
-            },
-            "hookStatsAddress":"",
-            "pools":[
-              {
-                "id":"0x82b4518a84dbec4f49ebffc1e01274ecc1f3e16c42e49fb39d96f9224df74957",
-                "tvlUSD":0,
-                "tvlETH":0
-              }
-            ]
-          },
+        "hookStatsAddress": "",
+        "pools": [
           {
-            "address": "0xd60d6b218116cfd801e28f78d011a203d2b068cc",
-            "name": "Clanker Dynamic Fee Hook on Base - v2",
-            "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-            "audit": "",
-            "version": {
-              "major": 2,
-              "minor": 0,
-              "patch": 0
-            },
-            "hookStatsAddress":"",
-            "pools":[
-              {
-                "id":"0x525d8e2619c2a9f8c12240c469c194e0a3099126c2f3a6aa56c9590dd8174592",
-                "tvlUSD":0,
-                "tvlETH":0
-              }
-            ]
-          },
+            "id": "0x15ddaf96b657ff1a7815670d4945164d71c7f0b3387124df662d99e5ce33dbde",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xdd5eeaff7bd481ad55db083062b13a3cdf0a68cc",
+        "name": "Clanker Static Fee Hook on Base",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
           {
-              "address": "0xb429d62f8f3bffb98cdb9569533ea23bf0ba28cc",
-              "name": "Clanker Static Fee Hook on Base - v2",
-              "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-              "audit": "",
-              "version": {
-                "major": 2,
-                "minor": 0,
-                "patch": 0
-              },
-              "hookStatsAddress":"",
-              "pools":[
-                {
-                  "id":"0x53fdb765a953dadb6123c01b4d5a099d67e0f6ac83aa7c5a4f03c43cf63e56df",
-                  "tvlUSD":0,
-                  "tvlETH":0
-                }
-              ]
-            }
-      ],
-      "42161": [
-        {
-            "address": "0xfd213be7883db36e1049dc42f5bd6a0ec66b68cc",
-            "name": "Clanker Dynamic Fee Hook on Arbitrum",
-            "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-            "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-            "version": {
-              "major": 1,
-              "minor": 0,
-              "patch": 0
-            },
-            "hookStatsAddress":"",
-            "pools":[
-              {
-                "id":"0x70b7962b63b7fe4b5da331d3173f7e1a4f223f09499dc056018f93c9dfa0667e",
-                "tvlUSD":0,
-                "tvlETH":0
-              }
-            ]
-          },
+            "id": "0x82b4518a84dbec4f49ebffc1e01274ecc1f3e16c42e49fb39d96f9224df74957",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xd60d6b218116cfd801e28f78d011a203d2b068cc",
+        "name": "Clanker Dynamic Fee Hook on Base - v2",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
           {
-              "address": "0xf7ac669593d2d9d01026fa5b756dd5b4f7aaa8cc",
-              "name": "Clanker Static Fee Hook on Arbitrum",
-              "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-              "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-              "version": {
-                "major": 1,
-                "minor": 0,
-                "patch": 0
-              },
-              "hookStatsAddress":"",
-              "pools":[
-                {
-                  "id":"0x32eccafdb852eaedba8456e371dea6bf6f6156b7c3d4ba89ea923c1ce8dc4d68",
-                  "tvlUSD":0,
-                  "tvlETH":0
-                }
-              ]
-            }
-      ],
-      "130": [
-        {
-            "address": "0x9b37a43422d7bbd4c8b231be11e50ad1ace828cc",
-            "name": "Clanker Dynamic Fee Hook on Unichain",
-            "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-            "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-            "version": {
-              "major": 1,
-              "minor": 0,
-              "patch": 0
-            },
-            "hookStatsAddress":"",
-            "pools":[
-              {
-                "id":"0x656d6be9fc559c9bc8dd165556b5ca2bdc1157a717ac4fd6e54ed23757c5669d",
-                "tvlUSD":0,
-                "tvlETH":0
-              }
-            ]
-          },
+            "id": "0x525d8e2619c2a9f8c12240c469c194e0a3099126c2f3a6aa56c9590dd8174592",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xb429d62f8f3bffb98cdb9569533ea23bf0ba28cc",
+        "name": "Clanker Static Fee Hook on Base - v2",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "",
+        "version": {
+          "major": 2,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
           {
-              "address": "0xbc6e5abda425309c2534bc2bc92562f5419ce8cc",
-              "name": "Clanker Static Fee Hook on Unichain",
-              "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
-              "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
-              "version": {
-                "major": 1,
-                "minor": 0,
-                "patch": 0
-              },
-              "hookStatsAddress":"",
-              "pools":[
-                {
-                  "id":"0x5fe1d0744945cc9019178b6c779c1d83701ff4e09e1e1e2c3ac6c0097ffa36c0",
-                  "tvlUSD":0,
-                  "tvlETH":0
-                }
-              ]
-            }
-      ]
-    }
+            "id": "0x53fdb765a953dadb6123c01b4d5a099d67e0f6ac83aa7c5a4f03c43cf63e56df",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
+    ],
+    "42161": [
+      {
+        "address": "0xfd213be7883db36e1049dc42f5bd6a0ec66b68cc",
+        "name": "Clanker Dynamic Fee Hook on Arbitrum",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x70b7962b63b7fe4b5da331d3173f7e1a4f223f09499dc056018f93c9dfa0667e",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xf7ac669593d2d9d01026fa5b756dd5b4f7aaa8cc",
+        "name": "Clanker Static Fee Hook on Arbitrum",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x32eccafdb852eaedba8456e371dea6bf6f6156b7c3d4ba89ea923c1ce8dc4d68",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
+    ],
+    "130": [
+      {
+        "address": "0x9b37a43422d7bbd4c8b231be11e50ad1ace828cc",
+        "name": "Clanker Dynamic Fee Hook on Unichain",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x656d6be9fc559c9bc8dd165556b5ca2bdc1157a717ac4fd6e54ed23757c5669d",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xbc6e5abda425309c2534bc2bc92562f5419ce8cc",
+        "name": "Clanker Static Fee Hook on Unichain",
+        "description": "Integrates with Clanker's v4 token launchpad to facilitate automatic fee claiming, Clanker protocol fee, per-chain mev games, and user controlled fee customization.",
+        "audit": "https://cantina.xyz/portfolio/e4db23cd-f46d-4d99-adca-a60941b44f65",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x5fe1d0744945cc9019178b6c779c1d83701ff4e09e1e1e2c3ac6c0097ffa36c0",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
+    ]
   }
+}

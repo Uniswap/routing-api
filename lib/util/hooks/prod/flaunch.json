@@ -1,83 +1,81 @@
 {
-    "name": "Flaunch Hooklist",
-    "timestamp": "2025-10-09T15:05:00+00:00",
-    "version": {
-      "major": 1,
-      "minor": 0,
-      "patch": 0
-    },
-    "keywords": [
-      "Flaunch"
-    ],
-    "description": "Flaunch hooks for token launching on Base",
-    "logoURI": "https://flaunch.gg/_next/image?url=%2Flogo.png&w=96&q=100&dpl=dpl_52G4pnK6czCLFZQsPxMBRzxuSCsH",
-    "chains": {
-      "8453": [
-        {
-          "address": "0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888",
-          "name": "ETH-flETH Auto Wrap Hook on Base",
-          "description": "Automatic wrapping functionality for ETH and Flaunch ETH (flETH) tokens on Base",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+  "name": "Flaunch Hooklist",
+  "timestamp": "2025-10-09T15:05:00+00:00",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["Flaunch"],
+  "description": "Flaunch hooks for token launching on Base",
+  "logoURI": "https://flaunch.gg/_next/image?url=%2Flogo.png&w=96&q=100&dpl=dpl_52G4pnK6czCLFZQsPxMBRzxuSCsH",
+  "chains": {
+    "8453": [
+      {
+        "address": "0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888",
+        "name": "ETH-flETH Auto Wrap Hook on Base",
+        "description": "Automatic wrapping functionality for ETH and Flaunch ETH (flETH) tokens on Base",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x51bba15255406cfe7099a42183302640ba7dafdc",
-          "name": "Flaunch Hook on Base",
-          "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
-          "audit": "https://docs.flaunch.gg/protocol/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x51bba15255406cfe7099a42183302640ba7dafdc",
+        "name": "Flaunch Hook on Base",
+        "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
+        "audit": "https://docs.flaunch.gg/protocol/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0xf785bb58059fab6fb19bdda2cb9078d9e546efdc",
-          "name": "Flaunch Hook on Base - v1.0.1",
-          "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
-          "audit": "https://docs.flaunch.gg/protocol/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 1
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0xf785bb58059fab6fb19bdda2cb9078d9e546efdc",
+        "name": "Flaunch Hook on Base - v1.0.1",
+        "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
+        "audit": "https://docs.flaunch.gg/protocol/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 1
         },
-        {
-          "address": "0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc",
-          "name": "Flaunch Hook on Base - v1.0.2",
-          "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
-          "audit": "https://docs.flaunch.gg/protocol/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 2
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc",
+        "name": "Flaunch Hook on Base - v1.0.2",
+        "description": "Flaunch memecoin launchpad liquidity management. Traditional position manager which supports internal buy position to support token buybacks automatically created from fees, internal Swap Pool to ensure that all fees are paid in ETH, rather than the token, and dynamic fee distribution across stakeholders",
+        "audit": "https://docs.flaunch.gg/protocol/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 2
         },
-        {
-          "address": "0x8dc3b85e1dc1c846ebf3971179a751896842e5dc",
-          "name": "Flaunch Hook on Base - v1.0.3",
-          "description": "Flaunch memecoin launchpad liquidity management. Position manager for importing external tokens.",
-          "audit": "https://docs.flaunch.gg/protocol/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 3
-          },
-          "hookStatsAddress": "",
-          "pools": []
-        }
-      ]
-    }
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x8dc3b85e1dc1c846ebf3971179a751896842e5dc",
+        "name": "Flaunch Hook on Base - v1.0.3",
+        "description": "Flaunch memecoin launchpad liquidity management. Position manager for importing external tokens.",
+        "audit": "https://docs.flaunch.gg/protocol/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 3
+        },
+        "hookStatsAddress": "",
+        "pools": []
+      }
+    ]
   }
+}

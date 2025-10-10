@@ -1,257 +1,255 @@
 {
-    "name": "General Hooklist",
-    "timestamp": "2025-10-09T19:37:00+00:00",
-    "version": {
-      "major": 1,
-      "minor": 0,
-      "patch": 0
-    },
-    "keywords": [
-      "General"
+  "name": "General Hooklist",
+  "timestamp": "2025-10-09T19:37:00+00:00",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["General"],
+  "description": "General collection of various hooks for different protocols and functionalities",
+  "logoURI": "",
+  "chains": {
+    "42161": [
+      {
+        "address": "0xc4bf39a096a1b610dd6186935f3ad99c66239080",
+        "name": "Slippage Fee Hook on Arbitrum",
+        "description": "Dynamic slippage-based fee adjustment hook for reducing imparement loss incurred by LPers.",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x582387e095a7fbcba58222b6f9f56cc3e6177d766d10dd0d96a70dab70f66be9",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xd73339564ac99f3e09b0ebc80603ff8b796500c0",
+        "name": "Gamma Limit Order Hook on Arbitrum",
+        "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
+        "audit": "https://docs.gamma.xyz/gamma/learn/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
     ],
-    "description": "General collection of various hooks for different protocols and functionalities",
-    "logoURI": "",
-    "chains": {
-      "42161": [
-        {
-          "address": "0xc4bf39a096a1b610dd6186935f3ad99c66239080",
-          "name": "Slippage Fee Hook on Arbitrum",
-          "description": "Dynamic slippage-based fee adjustment hook for reducing imparement loss incurred by LPers.",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x582387e095a7fbcba58222b6f9f56cc3e6177d766d10dd0d96a70dab70f66be9",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+    "8453": [
+      {
+        "address": "0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000",
+        "name": "Graduation Hook",
+        "description": "",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0xd73339564ac99f3e09b0ebc80603ff8b796500c0",
-          "name": "Gamma Limit Order Hook on Arbitrum",
-          "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
-          "audit": "https://docs.gamma.xyz/gamma/learn/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
-        }
-      ],
-      "8453": [
-        {
-          "address": "0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000",
-          "name": "Graduation Hook",
-          "description": "",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80",
+        "name": "Zaha TWAMM Hook",
+        "description": "Time-Weighted Average Market Maker for large order execution on Base.",
+        "audit": "https://github.com/akshatmittal/v4-twamm-hook/tree/main/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80",
-          "name": "Zaha TWAMM Hook",
-          "description": "Time-Weighted Average Market Maker for large order execution on Base.",
-          "audit": "https://github.com/akshatmittal/v4-twamm-hook/tree/main/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x8e91947e425341e3ec516628c32340f680656c8569a065d51388553eb328b560",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x8e91947e425341e3ec516628c32340f680656c8569a065d51388553eb328b560",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x5cd525c621afca515bf58631d4733fba7b72aae4",
+        "name": "Coinbase Verified Hook on Base",
+        "description": "Hook to only allow swapping by Coinbase verified wallets.",
+        "audit": "https://docs.verifiedpools.com/security/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x5cd525c621afca515bf58631d4733fba7b72aae4",
-          "name": "Coinbase Verified Hook on Base",
-          "description": "Hook to only allow swapping by Coinbase verified wallets.",
-          "audit": "https://docs.verifiedpools.com/security/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": []
+        "hookStatsAddress": "",
+        "pools": []
+      },
+      {
+        "address": "0x704268ac7043aeef50f47b6a03ae68ccf808e044",
+        "name": "BtcAcc",
+        "description": "btc/acc is a protocol that helps you automatically accumulate Bitcoin while trading. Instead of losing all your profits in memecoins, btc/acc ensures you're building a position in Bitcoin over time. The hook can be attached to any token pair on Uniswap v4 and takes 1% of each trade on behalf of the swapper, buys them Bitcoin, and deposits it in the protocol.",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x704268ac7043aeef50f47b6a03ae68ccf808e044",
-          "name": "BtcAcc",
-          "description": "btc/acc is a protocol that helps you automatically accumulate Bitcoin while trading. Instead of losing all your profits in memecoins, btc/acc ensures you're building a position in Bitcoin over time. The hook can be attached to any token pair on Uniswap v4 and takes 1% of each trade on behalf of the swapper, buys them Bitcoin, and deposits it in the protocol.",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xbd4f3968b6cd846ee2be64765e0edb3fe1238d3c35d3c5404fc20937b7901230",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xbd4f3968b6cd846ee2be64765e0edb3fe1238d3c35d3c5404fc20937b7901230",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0",
+        "name": "Doppler",
+        "description": "Doppler is a token launchpad utilizing dynamic bonding curves to mitigate sniping for large projects",
+        "audit": "https://docs.doppler.lol/resources/security-and-bug-bounties",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0",
-          "name": "Doppler",
-          "description": "Doppler is a token launchpad utilizing dynamic bonding curves to mitigate sniping for large projects",
-          "audit": "https://docs.doppler.lol/resources/security-and-bug-bounties",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0",
+        "name": "GammaLimit Order Hook on Base",
+        "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
+        "audit": "https://docs.gamma.xyz/gamma/learn/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x9d11f9505ca92f4b6983c1285d1ac0aaff7ec0c0",
-          "name": "GammaLimit Order Hook on Base",
-          "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
-          "audit": "https://docs.gamma.xyz/gamma/learn/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0xdfb2536ba09a004b32db0a1a15f73676b5e356d831c4ea1e843cd9433b080ab6",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
-        }
-      ],
-      "130": [
-        {
-          "address": "0x09dea99d714a3a19378e3d80d1ad22ca46085080",
-          "name": "Renzo exLP Dynamic Fee",
-          "description": "The Renzo ezLP Dynamic Fee hook allows the Uniswap Pool to actively react to market conditions.  As the pool price depegs from the exchange rate, fees are increased in a linear fashion when ezETH is sold into the pool (from 0.01% to 1%).  This incentivizes market participants to provide liquidity and defend the peg.  Buying ezETH from the pool always utilizes the minimum pool fee (0.01%).",
-          "audit": "",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0xdfb2536ba09a004b32db0a1a15f73676b5e356d831c4ea1e843cd9433b080ab6",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
+    ],
+    "130": [
+      {
+        "address": "0x09dea99d714a3a19378e3d80d1ad22ca46085080",
+        "name": "Renzo exLP Dynamic Fee",
+        "description": "The Renzo ezLP Dynamic Fee hook allows the Uniswap Pool to actively react to market conditions.  As the pool price depegs from the exchange rate, fees are increased in a linear fashion when ezETH is sold into the pool (from 0.01% to 1%).  This incentivizes market participants to provide liquidity and defend the peg.  Buying ezETH from the pool always utilizes the minimum pool fee (0.01%).",
+        "audit": "",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc",
-          "name": "AEGIS Dynamic Fee Hook for Unichain",
-          "description": "The AEGIS Dynamic Fee Hook implements dynamic fee management and full range liquidity management for Uniswap v4 pools. It manages dynamic fees using a TruncGeoOracleMulti for price feeds, handles full range liquidity provision through a FullRangeLiquidityManager, integrates with a PoolPolicyManager for governance and policy management, and provides automated fee adjustments based on market conditions",
-          "audit": "https://docs.aegis.markets/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc",
+        "name": "AEGIS Dynamic Fee Hook for Unichain",
+        "description": "The AEGIS Dynamic Fee Hook implements dynamic fee management and full range liquidity management for Uniswap v4 pools. It manages dynamic fees using a TruncGeoOracleMulti for price feeds, handles full range liquidity provision through a FullRangeLiquidityManager, integrates with a PoolPolicyManager for governance and policy management, and provides automated fee adjustments based on market conditions",
+        "audit": "https://docs.aegis.markets/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc",
-          "name": "AEGIS Dynamic Fee Hook for Unichain - v1.1",
-          "description": "The AEGIS Dynamic Fee Hook implements dynamic fee management and full range liquidity management for Uniswap v4 pools. It manages dynamic fees using a TruncGeoOracleMulti for price feeds, handles full range liquidity provision through a FullRangeLiquidityManager, integrates with a PoolPolicyManager for governance and policy management, and provides automated fee adjustments based on market conditions",
-          "audit": "https://docs.aegis.markets/audits",
-          "version": {
-            "major": 1,
-            "minor": 1,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc",
+        "name": "AEGIS Dynamic Fee Hook for Unichain - v1.1",
+        "description": "The AEGIS Dynamic Fee Hook implements dynamic fee management and full range liquidity management for Uniswap v4 pools. It manages dynamic fees using a TruncGeoOracleMulti for price feeds, handles full range liquidity provision through a FullRangeLiquidityManager, integrates with a PoolPolicyManager for governance and policy management, and provides automated fee adjustments based on market conditions",
+        "audit": "https://docs.aegis.markets/audits",
+        "version": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0
         },
-        {
-          "address": "0x2016c0e4f8bb1d6fea777dc791be919e2eda40c0",
-          "name": "Gamma Limit Order Hook on Unichain",
-          "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
-          "audit": "https://docs.gamma.xyz/gamma/learn/audits",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x2289791ab3c4a90c741427c52ea9411ba13bf8184c0b7bae4fea26262f400357",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x2016c0e4f8bb1d6fea777dc791be919e2eda40c0",
+        "name": "Gamma Limit Order Hook on Unichain",
+        "description": "The Gamma Limit Order Hook system is a comprehensive limit order system for Uniswap V4 pools, enabling single-tick limit orders and scale orders that execute autonomously through swap hooks. It is a decentralized limit order book built exclusively on Uniswap V4.  Limit orders are single-tick liquidity positions that are automatically executed through afterSwap hooks.",
+        "audit": "https://docs.gamma.xyz/gamma/learn/audits",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
         },
-        {
-          "address": "0x79330fe369c32a03e3b8516aff35b44706e39080",
-          "name": "Panoptic Oracle Hook on Unichain",
-          "description": "This hook records and exposes both standard and truncated Uniswap V3-like price observations for Uniswap V4 pools. Additionally, adapter contracts are deployed upon pool creation to allow for use as a drop-in replacement to the Uniswap V3 oracle in protocols leveraging that information. ",
-          "audit": "https://blog.openzeppelin.com/v3styleoraclehook-audit?hs_preview=hmquOpll-190369323392",
-          "version": {
-            "major": 1,
-            "minor": 0,
-            "patch": 0
-          },
-          "hookStatsAddress": "",
-          "pools": [
-            {
-              "id": "0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8",
-              "tvlUSD": 0,
-              "tvlETH": 0
-            }
-          ]
-        }
-      ]
-    }
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x2289791ab3c4a90c741427c52ea9411ba13bf8184c0b7bae4fea26262f400357",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      },
+      {
+        "address": "0x79330fe369c32a03e3b8516aff35b44706e39080",
+        "name": "Panoptic Oracle Hook on Unichain",
+        "description": "This hook records and exposes both standard and truncated Uniswap V3-like price observations for Uniswap V4 pools. Additionally, adapter contracts are deployed upon pool creation to allow for use as a drop-in replacement to the Uniswap V3 oracle in protocols leveraging that information. ",
+        "audit": "https://blog.openzeppelin.com/v3styleoraclehook-audit?hs_preview=hmquOpll-190369323392",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "hookStatsAddress": "",
+        "pools": [
+          {
+            "id": "0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8",
+            "tvlUSD": 0,
+            "tvlETH": 0
+          }
+        ]
+      }
+    ]
   }
+}
