@@ -61,6 +61,8 @@ export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1 = '0x5e5d19d22c85a4aef7c1fdf25fb
 export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_2 = '0xd61a675f8a0c67a73dc3b54fb7318b4d91409040'
 export const ZORA_CREATOR_HOOK_ON_BASE_v2_2 = '0x8218fa8d7922e22aed3556a09d5a715f16ad5040'
 export const ZORA_CREATOR_HOOK_ON_BASE_v2_2_1 = '0x1258e5f3c71ca9dce95ce734ba5759532e46d040'
+
+
 // example pool: https://app.uniswap.org/explore/pools/base/0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06
 export const ZORA_POST_HOOK_ON_BASE_v1 = '0xa1ebdd5ca6470bbd67114331387f2dda7bfad040'
 export const ZORA_POST_HOOK_ON_BASE_v1_0_0_1 = '0xb030fd8c2f8576f8ab05cfbbe659285e7d7a1040'
@@ -70,6 +72,7 @@ export const ZORA_POST_HOOK_ON_BASE_v1_1_1_1 = '0x5bf219b3cc11e3f6dd8dc8fc89d7d1
 export const ZORA_POST_HOOK_ON_BASE_v1_1_2 = '0x9ea932730a7787000042e34390b8e435dd839040'
 export const ZORA_POST_HOOK_ON_BASE_v2_2 = '0xff74be9d3596ea7a33bb4983dd7906fb34135040'
 export const ZORA_POST_HOOK_ON_BASE_v2_2_1 = '0x2b15a16b3ef024005ba899bb51764fcd58cf9040'
+export const ZORA_POST_HOOK_ON_BASE_v2_3_0 = '0xc8d077444625eb300a427a6dfb2b1dbf9b159040'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
 export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
@@ -163,6 +166,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v1_1_2,
     ZORA_POST_HOOK_ON_BASE_v2_2,
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
+    ZORA_POST_HOOK_ON_BASE_v2_3_0,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
