@@ -3,11 +3,14 @@ import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 // all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1 = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2 = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3 = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a
+export const FLAUNCH_POSM_V1_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
+export const FLAUNCH_POSM_V2_ON_BASE = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
+export const FLAUNCH_POSM_V3_ON_BASE = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
+export const FLAUNCH_POSM_V4_ON_BASE = '0x23321f11a6d44fd1ab790044fdfde5758c902fdc'
+export const FLAUNCH_ANYPOSM_V1_ON_BASE = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 
 export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
 export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
@@ -128,10 +131,11 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
     ADDRESS_ZERO,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3,
+    FLAUNCH_POSM_V1_ON_BASE,
+    FLAUNCH_POSM_V2_ON_BASE,
+    FLAUNCH_POSM_V3_ON_BASE,
+    FLAUNCH_POSM_V4_ON_BASE,
+    FLAUNCH_ANYPOSM_V1_ON_BASE,
     ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE,
     BUNNI_HOOKS_ADDRESS_v1_0,
     BUNNI_HOOKS_ADDRESS_v1_1,
