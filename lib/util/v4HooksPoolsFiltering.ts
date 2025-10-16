@@ -1,6 +1,23 @@
 import { isPoolFeeDynamic, log, nativeOnChain, V4SubgraphPool } from '@uniswap/smart-order-router'
 import { Hook } from '@uniswap/v4-sdk'
-import { HOOKS_ADDRESSES_ALLOWLIST, ZORA_CREATOR_HOOK_ON_BASE, ZORA_POST_HOOK_ON_BASE } from './hooksAddressesAllowlist'
+import {
+  HOOKS_ADDRESSES_ALLOWLIST,
+  ZORA_CREATOR_HOOK_ON_BASE_v1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2_1,
+  ZORA_POST_HOOK_ON_BASE_v1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_2,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2_1,
+} from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
 import { BUNNI_POOLS_CONFIG } from './bunni-pools'
@@ -159,8 +176,21 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
       let shouldNotAddV4Pool = false
 
       const isZoraPool =
-        (pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE ||
-          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE) &&
+        (pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v1_1_2 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v2_2 ||
+          pool.hooks.toLowerCase() === ZORA_CREATOR_HOOK_ON_BASE_v2_2_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_0_0_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_0_0_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_1_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1) &&
         chainId === ChainId.BASE
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
