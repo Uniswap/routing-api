@@ -18,6 +18,7 @@ import {
   ZORA_POST_HOOK_ON_BASE_v1_1_2,
   ZORA_POST_HOOK_ON_BASE_v2_2,
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
+  ZORA_POST_HOOK_ON_BASE_v2_3_0,
 } from '../util/hooksAddressesAllowlist'
 
 // during local cdk stack update, the env vars are not populated
@@ -46,7 +47,7 @@ export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
   ZORA_POST_HOOK_ON_BASE_v1_1_2,
   ZORA_POST_HOOK_ON_BASE_v2_2,
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
-  '0xc8d077444625eb300a427a6dfb2b1dbf9b159040', // Latest zora hook (TODO: add details)
+  ZORA_POST_HOOK_ON_BASE_v2_3_0,
 ])
 
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
