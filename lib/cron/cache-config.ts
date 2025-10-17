@@ -2,6 +2,23 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
+import {
+  ZORA_CREATOR_HOOK_ON_BASE_v1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2_1,
+  ZORA_POST_HOOK_ON_BASE_v1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_2,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2_1,
+} from '../util/hooksAddressesAllowlist'
 
 // during local cdk stack update, the env vars are not populated
 // make sure to fill in the env vars below
@@ -11,6 +28,26 @@ import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
 // process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
 // process.env.GRAPH_BEARER_TOKEN = ''
+
+// Zora hooks addresses for V4 filtering - MUST be lowercase
+export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
+  ZORA_CREATOR_HOOK_ON_BASE_v1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_CREATOR_HOOK_ON_BASE_v1_1_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2,
+  ZORA_CREATOR_HOOK_ON_BASE_v2_2_1,
+  ZORA_POST_HOOK_ON_BASE_v1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_1,
+  ZORA_POST_HOOK_ON_BASE_v1_0_0_2,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_1_1,
+  ZORA_POST_HOOK_ON_BASE_v1_1_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2,
+  ZORA_POST_HOOK_ON_BASE_v2_2_1,
+  '0xc8d077444625eb300a427a6dfb2b1dbf9b159040', // Latest zora hook (TODO: add details)
+])
 
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
@@ -510,6 +547,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
@@ -525,6 +563,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
@@ -540,6 +579,7 @@ export const chainProtocols = [
       true,
       v4BaseTrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE),
       process.env.GRAPH_BEARER_TOKEN
@@ -556,6 +596,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
@@ -571,6 +612,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
@@ -586,6 +628,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ZORA)
     ),
@@ -601,6 +644,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
@@ -623,6 +667,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BLAST)
     ),
@@ -638,6 +683,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
@@ -660,6 +706,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
@@ -675,6 +722,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
@@ -690,6 +738,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
     ),
