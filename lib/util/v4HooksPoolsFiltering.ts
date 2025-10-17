@@ -59,7 +59,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
     )
   } catch (e) {
     log.error(
-      `Error creating tokens for pool ${pool.id} on chain ${chainId} with token0 decimals ${pool.token0.decimals} token1 decimals ${pool.token1.decimals}: ${e}`,
+      `Error creating tokens for pool ${pool.id} on chain ${chainId} with token0 decimals ${pool.token0.decimals} token1 decimals ${pool.token1.decimals}: ${e}`
     )
 
     // hardcode to 18 decimals since we cannot parse and pass the token invariant checks
@@ -164,7 +164,7 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       // Check if this pool is in our Bunni pools configuration
       const bunniPool = BUNNI_POOLS_CONFIG.find(
-        (config) => config.id.toLowerCase() === pool.id.toLowerCase() && config.chainId === chainId,
+        (config) => config.id.toLowerCase() === pool.id.toLowerCase() && config.chainId === chainId
       )
 
       if (bunniPool) {
