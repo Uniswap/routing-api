@@ -53,7 +53,7 @@ export const BUNNI_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
 export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
-// exmaple pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
 export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0
