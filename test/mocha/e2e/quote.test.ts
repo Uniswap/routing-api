@@ -1048,7 +1048,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'WETH',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
+              amount: await getAmount(1, type, 'USDC', 'WETH', type == 'exactIn' ? '1000' : '1'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -1073,10 +1073,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(Number(tokenInBefore.subtract(tokenInAfter).toExact())).to.approximately(100, 0.0001)
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
             } else {
-              expect(Number(tokenOutAfter.subtract(tokenOutBefore).toExact())).to.approximately(100, 0.0001)
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
 
@@ -2484,7 +2484,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'WETH',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'USDC', 'WETH', '100'),
+                amount: await getAmount(1, type, 'USDC', 'WETH', type == 'exactIn' ? '1000' : '1'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -2510,10 +2510,10 @@ describe('quote', function () {
               )
 
               if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1000')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1')
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
               }
 
