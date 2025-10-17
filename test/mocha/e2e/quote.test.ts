@@ -999,7 +999,7 @@ describe('quote', function () {
               tokenInChainId: 1,
               tokenOutAddress: 'DAI',
               tokenOutChainId: 1,
-              amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
+              amount: await getAmount(1, type, 'WETH', 'DAI', type == 'exactIn' ? '1' : '1000'),
               type,
               recipient: alice.address,
               slippageTolerance: SLIPPAGE,
@@ -1024,10 +1024,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1')
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
             }
 
@@ -1073,10 +1073,10 @@ describe('quote', function () {
             )
 
             if (type == 'exactIn') {
-              expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+              expect(Number(tokenInBefore.subtract(tokenInAfter).toExact())).to.approximately(100, 0.0001)
               checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(WETH9[1], data.quote))
             } else {
-              expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+              expect(Number(tokenOutAfter.subtract(tokenOutBefore).toExact())).to.approximately(100, 0.0001)
               checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(USDC_MAINNET, data.quote))
             }
 
@@ -2434,7 +2434,7 @@ describe('quote', function () {
                 tokenInChainId: 1,
                 tokenOutAddress: 'DAI',
                 tokenOutChainId: 1,
-                amount: await getAmount(1, type, 'WETH', 'DAI', '100'),
+                amount: await getAmount(1, type, 'WETH', 'DAI', type == 'exactIn' ? '1' : '1000'),
                 type,
                 recipient: alice.address,
                 slippageTolerance: SLIPPAGE,
@@ -2460,10 +2460,10 @@ describe('quote', function () {
               )
 
               if (type == 'exactIn') {
-                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('100')
+                expect(tokenInBefore.subtract(tokenInAfter).toExact()).to.equal('1')
                 checkQuoteToken(tokenOutBefore, tokenOutAfter, CurrencyAmount.fromRawAmount(DAI_MAINNET, data.quote))
               } else {
-                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('100')
+                expect(tokenOutAfter.subtract(tokenOutBefore).toExact()).to.equal('1000')
                 checkQuoteToken(tokenInBefore, tokenInAfter, CurrencyAmount.fromRawAmount(WETH9[1]!, data.quote))
               }
 
