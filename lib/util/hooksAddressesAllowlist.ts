@@ -1,16 +1,59 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
+import fs from 'fs'
+import path from 'path'
+
+//Expected format of HookList JSON files
+interface TokenEntry {
+  symbol: string
+  id: string
+  name: string
+  decimals: string
+}
+
+interface PoolEntry {
+  id: string
+  tvlUSD?: number
+  tvlETH?: number
+  feeTier?: string
+  tickSpacing?: string
+  liquidity?: string
+  token0?: TokenEntry
+  token1?: TokenEntry
+}
+
+interface HookEntry {
+  address: string
+  name: string
+  description: string
+  audit: string
+  version: {
+    major: number
+    minor: number
+    patch: number
+  }
+  hookStatsAddress: string | null
+  pools: PoolEntry[]
+}
+
+interface HookFile {
+  name: string
+  timestamp: string
+  version: {
+    major: number
+    minor: number
+    patch: number
+  }
+  keywords: string[]
+  description: string
+  logoURI: string
+  chains: {
+    [chainId: string]: HookEntry[]
+  }
+}
 
 // all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
-
-// example pool: https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a
-export const FLAUNCH_POSM_V1_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
-export const FLAUNCH_POSM_V2_ON_BASE = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
-export const FLAUNCH_POSM_V3_ON_BASE = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
-export const FLAUNCH_POSM_V4_ON_BASE = '0x23321f11a6d44fd1ab790044fdfde5758c902fdc'
-export const FLAUNCH_ANYPOSM_V1_ON_BASE = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 
 export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
 export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
@@ -90,9 +133,33 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+function loadAllHookFiles(): HookFile[] {
+  const hooksDir = path.resolve(process.cwd(), 'lib', 'util', 'hooks', 'prod')
+  const hookFiles: HookFile[] = []
+
+  try {
+    const files = fs.readdirSync(hooksDir).filter((file) => file.endsWith('.json'))
+
+    for (const file of files) {
+      try {
+        const filePath = path.join(hooksDir, file)
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        const hookFile: HookFile = JSON.parse(fileContent)
+        hookFiles.push(hookFile)
+      } catch (error) {
+        console.warn(`Failed to load hook file ${file}:`, error)
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to read hooks directory ${hooksDir}:`, error)
+  }
+
+  return hookFiles
+}
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
-export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
+export const STARTER_HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
   [ChainId.MAINNET]: [
     ADDRESS_ZERO,
     BUNNI_HOOKS_ADDRESS_v1_0,
@@ -133,12 +200,6 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
     ADDRESS_ZERO,
-    FLAUNCH_POSM_V1_ON_BASE,
-    FLAUNCH_POSM_V2_ON_BASE,
-    FLAUNCH_POSM_V3_ON_BASE,
-    FLAUNCH_POSM_V4_ON_BASE,
-    FLAUNCH_ANYPOSM_V1_ON_BASE,
-    ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE,
     BUNNI_HOOKS_ADDRESS_v1_0,
     BUNNI_HOOKS_ADDRESS_v1_1,
     BUNNI_HOOKS_ADDRESS_v1_1_1,
@@ -196,3 +257,36 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
 }
+
+// Create a list of hook metadata for each chain by extending the existing allowlist
+function buildHooksAllowlist(): { [chain in ChainId]: Array<string> } {
+  const allowlist: { [chain in ChainId]: Array<string> } = {} as { [chain in ChainId]: Array<string> }
+
+  // Initialize with existing addresses from STARTER_HOOKS_ADDRESSES_ALLOWLIST
+  for (const chainIdKey of Object.keys(STARTER_HOOKS_ADDRESSES_ALLOWLIST)) {
+    const chainId = parseInt(chainIdKey) as ChainId
+    allowlist[chainId] = [...STARTER_HOOKS_ADDRESSES_ALLOWLIST[chainId]]
+  }
+
+  const hookFiles = loadAllHookFiles()
+
+  for (const hookFile of hookFiles) {
+    for (const [chainIdString, hooks] of Object.entries(hookFile.chains)) {
+      const chainId = parseInt(chainIdString) as ChainId
+
+      if (allowlist[chainId]) {
+        for (const hook of hooks) {
+          const hookAddress = hook.address.toLowerCase()
+
+          if (!allowlist[chainId].includes(hookAddress)) {
+            allowlist[chainId].push(hookAddress)
+          }
+        }
+      }
+    }
+  }
+  return allowlist
+}
+
+// Export the enhanced allowlist that includes both hardcoded and dynamically loaded addresses
+export const HOOKS_ADDRESSES_ALLOWLIST = buildHooksAllowlist()
