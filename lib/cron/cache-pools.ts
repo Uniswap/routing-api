@@ -26,11 +26,37 @@ import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
+import { EulerSwap } from '../types/ext/EulerSwap'
+import { EulerSwap__factory } from '../types/ext/factories/EulerSwap__factory'
+import { GlobalRpcProviders } from '../rpc/GlobalRpcProviders'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
 // so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
 dotenv.config()
+
+function getEthToUsdRate(pools: V4SubgraphPool[]): number {
+  const top3TvlPools = pools
+    .slice()
+    .sort((a, b) => b.tvlUSD - a.tvlUSD)
+    .slice(0, 3)
+  const averageRate = top3TvlPools.reduce((acc, pool) => acc + pool.tvlUSD / pool.tvlETH, 0) / top3TvlPools.length
+  return averageRate
+}
+
+function isUsdEquivalent(symbol: string | undefined): boolean {
+  if (!symbol) {
+    return false
+  }
+  return ['USDC', 'USDT', 'USDe'].includes(symbol)
+}
+
+function isEthEquivalent(symbol: string | undefined): boolean {
+  if (!symbol) {
+    return false
+  }
+  return ['WETH', 'stETH', 'ETH'].includes(symbol)
+}
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {
   const beforeAll = Date.now()
@@ -297,6 +323,9 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
       ]
 
       if (eulerHooksProvider) {
+        const ethToUsdRate = getEthToUsdRate(pools as V4SubgraphPool[])
+        log.info(`Eth to USD rate: ${ethToUsdRate}`)
+
         const eulerHooks = await eulerHooksProvider?.getHooks()
         if (eulerHooks) {
           metric.putMetric('eulerHooks.length', eulerHooks.length)
@@ -304,11 +333,51 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           const eulerPools = await Promise.all(
             eulerHooks.map(async (eulerHook) => {
               const pool = await eulerHooksProvider?.getPoolByHook(eulerHook.hook)
-              log.info(`eulerHooks pool ${JSON.stringify(pool)}`)
 
-              // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
-              ;(pool as V4SubgraphPool).tvlUSD = 1000
-              ;(pool as V4SubgraphPool).tvlETH = 5500000
+              if (!pool) {
+                log.info(`No pool found for euler hook ${eulerHook.hook}`)
+                return null
+              }
+
+              const contract: EulerSwap = EulerSwap__factory.connect(
+                pool.hooks,
+                GlobalRpcProviders.getGlobalUniRpcProviders(log).get(ChainId.MAINNET)!
+              )
+
+              log.info(`Pool: ${JSON.stringify(pool)}`)
+              // Get the TVL from the EulerSwap contract
+              const limits = await contract.getLimits(pool.token0.id, pool.token1.id)
+              log.info(`Limits: ${JSON.stringify(limits)}`)
+
+              const token0Symbol = pool.token0.symbol
+              const token1Symbol = pool.token1.symbol
+              if (isUsdEquivalent(token0Symbol)) {
+                pool.tvlUSD = limits[0].toNumber()
+                pool.tvlETH = limits[0].toNumber() / ethToUsdRate
+              } else if (isUsdEquivalent(token1Symbol)) {
+                pool.tvlUSD = limits[1].toNumber()
+                pool.tvlETH = limits[1].toNumber() / ethToUsdRate
+              } else if (isEthEquivalent(token0Symbol)) {
+                pool.tvlETH = limits[0].toNumber()
+                pool.tvlUSD = limits[0].toNumber() * ethToUsdRate
+              } else if (isEthEquivalent(token1Symbol)) {
+                pool.tvlETH = limits[1].toNumber()
+                pool.tvlUSD = limits[1].toNumber() * ethToUsdRate
+              } else {
+                log.info(
+                  `Unknown token symbol: pool ${pool.id} with token0 symbol ${token0Symbol} and token1 symbol ${token1Symbol} is not usd or eth equivalent`
+                )
+                log.info(`Setting TVL to 1000 USD and 5500000 ETH`)
+              }
+
+              if ((pool.tvlUSD === 0 && pool.tvlETH === 0) || !pool.tvlUSD || !pool.tvlETH) {
+                log.info(`Pool ${pool.id} has 0 TVL`)
+                // we need to inflate euler pool TVL from 0 to significant TVL, so that they have a chance to be picked up
+                ;(pool as V4SubgraphPool).tvlUSD = 1000
+                ;(pool as V4SubgraphPool).tvlETH = 5500000
+              }
+
+              log.info(`Pool TVL USD: ${pool.tvlUSD}, Pool TVL ETH: ${pool.tvlETH}`)
 
               return pool
             })
