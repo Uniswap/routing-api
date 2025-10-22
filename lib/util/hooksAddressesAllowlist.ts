@@ -90,6 +90,15 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x40d496321728c117bfe36498138a44dd4bfe54777093250cdf17095ebf11537e
+export const PUBHOUSE_HOOK_ON_BASE = '0x4ab61D774B170D0610FdcC5559AAe2c356c600C8'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xbdb0f9c31367485f85e691f638345f3de673a78effaff71ce34bc7ff1d54fddc
+export const PUNKSTRATEGY_HOOK_ON_MAINNET = '0xfAaad5B731F52cDc9746F2414c823eca9B06E844'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
+export const ENSWHEEL_HOOK_ON_MAINNET = '0xf13BdAFB90c79F2201e2cE42010c8ef75FEDE8C4'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -101,6 +110,8 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BUNNI_HOOKS_ADDRESS_v1_2_1,
     WETH_HOOKS_ADDRESS_ON_MAINNET,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+    PUNKSTRATEGY_HOOK_ON_MAINNET,
+    ENSWHEEL_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
@@ -170,6 +181,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v2_2,
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
     ZORA_POST_HOOK_ON_BASE_v2_3_0,
+    PUBHOUSE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
