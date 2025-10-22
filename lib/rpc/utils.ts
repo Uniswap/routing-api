@@ -63,6 +63,9 @@ export function generateProviderUrl(key: string, value: string): string {
     case 'ALCHEMY_43114': {
       return `https://avax-mainnet.g.alchemy.com/v2/${value}`
     }
+    case 'ALCHEMY_130': {
+      return `https://unichain-mainnet.g.alchemy.com/v2/${value}`
+    }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
 }

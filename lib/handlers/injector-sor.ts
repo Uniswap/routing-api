@@ -99,7 +99,9 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.OPTIMISM,
   ChainId.BASE,
   ChainId.BNB,
-  ChainId.AVALANCHE
+  ChainId.AVALANCHE,
+  ChainId.POLYGON,
+  ChainId.UNICHAIN
 ]
 const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
 
@@ -349,6 +351,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.AVALANCHE:
             case ChainId.BNB:
             case ChainId.BASE:
+            case ChainId.POLYGON:
+            case ChainId.UNICHAIN:  
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -489,7 +493,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.POLYGON,
             ChainId.OPTIMISM,
             ChainId.AVALANCHE,
-            ChainId.BNB
+            ChainId.BNB,
+            ChainId.UNICHAIN
           ]
 
           const v4Supported = [
@@ -499,7 +504,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.POLYGON,
             ChainId.OPTIMISM,
             ChainId.AVALANCHE,
-            ChainId.BNB
+            ChainId.BNB,
+            ChainId.UNICHAIN
           ]
 
           const mixedSupported = [
@@ -509,7 +515,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.POLYGON,
             ChainId.OPTIMISM,
             ChainId.AVALANCHE,
-            ChainId.BNB
+            ChainId.BNB,
+            ChainId.UNICHAIN
           ]
 
           const cachedRoutesCacheInvalidationFixRolloutPercentage = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]

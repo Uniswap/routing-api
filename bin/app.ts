@@ -384,13 +384,17 @@ const jsonRpcProviders = {
   ALCHEMY_56: process.env.ALCHEMY_56!,
   WEB3_RPC_10: process.env.WEB3_RPC_10!,
   ALCHEMY_10: process.env.ALCHEMY_10!,
+  WEB3_RPC_137: process.env.WEB3_RPC_137!,
+  ALCHEMY_137: process.env.ALCHEMY_137!,
+  WEB3_RPC_130: process.env.WEB3_RPC_130!,
+  ALCHEMY_130: process.env.ALCHEMY_130!,
   ALCHEMY_QUERY_KEY: process.env.ALCHEMY_QUERY_KEY!,
 }
 
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: jsonRpcProviders,
-  provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 0,
+  provisionedConcurrency: 2,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
