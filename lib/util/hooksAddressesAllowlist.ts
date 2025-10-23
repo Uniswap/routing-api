@@ -84,11 +84,7 @@ export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
-  [ChainId.MAINNET]: [
-    ADDRESS_ZERO,
-    WETH_HOOKS_ADDRESS_ON_MAINNET,
-    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
-  ],
+  [ChainId.MAINNET]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MAINNET, CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
