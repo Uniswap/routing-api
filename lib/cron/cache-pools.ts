@@ -25,7 +25,6 @@ import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
-import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -319,26 +318,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
               manuallyIncludedV4Pools.push(pool as V4SubgraphPool)
             }
           })
-        }
-      }
-
-      for (const bunniPool of BUNNI_POOLS_CONFIG) {
-        if (bunniPool.chainId === chainId) {
-          manuallyIncludedV4Pools.push({
-            id: bunniPool.id,
-            feeTier: bunniPool.feeTier,
-            tickSpacing: bunniPool.tickSpacing,
-            hooks: bunniPool.hooks,
-            liquidity: bunniPool.liquidity,
-            token0: {
-              ...bunniPool.token0,
-            },
-            token1: {
-              ...bunniPool.token1,
-            },
-            tvlETH: bunniPool.tvlETH,
-            tvlUSD: bunniPool.tvlUSD,
-          } as V4SubgraphPool)
         }
       }
 

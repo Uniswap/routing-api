@@ -21,7 +21,6 @@ import {
 } from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
-import { BUNNI_POOLS_CONFIG } from './bunni-pools'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 type V4PoolGroupingKey = string
@@ -159,18 +158,6 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         pool.tvlETH = 1000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
         pool.tvlUSD = 5500000 // similar to flETH/FLNCH pool (https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a)
         log.info(`Setting tvl for flETH/FLNCH pool ${JSON.stringify(pool)}`)
-        additionalAllowedPool += 1
-      }
-
-      // Check if this pool is in our Bunni pools configuration
-      const bunniPool = BUNNI_POOLS_CONFIG.find(
-        (config) => config.id.toLowerCase() === pool.id.toLowerCase() && config.chainId === chainId
-      )
-
-      if (bunniPool) {
-        pool.tvlETH = bunniPool.tvlETH
-        pool.tvlUSD = bunniPool.tvlUSD
-        log.info(`Setting tvl for ${bunniPool.comment} pool ${JSON.stringify(pool)}`)
         additionalAllowedPool += 1
       }
 
