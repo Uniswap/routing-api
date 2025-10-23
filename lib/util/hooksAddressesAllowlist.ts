@@ -43,9 +43,11 @@ export const WETH_HOOKS_ADDRESS_ON_ARBITRUM = '0x2a4adf825bd96598487dbb6b2d8d882
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
-export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
+export const AEGIS_ON_UNICHAIN_V1 = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
-export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
+export const AEGIS_ON_UNICHAIN_V2 = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
+// example pool: https://app.uniswap.org/explore/pools/unichain/0xBF12F5E68B1E1B3060BFB39B79794A0D5C1A723C0879281132B54887F87F928D
+export const AEGIS_ON_UNICHAIN_V3 = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0
 export const ZORA_CREATOR_HOOK_ON_BASE_v1 = '0xfbce3d80c659c765bc6c55e29e87d839c7609040'
@@ -156,8 +158,9 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.UNICHAIN]: [
     ADDRESS_ZERO,
     RENZO_ON_UNICHAIN,
-    AEGIS_ON_UNICHAIN,
-    UPDATED_AEGIS_ON_UNICHAIN,
+    AEGIS_ON_UNICHAIN_V1,
+    AEGIS_ON_UNICHAIN_V2,
+    AEGIS_ON_UNICHAIN_V3,
     WETH_HOOKS_ADDRESS_ON_UNICHAIN,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
