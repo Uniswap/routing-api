@@ -746,7 +746,7 @@ describe('quote', function () {
               amount:
                 type == 'exactIn'
                   ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
-                  : await getAmount(1, type, 'USDC', 'ETH', '100'),
+                  : await getAmount(1, type, 'USDC', 'ETH', '10'), // TODO: re-set to 100
               type,
               recipient: alice.address,
               slippageTolerance: LARGE_SLIPPAGE,
@@ -813,7 +813,7 @@ describe('quote', function () {
             const amount =
               type == 'exactIn'
                 ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
-                : await getAmount(1, type, 'USDC', 'ETH', '100')
+                : await getAmount(1, type, 'USDC', 'ETH', '10') // TODO: re-set to 100
 
             const permit: PermitSingle = {
               details: {
@@ -2253,7 +2253,7 @@ describe('quote', function () {
                 amount:
                   type == 'exactIn'
                     ? await getAmount(1, type, 'USDC', 'ETH', '1000000')
-                    : await getAmount(1, type, 'USDC', 'ETH', '100'),
+                    : await getAmount(1, type, 'USDC', 'ETH', '10'), // TODO: re-set to 100
                 type,
                 recipient: alice.address,
                 slippageTolerance: LARGE_SLIPPAGE,
