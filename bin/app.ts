@@ -395,7 +395,7 @@ const jsonRpcProviders = {
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: jsonRpcProviders,
   provisionedConcurrency: 2,
-  throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
+  throttlingOverride: '1000',
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
   stage: STAGE.LOCAL,
