@@ -214,7 +214,7 @@ export class RoutingAPIStack extends cdk.Stack {
                     byteMatchStatement: {
                       fieldToMatch: {
                         singleHeader: {
-                          name: 'x-api-key',
+                          Name: 'x-api-key',
                         },
                       },
                       positionalConstraint: 'EXACTLY',
