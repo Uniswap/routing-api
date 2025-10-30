@@ -65,6 +65,8 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
         return 'UNICHAIN_SEPOLIA'
       case ChainId.MONAD_TESTNET:
         return 'MONAD_TESTNET'
+      case ChainId.MONAD:
+        return 'MONAD'
       case ChainId.UNICHAIN:
         return 'UNICHAIN'
       case ChainId.SONEIUM:

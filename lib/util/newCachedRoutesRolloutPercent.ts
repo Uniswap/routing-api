@@ -33,6 +33,7 @@ export const NEW_CACHED_ROUTES_ROLLOUT_PERCENT: { [chain in ChainId]: number } =
   [ChainId.UNICHAIN_SEPOLIA]: 100,
   [ChainId.UNICHAIN]: 100,
   [ChainId.MONAD_TESTNET]: 100,
+  [ChainId.MONAD]: 100,
   [ChainId.BASE_SEPOLIA]: 100,
   [ChainId.SONEIUM]: 100,
 }

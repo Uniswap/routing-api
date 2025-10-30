@@ -3395,6 +3395,7 @@ describe('quote', function () {
     [ChainId.UNICHAIN_SEPOLIA]: () => USDC_ON(ChainId.UNICHAIN_SEPOLIA),
     [ChainId.UNICHAIN]: () => USDC_ON(ChainId.UNICHAIN),
     [ChainId.MONAD_TESTNET]: () => USDC_ON(ChainId.MONAD_TESTNET),
+    [ChainId.MONAD]: () => USDC_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => USDC_ON(ChainId.SONEIUM),
   }
 
@@ -3429,6 +3430,7 @@ describe('quote', function () {
     [ChainId.UNICHAIN_SEPOLIA]: () => WNATIVE_ON(ChainId.UNICHAIN_SEPOLIA),
     [ChainId.UNICHAIN]: () => WNATIVE_ON(ChainId.UNICHAIN),
     [ChainId.MONAD_TESTNET]: () => WNATIVE_ON(ChainId.MONAD_TESTNET),
+    [ChainId.MONAD]: () => WNATIVE_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => WNATIVE_ON(ChainId.SONEIUM),
   }
 
