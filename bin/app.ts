@@ -199,6 +199,7 @@ export class RoutingAPIPipeline extends Stack {
         chainId !== ChainId.WORLDCHAIN &&
         chainId !== ChainId.UNICHAIN_SEPOLIA &&
         chainId !== ChainId.MONAD_TESTNET &&
+        chainId !== ChainId.MONAD &&
         chainId !== ChainId.BASE_SEPOLIA &&
         chainId !== ChainId.UNICHAIN &&
         chainId !== ChainId.SONEIUM
