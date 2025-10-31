@@ -83,10 +83,12 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+export const MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM = '0x3bA779BAd405D9b68a7A7a86ff6916c806A200CC'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
-  [ChainId.MAINNET]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MAINNET, CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET],
+  [ChainId.MAINNET]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MAINNET, CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET, MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
