@@ -99,13 +99,10 @@ export const PUNKSTRATEGY_HOOK_ON_MAINNET = '0xfAaad5B731F52cDc9746F2414c823eca9
 export const CHIMPSTRATEGY_HOOK_ON_MAINNET = '0xbd15e4d324f8d02479a5ff53b52ef4048a79e444'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x134060a0672f5df29449673c9b2de0dc0beed4cd5354e532f801f0a3258906f8
 export const GOBSTRATEGY_HOOK_ON_MAINNET = '0xd6a45df0c82c9a686ab1e58fb28d8fc0cf106444'
-// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5506e13cbfea7c46fccf8ff414cf34d58191c094beb485306a390ea13fbb940b
-export const CHECKSTRATEGY_HOOK_ON_MAINNET = '0xbd15e4d324f8d02479a5ff53b52ef4048a79e444'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x29aceb9aea1d8f4f9ee40dfffb7e46285d69cd4e9b8999c08da265f27fd0f9a8
 export const BIRBSTRATEGY_HOOK_ON_MAINNET = '0xe3c63a9813ac03be0e8618b627cb8170cfa468c4'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xb0214c79008d1d71816166fbe17c01884386ccfc5560ce8b3cbb7a15dba93dce
 export const SQUIGGLESTRATEGY_HOOK_ON_MAINNET = '0x5d8a61fa2ced43eeabffc00c85f705e3e08c28c4'
-
 
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
 export const ENSWHEEL_HOOK_ON_MAINNET = '0xf13BdAFB90c79F2201e2cE42010c8ef75FEDE8C4'
@@ -122,6 +119,10 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     WETH_HOOKS_ADDRESS_ON_MAINNET,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
     PUNKSTRATEGY_HOOK_ON_MAINNET,
+    CHIMPSTRATEGY_HOOK_ON_MAINNET,
+    GOBSTRATEGY_HOOK_ON_MAINNET,
+    BIRBSTRATEGY_HOOK_ON_MAINNET,
+    SQUIGGLESTRATEGY_HOOK_ON_MAINNET,
     ENSWHEEL_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
