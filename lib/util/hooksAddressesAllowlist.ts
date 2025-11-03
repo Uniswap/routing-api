@@ -83,6 +83,8 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0x450e0fbfa8f19bc7c35d57ff083adff7f1b980cc'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -108,7 +110,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO],
+  [ChainId.BNB]: [ADDRESS_ZERO, LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
