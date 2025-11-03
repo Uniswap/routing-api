@@ -54,7 +54,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
         // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
         // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
-        !isPoolFeeDynamic(tokenA, tokenB, pool))
+        !isPoolFeeDynamic(tokenA, tokenB, Number(pool.tickSpacing), pool.hooks, pool.id))
     )
   } catch (e) {
     log.error(
@@ -85,7 +85,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
         // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
         // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
-        !isPoolFeeDynamic(tokenA, tokenB, pool))
+        !isPoolFeeDynamic(tokenA, tokenB, Number(pool.tickSpacing), pool.hooks, pool.id))
     )
   }
 }
