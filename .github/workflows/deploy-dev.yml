@@ -9,15 +9,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_REGION: eu-west-1
-      ENVIRONMENT: dev
-      AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -38,7 +39,7 @@ jobs:
     
       - name: Bootstrap CDK (Dev)
         run: |
-            cdk bootstrap aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+            cdk bootstrap aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/eu-west-1
           
       - name: Deploy CDK stack to Dev
         run: |
