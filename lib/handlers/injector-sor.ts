@@ -110,6 +110,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.WORLDCHAIN,
   ChainId.UNICHAIN_SEPOLIA,
   ChainId.MONAD_TESTNET,
+  ChainId.MONAD,
   ChainId.BASE_SEPOLIA,
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
@@ -374,6 +375,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.WORLDCHAIN:
             case ChainId.UNICHAIN_SEPOLIA:
             case ChainId.MONAD_TESTNET:
+            case ChainId.MONAD:
             case ChainId.BASE_SEPOLIA:
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
@@ -521,6 +523,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
             ChainId.WORLDCHAIN,
             ChainId.MONAD_TESTNET,
+            ChainId.MONAD,
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
           ]
@@ -539,6 +542,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
             ChainId.MAINNET,
             ChainId.SONEIUM,
+            ChainId.MONAD,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
@@ -573,6 +577,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.MONAD_TESTNET,
             ChainId.SONEIUM,
+            ChainId.MONAD,
           ]
           const mixedSupported = [
             ChainId.MAINNET,
@@ -588,6 +593,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.WORLDCHAIN,
             ChainId.ZORA,
             ChainId.SONEIUM,
+            // ChainId.MONAD, // ROUTE-760: support monad in mixed
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]
 
