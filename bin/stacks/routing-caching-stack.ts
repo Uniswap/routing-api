@@ -27,6 +27,7 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   chatbotSNSArn?: string
   alchemyQueryKey?: string
   alchemyQueryKey2?: string
+  theGraphApiKey?: string
 }
 
 export class RoutingCachingStack extends cdk.NestedStack {
@@ -41,16 +42,18 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly poolCacheLambdaNameArray: string[] = []
   public readonly alchemyQueryKey: string | undefined = undefined
   public readonly alchemyQueryKey2: string | undefined = undefined
+  public readonly theGraphApiKey: string | undefined = undefined
 
   constructor(scope: Construct, name: string, props: RoutingCachingStackProps) {
     super(scope, name, props)
 
-    const { chatbotSNSArn, alchemyQueryKey, alchemyQueryKey2 } = props
+    const { chatbotSNSArn, alchemyQueryKey, alchemyQueryKey2, theGraphApiKey } = props
 
     const chatBotTopic = chatbotSNSArn ? aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn) : undefined
 
     this.alchemyQueryKey = alchemyQueryKey
     this.alchemyQueryKey2 = alchemyQueryKey2
+    this.theGraphApiKey = theGraphApiKey
     // TODO: Remove and swap to the new bucket below. Kept around for the rollout, but all requests will go to bucket 2.
     this.poolCacheBucket = new aws_s3.Bucket(this, 'PoolCacheBucket')
     this.poolCacheBucket2 = new aws_s3.Bucket(this, 'PoolCacheBucket2')
@@ -133,6 +136,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
             POOL_CACHE_GZIP_KEY: this.poolCacheGzipKey,
             ALCHEMY_QUERY_KEY: this.alchemyQueryKey ?? '',
             ALCHEMY_QUERY_KEY_2: this.alchemyQueryKey2 ?? '',
+            THEGRAPH_API_KEY: this.theGraphApiKey ?? '',
             chainId: chainId.toString(),
             protocol,
             timeout: timeout.toString(),

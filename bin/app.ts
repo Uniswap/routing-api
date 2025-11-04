@@ -39,6 +39,7 @@ export class RoutingAPIStage extends Stage {
       unicornSecret: string
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
+      theGraphApiKey?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
     }
@@ -62,6 +63,7 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
+      theGraphApiKey,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     } = props
@@ -84,6 +86,7 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
+      theGraphApiKey,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
     })
@@ -439,7 +442,7 @@ const jsonRpcProviders = {
 // Local dev stack
 new RoutingAPIStack(app, 'RoutingAPIStack', {
   jsonRpcProviders: jsonRpcProviders,
-  provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 0,
+  provisionedConcurrency: process.env.PROVISION_CONCURRENCY ? parseInt(process.env.PROVISION_CONCURRENCY) : 5,
   throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
   ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
   chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
@@ -458,6 +461,32 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   uniGraphQLHeaderOrigin: process.env.GQL_H_ORGN!,
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
+  theGraphApiKey: process.env.THEGRAPH_API_KEY!,
+})
+
+// Dev environment stack (separate AWS environment)
+new RoutingAPIStack(app, 'RoutingAPIStackDev', {
+  jsonRpcProviders: jsonRpcProviders,
+  provisionedConcurrency: 0,
+  throttlingOverride: process.env.THROTTLE_PER_FIVE_MINS,
+  ethGasStationInfoUrl: process.env.ETH_GAS_STATION_INFO_URL!,
+  chatbotSNSArn: process.env.CHATBOT_SNS_ARN,
+  stage: STAGE.LOCAL, // Can be changed to a new STAGE.DEV if needed
+  internalApiKey: process.env.INTERNAL_API_KEY || 'dev-api-key',
+  route53Arn: process.env.ROLE_ARN,
+  pinata_key: process.env.PINATA_API_KEY!,
+  pinata_secret: process.env.PINATA_API_SECRET!,
+  hosted_zone: process.env.HOSTED_ZONE!,
+  tenderlyUser: process.env.TENDERLY_USER!,
+  tenderlyProject: process.env.TENDERLY_PROJECT!,
+  tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY!,
+  tenderlyNodeApiKey: process.env.TENDERLY_NODE_API_KEY!,
+  unicornSecret: process.env.UNICORN_SECRET!,
+  uniGraphQLEndpoint: process.env.GQL_URL!,
+  uniGraphQLHeaderOrigin: process.env.GQL_H_ORGN!,
+  alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
+  alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
+  theGraphApiKey: process.env.THEGRAPH_API_KEY!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

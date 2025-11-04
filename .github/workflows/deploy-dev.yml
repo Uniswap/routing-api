@@ -1,0 +1,59 @@
+name: Deploy CDK to Dev Environment
+
+on:
+  push:
+    branches:
+      - layerswap-dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: eu-west-1  # Change this to your dev region
+      ENVIRONMENT: dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install CDK CLI
+        run: npm install -g aws-cdk
+    
+      - name: Reconstruct .env file
+        run: |
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure AWS credentials
+        run: |
+          echo "Configuring AWS credentials for dev environment..."
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+    
+      - name: Bootstrap CDK (Dev)
+        run: |
+            cdk bootstrap aws://$ACCOUNT_ID/$AWS_REGION
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION:  ${{ env.AWS_REGION }}
+            ACCOUNT_ID: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          
+      - name: Deploy CDK stack to Dev
+        run: |
+          cdk deploy RoutingAPIStackDev --require-approval never 
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}

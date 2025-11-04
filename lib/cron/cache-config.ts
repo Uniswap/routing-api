@@ -9,6 +9,18 @@ import { ChainId } from '@uniswap/sdk-core'
 // process.env.ALCHEMY_QUERY_KEY = ''
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
 
+// The Graph Gateway requires bearer token authentication
+// Add this header to your subgraph requests
+export const theGraphHeaders = () => {
+  const apiKey = process.env.THEGRAPH_API_KEY
+  if (!apiKey) {
+    throw new Error('THEGRAPH_API_KEY environment variable is not set')
+  }
+  return {
+    Authorization: `Bearer ${apiKey}`,
+  }
+}
+
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
@@ -38,69 +50,73 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   }
 }
 
+// V3 Subgraph URLs using The Graph Gateway
+// Replace SUBGRAPH_ID_PLACEHOLDER with actual subgraph IDs from The Graph
 export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-arbitrum-ii/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-polygon/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.OPTIMISM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-optimism-ii/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.AVALANCHE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-avalanche/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-bsc-ii/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-blast/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BASE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-base/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.CELO:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-celo/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-worldchain/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.UNICHAIN_SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-astrochain-sepolia/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-unichain-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.ZORA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     default:
       return undefined
   }
 }
 
+// V2 Subgraph URLs using The Graph Gateway
+// Replace SUBGRAPH_ID_PLACEHOLDER with actual subgraph IDs from The Graph
 export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-arbitrum/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-polygon/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.OPTIMISM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-optimism/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.AVALANCHE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-avalanche/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-bsc/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-blast/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.BASE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-base/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-worldchain/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.UNICHAIN_SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-astrochain-sepolia/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.MONAD_TESTNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-monad-testnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
+      return `https://gateway.thegraph.com/api/subgraphs/id/SUBGRAPH_ID_PLACEHOLDER`
     default:
       return undefined
   }
