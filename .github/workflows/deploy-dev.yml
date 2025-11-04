@@ -1,24 +1,20 @@
-name: Deploy CDK to Dev Environment
+name: Deploy CDK with Access Keys
 
 on:
   push:
     branches:
-      - layerswap-dev
+      - layerswap
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: eu-west-1  # Change this to your region
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -30,17 +26,33 @@ jobs:
     
       - name: Reconstruct .env file
         run: |
-          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+          echo "${{ secrets.ENV_FILE }}" > .env
 
       - name: Install dependencies
         run: |
           npm ci
           npm run build
+
+      - name: Configure AWS credentials
+        run: |
+          echo "Configuring AWS credentials..."
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     
-      - name: Bootstrap CDK (Dev)
+      - name: Bootstrap CDK 
         run: |
-            cdk bootstrap aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/eu-west-1
+            cdk bootstrap aws://$ACCOUNT_ID/$AWS_REGION
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION:  ${{ env.AWS_REGION }}
+            ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           
-      - name: Deploy CDK stack to Dev
+      - name: Deploy CDK stack
         run: |
-          cdk deploy RoutingAPIStackDev --require-approval never
+          cdk deploy RoutingAPIStackDev --require-approval never 
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
