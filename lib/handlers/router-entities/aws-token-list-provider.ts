@@ -10,7 +10,7 @@ import { TokenList } from '@uniswap/token-lists'
 import S3 from 'aws-sdk/clients/s3'
 import NodeCache from 'node-cache'
 
-const TOKEN_LIST_CACHE = new NodeCache({ stdTTL: 600, useClones: false })
+const TOKEN_LIST_CACHE = new NodeCache({ stdTTL: 6000, useClones: false })
 
 export class AWSTokenListProvider extends CachingTokenListProvider {
   public static async fromTokenListS3Bucket(
@@ -22,7 +22,7 @@ export class AWSTokenListProvider extends CachingTokenListProvider {
 
     const cachedTokenList = TOKEN_LIST_CACHE.get<TokenList>(tokenListURI)
 
-    const tokenCache = new NodeCache({ stdTTL: 360, useClones: false })
+    const tokenCache = new NodeCache({ stdTTL: 3600, useClones: false })
 
     if (cachedTokenList) {
       log.info(`Found token lists for ${tokenListURI} in local cache`)

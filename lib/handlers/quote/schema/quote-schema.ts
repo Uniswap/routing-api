@@ -57,7 +57,7 @@ export const QuoteQueryParamsJoi = Joi.object({
     .max(77),
   permitSigDeadline: Joi.number().optional(),
   // TODO: Remove once universal router is no longer behind a feature flag.
-  enableUniversalRouter: Joi.boolean().optional().default(false),
+  enableUniversalRouter: Joi.boolean().optional().default(true),
   quoteSpeed: Joi.string().valid('fast', 'standard').optional().default('standard'),
   debugRoutingConfig: Joi.string().optional(),
   unicornSecret: Joi.string().optional(),

@@ -202,7 +202,7 @@ export class RoutingAPIStack extends cdk.Stack {
           statement: {
             rateBasedStatement: {
               // Limit is per 5 mins, i.e. 200 requests every 5 mins
-              limit: throttlingOverride ? parseInt(throttlingOverride) : 200,
+              limit: throttlingOverride ? parseInt(throttlingOverride) : 600,
               // API is of type EDGE so is fronted by Cloudfront as a proxy.
               // Use the ip set in X-Forwarded-For by Cloudfront, not the regular IP
               // which would just resolve to Cloudfronts IP.
@@ -217,7 +217,7 @@ export class RoutingAPIStack extends cdk.Stack {
                     byteMatchStatement: {
                       fieldToMatch: {
                         singleHeader: {
-                          name: 'x-api-key',
+                          Name: 'x-api-key',
                         },
                       },
                       positionalConstraint: 'EXACTLY',
