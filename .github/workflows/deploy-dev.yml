@@ -3,7 +3,7 @@ name: Deploy CDK with Access Keys
 on:
   push:
     branches:
-      - layerswap
+      - layerswap-dev
 
 jobs:
   deploy:
