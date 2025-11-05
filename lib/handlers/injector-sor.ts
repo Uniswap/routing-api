@@ -92,29 +92,9 @@ import {
 } from '../util/extraV4FeeTiersTickSpacingsHookAddresses'
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
+import { ZK_EVM_TESTNET_CHAIN_ID } from '../constants/zk-evm'
 
-export const SUPPORTED_CHAINS: ChainId[] = [
-  ChainId.MAINNET,
-  ChainId.OPTIMISM,
-  ChainId.ARBITRUM_ONE,
-  ChainId.POLYGON,
-  ChainId.SEPOLIA,
-  ChainId.CELO,
-  ChainId.CELO_ALFAJORES,
-  ChainId.BNB,
-  ChainId.AVALANCHE,
-  ChainId.BASE,
-  ChainId.BLAST,
-  ChainId.ZORA,
-  ChainId.ZKSYNC,
-  ChainId.WORLDCHAIN,
-  ChainId.UNICHAIN_SEPOLIA,
-  ChainId.MONAD_TESTNET,
-  ChainId.MONAD,
-  ChainId.BASE_SEPOLIA,
-  ChainId.UNICHAIN,
-  ChainId.SONEIUM,
-]
+export const SUPPORTED_CHAINS: ChainId[] = [ZK_EVM_TESTNET_CHAIN_ID]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
