@@ -84,13 +84,13 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x9c193659e9c8e7a801eaadfd3d61cca35239955fcc04e996a770d28805d21d4d
-export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x12b504160222d66c38d916d9fba11b613c51e888'
-export const RING_FEW_UNI_HOOK_ON_MAINNET = '0xcf1e7189264a84d7454077dc713c3d11400de888'
-export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x948922b055187c7366e71b876ab1242ebbaea888'
-export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0x28416b4c065e877e7c0bff17ab1f67c6527d6888'
-export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x1989cdab2779ed83c0c81a5799ff6af2e03c6888'
-export const RING_FEW_USDT_HOOK_ON_MAINNET = '0x9590a832d08545aad4f2a148f3eefa6ede1c2888'
-export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x90828f70070d84ac5cde145b27ca75fda6d02888'
+export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x8c3aae3bb65c5e08d25d9723e8b2e91f0ae22888'
+export const RING_FEW_UNI_HOOK_ON_MAINNET = '0x938eb2006bfded3da6d7626b29479360f1fca888'
+export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0xd1506851ae85f7336dbb1d3e99dbf80a2b352888'
+export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0xe00eb0a503666b6fe99313ee4415057b2d4aa888'
+export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x6f531e19c185225832eb0a2624982ea83d3aa888'
+export const RING_FEW_USDT_HOOK_ON_MAINNET = '0x905887ac3d351ac8be61ae50c30cc857e8cd6888'
+export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x134974e0b914728aa13cc550af0adcb557356888'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
