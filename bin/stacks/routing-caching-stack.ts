@@ -1,9 +1,5 @@
-import { Protocol } from '@uniswap/router-sdk'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
-import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
-import { MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
-import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_events from 'aws-cdk-lib/aws-events'
 import * as aws_events_targets from 'aws-cdk-lib/aws-events-targets'
 import * as aws_iam from 'aws-cdk-lib/aws-iam'
@@ -11,7 +7,6 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam'
 import * as aws_lambda from 'aws-cdk-lib/aws-lambda'
 import * as aws_lambda_nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as aws_s3 from 'aws-cdk-lib/aws-s3'
-import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
 import { chainProtocols } from '../../lib/cron/cache-config'
@@ -28,6 +23,7 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   alchemyQueryKey?: string
   alchemyQueryKey2?: string
   theGraphApiKey?: string
+  useExplicitResourceNames?: boolean
 }
 
 export class RoutingCachingStack extends cdk.NestedStack {
@@ -47,9 +43,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingCachingStackProps) {
     super(scope, name, props)
 
-    const { chatbotSNSArn, alchemyQueryKey, alchemyQueryKey2, theGraphApiKey } = props
-
-    const chatBotTopic = chatbotSNSArn ? aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn) : undefined
+    const { alchemyQueryKey, alchemyQueryKey2, theGraphApiKey } = props
 
     this.alchemyQueryKey = alchemyQueryKey
     this.alchemyQueryKey2 = alchemyQueryKey2
@@ -149,43 +143,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
       })
       this.poolCacheBucket2.grantReadWrite(lambda)
       this.poolCacheBucket3.grantReadWrite(lambda)
-      const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(
-        this,
-        `RoutingAPI-SEV4-PoolCacheToS3LambdaErrorRate-ChainId${chainId}-Protocol${protocol}`,
-        {
-          metric: new MathExpression({
-            expression: '(invocations - errors) < 1',
-            usingMetrics: {
-              invocations: lambda.metricInvocations({
-                period: Duration.minutes(60),
-                statistic: 'sum',
-              }),
-              errors: lambda.metricErrors({
-                period: Duration.minutes(60),
-                statistic: 'sum',
-              }),
-            },
-          }),
-          threshold: protocol === Protocol.V3 ? 50 : 85,
-          evaluationPeriods: protocol === Protocol.V3 ? 12 : 144,
-        }
-      )
-      const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(
-        this,
-        `RoutingAPI-PoolCacheToS3LambdaThrottles-ChainId${chainId}-Protocol${protocol}`,
-        {
-          metric: lambda.metricThrottles({
-            period: Duration.minutes(5),
-            statistic: 'sum',
-          }),
-          threshold: 5,
-          evaluationPeriods: 1,
-        }
-      )
-      if (chatBotTopic) {
-        lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-        lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      }
       this.poolCacheLambdaNameArray.push(lambda.functionName)
     }
 
@@ -257,21 +214,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
         schedule: aws_events.Schedule.rate(Duration.minutes(30)),
         targets: [new aws_events_targets.LambdaFunction(this.ipfsCleanPoolCachingLambda)],
       })
-    }
-
-    if (chatBotTopic) {
-      if (stage == 'beta' || stage == 'prod') {
-        const lambdaIpfsAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-PoolCacheToIPFSLambdaError', {
-          metric: this.ipfsPoolCachingLambda.metricErrors({
-            period: Duration.minutes(60),
-            statistic: 'sum',
-          }),
-          threshold: 13,
-          evaluationPeriods: 1,
-        })
-
-        lambdaIpfsAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      }
     }
 
     this.tokenListCacheBucket = new aws_s3.Bucket(this, 'TokenListCacheBucket')

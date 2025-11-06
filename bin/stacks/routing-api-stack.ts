@@ -1,42 +1,16 @@
-import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
-import { CfnOutput, Duration } from 'aws-cdk-lib'
-import { ChainId } from '@uniswap/sdk-core'
+import { CfnOutput } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
-import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
-import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
-import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
-import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import * as aws_waf from 'aws-cdk-lib/aws-wafv2'
 import { Construct } from 'constructs'
-import { STAGE } from '../../lib/util/stage'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
-import { REQUEST_SOURCES } from '../../lib/util/requestSources'
-import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
-
-export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
-export const REQUEST_SOURCES_NOT_MONITORED = ['unknown']
-
-// For low volume chains, we'll increase the evaluation periods to reduce triggering sensitivity.
-export const LOW_VOLUME_CHAINS: Set<ChainId> = new Set([
-  ChainId.CELO,
-  ChainId.ZORA,
-  ChainId.BLAST,
-  ChainId.ZKSYNC,
-  ChainId.SONEIUM,
-  ChainId.AVALANCHE,
-  ChainId.WORLDCHAIN,
-])
-
-// For low volume request sources, we'll increase the evaluation periods to reduce triggering sensitivity.
-export const LOW_VOLUME_REQUEST_SOURCES: Set<string> = new Set(['uniswap-extension', 'uniswap-android'])
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -66,6 +40,7 @@ export class RoutingAPIStack extends cdk.Stack {
       theGraphApiKey?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
+      useExplicitResourceNames?: boolean // Set to false for staging to auto-generate unique names
     }
   ) {
     super(parent, name, props)
@@ -92,6 +67,7 @@ export class RoutingAPIStack extends cdk.Stack {
       theGraphApiKey,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
+      useExplicitResourceNames = true, // Default to true for backward compatibility
     } = props
 
     const {
@@ -113,6 +89,7 @@ export class RoutingAPIStack extends cdk.Stack {
       alchemyQueryKey,
       alchemyQueryKey2,
       theGraphApiKey,
+      useExplicitResourceNames,
     })
 
     const {
@@ -124,7 +101,7 @@ export class RoutingAPIStack extends cdk.Stack {
       cachedV2PairsDynamoDb,
       tokenPropertiesCachingDynamoDb,
       rpcProviderHealthStateDynamoDb,
-    } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
+    } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', { stage, useExplicitResourceNames })
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
       poolCacheBucket,
@@ -278,381 +255,6 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
     quote.addMethod('GET', lambdaIntegration)
-
-    // All alarms default to GreaterThanOrEqualToThreshold for when to be triggered.
-    const apiAlarm5xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-5XXAlarm', {
-      alarmName: 'RoutingAPI-SEV2-5XX',
-      metric: api.metricServerError({
-        period: Duration.minutes(5),
-        // For this metric 'avg' represents error rate.
-        statistic: 'avg',
-      }),
-      threshold: 0.02,
-      // Beta has much less traffic so is more susceptible to transient errors.
-      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
-    })
-
-    const apiAlarm5xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-5XXAlarm', {
-      alarmName: 'RoutingAPI-SEV3-5XX',
-      metric: api.metricServerError({
-        period: Duration.minutes(5),
-        // For this metric 'avg' represents error rate.
-        statistic: 'avg',
-      }),
-      threshold: 0.01,
-      // Beta has much less traffic so is more susceptible to transient errors.
-      evaluationPeriods: stage == STAGE.BETA ? 5 : 3,
-    })
-
-    const apiAlarm4xxSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-4XXAlarm', {
-      alarmName: 'RoutingAPI-SEV2-4XX',
-      metric: api.metricClientError({
-        period: Duration.minutes(5),
-        statistic: 'avg',
-      }),
-      threshold: 0.6,
-      evaluationPeriods: 3,
-    })
-
-    const apiAlarm4xxSev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-4XXAlarm', {
-      alarmName: 'RoutingAPI-SEV3-4XX',
-      metric: api.metricClientError({
-        period: Duration.minutes(5),
-        statistic: 'avg',
-      }),
-      threshold: 0.4,
-      evaluationPeriods: 3,
-    })
-
-    const apiAlarmLatencySev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Latency', {
-      alarmName: 'RoutingAPI-SEV2-Latency',
-      metric: api.metricLatency({
-        period: Duration.minutes(5),
-        statistic: 'p90',
-      }),
-      threshold: 6500,
-      evaluationPeriods: 3,
-    })
-
-    const apiAlarmLatencySev3 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV3-Latency', {
-      alarmName: 'RoutingAPI-SEV3-Latency',
-      metric: api.metricLatency({
-        period: Duration.minutes(5),
-        statistic: 'p90',
-      }),
-      threshold: 3500,
-      evaluationPeriods: 3,
-    })
-
-    // Tenderly sim system downtime is sev2, because it's swap blocking from trading-api.
-    // We have confidence that tenderly is down
-    const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, 'RoutingAPI-SEV2-Simulation', {
-      alarmName: 'RoutingAPI-SEV2-Simulation',
-      metric: new MathExpression({
-        expression: '100*(simulationSystemDown/simulationRequested)',
-        period: Duration.minutes(30),
-        usingMetrics: {
-          simulationRequested: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `Simulation Requested`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          simulationSystemDown: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `SimulationSystemDown`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      }),
-      threshold: 20,
-      evaluationPeriods: 3,
-      treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-    })
-    const simulationAlarmByChainSev2: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach((chainId) => {
-      if (CHAINS_NOT_MONITORED.includes(chainId)) {
-        return
-      }
-
-      const simulationAlarmSev2 = new aws_cloudwatch.Alarm(this, `RoutingAPI-SEV2-SimulationChainId${chainId}`, {
-        alarmName: `RoutingAPI-SEV2-SimulationChainId${chainId}`,
-        metric: new MathExpression({
-          expression: `100*(simulationSystemDown/simulationRequested)`,
-          period: Duration.minutes(30),
-          usingMetrics: {
-            simulationRequested: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `Simulation Requested`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-            simulationSystemDown: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `SimulationSystemDownChainId${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-          },
-        }),
-        threshold: 20,
-        evaluationPeriods: 3,
-        treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-      })
-
-      simulationAlarmByChainSev2.push(simulationAlarmSev2)
-    })
-
-    // Create an alarm for when GraphQLTokenFeeFetcherFetchFeesFailure rate goes above 15%.
-    // We do have on chain fallback in place of GQL failure, but we want to be alerted if the failure rate is high to take action.
-    // For this reason we only alert on SEV3.
-    const graphqlTokenFeeFetcherErrorRateSev3 = new aws_cloudwatch.Alarm(
-      this,
-      'RoutingAPI-SEV3-GQLTokenFeeFetcherFailureRate',
-      {
-        alarmName: 'RoutingAPI-SEV3-GQLTokenFeeFetcherFailureRate',
-        metric: new MathExpression({
-          expression:
-            '100*(graphQLTokenFeeFetcherFetchFeesFailure/(graphQLTokenFeeFetcherFetchFeesSuccess+graphQLTokenFeeFetcherFetchFeesFailure))',
-          period: Duration.minutes(5),
-          usingMetrics: {
-            graphQLTokenFeeFetcherFetchFeesSuccess: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GraphQLTokenFeeFetcherFetchFeesSuccess`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-            graphQLTokenFeeFetcherFetchFeesFailure: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GraphQLTokenFeeFetcherFetchFeesFailure`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-          },
-        }),
-        threshold: 15,
-        evaluationPeriods: 3,
-        treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-      }
-    )
-
-    // Alarms for high 400 error rate for each chain
-    const percent4XXByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach((chainId) => {
-      if (CHAINS_NOT_MONITORED.includes(chainId)) {
-        return
-      }
-      const alarmName = `RoutingAPI-SEV3-4XXAlarm-ChainId: ${chainId.toString()}`
-      // We only want to alert if the volume is high enough over default period (5m) for 4xx errors (no route).
-      const invocationsThreshold = 500
-      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
-      const metric = new MathExpression({
-        expression: `IF(invocations > ${invocationsThreshold}, 100*(response400/invocations), 0)`,
-        usingMetrics: {
-          invocations: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response400: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_400_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      })
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        threshold: 80,
-        evaluationPeriods: evaluationPeriods,
-      })
-      percent4XXByChainAlarm.push(alarm)
-    })
-
-    // Alarms for high 500 error rate for each chain
-    const successRateByChainAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    SUPPORTED_CHAINS.forEach((chainId) => {
-      if (CHAINS_NOT_MONITORED.includes(chainId)) {
-        return
-      }
-      const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-ChainId: ${chainId.toString()}`
-      // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
-      const invocationsThreshold = 50
-      const evaluationPeriods = LOW_VOLUME_CHAINS.has(chainId) ? 4 : 2
-      const metric = new MathExpression({
-        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
-        usingMetrics: {
-          invocations: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_REQUESTED_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response400: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_400_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response200: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_200_CHAINID: ${chainId.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      })
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-        threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-        evaluationPeriods: evaluationPeriods,
-      })
-      successRateByChainAlarm.push(alarm)
-    })
-
-    // Alarms for high 500 error rate for each request source
-    const successRateByRequestSourceAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    REQUEST_SOURCES.forEach((requestSource) => {
-      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
-        return
-      }
-      const alarmName = `RoutingAPI-SEV2-SuccessRate-Alarm-RequestSource: ${requestSource.toString()}`
-      // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
-      const invocationsThreshold = 50
-      const evaluationPeriods = LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
-      const metric = new MathExpression({
-        expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
-        usingMetrics: {
-          invocations: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_REQUEST_SOURCE: ${requestSource.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response400: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_400_REQUEST_SOURCE: ${requestSource.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-          response200: new aws_cloudwatch.Metric({
-            namespace: 'Uniswap',
-            metricName: `GET_QUOTE_200_REQUEST_SOURCE: ${requestSource.toString()}`,
-            dimensionsMap: { Service: 'RoutingAPI' },
-            unit: aws_cloudwatch.Unit.COUNT,
-            statistic: 'sum',
-          }),
-        },
-      })
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-        threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-        evaluationPeriods: evaluationPeriods,
-      })
-      successRateByRequestSourceAlarm.push(alarm)
-    })
-
-    // Alarms for high 500 error rate for each request source and chain id
-    const successRateByRequestSourceAndChainIdAlarm: cdk.aws_cloudwatch.Alarm[] = []
-    REQUEST_SOURCES.forEach((requestSource) => {
-      if (REQUEST_SOURCES_NOT_MONITORED.includes(requestSource)) {
-        return
-      }
-
-      SUPPORTED_CHAINS.forEach((chainId) => {
-        if (CHAINS_NOT_MONITORED.includes(chainId)) {
-          return
-        }
-        const alarmName = `RoutingAPI-SEV3-SuccessRate-Alarm-RequestSource-ChainId: ${requestSource.toString()} ${chainId}`
-        // We only want to alert if the volume besides 400 errors is high enough over default period (5m) for 5xx errors.
-        const invocationsThreshold = 50
-        const evaluationPeriods =
-          LOW_VOLUME_CHAINS.has(chainId) || LOW_VOLUME_REQUEST_SOURCES.has(requestSource) ? 4 : 2
-        const metric = new MathExpression({
-          expression: `IF((invocations - response400) > ${invocationsThreshold}, 100*(response200/(invocations-response400)), 100)`,
-          usingMetrics: {
-            invocations: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-            response400: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_400_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-            response200: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: `GET_QUOTE_200_REQUEST_SOURCE_AND_CHAINID: ${requestSource.toString()} ${chainId}`,
-              dimensionsMap: { Service: 'RoutingAPI' },
-              unit: aws_cloudwatch.Unit.COUNT,
-              statistic: 'sum',
-            }),
-          },
-        })
-        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-          alarmName,
-          metric,
-          comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-          threshold: 95, // This is alarm will trigger if the SR is less than or equal to 95%
-          evaluationPeriods: evaluationPeriods,
-        })
-        successRateByRequestSourceAndChainIdAlarm.push(alarm)
-      })
-    })
-
-    if (chatbotSNSArn) {
-      const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
-      apiAlarm5xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarm4xxSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarmLatencySev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarm5xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarm4xxSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      apiAlarmLatencySev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      simulationAlarmSev2.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      graphqlTokenFeeFetcherErrorRateSev3.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-
-      percent4XXByChainAlarm.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      successRateByChainAlarm.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      successRateByRequestSourceAlarm.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      successRateByRequestSourceAndChainIdAlarm.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      simulationAlarmByChainSev2.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-    }
 
     this.url = new CfnOutput(this, 'Url', {
       value: api.url,

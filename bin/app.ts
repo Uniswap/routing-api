@@ -443,6 +443,7 @@ new RoutingAPIStack(app, 'RoutingAPIStackDev', {
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
   theGraphApiKey: process.env.THEGRAPH_API_KEY!,
+  useExplicitResourceNames: false, // Use auto-generated names to avoid conflicts
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

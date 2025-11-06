@@ -1,17 +1,13 @@
 import * as cdk from 'aws-cdk-lib'
-import { CfnOutput, Duration } from 'aws-cdk-lib'
+import { CfnOutput } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
-import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
-import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_iam from 'aws-cdk-lib/aws-iam'
 import * as aws_lambda from 'aws-cdk-lib/aws-lambda'
 import * as aws_lambda_nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as aws_s3 from 'aws-cdk-lib/aws-s3'
-import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
@@ -56,7 +52,6 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tokenListCacheBucket,
       provisionedConcurrency,
       ethGasStationInfoUrl,
-      chatbotSNSArn,
       tenderlyUser,
       tenderlyProject,
       tenderlyAccessKey,
@@ -131,22 +126,15 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         TENDERLY_NODE_API_KEY: tenderlyNodeApiKey,
-        // WARNING: Dynamo table name should be the tableinstance.name, e.g. routesDynamoDb.tableName.
-        //          But we tried and had seen lambd version error:
-        //          The following resource(s) failed to create: [RoutingLambda2CurrentVersion49A1BB948389ce4f9c26b15e2ccb07b4c1bab726].
-        //          2023-09-01 10:22:43 UTC-0700RoutingLambda2CurrentVersion49A1BB948389ce4f9c26b15e2ccb07b4c1bab726CREATE_FAILED
-        //          A version for this Lambda function exists ( 261 ). Modify the function to create a new version.
-        //          Hence we do not want to modify the table name below.
-        ROUTES_TABLE_NAME: DynamoDBTableProps.RoutesDbTable.Name,
-        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
-        CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
-        CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-        CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
-        V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
-        RPC_PROVIDER_HEALTH_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
-
-        // tokenPropertiesCachingDynamoDb.tableName is the correct format.
-        // we will start using the correct ones going forward
+        // Use actual table names from DynamoDB instances instead of hardcoded names
+        // This allows staging environments to use auto-generated table names
+        ROUTES_TABLE_NAME: routesDynamoDb.tableName,
+        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: routesDbCachingRequestFlagDynamoDb.tableName,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb.tableName,
+        CACHING_REQUEST_FLAG_TABLE_NAME: cachingRequestFlagDynamoDb.tableName,
+        CACHED_V3_POOLS_TABLE_NAME: cachedV3PoolsDynamoDb.tableName,
+        V2_PAIRS_CACHE_TABLE_NAME: cachedV2PairsDynamoDb.tableName,
+        RPC_PROVIDER_HEALTH_TABLE_NAME: rpcProviderHealthStateDynamoDb.tableName,
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         GQL_URL: uniGraphQLEndpoint,
@@ -194,22 +182,15 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         TENDERLY_PROJECT: tenderlyProject,
         TENDERLY_ACCESS_KEY: tenderlyAccessKey,
         TENDERLY_NODE_API_KEY: tenderlyNodeApiKey,
-        // WARNING: Dynamo table name should be the tableinstance.name, e.g. routesDynamoDb.tableName.
-        //          But we tried and had seen lambd version error:
-        //          The following resource(s) failed to create: [RoutingLambda2CurrentVersion49A1BB948389ce4f9c26b15e2ccb07b4c1bab726].
-        //          2023-09-01 10:22:43 UTC-0700RoutingLambda2CurrentVersion49A1BB948389ce4f9c26b15e2ccb07b4c1bab726CREATE_FAILED
-        //          A version for this Lambda function exists ( 261 ). Modify the function to create a new version.
-        //          Hence we do not want to modify the table name below.
-        ROUTES_TABLE_NAME: DynamoDBTableProps.RoutesDbTable.Name,
-        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.RoutesDbCachingRequestFlagTable.Name,
-        CACHED_ROUTES_TABLE_NAME: DynamoDBTableProps.CacheRouteDynamoDbTable.Name,
-        CACHING_REQUEST_FLAG_TABLE_NAME: DynamoDBTableProps.CachingRequestFlagDynamoDbTable.Name,
-        CACHED_V3_POOLS_TABLE_NAME: DynamoDBTableProps.V3PoolsDynamoDbTable.Name,
-        V2_PAIRS_CACHE_TABLE_NAME: DynamoDBTableProps.V2PairsDynamoCache.Name,
-        RPC_PROVIDER_HEALTH_TABLE_NAME: DynamoDBTableProps.RpcProviderHealthStateDbTable.Name,
-
-        // tokenPropertiesCachingDynamoDb.tableName is the correct format.
-        // we will start using the correct ones going forward
+        // Use actual table names from DynamoDB instances instead of hardcoded names
+        // This allows staging environments to use auto-generated table names
+        ROUTES_TABLE_NAME: routesDynamoDb.tableName,
+        ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME: routesDbCachingRequestFlagDynamoDb.tableName,
+        CACHED_ROUTES_TABLE_NAME: cachedRoutesDynamoDb.tableName,
+        CACHING_REQUEST_FLAG_TABLE_NAME: cachingRequestFlagDynamoDb.tableName,
+        CACHED_V3_POOLS_TABLE_NAME: cachedV3PoolsDynamoDb.tableName,
+        V2_PAIRS_CACHE_TABLE_NAME: cachedV2PairsDynamoDb.tableName,
+        RPC_PROVIDER_HEALTH_TABLE_NAME: rpcProviderHealthStateDynamoDb.tableName,
         TOKEN_PROPERTIES_CACHING_TABLE_NAME: tokenPropertiesCachingDynamoDb.tableName,
         UNICORN_SECRET: unicornSecret,
         GQL_URL: uniGraphQLEndpoint,
@@ -227,68 +208,6 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       tracing: aws_lambda.Tracing.ACTIVE,
       logRetention: RetentionDays.TWO_WEEKS,
     })
-
-    const cachingLambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'CachingRoutingAPI-LambdaErrorRate', {
-      metric: new aws_cloudwatch.MathExpression({
-        expression: 'errors / invocations',
-        usingMetrics: {
-          errors: cachingRoutingLambda.metricErrors({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-          invocations: cachingRoutingLambda.metricInvocations({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-        },
-      }),
-      threshold: 0.05,
-      evaluationPeriods: 3,
-    })
-    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
-      metric: new aws_cloudwatch.MathExpression({
-        expression: 'errors / invocations',
-        usingMetrics: {
-          errors: this.routingLambda.metricErrors({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-          invocations: this.routingLambda.metricInvocations({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-        },
-      }),
-      threshold: 0.05,
-      evaluationPeriods: 3,
-    })
-
-    const cachingLambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'CachingRoutingAPI-LambdaThrottles', {
-      metric: cachingRoutingLambda.metricThrottles({
-        period: Duration.minutes(5),
-        statistic: 'sum',
-      }),
-      threshold: 10,
-      evaluationPeriods: 3,
-    })
-    const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaThrottles', {
-      metric: this.routingLambda.metricThrottles({
-        period: Duration.minutes(5),
-        statistic: 'sum',
-      }),
-      threshold: 10,
-      evaluationPeriods: 3,
-    })
-
-    if (chatbotSNSArn) {
-      const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
-
-      cachingLambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-
-      cachingLambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-    }
 
     const enableProvisionedConcurrency = provisionedConcurrency > 0
 
