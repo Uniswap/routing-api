@@ -27,13 +27,14 @@ export interface RoutingDashboardProps extends cdk.NestedStackProps {
   routingLambdaName: string
   poolCacheLambdaNameArray: string[]
   ipfsPoolCacheLambdaName?: string
+  useExplicitResourceNames?: boolean
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName } = props
+    const { apiName, routingLambdaName, poolCacheLambdaNameArray, ipfsPoolCacheLambdaName, useExplicitResourceNames = true } = props
     const region = cdk.Stack.of(this).region
 
     const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
@@ -579,7 +580,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     ).generateWidgets()
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIDashboard', {
-      dashboardName: `RoutingDashboard`,
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      dashboardName: useExplicitResourceNames ? `RoutingDashboard` : undefined,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: perChainWidgetsForRoutingDashboard
@@ -1016,7 +1018,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
 
     const quoteAmountsWidgets = new QuoteAmountsWidgetsFactory(NAMESPACE, region)
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPITrackedPairsDashboard', {
-      dashboardName: 'RoutingAPITrackedPairsDashboard',
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      dashboardName: useExplicitResourceNames ? 'RoutingAPITrackedPairsDashboard' : undefined,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: quoteAmountsWidgets.generateWidgets(),
@@ -1025,7 +1028,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
 
     const cachedRoutesWidgets = new CachedRoutesWidgetsFactory(NAMESPACE, region, routingLambdaName)
     new aws_cloudwatch.CfnDashboard(this, 'CachedRoutesPerformanceDashboard', {
-      dashboardName: 'CachedRoutesPerformanceDashboard',
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      dashboardName: useExplicitResourceNames ? 'CachedRoutesPerformanceDashboard' : undefined,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: cachedRoutesWidgets.generateWidgets(),
@@ -1033,7 +1037,8 @@ export class RoutingDashboardStack extends cdk.NestedStack {
     })
 
     new aws_cloudwatch.CfnDashboard(this, 'RoutingAPIQuoteProviderDashboard', {
-      dashboardName: `RoutingQuoteProviderDashboard`,
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      dashboardName: useExplicitResourceNames ? `RoutingQuoteProviderDashboard` : undefined,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: [

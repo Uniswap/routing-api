@@ -302,9 +302,15 @@ function getRpcGatewayQuote5xxCountForChain(chainId: ChainId) {
   return metrics
 }
 
+export interface RpcGatewayDashboardStackProps extends cdk.NestedStackProps {
+  useExplicitResourceNames?: boolean
+}
+
 export class RpcGatewayDashboardStack extends cdk.NestedStack {
-  constructor(scope: Construct, name: string) {
-    super(scope, name)
+  constructor(scope: Construct, name: string, props?: RpcGatewayDashboardStackProps) {
+    super(scope, name, props)
+
+    const { useExplicitResourceNames = true } = props || {}
 
     const region = cdk.Stack.of(this).region
     const MAIN_NETWORKS = SUPPORTED_CHAINS.filter((chainId) => !TESTNETS.includes(chainId))
@@ -784,7 +790,8 @@ export class RpcGatewayDashboardStack extends cdk.NestedStack {
     ])
 
     new aws_cloudwatch.CfnDashboard(this, 'RpcGatewayDashboard', {
-      dashboardName: `RpcGatewayDashboard`,
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      dashboardName: useExplicitResourceNames ? `RpcGatewayDashboard` : undefined,
       dashboardBody: JSON.stringify({
         periodOverride: 'inherit',
         widgets: perChainWidgets,

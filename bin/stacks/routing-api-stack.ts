@@ -171,7 +171,8 @@ export class RoutingAPIStack extends cdk.Stack {
           content: '{"errorCode": "TOO_MANY_REQUESTS"}',
         },
       },
-      name: 'RoutingAPIIPThrottling',
+      // Only set explicit name for prod. Let CDK auto-generate for staging to avoid conflicts
+      name: useExplicitResourceNames ? 'RoutingAPIIPThrottling' : undefined,
       rules: [
         {
           name: 'ip',
@@ -241,9 +242,10 @@ export class RoutingAPIStack extends cdk.Stack {
       routingLambdaName: routingLambda.functionName,
       poolCacheLambdaNameArray,
       ipfsPoolCacheLambdaName: ipfsPoolCachingLambda ? ipfsPoolCachingLambda.functionName : undefined,
+      useExplicitResourceNames,
     })
 
-    new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack')
+    new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack', { useExplicitResourceNames })
     new RpcGatewayFallbackStack(this, 'RpcGatewayFallbackStack', { rpcProviderHealthStateDynamoDb })
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)
