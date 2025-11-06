@@ -1,0 +1,1 @@
+export const ZK_EVM_TESTNET_CHAIN_ID = 13473
