@@ -542,7 +542,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
             ChainId.MAINNET,
             ChainId.SONEIUM,
-            // ChainId.MONAD, ROUTE-778: support monad in v4 as it's causing issue with universal-router-version 2.0 now
+            ChainId.MONAD,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
