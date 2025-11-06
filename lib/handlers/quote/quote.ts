@@ -231,6 +231,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         hooksOptions,
         requestId,
         asyncRequestId,
+        poolsToManuallyRouteThrough,
       },
       requestInjected: {
         router,
@@ -353,6 +354,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       hooksOptions: hooksOptions,
       requestId: requestId,
       asyncRequestId: asyncRequestId,
+      poolsToManuallyRouteThrough: poolsToManuallyRouteThrough?.split(','),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
