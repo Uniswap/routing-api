@@ -78,6 +78,7 @@ export const QuoteQueryParamsJoi = Joi.object({
   hooksOptions: Joi.string().valid('NO_HOOKS', 'HOOKS_ONLY', 'HOOKS_INCLUSIVE').optional(),
   requestId: Joi.string().optional(),
   asyncRequestId: Joi.string().optional(),
+  poolsToManuallyRouteThrough: Joi.string().optional(),
 })
 
 // Future work: this TradeTypeParam can be converted into an enum and used in the
@@ -123,4 +124,5 @@ export type QuoteQueryParams = {
   hooksOptions?: HooksOptions
   requestId?: string
   asyncRequestId?: string
+  poolsToManuallyRouteThrough?: string
 }
