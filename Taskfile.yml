@@ -1,0 +1,23 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - task: compile:types
+      - npm run build
+  install:
+    cmds:
+      - npm install
+  setup:
+    cmds:
+      - task: install
+      - cp template.env .env
+  deploy:
+    cmds:
+      - npm run cdk
+  compile:types:
+    cmds:
+      - npm run compile-external-types
+      - npm run compile-v3-contract-types

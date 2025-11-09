@@ -83,7 +83,7 @@ export const v2SubgraphUrlOverride = (chainId: number) => {
 }
 
 const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
-const v4BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
+
 const v4BaseZoraTrackedEthThreshold = 0.001 // Pools on Zora need at least 0.1 of trackedEth to be selected
 const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
 
@@ -103,8 +103,8 @@ export interface ChainProtocol {
   eulerHooksProvider?: EulerSwapHooksSubgraphProvider
 }
 
-export const chainProtocols = [
-  // TODO: Add prototocols for ZK EVM
+export const chainProtocols: ChainProtocol[] = [
+  // TODO: Add protocols for ZK EVM
   // V3.
   {
     protocol: Protocol.V3,

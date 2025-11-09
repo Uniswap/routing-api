@@ -261,6 +261,7 @@ export class RoutingAPIPipeline extends Stack {
       'ALCHEMY_1301',
       // unirpc - serves all chains
       'UNIRPC_0',
+      'ZK_EVM_TESTNET',
     ]
     for (const provider of RPC_GATEWAY_PROVIDERS) {
       jsonRpcProviders[provider] = jsonRpcProvidersSecret.secretValueFromJson(provider).toString()
@@ -481,5 +482,5 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {
-  env: { account: '644039819003', region: 'ap-southeast-2' },
+  env: { account: '891377046950', region: 'ap-southeast-2' },
 })
