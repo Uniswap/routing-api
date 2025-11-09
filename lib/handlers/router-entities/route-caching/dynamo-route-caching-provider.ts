@@ -203,6 +203,21 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
           alphaRouterConfig,
           swapOptions
         )
+      } else if (currencyIn.isNative || currencyOut.isNative) {
+        // Caching requests are not `optimistic`, we need to be careful of not removing this flag
+        // This condition is protecting us against firing another caching request from inside a caching request
+        if (optimistic) {
+          // We send an async caching quote
+          // we do not await on this function, it's a fire and forget
+          this.maybeSendCachingQuoteForRoutesDb(
+            partitionKey,
+            amount,
+            currentBlockNumber,
+            [], // sending cachedRoutesRouteIds are really just for the debugging/logging purposes, async call does not use cachedRoutesRouteIds at all
+            alphaRouterConfig,
+            swapOptions
+          )
+        }
       } else {
         metric.putMetric('RoutesDbEntriesNotFound', 1, MetricLoggerUnit.Count)
         log.warn(`[DynamoRouteCachingProvider] No items found in the query response for ${partitionKey.toString()}`)
