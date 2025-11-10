@@ -18,9 +18,7 @@ import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
 
-// Needed for local stack dev, not needed for staging or prod
-// But it still doesn't work on the local cdk stack update,
-// so we will manually populate ALCHEMY_QUERY_KEY env var in the cron job lambda in cache-config.ts
+// Needed for local dev, not needed for staging or prod
 dotenv.config()
 
 const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBridgeEvent<string, void>) => {

@@ -552,38 +552,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         }
 
         if (nextPool instanceof V4Pool) {
-          // We want to filter the fake v4 pool here,
-          // because in SOR, we intentionally retain the fake pool, when it returns the valid routes
-          // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
-          if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
-            continue
-          }
-
-          curRoute.push({
-            type: 'v4-pool',
-            // V4 not supported - this code path won't execute
-            address: 'v4-not-supported',
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: getAddress(tokenIn),
-              symbol: tokenIn.symbol!,
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: getAddress(tokenOut),
-              symbol: tokenOut.symbol!,
-            },
-            fee: nextPool.fee.toString(),
-            tickSpacing: nextPool.tickSpacing.toString(),
-            hooks: nextPool.hooks.toString(),
-            liquidity: nextPool.liquidity.toString(),
-            sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
-            tickCurrent: nextPool.tickCurrent.toString(),
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
+          throw new Error(`V4 pools not supported`)
         } else if (nextPool instanceof V3Pool) {
           curRoute.push({
             type: 'v3-pool',
@@ -608,74 +577,7 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountOut: edgeAmountOut,
           })
         } else if (nextPool instanceof Pair) {
-          const reserve0 = nextPool.reserve0
-          const reserve1 = nextPool.reserve1
-
-          curRoute.push({
-            type: 'v2-pool',
-            // V2 not supported - this code path won't execute
-            address: 'v2-not-supported',
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: tokenIn.wrapped.address,
-              symbol: tokenIn.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: tokenOut.wrapped.address,
-              symbol: tokenOut.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            reserve0: {
-              token: {
-                chainId: reserve0.currency.wrapped.chainId,
-                decimals: reserve0.currency.wrapped.decimals.toString(),
-                address: reserve0.currency.wrapped.address,
-                symbol: reserve0.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve0.quotient.toString(),
-            },
-            reserve1: {
-              token: {
-                chainId: reserve1.currency.wrapped.chainId,
-                decimals: reserve1.currency.wrapped.decimals.toString(),
-                address: reserve1.currency.wrapped.address,
-                symbol: reserve1.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve1.quotient.toString(),
-            },
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
+          throw new Error(`V2 pools not supported`)
         } else {
           throw new Error(`Unsupported pool type ${JSON.stringify(nextPool)}`)
         }

@@ -25,5 +25,5 @@
     "typeRoots": ["./node_modules/@types"],
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["cdk.out", "./dist/**/*"]
+  "exclude": ["./dist/**/*"]
 }

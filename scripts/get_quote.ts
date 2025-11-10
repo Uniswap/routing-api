@@ -1,5 +1,5 @@
 /**
- * ts-node --project=tsconfig.cdk.json scripts/get_quote.ts
+ * ts-node scripts/get_quote.ts
  */
 import axios, { AxiosResponse } from 'axios'
 import dotenv from 'dotenv'
