@@ -237,9 +237,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         chainId,
         tokenProvider,
         tokenListProvider,
-        v4PoolProvider: v4PoolProvider,
         v3PoolProvider: v3PoolProvider,
-        v2PoolProvider: v2PoolProvider,
         metric,
       },
     } = params
@@ -563,13 +561,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
           curRoute.push({
             type: 'v4-pool',
-            address: v4PoolProvider.getPoolId(
-              nextPool.token0,
-              nextPool.token1,
-              nextPool.fee,
-              nextPool.tickSpacing,
-              nextPool.hooks
-            ).poolId,
+            // V4 not supported - this code path won't execute
+            address: 'v4-not-supported',
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),
@@ -620,7 +613,8 @@ export class QuoteHandler extends APIGLambdaHandler<
 
           curRoute.push({
             type: 'v2-pool',
-            address: v2PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1).poolAddress,
+            // V2 not supported - this code path won't execute
+            address: 'v2-not-supported',
             tokenIn: {
               chainId: tokenIn.chainId,
               decimals: tokenIn.decimals.toString(),

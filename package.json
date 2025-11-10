@@ -10,6 +10,8 @@
     "compile-external-types": "npx typechain --target ethers-v5 --out-dir lib/types/ext 'lib/abis/**/*.json'",
     "compile-v3-contract-types": "npx typechain --target ethers-v5 --out-dir lib/types/v3 './node_modules/@uniswap/?(v3-core|v3-periphery)/artifacts/contracts/**/*.json'",
     "build": "run-p compile-external-types compile-v3-contract-types && tsc",
+    "build:lambda": "npm run build && npm run bundle:lambda",
+    "bundle:lambda": "cd dist && zip -r lambda.zip . -x '*.map' -x 'bin/*'",
     "clean": "rm -rf dist cdk.out",
     "watch": "tsc -w",
     "test:unit": "jest test/jest/unit/ && ts-mocha -p tsconfig.cdk.json test/mocha/unit/**/*",

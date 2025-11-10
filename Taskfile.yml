@@ -6,17 +6,20 @@ tasks:
   build:
     cmds:
       - task: compile:types
-      - npm run build
+      - task: bundle:lambda
+  bundle:lambda:
+    cmds:
+      - cd dist && zip -r lambda.zip . -x '*.map' -x 'bin/*'
+  clean:
+    cmds:
+      - rm -rf dist
   install:
     cmds:
       - npm install
   setup:
     cmds:
       - task: install
-      - cp template.env .env
-  deploy:
-    cmds:
-      - npm run cdk
+      - cp .example.env .env
   compile:types:
     cmds:
       - npm run compile-external-types
