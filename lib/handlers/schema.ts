@@ -11,22 +11,7 @@ export type TokenInRoute = {
   sellFeeBps?: string
 }
 
-export type SupportedPoolInRoute = V2PoolInRoute | V3PoolInRoute | V4PoolInRoute
-
-export type V4PoolInRoute = {
-  type: 'v4-pool'
-  address: string
-  tokenIn: TokenInRoute
-  tokenOut: TokenInRoute
-  sqrtRatioX96: string
-  liquidity: string
-  tickCurrent: string
-  fee: string
-  tickSpacing: string
-  hooks: string
-  amountIn?: string
-  amountOut?: string
-}
+export type SupportedPoolInRoute = V3PoolInRoute
 
 export type V3PoolInRoute = {
   type: 'v3-pool'
@@ -37,22 +22,6 @@ export type V3PoolInRoute = {
   liquidity: string
   tickCurrent: string
   fee: string
-  amountIn?: string
-  amountOut?: string
-}
-
-export type V2Reserve = {
-  token: TokenInRoute
-  quotient: string
-}
-
-export type V2PoolInRoute = {
-  type: 'v2-pool'
-  address: string
-  tokenIn: TokenInRoute
-  tokenOut: TokenInRoute
-  reserve0: V2Reserve
-  reserve1: V2Reserve
   amountIn?: string
   amountOut?: string
 }

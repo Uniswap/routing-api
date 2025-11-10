@@ -13,10 +13,8 @@ import {
   sortsBefore,
   SwapOptions,
   SwapRoute,
-  V4_ETH_WETH_FAKE_POOL,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
-import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -39,7 +37,6 @@ import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
-import { Pair } from '@uniswap/v2-sdk'
 import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 import {
   convertStringRouterVersionToEnum,
@@ -266,9 +263,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
 
     const protocols = QuoteHandler.protocolsFromRequest(
-      chainId,
-      tokenInAddress,
-      tokenOutAddress,
       universalRouterVersion,
       protocolsStr,
       forceCrossProtocol
@@ -534,7 +528,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
+      // V3-only deployment - only V3 and MIXED routes are supported
+      if (subRoute.protocol !== Protocol.V3 && subRoute.protocol !== Protocol.MIXED) {
+        throw new Error(`Unsupported protocol: ${subRoute.protocol}`)
+      }
+
+      const pools = subRoute.route.pools
       const curRoute: SupportedPoolInRoute[] = []
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i]
@@ -551,9 +550,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
         }
 
-        if (nextPool instanceof V4Pool) {
-          throw new Error(`V4 pools not supported`)
-        } else if (nextPool instanceof V3Pool) {
+        if (nextPool instanceof V3Pool) {
           curRoute.push({
             type: 'v3-pool',
             address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
@@ -576,8 +573,6 @@ export class QuoteHandler extends APIGLambdaHandler<
             amountIn: edgeAmountIn,
             amountOut: edgeAmountOut,
           })
-        } else if (nextPool instanceof Pair) {
-          throw new Error(`V2 pools not supported`)
         } else {
           throw new Error(`Unsupported pool type ${JSON.stringify(nextPool)}`)
         }
@@ -641,53 +636,27 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   static protocolsFromRequest(
-    chainId: ChainId,
-    tokenInAddress: string,
-    tokenOutAddress: string,
     universalRouterVersion: UniversalRouterVersion,
     requestedProtocols?: string[] | string,
     forceCrossProtocol?: boolean
   ): Protocol[] | undefined {
-    const excludeV2 = false
-
     if (requestedProtocols) {
       let protocols: Protocol[] = []
 
-      // TODO: route-459 - make sure we understand the root cause and revert this tech-debt
-      //       we are only doing this because we don't know why cached routes don't refresh in case of all protocols
-      if (
-        chainId === ChainId.UNICHAIN &&
-        ((tokenInAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5' &&
-          tokenOutAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6') ||
-          (tokenInAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6' &&
-            tokenOutAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5'))
-      ) {
-        return [Protocol.V4]
-      }
-
+      // V3-only deployment - only support V3 and MIXED protocols
       for (const protocolStr of requestedProtocols) {
         switch (protocolStr.toUpperCase()) {
-          case Protocol.V2:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V2)) {
-                protocols.push(Protocol.V2)
-              }
-            }
-            break
           case Protocol.V3:
             if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V3)) {
               protocols.push(Protocol.V3)
             }
             break
-          case Protocol.V4:
-            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V4)) {
-              protocols.push(Protocol.V4)
-            }
-            break
           case Protocol.MIXED:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.MIXED)
-            }
+            protocols.push(Protocol.MIXED)
+            break
+          case Protocol.V2:
+          case Protocol.V4:
+            // V2 and V4 not supported in this deployment
             break
           default:
             return undefined

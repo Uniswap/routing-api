@@ -1,13 +1,10 @@
 import { Protocol } from '@uniswap/router-sdk'
 import {
-  IV2SubgraphProvider,
   IV3SubgraphProvider,
   log,
   metric,
   MetricLoggerUnit,
-  V2SubgraphPool,
   V3SubgraphPool,
-  V4SubgraphPool,
 } from '@uniswap/smart-order-router'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
@@ -20,7 +17,7 @@ const POOL_CACHE = new NodeCache({ stdTTL: 240, useClones: false })
 const LOCAL_POOL_CACHE_KEY = (chainId: ChainId, protocol: Protocol) => `pools${chainId}#${protocol}`
 const s3 = new S3({ correctClockSkew: true, maxRetries: 1 })
 
-export class AWSSubgraphProvider<TSubgraphPool extends V2SubgraphPool | V3SubgraphPool> {
+export class AWSSubgraphProvider<TSubgraphPool extends V3SubgraphPool> {
   constructor(private chain: ChainId, private protocol: Protocol, private bucket: string, private baseKey: string) {}
 
   public async getPools(): Promise<TSubgraphPool[]> {
@@ -107,18 +104,6 @@ export const cachePoolsFromS3 = async <TSubgraphPool>(
   return pools
 }
 
-export class V4AWSSubgraphProvider extends AWSSubgraphProvider<V4SubgraphPool> implements IV3SubgraphProvider {
-  constructor(chainId: ChainId, bucket: string, baseKey: string) {
-    super(chainId, Protocol.V4, bucket, baseKey)
-  }
-
-  public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V3AWSSubgraphProvider> {
-    await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V4)
-
-    return new V4AWSSubgraphProvider(chainId, bucket, baseKey)
-  }
-}
-
 export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> implements IV3SubgraphProvider {
   constructor(chainId: ChainId, bucket: string, baseKey: string) {
     super(chainId, Protocol.V3, bucket, baseKey)
@@ -128,17 +113,5 @@ export class V3AWSSubgraphProvider extends AWSSubgraphProvider<V3SubgraphPool> i
     await cachePoolsFromS3<V3SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V3)
 
     return new V3AWSSubgraphProvider(chainId, bucket, baseKey)
-  }
-}
-
-export class V2AWSSubgraphProvider extends AWSSubgraphProvider<V2SubgraphPool> implements IV2SubgraphProvider {
-  constructor(chainId: ChainId, bucket: string, key: string) {
-    super(chainId, Protocol.V2, bucket, key)
-  }
-
-  public static async EagerBuild(bucket: string, baseKey: string, chainId: ChainId): Promise<V2AWSSubgraphProvider> {
-    await cachePoolsFromS3<V2SubgraphPool>(s3, bucket, baseKey, chainId, Protocol.V2)
-
-    return new V2AWSSubgraphProvider(chainId, bucket, baseKey)
   }
 }
