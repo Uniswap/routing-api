@@ -667,48 +667,6 @@ export class QuoteHandler extends APIGLambdaHandler<
     }
   }
 
-  private deriveBuyFeeBps(
-    token: Currency,
-    reserve0?: CurrencyAmount<Token>,
-    reserve1?: CurrencyAmount<Token>,
-    enableFeeOnTransferFeeFetching?: boolean
-  ): string | undefined {
-    if (!enableFeeOnTransferFeeFetching) {
-      return undefined
-    }
-
-    if (reserve0?.currency.equals(token)) {
-      return reserve0.currency.buyFeeBps?.toString()
-    }
-
-    if (reserve1?.currency.equals(token)) {
-      return reserve1.currency.buyFeeBps?.toString()
-    }
-
-    return undefined
-  }
-
-  private deriveSellFeeBps(
-    token: Currency,
-    reserve0?: CurrencyAmount<Token>,
-    reserve1?: CurrencyAmount<Token>,
-    enableFeeOnTransferFeeFetching?: boolean
-  ): string | undefined {
-    if (!enableFeeOnTransferFeeFetching) {
-      return undefined
-    }
-
-    if (reserve0?.currency.equals(token)) {
-      return reserve0.currency.sellFeeBps?.toString()
-    }
-
-    if (reserve1?.currency.equals(token)) {
-      return reserve1.currency.sellFeeBps?.toString()
-    }
-
-    return undefined
-  }
-
   private logRouteMetrics(
     log: Logger,
     metric: IMetric,
