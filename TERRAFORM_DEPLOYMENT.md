@@ -451,25 +451,6 @@ curl -X POST https://your-api-endpoint/quote \
   }'
 ```
 
-## Cost Estimation
-
-### Pay-Per-Request Pricing (AWS ap-southeast-2)
-
-- **Lambda**: ~$0.0000166667 per GB-second + $0.20 per 1M requests
-  - With 5GB memory and 2s average execution: ~$0.00017 per request
-- **DynamoDB**: $1.4225 per million write requests, $0.285 per million read requests
-  - Typical: ~$0.000002 per quote (with caching)
-- **API Gateway**: $1.08 per million requests
-  - Or **Function URL**: Free
-
-### Monthly Cost Examples
-
-| Traffic           | Lambda | DynamoDB | API Gateway | Total     |
-| ----------------- | ------ | -------- | ----------- | --------- |
-| 10K quotes/month  | $1.70  | $0.02    | $0.01       | **~$2**   |
-| 100K quotes/month | $17    | $0.20    | $0.11       | **~$17**  |
-| 1M quotes/month   | $170   | $2       | $1.08       | **~$173** |
-
 ## Monitoring
 
 ### CloudWatch Metrics
