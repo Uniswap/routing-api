@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
 import { Protocol } from '@uniswap/router-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   getAddress,
