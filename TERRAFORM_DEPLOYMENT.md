@@ -78,7 +78,7 @@ resource "aws_lambda_function" "routing_api" {
     variables = {
       # Required
       ZK_EVM_TESTNET_RPC       = var.rpc_endpoint
-      ZK_EVM_V3_SUBGRAPH_URL   = var.subgraph_url
+      V3_SUBGRAPH_URL   = var.subgraph_url
       VERSION                   = "1"
       NODE_OPTIONS              = "--enable-source-maps"
 
@@ -349,28 +349,28 @@ output "function_url" {
 
 ### Required
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ZK_EVM_TESTNET_RPC` | RPC endpoint for zkEVM testnet | `https://rpc.testnet.immutable.com` |
-| `ZK_EVM_V3_SUBGRAPH_URL` | Your V3 subgraph GraphQL endpoint | `https://your-subgraph/graphql` |
-| `VERSION` | API version | `1` |
-| `NODE_OPTIONS` | Node.js runtime options | `--enable-source-maps` |
+| Variable             | Description                       | Example                             |
+| -------------------- | --------------------------------- | ----------------------------------- |
+| `ZK_EVM_TESTNET_RPC` | RPC endpoint for zkEVM testnet    | `https://rpc.testnet.immutable.com` |
+| `V3_SUBGRAPH_URL`    | Your V3 subgraph GraphQL endpoint | `https://your-subgraph/graphql`     |
+| `VERSION`            | API version                       | `1`                                 |
+| `NODE_OPTIONS`       | Node.js runtime options           | `--enable-source-maps`              |
 
 ### Recommended (DynamoDB Caching)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ROUTES_TABLE_NAME` | Routes cache table name | `RoutesDB` |
-| `CACHED_ROUTES_TABLE_NAME` | Cached routes table name | `RouteCachingDB` |
-| `ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME` | Caching flag table name | `RoutesDbCacheReqFlagDB` |
-| `CACHED_V3_POOLS_TABLE_NAME` | V3 pools cache table name | `V3PoolsCachingDB` |
+| Variable                                 | Description               | Example                  |
+| ---------------------------------------- | ------------------------- | ------------------------ |
+| `ROUTES_TABLE_NAME`                      | Routes cache table name   | `RoutesDB`               |
+| `CACHED_ROUTES_TABLE_NAME`               | Cached routes table name  | `RouteCachingDB`         |
+| `ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME` | Caching flag table name   | `RoutesDbCacheReqFlagDB` |
+| `CACHED_V3_POOLS_TABLE_NAME`             | V3 pools cache table name | `V3PoolsCachingDB`       |
 
 ### Optional
 
-| Variable | Description | Example |
-|----------|-------------|---------|
+| Variable         | Description                              | Example             |
+| ---------------- | ---------------------------------------- | ------------------- |
 | `UNICORN_SECRET` | Secret for enabling debug routing config | `random-string-123` |
-| `AWS_REGION` | AWS region (auto-set by Lambda) | `ap-southeast-2` |
+| `AWS_REGION`     | AWS region (auto-set by Lambda)          | `ap-southeast-2`    |
 
 ## API Usage
 
@@ -464,11 +464,11 @@ curl -X POST https://your-api-endpoint/quote \
 
 ### Monthly Cost Examples
 
-| Traffic | Lambda | DynamoDB | API Gateway | Total |
-|---------|--------|----------|-------------|-------|
-| 10K quotes/month | $1.70 | $0.02 | $0.01 | **~$2** |
-| 100K quotes/month | $17 | $0.20 | $0.11 | **~$17** |
-| 1M quotes/month | $170 | $2 | $1.08 | **~$173** |
+| Traffic           | Lambda | DynamoDB | API Gateway | Total     |
+| ----------------- | ------ | -------- | ----------- | --------- |
+| 10K quotes/month  | $1.70  | $0.02    | $0.01       | **~$2**   |
+| 100K quotes/month | $17    | $0.20    | $0.11       | **~$17**  |
+| 1M quotes/month   | $170   | $2       | $1.08       | **~$173** |
 
 ## Monitoring
 

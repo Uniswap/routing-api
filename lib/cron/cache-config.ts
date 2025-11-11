@@ -7,7 +7,7 @@ import { ZK_EVM_TESTNET_CHAIN_ID } from '../constants/zk-evm'
 export const v3SubgraphUrlOverride = (chainId: number) => {
   switch (chainId) {
     case ZK_EVM_TESTNET_CHAIN_ID:
-      return process.env.ZK_EVM_V3_SUBGRAPH_URL || ''
+      return process.env.V3_SUBGRAPH_URL || ''
     default:
       return undefined
   }
