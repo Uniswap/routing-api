@@ -1,11 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
-import {
-  IV3SubgraphProvider,
-  log,
-  metric,
-  MetricLoggerUnit,
-  V3SubgraphPool,
-} from '@uniswap/smart-order-router'
+import { IV3SubgraphProvider, log, metric, MetricLoggerUnit, V3SubgraphPool } from '@uniswap/smart-order-router'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
 import NodeCache from 'node-cache'

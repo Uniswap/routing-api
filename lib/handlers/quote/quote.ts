@@ -262,11 +262,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`AppVersion.${appVersion}`, 1)
     }
 
-    const protocols = QuoteHandler.protocolsFromRequest(
-      universalRouterVersion,
-      protocolsStr,
-      forceCrossProtocol
-    )
+    const protocols = QuoteHandler.protocolsFromRequest(universalRouterVersion, protocolsStr, forceCrossProtocol)
 
     if (protocols === undefined) {
       return {

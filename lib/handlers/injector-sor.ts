@@ -249,8 +249,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               (optimisticCachedRoutes, _protocol) => {
                 const protocol = Protocol.V3
                 return optimisticCachedRoutes
-                  ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId] || { batchSize: 2, gasLimitPerCall: 1_000_000, dropUnexecutedFetches: true }
-                  : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId] || { batchSize: 2, gasLimitPerCall: 1_000_000, dropUnexecutedFetches: false }
+                  ? OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId] || {
+                      batchSize: 2,
+                      gasLimitPerCall: 1_000_000,
+                      dropUnexecutedFetches: true,
+                    }
+                  : NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS[protocol][chainId] || {
+                      batchSize: 2,
+                      gasLimitPerCall: 1_000_000,
+                      dropUnexecutedFetches: false,
+                    }
               },
               (_protocol) => GAS_ERROR_FAILURE_OVERRIDES[chainId] || { gasLimitOverride: 2_000_000, maxTimes: 3 },
               (_protocol) => SUCCESS_RATE_FAILURE_OVERRIDES[chainId] || { successRateFailureOverrides: [] },

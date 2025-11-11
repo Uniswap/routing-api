@@ -1,10 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
-import {
-  setGlobalLogger,
-  setGlobalMetric,
-  V3SubgraphPool,
-  V3SubgraphProvider,
-} from '@uniswap/smart-order-router'
+import { setGlobalLogger, setGlobalMetric, V3SubgraphPool, V3SubgraphProvider } from '@uniswap/smart-order-router'
 import { EventBridgeEvent, ScheduledHandler } from 'aws-lambda'
 import { S3 } from 'aws-sdk'
 import { ChainId } from '@uniswap/sdk-core'
@@ -89,7 +84,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         return !shouldFilterOut
       })
     }
-
 
     metric.putMetric(`${metricPrefix}.getPools.latency`, Date.now() - beforeGetPool)
   } catch (err) {
