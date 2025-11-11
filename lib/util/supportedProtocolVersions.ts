@@ -1,7 +1,8 @@
 import { Protocol } from '@uniswap/router-sdk'
 import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 
-export const SUPPORTED_PROTOCOL_VERSIONS = [Protocol.V2, Protocol.V3, Protocol.V4]
+// V3-only deployment
+export const SUPPORTED_PROTOCOL_VERSIONS = [Protocol.V3]
 
 export function convertStringRouterVersionToEnum(routerVersion?: string): UniversalRouterVersion {
   const validVersions = Object.values(UniversalRouterVersion)
@@ -12,9 +13,10 @@ export type URVersionsToProtocolVersionsMapping = {
   readonly [universalRouterVersion in UniversalRouterVersion]: Array<Protocol>
 }
 
+// V3-only deployment - only support V3 protocol
 export const URVersionsToProtocolVersions: URVersionsToProtocolVersionsMapping = {
-  [UniversalRouterVersion.V1_2]: [Protocol.V2, Protocol.V3],
-  [UniversalRouterVersion.V2_0]: [Protocol.V2, Protocol.V3, Protocol.V4],
+  [UniversalRouterVersion.V1_2]: [Protocol.V3],
+  [UniversalRouterVersion.V2_0]: [Protocol.V3],
 }
 
 export function protocolVersionsToBeExcludedFromMixed(universalRouterVersion: UniversalRouterVersion): Protocol[] {

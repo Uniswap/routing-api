@@ -148,6 +148,9 @@ export function generateProviderUrl(key: string, value: string, chainId: number)
     case 'ALCHEMY_1301': {
       return `https://unichain-sepolia.g.alchemy.com/v2/${tokens[0]}`
     }
+    case 'ZK_EVM_TESTNET_13473': {
+      return value
+    }
   }
   throw new Error(`Unknown provider-chainId pair: ${key}`)
 }

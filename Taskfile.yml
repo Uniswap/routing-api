@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - task: compile:types
+      - task: bundle:lambda
+  bundle:lambda:
+    cmds:
+      - cd dist && zip -r lambda.zip . -x '*.map' -x 'bin/*'
+  clean:
+    cmds:
+      - rm -rf dist
+  install:
+    cmds:
+      - npm install
+  setup:
+    cmds:
+      - task: install
+      - cp .example.env .env
+  compile:types:
+    cmds:
+      - npm run compile-external-types
+      - npm run compile-v3-contract-types

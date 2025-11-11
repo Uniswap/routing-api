@@ -1,6 +1,0 @@
-{
-  "app": "npx ts-node --project=tsconfig.cdk.json bin/app.ts",
-  "context": {
-    "@aws-cdk/core:newStyleStackSynthesis": true
-  }
-}

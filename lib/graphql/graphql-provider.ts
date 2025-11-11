@@ -19,9 +19,9 @@ export interface IUniGraphQLProvider {
 
 /* Implementation of the UniGraphQLProvider interface to give access to Uniswap GraphQL API */
 export class UniGraphQLProvider implements IUniGraphQLProvider {
-  private readonly endpoint = process.env.GQL_URL!
+  private readonly endpoint = process.env.V3_SUBGRAPH_URL!
   private readonly headers = {
-    Origin: process.env.GQL_H_ORGN!,
+    // Origin: process.env.GQL_H_ORGN!,
     'Content-Type': 'application/json',
   }
   private client: IGraphQLClient

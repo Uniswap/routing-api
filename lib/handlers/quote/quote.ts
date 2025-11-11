@@ -13,10 +13,8 @@ import {
   sortsBefore,
   SwapOptions,
   SwapRoute,
-  V4_ETH_WETH_FAKE_POOL,
 } from '@uniswap/smart-order-router'
 import { Pool as V3Pool } from '@uniswap/v3-sdk'
-import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
@@ -39,7 +37,6 @@ import { SwapOptionsFactory } from './SwapOptionsFactory'
 import { GlobalRpcProviders } from '../../rpc/GlobalRpcProviders'
 import { adhocCorrectGasUsed } from '../../util/estimateGasUsed'
 import { adhocCorrectGasUsedUSD } from '../../util/estimateGasUsedUSD'
-import { Pair } from '@uniswap/v2-sdk'
 import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 import {
   convertStringRouterVersionToEnum,
@@ -237,9 +234,7 @@ export class QuoteHandler extends APIGLambdaHandler<
         chainId,
         tokenProvider,
         tokenListProvider,
-        v4PoolProvider: v4PoolProvider,
         v3PoolProvider: v3PoolProvider,
-        v2PoolProvider: v2PoolProvider,
         metric,
       },
     } = params
@@ -267,14 +262,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       metric.putMetric(`AppVersion.${appVersion}`, 1)
     }
 
-    const protocols = QuoteHandler.protocolsFromRequest(
-      chainId,
-      tokenInAddress,
-      tokenOutAddress,
-      universalRouterVersion,
-      protocolsStr,
-      forceCrossProtocol
-    )
+    const protocols = QuoteHandler.protocolsFromRequest(universalRouterVersion, protocolsStr, forceCrossProtocol)
 
     if (protocols === undefined) {
       return {
@@ -536,7 +524,12 @@ export class QuoteHandler extends APIGLambdaHandler<
     for (const subRoute of route) {
       const { amount, quote, tokenPath } = subRoute
 
-      const pools = subRoute.protocol == Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
+      // V3-only deployment - only V3 and MIXED routes are supported
+      if (subRoute.protocol !== Protocol.V3 && subRoute.protocol !== Protocol.MIXED) {
+        throw new Error(`Unsupported protocol: ${subRoute.protocol}`)
+      }
+
+      const pools = subRoute.route.pools
       const curRoute: SupportedPoolInRoute[] = []
       for (let i = 0; i < pools.length; i++) {
         const nextPool = pools[i]
@@ -553,45 +546,7 @@ export class QuoteHandler extends APIGLambdaHandler<
           edgeAmountOut = type == 'exactIn' ? quote.quotient.toString() : amount.quotient.toString()
         }
 
-        if (nextPool instanceof V4Pool) {
-          // We want to filter the fake v4 pool here,
-          // because in SOR, we intentionally retain the fake pool, when it returns the valid routes
-          // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
-          if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
-            continue
-          }
-
-          curRoute.push({
-            type: 'v4-pool',
-            address: v4PoolProvider.getPoolId(
-              nextPool.token0,
-              nextPool.token1,
-              nextPool.fee,
-              nextPool.tickSpacing,
-              nextPool.hooks
-            ).poolId,
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: getAddress(tokenIn),
-              symbol: tokenIn.symbol!,
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: getAddress(tokenOut),
-              symbol: tokenOut.symbol!,
-            },
-            fee: nextPool.fee.toString(),
-            tickSpacing: nextPool.tickSpacing.toString(),
-            hooks: nextPool.hooks.toString(),
-            liquidity: nextPool.liquidity.toString(),
-            sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
-            tickCurrent: nextPool.tickCurrent.toString(),
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
-        } else if (nextPool instanceof V3Pool) {
+        if (nextPool instanceof V3Pool) {
           curRoute.push({
             type: 'v3-pool',
             address: v3PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1, nextPool.fee).poolAddress,
@@ -611,74 +566,6 @@ export class QuoteHandler extends APIGLambdaHandler<
             liquidity: nextPool.liquidity.toString(),
             sqrtRatioX96: nextPool.sqrtRatioX96.toString(),
             tickCurrent: nextPool.tickCurrent.toString(),
-            amountIn: edgeAmountIn,
-            amountOut: edgeAmountOut,
-          })
-        } else if (nextPool instanceof Pair) {
-          const reserve0 = nextPool.reserve0
-          const reserve1 = nextPool.reserve1
-
-          curRoute.push({
-            type: 'v2-pool',
-            address: v2PoolProvider.getPoolAddress(nextPool.token0, nextPool.token1).poolAddress,
-            tokenIn: {
-              chainId: tokenIn.chainId,
-              decimals: tokenIn.decimals.toString(),
-              address: tokenIn.wrapped.address,
-              symbol: tokenIn.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenIn, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            tokenOut: {
-              chainId: tokenOut.chainId,
-              decimals: tokenOut.decimals.toString(),
-              address: tokenOut.wrapped.address,
-              symbol: tokenOut.symbol!,
-              buyFeeBps: this.deriveBuyFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-              sellFeeBps: this.deriveSellFeeBps(tokenOut, reserve0, reserve1, enableFeeOnTransferFeeFetching),
-            },
-            reserve0: {
-              token: {
-                chainId: reserve0.currency.wrapped.chainId,
-                decimals: reserve0.currency.wrapped.decimals.toString(),
-                address: reserve0.currency.wrapped.address,
-                symbol: reserve0.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve0.currency.wrapped,
-                  reserve0,
-                  undefined,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve0.quotient.toString(),
-            },
-            reserve1: {
-              token: {
-                chainId: reserve1.currency.wrapped.chainId,
-                decimals: reserve1.currency.wrapped.decimals.toString(),
-                address: reserve1.currency.wrapped.address,
-                symbol: reserve1.currency.wrapped.symbol!,
-                buyFeeBps: this.deriveBuyFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-                sellFeeBps: this.deriveSellFeeBps(
-                  reserve1.currency.wrapped,
-                  undefined,
-                  reserve1,
-                  enableFeeOnTransferFeeFetching
-                ),
-              },
-              quotient: reserve1.quotient.toString(),
-            },
             amountIn: edgeAmountIn,
             amountOut: edgeAmountOut,
           })
@@ -745,53 +632,27 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   static protocolsFromRequest(
-    chainId: ChainId,
-    tokenInAddress: string,
-    tokenOutAddress: string,
     universalRouterVersion: UniversalRouterVersion,
     requestedProtocols?: string[] | string,
     forceCrossProtocol?: boolean
   ): Protocol[] | undefined {
-    const excludeV2 = false
-
     if (requestedProtocols) {
       let protocols: Protocol[] = []
 
-      // TODO: route-459 - make sure we understand the root cause and revert this tech-debt
-      //       we are only doing this because we don't know why cached routes don't refresh in case of all protocols
-      if (
-        chainId === ChainId.UNICHAIN &&
-        ((tokenInAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5' &&
-          tokenOutAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6') ||
-          (tokenInAddress.toLowerCase() === '0x078d782b760474a361dda0af3839290b0ef57ad6' &&
-            tokenOutAddress.toLowerCase() === '0x9151434b16b9763660705744891fa906f660ecc5'))
-      ) {
-        return [Protocol.V4]
-      }
-
+      // V3-only deployment - only support V3 and MIXED protocols
       for (const protocolStr of requestedProtocols) {
         switch (protocolStr.toUpperCase()) {
-          case Protocol.V2:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V2)) {
-                protocols.push(Protocol.V2)
-              }
-            }
-            break
           case Protocol.V3:
             if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V3)) {
               protocols.push(Protocol.V3)
             }
             break
-          case Protocol.V4:
-            if (URVersionsToProtocolVersions[universalRouterVersion].includes(Protocol.V4)) {
-              protocols.push(Protocol.V4)
-            }
-            break
           case Protocol.MIXED:
-            if (chainId === ChainId.MAINNET || !excludeV2) {
-              protocols.push(Protocol.MIXED)
-            }
+            protocols.push(Protocol.MIXED)
+            break
+          case Protocol.V2:
+          case Protocol.V4:
+            // V2 and V4 not supported in this deployment
             break
           default:
             return undefined
