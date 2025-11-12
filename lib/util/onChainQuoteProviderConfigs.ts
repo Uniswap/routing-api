@@ -273,7 +273,7 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
       multicallChunk: 330,
-        gasLimitPerCall: 400_000,
+      gasLimitPerCall: 400_000,
       quoteMinSuccessRate: 0.1,
     },
     [ChainId.ARBITRUM_ONE]: {
