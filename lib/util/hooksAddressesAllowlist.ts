@@ -84,13 +84,16 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
 export const MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM = '0x3ba779bad405d9b68a7a7a86ff6916c806a200cc'
+// https://linear.app/uniswap/issue/ROUTE-757/allowlist-fey-finance-hook
+export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
+export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
   [ChainId.MAINNET]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MAINNET, CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET, MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
-  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
+  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
   [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
@@ -149,6 +152,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v2_2,
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
     ZORA_POST_HOOK_ON_BASE_v2_3_0,
+    FEY_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
