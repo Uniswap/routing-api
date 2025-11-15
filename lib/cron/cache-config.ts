@@ -373,7 +373,7 @@ export const chainProtocols = [
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLDSKY_API_KEY
+      process.env.GOLDSKY_BEARER_TOKEN
     ),
   },
   // V2.
@@ -570,7 +570,7 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLDSKY_API_KEY
+      process.env.GOLDSKY_BEARER_TOKEN
     ),
   },
   // V4
@@ -795,7 +795,7 @@ export const chainProtocols = [
       ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLDSKY_API_KEY
+      process.env.GOLDSKY_BEARER_TOKEN
     ),
   },
 ]
