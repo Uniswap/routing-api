@@ -29,6 +29,8 @@ import {
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
 // process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
 // process.env.GRAPH_BEARER_TOKEN = ''
+// process.env.GOLDSKY_BEARER_TOKEN = ''
+// process.env.GOLDSKY_API_KEY = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
@@ -76,6 +78,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-soneium-mainnet/api`
     case ChainId.OPTIMISM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-optimism/api`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
     default:
       return undefined
   }
@@ -111,6 +115,8 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
     default:
       return undefined
   }
@@ -144,6 +150,8 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
     default:
       return undefined
   }
@@ -355,6 +363,21 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLDSKY_BEARER_TOKEN
+    ),
+  },
   // V2.
   {
     protocol: Protocol.V2,
@@ -534,6 +557,22 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.SONEIUM)
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLDSKY_BEARER_TOKEN
     ),
   },
   // V4
@@ -742,6 +781,23 @@ export const chainProtocols = [
       ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLDSKY_BEARER_TOKEN
     ),
   },
 ]
