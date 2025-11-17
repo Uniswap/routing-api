@@ -76,6 +76,8 @@ export class RoutingAPIStack extends cdk.Stack {
       graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
+      goldskyBearerToken?: string
+      goldskyApiKey?: string
     }
   ) {
     super(parent, name, props)
@@ -103,6 +105,8 @@ export class RoutingAPIStack extends cdk.Stack {
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
+      goldskyBearerToken,
+      goldskyApiKey,
     } = props
 
     const {
@@ -124,6 +128,8 @@ export class RoutingAPIStack extends cdk.Stack {
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
       graphBearerToken,
+      goldskyBearerToken,
+      goldskyApiKey,
     })
 
     const {
