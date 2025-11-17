@@ -453,6 +453,10 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         enableDebug: alphaRouterConfig?.enableDebug,
         swapOptions: swapOptions?.simulate?.fromAddress,
         enableUniversalRouter: true,
+        // note we are still inside sync call, so we need to pass the requestId to the async call
+        // requestId is from upstream TAPI
+        // then we can correlate the async request with the sync request
+        asyncRequestId: alphaRouterConfig?.requestId,
       },
     }
 

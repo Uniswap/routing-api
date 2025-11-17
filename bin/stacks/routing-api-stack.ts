@@ -16,7 +16,6 @@ import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
-import { RpcGatewayDashboardStack } from './rpc-gateway-dashboard'
 import { REQUEST_SOURCES } from '../../lib/util/requestSources'
 import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
@@ -77,6 +76,8 @@ export class RoutingAPIStack extends cdk.Stack {
       graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
+      goldskyBearerToken?: string
+      goldskyApiKey?: string
     }
   ) {
     super(parent, name, props)
@@ -104,6 +105,8 @@ export class RoutingAPIStack extends cdk.Stack {
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
+      goldskyBearerToken,
+      goldskyApiKey,
     } = props
 
     const {
@@ -125,6 +128,8 @@ export class RoutingAPIStack extends cdk.Stack {
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
       graphBearerToken,
+      goldskyBearerToken,
+      goldskyApiKey,
     })
 
     const {
@@ -277,7 +282,6 @@ export class RoutingAPIStack extends cdk.Stack {
       poolCacheLambdaNameArray,
     })
 
-    new RpcGatewayDashboardStack(this, 'RpcGatewayDashboardStack')
     new RpcGatewayFallbackStack(this, 'RpcGatewayFallbackStack', { rpcProviderHealthStateDynamoDb })
 
     const lambdaIntegration = new aws_apigateway.LambdaIntegration(routingLambdaAlias)
