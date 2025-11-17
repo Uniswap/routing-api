@@ -29,6 +29,8 @@ import {
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
 // process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
 // process.env.GRAPH_BEARER_TOKEN = ''
+// process.env.GOLDSKY_BEARER_TOKEN = ''
+// process.env.GOLDSKY_API_KEY = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
