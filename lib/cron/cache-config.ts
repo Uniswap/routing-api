@@ -79,7 +79,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.OPTIMISM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-optimism/api`
     case ChainId.MONAD:
-      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
     default:
       return undefined
   }
@@ -116,7 +116,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
     case ChainId.MONAD:
-      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
     default:
       return undefined
   }
@@ -151,7 +151,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.SONEIUM:
       return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
     case ChainId.MONAD:
-      return `https://api.goldsky.com/api/private/${process.env.GOLDSKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
     default:
       return undefined
   }
