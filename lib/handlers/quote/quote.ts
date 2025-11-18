@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
+import { ADDRESS_ZERO, Protocol } from '@uniswap/router-sdk'
 import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
@@ -47,6 +47,7 @@ import {
   URVersionsToProtocolVersions,
 } from '../../util/supportedProtocolVersions'
 import { enableMixedRouteEthWeth } from '../../util/enableMixedRouteEthWeth'
+import { HOOKS_ADDRESSES_ALLOWLIST } from '../../util/hooksAddressesAllowlist'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -565,6 +566,11 @@ export class QuoteHandler extends APIGLambdaHandler<
           // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
           if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
             continue
+          }
+
+          if (nextPool.hooks !== ADDRESS_ZERO && !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(nextPool.hooks)) {
+            metric.putMetric(`V4UndesiredHooksOnChain${chainId}`, 1, MetricLoggerUnit.Count)
+            metric.putMetric(`V4UndesiredHooksOnChain${chainId}Hooks${nextPool.hooks}`, 1, MetricLoggerUnit.Count)
           }
 
           curRoute.push({
