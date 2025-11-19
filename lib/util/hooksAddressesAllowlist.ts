@@ -87,10 +87,38 @@ export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b
 export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
 export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x40d496321728c117bfe36498138a44dd4bfe54777093250cdf17095ebf11537e
+export const PUBHOUSE_HOOK_ON_BASE = '0x4ab61d774b170d0610fdcc5559aae2c356c600c8'
+
+// TokenWorks Hooks on Mainnet
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xbdb0f9c31367485f85e691f638345f3de673a78effaff71ce34bc7ff1d54fddc
+export const TOKENWORKS_HOOK_ON_MAINNET_1 = '0xfaaad5b731f52cdc9746f2414c823eca9b06e844'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xdaa6a16445812d9661eab80de42d8298417d5533b5a7cc4b9efc4a387413a4e1
+export const TOKENWORKS_HOOK_ON_MAINNET_2 = '0xbd15e4d324f8d02479a5ff53b52ef4048a79e444'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x134060a0672f5df29449673c9b2de0dc0beed4cd5354e532f801f0a3258906f8
+export const TOKENWORKS_HOOK_ON_MAINNET_3 = '0xd6a45df0c82c9a686ab1e58fb28d8fc0cf106444'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x29aceb9aea1d8f4f9ee40dfffb7e46285d69cd4e9b8999c08da265f27fd0f9a8
+export const TOKENWORKS_HOOK_ON_MAINNET_4 = '0xe3c63a9813ac03be0e8618b627cb8170cfa468c4'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xb0214c79008d1d71816166fbe17c01884386ccfc5560ce8b3cbb7a15dba93dce
+export const TOKENWORKS_HOOK_ON_MAINNET_5 = '0x5d8a61fa2ced43eeabffc00c85f705e3e08c28c4'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
+export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fede8c4'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
-  [ChainId.MAINNET]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MAINNET, CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET],
+  [ChainId.MAINNET]: [
+    ADDRESS_ZERO,
+    WETH_HOOKS_ADDRESS_ON_MAINNET,
+    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+    TOKENWORKS_HOOK_ON_MAINNET_1,
+    TOKENWORKS_HOOK_ON_MAINNET_2,
+    TOKENWORKS_HOOK_ON_MAINNET_3,
+    TOKENWORKS_HOOK_ON_MAINNET_4,
+    TOKENWORKS_HOOK_ON_MAINNET_5,
+    ENS_WHEEL_HOOK_ON_MAINNET,
+  ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
   [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
@@ -152,6 +180,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
     ZORA_POST_HOOK_ON_BASE_v2_3_0,
     FEY_ON_BASE,
+    PUBHOUSE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
