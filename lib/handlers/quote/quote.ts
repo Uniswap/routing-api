@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
 import { ADDRESS_ZERO, Protocol } from '@uniswap/router-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   getAddress,
@@ -509,6 +509,11 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionAmount: outputPortionAmount, // TODO: name it back to portionAmount,
       trade,
     } = swapRoute
+
+    if (hitsCachedRoute && trade.priceImpact.greaterThan(new Percent(20, 10000))) {
+      metric.putMetric('CachedRoutePriceImpactTooHigh', 1, MetricLoggerUnit.Count)
+      metric.putMetric(`CachedRoutePriceImpactTooHighChainId${chainId}`, 1, MetricLoggerUnit.Count)
+    }
 
     const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId)
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
