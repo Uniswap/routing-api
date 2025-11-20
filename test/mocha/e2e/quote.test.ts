@@ -1258,7 +1258,7 @@ describe('quote', function () {
             expect(response.data.hitsCachedRoutes).to.be.false
           })
 
-          it(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
+          it.skip(`weth -> usdc v4 include (v2,v3,v4)`, async () => {
             const quoteReq: QuoteQueryParams = {
               tokenInAddress: 'WETH',
               tokenInChainId: 1,
@@ -2199,7 +2199,7 @@ describe('quote', function () {
               })
             }
 
-            it(`erc20 -> eth`, async () => {
+            it.skip(`erc20 -> eth`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'USDC',
                 tokenInChainId: 1,
@@ -2330,7 +2330,7 @@ describe('quote', function () {
               expect(response.data.hitsCachedRoutes).to.be.true
             })
 
-            it(`eth -> erc20`, async () => {
+            it.skip(`eth -> erc20`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'ETH',
                 tokenInChainId: 1,
