@@ -57,6 +57,11 @@ export const RETRY_OPTIONS: { [chainId: number]: AsyncRetry.Options | undefined 
     minTimeout: 100,
     maxTimeout: 1000,
   },
+  [ChainId.MONAD]: {
+    retries: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
   [ChainId.BASE_SEPOLIA]: {
     retries: 2,
     minTimeout: 100,
@@ -143,6 +148,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.MONAD]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
@@ -235,6 +245,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
     },
+    [ChainId.MONAD]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
     [ChainId.BASE_SEPOLIA]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
@@ -257,13 +272,13 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
   [Protocol.V4]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
-      multicallChunk: 1320,
-      gasLimitPerCall: 100_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.1,
     },
     [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 3000,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.OPTIMISM]: {
@@ -297,8 +312,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.MAINNET]: {
-      multicallChunk: 1974,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
@@ -324,6 +339,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
     },
+    [ChainId.MONAD]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
     [ChainId.BASE_SEPOLIA]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
@@ -344,14 +364,19 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
   },
   [Protocol.MIXED]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.MAINNET]: {
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
+      quoteMinSuccessRate: 0.15,
+    },
     [ChainId.BASE]: {
-      multicallChunk: 1320,
-      gasLimitPerCall: 100_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.1,
     },
     [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 3000,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.OPTIMISM]: {
@@ -403,6 +428,11 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.MONAD_TESTNET]: {
+      multicallChunk: 80,
+      gasLimitPerCall: 1_200_000,
+      quoteMinSuccessRate: 0.1,
+    },
+    [ChainId.MONAD]: {
       multicallChunk: 80,
       gasLimitPerCall: 1_200_000,
       quoteMinSuccessRate: 0.1,
@@ -501,6 +531,11 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      [ChainId.MONAD]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
       [ChainId.BASE_SEPOLIA]: {
         multicallChunk: 80,
         gasLimitPerCall: 1_200_000,
@@ -589,6 +624,11 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      [ChainId.MONAD]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
       [ChainId.BASE_SEPOLIA]: {
         multicallChunk: 80,
         gasLimitPerCall: 1_200_000,
@@ -611,13 +651,13 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
     [Protocol.V4]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
       [ChainId.BASE]: {
-        multicallChunk: 660,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.1,
       },
       [ChainId.ARBITRUM_ONE]: {
-        multicallChunk: 1125,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.OPTIMISM]: {
@@ -651,8 +691,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.MAINNET]: {
-        multicallChunk: 987,
-        gasLimitPerCall: 150_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.ZKSYNC]: {
@@ -678,6 +718,11 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
       },
+      [ChainId.MONAD]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
       [ChainId.BASE_SEPOLIA]: {
         multicallChunk: 80,
         gasLimitPerCall: 1_200_000,
@@ -698,14 +743,19 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
     },
     [Protocol.MIXED]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.MAINNET]: {
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
+        quoteMinSuccessRate: 0.15,
+      },
       [ChainId.BASE]: {
-        multicallChunk: 660,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.1,
       },
       [ChainId.ARBITRUM_ONE]: {
-        multicallChunk: 1125,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.OPTIMISM]: {
@@ -763,6 +813,11 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.MONAD_TESTNET]: {
+        multicallChunk: 80,
+        gasLimitPerCall: 1_200_000,
+        quoteMinSuccessRate: 0.1,
+      },
+      [ChainId.MONAD]: {
         multicallChunk: 80,
         gasLimitPerCall: 1_200_000,
         quoteMinSuccessRate: 0.1,
@@ -820,6 +875,10 @@ export const GAS_ERROR_FAILURE_OVERRIDES: { [chainId: number]: FailureOverrides 
     multicallChunk: 45,
   },
   [ChainId.MONAD_TESTNET]: {
+    gasLimitOverride: 3_000_000,
+    multicallChunk: 45,
+  },
+  [ChainId.MONAD]: {
     gasLimitOverride: 3_000_000,
     multicallChunk: 45,
   },
@@ -943,6 +1002,14 @@ export const BLOCK_NUMBER_CONFIGS: { [chainId: number]: BlockNumberConfig } = {
       rollbackBlockOffset: -20,
     },
   },
+  [ChainId.MONAD]: {
+    baseBlockOffset: -25,
+    rollback: {
+      enabled: true,
+      attemptsBeforeRollback: 1,
+      rollbackBlockOffset: -20,
+    },
+  },
   [ChainId.BASE_SEPOLIA]: {
     baseBlockOffset: -25,
     rollback: {
@@ -1001,6 +1068,7 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.UNICHAIN_SEPOLIA]: -1,
   [ChainId.UNICHAIN]: -1,
   [ChainId.MONAD_TESTNET]: -1,
+  [ChainId.MONAD]: -1,
   [ChainId.SONEIUM]: -1,
 }
 
@@ -1035,6 +1103,7 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.UNICHAIN_SEPOLIA]: 0,
   [ChainId.UNICHAIN]: 0,
   [ChainId.MONAD_TESTNET]: 0,
+  [ChainId.MONAD]: 0,
   [ChainId.SONEIUM]: 0,
 }
 

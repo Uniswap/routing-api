@@ -1,7 +1,8 @@
-import { Pool } from '@uniswap/v4-sdk'
+import { DYNAMIC_FEE_FLAG, Pool } from '@uniswap/v4-sdk'
 import { MarshalledCurrency, TokenMarshaller } from '../token-marshaller'
 import { Protocol } from '@uniswap/router-sdk'
 import { FeeAmount } from '@uniswap/v3-sdk'
+import { isPoolFeeDynamic } from '@uniswap/smart-order-router'
 
 export interface MarshalledPool {
   protocol: Protocol
@@ -21,7 +22,9 @@ export class PoolMarshaller {
       protocol: Protocol.V4,
       token0: TokenMarshaller.marshal(pool.token0),
       token1: TokenMarshaller.marshal(pool.token1),
-      fee: pool.fee,
+      fee: isPoolFeeDynamic(pool.token0, pool.token1, pool.tickSpacing, pool.hooks, pool.poolId)
+        ? DYNAMIC_FEE_FLAG
+        : pool.fee,
       tickSpacing: pool.tickSpacing,
       hooks: pool.hooks,
       sqrtRatioX96: pool.sqrtRatioX96.toString(),

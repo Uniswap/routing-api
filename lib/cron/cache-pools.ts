@@ -25,7 +25,6 @@ import { metricScope } from 'aws-embedded-metrics'
 import * as zlib from 'zlib'
 import dotenv from 'dotenv'
 import { v4HooksPoolsFiltering } from '../util/v4HooksPoolsFiltering'
-import { BUNNI_POOLS_CONFIG } from '../util/bunni-pools'
 
 // Needed for local stack dev, not needed for staging or prod
 // But it still doesn't work on the local cdk stack update,
@@ -322,26 +321,6 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
         }
       }
 
-      for (const bunniPool of BUNNI_POOLS_CONFIG) {
-        if (bunniPool.chainId === chainId) {
-          manuallyIncludedV4Pools.push({
-            id: bunniPool.id,
-            feeTier: bunniPool.feeTier,
-            tickSpacing: bunniPool.tickSpacing,
-            hooks: bunniPool.hooks,
-            liquidity: bunniPool.liquidity,
-            token0: {
-              ...bunniPool.token0,
-            },
-            token1: {
-              ...bunniPool.token1,
-            },
-            tvlETH: bunniPool.tvlETH,
-            tvlUSD: bunniPool.tvlUSD,
-          } as V4SubgraphPool)
-        }
-      }
-
       if (chainId === ChainId.UNICHAIN) {
         // UNICHAIN ETH/WETH: https://uniscan.xyz/tx/0x935979a7e4a1e3ea92b180009c46242b89a787fb4f2f5799bd53c675d5e0f9fd#eventlog
         manuallyIncludedV4Pools.push({
@@ -454,6 +433,31 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
             symbol: 'WETH',
             id: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             name: 'WETH',
+            decimals: '18',
+          },
+          tvlETH: 44000.1795925485023741879813651641809,
+          tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool)
+      }
+
+      if (chainId === ChainId.MONAD) {
+        // Monad MON/WMON: https://app.uniswap.org/explore/pools/monad/0xbe86cc52a3300525c410fa1af308193a4a6fa9536f7a29f62b7d0fe018c94e85
+        manuallyIncludedV4Pools.push({
+          id: '0xbe86cc52a3300525c410fa1af308193a4a6fa9536f7a29f62b7d0fe018c94e85',
+          feeTier: '0',
+          tickSpacing: '1',
+          hooks: '0x3fad8a7205f943528915e67cf94fc792c8fce888',
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'MON',
+            id: '0x0000000000000000000000000000000000000000',
+            name: 'MON',
+            decimals: '18',
+          },
+          token1: {
+            symbol: 'WMON',
+            id: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
+            name: 'WMON',
             decimals: '18',
           },
           tvlETH: 44000.1795925485023741879813651641809,
