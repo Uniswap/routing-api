@@ -474,6 +474,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ChainId.WORLDCHAIN,
               ChainId.UNICHAIN,
               ChainId.SONEIUM,
+              ChainId.MONAD,
             ]
           )
 
