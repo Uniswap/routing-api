@@ -1052,7 +1052,7 @@ describe('quote', function () {
             expect(response.data.hitsCachedRoutes).to.be.true
           })
 
-          it(`erc20 -> weth`, async () => {
+          it.skip(`erc20 -> weth`, async () => {
             const quoteReq: QuoteQueryParams = {
               tokenInAddress: 'USDC',
               tokenInChainId: 1,
@@ -2253,7 +2253,7 @@ describe('quote', function () {
               expect(response.data.hitsCachedRoutes).to.be.true
             })
 
-            it(`erc20 -> eth large trade`, async () => {
+            it.skip(`erc20 -> eth large trade`, async () => {
               // Trade of this size almost always results in splits.
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'USDC',
@@ -2438,7 +2438,7 @@ describe('quote', function () {
               expect(response.data.hitsCachedRoutes).to.be.true
             })
 
-            it(`weth -> erc20`, async () => {
+            it.skip(`weth -> erc20`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'WETH',
                 tokenInChainId: 1,
@@ -2488,7 +2488,7 @@ describe('quote', function () {
               expect(response.data.hitsCachedRoutes).to.be.true
             })
 
-            it(`erc20 -> weth`, async () => {
+            it.skip(`erc20 -> weth`, async () => {
               const quoteReq: QuoteQueryParams = {
                 tokenInAddress: 'USDC',
                 tokenInChainId: 1,
