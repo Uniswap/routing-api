@@ -72,6 +72,7 @@ export const ZORA_POST_HOOK_ON_BASE_v2_3_0 = '0xc8d077444625eb300a427a6dfb2b1dbf
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
 export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
+export const DOPPLER_HOOKS_ADDRESS_ON_MONAD = '0x580ca49389d83b019d07E17e99454f2F218e2dc0'
 
 // LimitOrderHook addresses: https://linear.app/uniswap/issue/ROUTE-625
 // example pool: https://app.uniswap.org/explore/pools/arbitrum/0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98
@@ -204,6 +205,11 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
-  [ChainId.MONAD]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_MONAD],
+  [ChainId.MONAD]: [
+    ADDRESS_ZERO,
+    WETH_HOOKS_ADDRESS_ON_MONAD,
+    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
+    DOPPLER_HOOKS_ADDRESS_ON_MONAD,
+  ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
 }
