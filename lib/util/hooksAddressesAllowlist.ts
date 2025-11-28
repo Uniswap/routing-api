@@ -110,14 +110,20 @@ export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fed
 // example pool: https://app.uniswap.org/explore/pools/monad/0xfb2e06638df93ad3080109c410714b0903213135ff6f5909b3a846764df0b801
 export const CULT_FEE_HOOK_ADDRESS_ON_MONAD = '0x7A2524cE937F206844b9508EEc8f6486800a40CC'
 
-// example pool: https://app.uniswap.org/explore/pools/ethereum/0x2642bb6e97191d1e7eb1e8d81971b67d6219400ceba611a31d8975b30a74f8bb
-export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x8c3aae3bb65c5e08d25d9723e8b2e91f0ae22888'
-export const RING_FEW_UNI_HOOK_ON_MAINNET = '0x938eb2006bfded3da6d7626b29479360f1fca888'
-export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0xd1506851ae85f7336dbb1d3e99dbf80a2b352888'
-export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0xe00eb0a503666b6fe99313ee4415057b2d4aa888'
-export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x6f531e19c185225832eb0a2624982ea83d3aa888'
-export const RING_FEW_USDT_HOOK_ON_MAINNET = '0x905887ac3d351ac8be61ae50c30cc857e8cd6888'
-export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x134974e0b914728aa13cc550af0adcb557356888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7a5a8f5a36a6a2e9961caf6bb047a5a7580d0fe16a532aad93efc596028dfa54
+export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x044301939deb7ca53c4733dd4d9b3bc5ea0c6888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x301d41ff23b73b209ab2b1112f4effd0d8ff978ec29d743c1431463f84cbec24
+export const RING_FEW_UNI_HOOK_ON_MAINNET = '0x4b3e2a8cf36c7eb0fba2a5b39b20c896c6f22888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x18605c7a76101aeccc414cc300dd5e5ae44b30d6c247ba164ccd88952c259735
+export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x0fe942afdb2f51e25cbf892aad175c6a574f2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x8f8b0b21fb429ffb5210f2bf0f8b7cb267b944a0c61beaae35f20f6839c0f33b
+export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0x8347b7a3807c681513d2b51b8223e59aa16a2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5837e6b4fd4b8193f2f7a8b4490c0f154344bb9a52b36a885578ff6d3193fc47
+export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x4b2eb653d13e6c9ac5a0a01fde22f2c8d6592888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7db868544c8f7f6ddb107c7749c94f03c9e0155f2138aef3f8a020e4a469d95a
+export const RING_FEW_USDT_HOOK_ON_MAINNET = '0xbadf77d50478b4432ef1f243b9c0bc7869486888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xf906beb74154ca4d057b7079c90eb1044efaf40ef468e62ec983930cf80a1e2b
+export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x85b648a64aed6307d5d5ce26e6ae086c17bde888'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
