@@ -5,6 +5,8 @@ import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
 
+export const DISTRICT_ACCESS_CONTROL_HOOKS_ADDRESS_ON_BASE = '0xd3c1f2174f37f88811f99b1b1b4c1356c0246000'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a
 export const FLAUNCH_POSM_V1_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
 export const FLAUNCH_POSM_V2_ON_BASE = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
@@ -152,6 +154,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
     ADDRESS_ZERO,
+    DISTRICT_ACCESS_CONTROL_HOOKS_ADDRESS_ON_BASE,
     FLAUNCH_POSM_V1_ON_BASE,
     FLAUNCH_POSM_V2_ON_BASE,
     FLAUNCH_POSM_V3_ON_BASE,
