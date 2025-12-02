@@ -85,6 +85,7 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+export const MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM = '0x3ba779bad405d9b68a7a7a86ff6916c806a200cc'
 // https://linear.app/uniswap/issue/ROUTE-757/allowlist-fey-finance-hook
 export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
 export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
@@ -127,6 +128,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     TOKENWORKS_HOOK_ON_MAINNET_4,
     TOKENWORKS_HOOK_ON_MAINNET_5,
     ENS_WHEEL_HOOK_ON_MAINNET,
+    MEMESTRATEGY_HOOK_ADDRESS_ON_ETHEREUM,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
