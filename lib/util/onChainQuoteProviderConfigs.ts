@@ -272,13 +272,13 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
   [Protocol.V4]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
     [ChainId.BASE]: {
-      multicallChunk: 1320,
-      gasLimitPerCall: 100_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.1,
     },
     [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 3000,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.OPTIMISM]: {
@@ -312,8 +312,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.MAINNET]: {
-      multicallChunk: 1974,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.ZKSYNC]: {
@@ -364,14 +364,19 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
   },
   [Protocol.MIXED]: {
     ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+    [ChainId.MAINNET]: {
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
+      quoteMinSuccessRate: 0.15,
+    },
     [ChainId.BASE]: {
-      multicallChunk: 1320,
-      gasLimitPerCall: 100_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.1,
     },
     [ChainId.ARBITRUM_ONE]: {
-      multicallChunk: 3000,
-      gasLimitPerCall: 75_000,
+      multicallChunk: 100,
+      gasLimitPerCall: 1_500_000,
       quoteMinSuccessRate: 0.15,
     },
     [ChainId.OPTIMISM]: {
@@ -646,13 +651,13 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
     [Protocol.V4]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
       [ChainId.BASE]: {
-        multicallChunk: 660,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.1,
       },
       [ChainId.ARBITRUM_ONE]: {
-        multicallChunk: 1125,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.OPTIMISM]: {
@@ -686,8 +691,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.MAINNET]: {
-        multicallChunk: 987,
-        gasLimitPerCall: 150_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.ZKSYNC]: {
@@ -738,14 +743,19 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
     },
     [Protocol.MIXED]: {
       ...constructSameBatchParamsMap(DEFAULT_BATCH_PARAMS),
+      [ChainId.MAINNET]: {
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
+        quoteMinSuccessRate: 0.15,
+      },
       [ChainId.BASE]: {
-        multicallChunk: 660,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.1,
       },
       [ChainId.ARBITRUM_ONE]: {
-        multicallChunk: 1125,
-        gasLimitPerCall: 200_000,
+        multicallChunk: 100,
+        gasLimitPerCall: 1_500_000,
         quoteMinSuccessRate: 0.15,
       },
       [ChainId.OPTIMISM]: {
