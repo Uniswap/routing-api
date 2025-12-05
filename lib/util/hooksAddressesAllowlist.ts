@@ -133,6 +133,9 @@ export const M0_ALLOWLIST_HOOKS_ADDRESS_ON_MAINNET = '0xaf53cb78035a8e0acce38441
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x6b3403809baa251f186c546908d6ebdbd5dc52527b2b3f8bc7d4f5a437091b0f
 export const M0_TICK_RANGE_HOOKS_ADDRESS_ON_MAINNET = '0xde400595199e6dae55a1bcb742b3eb249af00800'
 
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x087de24dbfcd8c833dc54b73e3963451d315b7fda506dff0e45e5938e894dfbd
+export const UNIDERP_HOOK_ON_UNICHAIN = '0xcc2efb167503f2d7df0eae906600066aec9e8444'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -236,6 +239,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
     PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
+    UNIDERP_HOOK_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.MONAD]: [
