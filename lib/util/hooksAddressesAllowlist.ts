@@ -137,7 +137,7 @@ export const M0_TICK_RANGE_HOOKS_ADDRESS_ON_MAINNET = '0xde400595199e6dae55a1bcb
 export const UNIDERP_HOOK_ON_UNICHAIN = '0xcc2efb167503f2d7df0eae906600066aec9e8444'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xa113103448f7b09199e019656f377988c87f8f312ddcebc6fea9e78bcd6ec2af
-export const SUPERSTRATEGY_HOOK_ON_BASE = '0x1E0c810a30fB82391df936602c1161421381b0c8'
+export const SUPERSTRATEGY_HOOK_ON_BASE = '0x1e0c810a30fb82391df936602c1161421381b0c8'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
