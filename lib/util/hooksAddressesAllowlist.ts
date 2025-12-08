@@ -142,6 +142,25 @@ export const SUPERSTRATEGY_HOOK_ON_BASE = '0x1e0c810a30fb82391df936602c116142138
 // example pool: https://app.uniswap.org/explore/pools/base/0x3cdfb68e7c413e3ae9e5822ca428975a334d062388b2e3a0d42dc329880cbf36
 export const SIMPLE_SELL_TAX_HOOK_ON_BASE = '0xca975b9daf772c71161f3648437c3616e5be0088'
 
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7a5a8f5a36a6a2e9961caf6bb047a5a7580d0fe16a532aad93efc596028dfa54
+export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x044301939deb7ca53c4733dd4d9b3bc5ea0c6888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x301d41ff23b73b209ab2b1112f4effd0d8ff978ec29d743c1431463f84cbec24
+export const RING_FEW_UNI_HOOK_ON_MAINNET = '0x4b3e2a8cf36c7eb0fba2a5b39b20c896c6f22888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x18605c7a76101aeccc414cc300dd5e5ae44b30d6c247ba164ccd88952c259735
+export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x0fe942afdb2f51e25cbf892aad175c6a574f2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x8f8b0b21fb429ffb5210f2bf0f8b7cb267b944a0c61beaae35f20f6839c0f33b
+export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0x8347b7a3807c681513d2b51b8223e59aa16a2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5837e6b4fd4b8193f2f7a8b4490c0f154344bb9a52b36a885578ff6d3193fc47
+export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x4b2eb653d13e6c9ac5a0a01fde22f2c8d6592888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7db868544c8f7f6ddb107c7749c94f03c9e0155f2138aef3f8a020e4a469d95a
+export const RING_FEW_USDT_HOOK_ON_MAINNET = '0xbadf77d50478b4432ef1f243b9c0bc7869486888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xf906beb74154ca4d057b7079c90eb1044efaf40ef468e62ec983930cf80a1e2b
+export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x85b648a64aed6307d5d5ce26e6ae086c17bde888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x6933dfbf7441cc4ee4439843fdd464e215a6c90f07c5a769198e2a047f1f3f3e
+export const RING_FEW_WEETH_HOOK_ON_MAINNET = '0x877323adbf747f85eb8d182d42f01f34a5492888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xe7c2f30fd89238331b0e3e6ac6351578d5e3091b7839eff321c29cf88e17274e
+export const RING_FEW_WSTETH_HOOK_ON_MAINNET = '0x75ae0292e8ad3ab60b9a1a7b3046d3f4abdfa888'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -160,6 +179,15 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ACTION_HOOK_ON_MAINNET,
     M0_ALLOWLIST_HOOKS_ADDRESS_ON_MAINNET,
     M0_TICK_RANGE_HOOKS_ADDRESS_ON_MAINNET,
+    RING_FEW_ETH_HOOK_ON_MAINNET,
+    RING_FEW_UNI_HOOK_ON_MAINNET,
+    RING_FEW_WBTC_HOOK_ON_MAINNET,
+    RING_FEW_CBBTC_HOOK_ON_MAINNET,
+    RING_FEW_USDC_HOOK_ON_MAINNET,
+    RING_FEW_USDT_HOOK_ON_MAINNET,
+    RING_FEW_DAI_HOOK_ON_MAINNET,
+    RING_FEW_WEETH_HOOK_ON_MAINNET,
+    RING_FEW_WSTETH_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
