@@ -138,6 +138,8 @@ export const UNIDERP_HOOK_ON_UNICHAIN = '0xcc2efb167503f2d7df0eae906600066aec9e8
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xa113103448f7b09199e019656f377988c87f8f312ddcebc6fea9e78bcd6ec2af
 export const SUPERSTRATEGY_HOOK_ON_BASE = '0x1e0c810a30fb82391df936602c1161421381b0c8'
+// example pool: https://app.uniswap.org/explore/pools/base/0xe4821b1cbfce1906c2249d1b34366610960c01fa3f762b0579c594d2033b9152
+export const WASSBLASTER_HOOK_ON_BASE = '0x35b9b5b023897da8c7375ba6141245b8416460cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -224,6 +226,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     DELI_HOOK_CONSTANT_PRODUCT_ON_BASE,
     AQUINAS_HOOK_ADDRESS_ON_BASE,
     SUPERSTRATEGY_HOOK_ON_BASE,
+    WASSBLASTER_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
