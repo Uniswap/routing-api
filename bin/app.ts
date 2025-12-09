@@ -447,11 +447,15 @@ export class RoutingAPIPipeline extends Stack {
       goldskyBlastV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V2_ID').toString(),
       goldskyBaseV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V2_ID').toString(),
       goldskyWorldchainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V2_ID').toString(),
-      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID').toString(),
+      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID')
+        .toString(),
       goldskyMonadTestnetV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_MONAD_TESTNET_V2_ID').toString(),
       goldskyUnichainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V2_ID').toString(),
       goldskySoneiumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V2_ID').toString(),
-      goldskyEthereumSepoliaV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID').toString(),
+      goldskyEthereumSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID')
+        .toString(),
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V3_ID').toString(),
       goldskyArbitrumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V3_ID').toString(),
@@ -463,12 +467,16 @@ export class RoutingAPIPipeline extends Stack {
       goldskyBaseV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V3_ID').toString(),
       goldskyCeloV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V3_ID').toString(),
       goldskyWorldchainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V3_ID').toString(),
-      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID').toString(),
+      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID')
+        .toString(),
       goldskyUnichainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V3_ID').toString(),
       goldskyZoraV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V3_ID').toString(),
       goldskySoneiumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V3_ID').toString(),
       // Goldsky V4 subgraph IDs
-      goldskyEthereumSepoliaV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID').toString(),
+      goldskyEthereumSepoliaV4Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID')
+        .toString(),
       goldskyArbitrumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V4_ID').toString(),
       goldskyBaseV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V4_ID').toString(),
       goldskyPolygonV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V4_ID').toString(),
@@ -527,11 +535,15 @@ export class RoutingAPIPipeline extends Stack {
       goldskyBlastV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V2_ID').toString(),
       goldskyBaseV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V2_ID').toString(),
       goldskyWorldchainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V2_ID').toString(),
-      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID').toString(),
+      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID')
+        .toString(),
       goldskyMonadTestnetV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_MONAD_TESTNET_V2_ID').toString(),
       goldskyUnichainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V2_ID').toString(),
       goldskySoneiumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V2_ID').toString(),
-      goldskyEthereumSepoliaV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID').toString(),
+      goldskyEthereumSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID')
+        .toString(),
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V3_ID').toString(),
       goldskyArbitrumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V3_ID').toString(),
@@ -543,12 +555,16 @@ export class RoutingAPIPipeline extends Stack {
       goldskyBaseV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V3_ID').toString(),
       goldskyCeloV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V3_ID').toString(),
       goldskyWorldchainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V3_ID').toString(),
-      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID').toString(),
+      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID')
+        .toString(),
       goldskyUnichainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V3_ID').toString(),
       goldskyZoraV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V3_ID').toString(),
       goldskySoneiumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V3_ID').toString(),
       // Goldsky V4 subgraph IDs
-      goldskyEthereumSepoliaV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID').toString(),
+      goldskyEthereumSepoliaV4Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID')
+        .toString(),
       goldskyArbitrumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V4_ID').toString(),
       goldskyBaseV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V4_ID').toString(),
       goldskyPolygonV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V4_ID').toString(),
