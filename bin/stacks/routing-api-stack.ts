@@ -78,6 +78,51 @@ export class RoutingAPIStack extends cdk.Stack {
       uniGraphQLHeaderOrigin: string
       goldskyBearerToken?: string
       goldskyApiKey?: string
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id?: string
+      goldskyArbitrumV2Id?: string
+      goldskyPolygonV2Id?: string
+      goldskyOptimismV2Id?: string
+      goldskyAvalancheV2Id?: string
+      goldskyBnbV2Id?: string
+      goldskyBlastV2Id?: string
+      goldskyBaseV2Id?: string
+      goldskyWorldchainV2Id?: string
+      goldskyAstrochainSepoliaV2Id?: string
+      goldskyMonadTestnetV2Id?: string
+      goldskyUnichainV2Id?: string
+      goldskySoneiumV2Id?: string
+      goldskyEthereumSepoliaV2Id?: string
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id?: string
+      goldskyArbitrumV3Id?: string
+      goldskyPolygonV3Id?: string
+      goldskyOptimismV3Id?: string
+      goldskyAvalancheV3Id?: string
+      goldskyBnbV3Id?: string
+      goldskyBlastV3Id?: string
+      goldskyBaseV3Id?: string
+      goldskyCeloV3Id?: string
+      goldskyWorldchainV3Id?: string
+      goldskyAstrochainSepoliaV3Id?: string
+      goldskyUnichainV3Id?: string
+      goldskyZoraV3Id?: string
+      goldskySoneiumV3Id?: string
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id?: string
+      goldskyArbitrumV4Id?: string
+      goldskyBaseV4Id?: string
+      goldskyPolygonV4Id?: string
+      goldskyWorldchainV4Id?: string
+      goldskyZoraV4Id?: string
+      goldskyUnichainV4Id?: string
+      goldskyBnbV4Id?: string
+      goldskyBlastV4Id?: string
+      goldskyEthereumV4Id?: string
+      goldskySoneiumV4Id?: string
+      goldskyOptimismV4Id?: string
+      goldskyCeloV4Id?: string
+      goldskyAvalancheV4Id?: string
     }
   ) {
     super(parent, name, props)
@@ -107,6 +152,51 @@ export class RoutingAPIStack extends cdk.Stack {
       uniGraphQLHeaderOrigin,
       goldskyBearerToken,
       goldskyApiKey,
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id,
+      goldskyArbitrumV2Id,
+      goldskyPolygonV2Id,
+      goldskyOptimismV2Id,
+      goldskyAvalancheV2Id,
+      goldskyBnbV2Id,
+      goldskyBlastV2Id,
+      goldskyBaseV2Id,
+      goldskyWorldchainV2Id,
+      goldskyAstrochainSepoliaV2Id,
+      goldskyMonadTestnetV2Id,
+      goldskyUnichainV2Id,
+      goldskySoneiumV2Id,
+      goldskyEthereumSepoliaV2Id,
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id,
+      goldskyArbitrumV3Id,
+      goldskyPolygonV3Id,
+      goldskyOptimismV3Id,
+      goldskyAvalancheV3Id,
+      goldskyBnbV3Id,
+      goldskyBlastV3Id,
+      goldskyBaseV3Id,
+      goldskyCeloV3Id,
+      goldskyWorldchainV3Id,
+      goldskyAstrochainSepoliaV3Id,
+      goldskyUnichainV3Id,
+      goldskyZoraV3Id,
+      goldskySoneiumV3Id,
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id,
+      goldskyArbitrumV4Id,
+      goldskyBaseV4Id,
+      goldskyPolygonV4Id,
+      goldskyWorldchainV4Id,
+      goldskyZoraV4Id,
+      goldskyUnichainV4Id,
+      goldskyBnbV4Id,
+      goldskyBlastV4Id,
+      goldskyEthereumV4Id,
+      goldskySoneiumV4Id,
+      goldskyOptimismV4Id,
+      goldskyCeloV4Id,
+      goldskyAvalancheV4Id,
     } = props
 
     const {
@@ -130,6 +220,51 @@ export class RoutingAPIStack extends cdk.Stack {
       graphBearerToken,
       goldskyBearerToken,
       goldskyApiKey,
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id,
+      goldskyArbitrumV2Id,
+      goldskyPolygonV2Id,
+      goldskyOptimismV2Id,
+      goldskyAvalancheV2Id,
+      goldskyBnbV2Id,
+      goldskyBlastV2Id,
+      goldskyBaseV2Id,
+      goldskyWorldchainV2Id,
+      goldskyAstrochainSepoliaV2Id,
+      goldskyMonadTestnetV2Id,
+      goldskyUnichainV2Id,
+      goldskySoneiumV2Id,
+      goldskyEthereumSepoliaV2Id,
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id,
+      goldskyArbitrumV3Id,
+      goldskyPolygonV3Id,
+      goldskyOptimismV3Id,
+      goldskyAvalancheV3Id,
+      goldskyBnbV3Id,
+      goldskyBlastV3Id,
+      goldskyBaseV3Id,
+      goldskyCeloV3Id,
+      goldskyWorldchainV3Id,
+      goldskyAstrochainSepoliaV3Id,
+      goldskyUnichainV3Id,
+      goldskyZoraV3Id,
+      goldskySoneiumV3Id,
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id,
+      goldskyArbitrumV4Id,
+      goldskyBaseV4Id,
+      goldskyPolygonV4Id,
+      goldskyWorldchainV4Id,
+      goldskyZoraV4Id,
+      goldskyUnichainV4Id,
+      goldskyBnbV4Id,
+      goldskyBlastV4Id,
+      goldskyEthereumV4Id,
+      goldskySoneiumV4Id,
+      goldskyOptimismV4Id,
+      goldskyCeloV4Id,
+      goldskyAvalancheV4Id,
     })
 
     const {
