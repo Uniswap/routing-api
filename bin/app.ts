@@ -90,6 +90,7 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id?: string
       goldskyCeloV4Id?: string
       goldskyAvalancheV4Id?: string
+      graphXlayerV4Id?: string
     }
   ) {
     super(scope, id, props)
@@ -162,6 +163,7 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
+      graphXlayerV4Id,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -233,6 +235,7 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
+      graphXlayerV4Id,
     })
     this.url = url
   }
@@ -491,6 +494,7 @@ export class RoutingAPIPipeline extends Stack {
       goldskyOptimismV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V4_ID').toString(),
       goldskyCeloV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V4_ID').toString(),
       goldskyAvalancheV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V4_ID').toString(),
+      goldskyXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_XLAYER_V4_ID').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
