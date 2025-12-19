@@ -114,6 +114,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE_SEPOLIA,
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
+  ChainId.XLAYER,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -379,6 +380,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.BASE_SEPOLIA:
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
+            case ChainId.XLAYER:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -527,6 +529,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MONAD,
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
+            ChainId.XLAYER,
           ]
 
           const v4Supported = [
@@ -545,6 +548,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.SONEIUM,
             ChainId.MONAD,
             ChainId.CELO,
+            ChainId.XLAYER,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
@@ -580,6 +584,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MONAD_TESTNET,
             ChainId.SONEIUM,
             ChainId.MONAD,
+            ChainId.XLAYER,
           ]
           const mixedSupported = [
             ChainId.MAINNET,
@@ -595,6 +600,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.WORLDCHAIN,
             ChainId.ZORA,
             ChainId.SONEIUM,
+            ChainId.XLAYER,
             // ChainId.MONAD, // ROUTE-760: support monad in mixed
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]

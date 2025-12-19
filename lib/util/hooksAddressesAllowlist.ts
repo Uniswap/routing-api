@@ -289,4 +289,5 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CULT_FEE_HOOK_ADDRESS_ON_MONAD,
   ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
+  [ChainId.XLAYER]: [ADDRESS_ZERO],
 }

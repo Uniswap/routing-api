@@ -170,5 +170,14 @@
     "providerInitialWeights": [1],
     "providerUrls": ["UNIRPC_0"],
     "providerNames": ["UNIRPC"]
+  },
+  {
+    "chainId": 196,
+    "useMultiProviderProb": 1,
+    "latencyEvaluationSampleProb": 0,
+    "healthCheckSampleProb": 0,
+    "providerInitialWeights": [1],
+    "providerUrls": ["UNIRPC_0"],
+    "providerNames": ["UNIRPC"]
   }
 ]
