@@ -536,7 +536,7 @@ export class RoutingAPIPipeline extends Stack {
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
       graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('graph-xlayer-v4-subgraph-id').toString(),
       graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('graph-xlayer-v3-subgraph-id').toString(),
-      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('alchemy-xlayer-v2-subgraph-id').toString(),
+      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('graph-xlayer-v2-subgraph-id').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
       goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
