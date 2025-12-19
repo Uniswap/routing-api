@@ -71,6 +71,8 @@ export class UniGraphQLProvider implements IUniGraphQLProvider {
         return 'UNICHAIN'
       case ChainId.SONEIUM:
         return 'SONEIUM'
+      case ChainId.XLAYER:
+        return 'XLAYER'
       default:
         throw new Error(`UniGraphQLProvider._chainIdToGraphQLChainName unsupported ChainId: ${chainId}`)
     }

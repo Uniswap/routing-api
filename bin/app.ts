@@ -40,6 +40,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
       graphBaseV4SubgraphId?: string
+      graphXlayerV4Id?: string
+      graphXlayerV3Id?: string
+      graphXLayerV2Id?: string
       graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
@@ -112,6 +115,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
@@ -183,6 +189,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
@@ -343,7 +352,8 @@ export class RoutingAPIPipeline extends Stack {
         chainId !== ChainId.MONAD &&
         chainId !== ChainId.BASE_SEPOLIA &&
         chainId !== ChainId.UNICHAIN &&
-        chainId !== ChainId.SONEIUM
+        chainId !== ChainId.SONEIUM &&
+        chainId !== ChainId.XLAYER
       ) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
@@ -433,6 +443,9 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
+      graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
+      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
       goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
@@ -521,6 +534,9 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
+      graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
+      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
       goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
@@ -726,6 +742,9 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
   graphBaseV4SubgraphId: process.env.GRAPH_BASE_V4_SUBGRAPH_ID!,
+  graphXlayerV4Id: process.env.GRAPH_XLAYER_V4_ID!,
+  graphXlayerV3Id: process.env.GRAPH_XLAYER_V4_ID!,
+  graphXLayerV2Id: process.env.GRAPH_XLAYER_V4_ID!,
   graphBearerToken: process.env.GRAPH_BEARER_TOKEN!,
   goldskyBearerToken: process.env.GOLDSKY_BEARER_TOKEN!,
   goldskyApiKey: process.env.GOLDSKY_API_KEY!,
