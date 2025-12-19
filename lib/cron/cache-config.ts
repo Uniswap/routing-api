@@ -76,9 +76,9 @@ import {
 // process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
 // process.env.GOLD_SKY_CELO_V4_ID = ''
 // process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
-// process.env.GRAPH_XLAYER_V4_ID = ''
-// process.env.GRAPH_XLAYER_V3_ID = ''
-// process.env.GRAPH_XLAYER_V2_ID = ''
+process.env.GRAPH_XLAYER_V4_ID = ''
+process.env.GRAPH_XLAYER_V3_ID = ''
+process.env.GRAPH_XLAYER_V2_ID = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
@@ -443,7 +443,8 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.XLAYER)
+      v3SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   // V2.
@@ -655,7 +656,8 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.XLAYER)
+      v2SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   // V4
@@ -896,7 +898,8 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.XLAYER)
+      v4SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
 ]
