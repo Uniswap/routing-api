@@ -40,6 +40,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
       graphBaseV4SubgraphId?: string
+      graphXlayerV4Id?: string
+      graphXlayerV3Id?: string
+      graphXLayerV2Id?: string
       graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
@@ -90,7 +93,6 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id?: string
       goldskyCeloV4Id?: string
       goldskyAvalancheV4Id?: string
-      graphXlayerV4Id?: string
     }
   ) {
     super(scope, id, props)
@@ -113,6 +115,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
@@ -163,7 +168,6 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
-      graphXlayerV4Id,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -185,6 +189,9 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
@@ -235,7 +242,6 @@ export class RoutingAPIStage extends Stage {
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
-      graphXlayerV4Id,
     })
     this.url = url
   }
@@ -437,6 +443,9 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v4-subgraph-id').toString(),
+      graphXlayerV3Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v3-subgraph-id').toString(),
+      graphXLayerV2Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v2-subgraph-id').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
       goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
@@ -494,7 +503,6 @@ export class RoutingAPIPipeline extends Stack {
       goldskyOptimismV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V4_ID').toString(),
       goldskyCeloV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V4_ID').toString(),
       goldskyAvalancheV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V4_ID').toString(),
-      goldskyXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_XLAYER_V4_ID').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -526,6 +534,9 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v4-subgraph-id').toString(),
+      graphXlayerV3Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v3-subgraph-id').toString(),
+      graphXLayerV2Id: alchemySubgraphSecret.secretValueFromJson('alchemy-xlayer-v2-subgraph-id').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
       goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
@@ -731,6 +742,9 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
   graphBaseV4SubgraphId: process.env.GRAPH_BASE_V4_SUBGRAPH_ID!,
+  graphXlayerV4Id: process.env.GRAPH_XLAYER_V4_SUBGRAPH_ID!,
+  graphXlayerV3Id: process.env.GRAPH_XLAYER_V3_SUBGRAPH_ID!,
+  graphXLayerV2Id: process.env.GRAPH_XLAYER_V2_SUBGRAPH_ID!,
   graphBearerToken: process.env.GRAPH_BEARER_TOKEN!,
   goldskyBearerToken: process.env.GOLDSKY_BEARER_TOKEN!,
   goldskyApiKey: process.env.GOLDSKY_API_KEY!,
