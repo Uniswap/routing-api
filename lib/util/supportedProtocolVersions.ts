@@ -15,7 +15,6 @@ export type URVersionsToProtocolVersionsMapping = {
 export const URVersionsToProtocolVersions: URVersionsToProtocolVersionsMapping = {
   [UniversalRouterVersion.V1_2]: [Protocol.V2, Protocol.V3],
   [UniversalRouterVersion.V2_0]: [Protocol.V2, Protocol.V3, Protocol.V4],
-  [UniversalRouterVersion.V2_1]: [Protocol.V2, Protocol.V3, Protocol.V4],
 }
 
 export function protocolVersionsToBeExcludedFromMixed(universalRouterVersion: UniversalRouterVersion): Protocol[] {
