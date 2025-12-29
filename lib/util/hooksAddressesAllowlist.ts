@@ -162,6 +162,12 @@ export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x85b648a64aed6307d5d5ce26e6ae086c1
 export const RING_FEW_WEETH_HOOK_ON_MAINNET = '0x877323adbf747f85eb8d182d42f01f34a5492888'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xe7c2f30fd89238331b0e3e6ac6351578d5e3091b7839eff321c29cf88e17274e
 export const RING_FEW_WSTETH_HOOK_ON_MAINNET = '0x75ae0292e8ad3ab60b9a1a7b3046d3f4abdfa888'
+// example pool BSC: https://app.uniswap.org/explore/pools/bnb/0x085182518e82062e732fcb912becdf7140b42f8da31c7afd850db3c6d4309c8a
+export const BVCC_DYNAMIC_FEE_HOOK_ON_BSC = '0x8a36d8408f5285c3f81509947bc187b3c0efd0c4'
+export const BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET = '0xf9ced7d0f5292af02385410eda5b7570b10b50c4'
+export const BVCC_DYNAMIC_FEE_HOOK_ON_ARBITRUM = '0x2097d7329389264a1542ad50802bb0de84a650c4'
+export const BVCC_DYNAMIC_FEE_HOOK_ON_BASE = '0x2c56c1302b6224b2bb1906c46f554622e12f10c4'
+
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -190,6 +196,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     RING_FEW_DAI_HOOK_ON_MAINNET,
     RING_FEW_WEETH_HOOK_ON_MAINNET,
     RING_FEW_WSTETH_HOOK_ON_MAINNET,
+    BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
@@ -203,6 +210,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
     WETH_HOOKS_ADDRESS_ON_ARBITRUM,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM,
+    BVCC_DYNAMIC_FEE_HOOK_ON_ARBITRUM,
   ],
   [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
@@ -212,7 +220,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO],
+  [ChainId.BNB]: [ADDRESS_ZERO, BVCC_DYNAMIC_FEE_HOOK_ON_BSC],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
@@ -259,6 +267,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     SUPERSTRATEGY_HOOK_ON_BASE,
     SIMPLE_SELL_TAX_HOOK_ON_BASE,
     WASSBLASTER_HOOK_ON_BASE,
+    BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
