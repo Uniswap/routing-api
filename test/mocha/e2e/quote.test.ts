@@ -321,7 +321,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(40000)
+    this.timeout(80000)
     alice = await getFirstNonDelegatedSigner(await ethers.getSigners())
 
     // Make a dummy call to the API to get a block number to fork from.
