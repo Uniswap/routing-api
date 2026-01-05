@@ -3492,9 +3492,7 @@ describe('quote', function () {
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
-            chain === ChainId.BLAST ||
-            chain === ChainId.WORLDCHAIN ||
-            chain === ChainId.UNICHAIN_SEPOLIA
+            chain === ChainId.BLAST || chain === ChainId.WORLDCHAIN || chain === ChainId.UNICHAIN_SEPOLIA
               ? type === 'exactOut'
                 ? '0.002'
                 : '0.01'
