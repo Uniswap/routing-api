@@ -510,7 +510,17 @@ export class QuoteHandler extends APIGLambdaHandler<
       trade,
     } = swapRoute
 
-    if (hitsCachedRoute && trade.priceImpact.greaterThan(new Percent(20, 10000))) {
+    // TODO: ROUTE-886 - fix v4 midPrice calculation in SDK
+    // Temporary fix to make sure we don't throw an error and return a quote with priceImpact = 0
+    let priceImpact = new Percent(0, 100);
+    try {
+      priceImpact = trade.priceImpact;
+    } catch (error) {
+      log.error({ error }, 'Error calculating price impact')
+      metric.putMetric('ErrorCalculatingPriceImpact', 1, MetricLoggerUnit.Count)
+    }
+
+    if (hitsCachedRoute && priceImpact.greaterThan(new Percent(20, 10000))) {
       metric.putMetric('CachedRoutePriceImpactTooHigh', 1, MetricLoggerUnit.Count)
       metric.putMetric(`CachedRoutePriceImpactTooHighChainId${chainId}`, 1, MetricLoggerUnit.Count)
     }
@@ -737,7 +747,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionRecipient: outputPortionAmount && portionRecipient,
       portionAmount: outputPortionAmount?.quotient.toString(),
       portionAmountDecimals: outputPortionAmount?.toExact(),
-      priceImpact: trade?.priceImpact?.toFixed(),
+      priceImpact: priceImpact.toFixed(),
     }
 
     this.logRouteMetrics(
