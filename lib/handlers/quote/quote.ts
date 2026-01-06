@@ -512,9 +512,9 @@ export class QuoteHandler extends APIGLambdaHandler<
 
     // TODO: ROUTE-886 - fix v4 midPrice calculation in SDK
     // Temporary fix to make sure we don't throw an error and return a quote with priceImpact = 0
-    let priceImpact = new Percent(0, 100);
+    let priceImpact = new Percent(0, 100)
     try {
-      priceImpact = trade.priceImpact;
+      priceImpact = trade.priceImpact
     } catch (error) {
       log.error({ error }, 'Error calculating price impact')
       metric.putMetric('ErrorCalculatingPriceImpact', 1, MetricLoggerUnit.Count)
