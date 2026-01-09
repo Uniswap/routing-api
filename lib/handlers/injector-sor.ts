@@ -601,7 +601,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
             ChainId.XLAYER,
-            // ChainId.MONAD, // ROUTE-760: support monad in mixed
+            ChainId.MONAD,
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]
 
