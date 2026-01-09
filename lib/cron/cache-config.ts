@@ -76,9 +76,9 @@ import {
 // process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
 // process.env.GOLD_SKY_CELO_V4_ID = ''
 // process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
-process.env.GRAPH_XLAYER_V4_ID = ''
-process.env.GRAPH_XLAYER_V3_ID = ''
-process.env.GRAPH_XLAYER_V2_ID = ''
+process.env.GRAPH_XLAYER_V4_SUBGRAPH_ID = ''
+process.env.GRAPH_XLAYER_V3_SUBGRAPH_ID = ''
+process.env.GRAPH_XLAYER_V2_SUBGRAPH_ID = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
@@ -129,7 +129,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
     case ChainId.XLAYER:
-      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_SUBGRAPH_ID}`
     default:
       return undefined
   }
@@ -168,7 +168,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
     case ChainId.XLAYER:
-      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_ID}`
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_SUBGRAPH_ID}`
     default:
       return undefined
   }
@@ -205,7 +205,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
     case ChainId.XLAYER:
-      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_ID}`
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_SUBGRAPH_ID}`
     default:
       return undefined
   }
