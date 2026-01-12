@@ -457,7 +457,6 @@ export class DynamoRouteCachingProvider extends IRouteCachingProvider {
         // requestId is from upstream TAPI
         // then we can correlate the async request with the sync request
         asyncRequestId: alphaRouterConfig?.requestId,
-        slippageTolerance: swapOptions?.slippageTolerance.toFixed(),
       },
     }
 
