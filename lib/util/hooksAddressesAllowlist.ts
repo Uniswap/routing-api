@@ -3,18 +3,14 @@ import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 // all hook addresses need to be lower case, since the check in isHooksPoolRoutable assumes lower case
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1 = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2 = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
-export const FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3 = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 export const ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE = '0x9e433f32bb5481a9ca7dff5b3af74a7ed041a888'
 
-export const BUNNI_HOOKS_ADDRESS_v1_0 = '0x0010d0d5db05933fa0d9f7038d365e1541a41888'
-export const BUNNI_HOOKS_ADDRESS_v1_1 = '0x0000da5dcd7ec49d6ca5554f7b1ca1ce33fa1888'
-export const BUNNI_HOOKS_ADDRESS_v1_1_1 = '0x0000fe59823933ac763611a69c88f91d45f81888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1 = '0x000052423c1db6b7ff8641b85a7eefc7b2791888'
-export const BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM = '0x0000eb22c45bdb564f985ace0b4d05a64fa71888'
+// example pool: https://app.uniswap.org/explore/pools/base/0xf8f4afa64c443ff00630d089205140814c9c0ce79ff293d05913a161fcc7ec4a
+export const FLAUNCH_POSM_V1_ON_BASE = '0x51bba15255406cfe7099a42183302640ba7dafdc'
+export const FLAUNCH_POSM_V2_ON_BASE = '0xf785bb58059fab6fb19bdda2cb9078d9e546efdc'
+export const FLAUNCH_POSM_V3_ON_BASE = '0xb903b0ab7bcee8f5e4d8c9b10a71aac7135d6fdc'
+export const FLAUNCH_POSM_V4_ON_BASE = '0x23321f11a6d44fd1ab790044fdfde5758c902fdc'
+export const FLAUNCH_ANYPOSM_V1_ON_BASE = '0x8dc3b85e1dc1c846ebf3971179a751896842e5dc'
 
 export const GRADUATION_HOOKS_ADDRESS_ON_BASE = '0xc5a48b447f01e9ce3ede71e4c1c2038c38bd9000'
 export const TWAMM_HOOKS_ADDRESS_ON_BASE = '0xed1698c29928a6c44cddb0c75ab0e5d47eb72a80'
@@ -35,22 +31,24 @@ export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM = '0xfd213be7883db36e
 export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM = '0xf7ac669593d2d9d01026fa5b756dd5b4f7aaa8cc'
 export const CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN = '0x9b37a43422d7bbd4c8b231be11e50ad1ace828cc'
 export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN = '0xbc6e5abda425309c2534bc2bc92562f5419ce8cc'
+export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET = '0x6c24d0bcc264ef6a740754a11ca579b9d225e8cc'
+export const CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD = '0x94F802a9EFE4dd542FdBd77a25D9e69A6dC828Cc'
 
 export const WETH_HOOKS_ADDRESS_ON_OP_MAINNET = '0x480dafdb4d6092ef3217595b75784ec54b52e888'
 export const WETH_HOOKS_ADDRESS_ON_UNICHAIN = '0x730b109bad65152c67ecc94eb8b0968603dba888'
 export const WETH_HOOKS_ADDRESS_ON_BASE = '0xb08211d57032dd10b1974d4b876851a7f7596888'
 export const WETH_HOOKS_ADDRESS_ON_MAINNET = '0x57991106cb7aa27e2771beda0d6522f68524a888'
-
+export const WETH_HOOKS_ADDRESS_ON_MONAD = '0x3fad8a7205f943528915e67cf94fc792c8fce888'
 export const WETH_HOOKS_ADDRESS_ON_ARBITRUM = '0x2a4adf825bd96598487dbb6b2d8d882a4eb86888'
 
-// example pool: https://app.uniswap.org/explore/pools/unichain/0xeec51c6b1a9e7c4bb4fc4fa9a02fc4fff3fe94efd044f895d98b5bfbd2ff9433
-export const BUNNI_ON_UNICHAIN = '0x005af73a245d8171a0550ffae2631f12cc211888'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x7dbe9918ba991e7c2b078ec8ce882a060024a6126927cf66553a359e427f2f6a
 export const RENZO_ON_UNICHAIN = '0x09dea99d714a3a19378e3d80d1ad22ca46085080'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x0e3a702c43b613fe8c635e375ca4f0b8d4870526c1e6f795d379f0fb6041ed91
-export const AEGIS_ON_UNICHAIN = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
-// exmaple pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
-export const UPDATED_AEGIS_ON_UNICHAIN = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
+export const AEGIS_ON_UNICHAIN_V1 = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x410723c1949069324d0f6013dba28829c4a0562f7c81d0f7cb79ded668691e1f
+export const AEGIS_ON_UNICHAIN_V2 = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
+// example pool: https://app.uniswap.org/explore/pools/unichain/0xBF12F5E68B1E1B3060BFB39B79794A0D5C1A723C0879281132B54887F87F928D
+export const AEGIS_V3 = '0x88c9ff9fc0b22cca42265d3f1d1c2c39e41cdacc'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xc42d1a19441f4d29e1e87533958cf0afe16c9cc6ef3e2ce5ff67c3f291555fa0
 export const ZORA_CREATOR_HOOK_ON_BASE_v1 = '0xfbce3d80c659c765bc6c55e29e87d839c7609040'
@@ -60,6 +58,7 @@ export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_1_1 = '0x5e5d19d22c85a4aef7c1fdf25fb
 export const ZORA_CREATOR_HOOK_ON_BASE_v1_1_2 = '0xd61a675f8a0c67a73dc3b54fb7318b4d91409040'
 export const ZORA_CREATOR_HOOK_ON_BASE_v2_2 = '0x8218fa8d7922e22aed3556a09d5a715f16ad5040'
 export const ZORA_CREATOR_HOOK_ON_BASE_v2_2_1 = '0x1258e5f3c71ca9dce95ce734ba5759532e46d040'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0x36C114F3C641031C837427A8CE7BFCE351FFD6C0ED2F2241BE0F1079E79E3B06
 export const ZORA_POST_HOOK_ON_BASE_v1 = '0xa1ebdd5ca6470bbd67114331387f2dda7bfad040'
 export const ZORA_POST_HOOK_ON_BASE_v1_0_0_1 = '0xb030fd8c2f8576f8ab05cfbbe659285e7d7a1040'
@@ -69,9 +68,11 @@ export const ZORA_POST_HOOK_ON_BASE_v1_1_1_1 = '0x5bf219b3cc11e3f6dd8dc8fc89d7d1
 export const ZORA_POST_HOOK_ON_BASE_v1_1_2 = '0x9ea932730a7787000042e34390b8e435dd839040'
 export const ZORA_POST_HOOK_ON_BASE_v2_2 = '0xff74be9d3596ea7a33bb4983dd7906fb34135040'
 export const ZORA_POST_HOOK_ON_BASE_v2_2_1 = '0x2b15a16b3ef024005ba899bb51764fcd58cf9040'
+export const ZORA_POST_HOOK_ON_BASE_v2_3_0 = '0xc8d077444625eb300a427a6dfb2b1dbf9b159040'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
 export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
+export const DOPPLER_HOOKS_ADDRESS_ON_MONAD = '0x580ca49389d83b019d07E17e99454f2F218e2dc0'
 
 // LimitOrderHook addresses: https://linear.app/uniswap/issue/ROUTE-625
 // example pool: https://app.uniswap.org/explore/pools/arbitrum/0x015537a47e3865bd59fa4b0feed5546f1b5d27660447dddcdf86808bce384d98
@@ -84,6 +85,84 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+// https://linear.app/uniswap/issue/ROUTE-757/allowlist-fey-finance-hook
+export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
+export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0x40d496321728c117bfe36498138a44dd4bfe54777093250cdf17095ebf11537e
+export const PUBHOUSE_HOOK_ON_BASE = '0x4ab61d774b170d0610fdcc5559aae2c356c600c8'
+
+// TokenWorks Hooks on Mainnet
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xbdb0f9c31367485f85e691f638345f3de673a78effaff71ce34bc7ff1d54fddc
+export const TOKENWORKS_HOOK_ON_MAINNET_1 = '0xfaaad5b731f52cdc9746f2414c823eca9b06e844'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xdaa6a16445812d9661eab80de42d8298417d5533b5a7cc4b9efc4a387413a4e1
+export const TOKENWORKS_HOOK_ON_MAINNET_2 = '0xbd15e4d324f8d02479a5ff53b52ef4048a79e444'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x134060a0672f5df29449673c9b2de0dc0beed4cd5354e532f801f0a3258906f8
+export const TOKENWORKS_HOOK_ON_MAINNET_3 = '0xd6a45df0c82c9a686ab1e58fb28d8fc0cf106444'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x29aceb9aea1d8f4f9ee40dfffb7e46285d69cd4e9b8999c08da265f27fd0f9a8
+export const TOKENWORKS_HOOK_ON_MAINNET_4 = '0xe3c63a9813ac03be0e8618b627cb8170cfa468c4'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xb0214c79008d1d71816166fbe17c01884386ccfc5560ce8b3cbb7a15dba93dce
+export const TOKENWORKS_HOOK_ON_MAINNET_5 = '0x5d8a61fa2ced43eeabffc00c85f705e3e08c28c4'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
+export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fede8c4'
+
+// example pool: https://app.uniswap.org/explore/pools/monad/0xfb2e06638df93ad3080109c410714b0903213135ff6f5909b3a846764df0b801
+export const CULT_FEE_HOOK_ADDRESS_ON_MONAD = '0x7A2524cE937F206844b9508EEc8f6486800a40CC'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0xab22898bde69271720124833eb07b8e7268f69cb833d33cb2442e57e8b57eea1
+export const AQUINAS_HOOK_ADDRESS_ON_BASE = '0xd3c1f2174f37f88811f99b1b1b4c1356c0246000'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x389a26ef4a4634e55fc4e3ae2149c1cafdbc141af16057ab5fab962c2dca5221
+export const ASTERIX_HOOK_ADDRESS_ON_MAINNET = '0xdad7ea85ff786b389a13f4714a56b1721b56c044'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0x02aaacb8bf6a4c3c3a99d8de43fad01348e68e314b7773fb2df3edac065e0c4e
+export const DELI_HOOK_ADDRESS_ON_BASE = '0x570a48f96035c2874de1c0f13c5075a05683b0cc'
+// example pool: https://app.uniswap.org/explore/pools/base/0xa900d06df8073e50a50971720d6d3470d00e64198da3b03c82388f247e0d13c1
+export const DELI_HOOK_CONSTANT_PRODUCT_ON_BASE = '0x95afbc0fccf974b41380f24e562f15b6dd90fac8'
+
+// example pool: https://app.uniswap.org/explore/pools/optimism/0xa30abc0ccd08c0c16d28ccfaf15de692a1778775de9f6dea337fb9b490163b18
+export const FINDEX_HOOK_ON_OPTIMISM = '0xb35297543d357ef62df204d8c3bd0e96038cf440'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x26b73e77f7b2cfc05d28a8978b917eced1cdf7915862292cfbb507731d5120fd
+export const ACTION_HOOK_ON_MAINNET = '0x00bbc6fc07342cf80d14b60695cf0e1aa8de00cc'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x4de849063d9559a699e26463a433c6d29e7570de49209f95295529afee20eb05
+export const M0_ALLOWLIST_HOOKS_ADDRESS_ON_MAINNET = '0xaf53cb78035a8e0acce38441793e2648b15b88a0'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x6b3403809baa251f186c546908d6ebdbd5dc52527b2b3f8bc7d4f5a437091b0f
+export const M0_TICK_RANGE_HOOKS_ADDRESS_ON_MAINNET = '0xde400595199e6dae55a1bcb742b3eb249af00800'
+
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x087de24dbfcd8c833dc54b73e3963451d315b7fda506dff0e45e5938e894dfbd
+export const UNIDERP_HOOK_ON_UNICHAIN = '0xcc2efb167503f2d7df0eae906600066aec9e8444'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0xa113103448f7b09199e019656f377988c87f8f312ddcebc6fea9e78bcd6ec2af
+export const SUPERSTRATEGY_HOOK_ON_BASE = '0x1e0c810a30fb82391df936602c1161421381b0c8'
+// example pool: https://app.uniswap.org/explore/pools/base/0xe4821b1cbfce1906c2249d1b34366610960c01fa3f762b0579c594d2033b9152
+export const WASSBLASTER_HOOK_ON_BASE = '0x35b9b5b023897da8c7375ba6141245b8416460cc'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0x3cdfb68e7c413e3ae9e5822ca428975a334d062388b2e3a0d42dc329880cbf36
+export const SIMPLE_SELL_TAX_HOOK_ON_BASE = '0xca975b9daf772c71161f3648437c3616e5be0088'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7a5a8f5a36a6a2e9961caf6bb047a5a7580d0fe16a532aad93efc596028dfa54
+export const RING_FEW_ETH_HOOK_ON_MAINNET = '0x044301939deb7ca53c4733dd4d9b3bc5ea0c6888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x301d41ff23b73b209ab2b1112f4effd0d8ff978ec29d743c1431463f84cbec24
+export const RING_FEW_UNI_HOOK_ON_MAINNET = '0x4b3e2a8cf36c7eb0fba2a5b39b20c896c6f22888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x18605c7a76101aeccc414cc300dd5e5ae44b30d6c247ba164ccd88952c259735
+export const RING_FEW_WBTC_HOOK_ON_MAINNET = '0x0fe942afdb2f51e25cbf892aad175c6a574f2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x8f8b0b21fb429ffb5210f2bf0f8b7cb267b944a0c61beaae35f20f6839c0f33b
+export const RING_FEW_CBBTC_HOOK_ON_MAINNET = '0x8347b7a3807c681513d2b51b8223e59aa16a2888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5837e6b4fd4b8193f2f7a8b4490c0f154344bb9a52b36a885578ff6d3193fc47
+export const RING_FEW_USDC_HOOK_ON_MAINNET = '0x4b2eb653d13e6c9ac5a0a01fde22f2c8d6592888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x7db868544c8f7f6ddb107c7749c94f03c9e0155f2138aef3f8a020e4a469d95a
+export const RING_FEW_USDT_HOOK_ON_MAINNET = '0xbadf77d50478b4432ef1f243b9c0bc7869486888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xf906beb74154ca4d057b7079c90eb1044efaf40ef468e62ec983930cf80a1e2b
+export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x85b648a64aed6307d5d5ce26e6ae086c17bde888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x6933dfbf7441cc4ee4439843fdd464e215a6c90f07c5a769198e2a047f1f3f3e
+export const RING_FEW_WEETH_HOOK_ON_MAINNET = '0x877323adbf747f85eb8d182d42f01f34a5492888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0xe7c2f30fd89238331b0e3e6ac6351578d5e3091b7839eff321c29cf88e17274e
+export const RING_FEW_WSTETH_HOOK_ON_MAINNET = '0x75ae0292e8ad3ab60b9a1a7b3046d3f4abdfa888'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
 export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
 
@@ -92,23 +171,36 @@ export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c3
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
   [ChainId.MAINNET]: [
     ADDRESS_ZERO,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
     WETH_HOOKS_ADDRESS_ON_MAINNET,
+    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+    TOKENWORKS_HOOK_ON_MAINNET_1,
+    // Disable below 2 hooks for now as they cause sim failure: https://linear.app/uniswap/issue/ROUTE-736
+    // TOKENWORKS_HOOK_ON_MAINNET_2,
+    // TOKENWORKS_HOOK_ON_MAINNET_3,
+    TOKENWORKS_HOOK_ON_MAINNET_4,
+    TOKENWORKS_HOOK_ON_MAINNET_5,
+    ENS_WHEEL_HOOK_ON_MAINNET,
+    ASTERIX_HOOK_ADDRESS_ON_MAINNET,
+    ACTION_HOOK_ON_MAINNET,
+    M0_ALLOWLIST_HOOKS_ADDRESS_ON_MAINNET,
+    M0_TICK_RANGE_HOOKS_ADDRESS_ON_MAINNET,
+    RING_FEW_ETH_HOOK_ON_MAINNET,
+    RING_FEW_UNI_HOOK_ON_MAINNET,
+    RING_FEW_WBTC_HOOK_ON_MAINNET,
+    RING_FEW_CBBTC_HOOK_ON_MAINNET,
+    RING_FEW_USDC_HOOK_ON_MAINNET,
+    RING_FEW_USDT_HOOK_ON_MAINNET,
+    RING_FEW_DAI_HOOK_ON_MAINNET,
+    RING_FEW_WEETH_HOOK_ON_MAINNET,
+    RING_FEW_WSTETH_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
-  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia],
-  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET],
+  [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
+  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET, FINDEX_HOOK_ON_OPTIMISM],
   [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_ONE]: [
     ADDRESS_ZERO,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1_ON_ARBITRUM,
     SLIPPAGE_FEE_HOOK_ON_ARBITRUM,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
@@ -123,21 +215,18 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO, BUNNI_HOOKS_ADDRESS_v1_1_1, BUNNI_HOOKS_ADDRESS_v1_2_1],
+  [ChainId.BNB]: [ADDRESS_ZERO],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
     ADDRESS_ZERO,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_1,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_2,
-    FLAUNCH_HOOKS_ADDRESS_ON_BASE_v1_0_3,
+    FLAUNCH_POSM_V1_ON_BASE,
+    FLAUNCH_POSM_V2_ON_BASE,
+    FLAUNCH_POSM_V3_ON_BASE,
+    FLAUNCH_POSM_V4_ON_BASE,
+    FLAUNCH_ANYPOSM_V1_ON_BASE,
     ETH_FLETH_AUTO_WRAP_HOOKS_ADDRESS_ON_BASE,
-    BUNNI_HOOKS_ADDRESS_v1_0,
-    BUNNI_HOOKS_ADDRESS_v1_1,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
     GRADUATION_HOOKS_ADDRESS_ON_BASE,
     TWAMM_HOOKS_ADDRESS_ON_BASE,
     COINBASE_VERIFIED_HOOKS_ADDRESS_ON_BASE,
@@ -164,6 +253,16 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v1_1_2,
     ZORA_POST_HOOK_ON_BASE_v2_2,
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
+    ZORA_POST_HOOK_ON_BASE_v2_3_0,
+    FEY_ON_BASE,
+    PUBHOUSE_HOOK_ON_BASE,
+    DELI_HOOK_ADDRESS_ON_BASE,
+    DELI_HOOK_CONSTANT_PRODUCT_ON_BASE,
+    AQUINAS_HOOK_ADDRESS_ON_BASE,
+    SUPERSTRATEGY_HOOK_ON_BASE,
+    SIMPLE_SELL_TAX_HOOK_ON_BASE,
+    WASSBLASTER_HOOK_ON_BASE,
+    AEGIS_V3,
     FARSTR_HOOKS_ADDRESS_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
@@ -175,19 +274,25 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.UNICHAIN]: [
     ADDRESS_ZERO,
-    BUNNI_ON_UNICHAIN,
     RENZO_ON_UNICHAIN,
-    AEGIS_ON_UNICHAIN,
-    UPDATED_AEGIS_ON_UNICHAIN,
+    AEGIS_ON_UNICHAIN_V1,
+    AEGIS_ON_UNICHAIN_V2,
+    AEGIS_V3,
     WETH_HOOKS_ADDRESS_ON_UNICHAIN,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
-    BUNNI_HOOKS_ADDRESS_v1_1_1,
-    BUNNI_HOOKS_ADDRESS_v1_2_0_ON_UNICHAIN,
-    BUNNI_HOOKS_ADDRESS_v1_2_1,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
     PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
+    UNIDERP_HOOK_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
+  [ChainId.MONAD]: [
+    ADDRESS_ZERO,
+    WETH_HOOKS_ADDRESS_ON_MONAD,
+    CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
+    DOPPLER_HOOKS_ADDRESS_ON_MONAD,
+    CULT_FEE_HOOK_ADDRESS_ON_MONAD,
+  ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
+  [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
 }

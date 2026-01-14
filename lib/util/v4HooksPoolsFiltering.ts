@@ -1,4 +1,11 @@
-import { isPoolFeeDynamic, log, nativeOnChain, V4SubgraphPool } from '@uniswap/smart-order-router'
+import {
+  isPoolFeeDynamic,
+  log,
+  metric,
+  MetricLoggerUnit,
+  nativeOnChain,
+  V4SubgraphPool,
+} from '@uniswap/smart-order-router'
 import { Hook } from '@uniswap/v4-sdk'
 import {
   HOOKS_ADDRESSES_ALLOWLIST,
@@ -17,10 +24,10 @@ import {
   ZORA_POST_HOOK_ON_BASE_v1_1_2,
   ZORA_POST_HOOK_ON_BASE_v2_2,
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
+  ZORA_POST_HOOK_ON_BASE_v2_3_0,
 } from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
-import { BUNNI_POOLS_CONFIG } from './bunni-pools'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 type V4PoolGroupingKey = string
@@ -41,6 +48,8 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         ? nativeOnChain(chainId)
         : new Token(chainId, pool.token1.id, parseInt(pool.token1.decimals), pool.token1.symbol, pool.token1.name)
 
+    metric.putMetric(`Hook.hasSwapPermissions.${Hook.hasSwapPermissions(pool.hooks)}`, 1, MetricLoggerUnit.Count)
+
     return (
       // if hook address is ADDRESS_ZERO, it means the pool is not a hooks pool
       pool.hooks === ADDRESS_ZERO ||
@@ -54,7 +63,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
         // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
         // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
-        !isPoolFeeDynamic(tokenA, tokenB, pool))
+        !isPoolFeeDynamic(tokenA, tokenB, Number(pool.tickSpacing), pool.hooks, pool.id))
     )
   } catch (e) {
     log.error(
@@ -85,7 +94,7 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
         // ROUTE-606: Non-allowlisted hooks might make it in routing if dynamic fee
         // there's a chance dynamic fee has been updated to be <= 100%, but it's still a dyanmic fee hooked pool
         // in this case, the only way to track is to backtrack the computed pool id with 838% fee tier with the current pool id
-        !isPoolFeeDynamic(tokenA, tokenB, pool))
+        !isPoolFeeDynamic(tokenA, tokenB, Number(pool.tickSpacing), pool.hooks, pool.id))
     )
   }
 }
@@ -161,18 +170,6 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
         additionalAllowedPool += 1
       }
 
-      // Check if this pool is in our Bunni pools configuration
-      const bunniPool = BUNNI_POOLS_CONFIG.find(
-        (config) => config.id.toLowerCase() === pool.id.toLowerCase() && config.chainId === chainId
-      )
-
-      if (bunniPool) {
-        pool.tvlETH = bunniPool.tvlETH
-        pool.tvlUSD = bunniPool.tvlUSD
-        log.info(`Setting tvl for ${bunniPool.comment} pool ${JSON.stringify(pool)}`)
-        additionalAllowedPool += 1
-      }
-
       let shouldNotAddV4Pool = false
 
       const isZoraPool =
@@ -190,7 +187,8 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_1_1 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_2 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2 ||
-          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1) &&
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_3_0) &&
         chainId === ChainId.BASE
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {

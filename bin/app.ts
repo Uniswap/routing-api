@@ -40,9 +40,59 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
       graphBaseV4SubgraphId?: string
+      graphXlayerV4Id?: string
+      graphXlayerV3Id?: string
+      graphXLayerV2Id?: string
       graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
+      goldskyBearerToken?: string
+      goldskyApiKey?: string
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id?: string
+      goldskyArbitrumV2Id?: string
+      goldskyPolygonV2Id?: string
+      goldskyOptimismV2Id?: string
+      goldskyAvalancheV2Id?: string
+      goldskyBnbV2Id?: string
+      goldskyBlastV2Id?: string
+      goldskyBaseV2Id?: string
+      goldskyWorldchainV2Id?: string
+      goldskyAstrochainSepoliaV2Id?: string
+      goldskyMonadTestnetV2Id?: string
+      goldskyUnichainV2Id?: string
+      goldskySoneiumV2Id?: string
+      goldskyEthereumSepoliaV2Id?: string
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id?: string
+      goldskyArbitrumV3Id?: string
+      goldskyPolygonV3Id?: string
+      goldskyOptimismV3Id?: string
+      goldskyAvalancheV3Id?: string
+      goldskyBnbV3Id?: string
+      goldskyBlastV3Id?: string
+      goldskyBaseV3Id?: string
+      goldskyCeloV3Id?: string
+      goldskyWorldchainV3Id?: string
+      goldskyAstrochainSepoliaV3Id?: string
+      goldskyUnichainV3Id?: string
+      goldskyZoraV3Id?: string
+      goldskySoneiumV3Id?: string
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id?: string
+      goldskyArbitrumV4Id?: string
+      goldskyBaseV4Id?: string
+      goldskyPolygonV4Id?: string
+      goldskyWorldchainV4Id?: string
+      goldskyZoraV4Id?: string
+      goldskyUnichainV4Id?: string
+      goldskyBnbV4Id?: string
+      goldskyBlastV4Id?: string
+      goldskyEthereumV4Id?: string
+      goldskySoneiumV4Id?: string
+      goldskyOptimismV4Id?: string
+      goldskyCeloV4Id?: string
+      goldskyAvalancheV4Id?: string
     }
   ) {
     super(scope, id, props)
@@ -65,9 +115,59 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
+      goldskyBearerToken,
+      goldskyApiKey,
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id,
+      goldskyArbitrumV2Id,
+      goldskyPolygonV2Id,
+      goldskyOptimismV2Id,
+      goldskyAvalancheV2Id,
+      goldskyBnbV2Id,
+      goldskyBlastV2Id,
+      goldskyBaseV2Id,
+      goldskyWorldchainV2Id,
+      goldskyAstrochainSepoliaV2Id,
+      goldskyMonadTestnetV2Id,
+      goldskyUnichainV2Id,
+      goldskySoneiumV2Id,
+      goldskyEthereumSepoliaV2Id,
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id,
+      goldskyArbitrumV3Id,
+      goldskyPolygonV3Id,
+      goldskyOptimismV3Id,
+      goldskyAvalancheV3Id,
+      goldskyBnbV3Id,
+      goldskyBlastV3Id,
+      goldskyBaseV3Id,
+      goldskyCeloV3Id,
+      goldskyWorldchainV3Id,
+      goldskyAstrochainSepoliaV3Id,
+      goldskyUnichainV3Id,
+      goldskyZoraV3Id,
+      goldskySoneiumV3Id,
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id,
+      goldskyArbitrumV4Id,
+      goldskyBaseV4Id,
+      goldskyPolygonV4Id,
+      goldskyWorldchainV4Id,
+      goldskyZoraV4Id,
+      goldskyUnichainV4Id,
+      goldskyBnbV4Id,
+      goldskyBlastV4Id,
+      goldskyEthereumV4Id,
+      goldskySoneiumV4Id,
+      goldskyOptimismV4Id,
+      goldskyCeloV4Id,
+      goldskyAvalancheV4Id,
     } = props
 
     const { url } = new RoutingAPIStack(this, 'RoutingAPI', {
@@ -89,9 +189,59 @@ export class RoutingAPIStage extends Stage {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
+      goldskyBearerToken,
+      goldskyApiKey,
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id,
+      goldskyArbitrumV2Id,
+      goldskyPolygonV2Id,
+      goldskyOptimismV2Id,
+      goldskyAvalancheV2Id,
+      goldskyBnbV2Id,
+      goldskyBlastV2Id,
+      goldskyBaseV2Id,
+      goldskyWorldchainV2Id,
+      goldskyAstrochainSepoliaV2Id,
+      goldskyMonadTestnetV2Id,
+      goldskyUnichainV2Id,
+      goldskySoneiumV2Id,
+      goldskyEthereumSepoliaV2Id,
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id,
+      goldskyArbitrumV3Id,
+      goldskyPolygonV3Id,
+      goldskyOptimismV3Id,
+      goldskyAvalancheV3Id,
+      goldskyBnbV3Id,
+      goldskyBlastV3Id,
+      goldskyBaseV3Id,
+      goldskyCeloV3Id,
+      goldskyWorldchainV3Id,
+      goldskyAstrochainSepoliaV3Id,
+      goldskyUnichainV3Id,
+      goldskyZoraV3Id,
+      goldskySoneiumV3Id,
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id,
+      goldskyArbitrumV4Id,
+      goldskyBaseV4Id,
+      goldskyPolygonV4Id,
+      goldskyWorldchainV4Id,
+      goldskyZoraV4Id,
+      goldskyUnichainV4Id,
+      goldskyBnbV4Id,
+      goldskyBlastV4Id,
+      goldskyEthereumV4Id,
+      goldskySoneiumV4Id,
+      goldskyOptimismV4Id,
+      goldskyCeloV4Id,
+      goldskyAvalancheV4Id,
     })
     this.url = url
   }
@@ -199,9 +349,11 @@ export class RoutingAPIPipeline extends Stack {
         chainId !== ChainId.WORLDCHAIN &&
         chainId !== ChainId.UNICHAIN_SEPOLIA &&
         chainId !== ChainId.MONAD_TESTNET &&
+        chainId !== ChainId.MONAD &&
         chainId !== ChainId.BASE_SEPOLIA &&
         chainId !== ChainId.UNICHAIN &&
-        chainId !== ChainId.SONEIUM
+        chainId !== ChainId.SONEIUM &&
+        chainId !== ChainId.XLAYER
       ) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
@@ -273,7 +425,7 @@ export class RoutingAPIPipeline extends Stack {
       env: { account: '145079444317', region: 'us-east-2' },
       jsonRpcProviders: jsonRpcProviders,
       internalApiKey: internalApiKey.secretValue.toString(),
-      provisionedConcurrency: 5,
+      provisionedConcurrency: 10,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       stage: STAGE.BETA,
       route53Arn: route53Arn.secretValueFromJson('arn').toString(),
@@ -291,8 +443,66 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
+      graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
+      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
+      goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
+      goldskyApiKey: routingApiNewSecrets.secretValueFromJson('GOLDSKY_API_KEY').toString(),
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V2_ID').toString(),
+      goldskyArbitrumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V2_ID').toString(),
+      goldskyPolygonV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V2_ID').toString(),
+      goldskyOptimismV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V2_ID').toString(),
+      goldskyAvalancheV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V2_ID').toString(),
+      goldskyBnbV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V2_ID').toString(),
+      goldskyBlastV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V2_ID').toString(),
+      goldskyBaseV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V2_ID').toString(),
+      goldskyWorldchainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V2_ID').toString(),
+      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID')
+        .toString(),
+      goldskyMonadTestnetV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_MONAD_TESTNET_V2_ID').toString(),
+      goldskyUnichainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V2_ID').toString(),
+      goldskySoneiumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V2_ID').toString(),
+      goldskyEthereumSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID')
+        .toString(),
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V3_ID').toString(),
+      goldskyArbitrumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V3_ID').toString(),
+      goldskyPolygonV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V3_ID').toString(),
+      goldskyOptimismV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V3_ID').toString(),
+      goldskyAvalancheV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V3_ID').toString(),
+      goldskyBnbV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V3_ID').toString(),
+      goldskyBlastV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V3_ID').toString(),
+      goldskyBaseV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V3_ID').toString(),
+      goldskyCeloV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V3_ID').toString(),
+      goldskyWorldchainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V3_ID').toString(),
+      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID')
+        .toString(),
+      goldskyUnichainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V3_ID').toString(),
+      goldskyZoraV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V3_ID').toString(),
+      goldskySoneiumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V3_ID').toString(),
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID')
+        .toString(),
+      goldskyArbitrumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V4_ID').toString(),
+      goldskyBaseV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V4_ID').toString(),
+      goldskyPolygonV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V4_ID').toString(),
+      goldskyWorldchainV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V4_ID').toString(),
+      goldskyZoraV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V4_ID').toString(),
+      goldskyUnichainV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V4_ID').toString(),
+      goldskyBnbV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V4_ID').toString(),
+      goldskyBlastV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V4_ID').toString(),
+      goldskyEthereumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V4_ID').toString(),
+      goldskySoneiumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V4_ID').toString(),
+      goldskyOptimismV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V4_ID').toString(),
+      goldskyCeloV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V4_ID').toString(),
+      goldskyAvalancheV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V4_ID').toString(),
     })
 
     const betaUsEast2AppStage = pipeline.addStage(betaUsEast2Stage)
@@ -324,8 +534,66 @@ export class RoutingAPIPipeline extends Stack {
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
       graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
+      graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
+      graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
       uniGraphQLEndpoint: routingApiNewSecrets.secretValueFromJson('uni-graphql-endpoint').toString(),
       uniGraphQLHeaderOrigin: routingApiNewSecrets.secretValueFromJson('uni-graphql-header-origin').toString(),
+      goldskyBearerToken: routingApiNewSecrets.secretValueFromJson('GOLDSKY_BEARER_TOKEN').toString(),
+      goldskyApiKey: routingApiNewSecrets.secretValueFromJson('GOLDSKY_API_KEY').toString(),
+      // Goldsky V2 subgraph IDs
+      goldskyEthereumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V2_ID').toString(),
+      goldskyArbitrumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V2_ID').toString(),
+      goldskyPolygonV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V2_ID').toString(),
+      goldskyOptimismV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V2_ID').toString(),
+      goldskyAvalancheV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V2_ID').toString(),
+      goldskyBnbV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V2_ID').toString(),
+      goldskyBlastV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V2_ID').toString(),
+      goldskyBaseV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V2_ID').toString(),
+      goldskyWorldchainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V2_ID').toString(),
+      goldskyAstrochainSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID')
+        .toString(),
+      goldskyMonadTestnetV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_MONAD_TESTNET_V2_ID').toString(),
+      goldskyUnichainV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V2_ID').toString(),
+      goldskySoneiumV2Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V2_ID').toString(),
+      goldskyEthereumSepoliaV2Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID')
+        .toString(),
+      // Goldsky V3 subgraph IDs
+      goldskyEthereumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V3_ID').toString(),
+      goldskyArbitrumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V3_ID').toString(),
+      goldskyPolygonV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V3_ID').toString(),
+      goldskyOptimismV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V3_ID').toString(),
+      goldskyAvalancheV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V3_ID').toString(),
+      goldskyBnbV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V3_ID').toString(),
+      goldskyBlastV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V3_ID').toString(),
+      goldskyBaseV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V3_ID').toString(),
+      goldskyCeloV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V3_ID').toString(),
+      goldskyWorldchainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V3_ID').toString(),
+      goldskyAstrochainSepoliaV3Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID')
+        .toString(),
+      goldskyUnichainV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V3_ID').toString(),
+      goldskyZoraV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V3_ID').toString(),
+      goldskySoneiumV3Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V3_ID').toString(),
+      // Goldsky V4 subgraph IDs
+      goldskyEthereumSepoliaV4Id: routingApiNewSecrets
+        .secretValueFromJson('GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID')
+        .toString(),
+      goldskyArbitrumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ARBITRUM_V4_ID').toString(),
+      goldskyBaseV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BASE_V4_ID').toString(),
+      goldskyPolygonV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_POLYGON_V4_ID').toString(),
+      goldskyWorldchainV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_WORLDCHAIN_V4_ID').toString(),
+      goldskyZoraV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ZORA_V4_ID').toString(),
+      goldskyUnichainV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_UNICHAIN_V4_ID').toString(),
+      goldskyBnbV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BNB_V4_ID').toString(),
+      goldskyBlastV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_BLAST_V4_ID').toString(),
+      goldskyEthereumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_ETHEREUM_V4_ID').toString(),
+      goldskySoneiumV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_SONEIUM_V4_ID').toString(),
+      goldskyOptimismV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_OPTIMISM_V4_ID').toString(),
+      goldskyCeloV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_CELO_V4_ID').toString(),
+      goldskyAvalancheV4Id: routingApiNewSecrets.secretValueFromJson('GOLD_SKY_AVALANCHE_V4_ID').toString(),
     })
 
     const prodUsEast2AppStage = pipeline.addStage(prodUsEast2Stage)
@@ -474,7 +742,57 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
   graphBaseV4SubgraphId: process.env.GRAPH_BASE_V4_SUBGRAPH_ID!,
+  graphXlayerV4Id: process.env.GRAPH_XLAYER_V4_ID!,
+  graphXlayerV3Id: process.env.GRAPH_XLAYER_V4_ID!,
+  graphXLayerV2Id: process.env.GRAPH_XLAYER_V4_ID!,
   graphBearerToken: process.env.GRAPH_BEARER_TOKEN!,
+  goldskyBearerToken: process.env.GOLDSKY_BEARER_TOKEN!,
+  goldskyApiKey: process.env.GOLDSKY_API_KEY!,
+  // Goldsky V2 subgraph IDs
+  goldskyEthereumV2Id: process.env.GOLD_SKY_ETHEREUM_V2_ID!,
+  goldskyArbitrumV2Id: process.env.GOLD_SKY_ARBITRUM_V2_ID!,
+  goldskyPolygonV2Id: process.env.GOLD_SKY_POLYGON_V2_ID!,
+  goldskyOptimismV2Id: process.env.GOLD_SKY_OPTIMISM_V2_ID!,
+  goldskyAvalancheV2Id: process.env.GOLD_SKY_AVALANCHE_V2_ID!,
+  goldskyBnbV2Id: process.env.GOLD_SKY_BNB_V2_ID!,
+  goldskyBlastV2Id: process.env.GOLD_SKY_BLAST_V2_ID!,
+  goldskyBaseV2Id: process.env.GOLD_SKY_BASE_V2_ID!,
+  goldskyWorldchainV2Id: process.env.GOLD_SKY_WORLDCHAIN_V2_ID!,
+  goldskyAstrochainSepoliaV2Id: process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID!,
+  goldskyMonadTestnetV2Id: process.env.GOLD_SKY_MONAD_TESTNET_V2_ID!,
+  goldskyUnichainV2Id: process.env.GOLD_SKY_UNICHAIN_V2_ID!,
+  goldskySoneiumV2Id: process.env.GOLD_SKY_SONEIUM_V2_ID!,
+  goldskyEthereumSepoliaV2Id: process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID!,
+  // Goldsky V3 subgraph IDs
+  goldskyEthereumV3Id: process.env.GOLD_SKY_ETHEREUM_V3_ID!,
+  goldskyArbitrumV3Id: process.env.GOLD_SKY_ARBITRUM_V3_ID!,
+  goldskyPolygonV3Id: process.env.GOLD_SKY_POLYGON_V3_ID!,
+  goldskyOptimismV3Id: process.env.GOLD_SKY_OPTIMISM_V3_ID!,
+  goldskyAvalancheV3Id: process.env.GOLD_SKY_AVALANCHE_V3_ID!,
+  goldskyBnbV3Id: process.env.GOLD_SKY_BNB_V3_ID!,
+  goldskyBlastV3Id: process.env.GOLD_SKY_BLAST_V3_ID!,
+  goldskyBaseV3Id: process.env.GOLD_SKY_BASE_V3_ID!,
+  goldskyCeloV3Id: process.env.GOLD_SKY_CELO_V3_ID!,
+  goldskyWorldchainV3Id: process.env.GOLD_SKY_WORLDCHAIN_V3_ID!,
+  goldskyAstrochainSepoliaV3Id: process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID!,
+  goldskyUnichainV3Id: process.env.GOLD_SKY_UNICHAIN_V3_ID!,
+  goldskyZoraV3Id: process.env.GOLD_SKY_ZORA_V3_ID!,
+  goldskySoneiumV3Id: process.env.GOLD_SKY_SONEIUM_V3_ID!,
+  // Goldsky V4 subgraph IDs
+  goldskyEthereumSepoliaV4Id: process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID!,
+  goldskyArbitrumV4Id: process.env.GOLD_SKY_ARBITRUM_V4_ID!,
+  goldskyBaseV4Id: process.env.GOLD_SKY_BASE_V4_ID!,
+  goldskyPolygonV4Id: process.env.GOLD_SKY_POLYGON_V4_ID!,
+  goldskyWorldchainV4Id: process.env.GOLD_SKY_WORLDCHAIN_V4_ID!,
+  goldskyZoraV4Id: process.env.GOLD_SKY_ZORA_V4_ID!,
+  goldskyUnichainV4Id: process.env.GOLD_SKY_UNICHAIN_V4_ID!,
+  goldskyBnbV4Id: process.env.GOLD_SKY_BNB_V4_ID!,
+  goldskyBlastV4Id: process.env.GOLD_SKY_BLAST_V4_ID!,
+  goldskyEthereumV4Id: process.env.GOLD_SKY_ETHEREUM_V4_ID!,
+  goldskySoneiumV4Id: process.env.GOLD_SKY_SONEIUM_V4_ID!,
+  goldskyOptimismV4Id: process.env.GOLD_SKY_OPTIMISM_V4_ID!,
+  goldskyCeloV4Id: process.env.GOLD_SKY_CELO_V4_ID!,
+  goldskyAvalancheV4Id: process.env.GOLD_SKY_AVALANCHE_V4_ID!,
 })
 
 new RoutingAPIPipeline(app, 'RoutingAPIPipelineStack', {

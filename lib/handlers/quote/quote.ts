@@ -1,6 +1,6 @@
 import Joi from '@hapi/joi'
-import { Protocol } from '@uniswap/router-sdk'
-import { ChainId, Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { ADDRESS_ZERO, Protocol } from '@uniswap/router-sdk'
+import { ChainId, Currency, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
 import {
   AlphaRouterConfig,
   getAddress,
@@ -47,6 +47,7 @@ import {
   URVersionsToProtocolVersions,
 } from '../../util/supportedProtocolVersions'
 import { enableMixedRouteEthWeth } from '../../util/enableMixedRouteEthWeth'
+import { HOOKS_ADDRESSES_ALLOWLIST } from '../../util/hooksAddressesAllowlist'
 
 export class QuoteHandler extends APIGLambdaHandler<
   ContainerInjected,
@@ -229,6 +230,9 @@ export class QuoteHandler extends APIGLambdaHandler<
         cachedRoutesRouteIds,
         enableDebug,
         hooksOptions,
+        requestId,
+        asyncRequestId,
+        poolsToManuallyRouteThrough,
       },
       requestInjected: {
         router,
@@ -349,6 +353,9 @@ export class QuoteHandler extends APIGLambdaHandler<
       enableMixedRouteWithUR1_2: 100 >= Math.random() * 100, // enable mixed route with UR v1.2 fix at 50%, to see whether we see quote endpoint perf improvement.
       enableDebug: enableDebug,
       hooksOptions: hooksOptions,
+      requestId: requestId,
+      asyncRequestId: asyncRequestId,
+      poolsToManuallyRouteThrough: poolsToManuallyRouteThrough?.split(','),
     }
 
     metric.putMetric(`${intent}Intent`, 1, MetricLoggerUnit.Count)
@@ -503,6 +510,21 @@ export class QuoteHandler extends APIGLambdaHandler<
       trade,
     } = swapRoute
 
+    // TODO: ROUTE-886 - fix v4 midPrice calculation in SDK
+    // Temporary fix to make sure we don't throw an error and return a quote with priceImpact = 0
+    let priceImpact = new Percent(0, 100)
+    try {
+      priceImpact = trade.priceImpact
+    } catch (error) {
+      log.error({ error }, 'Error calculating price impact')
+      metric.putMetric('ErrorCalculatingPriceImpact', 1, MetricLoggerUnit.Count)
+    }
+
+    if (hitsCachedRoute && priceImpact.greaterThan(new Percent(20, 10000))) {
+      metric.putMetric('CachedRoutePriceImpactTooHigh', 1, MetricLoggerUnit.Count)
+      metric.putMetric(`CachedRoutePriceImpactTooHighChainId${chainId}`, 1, MetricLoggerUnit.Count)
+    }
+
     const estimatedGasUsed = adhocCorrectGasUsed(preProcessedEstimatedGasUsed, chainId)
     const estimatedGasUsedUSD = adhocCorrectGasUsedUSD(
       preProcessedEstimatedGasUsed,
@@ -559,6 +581,11 @@ export class QuoteHandler extends APIGLambdaHandler<
           // https://github.com/Uniswap/smart-order-router/pull/819/files#diff-0eeab2733d13572382be381aa273dddcb38e797adf48c864105fbab2dcf011ffR489
           if (nextPool.tickSpacing === V4_ETH_WETH_FAKE_POOL[chainId].tickSpacing) {
             continue
+          }
+
+          if (nextPool.hooks !== ADDRESS_ZERO && !HOOKS_ADDRESSES_ALLOWLIST[chainId].includes(nextPool.hooks)) {
+            metric.putMetric(`V4UndesiredHooksOnChain${chainId}`, 1, MetricLoggerUnit.Count)
+            metric.putMetric(`V4UndesiredHooksOnChain${chainId}Hooks${nextPool.hooks}`, 1, MetricLoggerUnit.Count)
           }
 
           curRoute.push({
@@ -720,7 +747,7 @@ export class QuoteHandler extends APIGLambdaHandler<
       portionRecipient: outputPortionAmount && portionRecipient,
       portionAmount: outputPortionAmount?.quotient.toString(),
       portionAmountDecimals: outputPortionAmount?.toExact(),
-      priceImpact: trade?.priceImpact?.toFixed(),
+      priceImpact: priceImpact.toFixed(),
     }
 
     this.logRouteMetrics(

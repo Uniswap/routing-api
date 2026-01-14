@@ -110,9 +110,11 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.WORLDCHAIN,
   ChainId.UNICHAIN_SEPOLIA,
   ChainId.MONAD_TESTNET,
+  ChainId.MONAD,
   ChainId.BASE_SEPOLIA,
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
+  ChainId.XLAYER,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -374,9 +376,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.WORLDCHAIN:
             case ChainId.UNICHAIN_SEPOLIA:
             case ChainId.MONAD_TESTNET:
+            case ChainId.MONAD:
             case ChainId.BASE_SEPOLIA:
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
+            case ChainId.XLAYER:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -472,6 +476,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ChainId.WORLDCHAIN,
               ChainId.UNICHAIN,
               ChainId.SONEIUM,
+              ChainId.MONAD,
             ]
           )
 
@@ -521,8 +526,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
             ChainId.WORLDCHAIN,
             ChainId.MONAD_TESTNET,
+            ChainId.MONAD,
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
+            ChainId.XLAYER,
           ]
 
           const v4Supported = [
@@ -539,6 +546,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.BLAST,
             ChainId.MAINNET,
             ChainId.SONEIUM,
+            ChainId.MONAD,
+            ChainId.CELO,
+            ChainId.XLAYER,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
@@ -573,6 +583,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.MONAD_TESTNET,
             ChainId.SONEIUM,
+            ChainId.MONAD,
+            ChainId.XLAYER,
           ]
           const mixedSupported = [
             ChainId.MAINNET,
@@ -588,6 +600,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.WORLDCHAIN,
             ChainId.ZORA,
             ChainId.SONEIUM,
+            ChainId.XLAYER,
+            ChainId.MONAD,
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]
 
