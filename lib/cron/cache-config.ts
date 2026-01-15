@@ -131,7 +131,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
     case ChainId.AVALANCHE:
-      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`  
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`
     default:
       return undefined
   }
