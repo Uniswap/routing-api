@@ -178,6 +178,7 @@ export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794a1d67f
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x796b074977701c1156e7fc95d84dfa739963f2de33af8b61c2b7ad5b7018e0e9
 export const ARTACLE_INDEX_TOKEN_HOOK_ON_BASE = '0xd577f945b6025ce1e60ac1a82f2ee8ff3fb428c4'
+export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794A1D67FeBe95f66B6Dff38c0A7e934044'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x0c1b00338ecfc1f4894a309420c2d8d654e500036268dd251b99decc66bd2b51
 export const TOKEN_FLOW_TAX_HOOK_ON_MAINNET = '0x74803bd586fa5ce3a9ab38b49a7ca633af8700cc'
 // example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
