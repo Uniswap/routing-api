@@ -104,6 +104,10 @@ export const TOKENWORKS_HOOK_ON_MAINNET_4 = '0xe3c63a9813ac03be0e8618b627cb8170c
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xb0214c79008d1d71816166fbe17c01884386ccfc5560ce8b3cbb7a15dba93dce
 export const TOKENWORKS_HOOK_ON_MAINNET_5 = '0x5d8a61fa2ced43eeabffc00c85f705e3e08c28c4'
 
+// V1 Punk Strategic Reserve Hooks on Mainnet
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x1b7cc22f2c6593851dbb0d42ab89eb92d2e02a8ea4822d68ef899581f630c33c
+export const STRATEGICRESERVE_HOOK_ON_MAINNET = '0x6e1babe41d708f6d46a89cda1ae46de95458e444'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
 export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fede8c4'
 
@@ -182,6 +186,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     // TOKENWORKS_HOOK_ON_MAINNET_3,
     TOKENWORKS_HOOK_ON_MAINNET_4,
     TOKENWORKS_HOOK_ON_MAINNET_5,
+    STRATEGICRESERVE_HOOK_ON_MAINNET,
     ENS_WHEEL_HOOK_ON_MAINNET,
     ASTERIX_HOOK_ADDRESS_ON_MAINNET,
     ACTION_HOOK_ON_MAINNET,
