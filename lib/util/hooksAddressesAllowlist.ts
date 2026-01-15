@@ -171,6 +171,8 @@ export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c3
 
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x03f7cea23a0c6f2bbbaca94eeaf292290d9a4950e3f806495683a9fb1a941faf
 export const UNIVERSAL_HOOK_ON_UNICHAIN = '0xcdfcab084b2d29025772141d3bf473bd9673aaa8'
+// example pool: https://app.uniswap.org/explore/pools/avalanche/0xc09399b17e189ba3528aa516eb4f9c134720316bc7b3b5f8003c3967ec11f7cd
+export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794A1D67FeBe95f66B6Dff38c0A7e934044'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x0c1b00338ecfc1f4894a309420c2d8d654e500036268dd251b99decc66bd2b51
 export const TOKEN_FLOW_TAX_HOOK_ON_MAINNET = '0x74803bd586fa5ce3a9ab38b49a7ca633af8700cc'
 // example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
@@ -231,7 +233,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
   [ChainId.BNB]: [ADDRESS_ZERO],
-  [ChainId.AVALANCHE]: [ADDRESS_ZERO],
+  [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
