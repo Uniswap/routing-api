@@ -104,6 +104,10 @@ export const TOKENWORKS_HOOK_ON_MAINNET_4 = '0xe3c63a9813ac03be0e8618b627cb8170c
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xb0214c79008d1d71816166fbe17c01884386ccfc5560ce8b3cbb7a15dba93dce
 export const TOKENWORKS_HOOK_ON_MAINNET_5 = '0x5d8a61fa2ced43eeabffc00c85f705e3e08c28c4'
 
+// V1 Punk Strategic Reserve Hooks on Mainnet
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x1b7cc22f2c6593851dbb0d42ab89eb92d2e02a8ea4822d68ef899581f630c33c
+export const STRATEGICRESERVE_HOOK_ON_MAINNET = '0x6e1babe41d708f6d46a89cda1ae46de95458e444'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xeea2c1344c876f4c8d7545cba9ed8b199e124d6dc3e2063e3f90ba94e7b53093
 export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fede8c4'
 
@@ -169,6 +173,20 @@ export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c8
 // example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
 export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
 
+// example pool: https://app.uniswap.org/explore/pools/avalanche/0xc09399b17e189ba3528aa516eb4f9c134720316bc7b3b5f8003c3967ec11f7cd
+export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794a1d67febe95f66b6dff38c0a7e934044'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0x796b074977701c1156e7fc95d84dfa739963f2de33af8b61c2b7ad5b7018e0e9
+export const ARTACLE_INDEX_TOKEN_HOOK_ON_BASE = '0xd577f945b6025ce1e60ac1a82f2ee8ff3fb428c4'
+
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x0c1b00338ecfc1f4894a309420c2d8d654e500036268dd251b99decc66bd2b51
+export const TOKEN_FLOW_TAX_HOOK_ON_MAINNET = '0x74803bd586fa5ce3a9ab38b49a7ca633af8700cc'
+
+// example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
+export const GPO_HOOKS = '0x6cabe2fd9fb60c5afcab7de732b0a224fc382eec'
+// example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
+export const GPX_HOOKS = '0x4519e2b040ff1b64fa03abe2aef0bc99d7cceaa8'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0x20aab1b33d63b7d6fc95deed43dfdf986a23a2d82857025533d2c18e2fef9e4b
 export const ARRAKIS_PRIVATE_HOOK_ON_BASE = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed57d4880'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x8679ef619b4ae7a464f8c208df1c49f294df41a237671d98882b50554c20a5c8
@@ -187,6 +205,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     // TOKENWORKS_HOOK_ON_MAINNET_3,
     TOKENWORKS_HOOK_ON_MAINNET_4,
     TOKENWORKS_HOOK_ON_MAINNET_5,
+    STRATEGICRESERVE_HOOK_ON_MAINNET,
     ENS_WHEEL_HOOK_ON_MAINNET,
     ASTERIX_HOOK_ADDRESS_ON_MAINNET,
     ACTION_HOOK_ON_MAINNET,
@@ -202,6 +221,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     RING_FEW_WEETH_HOOK_ON_MAINNET,
     RING_FEW_WSTETH_HOOK_ON_MAINNET,
     MEME_STRATEGY_HOOK_ON_MAINNET,
+    TOKEN_FLOW_TAX_HOOK_ON_MAINNET,
     ARRAKIS_PRIVATE_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
@@ -226,7 +246,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
   [ChainId.BNB]: [ADDRESS_ZERO],
-  [ChainId.AVALANCHE]: [ADDRESS_ZERO],
+  [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
@@ -274,6 +294,9 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     WASSBLASTER_HOOK_ON_BASE,
     AEGIS_V3,
     FARSTR_HOOKS_ADDRESS_ON_BASE,
+    ARTACLE_INDEX_TOKEN_HOOK_ON_BASE,
+    GPO_HOOKS,
+    GPX_HOOKS,
     ARRAKIS_PRIVATE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
