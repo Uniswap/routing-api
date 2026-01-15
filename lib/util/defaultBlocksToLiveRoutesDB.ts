@@ -54,4 +54,5 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   // (1 minute) / (1 seconds) = 60
   [ChainId.ZKSYNC]: 60,
   [ChainId.SONEIUM]: 60,
+  [ChainId.XLAYER]: 60,
 }

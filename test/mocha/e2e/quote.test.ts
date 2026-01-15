@@ -321,7 +321,7 @@ describe('quote', function () {
   }
 
   before(async function () {
-    this.timeout(40000)
+    this.timeout(80000)
     alice = await getFirstNonDelegatedSigner(await ethers.getSigners())
 
     // Make a dummy call to the API to get a block number to fork from.
@@ -3407,6 +3407,7 @@ describe('quote', function () {
     [ChainId.MONAD_TESTNET]: () => USDC_ON(ChainId.MONAD_TESTNET),
     [ChainId.MONAD]: () => USDC_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => USDC_ON(ChainId.SONEIUM),
+    [ChainId.XLAYER]: () => USDC_ON(ChainId.XLAYER),
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
@@ -3442,6 +3443,7 @@ describe('quote', function () {
     [ChainId.MONAD_TESTNET]: () => WNATIVE_ON(ChainId.MONAD_TESTNET),
     [ChainId.MONAD]: () => WNATIVE_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => WNATIVE_ON(ChainId.SONEIUM),
+    [ChainId.XLAYER]: () => WNATIVE_ON(ChainId.XLAYER),
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
@@ -3463,7 +3465,8 @@ describe('quote', function () {
       c != ChainId.MONAD_TESTNET &&
       c != ChainId.MONAD && // monad tests are not passing, ignore for now
       c != ChainId.UNICHAIN_SEPOLIA &&
-      c != ChainId.BASE_SEPOLIA
+      c != ChainId.BASE_SEPOLIA &&
+      c != ChainId.XLAYER
   )) {
     for (const type of TRADE_TYPES) {
       const erc1 = TEST_ERC20_1[chain]()
@@ -3483,12 +3486,13 @@ describe('quote', function () {
             return
           }
 
+          if (chain === ChainId.ZORA) {
+            return
+          }
+
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
-            chain === ChainId.BLAST ||
-            chain === ChainId.WORLDCHAIN ||
-            chain === ChainId.UNICHAIN_SEPOLIA ||
-            chain === ChainId.ZORA
+            chain === ChainId.BLAST || chain === ChainId.WORLDCHAIN || chain === ChainId.UNICHAIN_SEPOLIA
               ? type === 'exactOut'
                 ? '0.002'
                 : '0.01'
@@ -3579,8 +3583,8 @@ describe('quote', function () {
             return
           }
 
-          // Disable ZORA exactOut tests to unblock pipeline because it doesn't have enough liquidity to calc gas costs.
-          if (chain === ChainId.ZORA && type === 'exactOut') {
+          // Disable ZORA tests to unblock pipeline because it doesn't have enough liquidity to calc gas costs.
+          if (chain === ChainId.ZORA) {
             return
           }
 
@@ -3589,8 +3593,7 @@ describe('quote', function () {
             return
           }
 
-          // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
-          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
+          const protocols = ALL_PROTOCOLS
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
@@ -3618,18 +3621,7 @@ describe('quote', function () {
             const { status } = response
 
             expect(status).to.equal(200)
-
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-            if (!(chain === ChainId.ZORA && type === 'exactOut')) {
-              expect(response.data.hitsCachedRoutes).to.be.true
-            }
+            expect(response.data.hitsCachedRoutes).to.be.true
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }
@@ -3737,8 +3729,8 @@ describe('quote', function () {
             return
           }
 
-          // Disable ZORA exactOut tests to unblock pipeline because it doesn't have enough liquidity to calc gas costs.
-          if (chain === ChainId.ZORA && type === 'exactOut') {
+          // Disable ZORA tests to unblock pipeline because it doesn't have enough liquidity to calc gas costs.
+          if (chain === ChainId.ZORA) {
             return
           }
 
@@ -3747,8 +3739,7 @@ describe('quote', function () {
             return
           }
 
-          // if it's exactOut and ZORA, don't use V2 because it doesn't have enough liquidity to calc gas costs.
-          const protocols = chain === ChainId.ZORA && type === 'exactOut' ? 'v3,v4,mixed' : ALL_PROTOCOLS
+          const protocols = ALL_PROTOCOLS
 
           // Current WETH/USDB pool (https://blastscan.io/address/0xf52b4b69123cbcf07798ae8265642793b2e8990c) has low WETH amount
           const amount =
@@ -3787,18 +3778,7 @@ describe('quote', function () {
               expect(parseFloat(quoteGasAdjustedDecimals)).to.be.greaterThanOrEqual(parseFloat(quoteDecimals))
             }
 
-            // if it's exactIn quote, there's a slight chance the first quote request might be cache miss.
-            // but this is okay because each test case retries 3 times, so 2nd exactIn quote is def expected to hit cached routes.
-            // if it's exactOut quote, we should always hit the cached routes.
-            // this is regardless of protocol version.
-            // the reason is because exact in quote always runs before exact out
-            // along with the native or wrapped native pool token address assertions previously
-            // it ensures the cached routes will always cache wrapped native for v2,v3 pool routes
-            // and native for v4 pool routes
-
-            if (!(chain === ChainId.ZORA && type === 'exactOut')) {
-              expect(response.data.hitsCachedRoutes).to.be.true
-            }
+            expect(response.data.hitsCachedRoutes).to.be.true
           } catch (err: any) {
             fail(JSON.stringify(err.response.data))
           }

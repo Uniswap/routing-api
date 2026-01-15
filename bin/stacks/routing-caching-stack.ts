@@ -29,6 +29,9 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   alchemyQueryKey?: string
   alchemyQueryKey2?: string
   graphBaseV4SubgraphId?: string
+  graphXlayerV4Id?: string
+  graphXlayerV3Id?: string
+  graphXLayerV2Id?: string
   graphBearerToken?: string
   goldskyBearerToken?: string
   goldskyApiKey?: string
@@ -90,6 +93,9 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly alchemyQueryKey: string | undefined = undefined
   public readonly alchemyQueryKey2: string | undefined = undefined
   public readonly graphBaseV4SubgraphId: string | undefined = undefined
+  public readonly graphXlayerV4Id: string | undefined = undefined
+  public readonly graphXlayerV3Id: string | undefined = undefined
+  public readonly graphXLayerV2Id: string | undefined = undefined
   public readonly graphBearerToken: string | undefined = undefined
   public readonly goldskyBearerToken: string | undefined = undefined
   public readonly goldskyApiKey: string | undefined = undefined
@@ -147,6 +153,9 @@ export class RoutingCachingStack extends cdk.NestedStack {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
+      graphXlayerV4Id,
+      graphXlayerV3Id,
+      graphXLayerV2Id,
       graphBearerToken,
       goldskyApiKey,
       goldskyBearerToken,
@@ -202,6 +211,9 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.alchemyQueryKey = alchemyQueryKey
     this.alchemyQueryKey2 = alchemyQueryKey2
     this.graphBaseV4SubgraphId = graphBaseV4SubgraphId
+    this.graphXlayerV4Id = graphXlayerV4Id
+    this.graphXlayerV3Id = graphXlayerV3Id
+    this.graphXLayerV2Id = graphXLayerV2Id
     this.graphBearerToken = graphBearerToken
     this.goldskyApiKey = goldskyApiKey
     this.goldskyBearerToken = goldskyBearerToken
@@ -327,13 +339,16 @@ export class RoutingCachingStack extends cdk.NestedStack {
           layers: [lambdaLayerVersion],
           tracing: aws_lambda.Tracing.ACTIVE,
           environment: {
-            VERSION: '4',
+            VERSION: '5',
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_3: this.poolCacheBucket3.bucketName,
             POOL_CACHE_GZIP_KEY: this.poolCacheGzipKey,
             ALCHEMY_QUERY_KEY: this.alchemyQueryKey ?? '',
             ALCHEMY_QUERY_KEY_2: this.alchemyQueryKey2 ?? '',
             GRAPH_BASE_V4_SUBGRAPH_ID: this.graphBaseV4SubgraphId ?? '',
+            GRAPH_XLAYER_V4_ID: this.graphXlayerV4Id ?? '',
+            GRAPH_XLAYER_V3_ID: this.graphXlayerV3Id ?? '',
+            GRAPH_XLAYER_V2_ID: this.graphXLayerV2Id ?? '',
             GRAPH_BEARER_TOKEN: this.graphBearerToken ?? '',
             GOLD_SKY_BEARER_TOKEN: this.goldskyBearerToken ?? '',
             GOLD_SKY_API_KEY: this.goldskyApiKey ?? '',
