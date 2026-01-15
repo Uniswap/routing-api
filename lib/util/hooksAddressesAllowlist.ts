@@ -176,6 +176,9 @@ export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c3
 // example pool: https://app.uniswap.org/explore/pools/avalanche/0xc09399b17e189ba3528aa516eb4f9c134720316bc7b3b5f8003c3967ec11f7cd
 export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794A1D67FeBe95f66B6Dff38c0A7e934044'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x796b074977701c1156e7fc95d84dfa739963f2de33af8b61c2b7ad5b7018e0e9
+export const ARTACLE_INDEX_TOKEN_HOOK_ON_BASE = '0xd577f945b6025ce1e60ac1a82f2ee8ff3fb428c4'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -276,6 +279,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     WASSBLASTER_HOOK_ON_BASE,
     AEGIS_V3,
     FARSTR_HOOKS_ADDRESS_ON_BASE,
+    ARTACLE_INDEX_TOKEN_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
