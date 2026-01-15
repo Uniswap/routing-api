@@ -166,6 +166,9 @@ export const RING_FEW_WSTETH_HOOK_ON_MAINNET = '0x75ae0292e8ad3ab60b9a1a7b3046d3
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x95caa20ff578db4ceec56162bedc21e31adc70ef717661e11d6d1d74e9b2f844
 export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c806a200cc'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
+export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -264,6 +267,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     SIMPLE_SELL_TAX_HOOK_ON_BASE,
     WASSBLASTER_HOOK_ON_BASE,
     AEGIS_V3,
+    FARSTR_HOOKS_ADDRESS_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
