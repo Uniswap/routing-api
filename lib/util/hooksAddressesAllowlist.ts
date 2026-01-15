@@ -169,6 +169,8 @@ export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c8
 // example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
 export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
 
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x0c1b00338ecfc1f4894a309420c2d8d654e500036268dd251b99decc66bd2b51
+export const TOKEN_FLOW_TAX_HOOK_ON_MAINNET = '0x74803bd586fa5ce3a9ab38b49a7ca633af8700cc'
 // example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
 export const GPO_HOOKS = '0x6cabe2fd9fb60c5afcab7de732b0a224fc382eec'
 
@@ -203,6 +205,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     RING_FEW_WEETH_HOOK_ON_MAINNET,
     RING_FEW_WSTETH_HOOK_ON_MAINNET,
     MEME_STRATEGY_HOOK_ON_MAINNET,
+    TOKEN_FLOW_TAX_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
