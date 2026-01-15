@@ -29,6 +29,56 @@ import {
 // process.env.ALCHEMY_QUERY_KEY_2 = ''
 // process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
 // process.env.GRAPH_BEARER_TOKEN = ''
+// process.env.GOLDSKY_BEARER_TOKEN = ''
+// process.env.GOLDSKY_API_KEY = ''
+// // Goldsky V2 subgraph IDs
+// process.env.GOLD_SKY_ETHEREUM_V2_ID = ''
+// process.env.GOLD_SKY_ARBITRUM_V2_ID = ''
+// process.env.GOLD_SKY_POLYGON_V2_ID = ''
+// process.env.GOLD_SKY_OPTIMISM_V2_ID = ''
+// process.env.GOLD_SKY_AVALANCHE_V2_ID = ''
+// process.env.GOLD_SKY_BNB_V2_ID = ''
+// process.env.GOLD_SKY_BLAST_V2_ID = ''
+// process.env.GOLD_SKY_BASE_V2_ID = ''
+// process.env.GOLD_SKY_WORLDCHAIN_V2_ID = ''
+// process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID = ''
+// process.env.GOLD_SKY_MONAD_TESTNET_V2_ID = ''
+// process.env.GOLD_SKY_UNICHAIN_V2_ID = ''
+// process.env.GOLD_SKY_SONEIUM_V2_ID = ''
+// process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID = ''
+// // Goldsky V3 subgraph IDs
+// process.env.GOLD_SKY_ETHEREUM_V3_ID = ''
+// process.env.GOLD_SKY_ARBITRUM_V3_ID = ''
+// process.env.GOLD_SKY_POLYGON_V3_ID = ''
+// process.env.GOLD_SKY_OPTIMISM_V3_ID = ''
+// process.env.GOLD_SKY_AVALANCHE_V3_ID = ''
+// process.env.GOLD_SKY_BNB_V3_ID = ''
+// process.env.GOLD_SKY_BLAST_V3_ID = ''
+// process.env.GOLD_SKY_BASE_V3_ID = ''
+// process.env.GOLD_SKY_CELO_V3_ID = ''
+// process.env.GOLD_SKY_WORLDCHAIN_V3_ID = ''
+// process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID = ''
+// process.env.GOLD_SKY_UNICHAIN_V3_ID = ''
+// process.env.GOLD_SKY_ZORA_V3_ID = ''
+// process.env.GOLD_SKY_SONEIUM_V3_ID = ''
+// // Goldsky V4 subgraph IDs
+// process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID = ''
+// process.env.GOLD_SKY_ARBITRUM_V4_ID = ''
+// process.env.GOLD_SKY_BASE_V4_ID = ''
+// process.env.GOLD_SKY_POLYGON_V4_ID = ''
+// process.env.GOLD_SKY_WORLDCHAIN_V4_ID = ''
+// process.env.GOLD_SKY_ZORA_V4_ID = ''
+// process.env.GOLD_SKY_UNICHAIN_V4_ID = ''
+// process.env.GOLD_SKY_BNB_V4_ID = ''
+// process.env.GOLD_SKY_BLAST_V4_ID = ''
+// process.env.GOLD_SKY_ETHEREUM_V4_ID = ''
+// process.env.GOLD_SKY_SONEIUM_V4_ID = ''
+// process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
+// process.env.GOLD_SKY_CELO_V4_ID = ''
+// process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
+// process.env.GRAPH_XLAYER_V4_ID = ''
+// process.env.GRAPH_XLAYER_V3_ID = ''
+// process.env.GRAPH_XLAYER_V2_ID = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
@@ -53,29 +103,33 @@ export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-sepolia-test/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID}`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-arbitrum/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ARBITRUM_V4_ID}`
     case ChainId.BASE:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_BASE_V4_SUBGRAPH_ID}`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-polygon/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_POLYGON_V4_ID}`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-worldchain/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_WORLDCHAIN_V4_ID}`
     case ChainId.ZORA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-zora/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ZORA_V4_ID}`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-unichain-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_UNICHAIN_V4_ID}`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-bsc/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_BNB_V4_ID}`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-blast/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_BLAST_V4_ID}`
     case ChainId.MAINNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_V4_ID}`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-soneium-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_SONEIUM_V4_ID}`
     case ChainId.OPTIMISM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v4-optimism/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_OPTIMISM_V4_ID}`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
+    case ChainId.XLAYER:
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
     default:
       return undefined
   }
@@ -84,33 +138,37 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
 export const v3SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_V3_ID}`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-arbitrum-ii/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ARBITRUM_V3_ID}`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-polygon/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_POLYGON_V3_ID}`
     case ChainId.OPTIMISM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-optimism-ii/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_OPTIMISM_V3_ID}`
     case ChainId.AVALANCHE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-avalanche/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V3_ID}`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-bsc-ii/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_BNB_V3_ID}`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-blast/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_BLAST_V3_ID}`
     case ChainId.BASE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-base/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_BASE_V3_ID}`
     case ChainId.CELO:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-celo/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_CELO_V3_ID}`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-worldchain/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_WORLDCHAIN_V3_ID}`
     case ChainId.UNICHAIN_SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-astrochain-sepolia/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID}`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-unichain-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_UNICHAIN_V3_ID}`
     case ChainId.ZORA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-zora/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ZORA_V3_ID}`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY_2}/uniswap-2/uniswap-v3-soneium-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_SONEIUM_V3_ID}`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
+    case ChainId.XLAYER:
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_ID}`
     default:
       return undefined
   }
@@ -119,31 +177,35 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
 export const v2SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.MAINNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_V2_ID}`
     case ChainId.ARBITRUM_ONE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-arbitrum/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_ARBITRUM_V2_ID}`
     case ChainId.POLYGON:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-polygon/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_POLYGON_V2_ID}`
     case ChainId.OPTIMISM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-optimism/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_OPTIMISM_V2_ID}`
     case ChainId.AVALANCHE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-avalanche/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V2_ID}`
     case ChainId.BNB:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-bsc/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_BNB_V2_ID}`
     case ChainId.BLAST:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-blast/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_BLAST_V2_ID}`
     case ChainId.BASE:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-base/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_BASE_V2_ID}`
     case ChainId.WORLDCHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-worldchain/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_WORLDCHAIN_V2_ID}`
     case ChainId.UNICHAIN_SEPOLIA:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-astrochain-sepolia/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID}`
     case ChainId.MONAD_TESTNET:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-monad-testnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_MONAD_TESTNET_V2_ID}`
     case ChainId.UNICHAIN:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-unichain-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_UNICHAIN_V2_ID}`
     case ChainId.SONEIUM:
-      return `https://subgraph.satsuma-prod.com/${process.env.ALCHEMY_QUERY_KEY}/uniswap/uniswap-v2-soneium-mainnet/api`
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_SONEIUM_V2_ID}`
+    case ChainId.MONAD:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
+    case ChainId.XLAYER:
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_ID}`
     default:
       return undefined
   }
@@ -355,6 +417,36 @@ export const chainProtocols = [
       v3SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.XLAYER,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.XLAYER,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
+    ),
+  },
   // V2.
   {
     protocol: Protocol.V2,
@@ -534,6 +626,38 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.SONEIUM)
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.XLAYER,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.XLAYER,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   // V4
@@ -742,6 +866,40 @@ export const chainProtocols = [
       ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.MONAD,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.MONAD,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.XLAYER,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.XLAYER,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.XLAYER),
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
 ]

@@ -1,4 +1,11 @@
-import { isPoolFeeDynamic, log, nativeOnChain, V4SubgraphPool } from '@uniswap/smart-order-router'
+import {
+  isPoolFeeDynamic,
+  log,
+  metric,
+  MetricLoggerUnit,
+  nativeOnChain,
+  V4SubgraphPool,
+} from '@uniswap/smart-order-router'
 import { Hook } from '@uniswap/v4-sdk'
 import {
   HOOKS_ADDRESSES_ALLOWLIST,
@@ -40,6 +47,8 @@ function isHooksPoolRoutable(pool: V4SubgraphPool, chainId: ChainId): boolean {
       pool.token1.id === ADDRESS_ZERO
         ? nativeOnChain(chainId)
         : new Token(chainId, pool.token1.id, parseInt(pool.token1.decimals), pool.token1.symbol, pool.token1.name)
+
+    metric.putMetric(`Hook.hasSwapPermissions.${Hook.hasSwapPermissions(pool.hooks)}`, 1, MetricLoggerUnit.Count)
 
     return (
       // if hook address is ADDRESS_ZERO, it means the pool is not a hooks pool
