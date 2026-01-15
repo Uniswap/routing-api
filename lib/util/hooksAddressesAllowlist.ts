@@ -169,6 +169,9 @@ export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c8
 // example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
 export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
 
+// example pool: https://app.uniswap.org/explore/pools/avalanche/0xc09399b17e189ba3528aa516eb4f9c134720316bc7b3b5f8003c3967ec11f7cd
+export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794A1D67FeBe95f66B6Dff38c0A7e934044'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -220,7 +223,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
   [ChainId.BNB]: [ADDRESS_ZERO],
-  [ChainId.AVALANCHE]: [ADDRESS_ZERO],
+  [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
