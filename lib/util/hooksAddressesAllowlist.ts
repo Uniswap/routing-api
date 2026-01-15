@@ -173,6 +173,8 @@ export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c8
 // example pool: https://app.uniswap.org/explore/pools/base/0x6f104dafea59868dfee9883a56d666393633115c2fda5dca6da4aa6e39f18e2f
 export const FARSTR_HOOKS_ADDRESS_ON_BASE = '0xc3b8e77ac038aa260035a1911827086c34a9e844'
 
+// example pool: https://app.uniswap.org/explore/pools/unichain/0x03f7cea23a0c6f2bbbaca94eeaf292290d9a4950e3f806495683a9fb1a941faf
+export const UNIVERSAL_HOOK_ON_UNICHAIN = '0xcdfcab084b2d29025772141d3bf473bd9673aaa8'
 // example pool: https://app.uniswap.org/explore/pools/avalanche/0xc09399b17e189ba3528aa516eb4f9c134720316bc7b3b5f8003c3967ec11f7cd
 export const AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX = '0x3b48f794a1d67febe95f66b6dff38c0a7e934044'
 
@@ -311,6 +313,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     LIMIT_ORDER_HOOKS_ADDRESS_ON_UNICHAIN,
     PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
     UNIDERP_HOOK_ON_UNICHAIN,
+    UNIVERSAL_HOOK_ON_UNICHAIN,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.MONAD]: [
