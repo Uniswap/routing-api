@@ -194,6 +194,9 @@ export const ARRAKIS_PRIVATE_HOOK_ON_BASE = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x8679ef619b4ae7a464f8c208df1c49f294df41a237671d98882b50554c20a5c8
 export const ARRAKIS_PRIVATE_HOOK_ON_MAINNET = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed57d4880'
 
+// example pool: https://app.uniswap.org/positions/v4/bnb/215293
+export const WHITELIST_BUY_HOOK_ADDRESS_ON_BSC = '0xabf1f4421f2c4893a7fa9b411c59ddf248508080'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -247,7 +250,10 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO],
+  [ChainId.BNB]: [
+	ADDRESS_ZERO,
+	WHITELIST_BUY_HOOK_ADDRESS_ON_BSC,
+  ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
