@@ -85,6 +85,8 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+// example pool: https://app.uniswap.org/explore/pools/arbitrum/0xd360506b12c1f313676625b3b224df0ff76efb59127b9ae13e9a4ca0af7f3567
+export const LNT_VATH_ATH_HOOKS_ADDRESS_ON_ARBITRUM = '0xbf4b4a83708474528a93c123f817e7f2a0637a88'
 // https://linear.app/uniswap/issue/ROUTE-757/allowlist-fey-finance-hook
 export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
 export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
@@ -242,6 +244,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
     WETH_HOOKS_ADDRESS_ON_ARBITRUM,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM,
+    LNT_VATH_ATH_HOOKS_ADDRESS_ON_ARBITRUM
   ],
   [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
