@@ -172,7 +172,6 @@ export const BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET = '0xf9ced7d0f5292af02385410eda5b7
 export const BVCC_DYNAMIC_FEE_HOOK_ON_ARBITRUM = '0x2097d7329389264a1542ad50802bb0de84a650c4'
 export const BVCC_DYNAMIC_FEE_HOOK_ON_BASE = '0x2c56c1302b6224b2bb1906c46f554622e12f10c4'
 
-
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x95caa20ff578db4ceec56162bedc21e31adc70ef717661e11d6d1d74e9b2f844
 export const MEME_STRATEGY_HOOK_ON_MAINNET = '0x3ba779bad405d9b68a7a7a86ff6916c806a200cc'
 
@@ -210,7 +209,7 @@ export const DORY_BURN_AND_MINT_POWER_HOOK_ON_ARBITRUM = '0x6b70fef40d3925881251
 export const BASEMEME_HOOK_ADDRESS_ON_BASE = '0x755776c51399f7ee15d47ddaf47347d26f5ca840'
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xaca93c6543498289affeab3b3645b0faa3c660d73d76a3d271c8b92339f88589
-export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a97e525b69e400cc';
+export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a97e525b69e400cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
