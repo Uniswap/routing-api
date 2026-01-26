@@ -203,6 +203,9 @@ export const DORY_BURN_AND_MINT_POWER_HOOK_ON_ARBITRUM = '0x6b70fef40d3925881251
 // example pool: https://app.uniswap.org/explore/pools/base/0xd2e486be751887088da2f4bf76a5872e0810d1bcaf43efec7d4bea3acbc3135a
 export const BASEMEME_HOOK_ADDRESS_ON_BASE = '0x755776c51399f7ee15d47ddaf47347d26f5ca840'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0xaca93c6543498289affeab3b3645b0faa3c660d73d76a3d271c8b92339f88589
+export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a97e525b69e400cc';
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -312,6 +315,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     GPX_HOOKS,
     ARRAKIS_PRIVATE_HOOK_ON_BASE,
     BASEMEME_HOOK_ADDRESS_ON_BASE,
+    AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
