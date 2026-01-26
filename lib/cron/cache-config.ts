@@ -76,9 +76,9 @@ import {
 // process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
 // process.env.GOLD_SKY_CELO_V4_ID = ''
 // process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
-process.env.GRAPH_XLAYER_V4_ID = ''
-process.env.GRAPH_XLAYER_V3_ID = ''
-process.env.GRAPH_XLAYER_V2_ID = ''
+// process.env.GRAPH_XLAYER_V4_ID = ''
+// process.env.GRAPH_XLAYER_V3_ID = ''
+// process.env.GRAPH_XLAYER_V2_ID = ''
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
@@ -130,6 +130,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
+    case ChainId.AVALANCHE:
+      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`
     default:
       return undefined
   }
@@ -900,6 +902,22 @@ export const chainProtocols = [
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.XLAYER),
       process.env.GRAPH_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.AVALANCHE,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.AVALANCHE,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
 ]
