@@ -85,6 +85,8 @@ export const LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE = '0x9d11f9505ca92f4b6983c1285d1a
 // example pool: https://app.uniswap.org/explore/pools/unichain/0x348860e4565d7e3eb53af800a8931b1465a7540cdb5fa7f4dfd1e4d0bb2aa7f8
 export const PANOPTIC_ORACLE_HOOK_ON_UNICHAIN = '0x79330fe369c32a03e3b8516aff35b44706e39080'
 
+export const SUPERFLUID_TOKEN_WRAPER_HOOK_ON_BASE = '0xa09ff20120d0dc9b9840c3260ea4f2be7e6ce888'
+export const SUPERFLUID_SETH_HOOK_ON_BASE = '0xe0e522e5888e398d9e5d4d90a48c489425cb2888'
 // https://linear.app/uniswap/issue/ROUTE-757/allowlist-fey-finance-hook
 export const FEY_ON_SEPOLIA = '0x932d55d7b86d27eedd0934503e49f5f362faa8cc'
 export const FEY_ON_BASE = '0x5b409184204b86f708d3aebb3cad3f02835f68cc'
@@ -307,6 +309,8 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ZORA_POST_HOOK_ON_BASE_v2_2,
     ZORA_POST_HOOK_ON_BASE_v2_2_1,
     ZORA_POST_HOOK_ON_BASE_v2_3_0,
+    SUPERFLUID_TOKEN_WRAPER_HOOK_ON_BASE,
+    SUPERFLUID_SETH_HOOK_ON_BASE,
     FEY_ON_BASE,
     PUBHOUSE_HOOK_ON_BASE,
     DELI_HOOK_ADDRESS_ON_BASE,
