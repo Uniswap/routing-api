@@ -25,6 +25,7 @@ import {
   ZORA_POST_HOOK_ON_BASE_v2_2,
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
   ZORA_POST_HOOK_ON_BASE_v2_3_0,
+  ZORA_POST_HOOK_ON_BASE_v2_4_0,
 } from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
@@ -188,7 +189,8 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v1_1_2 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1 ||
-          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_3_0) &&
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_3_0 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_4_0) &&
         chainId === ChainId.BASE
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
