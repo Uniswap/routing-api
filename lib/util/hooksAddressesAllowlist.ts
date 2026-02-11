@@ -73,6 +73,7 @@ export const ZORA_POST_HOOK_ON_BASE_v2_4_0 = '0xf6d0a13609bb5779bc5d639f2ba3bfda
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x9cd78cc37624a69c32bc554d98460f9290bde0a3067583afaa7ec8de0a753ee3
 export const DOPPLER_HOOKS_ADDRESS_ON_BASE = '0x77bb2a8f1ab2a384918a4c090cd8ae82dc5078e0'
+export const DOPPLER_HOOKS_ADDRESS_ON_BASE_V2 = '0xbb7784a4d481184283ed89619a3e3ed143e1adc0'
 export const DOPPLER_HOOKS_ADDRESS_ON_MONAD = '0x580ca49389d83b019d07E17e99454f2F218e2dc0'
 
 // LimitOrderHook addresses: https://linear.app/uniswap/issue/ROUTE-625
@@ -291,6 +292,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
     WETH_HOOKS_ADDRESS_ON_BASE,
     DOPPLER_HOOKS_ADDRESS_ON_BASE,
+    DOPPLER_HOOKS_ADDRESS_ON_BASE_V2,
     LIMIT_ORDER_HOOKS_ADDRESS_ON_BASE,
     ZORA_CREATOR_HOOK_ON_BASE_v1,
     ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
