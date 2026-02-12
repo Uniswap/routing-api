@@ -198,6 +198,9 @@ export const GPO_HOOKS = '0x6cabe2fd9fb60c5afcab7de732b0a224fc382eec'
 // example pool: https://app.uniswap.org/explore/pools/base/0xe6b8b2f7320759927c826e663ba1a77eaf8156bad1422234d5282c17c5e8f637
 export const GPX_HOOKS = '0x4519e2b040ff1b64fa03abe2aef0bc99d7cceaa8'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0xD532BF016A98A1329B83507B376493B0AEBEF85C89AAF6B505A7070ECDD63CDF
+export const LIQUID_LAUNCH_HOOK_ON_BASE = '0xea9346e83952840e69beb36df365c4e68de0e080'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0x20aab1b33d63b7d6fc95deed43dfdf986a23a2d82857025533d2c18e2fef9e4b
 export const ARRAKIS_PRIVATE_HOOK_ON_BASE = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed57d4880'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x8679ef619b4ae7a464f8c208df1c49f294df41a237671d98882b50554c20a5c8
@@ -331,6 +334,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ARRAKIS_PRIVATE_HOOK_ON_BASE,
     BASEMEME_HOOK_ADDRESS_ON_BASE,
     AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE,
+    LIQUID_LAUNCH_HOOK_ON_BASE,
     BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
