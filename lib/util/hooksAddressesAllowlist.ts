@@ -213,6 +213,9 @@ export const BASEMEME_HOOK_ADDRESS_ON_BASE = '0x755776c51399f7ee15d47ddaf47347d2
 // example pool: https://app.uniswap.org/explore/pools/base/0xaca93c6543498289affeab3b3645b0faa3c660d73d76a3d271c8b92339f88589
 export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a97e525b69e400cc'
 
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5a58bbed3fb03eaa7a07ff77f3dc32fbfb8b3ba763805c4bcb42de02c63a2b5c
+export const UPEGS_HOOK_ON_MAINNET = '0xe54082DfBf044B6a8F584bdDdb90a22d5613C440'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -246,6 +249,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ARRAKIS_PRIVATE_HOOK_ON_MAINNET,
     CUSTOM_FEE_MEV_PROTECTION_HOOK_ON_MAINNET,
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
+    UPEGS_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
