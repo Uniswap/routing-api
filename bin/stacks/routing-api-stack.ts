@@ -288,6 +288,7 @@ export class RoutingAPIStack extends cdk.Stack {
     } = new RoutingDatabaseStack(this, 'RoutingDatabaseStack', {})
 
     const { routingLambda, routingLambdaAlias } = new RoutingLambdaStack(this, 'RoutingLambdaStack', {
+      stage,
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheBucket3,
