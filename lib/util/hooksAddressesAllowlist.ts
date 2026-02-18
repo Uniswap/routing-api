@@ -220,6 +220,7 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 // example pool: https://app.uniswap.org/explore/pools/base/0xc5de2f6f012f590e1d888feb07ee266b0e2538e1388e4c6b0d814e27c55e9d1b
 export const ACCUMULATE_HOOK_V1_ON_BASE = '0x64b54C01afCb36A405a2615e65B5E22A52b28044'
+export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -340,6 +341,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     LIQUID_LAUNCH_HOOK_ON_BASE,
     BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
     ACCUMULATE_HOOK_V1_ON_BASE,
+    CLAUNCH_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
