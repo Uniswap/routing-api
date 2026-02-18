@@ -13,8 +13,10 @@ import { Construct } from 'constructs'
 import * as path from 'path'
 import { DynamoDBTableProps } from './routing-database-stack'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
+import { STAGE } from '../../lib/util/stage'
 
 export interface RoutingLambdaStackProps extends cdk.NestedStackProps {
+  stage: string
   poolCacheBucket: aws_s3.Bucket
   poolCacheBucket2: aws_s3.Bucket
   poolCacheBucket3: aws_s3.Bucket
@@ -48,6 +50,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingLambdaStackProps) {
     super(scope, name, props)
     const {
+      stage,
       poolCacheBucket,
       poolCacheBucket2,
       poolCacheBucket3,
@@ -172,7 +175,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       // 11/8/23: URA currently calls the Routing API with a timeout of 10 seconds.
       // Set this lambda's timeout to be slightly lower to give them time to
       // log the response in the event of a failure on our end.
-      timeout: cdk.Duration.seconds(9),
+      // Beta uses a higher timeout to allow for more thorough routing exploration.
+      timeout: cdk.Duration.seconds(stage === STAGE.BETA ? 18 : 9),
       memorySize: 5120,
       deadLetterQueueEnabled: true,
       bundling: {
