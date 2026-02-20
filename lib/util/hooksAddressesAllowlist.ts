@@ -220,6 +220,8 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
+export const SEEDIFY_SPARK_HOOK_ON_BASE = '0x2Fd54Aaf84023EDA60Bd65eDb5914c1a306850cc';
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -339,6 +341,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     LIQUID_LAUNCH_HOOK_ON_BASE,
     BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
     CLAUNCH_HOOK_ON_BASE,
+    SEEDIFY_SPARK_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
