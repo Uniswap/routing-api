@@ -169,8 +169,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
+      multicallChunk: 400,
+      gasLimitPerCall: 240_000,
       quoteMinSuccessRate: 0.1,
     },
     // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -267,8 +267,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
+      multicallChunk: 160,
+      gasLimitPerCall: 600_000,
       quoteMinSuccessRate: 0.1,
     },
     // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -344,8 +344,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain-sepolia has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN_SEPOLIA]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
+      multicallChunk: 400,
+      gasLimitPerCall: 240_000,
       quoteMinSuccessRate: 0.1,
     },
     // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -366,8 +366,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
+      multicallChunk: 400,
+      gasLimitPerCall: 240_000,
       quoteMinSuccessRate: 0.1,
     },
     // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -464,8 +464,8 @@ export const OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]: { 
     },
     // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
     [ChainId.UNICHAIN]: {
-      multicallChunk: 80,
-      gasLimitPerCall: 1_200_000,
+      multicallChunk: 400,
+      gasLimitPerCall: 240_000,
       quoteMinSuccessRate: 0.1,
     },
     // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -568,8 +568,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.UNICHAIN]: {
-        multicallChunk: 80,
-        gasLimitPerCall: 1_200_000,
+        multicallChunk: 400,
+        gasLimitPerCall: 240_000,
         quoteMinSuccessRate: 0.1,
       },
       // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -666,8 +666,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.UNICHAIN]: {
-        multicallChunk: 80,
-        gasLimitPerCall: 1_200_000,
+        multicallChunk: 400,
+        gasLimitPerCall: 240_000,
         quoteMinSuccessRate: 0.1,
       },
       // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -765,8 +765,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.UNICHAIN]: {
-        multicallChunk: 80,
-        gasLimitPerCall: 1_200_000,
+        multicallChunk: 400,
+        gasLimitPerCall: 240_000,
         quoteMinSuccessRate: 0.1,
       },
       // TODO: once soneium has view-quoter, optimize muilcallChunk and gasLimitPerCall
@@ -847,8 +847,8 @@ export const NON_OPTIMISTIC_CACHED_ROUTES_BATCH_PARAMS: { [protocol in Protocol]
       },
       // TODO: once unichain has view-quoter, optimize muilcallChunk and gasLimitPerCall
       [ChainId.UNICHAIN]: {
-        multicallChunk: 80,
-        gasLimitPerCall: 1_200_000,
+        multicallChunk: 400,
+        gasLimitPerCall: 240_000,
         quoteMinSuccessRate: 0.1,
       },
       // TODO: once monad-testnet has view-quoter, optimize muilcallChunk and gasLimitPerCall
