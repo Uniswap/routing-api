@@ -93,7 +93,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
           evaluationPeriods: 1,
         })
 
-        const lambdaAliasName = `ErrorRate-${chainId}-${providerNameFix}`
+        const lambdaAliasName = `ErrRate-${chainId}-${providerNameFix}`
         const lambdaAlias = new aws_lambda.Alias(this, lambdaAliasName, {
           aliasName: lambdaAliasName,
           version: providerFallbackLambda.currentVersion,
