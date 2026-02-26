@@ -26,10 +26,33 @@ import {
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
   ZORA_POST_HOOK_ON_BASE_v2_3_0,
   ZORA_POST_HOOK_ON_BASE_v2_4_0,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
 } from './hooksAddressesAllowlist'
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 import { PriorityQueue } from '@datastructures-js/priority-queue'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
+
+const CLANKER_HOOKS = new Set([
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
+])
 
 type V4PoolGroupingKey = string
 const TOP_GROUPED_V4_POOLS = 10
@@ -193,6 +216,13 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_4_0) &&
         chainId === ChainId.BASE
       if (isZoraPool) {
+        if (pool.tvlETH <= 0.001) {
+          shouldNotAddV4Pool = true
+        }
+      }
+
+      const isClankerPool = CLANKER_HOOKS.has(pool.hooks.toLowerCase())
+      if (isClankerPool) {
         if (pool.tvlETH <= 0.001) {
           shouldNotAddV4Pool = true
         }
