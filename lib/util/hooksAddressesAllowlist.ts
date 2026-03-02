@@ -49,8 +49,6 @@ export const AEGIS_ON_UNICHAIN_V1 = '0x27bfccf7fdd8215ce5dd86c2a36651d05c8450cc'
 export const AEGIS_ON_UNICHAIN_V2 = '0xa0b0d2d00fd544d8e0887f1a3cedd6e24baf10cc'
 // example pool: https://app.uniswap.org/explore/pools/unichain/0xBF12F5E68B1E1B3060BFB39B79794A0D5C1A723C0879281132B54887F87F928D
 export const AEGIS_V3 = '0x88c9ff9fc0b22cca42265d3f1d1c2c39e41cdacc'
-// example pool: https://app.uniswap.org/explore/pools/ethereum/0x535d212a1933b4ab2e443d4556255707da2d1087a45a712fcc1a44d9ed8cc8cc
-export const AEGIS_BREVIS_ON_MAINNET = '0x170427F1465041BadB0D579e8c003242a5E91acC'
 // example pool: https://app.uniswap.org/explore/pools/polygon/0x54046e7777c4d35f07915f4906760bcb895938b0a6abf9f0394ec2de371ce16b
 export const AEGIS_V1_1_ON_POLYGON = '0x15cD9520D0fAF71c938Db4426F8C58B5cBAa9ACc'
 
@@ -224,12 +222,6 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
-// https://seedify.fund/
-export const SEEDIFY_HOOK_ON_BASE = '0x2Fd54Aaf84023EDA60Bd65eDb5914c1a306850cc'
-
-// https://clawn.cn/
-export const CLAWN_HOOK_STATIC_FEE_V2_ON_BSC = '0x2F9354Bbb0eDEf5c2a5C4b78D0C59D73412A28CC'
-
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -263,8 +255,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     ARRAKIS_PRIVATE_HOOK_ON_MAINNET,
     CUSTOM_FEE_MEV_PROTECTION_HOOK_ON_MAINNET,
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
-    AZTEC_HOOK_ADDRESS_ON_MAINNET,
-    AEGIS_BREVIS_ON_MAINNET
+    AZTEC_HOOK_ADDRESS_ON_MAINNET
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
@@ -289,7 +280,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO, BVCC_DYNAMIC_FEE_HOOK_ON_BSC, CLAWN_HOOK_STATIC_FEE_V2_ON_BSC],
+  [ChainId.BNB]: [ADDRESS_ZERO, BVCC_DYNAMIC_FEE_HOOK_ON_BSC],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
@@ -350,7 +341,6 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     LIQUID_LAUNCH_HOOK_ON_BASE,
     BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
     CLAUNCH_HOOK_ON_BASE,
-    SEEDIFY_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
