@@ -123,7 +123,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
       description: 'Caching Routing Lambda',
       environment: {
-        VERSION: '4',
+        VERSION: '5',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
@@ -160,7 +160,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
           'CachingInsightsLayer',
-          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
@@ -188,7 +188,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
       description: 'Routing Lambda',
       environment: {
-        VERSION: '32',
+        VERSION: '33',
         NODE_OPTIONS: '--enable-source-maps',
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
@@ -226,7 +226,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
           'InsightsLayer',
-          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,

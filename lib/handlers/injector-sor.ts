@@ -115,6 +115,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
   ChainId.XLAYER,
+  ChainId.LINEA,
 ]
 const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 
@@ -258,19 +259,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const v4PoolProvider = new CachingV4PoolProvider(
             chainId,
             new V4PoolProvider(chainId, multicall2Provider),
-            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
+            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false })),
           )
 
           const noCacheV3PoolProvider = new V3PoolProvider(chainId, multicall2Provider)
           const inMemoryCachingV3PoolProvider = new CachingV3PoolProvider(
             chainId,
             noCacheV3PoolProvider,
-            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false }))
+            new NodeJSCache(new NodeCache({ stdTTL: 180, useClones: false })),
           )
           const dynamoCachingV3PoolProvider = new DynamoDBCachingV3PoolProvider(
             chainId,
             noCacheV3PoolProvider,
-            'V3PoolsCachingDB'
+            'V3PoolsCachingDB',
           )
 
           const v3PoolProvider = new TrafficSwitchV3PoolProvider({
@@ -283,7 +284,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const graphQLTokenFeeFetcher = new GraphQLTokenFeeFetcher(
             new UniGraphQLProvider(),
             onChainTokenFeeFetcher,
-            chainId
+            chainId,
           )
           const trafficSwitcherTokenFetcher = new TrafficSwitcherITokenFeeFetcher('TokenFetcherExperimentV2', {
             control: graphQLTokenFeeFetcher,
@@ -299,21 +300,21 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           const tokenValidatorProvider = new TokenValidatorProvider(
             chainId,
             multicall2Provider,
-            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
+            new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
           )
           const tokenPropertiesProvider = new TokenPropertiesProvider(
             chainId,
             new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-            trafficSwitcherTokenFetcher
+            trafficSwitcherTokenFetcher,
           )
           const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
           const v2PoolProvider = new CachingV2PoolProvider(
             chainId,
             underlyingV2PoolProvider,
-            new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!)
+            new V2DynamoCache(V2_PAIRS_CACHE_TABLE_NAME!),
           )
           const v4PoolParams = getApplicableV4FeesTickspacingsHooks(chainId).concat(
-            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses
+            EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES[chainId] ?? emptyV4FeeTickSpacingsHookAddresses,
           )
 
           const [
@@ -331,21 +332,21 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
               v4PoolProvider,
-              v4PoolParams
+              v4PoolParams,
             )) as V4AWSSubgraphProvider,
             (await this.instantiateSubgraphProvider(
               chainId,
               Protocol.V3,
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
-              v3PoolProvider
+              v3PoolProvider,
             )) as V3AWSSubgraphProvider,
             (await this.instantiateSubgraphProvider(
               chainId,
               Protocol.V2,
               POOL_CACHE_BUCKET_3!,
               POOL_CACHE_GZIP_KEY!,
-              v2PoolProvider
+              v2PoolProvider,
             )) as V2AWSSubgraphProvider,
           ])
 
@@ -353,7 +354,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             chainId,
             tokenCache,
             tokenListProvider,
-            new TokenProvider(chainId, multicall2Provider)
+            new TokenProvider(chainId, multicall2Provider),
           )
 
           // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
@@ -381,6 +382,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
             case ChainId.XLAYER:
+            case ChainId.LINEA:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -405,8 +407,8 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
                       : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId]
                     : protocol === Protocol.V3
-                    ? QUOTER_V2_ADDRESSES[chainId]
-                    : PROTOCOL_V4_QUOTER_ADDRESSES[chainId]
+                      ? QUOTER_V2_ADDRESSES[chainId]
+                      : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
               )
               const targetQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -429,16 +431,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                   useMixedRouteQuoter
                     ? mixedRouteContainsV4Pool
                       ? MIXED_ROUTE_QUOTER_V2_ADDRESSES[chainId]
-                      : MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ??
+                      : (MIXED_ROUTE_QUOTER_V1_ADDRESSES[chainId] ??
                         // besides mainnet, only base has mixed quoter v1 deployed
-                        (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined)
+                        (chainId === ChainId.BASE ? '0xe544efae946f0008ae9a8d64493efa7886b73776' : undefined))
                     : protocol === Protocol.V3
-                    ? NEW_QUOTER_V2_ADDRESSES[chainId]
-                    : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
+                      ? NEW_QUOTER_V2_ADDRESSES[chainId]
+                      : PROTOCOL_V4_QUOTER_ADDRESSES[chainId],
                 (chainId: ChainId, useMixedRouteQuoter: boolean, optimisticCachedRoutes: boolean) =>
                   useMixedRouteQuoter
                     ? `ChainId_${chainId}_ShadowMixedQuoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
-                    : `ChainId_${chainId}_ShadowV3Quoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`
+                    : `ChainId_${chainId}_ShadowV3Quoter_OptimisticCachedRoutes${optimisticCachedRoutes}_`,
               )
               quoteProvider = new TrafficSwitchOnChainQuoteProvider({
                 currentQuoteProvider: currentQuoteProvider,
@@ -477,7 +479,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               ChainId.UNICHAIN,
               ChainId.SONEIUM,
               ChainId.MONAD,
-            ]
+            ],
           )
 
           const ethEstimateGasSimulator = new EthEstimateGasSimulator(
@@ -486,7 +488,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             v2PoolProvider,
             v3PoolProvider,
             v4PoolProvider,
-            portionProvider
+            portionProvider,
           )
 
           const simulator = new FallbackTenderlySimulator(
@@ -494,7 +496,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             provider,
             portionProvider,
             tenderlySimulator,
-            ethEstimateGasSimulator
+            ethEstimateGasSimulator,
           )
           const newCachedRoutesRolloutPercent = NEW_CACHED_ROUTES_ROLLOUT_PERCENT[chainId]
 
@@ -530,6 +532,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
 
           const v4Supported = [
@@ -549,6 +552,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MONAD,
             ChainId.CELO,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
@@ -585,6 +589,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.SONEIUM,
             ChainId.MONAD,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
           const mixedSupported = [
             ChainId.MAINNET,
@@ -601,6 +606,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.LINEA,
             ChainId.MONAD,
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]
@@ -621,9 +627,9 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
                 new OnChainGasPriceProvider(
                   chainId,
                   new EIP1559GasPriceProvider(provider),
-                  new LegacyGasPriceProvider(provider)
+                  new LegacyGasPriceProvider(provider),
                 ),
-                new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
+                new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false })),
               ),
               v4SubgraphProvider,
               v3SubgraphProvider,
@@ -646,7 +652,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
               deleteCacheEnabledChains,
             },
           }
-        })
+        }),
       )
 
       for (const { chainId, dependencies } of dependenciesByChainArray) {
@@ -669,11 +675,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     poolCacheBucket: string,
     poolCacheKey: string,
     poolProvider: IV2PoolProvider | IV3PoolProvider | IV4PoolProvider,
-    v4PoolsParams?: Array<[number, number, string]>
+    v4PoolsParams?: Array<[number, number, string]>,
   ) {
     try {
       const chainProtocol = chainProtocols.find(
-        (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === protocol
+        (chainProtocol) => chainProtocol.chainId === chainId && chainProtocol.protocol === protocol,
       )
 
       if (!chainProtocol) {

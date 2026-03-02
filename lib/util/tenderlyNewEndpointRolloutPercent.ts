@@ -33,4 +33,5 @@ export const TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT: { [chain in ChainId]: number
   [ChainId.MONAD]: 100,
   [ChainId.SONEIUM]: 100,
   [ChainId.XLAYER]: 100,
+  [ChainId.LINEA]: 100,
 }

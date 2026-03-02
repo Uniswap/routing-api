@@ -25,6 +25,7 @@ const ID_TO_PROVIDER = (id: ChainId): string => {
     case ChainId.MONAD_TESTNET:
     case ChainId.UNICHAIN:
     case ChainId.XLAYER:
+    case ChainId.LINEA:
       return ProviderName.QUIKNODE
     case ChainId.CELO_ALFAJORES:
       return ProviderName.FORNO

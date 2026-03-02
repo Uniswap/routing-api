@@ -89,6 +89,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
     case ChainId.UNICHAIN:
     case ChainId.SONEIUM:
     case ChainId.XLAYER:
+    case ChainId.LINEA:
       return {
         v2PoolSelection: {
           topN: 3,
@@ -163,7 +164,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNTokenInOut: 5,
           topNSecondHop: 2,
           tokensToAvoidOnSecondHops: new LowerCaseStringArray(
-            '0xd46ba6d942050d489dbd938a2c909a5d5039a161' // AMPL on Mainnet
+            '0xd46ba6d942050d489dbd938a2c909a5d5039a161', // AMPL on Mainnet
           ),
           topNWithEachBaseToken: 2,
           topNWithBaseToken: 6,
@@ -204,7 +205,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
           topNTokenInOut: 5,
           topNSecondHop: 2,
           tokensToAvoidOnSecondHops: new LowerCaseStringArray(
-            '0xd46ba6d942050d489dbd938a2c909a5d5039a161' // AMPL on Mainnet
+            '0xd46ba6d942050d489dbd938a2c909a5d5039a161', // AMPL on Mainnet
           ),
           topNWithEachBaseToken: 2,
           topNWithBaseToken: 6,
@@ -316,7 +317,7 @@ export type FeeOnTransferSpecificConfig = {
 }
 
 export const FEE_ON_TRANSFER_SPECIFIC_CONFIG = (
-  enableFeeOnTransferFeeFetching?: boolean
+  enableFeeOnTransferFeeFetching?: boolean,
 ): FeeOnTransferSpecificConfig => {
   return {
     enableFeeOnTransferFeeFetching: enableFeeOnTransferFeeFetching,
@@ -362,7 +363,7 @@ export function populateFeeOptions(
   type: string,
   portionBips?: number,
   portionRecipient?: string,
-  portionAmount?: string
+  portionAmount?: string,
 ): AllFeeOptions | undefined {
   switch (type) {
     case 'exactIn':
