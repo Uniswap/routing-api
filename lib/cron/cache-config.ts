@@ -166,7 +166,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.AVALANCHE:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`
     case ChainId.LINEA:
-      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_LINEA_V4_ID}`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-linea/prod/gn`
     default:
       return undefined
   }
@@ -207,7 +207,7 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_ID}`
     case ChainId.LINEA:
-      return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_LINEA_V3_ID}`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-linea/prod/gn`
     default:
       return undefined
   }
@@ -246,7 +246,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_ID}`
     case ChainId.LINEA:
-      return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_LINEA_V2_ID}`
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-linea/prod/gn`
     default:
       return undefined
   }
