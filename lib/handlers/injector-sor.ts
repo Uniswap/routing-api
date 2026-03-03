@@ -381,6 +381,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
             case ChainId.XLAYER:
+            case ChainId.LINEA:
             default:
               const currentQuoteProvider = new OnChainQuoteProvider(
                 chainId,
@@ -530,6 +531,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
 
           const v4Supported = [
@@ -549,6 +551,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MONAD,
             ChainId.CELO,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
 
           // https://linear.app/uniswap/issue/ROUTE-467/tenderly-simulation-during-caching-lambda
@@ -585,6 +588,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.SONEIUM,
             ChainId.MONAD,
             ChainId.XLAYER,
+            ChainId.LINEA,
           ]
           const mixedSupported = [
             ChainId.MAINNET,
@@ -601,6 +605,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.LINEA,
             ChainId.MONAD,
           ]
           const mixedCrossLiquidityV3AgainstV4Supported: ChainId[] = [ChainId.BASE]

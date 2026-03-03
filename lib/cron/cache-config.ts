@@ -55,6 +55,7 @@ import {
 // process.env.GOLD_SKY_MONAD_TESTNET_V2_ID = ''
 // process.env.GOLD_SKY_UNICHAIN_V2_ID = ''
 // process.env.GOLD_SKY_SONEIUM_V2_ID = ''
+// process.env.GOLD_SKY_LINEA_V2_ID = ''
 // process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID = ''
 // // Goldsky V3 subgraph IDs
 // process.env.GOLD_SKY_ETHEREUM_V3_ID = ''
@@ -71,6 +72,7 @@ import {
 // process.env.GOLD_SKY_UNICHAIN_V3_ID = ''
 // process.env.GOLD_SKY_ZORA_V3_ID = ''
 // process.env.GOLD_SKY_SONEIUM_V3_ID = ''
+// process.env.GOLD_SKY_LINEA_V3_ID = ''
 // // Goldsky V4 subgraph IDs
 // process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID = ''
 // process.env.GOLD_SKY_ARBITRUM_V4_ID = ''
@@ -86,6 +88,7 @@ import {
 // process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
 // process.env.GOLD_SKY_CELO_V4_ID = ''
 // process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
+// process.env.GOLD_SKY_LINEA_V4_ID = ''
 // process.env.GRAPH_XLAYER_V4_ID = ''
 // process.env.GRAPH_XLAYER_V3_ID = ''
 // process.env.GRAPH_XLAYER_V2_ID = ''
@@ -162,6 +165,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
     case ChainId.AVALANCHE:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-linea/prod/gn`
     default:
       return undefined
   }
@@ -201,6 +206,8 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-linea/prod/gn`
     default:
       return undefined
   }
@@ -238,6 +245,8 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-linea/prod/gn`
     default:
       return undefined
   }
@@ -479,6 +488,21 @@ export const chainProtocols = [
       process.env.GRAPH_BEARER_TOKEN
     ),
   },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
   // V2.
   {
     protocol: Protocol.V2,
@@ -690,6 +714,22 @@ export const chainProtocols = [
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.XLAYER),
       process.env.GRAPH_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   // V4
@@ -948,6 +988,23 @@ export const chainProtocols = [
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.AVALANCHE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
 ]
