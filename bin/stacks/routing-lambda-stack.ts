@@ -160,7 +160,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
           'CachingInsightsLayer',
-          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,
@@ -226,7 +226,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
           'InsightsLayer',
-          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
       tracing: aws_lambda.Tracing.ACTIVE,

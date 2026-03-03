@@ -318,7 +318,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           resources: [route53Arn!],
           actions: ['sts:AssumeRole'],
           sid: '1',
-        }),
+        })
       )
     }
 
@@ -327,7 +327,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
     const lambdaLayerVersion = aws_lambda.LayerVersion.fromLayerVersionArn(
       this,
       'InsightsLayerPools',
-      `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
+      `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
     )
 
     // Spin up a new pool cache lambda for each config in chain X protocol
@@ -416,7 +416,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
             protocol,
             timeout: timeout.toString(),
           },
-        },
+        }
       )
       new aws_events.Rule(this, `SchedulePoolCache-ChainId${chainId}-Protocol${protocol}`, {
         schedule: aws_events.Schedule.rate(Duration.minutes(15)),
@@ -443,7 +443,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           }),
           threshold: protocol === Protocol.V3 ? 50 : 85,
           evaluationPeriods: protocol === Protocol.V3 ? 12 : 144,
-        },
+        }
       )
       const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(
         this,
@@ -455,7 +455,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           }),
           threshold: 5,
           evaluationPeriods: 1,
-        },
+        }
       )
       if (chatBotTopic) {
         lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
@@ -481,7 +481,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         aws_lambda.LayerVersion.fromLayerVersionArn(
           this,
           'InsightsLayerTokenList',
-          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`,
+          `arn:aws:lambda:${region}:580247275435:layer:LambdaInsightsExtension:14`
         ),
       ],
       description: 'Token List Cache Lambda',

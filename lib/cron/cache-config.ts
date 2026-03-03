@@ -286,7 +286,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.MAINNET),
+      v3SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
   {
@@ -300,7 +300,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE),
+      v3SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   {
@@ -314,7 +314,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.POLYGON),
+      v3SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
   // Waiting for Alchemy subgraph
@@ -329,7 +329,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.OPTIMISM),
+      v3SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
   },
   {
@@ -343,7 +343,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.CELO),
+      v3SubgraphUrlOverride(ChainId.CELO)
     ),
   },
   {
@@ -357,7 +357,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.BNB),
+      v3SubgraphUrlOverride(ChainId.BNB)
     ),
   },
   {
@@ -371,7 +371,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.AVALANCHE),
+      v3SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
   {
@@ -385,7 +385,7 @@ export const chainProtocols = [
       true,
       v3BaseTrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.BASE),
+      v3SubgraphUrlOverride(ChainId.BASE)
     ),
   },
   {
@@ -399,7 +399,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.BLAST),
+      v3SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
   {
@@ -413,7 +413,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.UNICHAIN),
+      v3SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
   {
@@ -427,7 +427,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.WORLDCHAIN),
+      v3SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
   {
@@ -441,7 +441,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.ZORA),
+      v3SubgraphUrlOverride(ChainId.ZORA)
     ),
   },
   {
@@ -455,7 +455,7 @@ export const chainProtocols = [
       true,
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
-      v3SubgraphUrlOverride(ChainId.SONEIUM),
+      v3SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
   {
@@ -470,7 +470,7 @@ export const chainProtocols = [
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   {
@@ -485,7 +485,7 @@ export const chainProtocols = [
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.XLAYER),
-      process.env.GRAPH_BEARER_TOKEN,
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   {
@@ -500,7 +500,7 @@ export const chainProtocols = [
       v3TrackedEthThreshold,
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.LINEA),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   // V2.
@@ -516,7 +516,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.MAINNET),
+      v2SubgraphUrlOverride(ChainId.MAINNET)
     ), // 1000 is the largest page size supported by thegraph
   },
   {
@@ -531,7 +531,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE),
+      v2SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   {
@@ -546,7 +546,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.POLYGON),
+      v2SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
   {
@@ -561,7 +561,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.OPTIMISM),
+      v2SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
   },
   {
@@ -576,7 +576,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.BNB),
+      v2SubgraphUrlOverride(ChainId.BNB)
     ),
   },
   {
@@ -591,7 +591,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.AVALANCHE),
+      v2SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
   {
@@ -606,7 +606,7 @@ export const chainProtocols = [
       10000,
       v2BaseTrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.BASE),
+      v2SubgraphUrlOverride(ChainId.BASE)
     ),
   },
   {
@@ -621,7 +621,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.BLAST),
+      v2SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
   {
@@ -636,7 +636,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.WORLDCHAIN),
+      v2SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
   {
@@ -651,7 +651,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.MONAD_TESTNET),
+      v2SubgraphUrlOverride(ChainId.MONAD_TESTNET)
     ),
   },
   {
@@ -666,7 +666,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.UNICHAIN),
+      v2SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
   {
@@ -681,7 +681,7 @@ export const chainProtocols = [
       1000,
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
-      v2SubgraphUrlOverride(ChainId.SONEIUM),
+      v2SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
   {
@@ -697,7 +697,7 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   {
@@ -713,7 +713,7 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.XLAYER),
-      process.env.GRAPH_BEARER_TOKEN,
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   {
@@ -729,7 +729,7 @@ export const chainProtocols = [
       v2TrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.LINEA),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   // V4
@@ -746,7 +746,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.SEPOLIA),
+      v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
   },
   {
@@ -762,7 +762,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE),
+      v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
   },
   {
@@ -779,7 +779,7 @@ export const chainProtocols = [
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE),
-      process.env.GRAPH_BEARER_TOKEN,
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   {
@@ -795,7 +795,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.POLYGON),
+      v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
   },
   {
@@ -811,7 +811,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.WORLDCHAIN),
+      v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
   },
   {
@@ -827,7 +827,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.ZORA),
+      v4SubgraphUrlOverride(ChainId.ZORA)
     ),
   },
   {
@@ -843,14 +843,14 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.UNICHAIN),
+      v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
       ChainId.UNICHAIN,
       3,
       90000,
       true,
-      v4SubgraphUrlOverride(ChainId.UNICHAIN),
+      v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
   },
   {
@@ -866,7 +866,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.BLAST),
+      v4SubgraphUrlOverride(ChainId.BLAST)
     ),
   },
   {
@@ -882,14 +882,14 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.MAINNET),
+      v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
     eulerHooksProvider: new EulerSwapHooksSubgraphProvider(
       ChainId.MAINNET,
       3,
       90000,
       true,
-      v4SubgraphUrlOverride(ChainId.MAINNET),
+      v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
   },
   {
@@ -905,7 +905,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.SONEIUM),
+      v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
   },
   {
@@ -921,7 +921,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.OPTIMISM),
+      v4SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
   },
   {
@@ -937,7 +937,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.BNB),
+      v4SubgraphUrlOverride(ChainId.BNB)
     ),
   },
   {
@@ -954,7 +954,7 @@ export const chainProtocols = [
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MONAD),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   {
@@ -971,7 +971,7 @@ export const chainProtocols = [
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.XLAYER),
-      process.env.GRAPH_BEARER_TOKEN,
+      process.env.GRAPH_BEARER_TOKEN
     ),
   },
   {
@@ -987,7 +987,7 @@ export const chainProtocols = [
       v4BaseZoraTrackedEthThreshold,
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
-      v4SubgraphUrlOverride(ChainId.AVALANCHE),
+      v4SubgraphUrlOverride(ChainId.AVALANCHE)
     ),
   },
   {
@@ -1004,7 +1004,7 @@ export const chainProtocols = [
       HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.LINEA),
-      process.env.GOLD_SKY_BEARER_TOKEN,
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
 ]

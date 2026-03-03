@@ -129,7 +129,7 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyOptimismV4Id?: string
       goldskyCeloV4Id?: string
       goldskyAvalancheV4Id?: string
-    },
+    }
   ) {
     super(parent, name, props)
 
@@ -609,7 +609,7 @@ export class RoutingAPIStack extends cdk.Stack {
         threshold: 15,
         evaluationPeriods: 3,
         treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING, // Missing data points are treated as "good" and within the threshold
-      },
+      }
     )
 
     // Alarms for high 400 error rate for each chain
@@ -884,7 +884,7 @@ export class RoutingAPIStack extends cdk.Stack {
         const metricName = `${protocol}SubgraphProvider.chain_${chainId}.${metricSuffix}`
         const alarmName = `PoolCountAnomaly-SEV3-${protocol}-ChainId${chainId}-${metricSuffix.replace(
           /[^a-zA-Z0-9]/g,
-          '_',
+          '_'
         )}`
 
         // Create the base metric for pool count
