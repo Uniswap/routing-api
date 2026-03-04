@@ -218,7 +218,7 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
-export const SEEDIFY_SPARK_HOOK_ON_BASE = '0x2Fd54Aaf84023EDA60Bd65eDb5914c1a306850cc';
+export const SEEDIFY_SPARK_HOOK_ON_BASE = '0x2fd54aaf84023eda60bd65edb5914c1a306850cc'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
