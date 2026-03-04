@@ -55,7 +55,6 @@ import {
 // process.env.GOLD_SKY_MONAD_TESTNET_V2_ID = ''
 // process.env.GOLD_SKY_UNICHAIN_V2_ID = ''
 // process.env.GOLD_SKY_SONEIUM_V2_ID = ''
-// process.env.GOLD_SKY_LINEA_V2_ID = ''
 // process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID = ''
 // // Goldsky V3 subgraph IDs
 // process.env.GOLD_SKY_ETHEREUM_V3_ID = ''
@@ -72,7 +71,6 @@ import {
 // process.env.GOLD_SKY_UNICHAIN_V3_ID = ''
 // process.env.GOLD_SKY_ZORA_V3_ID = ''
 // process.env.GOLD_SKY_SONEIUM_V3_ID = ''
-// process.env.GOLD_SKY_LINEA_V3_ID = ''
 // // Goldsky V4 subgraph IDs
 // process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID = ''
 // process.env.GOLD_SKY_ARBITRUM_V4_ID = ''
@@ -88,7 +86,6 @@ import {
 // process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
 // process.env.GOLD_SKY_CELO_V4_ID = ''
 // process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
-// process.env.GOLD_SKY_LINEA_V4_ID = ''
 // process.env.GRAPH_XLAYER_V4_ID = ''
 // process.env.GRAPH_XLAYER_V3_ID = ''
 // process.env.GRAPH_XLAYER_V2_ID = ''

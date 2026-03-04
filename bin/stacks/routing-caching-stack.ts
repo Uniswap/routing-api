@@ -49,7 +49,6 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   goldskyMonadTestnetV2Id?: string
   goldskyUnichainV2Id?: string
   goldskySoneiumV2Id?: string
-  goldskyLineaV2Id?: string
   goldskyEthereumSepoliaV2Id?: string
   // Goldsky V3 subgraph IDs
   goldskyEthereumV3Id?: string
@@ -66,7 +65,6 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   goldskyUnichainV3Id?: string
   goldskyZoraV3Id?: string
   goldskySoneiumV3Id?: string
-  goldskyLineaV3Id?: string
   // Goldsky V4 subgraph IDs
   goldskyEthereumSepoliaV4Id?: string
   goldskyArbitrumV4Id?: string
@@ -79,7 +77,6 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   goldskyBlastV4Id?: string
   goldskyEthereumV4Id?: string
   goldskySoneiumV4Id?: string
-  goldskyLineaV4Id?: string
   goldskyOptimismV4Id?: string
   goldskyCeloV4Id?: string
   goldskyAvalancheV4Id?: string
@@ -116,7 +113,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly goldskyMonadTestnetV2Id: string | undefined = undefined
   public readonly goldskyUnichainV2Id: string | undefined = undefined
   public readonly goldskySoneiumV2Id: string | undefined = undefined
-  public readonly goldskyLineaV2Id: string | undefined = undefined
   public readonly goldskyEthereumSepoliaV2Id: string | undefined = undefined
   // Goldsky V3 subgraph IDs
   public readonly goldskyEthereumV3Id: string | undefined = undefined
@@ -133,7 +129,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly goldskyUnichainV3Id: string | undefined = undefined
   public readonly goldskyZoraV3Id: string | undefined = undefined
   public readonly goldskySoneiumV3Id: string | undefined = undefined
-  public readonly goldskyLineaV3Id: string | undefined = undefined
   // Goldsky V4 subgraph IDs
   public readonly goldskyEthereumSepoliaV4Id: string | undefined = undefined
   public readonly goldskyArbitrumV4Id: string | undefined = undefined
@@ -146,7 +141,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly goldskyBlastV4Id: string | undefined = undefined
   public readonly goldskyEthereumV4Id: string | undefined = undefined
   public readonly goldskySoneiumV4Id: string | undefined = undefined
-  public readonly goldskyLineaV4Id: string | undefined = undefined
   public readonly goldskyOptimismV4Id: string | undefined = undefined
   public readonly goldskyCeloV4Id: string | undefined = undefined
   public readonly goldskyAvalancheV4Id: string | undefined = undefined
@@ -179,7 +173,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
       goldskyMonadTestnetV2Id,
       goldskyUnichainV2Id,
       goldskySoneiumV2Id,
-      goldskyLineaV2Id,
       goldskyEthereumSepoliaV2Id,
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id,
@@ -196,7 +189,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
       goldskyUnichainV3Id,
       goldskyZoraV3Id,
       goldskySoneiumV3Id,
-      goldskyLineaV3Id,
       // Goldsky V4 subgraph IDs
       goldskyEthereumSepoliaV4Id,
       goldskyArbitrumV4Id,
@@ -209,7 +201,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
       goldskyBlastV4Id,
       goldskyEthereumV4Id,
       goldskySoneiumV4Id,
-      goldskyLineaV4Id,
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
@@ -240,7 +231,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.goldskyMonadTestnetV2Id = goldskyMonadTestnetV2Id
     this.goldskyUnichainV2Id = goldskyUnichainV2Id
     this.goldskySoneiumV2Id = goldskySoneiumV2Id
-    this.goldskyLineaV2Id = goldskyLineaV2Id
     this.goldskyEthereumSepoliaV2Id = goldskyEthereumSepoliaV2Id
     // Goldsky V3 subgraph IDs
     this.goldskyEthereumV3Id = goldskyEthereumV3Id
@@ -257,7 +247,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.goldskyUnichainV3Id = goldskyUnichainV3Id
     this.goldskyZoraV3Id = goldskyZoraV3Id
     this.goldskySoneiumV3Id = goldskySoneiumV3Id
-    this.goldskyLineaV3Id = goldskyLineaV3Id
     // Goldsky V4 subgraph IDs
     this.goldskyEthereumSepoliaV4Id = goldskyEthereumSepoliaV4Id
     this.goldskyArbitrumV4Id = goldskyArbitrumV4Id
@@ -270,7 +259,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.goldskyBlastV4Id = goldskyBlastV4Id
     this.goldskyEthereumV4Id = goldskyEthereumV4Id
     this.goldskySoneiumV4Id = goldskySoneiumV4Id
-    this.goldskyLineaV4Id = goldskyLineaV4Id
     this.goldskyOptimismV4Id = goldskyOptimismV4Id
     this.goldskyCeloV4Id = goldskyCeloV4Id
     this.goldskyAvalancheV4Id = goldskyAvalancheV4Id
@@ -378,7 +366,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
             GOLD_SKY_MONAD_TESTNET_V2_ID: this.goldskyMonadTestnetV2Id ?? '',
             GOLD_SKY_UNICHAIN_V2_ID: this.goldskyUnichainV2Id ?? '',
             GOLD_SKY_SONEIUM_V2_ID: this.goldskySoneiumV2Id ?? '',
-            GOLD_SKY_LINEA_V2_ID: this.goldskyLineaV2Id ?? '',
             GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID: this.goldskyEthereumSepoliaV2Id ?? '',
             // Goldsky V3 subgraph IDs
             GOLD_SKY_ETHEREUM_V3_ID: this.goldskyEthereumV3Id ?? '',
@@ -395,7 +382,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
             GOLD_SKY_UNICHAIN_V3_ID: this.goldskyUnichainV3Id ?? '',
             GOLD_SKY_ZORA_V3_ID: this.goldskyZoraV3Id ?? '',
             GOLD_SKY_SONEIUM_V3_ID: this.goldskySoneiumV3Id ?? '',
-            GOLD_SKY_LINEA_V3_ID: this.goldskyLineaV3Id ?? '',
             // Goldsky V4 subgraph IDs
             GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID: this.goldskyEthereumSepoliaV4Id ?? '',
             GOLD_SKY_ARBITRUM_V4_ID: this.goldskyArbitrumV4Id ?? '',
@@ -408,7 +394,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
             GOLD_SKY_BLAST_V4_ID: this.goldskyBlastV4Id ?? '',
             GOLD_SKY_ETHEREUM_V4_ID: this.goldskyEthereumV4Id ?? '',
             GOLD_SKY_SONEIUM_V4_ID: this.goldskySoneiumV4Id ?? '',
-            GOLD_SKY_LINEA_V4_ID: this.goldskyLineaV4Id ?? '',
             GOLD_SKY_OPTIMISM_V4_ID: this.goldskyOptimismV4Id ?? '',
             GOLD_SKY_CELO_V4_ID: this.goldskyCeloV4Id ?? '',
             GOLD_SKY_AVALANCHE_V4_ID: this.goldskyAvalancheV4Id ?? '',
