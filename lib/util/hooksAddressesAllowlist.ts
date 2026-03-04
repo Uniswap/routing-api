@@ -218,6 +218,7 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
+export const BEAN_PLANKER_FEE_STATIC_V2_HOOK_ON_MONAD = '0x0dA6b6c7E6e658f8f32b619A8e59BA84876E68Cc';
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -363,6 +364,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
     DOPPLER_HOOKS_ADDRESS_ON_MONAD,
     CULT_FEE_HOOK_ADDRESS_ON_MONAD,
+    BEAN_PLANKER_FEE_STATIC_V2_HOOK_ON_MONAD,
   ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
   [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
