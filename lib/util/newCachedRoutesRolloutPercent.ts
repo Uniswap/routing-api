@@ -37,4 +37,5 @@ export const NEW_CACHED_ROUTES_ROLLOUT_PERCENT: { [chain in ChainId]: number } =
   [ChainId.BASE_SEPOLIA]: 100,
   [ChainId.SONEIUM]: 100,
   [ChainId.XLAYER]: 100,
+  [ChainId.LINEA]: 100,
 }
