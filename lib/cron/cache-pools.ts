@@ -437,6 +437,27 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           },
           tvlETH: 44000.1795925485023741879813651641809,
           tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool,
+        {
+          id: '0xefa53f9ef29c2ffe0c86827a2cb9338b688c55e2810bd848226a035df4c339c8',
+          feeTier: '500',
+          tickSpacing: '1',
+          hooks: '0xf129bc86abbd6a71d9ae3fda0ff55b7711b2a088',
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'USDC',
+            id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            name: 'USDC',
+            decimals: '6',
+          },
+          token1: {
+            symbol: 'USDT',
+            id: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+            name: 'Tether USDC',
+            decimals: '6',
+          },
+          tvlETH: 4444.1795925485023741879813651641809,
+          tvlUSD: 950500000.95363442908526427214106054717,
         } as V4SubgraphPool)
       }
 
@@ -467,6 +488,8 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
 
       manuallyIncludedV4Pools.forEach((pool) => pools.push(pool))
 
+      log.info(`manuallyIncludedV4Pools: ${JSON.stringify(manuallyIncludedV4Pools)}`)
+
       pools = v4HooksPoolsFiltering(chainId, pools as Array<V4SubgraphPool>)
     }
 
@@ -488,6 +511,10 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
   log.info(
     `Got ${pools.length} ${protocol} pools from the subgraph for ${chainId.toString()}. Saving to ${compressedKey}`
   )
+
+  if (pools.filter((pool) => pool.id.toLowerCase() === '0xefa53f9ef29c2ffe0c86827a2cb9338b688c55e2810bd848226a035df4c339c8'.toLowerCase()).length > 0) {
+    log.info(`pools contains 0xefa53f9ef29c2ffe0c86827a2cb9338b688c55e2810bd848226a035df4c339c8`)
+  }
 
   const serializedPools = JSON.stringify(pools)
   const compressedPools = zlib.deflateSync(serializedPools)

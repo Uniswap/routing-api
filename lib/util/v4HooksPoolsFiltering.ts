@@ -139,6 +139,144 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
 
       let additionalAllowedPool = 0
 
+      if (
+        pool.id.toLowerCase() === '0x65f6bbe8a75d7bfec07054ae9ff1301a597c25420a9dce9f9030a70b189bb36b'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 826 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
+        pool.tvlUSD = 1482475 // https://app.uniswap.org/explore/pools/optimism/0x1fb3cf6e48F1E7B10213E7b6d87D4c073C7Fdb7b
+        log.info(`Setting tvl for MAINNET ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0x9ad419f2642f18f84450f339c97cd89add1e52c64e49275837ccc5d2a3441279'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        log.info(`Setting tvl for MAINNET ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // fluiddexlite USDC/USDT
+      if (
+        pool.id.toLowerCase() === '0xefa53f9ef29c2ffe0c86827a2cb9338b688c55e2810bd848226a035df4c339c8'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482
+        pool.tvlUSD = 60342168
+        log.info(`Setting tvl for MAINNET fluiddexlite pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0xac7764f07532a2d3ff87578fce79d5db7c32cd6742b40e2b9b7f9106aa106b39'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        log.info(`Setting tvl for MAINNET ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0x0fcd22262fc6697a1109e0560640e607750546c026ef75f27750acf100e6a7f0'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        log.info(`Setting tvl for MAINNET ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      if (
+        pool.id.toLowerCase() === '0xa717c6f9f87ef274f741e496d9bcd95ce2a6c60c7c269e15691bb5944f648353'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        pool.tvlUSD = 60342168 // https://app.uniswap.org/explore/pools/unichain/0x3258f413c7a88cda2fa8709a589d221a80f6574f63df5a5b6774485d8acc39d9
+        log.info(`Setting tvl for MAINNET ETH/WETH pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // fluiddext1 GHO/USDC
+      if (
+        pool.id.toLowerCase() === '0x0408b74d2e31a8e315126051b19012ec8a5a6790810dc4e2034b6e6247019136'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482
+        pool.tvlUSD = 60342168
+        log.info(`Setting tvl for MAINNET fluiddext1 pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // fluiddext1 ETH/weETH
+      if (
+        pool.id.toLowerCase() === '0xe20dfaf1bd6f896542972d7e768b44b42a836ffd90bced9a3d246721119c0f6f'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482
+        pool.tvlUSD = 60342168
+        log.info(`Setting tvl for MAINNET fluiddext1 pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // fluiddext1 ETH/INST
+      if (
+        pool.id.toLowerCase() === '0xaab91f5706abdbdf178712c1a928ba8934294cb5719200862fcc6dfa909fdc02'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 33482
+        pool.tvlUSD = 60342168
+        log.info(`Setting tvl for MAINNET fluiddext1 pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // stableswapng LBTC/USDT
+      if (
+        pool.id.toLowerCase() === '0x3065dca21cf3c5b7123a8d83d8d619ad1e0c00e0b26d3cd713dfac970238d33d'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 826
+        pool.tvlUSD = 1482475
+        log.info(`Setting tvl for MAINNET stableswapng pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // stableswapng USDC/USDT
+      if (
+        pool.id.toLowerCase() === '0x789358b25b6606a4418b680a311bf522bee5df0b2d855fda789bc6672e6f94bd'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 826
+        pool.tvlUSD = 1482475
+        log.info(`Setting tvl for MAINNET stableswapng pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // stableswapng PYUSD/USDC
+      if (
+        pool.id.toLowerCase() === '0x06e80c886893d7ad88be7edcd0ed4a39110e9244c5d21a21998bad8191415df5'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 826
+        pool.tvlUSD = 1482475
+        log.info(`Setting tvl for MAINNET stableswapng pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
+      // stableswapng USDC/eUSD
+      if (
+        pool.id.toLowerCase() === '0x7e28bd78c05aaf725fe7593003d73d12ac09ff08d9cd2642a986d88d68e8faaa'.toLowerCase() &&
+        chainId === ChainId.MAINNET
+      ) {
+        pool.tvlETH = 826
+        pool.tvlUSD = 1482475
+        log.info(`Setting tvl for MAINNET stableswapng pool ${JSON.stringify(pool)}`)
+        additionalAllowedPool += 1
+      }
+
       // OPTIMISM ETH/WETH
       if (
         pool.id.toLowerCase() === '0xbf3d38951e485c811bb1fc7025fcd1ef60c15fda4c4163458facb9bedfe26f83'.toLowerCase() &&

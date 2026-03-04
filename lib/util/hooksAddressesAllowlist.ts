@@ -218,6 +218,32 @@ export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a
 
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
+export const fluiddexlite_1 = '0xf37c11667d10bbc39c7712a5409c19ced7eba088'
+
+export const fluiddexlite_2 = '0xf3f1249cf3149c722b17da63513483722e852088'
+
+export const fluiddext1_1 = '0xf1a243d762b98103f442a909936da72e6436a088'
+
+export const fluiddext1_2 = '0xf102d4205da05cc312e8b7c15e57367345bda088'
+
+export const fluiddext1_3 = '0xf129bc86abbd6a71d9ae3fda0ff55b7711b2a088'
+
+export const fluiddext1_4 = '0xf171f45c8c7923b97f5ead86e5254a705df9e088'
+
+export const fluiddext1_5 = '0xf1c776133d1209b2e7fb6100a0ef8bbdc258a088'
+
+export const fluiddext1_6 = '0xf1c24a53160934214679d59b08481b861080e088'
+
+export const stableswapng_1 = '0xc24cf69d2f636db53b57342709bdcb01fbd3a088'
+
+export const stableswapng_2 = '0xc266b69c82000ab0c706e94ac2f745322858e088'
+
+export const stableswapng_3 = '0xc24ffd8935b9562b01e318e3e9f425bfc5152088'
+
+export const stableswapng_4 = '0xc284c5426546a2b1c88fb84bf2ef3ca3fbb36088'
+
+export const stableswapng_5 = '0xc244ac77d35f4d442f0a321bce8432e1d519e088'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -249,6 +275,19 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CUSTOM_FEE_MEV_PROTECTION_HOOK_ON_MAINNET,
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
     AZTEC_HOOK_ADDRESS_ON_MAINNET,
+    fluiddexlite_1,
+    fluiddexlite_2,
+    fluiddext1_1,
+    fluiddext1_2,
+    fluiddext1_3,
+    fluiddext1_4,
+    fluiddext1_5,
+    fluiddext1_6,
+    stableswapng_1,
+    stableswapng_2,
+    stableswapng_3,
+    stableswapng_4,
+    stableswapng_5,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
