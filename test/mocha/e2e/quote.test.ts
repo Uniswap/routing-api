@@ -87,10 +87,12 @@ const ALL_PROTOCOLS = 'v2,v3,v4,mixed'
 
 const HEADERS_1_2 = {
   'x-universal-router-version': '1.2',
+  'x-disable-decommission-failure': 'true',
 }
 
 const HEADERS_2_0 = {
   'x-universal-router-version': '2.0',
+  'x-disable-decommission-failure': 'true',
 }
 
 const BULLET = new Token(
