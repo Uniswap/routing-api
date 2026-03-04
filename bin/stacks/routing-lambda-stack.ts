@@ -250,34 +250,8 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       threshold: 0.05,
       evaluationPeriods: 3,
     })
-    const lambdaAlarmErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaErrorRate', {
-      metric: new aws_cloudwatch.MathExpression({
-        expression: 'errors / invocations',
-        usingMetrics: {
-          errors: this.routingLambda.metricErrors({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-          invocations: this.routingLambda.metricInvocations({
-            period: Duration.minutes(5),
-            statistic: 'avg',
-          }),
-        },
-      }),
-      threshold: 0.05,
-      evaluationPeriods: 3,
-    })
-
     const cachingLambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'CachingRoutingAPI-LambdaThrottles', {
       metric: cachingRoutingLambda.metricThrottles({
-        period: Duration.minutes(5),
-        statistic: 'sum',
-      }),
-      threshold: 10,
-      evaluationPeriods: 3,
-    })
-    const lambdaThrottlesErrorRate = new aws_cloudwatch.Alarm(this, 'RoutingAPI-LambdaThrottles', {
-      metric: this.routingLambda.metricThrottles({
         period: Duration.minutes(5),
         statistic: 'sum',
       }),
@@ -289,10 +263,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
 
       cachingLambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      lambdaAlarmErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-
       cachingLambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      lambdaThrottlesErrorRate.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
     }
 
     const enableProvisionedConcurrency = provisionedConcurrency > 0
