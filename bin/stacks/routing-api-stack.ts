@@ -95,7 +95,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyMonadTestnetV2Id?: string
       goldskyUnichainV2Id?: string
       goldskySoneiumV2Id?: string
-      goldskyLineaV2Id?: string
       goldskyEthereumSepoliaV2Id?: string
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id?: string
@@ -112,7 +111,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyUnichainV3Id?: string
       goldskyZoraV3Id?: string
       goldskySoneiumV3Id?: string
-      goldskyLineaV3Id?: string
       // Goldsky V4 subgraph IDs
       goldskyEthereumSepoliaV4Id?: string
       goldskyArbitrumV4Id?: string
@@ -125,7 +123,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyBlastV4Id?: string
       goldskyEthereumV4Id?: string
       goldskySoneiumV4Id?: string
-      goldskyLineaV4Id?: string
       goldskyOptimismV4Id?: string
       goldskyCeloV4Id?: string
       goldskyAvalancheV4Id?: string
@@ -175,7 +172,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyMonadTestnetV2Id,
       goldskyUnichainV2Id,
       goldskySoneiumV2Id,
-      goldskyLineaV2Id,
       goldskyEthereumSepoliaV2Id,
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id,
@@ -192,7 +188,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyUnichainV3Id,
       goldskyZoraV3Id,
       goldskySoneiumV3Id,
-      goldskyLineaV3Id,
       // Goldsky V4 subgraph IDs
       goldskyEthereumSepoliaV4Id,
       goldskyArbitrumV4Id,
@@ -205,7 +200,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyBlastV4Id,
       goldskyEthereumV4Id,
       goldskySoneiumV4Id,
-      goldskyLineaV4Id,
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
@@ -249,7 +243,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyMonadTestnetV2Id,
       goldskyUnichainV2Id,
       goldskySoneiumV2Id,
-      goldskyLineaV2Id,
       goldskyEthereumSepoliaV2Id,
       // Goldsky V3 subgraph IDs
       goldskyEthereumV3Id,
@@ -266,7 +259,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyUnichainV3Id,
       goldskyZoraV3Id,
       goldskySoneiumV3Id,
-      goldskyLineaV3Id,
       // Goldsky V4 subgraph IDs
       goldskyEthereumSepoliaV4Id,
       goldskyArbitrumV4Id,
@@ -279,7 +271,6 @@ export class RoutingAPIStack extends cdk.Stack {
       goldskyBlastV4Id,
       goldskyEthereumV4Id,
       goldskySoneiumV4Id,
-      goldskyLineaV4Id,
       goldskyOptimismV4Id,
       goldskyCeloV4Id,
       goldskyAvalancheV4Id,
