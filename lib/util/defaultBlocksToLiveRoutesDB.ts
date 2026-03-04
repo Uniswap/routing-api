@@ -56,4 +56,5 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.SONEIUM]: 60,
   [ChainId.XLAYER]: 60,
   [ChainId.LINEA]: 60,
+  [ChainId.TEMPO]: 60,
 }
