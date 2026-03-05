@@ -219,6 +219,8 @@ export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
 export const SEEDIFY_SPARK_HOOK_ON_BASE = '0x2fd54aaf84023eda60bd65edb5914c1a306850cc'
 
+export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0xe1b70e28a596972afe25087c062f459a0f4b40cc'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -274,7 +276,12 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
   [ChainId.GNOSIS]: [ADDRESS_ZERO],
   [ChainId.MOONBEAM]: [ADDRESS_ZERO],
-  [ChainId.BNB]: [ADDRESS_ZERO, BVCC_DYNAMIC_FEE_HOOK_ON_BSC, CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC],
+  [ChainId.BNB]: [
+    ADDRESS_ZERO,
+    BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
+    CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
+    LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+  ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
