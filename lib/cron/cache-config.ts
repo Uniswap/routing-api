@@ -19,6 +19,16 @@ import {
   ZORA_POST_HOOK_ON_BASE_v2_2,
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
   ZORA_POST_HOOK_ON_BASE_v2_3_0,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
 } from '../util/hooksAddressesAllowlist'
 
 // during local cdk stack update, the env vars are not populated
@@ -100,6 +110,26 @@ export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
   ZORA_POST_HOOK_ON_BASE_v2_3_0,
 ])
 
+// Clanker hooks addresses for V4 filtering - MUST be lowercase
+export const CLANKER_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_ARBITRUM,
+  CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_UNICHAIN,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MAINNET,
+  CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
+])
+
+// Combined hooks set for V4SubgraphProvider low-TVL filtering (uses trackedZoraEthThreshold = 0.001)
+export const HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING = new Set([
+  ...ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+  ...CLANKER_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+])
+
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.SEPOLIA:
@@ -128,10 +158,14 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_OPTIMISM_V4_ID}`
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-monad/prod/gn`
+    case ChainId.TEMPO:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-tempo/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V4_ID}`
     case ChainId.AVALANCHE:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_AVALANCHE_V4_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v4-linea/prod/gn`
     default:
       return undefined
   }
@@ -169,8 +203,12 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_SONEIUM_V3_ID}`
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-monad/prod/gn`
+    case ChainId.TEMPO:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-tempo/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V3_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v3-linea/prod/gn`
     default:
       return undefined
   }
@@ -206,8 +244,12 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_SONEIUM_V2_ID}`
     case ChainId.MONAD:
       return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-monad/prod/gn`
+    case ChainId.TEMPO:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-tempo/prod/gn`
     case ChainId.XLAYER:
       return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_XLAYER_V2_ID}`
+    case ChainId.LINEA:
+      return `https://api.goldsky.com/api/private/${process.env.GOLD_SKY_API_KEY}/subgraphs/uniswap-v2-linea/prod/gn`
     default:
       return undefined
   }
@@ -215,7 +257,7 @@ export const v2SubgraphUrlOverride = (chainId: ChainId) => {
 
 const v4TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
 const v4BaseTrackedEthThreshold = 0.1 // Pools on Base need at least 0.1 of trackedEth to be selected
-const v4BaseZoraTrackedEthThreshold = 0.001 // Pools on Zora need at least 0.1 of trackedEth to be selected
+const v4BaseZoraTrackedEthThreshold = 0.001 // Pools on Zora/Clanker need at least 0.001 of trackedEth to be selected
 const v4UntrackedUsdThreshold = 0 // v4 subgraph totalValueLockedUSDUntracked returns 0, even with the pools that have appropriate liqudities and correct pool pricing
 
 export const v3TrackedEthThreshold = 0.01 // Pools need at least 0.01 of trackedEth to be selected
@@ -436,6 +478,21 @@ export const chainProtocols = [
   },
   {
     protocol: Protocol.V3,
+    chainId: ChainId.TEMPO,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.TEMPO,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.TEMPO),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V3,
     chainId: ChainId.XLAYER,
     timeout: 90000,
     provider: new V3SubgraphProvider(
@@ -447,6 +504,21 @@ export const chainProtocols = [
       v3UntrackedUsdThreshold,
       v3SubgraphUrlOverride(ChainId.XLAYER),
       process.env.GRAPH_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V3,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V3SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      v3TrackedEthThreshold,
+      v3UntrackedUsdThreshold,
+      v3SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
   // V2.
@@ -648,6 +720,22 @@ export const chainProtocols = [
   },
   {
     protocol: Protocol.V2,
+    chainId: ChainId.TEMPO,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.TEMPO,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.TEMPO),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V2,
     chainId: ChainId.XLAYER,
     timeout: 90000,
     provider: new V2SubgraphProvider(
@@ -662,6 +750,22 @@ export const chainProtocols = [
       process.env.GRAPH_BEARER_TOKEN
     ),
   },
+  {
+    protocol: Protocol.V2,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V2SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      1000,
+      v2TrackedEthThreshold,
+      v2UntrackedUsdThreshold,
+      v2SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
   // V4
   {
     protocol: Protocol.V4,
@@ -674,7 +778,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SEPOLIA)
     ),
@@ -690,7 +794,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ARBITRUM_ONE)
     ),
@@ -706,7 +810,7 @@ export const chainProtocols = [
       true,
       v4BaseTrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BASE),
       process.env.GRAPH_BEARER_TOKEN
@@ -723,7 +827,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.POLYGON)
     ),
@@ -739,7 +843,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.WORLDCHAIN)
     ),
@@ -755,7 +859,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.ZORA)
     ),
@@ -771,7 +875,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.UNICHAIN)
     ),
@@ -794,7 +898,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BLAST)
     ),
@@ -810,7 +914,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MAINNET)
     ),
@@ -833,7 +937,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.SONEIUM)
     ),
@@ -849,7 +953,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.OPTIMISM)
     ),
@@ -865,7 +969,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.BNB)
     ),
@@ -881,9 +985,26 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.MONAD),
+      process.env.GOLD_SKY_BEARER_TOKEN
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.TEMPO,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.TEMPO,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.TEMPO),
       process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
@@ -898,7 +1019,7 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.XLAYER),
       process.env.GRAPH_BEARER_TOKEN
@@ -915,9 +1036,26 @@ export const chainProtocols = [
       true,
       v4TrackedEthThreshold,
       v4BaseZoraTrackedEthThreshold,
-      ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
       v4UntrackedUsdThreshold,
       v4SubgraphUrlOverride(ChainId.AVALANCHE)
+    ),
+  },
+  {
+    protocol: Protocol.V4,
+    chainId: ChainId.LINEA,
+    timeout: 90000,
+    provider: new V4SubgraphProvider(
+      ChainId.LINEA,
+      3,
+      90000,
+      true,
+      v4TrackedEthThreshold,
+      v4BaseZoraTrackedEthThreshold,
+      HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING,
+      v4UntrackedUsdThreshold,
+      v4SubgraphUrlOverride(ChainId.LINEA),
+      process.env.GOLD_SKY_BEARER_TOKEN
     ),
   },
 ]
