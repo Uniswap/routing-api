@@ -17,7 +17,7 @@ try {
   throw error
 }
 
-const DECOMMISSION_FAILURE_RATE = 0.5
+const DECOMMISSION_FAILURE_RATE = 1
 
 module.exports = {
   quoteHandler: async (event: any, context: any) => {
