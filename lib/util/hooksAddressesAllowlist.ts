@@ -203,6 +203,8 @@ export const ARRAKIS_PRIVATE_HOOK_ON_BASE = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x8679ef619b4ae7a464f8c208df1c49f294df41a237671d98882b50554c20a5c8
 export const ARRAKIS_PRIVATE_HOOK_ON_MAINNET = '0xf9527fb5a34ac6fbc579e4fbc3bf292ed57d4880'
 
+// example pool: https://app.uniswap.org/explore/pools/bnb/0xe59ed249748b6a94f36c1995e903acf3489b1a3c8eabb9e2f6ac5c9be545e499
+export const WHITELIST_BUY_HOOK_ADDRESS_ON_BSC = '0xabf1f4421f2c4893a7fa9b411c59ddf248508080'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xe1b5535dda2fc16079a8bfaf408acec9ca7aca84e2e48c3715e51da6ec8051f6
 export const CUSTOM_FEE_MEV_PROTECTION_HOOK_ON_MAINNET = '0xd5770936a6678353f1b17c342b29c4416b029080'
 
@@ -286,6 +288,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
     LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+    WHITELIST_BUY_HOOK_ADDRESS_ON_BSC,
   ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
