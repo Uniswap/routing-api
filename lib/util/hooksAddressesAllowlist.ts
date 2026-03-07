@@ -226,6 +226,8 @@ export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x2929d242c6c475f78ea7ce8837c9078bcd9ca088'
 
+export const PERMA_LOCK_HOOK_ON_MONAD = '0xc74864A1fcCe7e21cDD84E61DB97AEBF1Fc58200'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -377,6 +379,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
     DOPPLER_HOOKS_ADDRESS_ON_MONAD,
     CULT_FEE_HOOK_ADDRESS_ON_MONAD,
+    PERMA_LOCK_HOOK_ON_MONAD,
   ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
   [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
