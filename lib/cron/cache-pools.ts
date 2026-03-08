@@ -437,6 +437,46 @@ const handler: ScheduledHandler = metricScope((metrics) => async (event: EventBr
           },
           tvlETH: 44000.1795925485023741879813651641809,
           tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool, {
+          id: '0xefa53f9ef29c2ffe0c86827a2cb9338b688c55e2810bd848226a035df4c339c8',
+          feeTier: '500',
+          tickSpacing: '1',
+          hooks: '0xf37c11667d10bbc39c7712a5409c19ced7eba088',
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'USDC',
+            id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            name: 'USDC',
+            decimals: '18',
+          },
+          token1: {
+            symbol: 'USDT',
+            id: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            name: 'Tether USD',
+            decimals: '18',
+          },
+          tvlETH: 44000.1795925485023741879813651641809,
+          tvlUSD: 95050000.95363442908526427214106054717,
+        } as V4SubgraphPool, {
+          id: '0x9ad419f2642f18f84450f339c97cd89add1e52c64e49275837ccc5d2a3441279',
+          feeTier: '5000',
+          tickSpacing: '1',
+          hooks: '0xf3f1249cf3149c722b17da63513483722e852088',
+          liquidity: '482843960670027606548690',
+          token0: {
+            symbol: 'USDe',
+            id: '0x4c9edd5852cd905f086c759e8383e09bff1e68b3',
+            name: 'USDe',
+            decimals: '18',
+          },
+          token1: {
+            symbol: 'USDT',
+            id: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            name: 'Tether USD',
+            decimals: '18',
+          },
+          tvlETH: 44000.1795925485023741879813651641809,
+          tvlUSD: 95050000.95363442908526427214106054717,
         } as V4SubgraphPool)
       }
 
