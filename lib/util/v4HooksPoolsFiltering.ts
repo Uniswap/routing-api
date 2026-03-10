@@ -26,6 +26,7 @@ import {
   ZORA_POST_HOOK_ON_BASE_v2_2_1,
   ZORA_POST_HOOK_ON_BASE_v2_3_0,
   ZORA_POST_HOOK_ON_BASE_v2_4_0,
+  ZORA_POST_HOOK_ON_BASE_v2_6_0,
   CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE,
   CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_BASE,
   CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BASE_v2,
@@ -213,7 +214,8 @@ export function v4HooksPoolsFiltering(chainId: ChainId, pools: Array<V4SubgraphP
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_2_1 ||
           pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_3_0 ||
-          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_4_0) &&
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_4_0 ||
+          pool.hooks.toLowerCase() === ZORA_POST_HOOK_ON_BASE_v2_6_0) &&
         chainId === ChainId.BASE
       if (isZoraPool) {
         if (pool.tvlETH <= 0.001) {
