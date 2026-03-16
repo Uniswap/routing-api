@@ -29,8 +29,6 @@ export interface RoutingCachingStackProps extends cdk.NestedStackProps {
   alchemyQueryKey?: string
   alchemyQueryKey2?: string
   graphBaseV4SubgraphId?: string
-  graphBaseV4DeploymentId?: string
-  graphBaseV4IndexId?: string
   graphXlayerV4Id?: string
   graphXlayerV3Id?: string
   graphXLayerV2Id?: string
@@ -95,8 +93,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
   public readonly alchemyQueryKey: string | undefined = undefined
   public readonly alchemyQueryKey2: string | undefined = undefined
   public readonly graphBaseV4SubgraphId: string | undefined = undefined
-  public readonly graphBaseV4DeploymentId: string | undefined = undefined
-  public readonly graphBaseV4IndexId: string | undefined = undefined
   public readonly graphXlayerV4Id: string | undefined = undefined
   public readonly graphXlayerV3Id: string | undefined = undefined
   public readonly graphXLayerV2Id: string | undefined = undefined
@@ -157,8 +153,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
       alchemyQueryKey,
       alchemyQueryKey2,
       graphBaseV4SubgraphId,
-      graphBaseV4DeploymentId,
-      graphBaseV4IndexId,
       graphXlayerV4Id,
       graphXlayerV3Id,
       graphXLayerV2Id,
@@ -217,8 +211,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
     this.alchemyQueryKey = alchemyQueryKey
     this.alchemyQueryKey2 = alchemyQueryKey2
     this.graphBaseV4SubgraphId = graphBaseV4SubgraphId
-    this.graphBaseV4DeploymentId = graphBaseV4DeploymentId
-    this.graphBaseV4IndexId = graphBaseV4IndexId
     this.graphXlayerV4Id = graphXlayerV4Id
     this.graphXlayerV3Id = graphXlayerV3Id
     this.graphXLayerV2Id = graphXLayerV2Id
@@ -354,8 +346,6 @@ export class RoutingCachingStack extends cdk.NestedStack {
             ALCHEMY_QUERY_KEY: this.alchemyQueryKey ?? '',
             ALCHEMY_QUERY_KEY_2: this.alchemyQueryKey2 ?? '',
             GRAPH_BASE_V4_SUBGRAPH_ID: this.graphBaseV4SubgraphId ?? '',
-            GRAPH_BASE_V4_DEPLOYMENT_ID: this.graphBaseV4DeploymentId ?? '',
-            GRAPH_BASE_V4_INDEX_ID: this.graphBaseV4IndexId ?? '',
             GRAPH_XLAYER_V4_ID: this.graphXlayerV4Id ?? '',
             GRAPH_XLAYER_V3_ID: this.graphXlayerV3Id ?? '',
             GRAPH_XLAYER_V2_ID: this.graphXLayerV2Id ?? '',
