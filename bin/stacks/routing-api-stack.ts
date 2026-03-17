@@ -51,8 +51,7 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret: string
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
-      graphBaseV4DeploymentId?: string
-      graphBaseV4IndexId?: string
+      graphBaseV4SubgraphId?: string
       graphXlayerV4Id?: string
       graphXlayerV3Id?: string
       graphXLayerV2Id?: string
@@ -129,8 +128,7 @@ export class RoutingAPIStack extends cdk.Stack {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
-      graphBaseV4DeploymentId,
-      graphBaseV4IndexId,
+      graphBaseV4SubgraphId,
       graphXlayerV4Id,
       graphXlayerV3Id,
       graphXLayerV2Id,
@@ -203,8 +201,7 @@ export class RoutingAPIStack extends cdk.Stack {
       hosted_zone,
       alchemyQueryKey,
       alchemyQueryKey2,
-      graphBaseV4DeploymentId,
-      graphBaseV4IndexId,
+      graphBaseV4SubgraphId,
       graphXlayerV4Id,
       graphXlayerV3Id,
       graphXLayerV2Id,
