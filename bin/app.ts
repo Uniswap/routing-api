@@ -39,7 +39,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret: string
       alchemyQueryKey?: string
       alchemyQueryKey2?: string
-      graphBaseV4SubgraphId?: string
+      graphBaseV4DeploymentId?: string
+      graphBaseV4IndexId?: string
       graphXlayerV4Id?: string
       graphXlayerV3Id?: string
       graphXLayerV2Id?: string
@@ -114,7 +115,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
-      graphBaseV4SubgraphId,
+      graphBaseV4DeploymentId,
+      graphBaseV4IndexId,
       graphXlayerV4Id,
       graphXlayerV3Id,
       graphXLayerV2Id,
@@ -188,7 +190,8 @@ export class RoutingAPIStage extends Stage {
       unicornSecret,
       alchemyQueryKey,
       alchemyQueryKey2,
-      graphBaseV4SubgraphId,
+      graphBaseV4DeploymentId,
+      graphBaseV4IndexId,
       graphXlayerV4Id,
       graphXlayerV3Id,
       graphXLayerV2Id,
@@ -443,7 +446,8 @@ export class RoutingAPIPipeline extends Stack {
       // bearer token and base subgraph id are not from alchemy subgraph, but from the graph
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
-      graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphBaseV4DeploymentId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-deployment-id').toString(),
+      graphBaseV4IndexId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-index-id').toString(),
       graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
       graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
       graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
@@ -534,7 +538,8 @@ export class RoutingAPIPipeline extends Stack {
       // bearer token and base subgraph id are not from alchemy subgraph, but from the graph
       // below secret namings are wrong, but we take it as is
       graphBearerToken: alchemySubgraphSecret.secretValueFromJson('alchemy-bearer-token').toString(),
-      graphBaseV4SubgraphId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-subgraph-id').toString(),
+      graphBaseV4DeploymentId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-deployment-id').toString(),
+      graphBaseV4IndexId: alchemySubgraphSecret.secretValueFromJson('alchemy-base-v4-index-id').toString(),
       graphXlayerV4Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V4_ID').toString(),
       graphXlayerV3Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V3_ID').toString(),
       graphXLayerV2Id: routingApiNewSecrets.secretValueFromJson('GRAPH_XLAYER_V2_ID').toString(),
@@ -742,7 +747,8 @@ new RoutingAPIStack(app, 'RoutingAPIStack', {
   uniGraphQLHeaderOrigin: process.env.GQL_H_ORGN!,
   alchemyQueryKey: process.env.ALCHEMY_QUERY_KEY!,
   alchemyQueryKey2: process.env.ALCHEMY_QUERY_KEY_2!,
-  graphBaseV4SubgraphId: process.env.GRAPH_BASE_V4_SUBGRAPH_ID!,
+  graphBaseV4DeploymentId: process.env.GRAPH_BASE_V4_DEPLOYMENT_ID!,
+  graphBaseV4IndexId: process.env.GRAPH_BASE_V4_INDEX_ID!,
   graphXlayerV4Id: process.env.GRAPH_XLAYER_V4_ID!,
   graphXlayerV3Id: process.env.GRAPH_XLAYER_V4_ID!,
   graphXLayerV2Id: process.env.GRAPH_XLAYER_V4_ID!,
