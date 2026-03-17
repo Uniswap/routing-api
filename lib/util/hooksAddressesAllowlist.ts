@@ -227,7 +227,7 @@ export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0xe1b70e28a596972afe25087c062f
 // example pool: https://app.uniswap.org/explore/pools/base/0x71deb282904d0f76bc8c7867f4618ff91dcb43cf4574bc64700ffc48791d369c
 export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
-export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x2929d242c6c475f78ea7ce8837c9078bcd9ca088'
+export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
