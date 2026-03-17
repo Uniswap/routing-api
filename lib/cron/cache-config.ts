@@ -137,7 +137,7 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
     case ChainId.ARBITRUM_ONE:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ARBITRUM_V4_ID}`
     case ChainId.BASE:
-      return `https://gateway.thegraph.com/api/deployments/id/${process.env.GRAPH_BASE_V4_DEPLOYMENT_ID}/indexers/id/${process.env.GRAPH_BASE_V4_INDEX_ID}`
+      return `https://gateway.thegraph.com/api/subgraphs/id/${process.env.GRAPH_BASE_V4_SUBGRAPH_ID}`
     case ChainId.POLYGON:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_POLYGON_V4_ID}`
     case ChainId.WORLDCHAIN:
