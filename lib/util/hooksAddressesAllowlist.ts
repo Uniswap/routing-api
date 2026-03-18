@@ -225,6 +225,8 @@ export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0xe1b70e28a596972afe25087c062f
 // example pool: https://app.uniswap.org/explore/pools/base/0x71deb282904d0f76bc8c7867f4618ff91dcb43cf4574bc64700ffc48791d369c
 export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
+export const DYNAMIC_FEE_HOOK_ON_BASE = '0xbd2597a08627f119ed50c1a252f888f5bfd31b80'
+
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
@@ -350,6 +352,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLAUNCH_HOOK_ON_BASE,
     SEEDIFY_SPARK_HOOK_ON_BASE,
     ANSTROM_HOOK_ON_BASE,
+    DYNAMIC_FEE_HOOK_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
