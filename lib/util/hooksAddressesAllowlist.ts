@@ -133,6 +133,9 @@ export const DELI_HOOK_CONSTANT_PRODUCT_ON_BASE = '0x95afbc0fccf974b41380f24e562
 // example pool: https://app.uniswap.org/explore/pools/optimism/0xa30abc0ccd08c0c16d28ccfaf15de692a1778775de9f6dea337fb9b490163b18
 export const FINDEX_HOOK_ON_OPTIMISM = '0xb35297543d357ef62df204d8c3bd0e96038cf440'
 
+//example pool: https://app.uniswap.org/explore/pools/bnb/0x10a91c9db697c4de7cc02c2d500f498cb752dd728ab711b99118441d9768527c
+export const FINDEX_DYNAMIC_FEE_HOOK_ON_BSC = '0x85c2be3c314d90316f88b559fe087265f09c7440'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x26b73e77f7b2cfc05d28a8978b917eced1cdf7915862292cfbb507731d5120fd
 export const ACTION_HOOK_ON_MAINNET = '0x00bbc6fc07342cf80d14b60695cf0e1aa8de00cc'
 
@@ -229,8 +232,6 @@ export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0xe1b70e28a596972afe25087c062f
 export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
-
-export const FINDEX_DYNAMIC_FEE_HOOK_ON_BSC = '0x85c2be3c314d90316f88b559fe087265f09c7440'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
