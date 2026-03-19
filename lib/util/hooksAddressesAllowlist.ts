@@ -230,6 +230,8 @@ export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
 
+export const FINDEX_DYNAMIC_FEE_HOOK_ON_BSC = '0x85c2be3c314d90316f88b559fe087265f09c7440'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -290,6 +292,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
     LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+    FINDEX_DYNAMIC_FEE_HOOK_ON_BSC,
   ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
