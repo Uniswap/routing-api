@@ -353,7 +353,8 @@ export class RoutingAPIPipeline extends Stack {
         chainId !== ChainId.BASE_SEPOLIA &&
         chainId !== ChainId.UNICHAIN &&
         chainId !== ChainId.SONEIUM &&
-        chainId !== ChainId.XLAYER
+        chainId !== ChainId.XLAYER &&
+        chainId !== ChainId.LINEA
       ) {
         const key = `WEB3_RPC_${chainId}`
         jsonRpcProviders[key] = jsonRpcProvidersSecret.secretValueFromJson(key).toString()
@@ -515,7 +516,7 @@ export class RoutingAPIPipeline extends Stack {
       env: { account: '606857263320', region: 'us-east-2' },
       jsonRpcProviders: jsonRpcProviders,
       internalApiKey: internalApiKey.secretValue.toString(),
-      provisionedConcurrency: 70,
+      provisionedConcurrency: 1,
       ethGasStationInfoUrl: ethGasStationInfoUrl.secretValue.toString(),
       chatbotSNSArn: 'arn:aws:sns:us-east-2:644039819003:SlackChatbotTopic',
       stage: STAGE.PROD,

@@ -17,6 +17,16 @@ try {
   throw error
 }
 
+const DECOMMISSION_FAILURE_RATE = 1
+
 module.exports = {
-  quoteHandler: quoteHandler.handler,
+  quoteHandler: async (event: any, context: any) => {
+    if (!event?.headers?.['x-disable-decommission-failure'] && Math.random() < DECOMMISSION_FAILURE_RATE) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ errorCode: 'DECOMMISSIONED', detail: 'Routing API is being decommissioned' }),
+      }
+    }
+    return quoteHandler.handler(event, context)
+  },
 }

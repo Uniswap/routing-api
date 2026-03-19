@@ -339,7 +339,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           layers: [lambdaLayerVersion],
           tracing: aws_lambda.Tracing.ACTIVE,
           environment: {
-            VERSION: '5',
+            VERSION: '7',
             POOL_CACHE_BUCKET: this.poolCacheBucket.bucketName,
             POOL_CACHE_BUCKET_3: this.poolCacheBucket3.bucketName,
             POOL_CACHE_GZIP_KEY: this.poolCacheGzipKey,
@@ -404,7 +404,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         }
       )
       new aws_events.Rule(this, `SchedulePoolCache-ChainId${chainId}-Protocol${protocol}`, {
-        schedule: aws_events.Schedule.rate(Duration.minutes(15)),
+        schedule: aws_events.Schedule.rate(Duration.hours(3)),
         targets: [new aws_events_targets.LambdaFunction(lambda)],
       })
       this.poolCacheBucket2.grantReadWrite(lambda)

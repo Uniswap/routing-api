@@ -62,7 +62,7 @@ import { getBalance, getBalanceAndApprove } from '../../utils/getBalanceAndAppro
 import { DAI_ON, getAmount, getAmountFromToken, UNI_MAINNET, USDC_ON, USDT_ON, WNATIVE_ON } from '../../utils/tokens'
 import { FLAT_PORTION, GREENLIST_TOKEN_PAIRS, Portion } from '../../test-utils/mocked-data'
 import { WRAPPED_NATIVE_CURRENCY } from '@uniswap/smart-order-router/build/main/index'
-import { getFirstNonDelegatedSigner } from '../../utils/getFirstNonDelegatedSigner'
+import { getNewlyGeneratedFundedWalletSigner } from '../../utils/getNewlyGeneratedFundedWalletSigner'
 
 const { ethers } = hre
 
@@ -87,10 +87,12 @@ const ALL_PROTOCOLS = 'v2,v3,v4,mixed'
 
 const HEADERS_1_2 = {
   'x-universal-router-version': '1.2',
+  'x-disable-decommission-failure': 'true',
 }
 
 const HEADERS_2_0 = {
   'x-universal-router-version': '2.0',
+  'x-disable-decommission-failure': 'true',
 }
 
 const BULLET = new Token(
@@ -322,7 +324,7 @@ describe('quote', function () {
 
   before(async function () {
     this.timeout(80000)
-    alice = await getFirstNonDelegatedSigner(await ethers.getSigners())
+    alice = await getNewlyGeneratedFundedWalletSigner()
 
     // Make a dummy call to the API to get a block number to fork from.
     const quoteReq: QuoteQueryParams = {
@@ -3408,6 +3410,8 @@ describe('quote', function () {
     [ChainId.MONAD]: () => USDC_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => USDC_ON(ChainId.SONEIUM),
     [ChainId.XLAYER]: () => USDC_ON(ChainId.XLAYER),
+    [ChainId.LINEA]: () => null,
+    [ChainId.TEMPO]: () => null,
   }
 
   const TEST_ERC20_2: { [chainId in ChainId]: () => Token | null } = {
@@ -3444,6 +3448,8 @@ describe('quote', function () {
     [ChainId.MONAD]: () => WNATIVE_ON(ChainId.MONAD),
     [ChainId.SONEIUM]: () => WNATIVE_ON(ChainId.SONEIUM),
     [ChainId.XLAYER]: () => WNATIVE_ON(ChainId.XLAYER),
+    [ChainId.LINEA]: () => null,
+    [ChainId.TEMPO]: () => null,
   }
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.

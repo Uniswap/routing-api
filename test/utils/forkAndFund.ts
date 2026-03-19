@@ -42,6 +42,19 @@ export const resetAndFundAtBlock = async (
     ],
   })
 
+  // After hardhat_reset, re-fund alice if she's not a built-in hardhat signer
+  // (e.g. a random wallet generated for delegation safety).
+  // Built-in signers are auto-funded with 10,000 ETH; random addresses are not.
+  const builtInAddresses = new Set(
+    (await ethers.getSigners()).map((s: SignerWithAddress) => s.address.toLowerCase())
+  )
+  if (!builtInAddresses.has(alice.address.toLowerCase())) {
+    await hre.network.provider.request({
+      method: 'hardhat_setBalance',
+      params: [alice.address, '0x21E19E0C9BAB2400000'], // 10,000 ETH
+    })
+  }
+
   for (const whale of WHALES) {
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
