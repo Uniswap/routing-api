@@ -233,6 +233,10 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
+// example pool: https://app.uniswap.org/explore/pools/bnb/0x074e23f3099fdd244bfb10b8cdf959d02c1d26255bfbb110518936ce67b6f331
+export const BUY_HOOK_V3_ON_BNB = '0xDF4e5F77eBbe97bdeE477D685B946CA27a538080';
+
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -294,6 +298,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
     LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+    BUY_HOOK_V3_ON_BNB,
   ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
