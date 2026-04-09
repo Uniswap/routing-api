@@ -117,6 +117,9 @@ export const CULT_FEE_HOOK_ADDRESS_ON_MONAD = '0x7A2524cE937F206844b9508EEc8f648
 // example pool: https://app.uniswap.org/explore/pools/base/0xab22898bde69271720124833eb07b8e7268f69cb833d33cb2442e57e8b57eea1
 export const AQUINAS_HOOK_ADDRESS_ON_BASE = '0xd3c1f2174f37f88811f99b1b1b4c1356c0246000'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x035acc010308ff9692afeadd489644775ab4a3885cd3e10dccbb9bfa14a3a933
+export const AQUINAS_HOOK_ADDRESS_ON_BASE_2 = '0x98Aa253a44497dfa77ec1170e69f851cB17C2000'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x389a26ef4a4634e55fc4e3ae2149c1cafdbc141af16057ab5fab962c2dca5221
 export const ASTERIX_HOOK_ADDRESS_ON_MAINNET = '0xdad7ea85ff786b389a13f4714a56b1721b56c044'
 
@@ -227,13 +230,15 @@ export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
 
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
 
-// EMA Dynamic Fee Hook v2 — 30-step EMA-based fee (0.01%-3.00%), anti-JIT, immutable
+// example pool: https://app.uniswap.org/explore/pools/base/0x4ed71a07608f4cf0bad3ef9e53911853943532db10d6530a66586a0dd2b3604b
 export const EMA_DYNAMIC_FEE_HOOK_ON_BASE = '0x84129dc46b712614471131e8b9dadd64c7d21bc0'
 export const EMA_DYNAMIC_FEE_HOOK_ON_UNICHAIN = '0x6398f3c67b03c4622bdaa48d9e340d66e23a1bc0'
 export const EMA_DYNAMIC_FEE_HOOK_ON_ARBITRUM = '0xe025cb6c58826ac79e2052c350250881f8f51bc0'
 export const EMA_DYNAMIC_FEE_HOOK_ON_OPTIMISM = '0xb1db44de89634a001ceb5847defc3ff1e5601bc0'
 export const EMA_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x924e5c44c3b82c2c0ba231cd0de7b581180e1bc0'
 export const EMA_DYNAMIC_FEE_HOOK_ON_POLYGON = '0x8eb0089d6c616bc2b7f69b3cafecfedc3ef11bc0'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
+export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -267,6 +272,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CUSTOM_FEE_MEV_PROTECTION_HOOK_ON_MAINNET,
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
     AZTEC_HOOK_ADDRESS_ON_MAINNET,
+    TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
@@ -344,6 +350,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     DELI_HOOK_ADDRESS_ON_BASE,
     DELI_HOOK_CONSTANT_PRODUCT_ON_BASE,
     AQUINAS_HOOK_ADDRESS_ON_BASE,
+    AQUINAS_HOOK_ADDRESS_ON_BASE_2,
     SUPERSTRATEGY_HOOK_ON_BASE,
     SIMPLE_SELL_TAX_HOOK_ON_BASE,
     WASSBLASTER_HOOK_ON_BASE,

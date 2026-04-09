@@ -2,6 +2,7 @@ import { Protocol } from '@uniswap/router-sdk'
 import { V2SubgraphProvider, V3SubgraphProvider, V4SubgraphProvider } from '@uniswap/smart-order-router'
 import { ChainId } from '@uniswap/sdk-core'
 import { EulerSwapHooksSubgraphProvider } from '@uniswap/smart-order-router/'
+import dotenv from 'dotenv'
 import {
   ZORA_CREATOR_HOOK_ON_BASE_v1,
   ZORA_CREATOR_HOOK_ON_BASE_v1_0_0_1,
@@ -32,63 +33,71 @@ import {
 } from '../util/hooksAddressesAllowlist'
 
 // during local cdk stack update, the env vars are not populated
-// make sure to fill in the env vars below
+// make sure to have these env vars in your .env file, so they are explicitly populated
 // we have two alchemy accounts to split the load, v3 and v4 subgraphs are on
 // the second account while v2 is on the first
-// process.env.ALCHEMY_QUERY_KEY = ''
-// process.env.ALCHEMY_QUERY_KEY_2 = ''
-// process.env.GRAPH_BASE_V4_SUBGRAPH_ID = ''
-// process.env.GRAPH_BEARER_TOKEN = ''
-// process.env.GOLDSKY_BEARER_TOKEN = ''
-// process.env.GOLDSKY_API_KEY = ''
-// // Goldsky V2 subgraph IDs
-// process.env.GOLD_SKY_ETHEREUM_V2_ID = ''
-// process.env.GOLD_SKY_ARBITRUM_V2_ID = ''
-// process.env.GOLD_SKY_POLYGON_V2_ID = ''
-// process.env.GOLD_SKY_OPTIMISM_V2_ID = ''
-// process.env.GOLD_SKY_AVALANCHE_V2_ID = ''
-// process.env.GOLD_SKY_BNB_V2_ID = ''
-// process.env.GOLD_SKY_BLAST_V2_ID = ''
-// process.env.GOLD_SKY_BASE_V2_ID = ''
-// process.env.GOLD_SKY_WORLDCHAIN_V2_ID = ''
-// process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID = ''
-// process.env.GOLD_SKY_MONAD_TESTNET_V2_ID = ''
-// process.env.GOLD_SKY_UNICHAIN_V2_ID = ''
-// process.env.GOLD_SKY_SONEIUM_V2_ID = ''
-// process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID = ''
-// // Goldsky V3 subgraph IDs
-// process.env.GOLD_SKY_ETHEREUM_V3_ID = ''
-// process.env.GOLD_SKY_ARBITRUM_V3_ID = ''
-// process.env.GOLD_SKY_POLYGON_V3_ID = ''
-// process.env.GOLD_SKY_OPTIMISM_V3_ID = ''
-// process.env.GOLD_SKY_AVALANCHE_V3_ID = ''
-// process.env.GOLD_SKY_BNB_V3_ID = ''
-// process.env.GOLD_SKY_BLAST_V3_ID = ''
-// process.env.GOLD_SKY_BASE_V3_ID = ''
-// process.env.GOLD_SKY_CELO_V3_ID = ''
-// process.env.GOLD_SKY_WORLDCHAIN_V3_ID = ''
-// process.env.GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID = ''
-// process.env.GOLD_SKY_UNICHAIN_V3_ID = ''
-// process.env.GOLD_SKY_ZORA_V3_ID = ''
-// process.env.GOLD_SKY_SONEIUM_V3_ID = ''
-// // Goldsky V4 subgraph IDs
-// process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID = ''
-// process.env.GOLD_SKY_ARBITRUM_V4_ID = ''
-// process.env.GOLD_SKY_BASE_V4_ID = ''
-// process.env.GOLD_SKY_POLYGON_V4_ID = ''
-// process.env.GOLD_SKY_WORLDCHAIN_V4_ID = ''
-// process.env.GOLD_SKY_ZORA_V4_ID = ''
-// process.env.GOLD_SKY_UNICHAIN_V4_ID = ''
-// process.env.GOLD_SKY_BNB_V4_ID = ''
-// process.env.GOLD_SKY_BLAST_V4_ID = ''
-// process.env.GOLD_SKY_ETHEREUM_V4_ID = ''
-// process.env.GOLD_SKY_SONEIUM_V4_ID = ''
-// process.env.GOLD_SKY_OPTIMISM_V4_ID = ''
-// process.env.GOLD_SKY_CELO_V4_ID = ''
-// process.env.GOLD_SKY_AVALANCHE_V4_ID = ''
-// process.env.GRAPH_XLAYER_V4_ID = ''
-// process.env.GRAPH_XLAYER_V3_ID = ''
-// process.env.GRAPH_XLAYER_V2_ID = ''
+dotenv.config()
+
+const CONFIG_ENV_KEYS = [
+  'ALCHEMY_QUERY_KEY',
+  'ALCHEMY_QUERY_KEY_2',
+  'GRAPH_BASE_V4_SUBGRAPH_ID',
+  'GRAPH_BEARER_TOKEN',
+  'GOLDSKY_BEARER_TOKEN',
+  'GOLDSKY_API_KEY',
+  // Goldsky V2 subgraph IDs
+  'GOLD_SKY_ETHEREUM_V2_ID',
+  'GOLD_SKY_ARBITRUM_V2_ID',
+  'GOLD_SKY_POLYGON_V2_ID',
+  'GOLD_SKY_OPTIMISM_V2_ID',
+  'GOLD_SKY_AVALANCHE_V2_ID',
+  'GOLD_SKY_BNB_V2_ID',
+  'GOLD_SKY_BLAST_V2_ID',
+  'GOLD_SKY_BASE_V2_ID',
+  'GOLD_SKY_WORLDCHAIN_V2_ID',
+  'GOLD_SKY_ASTROCHAIN_SEPOLIA_V2_ID',
+  'GOLD_SKY_MONAD_TESTNET_V2_ID',
+  'GOLD_SKY_UNICHAIN_V2_ID',
+  'GOLD_SKY_SONEIUM_V2_ID',
+  'GOLD_SKY_ETHEREUM_SEPOLIA_V2_ID',
+  // Goldsky V3 subgraph IDs
+  'GOLD_SKY_ETHEREUM_V3_ID',
+  'GOLD_SKY_ARBITRUM_V3_ID',
+  'GOLD_SKY_POLYGON_V3_ID',
+  'GOLD_SKY_OPTIMISM_V3_ID',
+  'GOLD_SKY_AVALANCHE_V3_ID',
+  'GOLD_SKY_BNB_V3_ID',
+  'GOLD_SKY_BLAST_V3_ID',
+  'GOLD_SKY_BASE_V3_ID',
+  'GOLD_SKY_CELO_V3_ID',
+  'GOLD_SKY_WORLDCHAIN_V3_ID',
+  'GOLD_SKY_ASTROCHAIN_SEPOLIA_V3_ID',
+  'GOLD_SKY_UNICHAIN_V3_ID',
+  'GOLD_SKY_ZORA_V3_ID',
+  'GOLD_SKY_SONEIUM_V3_ID',
+  // Goldsky V4 subgraph IDs
+  'GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID',
+  'GOLD_SKY_ARBITRUM_V4_ID',
+  'GOLD_SKY_BASE_V4_ID',
+  'GOLD_SKY_POLYGON_V4_ID',
+  'GOLD_SKY_WORLDCHAIN_V4_ID',
+  'GOLD_SKY_ZORA_V4_ID',
+  'GOLD_SKY_UNICHAIN_V4_ID',
+  'GOLD_SKY_BNB_V4_ID',
+  'GOLD_SKY_BLAST_V4_ID',
+  'GOLD_SKY_ETHEREUM_V4_ID',
+  'GOLD_SKY_SONEIUM_V4_ID',
+  'GOLD_SKY_OPTIMISM_V4_ID',
+  'GOLD_SKY_CELO_V4_ID',
+  'GOLD_SKY_AVALANCHE_V4_ID',
+  'GRAPH_XLAYER_V4_ID',
+  'GRAPH_XLAYER_V3_ID',
+  'GRAPH_XLAYER_V2_ID',
+] as const
+
+for (const key of CONFIG_ENV_KEYS) {
+  process.env[key] = process.env[key] || ''
+}
 
 // Zora hooks addresses for V4 filtering - MUST be lowercase
 export const ZORA_HOOKS_FOR_V4_SUBGRAPH_FILTERING = new Set([
