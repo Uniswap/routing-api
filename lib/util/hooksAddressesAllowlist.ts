@@ -219,8 +219,6 @@ export const BASEMEME_HOOK_ADDRESS_ON_BASE = '0x755776c51399f7ee15d47ddaf47347d2
 // example pool: https://app.uniswap.org/explore/pools/base/0xaca93c6543498289affeab3b3645b0faa3c660d73d76a3d271c8b92339f88589
 export const AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE = '0x121f94835dab08ebaf084809a97e525b69e400cc'
 
-// example pool: https://app.uniswap.org/explore/pools/base/0xc5de2f6f012f590e1d888feb07ee266b0e2538e1388e4c6b0d814e27c55e9d1b
-export const ACCUMULATE_HOOK_V1_ON_BASE = '0x64b54C01afCb36A405a2615e65B5E22A52b28044'
 export const CLAUNCH_HOOK_ON_BASE = '0x2f9354bbb0edef5c2a5c4b78d0c59d73412a28cc'
 
 export const SEEDIFY_SPARK_HOOK_ON_BASE = '0x2fd54aaf84023eda60bd65edb5914c1a306850cc'
@@ -234,6 +232,8 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
+
+export const ACCUMULATE_HOOK_V1_ON_ETH = '0x215e33c79a0c9d4a4532b4abef96e71a6a4b4044'
 
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
@@ -267,6 +267,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
     AZTEC_HOOK_ADDRESS_ON_MAINNET,
     TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET,
+    ACCUMULATE_HOOK_V1_ON_ETH
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
@@ -357,7 +358,6 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     AI_PROTOCOL_SWAP_FEE_HOOK_V1_ON_BASE,
     LIQUID_LAUNCH_HOOK_ON_BASE,
     BVCC_DYNAMIC_FEE_HOOK_ON_BASE,
-    ACCUMULATE_HOOK_V1_ON_BASE,
     CLAUNCH_HOOK_ON_BASE,
     SEEDIFY_SPARK_HOOK_ON_BASE,
     ANSTROM_HOOK_ON_BASE,
