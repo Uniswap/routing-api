@@ -133,6 +133,9 @@ export const DELI_HOOK_CONSTANT_PRODUCT_ON_BASE = '0x95afbc0fccf974b41380f24e562
 // example pool: https://app.uniswap.org/explore/pools/optimism/0xa30abc0ccd08c0c16d28ccfaf15de692a1778775de9f6dea337fb9b490163b18
 export const FINDEX_HOOK_ON_OPTIMISM = '0xb35297543d357ef62df204d8c3bd0e96038cf440'
 
+// example pool: https://app.uniswap.org/explore/pools/polygon/0xa17349604c8405acbd688f202507d05580b2e65729b052d321fa5bcb10ef40f3
+export const FINDEX_V2_HOOK_ON_POLYGON = '0x6c67d89c4efdc7b88e5b066b7f3d5a99060a55d8'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x26b73e77f7b2cfc05d28a8978b917eced1cdf7915862292cfbb507731d5120fd
 export const ACTION_HOOK_ON_MAINNET = '0x00bbc6fc07342cf80d14b60695cf0e1aa8de00cc'
 
@@ -283,7 +286,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   ],
   [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.POLYGON]: [ADDRESS_ZERO, AEGIS_V1_1_ON_POLYGON],
+  [ChainId.POLYGON]: [ADDRESS_ZERO, AEGIS_V1_1_ON_POLYGON, FINDEX_V2_HOOK_ON_POLYGON],
   [ChainId.POLYGON_MUMBAI]: [ADDRESS_ZERO],
   [ChainId.CELO]: [ADDRESS_ZERO],
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
