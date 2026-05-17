@@ -133,6 +133,9 @@ export const DELI_HOOK_CONSTANT_PRODUCT_ON_BASE = '0x95afbc0fccf974b41380f24e562
 // example pool: https://app.uniswap.org/explore/pools/optimism/0xa30abc0ccd08c0c16d28ccfaf15de692a1778775de9f6dea337fb9b490163b18
 export const FINDEX_HOOK_ON_OPTIMISM = '0xb35297543d357ef62df204d8c3bd0e96038cf440'
 
+// example pool: https://app.uniswap.org/explore/pools/bnb/0x34970fb7a24b05830da85c3060a732cba387f9f7b4e15cc72f364bb9a905bf78
+export const FINDEX_V2_HOOK_ON_BSC = '0x91fb28d8f4906df4e8c71806dfeb882dd82815d8'
+
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x26b73e77f7b2cfc05d28a8978b917eced1cdf7915862292cfbb507731d5120fd
 export const ACTION_HOOK_ON_MAINNET = '0x00bbc6fc07342cf80d14b60695cf0e1aa8de00cc'
 
@@ -294,6 +297,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
     LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+    FINDEX_V2_HOOK_ON_BSC,
   ],
   [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
