@@ -171,6 +171,8 @@ export const RING_FEW_DAI_HOOK_ON_MAINNET = '0x85b648a64aed6307d5d5ce26e6ae086c1
 export const RING_FEW_WEETH_HOOK_ON_MAINNET = '0x877323adbf747f85eb8d182d42f01f34a5492888'
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0xe7c2f30fd89238331b0e3e6ac6351578d5e3091b7839eff321c29cf88e17274e
 export const RING_FEW_WSTETH_HOOK_ON_MAINNET = '0x75ae0292e8ad3ab60b9a1a7b3046d3f4abdfa888'
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x56c56d2d3064b20322613b1a64377cb705e964d42899717eb2d51f2a9e8b8aa3
+export const RING_AGGREGATOR_HOOK_ON_MAINNET = '0x1c94eb938ffb066c3a5f0d43e44a428f35a1e888'
 // example pool BSC: https://app.uniswap.org/explore/pools/bnb/0x085182518e82062e732fcb912becdf7140b42f8da31c7afd850db3c6d4309c8a
 export const BVCC_DYNAMIC_FEE_HOOK_ON_BSC = '0x8a36d8408f5285c3f81509947bc187b3c0efd0c4'
 export const BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET = '0xf9ced7d0f5292af02385410eda5b7570b10b50c4'
@@ -258,6 +260,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     RING_FEW_DAI_HOOK_ON_MAINNET,
     RING_FEW_WEETH_HOOK_ON_MAINNET,
     RING_FEW_WSTETH_HOOK_ON_MAINNET,
+    RING_AGGREGATOR_HOOK_ON_MAINNET,
     MEME_STRATEGY_HOOK_ON_MAINNET,
     TOKEN_FLOW_TAX_HOOK_ON_MAINNET,
     ARRAKIS_PRIVATE_HOOK_ON_MAINNET,
