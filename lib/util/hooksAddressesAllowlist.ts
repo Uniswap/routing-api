@@ -233,6 +233,8 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
+export const ROBINS_WORLD_LAUNCHPAD_HOOK_ON_ROBINHOOD = '0x6244de7a51c9db9ee044fca9069b04b9c24020cc'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -392,4 +394,5 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
   [ChainId.LINEA]: [ADDRESS_ZERO],
   [ChainId.TEMPO]: [ADDRESS_ZERO, UNISWAP_AGG_HOOK_ON_TEMPO],
+  [ChainId.ROBINHOOD]: [ADDRESS_ZERO, ROBINS_WORLD_LAUNCHPAD_HOOK_ON_ROBINHOOD],
 }
