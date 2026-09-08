@@ -227,6 +227,14 @@ export const LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB = '0xe1b70e28a596972afe25087c062f
 
 // example pool: https://app.uniswap.org/explore/pools/base/0x71deb282904d0f76bc8c7867f4618ff91dcb43cf4574bc64700ffc48791d369c
 export const ANSTROM_HOOK_ON_BASE = '0x631352aaa9d6554848af674106bcd8bb9e59a5cf'
+// BaseStonk launchpad hooks (https://basestonk.io). beforeInitialize | afterSwap | afterSwapReturnDelta;
+// no beforeSwap, no dynamic fee, not upgradeable. Example pool (V2, BSTONK/USDC):
+// 0xc9786476d2492eb8ddb2ebf8b4b69e227e1f31397c790d877541ab0ed5cf5ee2
+export const BASESTONK_HOOK_V2_ON_BASE = '0x03d2434d5a9ab7fb46bd3c7956a7c62e0cd46044'
+export const BASESTONK_HOOK_V5C_ON_BASE = '0x201c4916c085032fb49f0b778efa98df23672044'
+export const BASESTONK_HOOK_V6_ON_BASE = '0x7c672f3850afadcb8f83478e0a2a90d109fa6044'
+export const BASESTONK_B20_HOOK_V1_ON_BASE = '0x805975d27518e3e23c4838802d9dda7302dca044'
+export const BASESTONK_B20_HOOK_V6_ON_BASE = '0xaa4025e5667719db2ceaa0c1ed8801ce7bdfa044'
 
 export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afdaa888'
 
@@ -358,6 +366,11 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLAUNCH_HOOK_ON_BASE,
     SEEDIFY_SPARK_HOOK_ON_BASE,
     ANSTROM_HOOK_ON_BASE,
+    BASESTONK_HOOK_V2_ON_BASE,
+    BASESTONK_HOOK_V5C_ON_BASE,
+    BASESTONK_HOOK_V6_ON_BASE,
+    BASESTONK_B20_HOOK_V1_ON_BASE,
+    BASESTONK_B20_HOOK_V6_ON_BASE,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
