@@ -114,6 +114,9 @@ export const ENS_WHEEL_HOOK_ON_MAINNET = '0xf13bdafb90c79f2201e2ce42010c8ef75fed
 // example pool: https://app.uniswap.org/explore/pools/monad/0xfb2e06638df93ad3080109c410714b0903213135ff6f5909b3a846764df0b801
 export const CULT_FEE_HOOK_ADDRESS_ON_MONAD = '0x7A2524cE937F206844b9508EEc8f6486800a40CC'
 
+// example pool: https://app.uniswap.org/explore/pools/monad/0x6a9510732404a6693d5a0be38dc71cc601b4ea1d9519c78eb24ca095498d18f3
+export const LONGER_HOOK_ADDRESS_ON_MONAD = '0x07114b9c40d99fee1672cdce8d3cc6a64d409088'
+
 // example pool: https://app.uniswap.org/explore/pools/base/0xab22898bde69271720124833eb07b8e7268f69cb833d33cb2442e57e8b57eea1
 export const AQUINAS_HOOK_ADDRESS_ON_BASE = '0xd3c1f2174f37f88811f99b1b1b4c1356c0246000'
 
@@ -387,6 +390,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLANKER_STATIC_FEE_HOOKS_ADDRESS_ON_MONAD,
     DOPPLER_HOOKS_ADDRESS_ON_MONAD,
     CULT_FEE_HOOK_ADDRESS_ON_MONAD,
+    LONGER_HOOK_ADDRESS_ON_MONAD,
   ],
   [ChainId.SONEIUM]: [ADDRESS_ZERO],
   [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
