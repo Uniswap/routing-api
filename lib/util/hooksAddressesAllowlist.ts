@@ -233,6 +233,12 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0x92539a4f035e4cf0584a5d3b2a06b11fa911715a1279d3d6a9214045a213394d
+// GlueHook V3 (https://gluehook.trade, source https://github.com/glue-finance/GlueHook): buyback pot behind every
+// swap, auto-compounding LP. Flags 0x2040 = beforeInitialize + afterSwap, no delta flags, so quotes are exact.
+// Deployed via CREATE at the same address on every chain below.
+export const GLUEHOOK_ON_ALL_CHAINS = '0xbb021554c5294328b04fa313669715bd201ba040'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -265,10 +271,11 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
     AZTEC_HOOK_ADDRESS_ON_MAINNET,
     TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET,
+    GLUEHOOK_ON_ALL_CHAINS,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
-  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET, FINDEX_HOOK_ON_OPTIMISM],
+  [ChainId.OPTIMISM]: [ADDRESS_ZERO, WETH_HOOKS_ADDRESS_ON_OP_MAINNET, FINDEX_HOOK_ON_OPTIMISM, GLUEHOOK_ON_ALL_CHAINS],
   [ChainId.OPTIMISM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.OPTIMISM_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_ONE]: [
@@ -280,10 +287,11 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     LIMIT_ORDER_HOOKS_ADDRESS_ON_ARBITRUM,
     DORY_BURN_AND_MINT_POWER_HOOK_ON_ARBITRUM,
     BVCC_DYNAMIC_FEE_HOOK_ON_ARBITRUM,
+    GLUEHOOK_ON_ALL_CHAINS,
   ],
   [ChainId.ARBITRUM_GOERLI]: [ADDRESS_ZERO],
   [ChainId.ARBITRUM_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.POLYGON]: [ADDRESS_ZERO, AEGIS_V1_1_ON_POLYGON],
+  [ChainId.POLYGON]: [ADDRESS_ZERO, AEGIS_V1_1_ON_POLYGON, GLUEHOOK_ON_ALL_CHAINS],
   [ChainId.POLYGON_MUMBAI]: [ADDRESS_ZERO],
   [ChainId.CELO]: [ADDRESS_ZERO],
   [ChainId.CELO_ALFAJORES]: [ADDRESS_ZERO],
@@ -294,8 +302,9 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_BSC,
     CLANKER_DYNAMIC_FEE_HOOKS_ADDRESS_ON_BSC,
     LAUNCHLY_BNB_HOOKS_ADDRESS_ON_BNB,
+    GLUEHOOK_ON_ALL_CHAINS,
   ],
-  [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX],
+  [ChainId.AVALANCHE]: [ADDRESS_ZERO, AVAXSTRATEGIES_STATIC_FEE_HOOKS_ADDRESS_ON_AVAX, GLUEHOOK_ON_ALL_CHAINS],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.BASE]: [
@@ -358,13 +367,14 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     CLAUNCH_HOOK_ON_BASE,
     SEEDIFY_SPARK_HOOK_ON_BASE,
     ANSTROM_HOOK_ON_BASE,
+    GLUEHOOK_ON_ALL_CHAINS,
   ],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.ROOTSTOCK]: [ADDRESS_ZERO],
   [ChainId.BLAST]: [ADDRESS_ZERO],
   [ChainId.ZKSYNC]: [ADDRESS_ZERO],
-  [ChainId.WORLDCHAIN]: [ADDRESS_ZERO],
+  [ChainId.WORLDCHAIN]: [ADDRESS_ZERO, GLUEHOOK_ON_ALL_CHAINS],
   [ChainId.UNICHAIN_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.UNICHAIN]: [
     ADDRESS_ZERO,
@@ -379,6 +389,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     PANOPTIC_ORACLE_HOOK_ON_UNICHAIN,
     UNIDERP_HOOK_ON_UNICHAIN,
     UNIVERSAL_HOOK_ON_UNICHAIN,
+    GLUEHOOK_ON_ALL_CHAINS,
   ],
   [ChainId.MONAD_TESTNET]: [ADDRESS_ZERO],
   [ChainId.MONAD]: [
@@ -388,8 +399,8 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     DOPPLER_HOOKS_ADDRESS_ON_MONAD,
     CULT_FEE_HOOK_ADDRESS_ON_MONAD,
   ],
-  [ChainId.SONEIUM]: [ADDRESS_ZERO],
-  [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
+  [ChainId.SONEIUM]: [ADDRESS_ZERO, GLUEHOOK_ON_ALL_CHAINS],
+  [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3, GLUEHOOK_ON_ALL_CHAINS],
   [ChainId.LINEA]: [ADDRESS_ZERO],
   [ChainId.TEMPO]: [ADDRESS_ZERO, UNISWAP_AGG_HOOK_ON_TEMPO],
 }
