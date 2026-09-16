@@ -233,6 +233,7 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
+// example pool: https://app.uniswap.org/explore/pools/base/0xa282783bd0613414d3d2a87817b5e666d46d5cb2d8cc86c0e9062d97159a8d9c
 // GlueHook V3 (https://gluehook.trade, source https://github.com/glue-finance/glueHook): buyback pot behind every
 // swap, auto-compounding LP. Flags 0x2040 = beforeInitialize + afterSwap, no delta flags, so quotes are exact.
 // Deployed via CREATE at the same address on every chain below.
