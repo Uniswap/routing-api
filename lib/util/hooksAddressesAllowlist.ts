@@ -233,9 +233,14 @@ export const UNISWAP_AGG_HOOK_ON_TEMPO = '0x717c31c3ea5f9070297f239fafd63d21afda
 // example pool: https://app.uniswap.org/explore/pools/ethereum/0x3facd9ce342c0f04dab80699211fa1aca4cc837671cade16a6cfc52d6d650cb3
 export const TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET = '0x3a3a9a072ab438335a52e0cf064f7ec91d824080'
 
+// ephemeral: ERC-5564 stealth payments, time-based ETH fee via beforeSwap/afterSwap return deltas, LP fee 0, launcher-only liquidity
+// example pool: https://app.uniswap.org/explore/pools/ethereum/0x5a481d3f91304b0e5b1813983178e65806cbf54832eeba60f13c1d28f019d243
+export const EPHEMERAL_HOOK_ON_MAINNET = '0xb7424b2d72ad941763b198d13a3eb07fc0e768cc'
+
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
+  
   [ChainId.MAINNET]: [
     ADDRESS_ZERO,
     WETH_HOOKS_ADDRESS_ON_MAINNET,
@@ -265,6 +270,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
     BVCC_DYNAMIC_FEE_HOOK_ON_MAINNET,
     AZTEC_HOOK_ADDRESS_ON_MAINNET,
     TETRIS_CUSTOM_DYNAMIC_FEE_HOOK_ON_MAINNET,
+    EPHEMERAL_HOOK_ON_MAINNET,
   ],
   [ChainId.GOERLI]: [ADDRESS_ZERO],
   [ChainId.SEPOLIA]: [ADDRESS_ZERO, extraHooksAddressesOnSepolia, FEY_ON_SEPOLIA],
