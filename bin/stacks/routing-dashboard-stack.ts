@@ -25,14 +25,13 @@ export type LambdaWidget = {
 export interface RoutingDashboardProps extends cdk.NestedStackProps {
   apiName: string
   routingLambdaName: string
-  poolCacheLambdaNameArray: string[]
 }
 
 export class RoutingDashboardStack extends cdk.NestedStack {
   constructor(scope: Construct, name: string, props: RoutingDashboardProps) {
     super(scope, name, props)
 
-    const { apiName, routingLambdaName, poolCacheLambdaNameArray } = props
+    const { apiName, routingLambdaName } = props
     const region = cdk.Stack.of(this).region
 
     const MAINNETS = SUPPORTED_CHAINS.filter((chain) => !TESTNETS.includes(chain))
@@ -90,12 +89,6 @@ export class RoutingDashboardStack extends cdk.NestedStack {
         RuleName: REQUESTED_QUOTES_BY_CHAIN_RULE_NAME,
         RuleState: 'ENABLED',
       },
-    })
-
-    const poolCacheLambdaMetrics: string[][] = []
-    poolCacheLambdaNameArray.forEach((poolCacheLambdaName) => {
-      poolCacheLambdaMetrics.push(['AWS/Lambda', `${poolCacheLambdaName}Errors`, 'FunctionName', poolCacheLambdaName])
-      poolCacheLambdaMetrics.push(['.', `${poolCacheLambdaName}Invocations`, '.', '.'])
     })
 
     const perChainWidgetsForRoutingDashboard: any[] = _.flatMap([MAINNETS, TESTNETS], (chains) => [
