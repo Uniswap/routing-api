@@ -1,30 +1,15 @@
-import { SUPPORTED_CHAINS } from '@uniswap/smart-order-router'
 import * as cdk from 'aws-cdk-lib'
-import { CfnOutput, Duration } from 'aws-cdk-lib'
-import { ChainId } from '@uniswap/sdk-core'
+import { CfnOutput } from 'aws-cdk-lib'
 import * as aws_apigateway from 'aws-cdk-lib/aws-apigateway'
 import { MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway'
-import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
-import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch'
-import * as aws_cloudwatch_actions from 'aws-cdk-lib/aws-cloudwatch-actions'
 import * as aws_logs from 'aws-cdk-lib/aws-logs'
-import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import * as aws_waf from 'aws-cdk-lib/aws-wafv2'
 import { Construct } from 'constructs'
 import { RoutingCachingStack } from './routing-caching-stack'
 import { RoutingDashboardStack } from './routing-dashboard-stack'
 import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
-import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
-import { chainProtocols } from '../../lib/cron/cache-config'
-
-export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
-
-// Pool count anomaly detection configuration
-export const POOL_COUNT_DEVIATION_ALERT_THRESHOLD = 0.05 // 5% deviation threshold
-export const POOL_COUNT_EVALUATION_WINDOW_HOURS = 3 // 3-hour evaluation window for baseline compared to last 1 hour
-export const POOL_COUNT_MINIMUM_VALUE_FOR_ANOMALY_DETECTION = 500 // Minimum value for pool count to trigger anomaly detection
 
 export class RoutingAPIStack extends cdk.Stack {
   public readonly url: CfnOutput
@@ -49,62 +34,8 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyAccessKey: string
       tenderlyNodeApiKey: string
       unicornSecret: string
-      alchemyQueryKey?: string
-      alchemyQueryKey2?: string
-      graphBaseV4SubgraphId?: string
-      graphXlayerV4Id?: string
-      graphXlayerV3Id?: string
-      graphXLayerV2Id?: string
-      graphBearerToken?: string
       uniGraphQLEndpoint: string
       uniGraphQLHeaderOrigin: string
-      goldskyBearerToken?: string
-      goldskyApiKey?: string
-      // Goldsky V2 subgraph IDs
-      goldskyEthereumV2Id?: string
-      goldskyArbitrumV2Id?: string
-      goldskyPolygonV2Id?: string
-      goldskyOptimismV2Id?: string
-      goldskyAvalancheV2Id?: string
-      goldskyBnbV2Id?: string
-      goldskyBlastV2Id?: string
-      goldskyBaseV2Id?: string
-      goldskyWorldchainV2Id?: string
-      goldskyAstrochainSepoliaV2Id?: string
-      goldskyMonadTestnetV2Id?: string
-      goldskyUnichainV2Id?: string
-      goldskySoneiumV2Id?: string
-      goldskyEthereumSepoliaV2Id?: string
-      // Goldsky V3 subgraph IDs
-      goldskyEthereumV3Id?: string
-      goldskyArbitrumV3Id?: string
-      goldskyPolygonV3Id?: string
-      goldskyOptimismV3Id?: string
-      goldskyAvalancheV3Id?: string
-      goldskyBnbV3Id?: string
-      goldskyBlastV3Id?: string
-      goldskyBaseV3Id?: string
-      goldskyCeloV3Id?: string
-      goldskyWorldchainV3Id?: string
-      goldskyAstrochainSepoliaV3Id?: string
-      goldskyUnichainV3Id?: string
-      goldskyZoraV3Id?: string
-      goldskySoneiumV3Id?: string
-      // Goldsky V4 subgraph IDs
-      goldskyEthereumSepoliaV4Id?: string
-      goldskyArbitrumV4Id?: string
-      goldskyBaseV4Id?: string
-      goldskyPolygonV4Id?: string
-      goldskyWorldchainV4Id?: string
-      goldskyZoraV4Id?: string
-      goldskyUnichainV4Id?: string
-      goldskyBnbV4Id?: string
-      goldskyBlastV4Id?: string
-      goldskyEthereumV4Id?: string
-      goldskySoneiumV4Id?: string
-      goldskyOptimismV4Id?: string
-      goldskyCeloV4Id?: string
-      goldskyAvalancheV4Id?: string
     }
   ) {
     super(parent, name, props)
@@ -126,62 +57,8 @@ export class RoutingAPIStack extends cdk.Stack {
       tenderlyAccessKey,
       tenderlyNodeApiKey,
       unicornSecret,
-      alchemyQueryKey,
-      alchemyQueryKey2,
-      graphBaseV4SubgraphId,
-      graphXlayerV4Id,
-      graphXlayerV3Id,
-      graphXLayerV2Id,
-      graphBearerToken,
       uniGraphQLEndpoint,
       uniGraphQLHeaderOrigin,
-      goldskyBearerToken,
-      goldskyApiKey,
-      // Goldsky V2 subgraph IDs
-      goldskyEthereumV2Id,
-      goldskyArbitrumV2Id,
-      goldskyPolygonV2Id,
-      goldskyOptimismV2Id,
-      goldskyAvalancheV2Id,
-      goldskyBnbV2Id,
-      goldskyBlastV2Id,
-      goldskyBaseV2Id,
-      goldskyWorldchainV2Id,
-      goldskyAstrochainSepoliaV2Id,
-      goldskyMonadTestnetV2Id,
-      goldskyUnichainV2Id,
-      goldskySoneiumV2Id,
-      goldskyEthereumSepoliaV2Id,
-      // Goldsky V3 subgraph IDs
-      goldskyEthereumV3Id,
-      goldskyArbitrumV3Id,
-      goldskyPolygonV3Id,
-      goldskyOptimismV3Id,
-      goldskyAvalancheV3Id,
-      goldskyBnbV3Id,
-      goldskyBlastV3Id,
-      goldskyBaseV3Id,
-      goldskyCeloV3Id,
-      goldskyWorldchainV3Id,
-      goldskyAstrochainSepoliaV3Id,
-      goldskyUnichainV3Id,
-      goldskyZoraV3Id,
-      goldskySoneiumV3Id,
-      // Goldsky V4 subgraph IDs
-      goldskyEthereumSepoliaV4Id,
-      goldskyArbitrumV4Id,
-      goldskyBaseV4Id,
-      goldskyPolygonV4Id,
-      goldskyWorldchainV4Id,
-      goldskyZoraV4Id,
-      goldskyUnichainV4Id,
-      goldskyBnbV4Id,
-      goldskyBlastV4Id,
-      goldskyEthereumV4Id,
-      goldskySoneiumV4Id,
-      goldskyOptimismV4Id,
-      goldskyCeloV4Id,
-      goldskyAvalancheV4Id,
     } = props
 
     const {
@@ -190,69 +67,13 @@ export class RoutingAPIStack extends cdk.Stack {
       poolCacheBucket3,
       poolCacheKey,
       poolCacheGzipKey,
-      poolCacheLambdaNameArray,
       tokenListCacheBucket,
     } = new RoutingCachingStack(this, 'RoutingCachingStack', {
-      chatbotSNSArn,
       stage,
       route53Arn,
       pinata_key,
       pinata_secret,
       hosted_zone,
-      alchemyQueryKey,
-      alchemyQueryKey2,
-      graphBaseV4SubgraphId,
-      graphXlayerV4Id,
-      graphXlayerV3Id,
-      graphXLayerV2Id,
-      graphBearerToken,
-      goldskyBearerToken,
-      goldskyApiKey,
-      // Goldsky V2 subgraph IDs
-      goldskyEthereumV2Id,
-      goldskyArbitrumV2Id,
-      goldskyPolygonV2Id,
-      goldskyOptimismV2Id,
-      goldskyAvalancheV2Id,
-      goldskyBnbV2Id,
-      goldskyBlastV2Id,
-      goldskyBaseV2Id,
-      goldskyWorldchainV2Id,
-      goldskyAstrochainSepoliaV2Id,
-      goldskyMonadTestnetV2Id,
-      goldskyUnichainV2Id,
-      goldskySoneiumV2Id,
-      goldskyEthereumSepoliaV2Id,
-      // Goldsky V3 subgraph IDs
-      goldskyEthereumV3Id,
-      goldskyArbitrumV3Id,
-      goldskyPolygonV3Id,
-      goldskyOptimismV3Id,
-      goldskyAvalancheV3Id,
-      goldskyBnbV3Id,
-      goldskyBlastV3Id,
-      goldskyBaseV3Id,
-      goldskyCeloV3Id,
-      goldskyWorldchainV3Id,
-      goldskyAstrochainSepoliaV3Id,
-      goldskyUnichainV3Id,
-      goldskyZoraV3Id,
-      goldskySoneiumV3Id,
-      // Goldsky V4 subgraph IDs
-      goldskyEthereumSepoliaV4Id,
-      goldskyArbitrumV4Id,
-      goldskyBaseV4Id,
-      goldskyPolygonV4Id,
-      goldskyWorldchainV4Id,
-      goldskyZoraV4Id,
-      goldskyUnichainV4Id,
-      goldskyBnbV4Id,
-      goldskyBlastV4Id,
-      goldskyEthereumV4Id,
-      goldskySoneiumV4Id,
-      goldskyOptimismV4Id,
-      goldskyCeloV4Id,
-      goldskyAvalancheV4Id,
     })
 
     const {
@@ -403,7 +224,6 @@ export class RoutingAPIStack extends cdk.Stack {
     new RoutingDashboardStack(this, 'RoutingDashboardStack', {
       apiName: api.restApiName,
       routingLambdaName: routingLambda.functionName,
-      poolCacheLambdaNameArray,
     })
 
     new RpcGatewayFallbackStack(this, 'RpcGatewayFallbackStack', { rpcProviderHealthStateDynamoDb })
@@ -417,150 +237,6 @@ export class RoutingAPIStack extends cdk.Stack {
       },
     })
     quote.addMethod('GET', lambdaIntegration)
-
-    // Alarms for subgraph metrics that trigger when no samples are received in the last 1 day
-    const subgraphAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
-
-    for (let i = 0; i < chainProtocols.length; i++) {
-      const { protocol, chainId } = chainProtocols[i]
-      const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.getPools.latency`
-      const alarmName = `CachePools-SEV3-SubgraphNoData-${metricName.replace(/[^a-zA-Z0-9]/g, '_')}`
-
-      // Create a metric that represents the count of samples in the last 1 day
-      // Use a shorter period (1 hour) with more evaluation periods for more responsive detection
-      const metric = new aws_cloudwatch.Metric({
-        namespace: 'Uniswap',
-        metricName: metricName,
-        dimensionsMap: { Service: 'CachePools' },
-        unit: aws_cloudwatch.Unit.NONE,
-        statistic: 'SampleCount',
-        period: Duration.hours(1), // 1 hour period for more responsive detection
-      })
-
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-        threshold: 0, // Trigger when no samples (count = 0)
-        evaluationPeriods: 24, // Check 24 consecutive 1-hour periods (1 day total)
-        treatMissingData: aws_cloudwatch.TreatMissingData.BREACHING, // Missing data should trigger the alarm
-      })
-
-      subgraphAlertAlarms.push(alarm)
-    }
-
-    // Alarms for compressed pool cache size that trigger when size exceeds 35MB
-    const compressedSizeAlertAlarms: cdk.aws_cloudwatch.Alarm[] = []
-
-    for (let i = 0; i < chainProtocols.length; i++) {
-      const { protocol, chainId } = chainProtocols[i]
-      const metricName = `CachePools.chain_${chainId}.${protocol}_protocol.compressed_size_mb`
-      const alarmName = `CachePools-SEV3-CompressedSizeExceeded-${chainId}-${protocol}`
-
-      const metric = new aws_cloudwatch.Metric({
-        namespace: 'Uniswap',
-        metricName: metricName,
-        dimensionsMap: { Service: 'CachePools' },
-        unit: aws_cloudwatch.Unit.NONE,
-        statistic: 'Average',
-        period: Duration.hours(1), // 1 hour period
-      })
-
-      const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-        alarmName,
-        metric,
-        comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-        threshold: 35, // Trigger when compressed size exceeds 35MB
-        evaluationPeriods: 1, // Trigger immediately when threshold is exceeded
-        treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING,
-        alarmDescription: `Compressed pool cache size for ${protocol} on chain ${chainId} exceeds 35MB threshold.`,
-      })
-
-      compressedSizeAlertAlarms.push(alarm)
-    }
-
-    // Anomaly alerts for pool count metrics per protocol and chain
-    const poolCountAnomalyAlarms: cdk.aws_cloudwatch.Alarm[] = []
-
-    // Define the pool count metrics we want to monitor
-    const poolCountMetrics = [
-      { protocol: 'V3', metricSuffix: 'getPools.filter.length' },
-      { protocol: 'V4', metricSuffix: 'getPools.filter.length' },
-      { protocol: 'V2', metricSuffix: 'getPools.untracked.length' },
-    ]
-
-    // Create anomaly alarms for each supported chain and protocol
-    SUPPORTED_CHAINS.forEach((chainId) => {
-      if (CHAINS_NOT_MONITORED.includes(chainId)) {
-        return
-      }
-
-      poolCountMetrics.forEach(({ protocol, metricSuffix }) => {
-        const metricName = `${protocol}SubgraphProvider.chain_${chainId}.${metricSuffix}`
-        const alarmName = `PoolCountAnomaly-SEV3-${protocol}-ChainId${chainId}-${metricSuffix.replace(
-          /[^a-zA-Z0-9]/g,
-          '_'
-        )}`
-
-        // Create the base metric for pool count
-        const poolCountMetric = new aws_cloudwatch.Metric({
-          namespace: 'Uniswap',
-          metricName: metricName,
-          dimensionsMap: { Service: 'CachePools' },
-          unit: aws_cloudwatch.Unit.NONE,
-          statistic: 'Average',
-          period: Duration.hours(1), // 1 hour aggregation period
-        })
-
-        // Create anomaly detection using statistical comparison
-        // Compare current value to configurable-hour average and check for configurable deviation threshold
-        const upperThreshold = 1 + POOL_COUNT_DEVIATION_ALERT_THRESHOLD
-        const lowerThreshold = 1 - POOL_COUNT_DEVIATION_ALERT_THRESHOLD
-        const anomalyExpression = new MathExpression({
-          expression: `IF(poolCount > ${POOL_COUNT_MINIMUM_VALUE_FOR_ANOMALY_DETECTION}, IF(poolCount > (avgBaseline * ${upperThreshold}) OR poolCount < (avgBaseline * ${lowerThreshold}), 1, 0), 0)`,
-          period: Duration.hours(POOL_COUNT_EVALUATION_WINDOW_HOURS), // Configurable evaluation window
-          usingMetrics: {
-            poolCount: poolCountMetric,
-            avgBaseline: new aws_cloudwatch.Metric({
-              namespace: 'Uniswap',
-              metricName: metricName,
-              dimensionsMap: { Service: 'CachePools' },
-              unit: aws_cloudwatch.Unit.NONE,
-              statistic: 'Average',
-              period: Duration.hours(POOL_COUNT_EVALUATION_WINDOW_HOURS), // Configurable baseline period
-            }),
-          },
-        })
-
-        // Create the alarm that triggers when there's an anomaly and pool count > 1000
-        const alarm = new aws_cloudwatch.Alarm(this, alarmName, {
-          alarmName,
-          metric: anomalyExpression,
-          comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-          threshold: 0, // Trigger when the anomaly expression returns 1 (anomaly detected)
-          evaluationPeriods: 1, // Trigger immediately when anomaly is detected
-          treatMissingData: aws_cloudwatch.TreatMissingData.NOT_BREACHING,
-          alarmDescription: `Anomaly detected in ${protocol} pool count for chain ${chainId} when count > 1000. Deviation threshold: ${(
-            POOL_COUNT_DEVIATION_ALERT_THRESHOLD * 100
-          ).toFixed(0)}% over ${POOL_COUNT_EVALUATION_WINDOW_HOURS}-hour window.`,
-        })
-
-        poolCountAnomalyAlarms.push(alarm)
-      })
-    })
-
-    if (chatbotSNSArn) {
-      const chatBotTopic = aws_sns.Topic.fromTopicArn(this, 'ChatbotTopic', chatbotSNSArn)
-      subgraphAlertAlarms.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      compressedSizeAlertAlarms.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-      poolCountAnomalyAlarms.forEach((alarm) => {
-        alarm.addAlarmAction(new aws_cloudwatch_actions.SnsAction(chatBotTopic))
-      })
-    }
 
     this.url = new CfnOutput(this, 'Url', {
       value: api.url,
